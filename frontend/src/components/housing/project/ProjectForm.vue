@@ -99,120 +99,6 @@ const locationPidsAuto: Ref<string> = ref('');
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-const projectFormSchema = createProjectFormSchema();
-
-function emitProjectNameChange(e: Event) {
-  emit('input-project-name', (e.target as HTMLInputElement).value);
-}
-
-const getAssigneeOptionLabel = (e: User) => {
-  return `${e.fullName}`;
-};
-
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
-
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
-};
-
-function initializeFormValues(project: HousingProject) {
-  const firstContact = project?.activity?.activityContact?.[0]?.contact;
-
-  return {
-    consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
-    contact: {
-      contactId: firstContact?.contactId,
-      firstName: firstContact?.firstName,
-      lastName: firstContact?.lastName,
-      phoneNumber: firstContact?.phoneNumber,
-      email: firstContact?.email,
-      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-      contactPreference: firstContact?.contactPreference,
-      userId: firstContact?.userId
-    },
-    finance: {
-      financiallySupportedBc: project.financiallySupportedBc,
-      financiallySupportedIndigenous: project.financiallySupportedIndigenous,
-      indigenousDescription: project.indigenousDescription,
-      financiallySupportedNonProfit: project.financiallySupportedNonProfit,
-      nonProfitDescription: project.nonProfitDescription,
-      financiallySupportedHousingCoop: project.financiallySupportedHousingCoop,
-      housingCoopDescription: project.housingCoopDescription
-    },
-    location: {
-      locationAddress: updateLocationAddress(project),
-      streetAddress: project.streetAddress,
-      locality: project.locality,
-      province: project.province,
-      locationPids: project.locationPids,
-      latitude: project.latitude,
-      longitude: project.longitude,
-      geomarkUrl: project.geomarkUrl,
-      naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
-    },
-    locationPidsAuto: locationPidsAuto.value,
-    project: {
-      companyNameRegistered: project.companyNameRegistered,
-      isDevelopedInBc: project.isDevelopedInBc,
-      projectName: project.projectName
-    },
-
-    // Additional Info
-    projectDescription: project.projectDescription,
-
-    // Location
-    projectLocationDescription: project.projectLocationDescription,
-
-    // Automated Status Tool Notes
-    astNotes: project.astNotes,
-
-    // Submission state
-    submissionState: {
-      queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
-      assignedUser: assigneeOptions.value[0] ?? null,
-      applicationStatus: project.applicationStatus
-    },
-
-    units: {
-      singleFamilyUnits: project.singleFamilyUnits,
-      multiFamilyUnits: project.multiFamilyUnits,
-      otherUnitsDescription: project.otherUnitsDescription,
-      otherUnits: project.otherUnits,
-      hasRentalUnits: project.hasRentalUnits,
-      rentalUnits: project.rentalUnits
-    },
-
-    // ATS link
-    atsClientId: project.atsClientId,
-    atsEnquiryId: project.atsEnquiryId,
-
-    // Updates
-    aaiUpdated: project.aaiUpdated,
-    addedToAts: project.addedToAts,
-    ltsaCompleted: project.ltsaCompleted,
-    bcOnlineCompleted: project.bcOnlineCompleted,
-    submittedAt: new Date(project.submittedAt),
-    relatedEnquiries: project.relatedEnquiries
-  };
-}
-
 async function createATSClient() {
   try {
     const address: Partial<ATSAddressResource> = {
@@ -270,6 +156,120 @@ async function createATSEnquiry(atsClientId?: number) {
   }
 }
 
+function emitProjectNameChange(e: Event) {
+  emit('input-project-name', (e.target as HTMLInputElement).value);
+}
+
+const getAssigneeOptionLabel = (e: User) => {
+  return `${e.fullName}`;
+};
+
+function initializeFormValues(project: HousingProject) {
+  const firstContact = project?.activity?.activityContact?.[0]?.contact;
+
+  return {
+    consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
+    contact: {
+      contactId: firstContact?.contactId,
+      firstName: firstContact?.firstName,
+      lastName: firstContact?.lastName,
+      phoneNumber: firstContact?.phoneNumber,
+      email: firstContact?.email,
+      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+      contactPreference: firstContact?.contactPreference,
+      userId: firstContact?.userId
+    },
+    finance: {
+      financiallySupportedBc: project.financiallySupportedBc,
+      financiallySupportedIndigenous: project.financiallySupportedIndigenous,
+      indigenousDescription: project.indigenousDescription,
+      financiallySupportedNonProfit: project.financiallySupportedNonProfit,
+      nonProfitDescription: project.nonProfitDescription,
+      financiallySupportedHousingCoop: project.financiallySupportedHousingCoop,
+      housingCoopDescription: project.housingCoopDescription
+    },
+    location: {
+      locationAddress: [project.streetAddress, project.locality, project.province]
+        .filter((str) => str?.trim())
+        .join(', '),
+      streetAddress: project.streetAddress,
+      locality: project.locality,
+      province: project.province,
+      locationPids: project.locationPids,
+      latitude: project.latitude,
+      longitude: project.longitude,
+      geomarkUrl: project.geomarkUrl,
+      naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
+    },
+    locationPidsAuto: locationPidsAuto.value,
+    project: {
+      companyNameRegistered: project.companyNameRegistered,
+      isDevelopedInBc: project.isDevelopedInBc,
+      projectName: project.projectName
+    },
+
+    // Additional Info
+    projectDescription: project.projectDescription,
+
+    // Location
+    projectLocationDescription: project.projectLocationDescription,
+
+    // Automated Status Tool Notes
+    astNotes: project.astNotes,
+
+    // Submission state
+    submissionState: {
+      queuePriority: project.queuePriority,
+      submissionType: project.submissionType,
+      assignedUser: assigneeOptions.value[0] ?? null,
+      applicationStatus: project.applicationStatus
+    },
+
+    units: {
+      singleFamilyUnits: project.singleFamilyUnits,
+      multiFamilyUnits: project.multiFamilyUnits,
+      otherUnitsDescription: project.otherUnitsDescription,
+      otherUnits: project.otherUnits,
+      hasRentalUnits: project.hasRentalUnits,
+      rentalUnits: project.rentalUnits
+    },
+
+    // ATS link
+    atsClientId: project.atsClientId,
+    atsEnquiryId: project.atsEnquiryId,
+
+    // Updates
+    aaiUpdated: project.aaiUpdated,
+    addedToAts: project.addedToAts,
+    ltsaCompleted: project.ltsaCompleted,
+    bcOnlineCompleted: project.bcOnlineCompleted,
+    submittedAt: new Date(project.submittedAt),
+    relatedEnquiries: project.relatedEnquiries
+  };
+}
+
+const isCompleted = computed(() => {
+  return project.applicationStatus === ApplicationStatus.COMPLETED;
+});
+
+const onAssigneeInput = async (e: IInputEvent) => {
+  const input = e.target.value;
+
+  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+
+  if (idpCfg) {
+    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
+      assigneeOptions.value = (
+        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
+      ).data;
+    } else if (input.match(Regex.EMAIL)) {
+      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
+    } else {
+      assigneeOptions.value = [];
+    }
+  }
+};
+
 function onCancel() {
   formRef.value?.resetForm();
   showCancelMessage.value = true;
@@ -291,16 +291,15 @@ function onInvalidSubmit(e: any) {
   scrollToFirstError(e.errors);
 }
 
-function onReOpen() {
+function onNewATSEnquiry() {
   confirm.require({
-    message: t('i.common.projectForm.confirmReopenMessage'),
-    header: t('i.common.projectForm.confirmReopenHeader'),
-    acceptLabel: t('i.common.projectForm.reopenAccept'),
-    rejectLabel: t('i.common.projectForm.reopenReject'),
+    message: t('i.housing.project.projectForm.atsEnquiryConfirmMsg'),
+    header: t('i.housing.project.projectForm.atsEnquiryConfirmTitle'),
+    acceptLabel: t('i.housing.project.projectForm.confirm'),
+    rejectLabel: t('i.housing.project.projectForm.cancel'),
     rejectProps: { outlined: true },
     accept: () => {
-      formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      onSubmit(formRef.value?.values);
+      atsCreateType.value = ATSCreateTypes.ENQUIRY;
     }
   });
 }
@@ -325,27 +324,16 @@ const onSaveGeoJson = () => {
   URL.revokeObjectURL(downloadLink);
 };
 
-// Set basic info, clear it if no contact is provided
-function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
-}
-
-function onNewATSEnquiry() {
+function onReOpen() {
   confirm.require({
-    message: t('i.housing.project.projectForm.atsEnquiryConfirmMsg'),
-    header: t('i.housing.project.projectForm.atsEnquiryConfirmTitle'),
-    acceptLabel: t('i.housing.project.projectForm.confirm'),
-    rejectLabel: t('i.housing.project.projectForm.cancel'),
+    message: t('i.common.projectForm.confirmReopenMessage'),
+    header: t('i.common.projectForm.confirmReopenHeader'),
+    acceptLabel: t('i.common.projectForm.reopenAccept'),
+    rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
     accept: () => {
-      atsCreateType.value = ATSCreateTypes.ENQUIRY;
+      formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
+      onSubmit(formRef.value?.values);
     }
   });
 }
@@ -442,12 +430,26 @@ const onSubmit = async (values: any) => {
   }
 };
 
+const projectFormSchema = createProjectFormSchema();
+
+// Set basic info, clear it if no contact is provided
+function setBasicInfo(contact?: Contact) {
+  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
+  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
+  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
+  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
+  formRef.value?.setFieldValue('contact.email', contact?.email);
+  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
+  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
+  formRef.value?.setFieldValue('contact.userId', contact?.userId);
+}
+
 function updateLocationAddress(values: any, setFieldValue?: Function) {
-  const locationAddressStr = [values.streetAddress, values.locality, values.province]
+  const locationAddressStr = [values.location?.streetAddress, values.location?.locality, values.location?.province]
     .filter((str) => str?.trim())
     .join(', ');
 
-  if (setFieldValue) setFieldValue('locationAddress', locationAddressStr);
+  if (setFieldValue) setFieldValue('location.locationAddress', locationAddressStr);
 
   return locationAddressStr;
 }
@@ -497,7 +499,7 @@ onBeforeMount(async () => {
         </div>
         <ContactCardNavForm
           :editable="editable"
-          :initial-form-values="initialFormValues"
+          :form-values="initialFormValues"
           @contact-card-nav-form:pick="
             (contact: Contact) => {
               setBasicInfo(contact);
@@ -526,15 +528,15 @@ onBeforeMount(async () => {
               @on-change="
                 (e) => {
                   if (!e.target.value) {
-                    setFieldValue('companyNameRegistered', null);
-                    setFieldValue('isDevelopedInBc', null);
+                    setFieldValue('project.companyNameRegistered', null);
+                    setFieldValue('project.isDevelopedInBc', null);
                   }
                 }
               "
             />
             <Select
               name="project.isDevelopedInBc"
-              label="Company registered in B.C?"
+              :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
               :disabled="!editable || !values.project.companyNameRegistered"
               :options="YES_NO_LIST"
             />
@@ -558,49 +560,49 @@ onBeforeMount(async () => {
           <div class="grid grid-cols-3 gap-x-6 gap-y-6">
             <Select
               name="units.singleFamilyUnits"
-              label="Single family units"
+              :label="t('i.housing.project.projectForm.singleFamilyUnits')"
               :disabled="!editable"
               :options="NUM_RESIDENTIAL_UNITS_LIST"
             />
             <Select
               name="units.multiFamilyUnits"
-              label="Multi-family units"
+              :label="t('i.housing.project.projectForm.multiFamilyUnits')"
               :disabled="!editable"
               :options="NUM_RESIDENTIAL_UNITS_LIST"
             />
             <Select
               name="units.hasRentalUnits"
-              label="Rental included?"
+              :label="t('i.housing.project.projectForm.rentalIncluded')"
               :disabled="!editable"
               :options="YES_NO_UNSURE_LIST"
               @on-change="
                 (e: SelectChangeEvent) => {
-                  if (e.value !== BasicResponse.YES) setFieldValue('rentalUnits', null);
+                  if (e.value !== BasicResponse.YES) setFieldValue('units.rentalUnits', null);
                 }
               "
             />
             <Select
               name="units.rentalUnits"
-              label="Rental units"
+              :label="t('i.housing.project.projectForm.rentalUnits')"
               :disabled="!editable || values.units.hasRentalUnits !== BasicResponse.YES"
               :options="NUM_RESIDENTIAL_UNITS_LIST"
             />
             <InputText
               name="units.otherUnitsDescription"
-              label="Other type"
+              :label="t('i.housing.project.projectForm.otherType')"
               :disabled="!editable"
               @on-change="
                 (e) => {
                   if (!e.target.value) {
-                    setFieldValue('otherUnitsDescription', null);
-                    setFieldValue('otherUnits', null);
+                    setFieldValue('units.otherUnitsDescription', null);
+                    setFieldValue('units.otherUnits', null);
                   }
                 }
               "
             />
             <Select
               name="units.otherUnits"
-              label="Other type units"
+              :label="t('i.housing.project.projectForm.otherTypeUnits')"
               :disabled="!editable || !values.units.otherUnitsDescription"
               :options="NUM_RESIDENTIAL_UNITS_LIST"
             />
@@ -619,7 +621,7 @@ onBeforeMount(async () => {
             <Select
               class="col-span-1"
               name="finance.financiallySupportedBc"
-              label="BC Housing"
+              :label="t('i.housing.project.projectForm.bcHousing')"
               :disabled="!editable"
               :options="YES_NO_UNSURE_LIST"
             />
@@ -707,27 +709,27 @@ onBeforeMount(async () => {
               <InputText
                 class="col-span-2"
                 name="location.locationAddress"
-                label="Location address"
+                :label="t('i.housing.project.projectForm.locationAddress')"
                 :disabled="true"
               />
               <InputText
                 class="col-span-2"
                 name="location.streetAddress"
-                label="Street address"
+                :label="t('i.housing.project.projectForm.streetAddress')"
                 :disabled="!editable"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
               <InputText
                 class="col-span-1"
                 name="location.locality"
-                label="Locality"
+                :label="t('i.housing.project.projectForm.locality')"
                 :disabled="!editable"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
               <InputText
                 class="col-span-1"
                 name="location.province"
-                label="Province"
+                :label="t('i.housing.project.projectForm.province')"
                 :disabled="!editable"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
@@ -735,26 +737,26 @@ onBeforeMount(async () => {
             <InputText
               class="col-span-3"
               name="location.locationPids"
-              label="Location PID(s)"
+              :label="t('i.housing.project.projectForm.locationPIDs')"
               :disabled="!editable"
             />
             <div class="grid grid-cols-3 gap-x-6">
               <InputNumber
                 name="location.latitude"
-                label="Location latitude"
-                help-text="Optionally provide a number between 48 and 60"
+                :label="t('i.housing.project.projectForm.locationLatitude')"
+                :help-text="t('i.housing.project.projectForm.locationLatitudeHelp')"
                 :disabled="!editable"
               />
               <InputNumber
                 name="location.longitude"
-                label="Location longitude"
-                help-text="Optionally provide a number between -114 and -139"
+                :label="t('i.housing.project.projectForm.locationLongitude')"
+                :help-text="t('i.housing.project.projectForm.locationLongitudeHelp')"
                 :disabled="!editable"
               />
 
               <Select
                 name="location.naturalDisaster"
-                label="Affected by natural disaster?"
+                :label="t('i.housing.project.projectForm.affectedByNaturalDisaster')"
                 :disabled="!editable"
                 :options="YES_NO_LIST"
               />
@@ -762,7 +764,7 @@ onBeforeMount(async () => {
             <InputText
               class="col-span-3"
               name="location.geomarkUrl"
-              label="Geomark URL"
+              :label="t('i.housing.project.projectForm.geomarkUrl')"
               :disabled="!editable"
             />
           </div>
@@ -786,10 +788,10 @@ onBeforeMount(async () => {
               id="download-geojson"
               class="col-start-1 col-span-2 mb-2"
               outlined
-              aria-label="Download GeoJSON"
+              :aria-label="t('i.housing.project.projectForm.downloadGeoJson')"
               @click="onSaveGeoJson"
             >
-              Download GeoJSON
+              {{ t('i.housing.project.projectForm.downloadGeoJson') }}
             </Button>
           </div>
         </Panel>
@@ -877,7 +879,7 @@ onBeforeMount(async () => {
           </h4>
           <InputText
             name="relatedEnquiries"
-            label="Related enquiries"
+            :label="t('i.housing.project.projectForm.relatedEnquiriesLabel')"
             :disabled="true"
           />
         </div>
@@ -932,7 +934,7 @@ onBeforeMount(async () => {
             <Button
               v-if="!values.atsClientId && atsCreateType === undefined"
               class="ats-button"
-              aria-label="Link to ATS"
+              :aria-label="t('i.housing.project.projectForm.atsSearchButton')"
               outlined
               :label="t('i.housing.project.projectForm.atsSearchButton')"
               :disabled="!editable"
@@ -941,7 +943,7 @@ onBeforeMount(async () => {
             <Button
               v-if="!values.atsClientId && atsCreateType === undefined"
               class="ats-button"
-              aria-label="New ATS client"
+              :aria-label="t('i.housing.project.projectForm.atsNewButton')"
               outlined
               :label="t('i.housing.project.projectForm.atsNewButton')"
               :disabled="!editable"
@@ -951,7 +953,7 @@ onBeforeMount(async () => {
           <Button
             v-if="values.atsClientId && !values.atsEnquiryId && atsCreateType === undefined"
             class="mt-4"
-            aria-label="New ATS enquiry"
+            :aria-label="t('enquiryForm.atsNewEnquiryBtn')"
             :disabled="!editable"
             @click="onNewATSEnquiry()"
           >
@@ -971,13 +973,13 @@ onBeforeMount(async () => {
           <Checkbox
             class="col-span-12 mb-4"
             name="ltsaCompleted"
-            label="LTSA completed"
+            :label="t('i.housing.project.projectForm.ltsaCompleted')"
             :disabled="!editable"
           />
           <Checkbox
             class="col-span-12 mb-4"
             name="bcOnlineCompleted"
-            label="BC Online completed"
+            :label="t('i.housing.project.projectForm.bcOnlineCompleted')"
             :disabled="!editable"
           />
           <Checkbox

@@ -108,7 +108,7 @@ export function createProjectFormSchema() {
         .notRequired()
         .max(255)
         .label(t('i.housing.project.projectFormSchema.projectCompanyNameRegistered')),
-      isDevelopedInBc: string().when('project.companyNameRegistered', {
+      isDevelopedInBc: string().when('companyNameRegistered', {
         is: (val: string) => val,
         then: (schema) =>
           schema.required().oneOf(YES_NO_LIST).label(t('i.housing.project.projectFormSchema.projectIsDevelopedInBc')),

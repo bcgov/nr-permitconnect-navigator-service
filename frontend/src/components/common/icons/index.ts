@@ -1,9 +1,9 @@
 export { default as AdditionalInfo } from './AdditionalInfo.vue';
 export { default as AddLocation } from './AddLocation.vue';
-export { default as AutoPids } from './AutoPids.vue';
 export { default as AskMyNavigator } from './AskMyNavigator.vue';
 export { default as AstNote } from './AstNote.vue';
 export { default as Authorizations } from './Authorizations.vue';
+export { default as AutoPids } from './AutoPids.vue';
 export { default as BasicInfo } from './BasicInfo.vue';
 export { default as Company } from './Company.vue';
 export { default as Electrification } from './Electrification.vue';
