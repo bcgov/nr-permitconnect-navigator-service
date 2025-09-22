@@ -59,7 +59,7 @@ import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/housing';
-import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { IntakeFormCategory, SubmissionType } from '@/utils/enums/projectCommon';
 import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
@@ -257,7 +257,7 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Functi
       push({
         permitTypeId: undefined,
         trackingId: undefined,
-        status: undefined
+        stage: undefined
       });
     }
   } else {
@@ -470,7 +470,7 @@ onBeforeMount(async () => {
           geoJson: response?.geoJson
         },
         appliedPermits: permits
-          .filter((x: Permit) => x.status === PermitStatus.APPLIED)
+          .filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
           .map((x: Permit) => ({
             ...x,
             submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined

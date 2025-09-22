@@ -25,7 +25,7 @@ import { upsertPermit } from '../services/permit';
 import { upsertPermitTracking } from '../services/permitTracking';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
+import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit';
 import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { Problem } from '../utils';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
@@ -152,11 +152,12 @@ const generateHousingProjectData = async (
       permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId,
       activityId: activityId as string,
-      status: PermitStatus.APPLIED,
+      stage: PermitStage.APPLICATION_SUBMISSION,
       needed: PermitNeeded.YES,
+      statusLastChanged: null,
       statusLastVerified: null,
       issuedPermitId: null,
-      authStatus: PermitAuthorizationStatus.IN_REVIEW,
+      state: PermitState.IN_PROGRESS,
       submittedDate: x.submittedDate,
       adjudicationDate: null,
       permitTracking: x.permitTracking?.map((pt) => ({
@@ -174,11 +175,12 @@ const generateHousingProjectData = async (
       permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId as number,
       activityId: activityId as string,
-      status: PermitStatus.NEW,
+      stage: PermitStage.PRE_SUBMISSION,
       needed: PermitNeeded.UNDER_INVESTIGATION,
+      statusLastChanged: null,
       statusLastVerified: null,
       issuedPermitId: null,
-      authStatus: PermitAuthorizationStatus.NONE,
+      state: PermitState.NONE,
       submittedDate: null,
       adjudicationDate: null,
       ...generateCreateStamps(currentContext),
