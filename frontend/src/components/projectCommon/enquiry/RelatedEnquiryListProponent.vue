@@ -74,7 +74,7 @@ onBeforeMount(async () => {
 
 <template>
   <DataTable
-    :selection="selection"
+    v-model:selection="selection"
     :loading="loading"
     :value="enquiries"
     data-key="enquiryId"

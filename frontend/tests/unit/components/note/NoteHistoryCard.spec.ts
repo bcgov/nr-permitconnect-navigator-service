@@ -168,10 +168,10 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').exists()).toBe(false);
     expect(pTag.length).toBe(4);
-    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
-    expect(spanTag[1].text()).toBe(t('note.noteHistoryCard.lastUpdated:'));
-    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
-    expect(pTag[3].text()).toBe(TEST_NOTE_HISTORY.note[0].note);
+    expect(pTag[0]!.text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(spanTag[1]!.text()).toBe(t('note.noteHistoryCard.lastUpdated:'));
+    expect(pTag[2]!.text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[3]!.text()).toBe(TEST_NOTE_HISTORY.note[0]?.note);
   });
 
   it('displays p tags for unresolved notes', async () => {
@@ -180,10 +180,10 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`${TEST_NOTE_HISTORY_UNRESOLVED.bringForwardState}`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
-    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(tomorrowDate)}`);
-    expect(pTag[3].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
-    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0].note);
+    expect(pTag[0]!.text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(pTag[2]!.text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(tomorrowDate)}`);
+    expect(pTag[3]!.text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_UNRESOLVED.note[0]?.note);
   });
 
   it('displays p tags for resolved notes', async () => {
@@ -192,9 +192,9 @@ describe('NoteHistoryCard', () => {
 
     expect(wrapper.find('[data-test="bf-title"]').text()).toBe(`${TEST_NOTE_HISTORY_RESOLVED.bringForwardState}`);
     expect(pTag.length).toBe(5);
-    expect(pTag[0].text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
-    expect(pTag[2].text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(yesterdayDate)}`);
-    expect(pTag[3].text()).toBe(`${t('note.noteHistoryCard.author')}:`);
-    expect(pTag[4].text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0].note);
+    expect(pTag[0]!.text()).toBe(`${t('note.noteHistoryCard.created')}: ${formatDate(currentDate)}`);
+    expect(pTag[2]!.text()).toBe(`${t('note.noteHistoryCard.bringForward')}: ${formatDate(yesterdayDate)}`);
+    expect(pTag[3]!.text()).toBe(`${t('note.noteHistoryCard.author')}:`);
+    expect(pTag[4]!.text()).toBe(TEST_NOTE_HISTORY_RESOLVED.note[0]?.note);
   });
 });

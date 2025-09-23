@@ -126,8 +126,8 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
+    v-model:selection="selection"
     :filters="filters"
-    :selection="selection"
     :loading="loading"
     :value="contacts"
     data-key="contactId"

@@ -135,7 +135,7 @@ onBeforeMount(() => {
         </p>
       </div>
       <div class="mt-4 flex justify-between items-center">
-        <p class="note-content truncate max-w-[145ch] text-base sm:text-md">{{ noteHistory.note[0].note }}</p>
+        <p class="note-content truncate max-w-[145ch] text-base sm:text-md">{{ noteHistory.note[0]?.note }}</p>
         <Button
           class="p-button-outlined"
           aria-label="Edit"

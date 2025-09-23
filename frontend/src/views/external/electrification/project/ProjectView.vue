@@ -186,45 +186,16 @@ onBeforeMount(async () => {
               :assignee="assigneeName"
               :created-by="createdByName"
               :activity-id="getProject.activityId"
-              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+              @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
-
-    <Tabs
-      :value="activeTab"
-      class="mt-3"
-    >
-      <TabList>
-        <Tab :value="0">
-          <font-awesome-icon
-            class="mr-2 ellipsis-icon"
-            icon="fa-solid fa-file"
-          />
-          {{ t('e.common.projectView.tabAuthorizations') }}
-        </Tab>
-        <Tab :value="1">
-          <font-awesome-icon
-            class="mr-2 ellipsis-icon"
-            icon="fa-solid fa-file-circle-question"
-          />
-          {{ t('i.common.projectView.tabRelatedEnquiries') }}
-        </Tab>
-      </TabList>
-      <TabPanels>
-        <TabPanel :value="0">
-          <BasicProjectInfoCard
-            :assignee="assigneeName"
-            :created-by="createdByName"
-            :activity-id="getProject.activityId"
-            @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
-          />
-          <NoteBanner
-            v-if="getNoteHistoryShownToProponent.length"
-            :note="getNoteHistoryShownToProponent[0].note[0]"
-            @note-banner:show-history="noteHistoryVisible = true"
-          />
-          <div class="disclaimer-block p-8 mt-8">
-            {{ t('e.common.projectView.disclaimer') }}
-          </div>
+            <NoteBanner
+              v-if="getNoteHistoryShownToProponent[0]?.note[0]"
+              :note="getNoteHistoryShownToProponent[0].note[0]"
+              @note-banner:show-history="noteHistoryVisible = true"
+            />
+            <div class="disclaimer-block p-8 mt-8">
+              {{ t('e.common.projectView.disclaimer') }}
+            </div>
 
             <div>
               <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
@@ -295,7 +266,6 @@ onBeforeMount(async () => {
               <AuthorizationCardLite :permit="permit" />
             </router-link>
           </TabPanel>
-
           <TabPanel :value="1">
             <div>
               <div class="disclaimer-block p-8 mt-4 mb-8">
@@ -312,15 +282,15 @@ onBeforeMount(async () => {
               :enquiries="getRelatedEnquiries"
               :project-id="projectId"
             />
-          </div>
-        </TabPanel>
-      </TabPanels>
-    </Tabs>
+          </TabPanel>
+        </TabPanels>
+      </Tabs>
+    </div>
+    <ShownToProponentModal
+      v-model:visible="noteHistoryVisible"
+      :note-history="getNoteHistoryShownToProponent"
+    />
   </div>
-  <ShownToProponentModal
-    v-model:visible="noteHistoryVisible"
-    :note-history="getNoteHistoryShownToProponent"
-  />
 </template>
 
 <style scoped lang="scss">

@@ -113,6 +113,8 @@ model draft {
   createdAt                          DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                          String?    @map("updated_by")
   updatedAt                          DateTime?  @map("updated_at") @db.Timestamptz(6)
+  deletedBy                          String?    @map("deleted_by")
+  deletedAt                          DateTime?  @map("deleted_at") @db.Timestamptz(6)
   activity                           activity   @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "draft_activity_id_foreign")
   draftCodeDraftDraftCodeTodraftCode draft_code @relation("draft_draft_codeTodraft_code", fields: [draftCode], references: [draftCode], onDelete: Cascade, map: "draft_draft_code_foreign")
 
@@ -125,6 +127,8 @@ model draft_code {
   createdAt                      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                      String?   @map("updated_by")
   updatedAt                      DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy                      String?   @map("deleted_by")
+  deletedAt                      DateTime? @map("deleted_at") @db.Timestamptz(6)
   draftDraftDraftCodeTodraftCode draft[]   @relation("draft_draft_codeTodraft_code")
 
   @@schema("public")
@@ -156,6 +160,8 @@ model electrification_project {
   createdAt                          DateTime?                              @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                          String?                                @map("updated_by")
   updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
+  deletedBy                          String?                                @map("deleted_by")
+  deletedAt                          DateTime?                              @map("deleted_at") @db.Timestamptz(6)
   atsEnquiryId                       Int?                                   @map("ats_enquiry_id")
   addedToAts                         Boolean                                @default(false) @map("added_to_ats")
   activity                           activity                               @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
@@ -176,6 +182,8 @@ model electrification_project_category_code {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   electrificationProject electrification_project[]
 
   @@schema("public")
@@ -191,6 +199,8 @@ model electrification_project_type_code {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?                   @map("deleted_by")
+  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
   electrificationProject electrification_project[]
 
   @@schema("public")
@@ -206,6 +216,8 @@ model email_log {
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   @@schema("public")
 }
@@ -227,29 +239,14 @@ model enquiry {
   createdAt          DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?                       @map("updated_by")
   updatedAt          DateTime?                     @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?                       @map("deleted_by")
+  deletedAt          DateTime?                     @map("deleted_at") @db.Timestamptz(6)
   atsClientId        Int?                          @map("ats_client_id")
   addedToAts         Boolean                       @default(false) @map("added_to_ats")
   submittedMethod    enquiry_submitted_method_enum @default(PCNS) @map("submitted_method")
   atsEnquiryId       Int?                          @map("ats_enquiry_id")
-  deletedBy          String?                       @map("deleted_by")
-  deletedAt          DateTime?                     @map("deleted_at") @db.Timestamptz(6)
   activity           activity                      @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "enquiry_activity_id_foreign")
   user               user?                         @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
-
-  @@schema("public")
-}
-
-/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
-model escalation_type_code {
-  code        String         @id
-  display     String         @unique(map: "escalation_type_code_display_unique")
-  definition  String
-  active      Boolean        @default(true)
-  createdBy   String?        @default("00000000-0000-0000-0000-000000000000") @map("created_by")
-  createdAt   DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy   String?        @map("updated_by")
-  updatedAt   DateTime?      @map("updated_at") @db.Timestamptz(6)
-  noteHistory note_history[]
 
   @@schema("public")
 }
@@ -291,6 +288,8 @@ model housing_project {
   createdAt                       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                       String?   @map("updated_by")
   updatedAt                       DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy                       String?   @map("deleted_by")
+  deletedAt                       DateTime? @map("deleted_at") @db.Timestamptz(6)
   hasRentalUnits                  String?   @map("has_rental_units")
   projectDescription              String?   @map("project_description")
   projectApplicantType            String?   @map("project_applicant_type")
@@ -374,6 +373,8 @@ model note {
   createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy     String?      @map("updated_by")
   updatedAt     DateTime?    @map("updated_at") @db.Timestamptz(6)
+  deletedBy     String?      @map("deleted_by")
+  deletedAt     DateTime?    @map("deleted_at") @db.Timestamptz(6)
   noteHistory   note_history @relation(fields: [noteHistoryId], references: [noteHistoryId], onDelete: Cascade, map: "note_note_history_id_foreign")
 
   @@schema("public")
@@ -388,9 +389,10 @@ model note_history {
   createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy            String?               @map("updated_by")
   updatedAt            DateTime?             @map("updated_at") @db.Timestamptz(6)
+  deletedBy            String?               @map("deleted_by")
+  deletedAt            DateTime?             @map("deleted_at") @db.Timestamptz(6)
   bringForwardDate     DateTime?             @map("bring_forward_date") @db.Timestamptz(6)
   bringForwardState    String?               @map("bring_forward_state")
-  isDeleted            Boolean               @default(false) @map("is_deleted")
   shownToProponent     Boolean               @default(false) @map("shown_to_proponent")
   escalateToSupervisor Boolean               @default(false) @map("escalate_to_supervisor")
   escalateToDirector   Boolean               @default(false) @map("escalate_to_director")
@@ -416,9 +418,9 @@ model permit {
   createdAt          DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?           @map("updated_by")
   updatedAt          DateTime?         @map("updated_at") @db.Timestamptz(6)
-  statusLastVerified DateTime?         @map("status_last_verified") @db.Timestamptz(6)
   deletedBy          String?           @map("deleted_by")
   deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  statusLastVerified DateTime?         @map("status_last_verified") @db.Timestamptz(6)
   activity           activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   permitType         permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
   permitNote         permit_note[]
@@ -436,7 +438,8 @@ model permit_note {
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
-  isDeleted    Boolean   @default(false) @map("is_deleted")
+  deletedBy    String?   @map("deleted_by")
+  deletedAt    DateTime? @map("deleted_at") @db.Timestamptz(6)
   permit       permit    @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_note_permit_id_foreign")
 
   @@schema("public")
@@ -452,6 +455,8 @@ model permit_tracking {
   createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?             @map("updated_by")
   updatedAt          DateTime?           @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?             @map("deleted_by")
+  deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(6)
   permit             permit              @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
   sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
 
@@ -474,10 +479,10 @@ model permit_type {
   createdAt                DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                String?                       @map("updated_by")
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
-  sourceSystem             String?                       @map("source_system")
-  infoUrl                  String?                       @map("info_url")
   deletedBy                String?                       @map("deleted_by")
   deletedAt                DateTime?                     @map("deleted_at") @db.Timestamptz(6)
+  sourceSystem             String?                       @map("source_system")
+  infoUrl                  String?                       @map("info_url")
   permit                   permit[]
   sourceSystemCode         source_system_code?           @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
   permitTypeInitiativeXref permit_type_initiative_xref[]
@@ -493,6 +498,8 @@ model permit_type_initiative_xref {
   createdAt    DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?     @map("updated_by")
   updatedAt    DateTime?   @map("updated_at") @db.Timestamptz(6)
+  deletedBy    String?     @map("deleted_by")
+  deletedAt    DateTime?   @map("deleted_at") @db.Timestamptz(6)
   initiative   initiative  @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "permit_type_initiative_xref_initiative_id_foreign")
   permitType   permit_type @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_type_initiative_xref_permit_type_id_foreign")
 
@@ -510,6 +517,8 @@ model source_system_code {
   createdAt        DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy        String?              @map("updated_by")
   updatedAt        DateTime?            @map("updated_at") @db.Timestamptz(6)
+  deletedBy        String?              @map("deleted_by")
+  deletedAt        DateTime?            @map("deleted_at") @db.Timestamptz(6)
   permitType       permit_type[]
   sourceSystemKind source_system_kind[]
 
@@ -525,6 +534,8 @@ model source_system_kind {
   createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?            @map("updated_by")
   updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?            @map("deleted_by")
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
   permitTracking     permit_tracking[]
   sourceSystemCode   source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 
@@ -544,9 +555,9 @@ model user {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  bceidBusinessName      String?                   @map("bceid_business_name")
   deletedBy              String?                   @map("deleted_by")
   deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
+  bceidBusinessName      String?                   @map("bceid_business_name")
   accessRequest          access_request[]
   contact                contact[]
   electrificationProject electrification_project[]
@@ -738,6 +749,23 @@ model subject_group {
 
   @@id([sub, groupId])
   @@schema("yars")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model escalation_type_code {
+  code        String         @id
+  display     String         @unique(map: "escalation_type_code_display_unique")
+  definition  String
+  active      Boolean        @default(true)
+  createdBy   String?        @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdAt   DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy   String?        @map("updated_by")
+  updatedAt   DateTime?      @map("updated_at") @db.Timestamptz(6)
+  deletedBy   String?        @map("deleted_by")
+  deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
+  noteHistory note_history[]
+
+  @@schema("public")
 }
 
 /// The underlying view does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.

@@ -23,16 +23,18 @@ const { t } = useI18n();
     v-if="note"
     severity="warn"
   >
-    <div class="grid grid-cols-7 gap-4 items-center">
-      <div class="col-span-2">
+    <div class="flex flex-row gap-4 items-center">
+      <div class="flex">
         <span class="font-bold mr-4">{{ t('note.noteBanner.attnReqd') }}:</span>
+      </div>
+      <div class="flex">
         <span class="font-bold">
           {{ t('note.noteBanner.updatedOn') }}
           {{ formatDate(note.createdAt) }}
         </span>
       </div>
-      <div class="col-span-4 truncate">{{ note.note }}</div>
-      <div class="flex justify-end">
+      <div class="flex truncate text-ellipsis">{{ note.note }}</div>
+      <div class="flex grow justify-end">
         <Button
           size="small"
           :label="t('note.noteBanner.viewAll')"
@@ -45,6 +47,10 @@ const { t } = useI18n();
 </template>
 
 <style scoped lang="scss">
+:deep(.p-message-text) {
+  width: 100%;
+}
+
 .p-button-outlined {
   background-color: white;
 }

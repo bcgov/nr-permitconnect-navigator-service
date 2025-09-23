@@ -103,8 +103,8 @@ export const useProjectStore = defineStore('project', () => {
       return state.noteHistory.value
         .filter((noteHistory) => noteHistory.shownToProponent)
         .sort((a, b) => {
-          const aCreatedAt = a.note[0].createdAt!;
-          const bCreatedAt = b.note[0].createdAt!;
+          const aCreatedAt = a.note[0]?.createdAt!;
+          const bCreatedAt = b.note[0]?.createdAt!;
           return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
         });
     }),
