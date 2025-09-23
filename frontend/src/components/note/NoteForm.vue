@@ -11,7 +11,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Card, Message, ToggleSwitch, useConfirm, useToast } from '@/lib/primevue';
 import { noteHistoryService, userService } from '@/services';
-import { useAuthZStore, useCodeStore, useConfigStore, useEnquiryStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, useCodeStore, useConfigStore, useEnquiryStore, useProjectStore } from '@/store';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { GroupName, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
@@ -226,7 +226,9 @@ function navigateToOrigin() {
 }
 
 async function emailNotification() {
-  const supervisors = (await userService.searchUsers({ group: [GroupName.SUPERVISOR] })).data;
+  const supervisors = (
+    await userService.searchUsers({ group: [GroupName.SUPERVISOR], initiative: [useAppStore().getInitiative] })
+  ).data;
   const supervisorsEmails = supervisors.map((u: User) => u.email);
 
   if (supervisorsEmails.length === 0) return;
