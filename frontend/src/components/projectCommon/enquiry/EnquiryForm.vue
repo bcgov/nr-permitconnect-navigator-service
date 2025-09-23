@@ -2,25 +2,14 @@
 import { Form } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { boolean, date, mixed, object, string } from 'yup';
+import { boolean, mixed, object, string } from 'yup';
 
-import {
-  CancelButton,
-  Checkbox,
-  DatePicker,
-  EditableSelect,
-  FormNavigationGuard,
-  InputMask,
-  InputText,
-  Select,
-  SectionHeader,
-  TextArea
-} from '@/components/form';
+import { CancelButton, EditableSelect, FormNavigationGuard, Select, TextArea } from '@/components/form';
+import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
-import ContactSearchModal from '@/components/contact/ContactSearchModal.vue';
-import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
@@ -30,7 +19,6 @@ import {
   CONTACT_PREFERENCE_LIST,
   ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST,
-  INTAKE_STATUS_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/projectCommon';
 import {
@@ -41,10 +29,12 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
-import { atsClientIdValidator, contactValidator } from '@/validators';
+import { atsClientIdValidator } from '@/validators';
+import { emailValidator } from '@/validators/common';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
@@ -84,36 +74,24 @@ const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const projectActivityIds: Ref<Array<string>> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const searchContactModalVisible: Ref<boolean> = ref(false);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
 const intakeSchema = object({
   submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
-  submittedAt: date().required().label('Submission date'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
-  ...contactValidator,
+  contact: object({
+    email: emailValidator('Contact email must be valid').required().label('Contact email'),
+    firstName: string().required().max(255).label('Contact first name'),
+    lastName: string().max(255).label('Contact last name').nullable(),
+    phoneNumber: string().required().label('Contact phone number'),
+    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
+    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method')
+  }),
   enquiryDescription: string().required().label('Enquiry detail'),
-  intakeStatus: string().oneOf(INTAKE_STATUS_LIST).label('Intake state'),
-  user: mixed()
-    .nullable()
-    .when('intakeStatus', {
-      is: (val: string) => val === IntakeStatus.SUBMITTED,
-      then: (schema) =>
-        schema
-          .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
-            if (obj == null || (obj as User)?.userId || (typeof obj == 'string' && obj.length === 0)) return true;
-          })
-          .nullable(),
-      otherwise: (schema) =>
-        schema.test('expect-user', 'Assigned to must be a selected user', (obj) => {
-          return obj !== null && !!(obj as User)?.userId;
-        })
-    })
-    .label('Assigned to'),
-  applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
-  waitingOn: string().notRequired().max(255).label('waiting on'),
+  user: mixed().nullable().label('Assigned to'),
+  enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
   atsClientId: atsClientIdValidator
@@ -155,8 +133,8 @@ async function createATSEnquiry(atsClientId?: number) {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
-      contactFirstName: formRef.value?.values.contactFirstName,
-      contactSurname: formRef.value?.values.contactLastName,
+      contactFirstName: formRef.value?.values.contact.firstName,
+      contactSurname: formRef.value?.values.contact.lastName,
       regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
@@ -191,7 +169,7 @@ function onCancel() {
 function onInvalidSubmit(e: any) {
   const errors = Object.keys(e.errors);
 
-  if (errors.includes('contactFirstName')) {
+  if (errors.includes('contact.firstName')) {
     toast.warn(t('enquiryForm.basicInfoMissing'));
   }
   scrollToFirstError(e.errors);
@@ -254,14 +232,14 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contactFirstName', contact?.firstName);
-  formRef.value?.setFieldValue('contactLastName', contact?.lastName);
-  formRef.value?.setFieldValue('contactPhoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contactEmail', contact?.email);
-  formRef.value?.setFieldValue('contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contactUserId', contact?.userId);
+  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
+  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
+  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
+  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
+  formRef.value?.setFieldValue('contact.email', contact?.email);
+  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
+  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
+  formRef.value?.setFieldValue('contact.userId', contact?.userId);
   basicInfoManualEntry.value = false;
 }
 
@@ -299,26 +277,17 @@ const onSubmit = async (values: any) => {
 
     // Grab the contact information
     const contact = {
-      contactId: values.contactId,
-      firstName: values.contactFirstName,
-      lastName: values.contactLastName,
-      phoneNumber: values.contactPhoneNumber,
-      email: values.contactEmail,
-      contactApplicantRelationship: values.contactApplicantRelationship,
-      contactPreference: values.contactPreference
+      contactId: values.contact.contactId,
+      firstName: values.contact.firstName,
+      lastName: values.contact.lastName,
+      phoneNumber: values.contact.phoneNumber,
+      email: values.contact.email,
+      contactApplicantRelationship: values.contact.contactApplicantRelationship,
+      contactPreference: values.contact.contactPreference
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values }, [
-      'contactId',
-      'contactFirstName',
-      'contactLastName',
-      'contactPhoneNumber',
-      'contactEmail',
-      'contactApplicantRelationship',
-      'contactPreference',
-      'contactUserId'
-    ]);
+    const dataOmitted = omit({ ...values }, ['contact']);
 
     // Remove ATS client number from enquiry if submitted with linked activity
     if (dataOmitted.relatedActivityId) {
@@ -345,14 +314,16 @@ const onSubmit = async (values: any) => {
     formRef.value?.resetForm({
       values: {
         ...submitData,
-        contactId: firstContact.contactId,
-        contactFirstName: firstContact.firstName,
-        contactLastName: firstContact.lastName,
-        contactPhoneNumber: firstContact.phoneNumber,
-        contactEmail: firstContact.email,
-        contactApplicantRelationship: firstContact.contactApplicantRelationship,
-        contactPreference: firstContact.contactPreference,
-        contactUserId: firstContact.userId,
+        contact: {
+          contactId: firstContact?.contactId,
+          firstName: firstContact?.firstName,
+          lastName: firstContact?.lastName,
+          phoneNumber: firstContact?.phoneNumber,
+          email: firstContact?.email,
+          contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+          contactPreference: firstContact?.contactPreference,
+          userId: firstContact?.userId
+        },
         submittedAt: new Date(submitData.submittedAt),
         user: values.user
       }
@@ -386,23 +357,23 @@ onBeforeMount(async () => {
     relatedActivityId: enquiry?.relatedActivityId,
     submittedMethod: enquiry?.submittedMethod,
     enquiryDescription: enquiry?.enquiryDescription,
-    contactId: firstContact?.contactId,
-    contactFirstName: firstContact?.firstName,
-    contactLastName: firstContact?.lastName,
-    contactPhoneNumber: firstContact?.phoneNumber,
-    contactEmail: firstContact?.email,
-    contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-    contactPreference: firstContact?.contactPreference,
-    contactUserId: firstContact?.userId,
+    contact: {
+      contactId: firstContact?.contactId,
+      firstName: firstContact?.firstName,
+      lastName: firstContact?.lastName,
+      phoneNumber: firstContact?.phoneNumber,
+      email: firstContact?.email,
+      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
+      contactPreference: firstContact?.contactPreference,
+      userId: firstContact?.userId
+    },
 
     addedToAts: enquiry?.addedToAts,
     atsClientId: enquiry?.atsClientId,
     atsEnquiryId: enquiry?.atsEnquiryId,
 
-    intakeStatus: enquiry?.intakeStatus,
     user: assigneeOptions.value[0] ?? null,
-    enquiryStatus: enquiry?.enquiryStatus,
-    waitingOn: enquiry?.waitingOn
+    enquiryStatus: enquiry?.enquiryStatus
   };
 
   if (enquiry?.relatedActivityId) getRelatedATSClientID(enquiry?.relatedActivityId);
@@ -415,14 +386,14 @@ async function createATSClientEnquiry() {
   try {
     const address: Partial<ATSAddressResource> = {
       '@type': 'AddressResource',
-      primaryPhone: formRef.value?.values.contactPhoneNumber ?? '',
-      email: formRef.value?.values?.contactEmail ?? ''
+      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
+      email: formRef.value?.values?.contact.email ?? ''
     };
     const data = {
       '@type': 'ClientResource',
       address: address,
-      firstName: formRef.value?.values.contactFirstName,
-      surName: formRef.value?.values.contactLastName,
+      firstName: formRef.value?.values.contact.firstName,
+      surName: formRef.value?.values.contact.lastName,
       regionName: GroupName.NAVIGATOR,
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
@@ -455,281 +426,206 @@ async function createATSClientEnquiry() {
     v-if="initialFormValues"
     v-slot="{ setFieldValue, values }"
     ref="formRef"
-    :validation-schema="intakeSchema"
     :initial-values="initialFormValues"
+    :validation-schema="intakeSchema"
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
     <FormNavigationGuard v-if="!isCompleted" />
 
-    <div class="grid grid-cols-12 gap-4">
-      <Select
-        class="col-span-3"
-        name="submissionType"
-        label="Submission type"
-        :disabled="!editable"
-        :options="ENQUIRY_TYPE_LIST"
-      />
-      <DatePicker
-        class="col-span-3"
-        name="submittedAt"
-        label="Submission date"
-        :disabled="!editable"
-      />
-      <EditableSelect
-        class="col-span-3"
-        name="relatedActivityId"
-        label="Related project"
-        :disabled="!editable"
-        :options="filteredProjectActivityIds"
-        :get-option-label="(e: string) => e"
-        @on-input="onRelatedActivityInput"
-        @on-change="onRelatedActivityChange"
-      />
-
-      <EditableSelect
-        class="col-span-3"
-        name="submittedMethod"
-        :label="t('enquiryForm.submittedMethod')"
-        :disabled="!editable"
-        :options="Object.values(EnquirySubmittedMethod)"
-        :get-option-label="(e: string) => e"
-      />
-      <div class="col-span-3" />
-
-      <SectionHeader :title="t('enquiryForm.basicInfoHeader')" />
-
-      <Button
-        v-if="!values.relatedActivityId"
-        class="col-span-2"
-        outlined
-        aria-label="Search Contacts"
-        :disabled="!editable"
-        @click="searchContactModalVisible = true"
-      >
-        {{ t('enquiryForm.searchContacts') }}
-      </Button>
-      <div
-        v-if="!values.contactUserId && values.contactId"
-        class="col-span-12 mt-2"
-      >
-        <Message
-          severity="warn"
-          class="text-center"
-          :closable="false"
-        >
-          {{ t('enquiryForm.manualContactHint') }}
-        </Message>
+    <div class="grid grid-cols-[4fr_1fr] gap-x-9 mt-4">
+      <div class="flex flex-col gap-y-9">
+        <div class="p-panel flex justify-between items-start px-6 py-4">
+          <h2 class="section-header my-0">{{ values.contact.firstName }} {{ values.contact.lastName }}</h2>
+          <div class="flex flex-col">
+            <span>{{ t('enquiryForm.submissionDate') }}</span>
+            <span class="text-[var(--p-bcblue-900)]">{{ formatDate(enquiry.submittedAt) }}</span>
+          </div>
+        </div>
+        <ContactCardNavForm
+          :editable="editable"
+          :form-values="values"
+          @contact-card-nav-form:pick="
+            (contact: Contact) => {
+              setBasicInfo(contact);
+            }
+          "
+          @contact-card-nav-form:manual-entry="
+            () => {
+              setBasicInfo();
+            }
+          "
+        />
+        <Panel toggleable>
+          <template #header>
+            <div class="flex items-center gap-x-2.5">
+              <h3 class="section-header m-0">
+                {{ t('enquiryForm.enquiryDetailHeader') }}
+              </h3>
+            </div>
+          </template>
+          <TextArea
+            name="enquiryDescription"
+            label=""
+            :disabled="!editable"
+          />
+        </Panel>
+        <div class="flex mt-10">
+          <Button
+            v-if="!isCompleted"
+            :label="t('enquiryForm.save')"
+            type="submit"
+            icon="pi pi-check"
+            :disabled="!editable"
+          />
+          <CancelButton
+            v-if="!isCompleted"
+            :editable="editable"
+            @clicked="onCancel"
+          />
+          <Button
+            v-if="isCompleted"
+            :label="t('enquiryForm.reopenSubmission')"
+            icon="pi pi-check"
+            @click="onReOpen()"
+          />
+        </div>
       </div>
+      <div class="flex flex-col gap-y-9">
+        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
+          <h4 class="section-header mb-4 mt-0">
+            {{ t('enquiryForm.relatedSubmission') }}
+          </h4>
+          <EditableSelect
+            name="relatedActivityId"
+            :disabled="!editable"
+            :options="filteredProjectActivityIds"
+            :get-option-label="(e: string) => e"
+            @on-input="onRelatedActivityInput"
+            @on-change="onRelatedActivityChange"
+          />
+        </div>
+        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
+          <h4 class="section-header mb-4 mt-0">
+            {{ t('enquiryForm.submissionStateHeader') }}
+          </h4>
+          <div class="flex flex-col gap-y-4">
+            <EditableSelect
+              name="user"
+              :label="t('enquiryForm.assignedTo')"
+              :disabled="!editable"
+              :options="assigneeOptions"
+              :get-option-label="getAssigneeOptionLabel"
+              @on-input="onAssigneeInput"
+            />
+            <EditableSelect
+              name="submittedMethod"
+              :label="t('enquiryForm.submittedMethod')"
+              :disabled="!editable"
+              :options="ENQUIRY_SUBMITTED_METHOD"
+              :get-option-label="(e: string) => e"
+            />
 
-      <!-- TODO: Use <ContactCardNavForm> -->
-      <div
-        v-if="values.contactId || basicInfoManualEntry || values.relatedActivityId"
-        class="grid grid-cols-subgrid gap-4 col-span-12"
-      >
-        <InputText
-          class="col-span-3"
-          name="contactFirstName"
-          label="First name"
-          :disabled="!editable || !basicInfoManualEntry"
-        />
-        <InputText
-          class="col-span-3"
-          name="contactLastName"
-          label="Last name"
-          :disabled="!editable || !basicInfoManualEntry"
-        />
-        <Select
-          class="col-span-3"
-          name="contactApplicantRelationship"
-          label="Relationship to activity"
-          :disabled="!editable || !basicInfoManualEntry"
-          :options="PROJECT_RELATIONSHIP_LIST"
-        />
-        <Select
-          class="col-span-3"
-          name="contactPreference"
-          label="Preferred contact method"
-          :disabled="!editable || !basicInfoManualEntry"
-          :options="CONTACT_PREFERENCE_LIST"
-        />
-        <InputMask
-          class="col-span-3"
-          name="contactPhoneNumber"
-          mask="(999) 999-9999"
-          label="Phone number"
-          :disabled="!editable || !basicInfoManualEntry"
-        />
-        <InputText
-          class="col-span-3"
-          name="contactEmail"
-          label="Contact email"
-          :disabled="!editable || !basicInfoManualEntry"
-        />
-      </div>
-      <ContactSearchModal
-        v-model:visible="searchContactModalVisible"
-        @contact-search:pick="
-          (contact: Contact) => {
-            searchContactModalVisible = false;
-            setBasicInfo(contact);
-            basicInfoManualEntry = false;
-          }
-        "
-        @contact-search:manual-entry="
-          () => {
-            searchContactModalVisible = false;
-            setBasicInfo();
-            basicInfoManualEntry = true;
-          }
-        "
-      />
-
-      <SectionHeader :title="t('enquiryForm.enquiryDetailHeader')" />
-
-      <TextArea
-        class="col-span-12"
-        name="enquiryDescription"
-        label=""
-        :disabled="!editable"
-      />
-
-      <SectionHeader :title="t('enquiryForm.atsHeader')" />
-
-      <div class="grid grid-cols-subgrid gap-4 col-span-12">
-        <div
-          v-if="values.atsClientId || atsCreateType !== undefined"
-          class="col-start-1 col-span-12"
-        >
-          <div class="col-start-1 col-span-12">
+            <Select
+              name="enquiryStatus"
+              :label="t('enquiryForm.enquiryState')"
+              :disabled="!editable"
+              :options="APPLICATION_STATUS_LIST"
+            />
+            <Select
+              name="submissionType"
+              :label="t('enquiryForm.submissionType')"
+              :disabled="!editable"
+              :options="ENQUIRY_TYPE_LIST"
+            />
+          </div>
+        </div>
+        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
+          <h4 class="section-header mb-4 mt-0">
+            {{ t('enquiryForm.atsHeader') }}
+          </h4>
+          <div
+            v-if="values.atsClientId || atsCreateType !== undefined"
+            class="flex flex-col gap-y-3"
+          >
+            <input
+              type="hidden"
+              name="atsClientId"
+            />
             <div class="flex items-center">
-              <h5 class="mr-3">{{ t('enquiryForm.clientId') }}</h5>
-              <a
-                class="hover-hand"
+              <p class="text-[var(--p-primary-900)] mr-3">
+                <b>{{ t('enquiryForm.clientId') }}</b>
+              </p>
+              <button
+                class="hover-hand underline text-[var(--p-bcblue-950)]"
                 @click="atsUserDetailsModalVisible = true"
               >
                 {{ values.atsClientId }}
-              </a>
-              <span v-if="atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY">{{ t('enquiryForm.pendingSave') }}</span>
+              </button>
+              <span v-if="atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY">
+                {{ t('enquiryForm.pendingSave') }}
+              </span>
+            </div>
+            <input
+              type="hidden"
+              name="atsEnquiryId"
+            />
+            <div
+              v-if="values.atsEnquiryId || atsCreateType !== undefined"
+              class="flex items-center"
+            >
+              <p class="text-[var(--p-primary-900)] mr-2">
+                <b>{{ t('enquiryForm.enquiryNo') }}</b>
+              </p>
+
+              {{ values.atsEnquiryId }}
+              <span v-if="atsCreateType !== undefined">
+                {{ t('enquiryForm.pendingSave') }}
+              </span>
             </div>
           </div>
-        </div>
-        <input
-          type="hidden"
-          name="atsClientId"
-        />
-        <div
-          v-if="values.atsEnquiryId || atsCreateType !== undefined"
-          class="col-start-1 col-span-12"
-        >
-          <div class="flex items-center">
-            <h5 class="mr-2">{{ t('enquiryForm.enquiry#') }}</h5>
-            {{ values.atsEnquiryId }}
-            <span v-if="atsCreateType !== undefined">
-              {{ t('enquiryForm.pendingSave') }}
-            </span>
+          <div
+            v-else
+            class="flex flex-col gap-y-6"
+          >
+            <Button
+              v-if="!values.atsClientId && atsCreateType === undefined"
+              class="ats-button"
+              :aria-label="t('enquiryForm.atsSearchBtn')"
+              outlined
+              :label="t('enquiryForm.atsSearchBtn')"
+              :disabled="!editable"
+              @click="atsUserLinkModalVisible = true"
+            />
+            <Button
+              v-if="!values.atsClientId && atsCreateType === undefined"
+              class="ats-button"
+              :aria-label="t('enquiryForm.atsNewClientBtn')"
+              outlined
+              :label="t('enquiryForm.atsNewClientBtn')"
+              :disabled="!editable"
+              @click="atsUserCreateModalVisible = true"
+            />
           </div>
+          <Button
+            v-if="values.atsClientId && !values.atsEnquiryId && atsCreateType === undefined"
+            class="mt-4"
+            :aria-label="t('enquiryForm.atsNewEnquiryBtn')"
+            :disabled="!editable"
+            @click="onNewATSEnquiry()"
+          >
+            {{ t('enquiryForm.atsNewEnquiryBtn') }}
+          </Button>
         </div>
-        <input
-          type="hidden"
-          name="atsEnquiryId"
-        />
-        <Button
-          v-if="!values.atsClientId && atsCreateType === undefined"
-          class="col-start-1 col-span-2"
-          outlined
-          aria-label="Link to ATS"
-          :disabled="!editable"
-          @click="atsUserLinkModalVisible = true"
-        >
-          {{ t('enquiryForm.atsSearchBtn') }}
-        </Button>
-        <Button
-          v-if="!values.atsClientId && atsCreateType === undefined"
-          class="grid-col-start-3 col-span-2"
-          outlined
-          aria-label="New ATS client"
-          :disabled="!editable"
-          @click="atsUserCreateModalVisible = true"
-        >
-          {{ t('enquiryForm.atsNewClientBtn') }}
-        </Button>
-        <Button
-          v-if="values.atsClientId && !values.atsEnquiryId && atsCreateType === undefined"
-          class="grid-col-start-3 col-span-2"
-          aria-label="New ATS enquiry"
-          :disabled="!editable"
-          @click="onNewATSEnquiry()"
-        >
-          {{ t('enquiryForm.atsNewEnquiryBtn') }}
-        </Button>
-      </div>
-      <Checkbox
-        class="col-span-12 mt-2"
-        name="addedToAts"
-        label="Authorized Tracking System (ATS) updated"
-        :disabled="!editable"
-        :bold="true"
-      />
-      <SectionHeader title="Submission state" />
-
-      <Select
-        class="col-span-3"
-        name="intakeStatus"
-        label="Intake state"
-        :disabled="!editable"
-        :options="INTAKE_STATUS_LIST"
-      />
-      <EditableSelect
-        class="col-span-3"
-        name="user"
-        label="Assigned to"
-        :disabled="!editable"
-        :options="assigneeOptions"
-        :get-option-label="getAssigneeOptionLabel"
-        @on-input="onAssigneeInput"
-      />
-      <Select
-        class="col-span-3"
-        name="enquiryStatus"
-        label="Activity state"
-        :disabled="!editable"
-        :options="APPLICATION_STATUS_LIST"
-      />
-      <InputText
-        class="col-span-3"
-        name="waitingOn"
-        label="Waiting on"
-        :disabled="!editable"
-      />
-
-      <div class="field col-span-12 mt-8">
-        <Button
-          v-if="!isCompleted"
-          type="submit"
-          icon="pi pi-check"
-          :disabled="!editable"
-          :label="t('enquiryForm.formSaveBtn')"
-        />
-        <CancelButton
-          v-if="!isCompleted"
-          :editable="editable"
-          @clicked="onCancel"
-        />
-        <Button
-          v-if="isCompleted"
-          icon="pi pi-check"
-          :label="t('enquiryForm.formReopenBtn')"
-          @click="onReOpen()"
-        />
       </div>
     </div>
+
     <ATSUserLinkModal
       v-model:visible="atsUserLinkModalVisible"
-      :f-name="values.contactFirstName"
-      :l-name="values.contactLastName"
-      :phone-number="values.contactPhoneNumber"
-      :email-id="values.contactEmail"
+      :f-name="values.contact.firstName"
+      :l-name="values.contact.lastName"
+      :phone-number="values.contact.phoneNumber"
+      :email-id="values.contact.email"
       @ats-user-link:link="
         (atsClientResource: ATSClientResource) => {
           atsUserLinkModalVisible = false;
@@ -741,7 +637,6 @@ async function createATSClientEnquiry() {
     <ATSUserDetailsModal
       v-model:visible="atsUserDetailsModalVisible"
       :ats-client-id="values.atsClientId"
-      :disabled="!!values.relatedActivityId"
       @ats-user-details:un-link="
         () => {
           atsUserDetailsModalVisible = false;
@@ -754,10 +649,10 @@ async function createATSClientEnquiry() {
     />
     <ATSUserCreateModal
       v-model:visible="atsUserCreateModalVisible"
-      :first-name="values.contactFirstName"
-      :last-name="values.contactLastName"
-      :phone="values.contactPhoneNumber"
-      :email="values.contactEmail"
+      :first-name="values.contact.firstName"
+      :last-name="values.contact.lastName"
+      :phone="values.contact.phoneNumber"
+      :email="values.contact.email"
       @ats-user-create:create="
         () => {
           atsUserCreateModalVisible = false;
@@ -767,3 +662,8 @@ async function createATSClientEnquiry() {
     />
   </Form>
 </template>
+<style scoped lang="scss">
+.ats-button {
+  background-color: white;
+}
+</style>

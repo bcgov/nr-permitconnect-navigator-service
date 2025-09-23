@@ -12,9 +12,9 @@ import type { Ref } from 'vue';
 import type { Contact } from '@/types';
 
 // Props
-const { editable = true, initialFormValues } = defineProps<{
+const { editable = true, formValues } = defineProps<{
   editable?: boolean;
-  initialFormValues: any;
+  formValues: any;
 }>();
 
 // State
@@ -35,7 +35,7 @@ const { t } = useI18n();
 // 2. The initial form values have a contactId but no userId
 function showManualContactHint() {
   if (selectedContact.value) return !selectedContact.value.userId;
-  else if (initialFormValues.contact.contactId) return !initialFormValues.contact.userId;
+  else if (formValues.contact.contactId) return !formValues.contact.userId;
   return false;
 }
 </script>
@@ -95,7 +95,7 @@ function showManualContactHint() {
       "
     />
     <div
-      v-if="initialFormValues?.contact.contactId || basicInfoManualEntry || selectedContact?.contactId"
+      v-if="formValues?.contact.contactId || basicInfoManualEntry || selectedContact?.contactId"
       class="grid grid-cols-3 gap-x-6 gap-y-6"
     >
       <InputText

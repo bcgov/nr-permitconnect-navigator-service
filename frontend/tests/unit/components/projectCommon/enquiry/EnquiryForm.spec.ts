@@ -132,24 +132,7 @@ describe('EnquiryForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(6);
-  });
-
-  it('renders the correct amount of input components', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings());
-    await nextTick();
-
-    // includes datepicker and input mask components, but not dropdowns
-    const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(2);
-  });
-
-  it('renders the correct amount of datepickers components', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings());
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-datepicker-input');
-    expect(elements.length).toBe(1);
+    expect(elements.length).toBe(5);
   });
 
   it('renders the correct amount of input mask components (phone number)', async () => {
@@ -204,6 +187,6 @@ describe('EnquiryForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.props('editable')).toBe(false);
-    expect(elements.length).toBe(7);
+    expect(elements.length).toBe(5);
   });
 });
