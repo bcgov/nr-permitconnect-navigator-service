@@ -98,7 +98,7 @@ onBeforeMount(() => {
 
 <template>
   <DataTable
-    :selection="selection"
+    v-model:selection="selection"
     :loading="loading"
     :value="normalizeContactHistory()"
     data-key="activityId"

@@ -126,7 +126,7 @@ watch(
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
     if (validUser) {
-      if (projectService) statistics.value = (await projectService.getStatistics(statisticFilters.value)).data;
+      if (projectService) statistics.value = (await projectService.value.getStatistics(statisticFilters.value)).data;
     }
   },
   { deep: true }

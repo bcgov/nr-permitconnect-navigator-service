@@ -10,10 +10,10 @@ import type { Document, ElectrificationProject, Enquiry, HousingProject, NoteHis
 export type ProjectType = ElectrificationProject | HousingProject | undefined;
 
 export type ProjectStoreState = {
-  documents: Ref<Array<Document>>;
-  relatedEnquiries: Ref<Array<Enquiry>>;
-  noteHistory: Ref<Array<NoteHistory>>;
-  permits: Ref<Array<Permit>>;
+  documents: Ref<Document[]>;
+  relatedEnquiries: Ref<Enquiry[]>;
+  noteHistory: Ref<NoteHistory[]>;
+  permits: Ref<Permit[]>;
   project: Ref<ProjectType>;
 };
 
@@ -94,6 +94,20 @@ export const useProjectStore = defineStore('project', () => {
     }),
     getDocuments: computed(() => state.documents.value),
     getNoteHistory: computed(() => state.noteHistory.value),
+    getNoteHistoryById: computed(
+      () => (noteHistoryId: string | undefined) =>
+        state.noteHistory.value.find((x) => x.noteHistoryId === noteHistoryId)
+    ),
+    // Get array of note history that is shown to the proponent in descending order of creation date of the note
+    getNoteHistoryShownToProponent: computed(() => {
+      return state.noteHistory.value
+        .filter((noteHistory) => noteHistory.shownToProponent)
+        .sort((a, b) => {
+          const aCreatedAt = a.note[0]?.createdAt!;
+          const bCreatedAt = b.note[0]?.createdAt!;
+          return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
+        });
+    }),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
     getProject: computed(() => state.project.value)
@@ -129,7 +143,7 @@ export const useProjectStore = defineStore('project', () => {
     state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNoteHistory(data: Array<NoteHistory>) {
+  function setNoteHistory(data: NoteHistory[]) {
     state.noteHistory.value = data;
   }
 

@@ -40,8 +40,8 @@ function onDelete(draftId: string) {
     rejectLabel: t('submissionDraftListProponent.cancel'),
     rejectProps: { outlined: true },
     accept: () => {
-      if (!projectService) throw new Error('No service');
-      projectService
+      if (!projectService?.value) throw new Error('No service');
+      projectService.value
         .deleteDraft(draftId)
         .then(() => {
           emit('submissionDraft:delete', draftId);

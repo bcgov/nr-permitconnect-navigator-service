@@ -5,7 +5,7 @@ import type { Ref } from 'vue';
 import type { Enquiry, NoteHistory } from '@/types';
 
 export type EnquiryStoreState = {
-  noteHistory: Ref<Array<NoteHistory>>;
+  noteHistory: Ref<NoteHistory[]>;
   enquiry: Ref<Enquiry | undefined>;
 };
 
@@ -19,6 +19,10 @@ export const useEnquiryStore = defineStore('enquiry', () => {
   // Getters
   const getters = {
     getNoteHistory: computed(() => state.noteHistory.value),
+    getNoteHistoryById: computed(
+      () => (noteHistoryId: string | undefined) =>
+        state.noteHistory.value.find((x) => x.noteHistoryId === noteHistoryId)
+    ),
     getEnquiry: computed(() => state.enquiry.value)
   };
 
@@ -33,7 +37,7 @@ export const useEnquiryStore = defineStore('enquiry', () => {
     state.noteHistory.value = state.noteHistory.value.filter((x) => x.noteHistoryId !== data.noteHistoryId);
   }
 
-  function setNoteHistory(data: Array<NoteHistory>) {
+  function setNoteHistory(data: NoteHistory[]) {
     state.noteHistory.value = data;
   }
 

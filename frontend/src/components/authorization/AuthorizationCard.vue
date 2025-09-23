@@ -51,13 +51,17 @@ function toCopy(toCopy: string) {
     </template>
     <template #content>
       <div class="flex gap-2">
-        <span :class="permit.authStatus !== PermitAuthorizationStatus.NONE ? 'pb-4' : ''">
+        <span :class="{ 'pb-4': permit.authStatus !== PermitAuthorizationStatus.NONE }">
           <AuthorizationStatusPill
             v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
             :auth-status="permit.authStatus"
           />
         </span>
-        <StatusPill :status="permit.status" />
+        <StatusPill
+          :status="permit.status"
+          :border-color="'var(--p-bcblue-900)'"
+          :bg-color="'var(--p-bcblue-50)'"
+        />
       </div>
       <div class="grid grid-cols-[1fr_1fr_1fr] pt-2 pb-2 pr-2 gap-4">
         <div class="bg-[var(--p-bcblue-50)] py-5 pl-5">
@@ -79,7 +83,6 @@ function toCopy(toCopy: string) {
                 {{ trackingShownToProponent.sourceSystemKind?.description }}
               </span>
               :
-
               {{ trackingShownToProponent.trackingId }}
             </span>
           </div>

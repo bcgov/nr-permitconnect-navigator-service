@@ -2,21 +2,21 @@
 import { storeToRefs } from 'pinia';
 import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
 import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
-import { enquiryService, housingProjectService, noteHistoryService } from '@/services';
+import { enquiryService, housingProjectService, noteHistoryService, userService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
+import { toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { HousingProject, NoteHistory } from '@/types';
-import { toTitleCase } from '@/utils/utils';
+import type { HousingProject, User } from '@/types';
 
 // Props
 const {
@@ -31,6 +31,7 @@ const {
 
 // Composables
 const { t } = useI18n();
+const router = useRouter();
 
 // Store
 const enquiryStore = useEnquiryStore();
@@ -42,7 +43,7 @@ const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const relatedHousingProject: Ref<HousingProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const noteModalVisible: Ref<boolean> = ref(false);
+const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
 const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
@@ -51,21 +52,9 @@ const isCompleted = computed(() => {
 // Providers
 provide(atsEnquiryPartnerAgenciesKey, Initiative.HOUSING);
 provide(atsEnquiryTypeCodeKey, toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX);
-provide(projectServiceKey, housingProjectService);
+provide(projectServiceKey, ref(housingProjectService));
 
 // Actions
-function onCreateNoteHistory(history: NoteHistory) {
-  enquiryStore.addNoteHistory(history, true);
-}
-
-function onDeleteNoteHistory(history: NoteHistory) {
-  enquiryStore.removeNoteHistory(history);
-}
-
-function onUpdateNoteHistory(history: NoteHistory) {
-  enquiryStore.updateNoteHistory(history);
-}
-
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
 }
@@ -78,6 +67,16 @@ async function updateRelatedEnquiry() {
       })
     ).data[0];
   } else relatedHousingProject.value = undefined;
+}
+
+function toEditNote(noteHistoryId: string) {
+  router.push({
+    name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+    params: {
+      enquiryId: enquiryId,
+      noteHistoryId: noteHistoryId
+    }
+  });
 }
 
 onBeforeMount(async () => {
@@ -96,6 +95,25 @@ onBeforeMount(async () => {
   if (projectId) {
     const project = (await housingProjectService.getProject(projectId)).data;
     projectStore.setProject(project);
+  }
+
+  // Batch lookup the users who have created notes
+  const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
+    noteHistoryId: x.noteHistoryId,
+    createdBy: x.createdBy
+  }));
+
+  if (noteHistoryCreatedByUsers.length) {
+    const noteHistoryUsers = (
+      await userService.searchUsers({
+        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+      })
+    ).data;
+
+    noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
+      noteHistoryId: x.noteHistoryId as string,
+      createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
+    }));
   }
 
   loading.value = false;
@@ -166,7 +184,14 @@ onBeforeMount(async () => {
           <Button
             aria-label="Add note"
             :disabled="!isCompleted && !useAuthZStore().can(Initiative.HOUSING, Resource.NOTE, Action.CREATE)"
-            @click="noteModalVisible = true"
+            @click="
+              router.push({
+                name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+                params: {
+                  enquiryId: enquiryId
+                }
+              })
+            "
           >
             <font-awesome-icon
               class="pr-2"
@@ -175,25 +200,26 @@ onBeforeMount(async () => {
             Add note
           </Button>
         </div>
-        <div
-          v-for="(history, index) in getNoteHistory"
-          :key="history.noteHistoryId"
-          :index="index"
-          class="col-span-12"
-        >
-          <NoteHistoryCard
-            :editable="!isCompleted"
-            :note-history="history"
-            @delete-note-history="onDeleteNoteHistory"
-            @update-note-history="onUpdateNoteHistory"
-          />
+        <div v-if="!loading">
+          <div
+            v-for="(noteHistory, index) in getNoteHistory"
+            :key="noteHistory.noteHistoryId"
+            :index="index"
+            class="col-span-12"
+          >
+            <NoteHistoryCard
+              :editable="!isCompleted"
+              :note-history="noteHistory"
+              :created-by-full-name="
+                noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
+                  ?.createdByFullname
+              "
+              @edit-note-history="(e) => toEditNote(e)"
+              @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
+              @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
+            />
+          </div>
         </div>
-        <NoteHistoryModal
-          v-if="noteModalVisible && activityId"
-          v-model:visible="noteModalVisible"
-          :activity-id="activityId"
-          @create-note-history="onCreateNoteHistory"
-        />
       </TabPanel>
     </TabPanels>
   </Tabs>

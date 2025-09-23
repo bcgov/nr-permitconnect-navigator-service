@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { provide } from 'vue';
+import { provide, ref } from 'vue';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { electrificationProjectService } from '@/services';
@@ -12,7 +12,7 @@ const { contactId } = defineProps<{
 }>();
 
 // Providers
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 provide(contactInitiativeRouteNameKey, RouteName.INT_ELECTRIFICATION_CONTACT);
 </script>
 

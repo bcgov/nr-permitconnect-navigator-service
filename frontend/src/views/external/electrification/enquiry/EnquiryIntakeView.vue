@@ -41,7 +41,7 @@ provide(enquiryConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIR
 provide(enquiryPermitConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION);
 provide(enquiryProjectConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION);
 provide(enquiryRouteNameKey, RouteName.EXT_ELECTRIFICATION);
-provide(projectServiceKey, electrificationProjectService);
+provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions
 onBeforeMount(async () => {

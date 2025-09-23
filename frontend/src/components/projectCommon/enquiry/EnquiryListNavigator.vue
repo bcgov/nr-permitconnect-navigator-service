@@ -154,8 +154,8 @@ function updateQueryParams() {
 
 <template>
   <DataTable
+    v-model:selection="selection"
     :filters="filters"
-    :selection="selection"
     :value="filteredEnquiries"
     data-key="enquiryId"
     removable-sort

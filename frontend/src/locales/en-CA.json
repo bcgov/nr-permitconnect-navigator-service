@@ -52,7 +52,6 @@
         "agency": "Agency",
         "askMyNavigator": "Ask my Navigator",
         "completedAuths": "Completed authorizations",
-        "beAware": "Please be aware!",
         "createdBy": "Created by",
         "crumbAppsPermits": "Applications and Permits",
         "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
@@ -579,20 +578,67 @@
     "login": "Log in",
     "logout": "Log out"
   },
-  "noteHistoryModal": {
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "created": "Created",
-    "deleteHeader": "Confirm delete",
-    "deleteMessage": "Please confirm that you want to delete the selected note.",
-    "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
-    "escalateToDirector": "Escalate to Director",
-    "escalateToSupervisor": "Escalate to Supervisor",
-    "lastUpdated": "Last updated",
-    "noteDeleted": "Note deleted",
-    "noteDeleteFailed": "Failed to delete note",
-    "showProponent": "Show to Proponent",
-    "shownToProponentBanner": "The title and date of the latest note will get shared with the proponent. You may turn this off anytime."
+  "note": {
+    "noteBanner": {
+      "attnReqd": "Attention required",
+      "updatedOn": "Updated on",
+      "viewAll": "View all"
+    },
+    "noteForm": {
+      "bfDateReqd": "Bring forward date is a required field",
+      "bfNoteHint": "Provide a brief, factual summary of what occurred, when it happened, why it’s important, any associated risks, and follow-up actions taken. Please avoid personal opinions or subjective language use.",
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "created": "Created",
+      "deleteHeader": "Confirm delete",
+      "deleteMessage": "Please confirm that you want to delete the selected note.",
+      "deleteMessageIfShown": "This note is currently visible to the Proponent. Deleting it will also remove it from their view. Please confirm that you want to delete this note.",
+      "escalateToDirector": "Escalate to Director",
+      "escalateToSupervisor": "Escalate to Supervisor",
+      "escalationEmailTitle": "New escalation in PCNS",
+      "escalationTypeReqd": "Escalation type is a required field",
+      "lastUpdated": "Last updated",
+      "note": "Note",
+      "noteDeleted": "Note deleted",
+      "noteDeleteFailed": "Failed to delete note",
+      "noteSaved": "Note saved",
+      "noteSaveFailed": "Failed to save note",
+      "noteReqd": "Note is a required field",
+      "showProponent": "Show to Proponent",
+      "shownToPropBanner": "The title, date, and latest note history will get shared with the proponent. You may turn this off anytime.",
+      "titleLong": "Title too long"
+    },
+    "noteHistoryCard": {
+      "author": "Author",
+      "bringForward": "Bring forward",
+      "created": "Created",
+      "escalated": "Escalated",
+      "lastUpdated": "Last updated",
+      "shownToProponent": "Shown to Proponent"
+    },
+    "noteView": {
+      "noteLoadError": "Unable to load note or project, please try again later"
+    },
+    "shownToProponentModal": {
+      "attnReqd": "Attention required"
+    }
+  },
+  "permitCard": {
+    "addUpdates": "Add updates",
+    "adjudicationDate": "Adjudication date:",
+    "agency": "Agency:",
+    "businessDomain": "Business domain:",
+    "issuedPermitId": "Issued Permit ID:",
+    "lastUpdated": "Last updated:",
+    "latestUpdate": "Latest update for the client:",
+    "needed": "Needed:",
+    "permitState": "Permit state:",
+    "previousUpdates": "Previous Updates",
+    "sourceSystem": "Source system:",
+    "statusVerified": "Status verified date:",
+    "submittedDate": "Submitted date:",
+    "trackingId": "Tracking ID:",
+    "updatedBy": "Updated by:"
   },
   "permitModal": {
     "addTitle": "Add permit",

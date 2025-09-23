@@ -7,17 +7,24 @@ import { useRouter } from 'vue-router';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import AuthorizationCardProponent from '@/components/authorization/AuthorizationCardProponent.vue';
 import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
-import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import { AskMyNavigator } from '@/components/common/icons';
+import NoteBanner from '@/components/note/NoteBanner.vue';
+import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
+import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
-import { Button, Dialog, Tab, Tabs, TabList, TabPanel, TabPanels, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, electrificationProjectService, permitService } from '@/services';
+import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
+import {
+  contactService,
+  enquiryService,
+  electrificationProjectService,
+  noteHistoryService,
+  permitService
+} from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
-import { formatDate, formatDateLong } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -43,7 +50,7 @@ const {
   getAuthsNeeded,
   getAuthsNotNeeded,
   getAuthsOnGoing,
-  getNoteHistory,
+  getNoteHistoryShownToProponent,
   getProject,
   getRelatedEnquiries
 } = storeToRefs(projectStore);
@@ -99,10 +106,10 @@ onBeforeMount(async () => {
 
   try {
     const activityId = projectValue.activityId;
-    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    projectStore.setPermits(permitsValue);
+    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+    projectStore.setNoteHistory(noteHistory);
   } catch {
-    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
+    toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
   }
 
   projectStore.setProject(projectValue);
@@ -179,30 +186,13 @@ onBeforeMount(async () => {
               :assignee="assigneeName"
               :created-by="createdByName"
               :activity-id="getProject.activityId"
-              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+              @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
-
-            <div
-              v-if="getNoteHistory.length"
-              class="bg-[var(--p-green-100)] p-4"
-            >
-              <div class="grid grid-cols-6 gap-4 items-center">
-                <div class="font-bold">Please be aware!</div>
-                <div class="font-bold">
-                  Updated on {{ formatDate(getNoteHistory[0]!.updatedAt ?? getNoteHistory[0]!.createdAt) }}
-                </div>
-                <div class="col-span-3 font-bold truncate">{{ getNoteHistory[0]!.note[0]!.note }}</div>
-                <div class="flex justify-end">
-                  <Button
-                    class="p-button-sm header-btn"
-                    label="View all"
-                    outlined
-                    @click="noteHistoryVisible = true"
-                  />
-                </div>
-              </div>
-            </div>
-
+            <NoteBanner
+              v-if="getNoteHistoryShownToProponent[0]?.note[0]"
+              :note="getNoteHistoryShownToProponent[0].note[0]"
+              @note-banner:show-history="noteHistoryVisible = true"
+            />
             <div class="disclaimer-block p-8 mt-8">
               {{ t('e.common.projectView.disclaimer') }}
             </div>
@@ -276,7 +266,6 @@ onBeforeMount(async () => {
               <AuthorizationCardLite :permit="permit" />
             </router-link>
           </TabPanel>
-
           <TabPanel :value="1">
             <div>
               <div class="disclaimer-block p-8 mt-4 mb-8">
@@ -288,33 +277,19 @@ onBeforeMount(async () => {
                 :project-id="projectId"
               />
             </div>
+            <RelatedEnquiryListProponent
+              :loading="loading"
+              :enquiries="getRelatedEnquiries"
+              :project-id="projectId"
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>
     </div>
-
-    <Dialog
+    <ShownToProponentModal
       v-model:visible="noteHistoryVisible"
-      :draggable="false"
-      :modal="true"
-      class="app-info-dialog w-6/12"
-    >
-      <template #header>
-        <span class="p-dialog-title">{{ t('e.common.projectView.beAware') }}</span>
-      </template>
-
-      <div
-        v-for="history of getNoteHistory"
-        :key="history.noteHistoryId"
-        class="mb-5"
-      >
-        <div class="flex flex-col">
-          <div class="font-bold mb-1">{{ formatDateLong(history.createdAt) }}</div>
-          <div class="font-bold">{{ history.title }}</div>
-          <div>{{ history.note[0]!.note }}</div>
-        </div>
-      </div>
-    </Dialog>
+      :note-history="getNoteHistoryShownToProponent"
+    />
   </div>
 </template>
 

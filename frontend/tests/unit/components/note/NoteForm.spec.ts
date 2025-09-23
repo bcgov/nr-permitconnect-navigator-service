@@ -4,11 +4,13 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import NoteHistoryModal from '@/components/note/NoteHistoryModal.vue';
+import NoteForm from '@/components/note/NoteForm.vue';
+import { userService } from '@/services';
 
 import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 
+import type { AxiosResponse } from 'axios';
 import type { Note, NoteHistory } from '@/types';
 
 vi.mock('vue-i18n', () => ({
@@ -23,6 +25,8 @@ vi.mock('vue-router', () => ({
     replace: vi.fn()
   })
 }));
+
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 const TEST_NOTE: Note = {
   noteId: '123',
@@ -54,7 +58,6 @@ const TEST_NOTE_HISTORY: NoteHistory = {
 
 const wrapperSettings = () => ({
   props: {
-    activityId: '123',
     noteHistory: TEST_NOTE_HISTORY
   },
   global: {
@@ -72,11 +75,6 @@ const wrapperSettings = () => ({
       ToastService
     ],
     stubs: {
-      Dialog: {
-        name: 'Dialog',
-        template: '<div class="dialog-stub">test</div>',
-        props: ['visible']
-      },
       'font-awesome-icon': true
     }
   }
@@ -101,9 +99,10 @@ afterEach(() => {
 });
 
 // Currently, modal functionality hidden behind Primevue component Dialog
-describe('NoteHistoryModal', () => {
+describe('NoteForm', () => {
   it('renders', () => {
-    const wrapper = shallowMount(NoteHistoryModal, wrapperSettings());
+    searchUsersSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+    const wrapper = shallowMount(NoteForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

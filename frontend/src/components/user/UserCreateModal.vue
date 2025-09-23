@@ -131,7 +131,7 @@ watchEffect(async () => {
       </div>
     </div>
     <DataTable
-      :selection="selectedUser"
+      v-model:selection="selectedUser"
       :row-hover="true"
       :loading="loading"
       class="datatable mt-4 mb-2"

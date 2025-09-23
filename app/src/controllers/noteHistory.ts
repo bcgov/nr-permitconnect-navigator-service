@@ -132,7 +132,9 @@ export const listBringForwardController = async (
           housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
           null,
         createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
-        bringForwardDate: h.bringForwardDate?.toISOString() as string
+        bringForwardDate: h.bringForwardDate?.toISOString() as string,
+        escalateToSupervisor: h.escalateToSupervisor,
+        escalateToDirector: h.escalateToDirector
       }));
     } else {
       return [];

@@ -9,7 +9,7 @@ export type NoteHistory = {
   escalateToDirector: boolean;
   escalateToSupervisor: boolean;
   escalationType: string | null;
-  note: Array<Note>;
+  note: Note[];
   shownToProponent: boolean;
   title: string;
   type: string;
