@@ -376,6 +376,18 @@ export type ListPermitsOptions = {
   includeNotes?: boolean;
 } & Partial<IStamps>;
 
+export type PermitSearchParams = {
+  permitId?: string[];
+  activityId?: string[];
+  permitTypeId?: number[];
+  stage?: string[];
+  state?: string[];
+  sourceSystems?: string[];
+  includePermitNotes?: boolean;
+  includePermitTracking?: boolean;
+  includePermitType?: boolean;
+};
+
 export type StatisticsFilters = {
   dateFrom: string;
   dateTo: string;

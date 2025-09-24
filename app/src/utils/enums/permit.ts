@@ -1,3 +1,9 @@
+export enum PeachItegratedSystems {
+  ATS = 'ITSM-5314',
+  WMA = 'ITSM-6197',
+  VFCBC = 'ITSM-6117'
+}
+
 export enum PermitNeeded {
   YES = 'Yes',
   UNDER_INVESTIGATION = 'Under investigation',

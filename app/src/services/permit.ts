@@ -1,7 +1,7 @@
 import { Initiative } from '../utils/enums/application';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitBase, PermitType } from '../types';
+import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types';
 
 /** Delete a specific permit
  * @param tx Prisma transaction client
@@ -102,6 +102,49 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
     }
   });
 
+  return response;
+};
+
+/**
+ * Retrieve permits matching the given params
+ * @param tx Prisma transaction client
+ * @param params Search params
+ * @returns A Promise that resolves to a list of permits matching the search params
+ */
+export const searchPermits = async (tx: PrismaTransactionClient, params: PermitSearchParams): Promise<Permit[]> => {
+  let permitTrackingInclude: object = {};
+
+  // Only include the matching params.sourceSystemKinds if given
+  if (params.includePermitTracking) {
+    permitTrackingInclude = {
+      permitTracking: {
+        ...(params.sourceSystems
+          ? { where: { sourceSystemKind: { sourceSystem: { in: params.sourceSystems } } } }
+          : {}),
+        include: { sourceSystemKind: true }
+      }
+    };
+  }
+
+  const response = await tx.permit.findMany({
+    where: {
+      AND: [
+        params.permitId ? { permitId: { in: params.permitId } } : {},
+        params.activityId ? { activityId: { in: params.activityId } } : {},
+        params.permitTypeId ? { permitTypeId: { in: params.permitTypeId } } : {},
+        params.stage ? { stage: { in: params.stage } } : {},
+        params.state ? { state: { in: params.state } } : {},
+        params.sourceSystems
+          ? { permitTracking: { some: { sourceSystemKind: { sourceSystem: { in: params.sourceSystems } } } } }
+          : {}
+      ]
+    },
+    include: {
+      ...(params.includePermitType ? { permitType: true } : {}),
+      ...(params.includePermitNotes ? { permitNote: true } : {}),
+      ...permitTrackingInclude
+    }
+  });
   return response;
 };
 

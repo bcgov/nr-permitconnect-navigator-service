@@ -1,4 +1,10 @@
-import { PermitNeeded, PermitStage, PermitState } from '../enums/permit';
+import { PeachItegratedSystems, PermitNeeded, PermitStage, PermitState } from '../enums/permit';
+
+export const PEACH_INTEGRATED_SYSTEMS = [
+  PeachItegratedSystems.ATS,
+  PeachItegratedSystems.WMA,
+  PeachItegratedSystems.VFCBC
+];
 
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 

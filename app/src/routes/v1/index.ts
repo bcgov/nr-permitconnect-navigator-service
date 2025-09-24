@@ -10,6 +10,7 @@ import contact from './contact';
 import docs from './docs';
 import electrification from './electrification';
 import housing from './housing';
+import peach from './peach';
 import reporting from './reporting';
 import sso from './sso';
 import sourceSystemKind from './sourceSystemKind';
@@ -30,6 +31,7 @@ router.get('/', (_req, res) => {
       '/docs',
       '/electrification',
       '/housing',
+      '/peach',
       '/reporting',
       '/sso',
       '/sourceSystemKind',
@@ -46,6 +48,7 @@ router.use('/contact', contact);
 router.use('/docs', docs);
 router.use('/electrification', electrification);
 router.use('/housing', housing);
+router.use('/peach', peach);
 router.use('/reporting', reporting);
 router.use('/sso', sso);
 router.use('/sourceSystemKind', sourceSystemKind);
