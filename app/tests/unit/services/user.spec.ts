@@ -1,19 +1,20 @@
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
 import * as contactService from '../../../src/services/contact';
 import * as userService from '../../../src/services/user';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { SYSTEM_ID } from '../../../src/utils/constants/application';
 import { IdentityProvider } from '../../../src/utils/enums/application';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
 
 import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
 
 const idirIdentityProvider: IDPType = {
   idp: IdentityProvider.IDIR,
   active: true,
   createdAt: new Date(),
-  createdBy: NIL,
+  createdBy: SYSTEM_ID,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
@@ -31,7 +32,7 @@ const bceidUser: User = {
   lastName: null,
   active: true,
   createdAt: new Date(),
-  createdBy: NIL,
+  createdBy: SYSTEM_ID,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
@@ -49,7 +50,7 @@ const idirUser: User = {
   lastName: 'User',
   active: true,
   createdAt: new Date(),
-  createdBy: NIL,
+  createdBy: SYSTEM_ID,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
@@ -358,9 +359,9 @@ describe('searchUsers', () => {
     expect(response).toStrictEqual([idirUser]);
   });
 
-  it('filters NIL userIds', async () => {
-    const nilUser: User = { ...idirUser, userId: NIL };
-    prismaTxMock.user.findMany.mockResolvedValueOnce([nilUser]);
+  it('filters SYTSTEM_ID userIds', async () => {
+    const systemUser: User = { ...idirUser, userId: SYSTEM_ID };
+    prismaTxMock.user.findMany.mockResolvedValueOnce([systemUser]);
     const response = await userService.searchUsers(prismaTxMock, {});
 
     expect(response).toEqual([]);

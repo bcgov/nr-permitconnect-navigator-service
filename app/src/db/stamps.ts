@@ -1,9 +1,9 @@
-import { NIL } from 'uuid';
+import { SYSTEM_ID } from '../utils/constants/application';
 
 // TODO: Figure out these Knex types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function (knex: any, table: any) {
-  table.text('created_by').defaultTo(NIL);
+  table.text('created_by').defaultTo(SYSTEM_ID);
   table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
   table.text('updated_by');
   table.timestamp('updated_at', { useTz: true });

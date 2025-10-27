@@ -2,8 +2,6 @@
  * Shared application wide constants
  */
 
-import { NIL } from 'uuid';
-
 import { AccessRequestStatus, BasicResponse, GroupName, UserSearchParams } from '../enums/application';
 
 export const ACCESS_REQUEST_STATUS = [
@@ -56,11 +54,15 @@ export const SPATIAL_FILE_FORMATS = [
   '.xml'
 ];
 
-export const SYSTEM_USER = NIL;
+/**
+ * Minimally valid UUIDv4 for the system ID
+ * @see https://www.rfc-editor.org/rfc/rfc9562#variant_field
+ */
+export const SYSTEM_ID = '00000000-0000-4000-8000-000000000000';
 
 export const USER_SEARCH_PARAMS = [UserSearchParams.FIRST_NAME, UserSearchParams.LAST_NAME, UserSearchParams.EMAIL];
 
-export const UUID_V4_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/;
+export const UUID_V4_PATTERN = /[0-9A-F]{8}-[0-9A-F]{4}-[4][0-9A-F]{3}-[89AB][0-9A-F]{3}-[0-9A-F]{12}/i;
 
 export const YES_NO_LIST = [BasicResponse.YES, BasicResponse.NO];
 export const YES_NO_UNSURE_LIST = [BasicResponse.YES, BasicResponse.NO, BasicResponse.UNSURE];

@@ -15,7 +15,7 @@ model access_request {
   groupId         Int                        @map("group_id")
   status          access_request_status_enum @default(Pending)
   grant           Boolean
-  createdBy       String?                    @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy       String?                    @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt       DateTime?                  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?                    @map("updated_by")
   updatedAt       DateTime?                  @map("updated_at") @db.Timestamptz(6)
@@ -30,7 +30,7 @@ model access_request {
 model activity {
   activityId             String                    @id @map("activity_id")
   initiativeId           String                    @map("initiative_id") @db.Uuid
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy              String?                   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
@@ -52,7 +52,7 @@ model activity {
 model activity_contact {
   activityId String    @map("activity_id")
   contactId  String    @map("contact_id") @db.Uuid
-  createdBy  String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -74,7 +74,7 @@ model contact {
   email                        String?
   contactPreference            String?            @map("contact_preference")
   contactApplicantRelationship String?            @map("contact_applicant_relationship")
-  createdBy                    String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                    String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                    DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                    String?            @map("updated_by")
   updatedAt                    DateTime?          @map("updated_at") @db.Timestamptz(6)
@@ -92,7 +92,7 @@ model document {
   filename   String
   mimeType   String    @default("application/octet-stream") @map("mime_type")
   filesize   BigInt
-  createdBy  String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -109,7 +109,7 @@ model draft {
   activityId                         String     @map("activity_id")
   draftCode                          String     @map("draft_code")
   data                               Json       @db.Json
-  createdBy                          String?    @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                          String?    @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                          DateTime?  @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                          String?    @map("updated_by")
   updatedAt                          DateTime?  @map("updated_at") @db.Timestamptz(6)
@@ -123,7 +123,7 @@ model draft {
 
 model draft_code {
   draftCode                      String    @id @map("draft_code")
-  createdBy                      String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                      String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                      DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                      String?   @map("updated_by")
   updatedAt                      DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -156,7 +156,7 @@ model electrification_project {
   astNotes                           String?                                @map("ast_notes")
   projectType                        String?                                @map("project_type")
   projectCategory                    String?                                @map("project_category")
-  createdBy                          String?                                @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                          String?                                @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                          DateTime?                              @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                          String?                                @map("updated_by")
   updatedAt                          DateTime?                              @map("updated_at") @db.Timestamptz(6)
@@ -178,7 +178,7 @@ model electrification_project_category_code {
   display                String                    @unique(map: "electrification_project_category_code_display_unique")
   definition             String
   active                 Boolean                   @default(true)
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy              String?                   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
@@ -195,7 +195,7 @@ model electrification_project_type_code {
   display                String                    @unique(map: "electrification_project_type_code_display_unique")
   definition             String
   active                 Boolean                   @default(true)
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy              String?                   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
@@ -212,7 +212,7 @@ model email_log {
   msgId      String?   @map("msg_id") @db.Uuid
   to         String?
   txId       String?   @map("tx_id") @db.Uuid
-  createdBy  String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -235,7 +235,7 @@ model enquiry {
   intakeStatus       String?                       @map("intake_status")
   enquiryStatus      String?                       @map("enquiry_status")
   waitingOn          String?                       @map("waiting_on")
-  createdBy          String?                       @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy          String?                       @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt          DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?                       @map("updated_by")
   updatedAt          DateTime?                     @map("updated_at") @db.Timestamptz(6)
@@ -284,7 +284,7 @@ model housing_project {
   waitingOn                       String?   @map("waiting_on")
   intakeStatus                    String?   @map("intake_status")
   applicationStatus               String?   @map("application_status")
-  createdBy                       String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                       String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                       DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                       String?   @map("updated_by")
   updatedAt                       DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -321,7 +321,7 @@ model housing_project {
 model identity_provider {
   idp       String    @id
   active    Boolean   @default(true)
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -336,7 +336,7 @@ model initiative {
   initiativeId             String                        @id @map("initiative_id") @db.Uuid
   code                     String
   label                    String
-  createdBy                String?                       @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                String?                       @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                String?                       @map("updated_by")
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
@@ -369,7 +369,7 @@ model note {
   noteId        String       @id @map("note_id") @db.Uuid
   noteHistoryId String       @map("note_history_id") @db.Uuid
   note          String       @default("")
-  createdBy     String?      @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy     String?      @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt     DateTime?    @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy     String?      @map("updated_by")
   updatedAt     DateTime?    @map("updated_at") @db.Timestamptz(6)
@@ -385,7 +385,7 @@ model note_history {
   activityId           String                @map("activity_id")
   type                 String                @default("")
   title                String                @default("")
-  createdBy            String?               @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy            String?               @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt            DateTime?             @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy            String?               @map("updated_by")
   updatedAt            DateTime?             @map("updated_at") @db.Timestamptz(6)
@@ -414,7 +414,7 @@ model permit {
   status             String?
   submittedDate      DateTime?         @map("submitted_date") @db.Timestamptz(6)
   adjudicationDate   DateTime?         @map("adjudication_date") @db.Timestamptz(6)
-  createdBy          String?           @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy          String?           @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt          DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?           @map("updated_by")
   updatedAt          DateTime?         @map("updated_at") @db.Timestamptz(6)
@@ -434,7 +434,7 @@ model permit_note {
   permitNoteId String    @id @map("permit_note_id") @db.Uuid
   permitId     String    @map("permit_id") @db.Uuid
   note         String    @default("")
-  createdBy    String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy    String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt    DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?   @map("updated_by")
   updatedAt    DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -451,7 +451,7 @@ model permit_tracking {
   trackingId         String?             @map("tracking_id")
   sourceSystemKindId Int?                @map("source_system_kind_id")
   shownToProponent   Boolean             @default(false) @map("shown_to_proponent")
-  createdBy          String?             @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy          String?             @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt          DateTime?           @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?             @map("updated_by")
   updatedAt          DateTime?           @map("updated_at") @db.Timestamptz(6)
@@ -475,7 +475,7 @@ model permit_type {
   nameSubtype              String?                       @map("name_subtype")
   acronym                  String?
   trackedInAts             Boolean                       @default(false) @map("tracked_in_ats")
-  createdBy                String?                       @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy                String?                       @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy                String?                       @map("updated_by")
   updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
@@ -494,7 +494,7 @@ model permit_type {
 model permit_type_initiative_xref {
   permitTypeId Int         @map("permit_type_id")
   initiativeId String      @map("initiative_id") @db.Uuid
-  createdBy    String?     @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy    String?     @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt    DateTime?   @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy    String?     @map("updated_by")
   updatedAt    DateTime?   @map("updated_at") @db.Timestamptz(6)
@@ -513,7 +513,7 @@ model source_system_code {
   display          String               @unique(map: "source_system_code_display_unique")
   definition       String
   active           Boolean              @default(true)
-  createdBy        String?              @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy        String?              @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt        DateTime?            @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy        String?              @map("updated_by")
   updatedAt        DateTime?            @map("updated_at") @db.Timestamptz(6)
@@ -530,7 +530,7 @@ model source_system_kind {
   kind               String?
   description        String?
   sourceSystem       String             @map("source_system")
-  createdBy          String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy          String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy          String?            @map("updated_by")
   updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
@@ -551,7 +551,7 @@ model user {
   fullName               String?                   @map("full_name")
   lastName               String?                   @map("last_name")
   active                 Boolean                   @default(true)
-  createdBy              String?                   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy              String?                   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
@@ -574,7 +574,7 @@ model user {
 model action {
   actionId  Int       @id @default(autoincrement()) @map("action_id")
   name      String    @unique(map: "action_name_unique")
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -589,7 +589,7 @@ model attribute {
   attributeId     Int                @id @default(autoincrement()) @map("attribute_id")
   name            String             @unique(map: "attribute_name_unique")
   description     String?
-  createdBy       String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy       String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt       DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?            @map("updated_by")
   updatedAt       DateTime?          @map("updated_at") @db.Timestamptz(6)
@@ -604,7 +604,7 @@ model attribute {
 model attribute_group {
   attributeId Int       @map("attribute_id")
   groupId     Int       @map("group_id")
-  createdBy   String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy   String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy   String?   @map("updated_by")
   updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -622,7 +622,7 @@ model group {
   initiativeId   String            @map("initiative_id") @db.Uuid
   name           String
   label          String
-  createdBy      String?           @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy      String?           @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt      DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy      String?           @map("updated_by")
   updatedAt      DateTime?         @map("updated_at") @db.Timestamptz(6)
@@ -641,7 +641,7 @@ model group {
 model group_role {
   groupId   Int       @map("group_id")
   roleId    Int       @map("role_id")
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -658,7 +658,7 @@ model policy {
   policyId        Int                @id @default(autoincrement()) @map("policy_id")
   resourceId      Int                @map("resource_id")
   actionId        Int                @map("action_id")
-  createdBy       String?            @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy       String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt       DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy       String?            @map("updated_by")
   updatedAt       DateTime?          @map("updated_at") @db.Timestamptz(6)
@@ -676,7 +676,7 @@ model policy {
 model policy_attribute {
   policyId    Int       @map("policy_id")
   attributeId Int       @map("attribute_id")
-  createdBy   String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy   String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy   String?   @map("updated_by")
   updatedAt   DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -692,7 +692,7 @@ model policy_attribute {
 model resource {
   resourceId Int       @id @default(autoincrement()) @map("resource_id")
   name       String    @unique(map: "resource_name_unique")
-  createdBy  String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy  String?   @map("updated_by")
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -708,7 +708,7 @@ model role {
   name           String        @unique(map: "role_name_unique")
   description    String?
   recordSecurity Boolean       @default(false) @map("record_security")
-  createdBy      String?       @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy      String?       @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt      DateTime?     @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy      String?       @map("updated_by")
   updatedAt      DateTime?     @map("updated_at") @db.Timestamptz(6)
@@ -723,7 +723,7 @@ model role {
 model role_policy {
   roleId    Int       @map("role_id")
   policyId  Int       @map("policy_id")
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -739,7 +739,7 @@ model role_policy {
 model subject_group {
   sub       String
   groupId   Int       @map("group_id")
-  createdBy String?   @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy String?   @map("updated_by")
   updatedAt DateTime? @map("updated_at") @db.Timestamptz(6)
@@ -757,7 +757,7 @@ model escalation_type_code {
   display     String         @unique(map: "escalation_type_code_display_unique")
   definition  String
   active      Boolean        @default(true)
-  createdBy   String?        @default("00000000-0000-0000-0000-000000000000") @map("created_by")
+  createdBy   String?        @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt   DateTime?      @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy   String?        @map("updated_by")
   updatedAt   DateTime?      @map("updated_at") @db.Timestamptz(6)

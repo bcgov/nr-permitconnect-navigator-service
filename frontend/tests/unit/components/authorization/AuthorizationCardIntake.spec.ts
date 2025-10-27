@@ -1,13 +1,14 @@
 import { createTestingPinia } from '@pinia/testing';
-import { shallowMount } from '@vue/test-utils';
-
-import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
-import { permitService, sourceSystemKindService } from '@/services';
-import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
+import { shallowMount } from '@vue/test-utils';
+
+import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
+import { permitService, sourceSystemKindService } from '@/services';
+import { SYSTEM_ID } from '@/utils/constants/application';
+import { StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
 
@@ -20,10 +21,11 @@ const sampleSourceSystemKind = {
   sourceSystemCode: 'ITSM-5314',
   sourceSystemKindId: 2,
   createdAt: '2025-06-18T15:56:00.515Z',
-  createdBy: '00000000-0000-0000-0000-000000000000',
+  createdBy: SYSTEM_ID,
   updatedAt: null,
   updatedBy: null
 };
+
 const permitTypesList = [
   {
     permitTypeId: 123,
