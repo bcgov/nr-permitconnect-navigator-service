@@ -1,5 +1,4 @@
 import { appAxios } from './interceptors';
-import { SYSTEM_USER } from '@/utils/constants/application';
 
 import type { AxiosResponse } from 'axios';
 import type { UserSearchParameters } from '@/types';
@@ -14,9 +13,9 @@ export default {
    * @returns {Promise<AxiosResponse>} An axios response or empty array
    */
   searchUsers(params: UserSearchParameters): Promise<AxiosResponse> {
-    // Filter out SYSTEM_USER from userId param
-    const userIds = params.userId?.filter((id: string | undefined) => id !== undefined && id !== SYSTEM_USER);
-    // Drop userId param if it only contains the system user or assign back to params object, without duplicates
+    const userIds = params.userId;
+
+    // Drop userId param if empty or assign back to params object, without duplicates
     if (userIds) {
       if (userIds.length === 0) {
         delete params.userId;

@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4, NIL } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact';
+import { SYSTEM_ID } from '../utils/constants/application';
 import { IdentityProvider as enumIDP } from '../utils/enums/application';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { Problem } from '../utils';
@@ -57,7 +58,7 @@ export const createIdp = async (tx: PrismaTransactionClient, idp: string): Promi
   const obj = {
     idp: idp,
     active: true,
-    createdBy: NIL
+    createdBy: SYSTEM_ID
   };
 
   const response = tx.identity_provider.create({ data: obj });
@@ -280,7 +281,7 @@ export const searchUsers = async (tx: PrismaTransactionClient, params: UserSearc
     }
   });
 
-  return response.filter((x) => x.userId !== NIL);
+  return response.filter((x) => x.userId !== SYSTEM_ID);
 };
 
 /**

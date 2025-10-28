@@ -1,5 +1,3 @@
-import { NIL } from 'uuid';
-
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { getDocument } from '../services/document';
 import { getDraft } from '../services/draft';
@@ -15,6 +13,7 @@ import {
   getPolicyAttributes,
   getSubjectGroups
 } from '../services/yars';
+import { SYSTEM_ID } from '../utils/constants/application';
 import { Initiative, GroupName } from '../utils/enums/application';
 import { Problem } from '../utils';
 import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
@@ -42,7 +41,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         };
 
         if (req.currentContext) {
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), NIL);
+          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
 
           if (!userId) {
             throw new Error('Invalid user');
@@ -153,7 +152,7 @@ export const hasAccess = (param: string) => {
       await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), NIL);
+          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
 
           let data;
           const func = paramMap.get(param);
@@ -180,7 +179,7 @@ export const hasAccessPermit = (param: string) => {
       await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), NIL);
+          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
 
           let data;
           const func = paramMap.get(param);

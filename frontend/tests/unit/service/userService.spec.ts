@@ -1,6 +1,5 @@
 import { userService } from '@/services';
 import { appAxios } from '@/services/interceptors';
-import { SYSTEM_USER } from '@/utils/constants/application';
 
 import type { AxiosResponse } from 'axios';
 import type { UserSearchParameters } from '@/types/UserSearchParameters';
@@ -46,19 +45,6 @@ describe('userService test', () => {
     };
     const expectedCall: UserSearchParameters = {
       userId: ['testUserId1', 'testUserId2', 'duplicateId']
-    };
-    await userService.searchUsers(searchParams);
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
-  });
-
-  it('filters out syster userId', async () => {
-    const searchParams: UserSearchParameters = {
-      userId: ['testUserId1', SYSTEM_USER, 'testUserId2']
-    };
-    const expectedCall: UserSearchParameters = {
-      userId: ['testUserId1', 'testUserId2']
     };
     await userService.searchUsers(searchParams);
 

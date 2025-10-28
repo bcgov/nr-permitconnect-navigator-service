@@ -1,9 +1,10 @@
 import { Prisma } from '@prisma/client';
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
 import { getLogger } from '../../components/log';
 import { getActivity } from '../../services/activity';
+import { SYSTEM_ID } from '../../utils/constants/application';
 import { uuidToActivityId } from '../../utils/utils';
 
 import type { CurrentContext } from '../../types';
@@ -81,7 +82,7 @@ export async function checkDatabaseSchema(): Promise<boolean> {
  */
 export function generateCreateStamps(currentContext: CurrentContext | undefined) {
   return {
-    createdBy: currentContext?.userId ?? NIL,
+    createdBy: currentContext?.userId ?? SYSTEM_ID,
     createdAt: new Date()
   };
 }
@@ -93,7 +94,7 @@ export function generateCreateStamps(currentContext: CurrentContext | undefined)
  */
 export function generateUpdateStamps(currentContext: CurrentContext | undefined) {
   return {
-    updatedBy: (currentContext?.userId as string) ?? NIL,
+    updatedBy: currentContext?.userId ?? SYSTEM_ID,
     updatedAt: new Date()
   };
 }
@@ -112,7 +113,7 @@ export function generateNullUpdateStamps() {
 
 export function generateDeleteStamps(currentContext: CurrentContext | undefined) {
   return {
-    deletedBy: (currentContext?.userId as string) ?? NIL,
+    deletedBy: currentContext?.userId ?? SYSTEM_ID,
     deletedAt: new Date()
   };
 }

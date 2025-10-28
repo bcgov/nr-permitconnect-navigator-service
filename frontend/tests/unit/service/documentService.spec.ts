@@ -35,8 +35,7 @@ const getSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('uuid', () => ({
-  v4: () => mockedUuid,
-  NIL: () => '00000000-0000-0000-0000-000000000000'
+  v4: () => mockedUuid
 }));
 
 vi.mock('vue-router', () => ({
