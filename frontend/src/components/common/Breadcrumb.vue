@@ -113,13 +113,11 @@ function generateToObject(record: RouteLocationMatched) {
   }
 
   const toObject = {
-    name: toName,
-    // Note: Params not needed
+    name: toName
+    // Note: Params, query & hash not needed
     // Breacrumb always navigates backwards so required params are present in router
     // If navigation leads to different part of router tree without needed params
     // The breadcrumbs will reflect that and not show link back to previous view/route
-    query: route.query,
-    hash: route.hash
   };
   return toObject;
 }
