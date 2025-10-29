@@ -48,4 +48,7 @@ const { t } = useI18n();
 .p-button-outlined {
   background-color: white;
 }
+:deep(.p-message-text) {
+  width: 100%;
+}
 </style>

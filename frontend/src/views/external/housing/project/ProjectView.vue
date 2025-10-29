@@ -178,7 +178,7 @@ onBeforeMount(async () => {
               :assignee="assigneeName"
               :created-by="createdByName"
               :activity-id="getProject.activityId"
-              @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
             <NoteBanner
               v-if="getNoteHistoryShownToProponent[0]?.note[0]"
@@ -269,11 +269,6 @@ onBeforeMount(async () => {
                 :project-id="projectId"
               />
             </div>
-            <RelatedEnquiryListProponent
-              :loading="loading"
-              :enquiries="getRelatedEnquiries"
-              :project-id="projectId"
-            />
           </TabPanel>
         </TabPanels>
       </Tabs>

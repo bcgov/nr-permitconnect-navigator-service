@@ -572,7 +572,7 @@
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",
     "addressSearchPlaceholder": "Type to search the address of your housing project",
-    "addressTooltip": "A civic address contains a street name and number where a non-civid does not.",
+    "addressTooltip": "A civic address contains a street name and number where a non-civic does not.",
     "header": "Provide one of the following project locations",
     "latitudePlaceholder": "Latitude",
     "localityPlaceholder": "Locality",
@@ -731,7 +731,7 @@
     "projectLocationDescriptionCard": "Is there anything else you would like to tell us about this project's location? (optional)",
     "projectNameCard": "Tell us your project name",
     "provincialPermitsCard": "Have you applied for any provincial permits for this project?",
-    "rentalUnitsTooltip": "Rental refers to a purpose built residentual unit, property, or dwelling that is available for long term rent by tenants.",
+    "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
   },
