@@ -299,26 +299,40 @@ onBeforeMount(async () => {
       />
       <Card v-if="isOnlyProjectRelated">
         <template #title>
-          <span class="section-header">
-            {{ t('enquiryIntakeForm.about') }}
-            <span class="text-primary">
-              {{ project?.projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
-              {{ project?.activityId }}
+          <div class="flex flex-col justify-between gap-2 mt-2">
+            <span class="section-header">
+              {{ t('enquiryIntakeForm.about') }}
+              <span class="text-primary">
+                {{ project?.projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
+                {{ project?.activityId }}
+              </span>
             </span>
-          </span>
+            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
+          </div>
         </template>
       </Card>
 
       <Card v-if="isPermitRelated">
         <template #title>
-          <span class="section-header">
-            {{ t('enquiryIntakeForm.about') }}
-            <span class="text-primary">
-              {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
-              {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
-              {{ permit?.authStatus ?? 'No authorization status.' }}
+          <div class="flex flex-col justify-between gap-2 mt-2">
+            <span class="section-header">
+              {{ t('enquiryIntakeForm.about') }}
+              <span class="text-primary">
+                {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
+                {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
+                {{ permit?.authStatus ?? 'No authorization status.' }}
+              </span>
             </span>
-          </span>
+            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
+          </div>
+        </template>
+      </Card>
+
+      <Card v-if="!isPermitRelated && !isOnlyProjectRelated">
+        <template #title>
+          <div class="mt-2">
+            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
+          </div>
         </template>
       </Card>
 

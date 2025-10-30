@@ -424,7 +424,7 @@ onBeforeMount(async () => {
         </div>
         <ContactCardNavForm
           :editable="editable"
-          :initial-form-values="initialFormValues"
+          :form-values="initialFormValues"
           @contact-card-nav-form:pick="
             (contact: Contact) => {
               setBasicInfo(contact);
@@ -598,12 +598,12 @@ onBeforeMount(async () => {
               <p class="text-[var(--p-primary-900)] mr-3">
                 <b>{{ t('i.electrification.projectForm.atsClientIdHeader') }}</b>
               </p>
-              <a
-                class="hover-hand"
+              <button
+                class="hover-hand underline text-[var(--p-bcblue-950)]"
                 @click="atsUserDetailsModalVisible = true"
               >
                 {{ values.atsClientId }}
-              </a>
+              </button>
               <span v-if="atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY">
                 {{ t('i.electrification.projectForm.pendingSave') }}
               </span>
