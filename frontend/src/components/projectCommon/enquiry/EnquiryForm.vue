@@ -184,11 +184,10 @@ function onRelatedActivityInput(e: IInputEvent) {
 }
 
 async function getRelatedATSClientID(activityId: string) {
-  formRef.value?.setFieldValue('atsClientId', null);
   if (projectService?.value) {
     const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
     if (response.length > 0) {
-      formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+      return response[0].atsClientId;
     }
   } else {
     throw new Error('No service');
@@ -311,6 +310,10 @@ const onSubmit = async (values: any) => {
 
     // TODO: Create one function for creating initial values and reset values
     const firstContact = result.data?.activity?.activityContact?.[0]?.contact;
+
+    let atsClientId;
+    if (submitData?.relatedActivityId) atsClientId = await getRelatedATSClientID(submitData?.relatedActivityId);
+
     formRef.value?.resetForm({
       values: {
         ...submitData,
@@ -324,13 +327,14 @@ const onSubmit = async (values: any) => {
           contactPreference: firstContact?.contactPreference,
           userId: firstContact?.userId
         },
+        atsClientId: values.atsClientId || atsClientId,
+        atsEnquiryId: values.atsEnquiryId,
         submittedAt: new Date(submitData.submittedAt),
         user: values.user
       }
     });
 
     basicInfoManualEntry.value = false;
-    if (submitData?.relatedActivityId) getRelatedATSClientID(submitData?.relatedActivityId);
 
     emit('enquiryForm:saved');
 
@@ -346,6 +350,9 @@ onBeforeMount(async () => {
   }
 
   const firstContact = enquiry?.activity?.activityContact?.[0]?.contact;
+
+  let atsClientId;
+  if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
 
   initialFormValues.value = {
     activityId: enquiry?.activityId,
@@ -369,14 +376,12 @@ onBeforeMount(async () => {
     },
 
     addedToAts: enquiry?.addedToAts,
-    atsClientId: enquiry?.atsClientId,
+    atsClientId: enquiry?.atsClientId || atsClientId,
     atsEnquiryId: enquiry?.atsEnquiryId,
 
     user: assigneeOptions.value[0] ?? null,
     enquiryStatus: enquiry?.enquiryStatus
   };
-
-  if (enquiry?.relatedActivityId) getRelatedATSClientID(enquiry?.relatedActivityId);
 
   if (!projectService?.value) throw new Error('No service');
   projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
