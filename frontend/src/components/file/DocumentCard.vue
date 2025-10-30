@@ -107,7 +107,7 @@ function onClick() {
       </div>
     </template>
     <template #footer>
-      <div class="flex justify-between">
+      <div class="flex justify-between pl-4">
         <h6 class="text-left inline-block">
           {{ filesize(document.filesize) }}
         </h6>

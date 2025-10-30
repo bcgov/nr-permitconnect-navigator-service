@@ -186,7 +186,7 @@ onBeforeMount(async () => {
               :assignee="assigneeName"
               :created-by="createdByName"
               :activity-id="getProject.activityId"
-              @basic-project-info:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
+              @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
             <NoteBanner
               v-if="getNoteHistoryShownToProponent[0]?.note[0]"

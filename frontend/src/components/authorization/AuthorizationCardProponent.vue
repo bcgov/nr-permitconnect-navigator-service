@@ -37,6 +37,8 @@ const { t } = useI18n();
           <StatusPill
             class="mr-2"
             :status="permit.status"
+            :border-color="'var(--p-bcblue-900)'"
+            :bg-color="'var(--p-bcblue-50)'"
           />
           <div v-if="permit.statusLastVerified">
             <span class="label-verified mr-1">{{ t('authorization.authorizationCardProponent.statusVerified') }}</span>
