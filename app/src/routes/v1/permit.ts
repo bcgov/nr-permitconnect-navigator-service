@@ -8,7 +8,7 @@ import {
   listPermitsController,
   upsertPermitController
 } from '../../controllers/permit';
-import { hasAccess, hasAccessPermit, hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
@@ -41,7 +41,7 @@ router.get('/types', hasAuthorization(Resource.PERMIT, Action.READ), getPermitTy
 router.get(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.READ),
-  hasAccessPermit('permitId'),
+  hasAccess('permitId'),
   permitValidator.getPermit,
   getPermitController
 );

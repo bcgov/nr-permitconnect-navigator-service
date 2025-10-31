@@ -13,10 +13,10 @@ import {
   getHousingProjectStatisticsController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
-  updateHousingProjectDraftController,
+  upsertHousingProjectDraftController,
   updateHousingProjectController
 } from '../../controllers/housingProject';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { filterActivityResponseByScope, hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
@@ -27,12 +27,18 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of housing projects */
-router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectsController);
+router.get(
+  '/',
+  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
+  filterActivityResponseByScope,
+  getHousingProjectsController
+);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
+  filterActivityResponseByScope,
   getHousingProjectActivityIdsController
 );
 
@@ -41,6 +47,7 @@ router.get(
   '/search',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
   housingProjectValidator.searcHousingProjects,
+  filterActivityResponseByScope,
   searchHousingProjectsController
 );
 
@@ -61,10 +68,15 @@ router.get(
 );
 
 /** Gets a housing project draft */
-router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
+router.get(
+  '/draft',
+  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
+  filterActivityResponseByScope,
+  getHousingProjectDraftsController
+);
 
 /** Creates or updates an intake and set status to Draft */
-router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), updateHousingProjectDraftController);
+router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), upsertHousingProjectDraftController);
 
 /** Creates or updates an intake and set status to Submitted */
 router.put(
@@ -103,7 +115,7 @@ router.delete(
 router.get(
   '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  //hasAccess('housingProjectId'), // TODO: Temp fix to check submittedBy in controller until we're off chefs
+  hasAccess('housingProjectId'),
   housingProjectValidator.getHousingProject,
   getHousingProjectController
 );

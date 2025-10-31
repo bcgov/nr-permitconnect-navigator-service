@@ -18,7 +18,7 @@ export type Contact = ContactBase & { activityContact?: ActivityContact[]; user?
 
 const draftBase = Prisma.validator<Prisma.draftDefaultArgs>()({});
 export type DraftBase = Prisma.draftGetPayload<typeof draftBase>;
-export type Draft = DraftBase;
+export type Draft = DraftBase & { activity?: Activity };
 
 const documentBase = Prisma.validator<Prisma.documentDefaultArgs>()({});
 export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;

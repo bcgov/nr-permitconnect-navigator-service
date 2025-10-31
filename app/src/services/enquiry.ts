@@ -167,6 +167,17 @@ export const getRelatedEnquiries = async (tx: PrismaTransactionClient, activityI
     where: {
       relatedActivityId: activityId
     },
+    include: {
+      activity: {
+        include: {
+          activityContact: {
+            include: {
+              contact: true
+            }
+          }
+        }
+      }
+    },
     orderBy: {
       createdAt: 'asc'
     }
