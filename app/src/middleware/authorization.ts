@@ -1,9 +1,12 @@
+import prisma from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { getActivityContacts } from '../services/activityContact';
+import { searchContacts } from '../services/contact';
 import { getDocument } from '../services/document';
 import { getDraft } from '../services/draft';
-import { getElectrificationProject, searchElectrificationProjects } from '../services/electrificationProject';
+import { getElectrificationProject } from '../services/electrificationProject';
 import { getEnquiry } from '../services/enquiry';
-import { getHousingProject, searchHousingProjects } from '../services/housingProject';
+import { getHousingProject } from '../services/housingProject';
 import { getNoteHistory } from '../services/noteHistory';
 import { getPermit } from '../services/permit';
 import { getCurrentUserId } from '../services/user';
@@ -16,15 +19,16 @@ import {
 import { SYSTEM_ID } from '../utils/constants/application';
 import { Initiative, GroupName } from '../utils/enums/application';
 import { Problem } from '../utils';
-import { getCurrentSubject, getCurrentUsername } from '../utils/utils';
+import { getCurrentSubject } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentAuthorization } from '../types';
+import type { Activity, CurrentAuthorization } from '../types';
 
 /**
  * Obtains the groups for the current users identity
  * Obtains the full permission mappings for the given resource/action pair for any of the users groups
+ * Obtains attributes attached to any of those groups
  * 403 if none are found
  * @param  resource a resource name
  * @param action an action name
@@ -138,11 +142,11 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
 ]);
 
 /**
- * If current scope of request is self ensure that the object being acted upon was created by the current user
+ * If current scope of request is self
  * Takes the key to be read from request params
  * Obtains callback function from paramMap
- * Compares createdBy with current userId
- * @param param A route parameter string
+ * Ensure that the current user contact is part of the activity contact list
+ * @param param A route parameter string, typically a GUID
  * @returns Express middleware function
  * @throws The error encountered upon failure
  */
@@ -152,14 +156,19 @@ export const hasAccess = (param: string) => {
       await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
 
           let data;
-          const func = paramMap.get(param);
-          if (func) data = await func(tx, id);
+          if (param !== 'activityId') {
+            const func = paramMap.get(param);
+            if (func) data = await func(tx, id);
+          }
 
-          if (!data || data?.createdBy !== userId) {
-            throw new Error('No access');
+          const activityId = data?.activityId ?? id;
+          const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+          const activityContacts = await getActivityContacts(tx, activityId);
+
+          if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
+            throw new Error();
           }
         }
       });
@@ -173,40 +182,42 @@ export const hasAccess = (param: string) => {
   };
 };
 
-export const hasAccessPermit = (param: string) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    try {
-      await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-        if (req.currentAuthorization?.attributes.includes('scope:self')) {
-          const id = req.params[param];
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
+/**
+ * Filters the response json based on the scope of the current authorization
+ * Filtering is based on the current authorizations `contactId` compared against the outgoing
+ * `activityContact` data
+ * @returns Express middleware function
+ * @throws The error encountered upon failure
+ */
+export const filterActivityResponseByScope = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    // Store the original res.json function
+    const originalJson = res.json;
 
-          let data;
-          const func = paramMap.get(param);
-          if (func) data = await func(tx, id);
+    const contact = await searchContacts(prisma, { userId: [req.currentContext.userId as string] });
 
-          if (!data || data?.createdBy !== userId) {
-            let project;
-            if (req.currentContext?.initiative === Initiative.HOUSING) {
-              project = (await searchHousingProjects(tx, { activityId: [data.activityId] }))[0];
-              if (
-                !project ||
-                project?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()
-              )
-                throw new Error('No access');
-            } else {
-              project = (await searchElectrificationProjects(tx, { activityId: [data.activityId] }))[0];
-              if (!project || project?.createdBy !== req.currentContext.userId) throw new Error('No access');
-            }
-          }
+    // Override res.json to intercept the response data
+    type unknownType = unknown & { activity?: Activity };
+    res.json = function (data: unknownType | unknownType[]) {
+      let filtered = data;
+
+      // Check scope and filter as necessary
+      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (Array.isArray(data)) {
+          filtered = data.filter((x: unknown & { activity?: Activity }) =>
+            x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)
+          );
+        } else {
+          if (!data.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)) filtered = {};
         }
-      });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
-    }
+      }
 
-    // Continue middleware
+      return originalJson.call(this, filtered);
+    };
+
     next();
-  };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
+    return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+  }
 };

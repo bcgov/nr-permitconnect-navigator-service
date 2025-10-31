@@ -314,7 +314,7 @@ async function onSubmit(data: any) {
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit(setEmptyStringsToNull({ ...data }), ['contacts']);
+    const dataOmitted = omit(setEmptyStringsToNull({ ...data, contact }), ['contacts']);
 
     // Show the trackingNumber of all appliedPermits to the proponent
     dataOmitted.appliedPermits?.forEach((x: Permit) => {
@@ -332,17 +332,13 @@ async function onSubmit(data: any) {
     const response = await housingProjectService.submitDraft({ ...dataOmitted, draftId });
 
     if (response.data.activityId && response.data.housingProjectId) {
-      // Link activity contact
-      const contactResponse = (await contactService.updateContact(contact)).data;
-      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
-
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(contactResponse);
+      contactStore.setContact(response.data.contact);
 
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,

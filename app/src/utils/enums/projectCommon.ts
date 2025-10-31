@@ -2,6 +2,12 @@
  * Common initiative enums
  */
 
+export enum ActivityContactRole {
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+  PRIMARY = 'PRIMARY'
+}
+
 export enum ApplicationStatus {
   NEW = 'New',
   IN_PROGRESS = 'In Progress',

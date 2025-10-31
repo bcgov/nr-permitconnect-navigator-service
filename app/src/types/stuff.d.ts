@@ -318,7 +318,7 @@ export type HousingProjectIntake = {
 
   appliedPermits: Permit[];
   investigatePermits: Permit[];
-  contacts: Contact[];
+  contact: Contact;
 };
 
 export type HousingProjectSearchParameters = {
