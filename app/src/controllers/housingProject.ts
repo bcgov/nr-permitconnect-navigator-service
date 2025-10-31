@@ -23,16 +23,23 @@ import {
 } from '../services/housingProject';
 import { upsertPermit } from '../services/permit';
 import { upsertPermitTracking } from '../services/permitTracking';
+import { Problem } from '../utils';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../utils/enums/permit';
-import { ApplicationStatus, DraftCode, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Problem } from '../utils';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  DraftCode,
+  IntakeStatus,
+  SubmissionType
+} from '../utils/enums/projectCommon';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type {
+  Contact,
   CurrentContext,
   Draft,
   Email,
@@ -43,6 +50,8 @@ import type {
   Permit,
   StatisticsFilters
 } from '../types';
+import { searchContacts, upsertContacts } from '../services/contact';
+import { upsertActivityContacts } from '../services/activityContact';
 
 /**
  * Assigns a priority level to a housing project based on given criteria
@@ -323,7 +332,15 @@ export const getHousingProjectDraftController = async (req: Request<{ draftId: s
 
 export const getHousingProjectDraftsController = async (req: Request, res: Response) => {
   let response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    return await getDrafts(tx, DraftCode.HOUSING_PROJECT);
+    const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+    const drafts = await getDrafts(tx, DraftCode.HOUSING_PROJECT);
+
+    let filtered = drafts;
+    if (req.currentAuthorization?.attributes.includes('scope:self')) {
+      filtered = drafts.filter((x) => x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId));
+    }
+
+    return filtered;
   });
 
   if (req.currentAuthorization?.attributes.includes('scope:self')) {
@@ -347,26 +364,23 @@ export const getHousingProjectController = async (req: Request<{ housingProjectI
   const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
     return await getHousingProject(tx, req.params.housingProjectId);
   });
-
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
-    if (response?.submittedBy.toUpperCase() !== getCurrentUsername(req.currentContext)?.toUpperCase()) {
-      throw new Problem(403);
-    }
-  }
-
   res.status(200).json(response);
 };
 
 export const getHousingProjectsController = async (req: Request, res: Response) => {
-  let response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getHousingProjects(tx);
-  });
+  const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
+    const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+    const projects = await getHousingProjects(tx);
 
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
-    response = response.filter(
-      (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
-    );
-  }
+    let filtered = projects;
+    if (req.currentAuthorization?.attributes.includes('scope:self')) {
+      filtered = projects.filter((x) =>
+        x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)
+      );
+    }
+
+    return filtered;
+  });
 
   res.status(200).json(response);
 };
@@ -375,18 +389,22 @@ export const searchHousingProjectsController = async (
   req: Request<never, never, never, HousingProjectSearchParameters>,
   res: Response
 ) => {
-  let response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    return await searchHousingProjects(tx, {
+  const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
+    const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+    const projects = await searchHousingProjects(tx, {
       ...req.query,
       includeUser: isTruthy(req.query.includeUser)
     });
-  });
 
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
-    response = response.filter(
-      (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
-    );
-  }
+    let filtered = projects;
+    if (req.currentAuthorization?.attributes.includes('scope:self')) {
+      filtered = projects.filter((x) =>
+        x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)
+      );
+    }
+
+    return filtered;
+  });
 
   res.status(200).json(response);
 };
@@ -395,41 +413,49 @@ export const submitHousingProjectDraftController = async (
   req: Request<never, never, HousingProjectIntake>,
   res: Response
 ) => {
-  const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
-    const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
-      tx,
-      req.body,
-      req.currentContext
-    );
+  const result = await transactionWrapper<HousingProject & { contact: Contact }>(
+    async (tx: PrismaTransactionClient) => {
+      const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
+        tx,
+        req.body,
+        req.currentContext
+      );
 
-    // Create new housing project
-    const data = await createHousingProject(tx, {
-      ...housingProject,
-      ...generateCreateStamps(req.currentContext)
-    });
+      // Create new housing project
+      const data = await createHousingProject(tx, {
+        ...housingProject,
+        ...generateCreateStamps(req.currentContext)
+      });
 
-    // Create each permit and tracking IDs
-    await Promise.all(
-      appliedPermits.map(async (p: Permit) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { permitTracking, ...rest } = p;
-        await upsertPermit(tx, rest);
-      })
-    );
-    await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-    await Promise.all(
-      appliedPermits
-        .filter((p: Permit) => !!p.permitTracking)
-        .map(async (p: Permit) => await upsertPermitTracking(tx, p))
-    );
+      // Create each permit and tracking IDs
+      await Promise.all(
+        appliedPermits.map(async (p: Permit) => {
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { permitTracking, ...rest } = p;
+          await upsertPermit(tx, rest);
+        })
+      );
+      await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
+      await Promise.all(
+        appliedPermits
+          .filter((p: Permit) => !!p.permitTracking)
+          .map(async (p: Permit) => await upsertPermitTracking(tx, p))
+      );
 
-    // Delete old draft
-    if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
+      // Delete old draft
+      if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
 
-    return data;
-  });
+      // Update the contact and link to activity
+      const contactResponse = await upsertContacts(tx, [
+        { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+      ]);
+      await upsertActivityContacts(tx, data.activityId, contactResponse, ActivityContactRole.PRIMARY);
 
-  res.status(201).json({ activityId: result.activityId, housingProjectId: result.housingProjectId });
+      return { ...data, contact: contactResponse[0] };
+    }
+  );
+
+  res.status(201).json({ ...result, contact: result.contact });
 };
 
 export const updateHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {

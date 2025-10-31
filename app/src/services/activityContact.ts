@@ -1,3 +1,5 @@
+import { ActivityContactRole } from '../utils/enums/projectCommon';
+
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { ActivityContact, Contact } from '../types';
 
@@ -24,6 +26,23 @@ export const deleteUnmatchedActivityContacts = async (
 };
 
 /**
+ * Gets activity_contact records that match the provided activityId
+ * @param tx Prisma transaction client
+ * @param activityId The activity ID
+ * @returns A Promise that resolves to an array of ActivityContacts
+ */
+export const getActivityContacts = async (
+  tx: PrismaTransactionClient,
+  activityId: string
+): Promise<ActivityContact[]> => {
+  return await tx.activity_contact.findMany({
+    where: {
+      activityId: activityId
+    }
+  });
+};
+
+/**
  * Upserts activity_contact records for the given activityId and contacts
  * @param tx Prisma transaction client
  * @param activityId The activity ID the contacts are associated to
@@ -33,7 +52,8 @@ export const deleteUnmatchedActivityContacts = async (
 export const upsertActivityContacts = async (
   tx: PrismaTransactionClient,
   activityId: string,
-  contacts: Array<Contact>
+  contacts: Array<Contact>,
+  role: ActivityContactRole = ActivityContactRole.MEMBER
 ): Promise<ActivityContact[]> => {
   return await Promise.all(
     contacts.map(async (x: Contact) => {
@@ -46,11 +66,13 @@ export const upsertActivityContacts = async (
         },
         update: {
           activityId: activityId,
-          contactId: x.contactId
+          contactId: x.contactId,
+          role: role
         },
         create: {
           activityId: activityId,
-          contactId: x.contactId
+          contactId: x.contactId,
+          role: role
         }
       });
     })

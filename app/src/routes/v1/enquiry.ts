@@ -39,7 +39,7 @@ router.get(
 );
 
 /** Gets enquiries related to an activityId */
-router.get('/list/:activityId', listRelatedEnquiriesController);
+router.get('/list/:activityId', hasAccess('activityId'), listRelatedEnquiriesController);
 
 /** Creates an enquiry and set status to Submitted */
 router.put(
