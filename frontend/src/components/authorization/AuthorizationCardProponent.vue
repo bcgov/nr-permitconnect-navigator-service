@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
-import { formatDate } from '@/utils/formatters';
+import { formatDate, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -40,24 +40,23 @@ const { t } = useI18n();
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />
-          <div v-if="permit.statusLastVerified">
-            <span class="label-verified mr-1">{{ t('authorization.authorizationCardProponent.statusVerified') }}</span>
-            <span class="label-date">{{ formatDate(permit.statusLastVerified) }}</span>
-          </div>
-          <div v-else>
-            <span class="label-verified mr-1">
-              {{ t('authorization.authorizationCardProponent.statusNotVerified') }}
-            </span>
-          </div>
         </div>
         <div class="col-span-6">
           <div class="label-field">{{ t('authorization.authorizationCardProponent.latestUpdates') }}</div>
-          <div class="permit-data">
-            {{
-              permit?.permitNote[0]
-                ? permit?.permitNote[0].note
-                : t('authorization.authorizationCardProponent.noUpdates')
-            }}
+          <div>
+            <span
+              v-if="permit.permitNote[0]"
+              class="mr-1 font-bold"
+            >
+              {{ formatDateTime(permit.permitNote[0].createdAt) }},
+            </span>
+            <span class="permit-data">
+              {{
+                permit?.permitNote[0]
+                  ? permit?.permitNote[0].note
+                  : t('authorization.authorizationCardProponent.noUpdates')
+              }}
+            </span>
           </div>
         </div>
         <div class="col-span-3">
