@@ -53,6 +53,18 @@ const pillState = {
     iconString: '',
     toolTip: PermitStateDescriptions.IN_PROGRESS
   },
+  [PermitState.INITIAL_REVIEW]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: '',
+    toolTip: PermitStateDescriptions.INITIAL_REVIEW
+  },
+  [PermitState.ISSUED]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: 'fas fa-circle-check',
+    toolTip: PermitStateDescriptions.ISSUED
+  },
   [PermitState.NONE]: {
     badgeClass: 'grey',
     iconClass: '',
@@ -64,6 +76,12 @@ const pillState = {
     iconClass: '',
     iconString: 'fas fa-circle-exclamation',
     toolTip: PermitStateDescriptions.PENDING_CLIENT
+  },
+  [PermitState.REJECTED]: {
+    badgeClass: 'red',
+    iconClass: '',
+    iconString: 'fas fa-circle-xmark',
+    toolTip: PermitStateDescriptions.REJECTED
   },
   [PermitState.WITHDRAWN]: {
     badgeClass: 'grey',
