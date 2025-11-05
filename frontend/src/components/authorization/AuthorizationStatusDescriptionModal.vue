@@ -51,6 +51,12 @@ const visible = defineModel<boolean>('visible');
     <h4 class="mb-6">Application statuses</h4>
     <div class="my-6">
       <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.INITIAL_REVIEW" />
+      </div>
+      <div class="mt-2">{{ PermitStateDescriptions.INITIAL_REVIEW }}</div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
         <AuthorizationStatusPill :state="PermitState.IN_PROGRESS" />
       </div>
       <div class="mt-2">{{ PermitStateDescriptions.IN_PROGRESS }}</div>
@@ -77,6 +83,14 @@ const visible = defineModel<boolean>('visible');
     </div>
     <div class="my-6">
       <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.REJECTED" />
+      </div>
+      <div class="mt-2">
+        {{ PermitStateDescriptions.REJECTED }}
+      </div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
         <AuthorizationStatusPill :state="PermitState.DENIED" />
       </div>
       <div class="mt-2">
@@ -89,6 +103,14 @@ const visible = defineModel<boolean>('visible');
       </div>
       <div class="mt-2">
         {{ PermitStateDescriptions.APPROVED }}
+      </div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.ISSUED" />
+      </div>
+      <div class="mt-2">
+        {{ PermitStateDescriptions.ISSUED }}
       </div>
     </div>
   </Dialog>

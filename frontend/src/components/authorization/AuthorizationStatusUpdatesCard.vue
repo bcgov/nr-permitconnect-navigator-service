@@ -59,7 +59,7 @@ const stateDisplayText = {
         </div>
         <div>
           <Select
-            name="status"
+            name="stage"
             :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
             :options="PERMIT_STAGE_LIST"
             :disabled="!editable"
