@@ -452,8 +452,6 @@
       "latestUpdates": "Latest updates",
       "more": "More",
       "noUpdates": "No updates at the moment.",
-      "statusNotVerified": "This status has not yet been verified by Navigators",
-      "statusVerified": "Status last verified by Navigator on",
       "submittedOn": "Submitted on"
     },
     "authorizationForm": {
@@ -516,11 +514,6 @@
       "updateNoteForProponent": "Update note for Proponent",
       "updateToToday": "Update to today",
       "withdrawnByClient": "Withdrawn by client"
-    },
-    "authorizationTrackerCard": {
-      "byYourNavigator": "by your Navigator",
-      "statusLastVerified": "Status last verified on",
-      "statusNotVerified": "This status has not yet been verified."
     },
     "requiredAuths": {
       "areNotNeeded": "are not needed. ",
