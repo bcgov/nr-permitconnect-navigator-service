@@ -21,7 +21,7 @@ import {
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  updateElectrificationProjectDraftController
+  upsertElectrificationProjectDraftController
 } from '../../../src/controllers/electrificationProject';
 import * as activityService from '../../../src/services/activity';
 import * as emailService from '../../../src/services/email';
@@ -477,7 +477,7 @@ describe('updateElectrificationProjectDraftController', () => {
     createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
     createDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
-    await updateElectrificationProjectDraftController(
+    await upsertElectrificationProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );
@@ -528,7 +528,7 @@ describe('updateElectrificationProjectDraftController', () => {
 
     updateDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
-    await updateElectrificationProjectDraftController(
+    await upsertElectrificationProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );

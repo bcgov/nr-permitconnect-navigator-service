@@ -247,7 +247,7 @@ export type EnquiryIntake = {
     enquiryDescription?: string;
   };
 
-  contacts: Array<Contact>;
+  contact: Contact;
 };
 
 export type EnquirySearchParameters = {

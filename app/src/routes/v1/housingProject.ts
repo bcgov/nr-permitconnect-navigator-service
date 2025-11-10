@@ -59,7 +59,7 @@ router.get(
   getHousingProjectStatisticsController
 );
 
-/** Gets a list of housing project drafts */
+/** Get a specific housing project draft */
 router.get(
   '/draft/:draftId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
@@ -95,7 +95,7 @@ router.put(
 );
 
 /** Creates a blank housing project */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.createHousingProject,

@@ -94,7 +94,7 @@ router.put(
 );
 
 /** Creates a blank electrification project */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   electrificationProjectValidator.createElectrificationProject,

@@ -13,7 +13,7 @@ import {
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectController,
-  updateHousingProjectDraftController
+  upsertHousingProjectDraftController
 } from '../../../src/controllers/housingProject';
 import * as activityService from '../../../src/services/activity';
 import * as contactService from '../../../src/services/contact';
@@ -725,7 +725,7 @@ describe('updateHousingProjectDraftController', () => {
     createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
     createDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
 
-    await updateHousingProjectDraftController(
+    await upsertHousingProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );
@@ -776,7 +776,7 @@ describe('updateHousingProjectDraftController', () => {
 
     updateDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
 
-    await updateHousingProjectDraftController(
+    await upsertHousingProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );

@@ -13,7 +13,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   createProject(data?: any) {
-    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, data);
+    return appAxios().post(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, data);
   },
 
   /**

@@ -4,12 +4,13 @@ import { ActivityContactRole } from '../utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { ActivityContact } from '../types';
 
 export const createActivityContactController = async (
   req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,
   res: Response
 ) => {
-  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+  const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
     return await createActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
   });
 
@@ -20,7 +21,7 @@ export const deleteActivityContactController = async (
   req: Request<{ activityId: string; contactId: string }>,
   res: Response
 ) => {
-  await transactionWrapper(async (tx: PrismaTransactionClient) => {
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     await deleteActivityContact(tx, req.params.activityId, req.params.contactId);
   });
 
@@ -28,7 +29,7 @@ export const deleteActivityContactController = async (
 };
 
 export const listActivityContactController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+  const response = await transactionWrapper<ActivityContact[]>(async (tx: PrismaTransactionClient) => {
     return await listActivityContacts(tx, req.params.activityId);
   });
 
