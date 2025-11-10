@@ -1,6 +1,6 @@
 import prisma from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { getActivityContacts } from '../services/activityContact';
+import { listActivityContacts } from '../services/activityContact';
 import { searchContacts } from '../services/contact';
 import { getDocument } from '../services/document';
 import { getDraft } from '../services/draft';
@@ -165,7 +165,7 @@ export const hasAccess = (param: string) => {
 
           const activityId = data?.activityId ?? id;
           const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
-          const activityContacts = await getActivityContacts(tx, activityId);
+          const activityContacts = await listActivityContacts(tx, activityId);
 
           if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
             throw new Error();

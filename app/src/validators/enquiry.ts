@@ -3,7 +3,7 @@ import Joi from 'joi';
 import atsValidator from './ats';
 import { basicEnquiry } from './basic';
 import { uuidv4 } from './common';
-import { contacts } from './contact';
+import { contacts, contactSchema } from './contact';
 import { validate } from '../middleware/validation';
 import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/projectCommon';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
@@ -11,7 +11,7 @@ import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/
 const schema = {
   createEnquiry: {
     body: Joi.object({
-      contacts: contacts,
+      contact: contactSchema,
       basic: basicEnquiry,
       activityId: Joi.string(),
       enquiryId: Joi.string()

@@ -11,7 +11,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
 import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, contactService, enquiryService } from '@/services';
+import { enquiryService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
@@ -217,7 +217,7 @@ async function onSubmit(values: any) {
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values }, [
+    const dataOmitted = omit({ ...values, contact }, [
       'contactId',
       'contactFirstName',
       'contactLastName',
@@ -239,19 +239,15 @@ async function onSubmit(values: any) {
     }
 
     // Create enquiry
-    const result = await enquiryService.createEnquiry(dataOmitted);
-
-    // Link activity contact
-    const contactResponse = (await contactService.updateContact(contact)).data;
-    await activityContactService.updateActivityContact(result.data.activityId, [contactResponse]);
+    const response = await enquiryService.createEnquiry(dataOmitted);
 
     // Save contact data to store
-    contactStore.setContact(contactResponse);
+    contactStore.setContact(response.data.contact);
 
     // Send confirmation email
-    emailConfirmation(result.data.activityId, result.data.enquiryId);
+    emailConfirmation(response.data.activityId, response.data.enquiryId);
 
-    router.push(getEnquiryConfirmationRoute(result.data));
+    router.push(getEnquiryConfirmationRoute(response.data));
   } catch (e: any) {
     toast.error('Failed to save intake', e);
   } finally {

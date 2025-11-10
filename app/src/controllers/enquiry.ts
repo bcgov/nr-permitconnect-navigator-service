@@ -8,7 +8,7 @@ import {
   generateUpdateStamps
 } from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
-import { upsertActivityContacts } from '../services/activityContact';
+import { createActivityContact } from '../services/activityContact';
 import { searchContacts, upsertContacts } from '../services/contact';
 import {
   createEnquiry,
@@ -31,7 +31,7 @@ import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
+import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,
@@ -44,7 +44,7 @@ const generateEnquiryData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
-    await upsertActivityContacts(tx, activityId, contacts, ActivityContactRole.PRIMARY);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
   let basic;
@@ -72,17 +72,14 @@ const generateEnquiryData = async (
 };
 
 export const createEnquiryController = async (req: Request<never, never, EnquiryIntake>, res: Response) => {
-  // TODO: Remove when create PUT calls get switched to POST
-  if (req.body === undefined) req.body = { contacts: [] };
+  // Provide an empty body if POST body is given undefined
+  if (req.body === undefined) req.body = {} as EnquiryIntake;
 
-  const result = await transactionWrapper<Enquiry>(async (tx: PrismaTransactionClient) => {
+  const result = await transactionWrapper<Enquiry & { contact: Contact }>(async (tx: PrismaTransactionClient) => {
     const enquiry = await generateEnquiryData(tx, req.body, req.currentContext);
 
-    // Create or update contacts
-    if (req.body.contacts) await upsertContacts(tx, req.body.contacts);
-
     // Create new enquiry
-    return await createEnquiry(tx, {
+    const data = await createEnquiry(tx, {
       ...enquiry,
       assignedUserId: null,
       addedToAts: false,
@@ -93,6 +90,13 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       ...generateCreateStamps(req.currentContext),
       ...generateNullUpdateStamps()
     });
+
+    // Update the contact
+    const contactResponse = await upsertContacts(tx, [
+      { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+    ]);
+
+    return { ...data, contact: contactResponse[0] };
   });
 
   res.status(201).json(result);

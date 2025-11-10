@@ -9,7 +9,9 @@ import {
   generateUpdateStamps,
   jsonToPrismaInputJson
 } from '../db/utils/utils';
-import { createActivity, deleteActivity } from '../services/activity';
+import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity';
+import { createActivityContact } from '../services/activityContact';
+import { searchContacts, upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
@@ -49,8 +51,6 @@ import type {
   Permit,
   StatisticsFilters
 } from '../types';
-import { searchContacts, upsertContacts } from '../services/contact';
-import { upsertActivityContacts } from '../services/activityContact';
 
 /**
  * Assigns a priority level to a housing project based on given criteria
@@ -103,7 +103,7 @@ const generateHousingProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
-    await upsertActivityContacts(tx, activityId, contacts, ActivityContactRole.PRIMARY);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
   let basic, housing, location, permits;
@@ -269,8 +269,9 @@ export const createHousingProjectController = async (
   req: Request<never, never, HousingProjectIntake>,
   res: Response
 ) => {
-  // TODO: Remove when create PUT calls get switched to POST
+  // Provide an empty body if POST body is given undefined
   if (req.body === undefined) req.body = {} as HousingProjectIntake;
+
   const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
     const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
       tx,
@@ -317,7 +318,8 @@ export const deleteHousingProjectController = async (req: Request<{ housingProje
 
 export const deleteHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deleteDraft(tx, req.params.draftId);
+    const draft = await getDraft(tx, req.params.draftId);
+    await deleteActivityHard(tx, draft.activityId);
   });
   res.status(204).end();
 };
@@ -446,9 +448,11 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
         ...generateNullDeleteStamps()
       });
 
-      // Update the contact and link to activity
+      // Link contact to activity
       const contacts = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
-      await upsertActivityContacts(tx, draft.activityId, contacts, ActivityContactRole.PRIMARY);
+      if (contacts[0]) {
+        await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
+      }
 
       return draft;
     }

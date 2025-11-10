@@ -8,7 +8,9 @@ import {
   generateNullUpdateStamps,
   generateUpdateStamps
 } from '../db/utils/utils';
-import { createActivity, deleteActivity } from '../services/activity';
+import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity';
+import { createActivityContact } from '../services/activityContact';
+import { searchContacts, upsertContacts } from '../services/contact';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
 import { email } from '../services/email';
 import {
@@ -43,8 +45,6 @@ import type {
   Email,
   StatisticsFilters
 } from '../types';
-import { searchContacts, upsertContacts } from '../services/contact';
-import { upsertActivityContacts } from '../services/activityContact';
 
 /**
  * Handles creating a project from intake data
@@ -61,7 +61,7 @@ const generateElectrificationProjectData = async (
     activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
       ?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
-    await upsertActivityContacts(tx, activityId, contacts, ActivityContactRole.PRIMARY);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
   // Put new electrification project together
@@ -118,18 +118,13 @@ export const createElectrificationProjectController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
   res: Response
 ) => {
-  // TODO: Remove when create PUT calls get switched to POST
+  // Provide an empty body if POST body is given undefined
   if (req.body === undefined) {
     req.body = {
-      project: {
-        projectName: null,
-        projectDescription: null,
-        companyNameRegistered: null,
-        projectType: null,
-        bcHydroNumber: null
-      }
+      project: {}
     } as ElectrificationProjectIntake;
   }
+
   const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
     const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
 
@@ -161,7 +156,8 @@ export const deleteElectrificationProjectController = async (
 
 export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deleteDraft(tx, req.params.draftId);
+    const draft = await getDraft(tx, req.params.draftId);
+    await deleteActivityHard(tx, draft.activityId);
   });
   res.status(204).end();
 };
@@ -278,7 +274,8 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
 
       // Update the contact and link to activity
       const contacts = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
-      await upsertActivityContacts(tx, draft.activityId, contacts, ActivityContactRole.PRIMARY);
+      if (contacts[0])
+        await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
 
       return draft;
     }

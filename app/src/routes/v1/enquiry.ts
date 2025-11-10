@@ -49,7 +49,7 @@ router.get(
 router.get('/', hasAuthorization(Resource.ENQUIRY, Action.READ), filterActivityResponseByScope, getEnquiriesController);
 
 /** Creates an enquiry and set status to Submitted */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.ENQUIRY, Action.CREATE),
   enquiryValidator.createEnquiry,

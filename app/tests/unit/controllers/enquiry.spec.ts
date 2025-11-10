@@ -61,7 +61,7 @@ describe('createEnquiryController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
-    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_INTAKE.contacts);
+    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_INTAKE.contact);
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);

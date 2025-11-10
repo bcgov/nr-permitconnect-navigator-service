@@ -33,7 +33,8 @@ export const createActivity = async (
 };
 
 /**
- * Delete an activity
+ * Soft delete an activity
+ * Use this over a hard delete
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
  * @param deleteStamp Timestamp information of the delete
@@ -45,6 +46,18 @@ export const deleteActivity = async (
 ): Promise<void> => {
   await tx.activity.update({
     data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
+    where: { activityId }
+  });
+};
+
+/**
+ * Hard delete an activity
+ * Should not be used unless absolutely sure as it will cascade
+ * @param tx Prisma transaction client
+ * @param activityId Unique activity ID
+ */
+export const deleteActivityHard = async (tx: PrismaTransactionClient, activityId: string): Promise<void> => {
+  await tx.activity.delete({
     where: { activityId }
   });
 };
