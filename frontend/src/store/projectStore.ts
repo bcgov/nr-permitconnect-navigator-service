@@ -33,8 +33,9 @@ export const useProjectStore = defineStore('project', () => {
       state.permits.value
         .filter(
           (p) =>
-            [PermitState.IN_PROGRESS, PermitState.PENDING_CLIENT].includes(p.state as PermitState) &&
-            ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
+            [PermitState.IN_PROGRESS, PermitState.INITIAL_REVIEW, PermitState.PENDING_CLIENT].includes(
+              p.state as PermitState
+            ) && ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
         )
         .sort(permitNameSortFcn)
     ),
@@ -58,8 +59,9 @@ export const useProjectStore = defineStore('project', () => {
     getAuthsCompleted: computed(() => {
       const authsCompleted = state.permits.value.filter(
         (p) =>
-          ![PermitState.NONE, PermitState.IN_PROGRESS, PermitState.PENDING_CLIENT].includes(p.state as PermitState) &&
-          ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
+          ![PermitState.NONE, PermitState.IN_PROGRESS, PermitState.INITIAL_REVIEW, PermitState.PENDING_CLIENT].includes(
+            p.state as PermitState
+          ) && ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
       );
       const authsIssued = authsCompleted.filter((p) => p.state === PermitState.APPROVED).sort(permitNameSortFcn);
       const authsNotIssued = authsCompleted.filter((p) => p.state !== PermitState.APPROVED).sort(permitNameSortFcn);

@@ -70,6 +70,14 @@ const statusBoxStates = {
     boxClass: 'green',
     message: PermitStateDescriptions.IN_PROGRESS
   },
+  [PermitState.INITIAL_REVIEW]: {
+    boxClass: 'green',
+    message: PermitStateDescriptions.IN_PROGRESS
+  },
+  [PermitState.ISSUED]: {
+    boxClass: 'green',
+    message: PermitStateDescriptions.ISSUED
+  },
   [PermitState.NONE]: {
     boxClass: 'grey',
     message: PermitStateDescriptions.NONE
@@ -77,6 +85,10 @@ const statusBoxStates = {
   [PermitState.PENDING_CLIENT]: {
     boxClass: 'yellow',
     message: PermitStateDescriptions.PENDING_CLIENT
+  },
+  [PermitState.REJECTED]: {
+    boxClass: 'red',
+    message: PermitStateDescriptions.REJECTED
   },
   [PermitState.WITHDRAWN]: {
     boxClass: 'grey',
