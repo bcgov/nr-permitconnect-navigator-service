@@ -277,6 +277,7 @@ export const createHousingProjectController = async (
       req.body,
       req.currentContext
     );
+
     // Create new housing project
     const data = await createHousingProject(tx, {
       ...housingProject,

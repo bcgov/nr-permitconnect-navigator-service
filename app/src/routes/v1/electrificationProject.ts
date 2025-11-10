@@ -13,10 +13,10 @@ import {
   getElectrificationProjectStatisticsController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
-  updateElectrificationProjectDraftController,
+  upsertElectrificationProjectDraftController,
   updateElectrificationProjectController
 } from '../../controllers/electrificationProject';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { filterActivityResponseByScope, hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 import { Action, Resource } from '../../utils/enums/application';
@@ -27,12 +27,18 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of electrification projects */
-router.get('/', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), getElectrificationProjectsController);
+router.get(
+  '/',
+  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+  filterActivityResponseByScope,
+  getElectrificationProjectsController
+);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+  filterActivityResponseByScope,
   getElectrificationProjectActivityIdsController
 );
 
@@ -41,6 +47,7 @@ router.get(
   '/search',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
   electrificationProjectValidator.searcElectrificationProjects,
+  filterActivityResponseByScope,
   searchElectrificationProjectsController
 );
 
@@ -59,6 +66,7 @@ router.get(
 router.get(
   '/draft',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
+  filterActivityResponseByScope,
   getElectrificationProjectDraftsController
 );
 
@@ -66,7 +74,7 @@ router.get(
 router.put(
   '/draft',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
-  updateElectrificationProjectDraftController
+  upsertElectrificationProjectDraftController
 );
 
 /** Creates or updates an intake and set status to Submitted */
