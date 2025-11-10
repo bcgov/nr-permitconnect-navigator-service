@@ -168,7 +168,7 @@ export type CurrentContext = {
 };
 
 export type ElectrificationProjectIntake = {
-  contacts?: Array<Contact>;
+  contact: Contact;
   draftId?: string;
   project: {
     activityId?: string;

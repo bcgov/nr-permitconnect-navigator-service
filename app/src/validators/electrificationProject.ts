@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 import atsValidator from './ats';
 import { email, uuidv4 } from './common';
-import { contacts } from './contact';
+import { contactSchema } from './contact';
 import { validate } from '../middleware/validation';
 import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes';
 import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
@@ -29,7 +29,7 @@ const schema = {
   createElectrificationProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
-      contacts: contacts,
+      contact: contactSchema,
       project: {
         ...electrificationIntake
       }
@@ -82,7 +82,7 @@ const schema = {
   },
   updateElectrificationProject: {
     body: Joi.object({
-      contacts: contacts,
+      contact: contactSchema,
       project: {
         ...electrificationIntake,
         electrificationProjectId: uuidv4.required(),

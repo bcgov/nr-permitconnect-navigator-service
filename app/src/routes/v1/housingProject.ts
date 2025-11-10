@@ -67,7 +67,7 @@ router.get(
   getHousingProjectDraftController
 );
 
-/** Gets a housing project draft */
+/** Gets a list of housing project drafts */
 router.get(
   '/draft',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
