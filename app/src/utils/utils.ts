@@ -10,6 +10,19 @@ import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttribute
 const log = getLogger(module.filename);
 
 /**
+ * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
+ * @param str The input string uuid
+ * @returns The string `str` but with dashes inserted, or `str` if not a string.
+ */
+export function addDashesToUuid(str: string): string {
+  if (str.length === 32) {
+    return `${str.slice(0, 8)}-${str.slice(8, 12)}-${str.slice(12, 16)}-${str.slice(16, 20)}-${str.slice(
+      20
+    )}`.toLowerCase();
+  } else return str;
+}
+
+/**
  * Converts a CamelCase string to title case that can handle camel case
  * @param str The string to convert
  * @returns A string in title case
@@ -22,16 +35,22 @@ export function camelCaseToTitleCase(input: string | null): string | null {
 }
 
 /**
- * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
- * @param str The input string uuid
- * @returns The string `str` but with dashes inserted, or `str` if not a string.
+ * Comparator function for sorting dates
+ * Defaults to ascending order: oldest to newest
+ * @param a Optional first date to compare
+ * @param b Optional second date to compare
+ * @param desc If true, sorts in descending order: newest to oldest
+ * @returns A negative number if a before b, positive if a after b, or 0 if equal
  */
-export function addDashesToUuid(str: string): string {
-  if (str.length === 32) {
-    return `${str.slice(0, 8)}-${str.slice(8, 12)}-${str.slice(12, 16)}-${str.slice(16, 20)}-${str.slice(
-      20
-    )}`.toLowerCase();
-  } else return str;
+export function compareDates(a?: Date, b?: Date, desc = false): number {
+  // Both dates undefined
+  if (!a && !b) return 0;
+
+  // One date undefined
+  if (!a || !b) return desc ? (a ? -1 : 1) : a ? 1 : -1;
+
+  // Both dates defined
+  return desc ? b.getTime() - a.getTime() : a.getTime() - b.getTime();
 }
 
 /**

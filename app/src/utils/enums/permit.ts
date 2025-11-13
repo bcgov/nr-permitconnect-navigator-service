@@ -1,7 +1,16 @@
+export enum PeachTerminatedStage {
+  REJECTED = 'REJECTED',
+  WITHDRAWN = 'WITHDRAWN'
+}
+
 export enum PermitNeeded {
   YES = 'Yes',
   UNDER_INVESTIGATION = 'Under investigation',
   NO = 'No'
+}
+
+export enum PermitPhase {
+  APPLICATION = 'Application'
 }
 
 export enum PermitStage {

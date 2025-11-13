@@ -83,6 +83,16 @@ describe('utils', () => {
     (config.has as jest.Mock).mockReset();
   });
 
+  describe('addDashesToUuid', () => {
+    it('inserts dashes and lowercases for 32-hex strings', () => {
+      const raw = 'AABBCCDDEEFF00112233445566778899';
+      expect(utils.addDashesToUuid(raw)).toBe('aabbccdd-eeff-0011-2233-445566778899');
+    });
+    it('returns original if not length 32', () => {
+      expect(utils.addDashesToUuid('123')).toBe('123');
+    });
+  });
+
   describe('camelCaseToTitleCase', () => {
     it('returns null for null', () => {
       expect(utils.camelCaseToTitleCase(null)).toBeNull();
@@ -95,13 +105,33 @@ describe('utils', () => {
     });
   });
 
-  describe('addDashesToUuid', () => {
-    it('inserts dashes and lowercases for 32-hex strings', () => {
-      const raw = 'AABBCCDDEEFF00112233445566778899';
-      expect(utils.addDashesToUuid(raw)).toBe('aabbccdd-eeff-0011-2233-445566778899');
+  describe('compareDates', () => {
+    const older = new Date('2025-01-01T00:00:00.000Z');
+    const newer = new Date('2025-01-02T00:00:00.000Z');
+
+    it('returns 0 for equal dates', () => {
+      expect(utils.compareDates(older, new Date(older))).toBe(0);
     });
-    it('returns original if not length 32', () => {
-      expect(utils.addDashesToUuid('123')).toBe('123');
+
+    it('sorts ascending by default (oldest to newest)', () => {
+      expect(utils.compareDates(older, newer)).toBeLessThan(0);
+      expect(utils.compareDates(newer, older)).toBeGreaterThan(0);
+    });
+
+    it('treats undefined as the oldest value', () => {
+      expect(utils.compareDates(undefined, newer)).toBeLessThan(0);
+      expect(utils.compareDates(newer, undefined)).toBeGreaterThan(0);
+      expect(utils.compareDates(undefined, undefined)).toBe(0);
+    });
+
+    it('sorts descending when desc=true (newest to oldest)', () => {
+      expect(utils.compareDates(older, newer, true)).toBeGreaterThan(0);
+      expect(utils.compareDates(newer, older, true)).toBeLessThan(0);
+    });
+
+    it('in descending order, undefined still counts as oldest (comes last)', () => {
+      expect(utils.compareDates(undefined, newer, true)).toBeGreaterThan(0);
+      expect(utils.compareDates(newer, undefined, true)).toBeLessThan(0);
     });
   });
 
