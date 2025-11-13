@@ -42,7 +42,9 @@ const generateEnquiryData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
+    activityId = (
+      await createActivity(tx, currentContext.initiative as Initiative, generateCreateStamps(currentContext))
+    )?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
