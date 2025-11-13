@@ -1,7 +1,7 @@
 import { getLogger } from '../components/log';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateUpdateStamps } from '../db/utils/utils';
-import { parsePeachRecords } from '../parsers/peachParser';
+import { parsePeachRecords, summarizeRecord } from '../parsers/peachParser';
 import { getPeachRecord } from '../services/peach';
 import { searchPermits, upsertPermit } from '../services/permit';
 import { compareDates } from '../utils';
@@ -17,7 +17,9 @@ const log = getLogger(module.filename);
 export const getPeachRecordController = async (req: Request<{ recordId: string; systemId: string }>, res: Response) => {
   const response = await getPeachRecord(req.params.recordId, req.params.systemId);
 
-  res.status(200).json(response);
+  const peachSummary: PeachSummary = summarizeRecord(response);
+
+  res.status(200).json(peachSummary);
 };
 
 export const syncPeachRecords = async () => {
