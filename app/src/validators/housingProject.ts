@@ -4,7 +4,7 @@ import { appliedPermit } from './appliedPermit';
 import atsValidator from './ats';
 import { basicIntake } from './basic';
 import { activityId, email, uuidv4 } from './common';
-import { contacts } from './contact';
+import { contactSchema } from './contact';
 
 import { housing } from './housing';
 import { permits } from './permits';
@@ -20,7 +20,7 @@ const schema = {
     body: Joi.object({
       draftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
-      contacts: contacts,
+      contact: contactSchema,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
       housing: housing,

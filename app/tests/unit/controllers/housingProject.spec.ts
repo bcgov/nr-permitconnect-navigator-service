@@ -13,9 +13,10 @@ import {
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectController,
-  updateHousingProjectDraftController
+  upsertHousingProjectDraftController
 } from '../../../src/controllers/housingProject';
 import * as activityService from '../../../src/services/activity';
+import * as activityContactService from '../../../src/services/activityContact';
 import * as contactService from '../../../src/services/contact';
 import * as draftService from '../../../src/services/draft';
 import * as emailService from '../../../src/services/email';
@@ -23,12 +24,13 @@ import * as enquiryService from '../../../src/services/enquiry';
 import * as housingProjectService from '../../../src/services/housingProject';
 import * as permitService from '../../../src/services/permit';
 import * as permitTrackingService from '../../../src/services/permitTracking';
-import { DraftCode } from '../../../src/utils/enums/projectCommon';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon';
 import { Initiative } from '../../../src/utils/enums/application';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
 
 import type { Request, Response } from 'express';
 import type {
+  ActivityContact,
   Draft,
   Email,
   HousingProject,
@@ -218,6 +220,8 @@ describe('createHousingProjectController', () => {
   const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
   const getCurrentUsernameSpy = jest.spyOn(utils, 'getCurrentUsername');
 
   it('should call services and respond with 201 and result', async () => {
@@ -227,6 +231,11 @@ describe('createHousingProjectController', () => {
     };
 
     createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    createActivityContactSpy.mockResolvedValue({
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      contactId: TEST_CONTACT_1.contactId
+    } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
     upsertPermitTrackingSpy.mockResolvedValue([]);
     getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName as string);
@@ -241,6 +250,17 @@ describe('createHousingProjectController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      userId: [TEST_CURRENT_CONTEXT.userId]
+    });
+    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(createActivityContactSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      TEST_HOUSING_ACTIVITY.activityId,
+      TEST_CONTACT_1.contactId,
+      ActivityContactRole.PRIMARY
+    );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_CREATE,
@@ -346,7 +366,8 @@ describe('deleteHousingProjectController', () => {
 });
 
 describe('deleteHousingProjectDraftController', () => {
-  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
+  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
+  const deleteActivityHardSpy = jest.spyOn(activityService, 'deleteActivityHard');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -354,15 +375,18 @@ describe('deleteHousingProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    deleteDraftSpy.mockResolvedValue();
+    getDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
+    deleteActivityHardSpy.mockResolvedValue();
 
     await deleteHousingProjectDraftController(
       req as unknown as Request<{ draftId: string }>,
       res as unknown as Response
     );
 
-    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
-    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
+    expect(getDraftSpy).toHaveBeenCalledTimes(1);
+    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
+    expect(deleteActivityHardSpy).toHaveBeenCalledTimes(1);
+    expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_DRAFT.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
@@ -586,7 +610,9 @@ describe('submitHousingProjectDraftController', () => {
   const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
   const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const upsertContacts = jest.spyOn(contactService, 'upsertContacts');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
+  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
   const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
   const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
 
@@ -597,7 +623,13 @@ describe('submitHousingProjectDraftController', () => {
     };
 
     createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    createActivityContactSpy.mockResolvedValue({
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      contactId: TEST_CONTACT_1.contactId
+    } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
     await submitHousingProjectDraftController(
       req as unknown as Request<never, never, HousingProjectIntake>,
@@ -609,6 +641,17 @@ describe('submitHousingProjectDraftController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      userId: [TEST_CURRENT_CONTEXT.userId]
+    });
+    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(createActivityContactSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      TEST_HOUSING_ACTIVITY.activityId,
+      TEST_CONTACT_1.contactId,
+      ActivityContactRole.PRIMARY
+    );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_1,
@@ -619,8 +662,8 @@ describe('submitHousingProjectDraftController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
-      activityId: TEST_HOUSING_PROJECT_1.activityId,
-      housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId
+      ...TEST_HOUSING_PROJECT_1,
+      contact: TEST_CONTACT_1
     });
   });
 
@@ -658,7 +701,7 @@ describe('submitHousingProjectDraftController', () => {
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
     upsertPermitTrackingSpy.mockResolvedValue([]);
-    upsertContacts.mockResolvedValue([TEST_CONTACT_1]);
+    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
     await submitHousingProjectDraftController(
       req as unknown as Request<never, never, HousingProjectIntake>,
@@ -666,7 +709,7 @@ describe('submitHousingProjectDraftController', () => {
     );
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContacts).toHaveBeenCalledTimes(0);
+    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
@@ -725,7 +768,7 @@ describe('updateHousingProjectDraftController', () => {
     createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
     createDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
 
-    await updateHousingProjectDraftController(
+    await upsertHousingProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );
@@ -776,7 +819,7 @@ describe('updateHousingProjectDraftController', () => {
 
     updateDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
 
-    await updateHousingProjectDraftController(
+    await upsertHousingProjectDraftController(
       req as unknown as Request<never, never, Draft>,
       res as unknown as Response
     );

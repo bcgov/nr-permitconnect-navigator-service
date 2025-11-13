@@ -41,7 +41,10 @@ export const deleteDraft = async (tx: PrismaTransactionClient, draftId: string):
  * @returns A Promise that resolves to the draft
  */
 export const getDraft = async (tx: PrismaTransactionClient, draftId: string): Promise<Draft> => {
-  const result = await tx.draft.findFirstOrThrow({ where: { draftId } });
+  const result = await tx.draft.findFirstOrThrow({
+    where: { draftId },
+    include: { activity: { include: { activityContact: true } } }
+  });
   return result;
 };
 
@@ -52,7 +55,10 @@ export const getDraft = async (tx: PrismaTransactionClient, draftId: string): Pr
  * @returns A Promise that resolves to an array of drafts
  */
 export const getDrafts = async (tx: PrismaTransactionClient, draftCode?: DraftCode): Promise<Draft[]> => {
-  const result = await tx.draft.findMany({ where: { draftCode } });
+  const result = await tx.draft.findMany({
+    where: { draftCode },
+    include: { activity: { include: { activityContact: true } } }
+  });
   return result;
 };
 

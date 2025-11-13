@@ -29,6 +29,7 @@ import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../
 import { ProjectType } from '../../../src/utils/enums/electrification';
 import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
 import {
+  ActivityContactRole,
   ApplicationStatus,
   ContactPreference,
   DraftCode,
@@ -111,7 +112,7 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
     bcHydroNumber: '12345',
     submissionType: SubmissionType.GUIDANCE
   },
-  contacts: [TEST_CONTACT_1]
+  contact: TEST_CONTACT_1
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
@@ -179,7 +180,7 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
 };
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
-  contacts: [TEST_CONTACT_1],
+  contact: TEST_CONTACT_1,
   basic: {
     submissionType: SubmissionType.GENERAL_ENQUIRY,
     relatedActivityId: 'ACTI1234',
@@ -222,6 +223,7 @@ export const TEST_ENQUIRY_1: Enquiry = {
       {
         activityId: 'ACTI1234',
         contactId: TEST_CONTACT_1.contactId,
+        role: ActivityContactRole.PRIMARY,
         createdAt: null,
         createdBy: null,
         updatedAt: null,
@@ -320,7 +322,7 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     projectApplicantType: null,
     registeredName: 'COMPANY'
   },
-  contacts: [TEST_CONTACT_1],
+  contact: TEST_CONTACT_1,
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   housing: {
     financiallySupportedBc: BasicResponse.NO,
@@ -423,6 +425,7 @@ export const TEST_HOUSING_PROJECT_1: HousingProject = {
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   activityId: 'ACTI1234',
   contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+  role: ActivityContactRole.PRIMARY,
   createdAt: null,
   createdBy: null,
   updatedBy: null,

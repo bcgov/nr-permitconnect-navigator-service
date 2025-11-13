@@ -37,6 +37,7 @@ const testEnquiry = {
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
 const patchSpy = vi.fn();
+const postSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('vue-router', () => ({
@@ -51,6 +52,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   delete: deleteSpy,
   patch: patchSpy,
+  post: postSpy,
   put: putSpy
 } as any);
 
@@ -103,8 +105,8 @@ describe('enquiryService', () => {
       it('calls createEnquiry with correct data', () => {
         enquiryService.createEnquiry(testEnquiry);
 
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testEnquiry);
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testEnquiry);
       });
 
       it('calls searchEnquiries with correct data', () => {

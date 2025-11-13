@@ -5,22 +5,20 @@ import { validate } from '../middleware/validation';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/projectCommon';
 import { Initiative } from '../utils/enums/application';
 
-export const contacts = Joi.array()
-  .items(
-    Joi.object({
-      contactId: uuidv4.allow(null),
-      userId: uuidv4.allow(null),
-      contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
-      email: email.required(),
-      firstName: Joi.string().required().max(255),
-      lastName: Joi.string().max(255).allow(null),
-      phoneNumber: phoneNumber.required(),
-      contactApplicantRelationship: Joi.string()
-        .required()
-        .valid(...PROJECT_RELATIONSHIP_LIST)
-    })
-  )
-  .allow(null);
+export const contactSchema = Joi.object({
+  contactId: uuidv4.allow(null),
+  userId: uuidv4.allow(null),
+  contactPreference: Joi.string().valid(...CONTACT_PREFERENCE_LIST),
+  email: email.required(),
+  firstName: Joi.string().required().max(255),
+  lastName: Joi.string().max(255).allow(null),
+  phoneNumber: phoneNumber.required(),
+  contactApplicantRelationship: Joi.string()
+    .required()
+    .valid(...PROJECT_RELATIONSHIP_LIST)
+});
+
+export const contacts = Joi.array().items(contactSchema).allow(null);
 
 const schema = {
   deleteContact: {

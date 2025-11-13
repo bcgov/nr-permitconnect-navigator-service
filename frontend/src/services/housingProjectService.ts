@@ -14,7 +14,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   createProject(data?: any) {
-    return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, data);
+    return appAxios().post(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, data);
   },
 
   /**
