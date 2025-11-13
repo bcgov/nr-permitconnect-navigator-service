@@ -523,6 +523,101 @@ export const TEST_PEACH_RECORD_1: PeachRecord = {
   on_hold_event_set: []
 };
 
+export const TEST_PEACH_RECORD_2: PeachRecord = {
+  transaction_id: '22222222-2222-4222-8222-222222222222',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-DECISION',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-03-01T12:00:00.000Z' },
+      process: {
+        code: 'ALLOWED',
+        code_display: 'Allowed',
+        code_set: ['APPLICATION', 'DECISION', 'ALLOWED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_ISSUED: PeachRecord = {
+  transaction_id: '55555555-5555-4555-8555-555555555555',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-ISSUED',
+  process_event_set: [
+    {
+      // NOTE: start_date only (no start_datetime) so we hit
+      // the piesEventToDate "else" branch.
+      event: { start_date: '2024-07-01' },
+      process: {
+        code: 'ISSUED',
+        code_display: 'Issued',
+        code_set: ['APPLICATION', 'ISSUANCE', 'ISSUED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
+  transaction_id: '33333333-3333-4333-8333-333333333333',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-REJECTED',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-04-01T00:00:00.000Z' },
+      process: {
+        code: 'TECH_REVIEW_COMMENT',
+        code_display: 'Technical Review',
+        code_set: ['APPLICATION', 'TECH_REVIEW_COMMENT', 'TECHNICAL_REVIEW'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-05-01T00:00:00.000Z' },
+      process: {
+        code: 'REJECTED',
+        code_display: 'Rejected',
+        code_set: ['APPLICATION', 'REJECTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
+  transaction_id: '44444444-4444-4444-8444-444444444444',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-UNMAPPED',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'SOME_FUTURE_STATUS',
+        code_display: 'Some future stage',
+        code_set: ['APPLICATION', 'SOME_FUTURE_STAGE', 'SOME_STATUS'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
 export const TEST_PERMIT_1: Permit = {
   permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
   permitTypeId: 1,

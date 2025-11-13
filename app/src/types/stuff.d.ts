@@ -376,6 +376,14 @@ export type ListPermitsOptions = {
   includeNotes?: boolean;
 } & Partial<IStamps>;
 
+export type PeachSummary = {
+  adjudicationDate?: Date;
+  stage: Code;
+  state: Code;
+  statusLastChanged: Date;
+  submittedDate?: Date;
+};
+
 export type PermitSearchParams = {
   permitId?: string[];
   activityId?: string[];
