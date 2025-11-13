@@ -626,10 +626,10 @@ export const TEST_PERMIT_1: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  state: PermitState.IN_PROGRESS,
+  state: PermitState.NONE,
   needed: PermitNeeded.YES,
-  stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date(),
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
   adjudicationDate: null,
   statusLastChanged: null,
   statusLastVerified: null,
@@ -638,7 +638,34 @@ export const TEST_PERMIT_1: Permit = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
+      permitTrackingId: 1,
+      trackingId: 'REC-123',
+      sourceSystemKindId: 1,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 1,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        kind: null,
+        description: null
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_2: Permit = {
@@ -649,16 +676,43 @@ export const TEST_PERMIT_2: Permit = {
   state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
   stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date(),
+  submittedDate: new Date('2024-01-05T00:00:00.000Z'),
   adjudicationDate: null,
-  statusLastChanged: null,
-  statusLastVerified: null,
+  statusLastChanged: new Date('2024-01-05T00:00:00.000Z'),
+  statusLastVerified: new Date('2024-01-05T00:00:00.000Z'),
   createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: 'fac00e1e-a68e-4fe0-a7bf-43ed3896c751',
+      permitTrackingId: 2,
+      trackingId: 'REC-XYZ',
+      sourceSystemKindId: 2,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 2,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        kind: null,
+        description: null
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_3: Permit = {
@@ -678,7 +732,55 @@ export const TEST_PERMIT_3: Permit = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '7530538d-4671-47fe-9b3f-31d70b6b72dc',
+      permitTrackingId: 3,
+      trackingId: 'REC-999',
+      sourceSystemKindId: 3,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 3,
+        sourceSystem: PeachIntegratedSystem.ATS,
+        kind: null,
+        description: null
+      }
+    }
+  ]
+};
+
+export const TEST_PERMIT_4: Permit = {
+  permitId: '11111111-2222-3333-4444-555555555555',
+  permitTypeId: 1,
+  activityId: 'ACTI1234',
+  issuedPermitId: null,
+  state: PermitState.NONE,
+  needed: PermitNeeded.YES,
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
+  adjudicationDate: null,
+  statusLastChanged: null,
+  statusLastVerified: null,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null,
+  permitTracking: []
 };
 
 export const TEST_PERMIT_NOTE_1: PermitNote = {

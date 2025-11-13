@@ -280,9 +280,16 @@ describe('createHousingProjectController', () => {
   });
 
   it('creates permits if they exist', async () => {
+    const permit1NoTracking = { ...TEST_PERMIT_1 };
+    delete permit1NoTracking.permitTracking;
+    const permit2NoTracking = { ...TEST_PERMIT_2 };
+    delete permit2NoTracking.permitTracking;
+    const permit3NoTracking = { ...TEST_PERMIT_3 };
+    delete permit3NoTracking.permitTracking;
+
     const req = {
       body: {
-        appliedPermits: [TEST_PERMIT_1, TEST_PERMIT_2],
+        appliedPermits: [permit1NoTracking, permit2NoTracking],
         investigatePermits: [TEST_PERMIT_3]
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -305,25 +312,56 @@ describe('createHousingProjectController', () => {
 
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...TEST_PERMIT_1,
+      ...permit1NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Application submission',
+      state: 'In progress',
+      needed: 'Yes',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...TEST_PERMIT_2,
+      ...permit2NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Application submission',
+      state: 'In progress',
+      needed: 'Yes',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...TEST_PERMIT_3,
+      ...permit3NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Pre-submission',
+      state: 'None',
+      needed: 'Under investigation',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      submittedDate: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
   });
@@ -687,9 +725,16 @@ describe('submitHousingProjectDraftController', () => {
   });
 
   it('creates permits if they exist', async () => {
+    const permit1NoTracking = { ...TEST_PERMIT_1 };
+    delete permit1NoTracking.permitTracking;
+    const permit2NoTracking = { ...TEST_PERMIT_2 };
+    delete permit2NoTracking.permitTracking;
+    const permit3NoTracking = { ...TEST_PERMIT_3 };
+    delete permit3NoTracking.permitTracking;
+
     const req = {
       body: {
-        appliedPermits: [TEST_PERMIT_1, TEST_PERMIT_2],
+        appliedPermits: [permit1NoTracking, permit2NoTracking],
         investigatePermits: [TEST_PERMIT_3]
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -713,25 +758,56 @@ describe('submitHousingProjectDraftController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...TEST_PERMIT_1,
+      ...permit1NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Application submission',
+      state: 'In progress',
+      needed: 'Yes',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...TEST_PERMIT_2,
+      ...permit2NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Application submission',
+      state: 'In progress',
+      needed: 'Yes',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...TEST_PERMIT_3,
+      ...permit3NoTracking,
+      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      stage: 'Pre-submission',
+      state: 'None',
+      needed: 'Under investigation',
+      statusLastChanged: null,
+      statusLastVerified: null,
+      issuedPermitId: null,
+      submittedDate: null,
+      adjudicationDate: null,
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date),
-      updatedBy: TEST_CURRENT_CONTEXT.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId,
+      deletedAt: null,
+      deletedBy: null
     });
     expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
   });
