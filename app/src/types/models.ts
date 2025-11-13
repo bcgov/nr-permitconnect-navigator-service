@@ -87,7 +87,7 @@ export type PermitNote = PermitNoteBase;
 
 const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
 export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
-export type PermitTracking = PermitTrackingBase;
+export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSystemKind | null };
 
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;
