@@ -1,3 +1,9 @@
+export enum PeachIntegratedSystem {
+  ATS = 'ITSM-5314',
+  WMA = 'ITSM-6197',
+  VFCBC = 'ITSM-6117'
+}
+
 export enum PeachTerminatedStage {
   REJECTED = 'REJECTED',
   WITHDRAWN = 'WITHDRAWN'
