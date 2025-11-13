@@ -20,6 +20,7 @@ import {
   HousingProjectIntake,
   Note,
   NoteHistory,
+  Record as PeachRecord,
   Permit,
   PermitNote,
   PermitType,
@@ -27,7 +28,7 @@ import {
 } from '../../../src/types';
 import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
 import { ProjectType } from '../../../src/utils/enums/electrification';
-import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
+import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 import {
   ApplicationStatus,
   ContactPreference,
@@ -499,6 +500,27 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   updatedAt: null,
   deletedBy: null,
   deletedAt: null
+};
+
+export const TEST_PEACH_RECORD_1: PeachRecord = {
+  transaction_id: '11111111-1111-4111-8111-111111111111',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-SUB',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-02-01T00:00:00.000Z' },
+      process: {
+        code: 'SUBMITTED',
+        code_display: 'Submitted',
+        code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
 };
 
 export const TEST_PERMIT_1: Permit = {
