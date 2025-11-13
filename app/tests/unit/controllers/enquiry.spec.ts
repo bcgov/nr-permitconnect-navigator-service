@@ -8,14 +8,22 @@ import {
   updateEnquiryController
 } from '../../../src/controllers/enquiry';
 import * as activityService from '../../../src/services/activity';
+import * as activityContactService from '../../../src/services/activityContact';
 import * as enquiryService from '../../../src/services/enquiry';
 import * as contactService from '../../../src/services/contact';
 import { Initiative } from '../../../src/utils/enums/application';
 
 import type { Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
-import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_ACTIVITY, TEST_ENQUIRY_1, TEST_ENQUIRY_INTAKE } from '../data';
+import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
+import {
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_ELECTRIFICATION_ACTIVITY,
+  TEST_ENQUIRY_1,
+  TEST_ENQUIRY_INTAKE
+} from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -42,6 +50,8 @@ TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
 describe('createEnquiryController', () => {
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
   const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
   const createEnquirySpy = jest.spyOn(enquiryService, 'createEnquiry');
 
@@ -52,6 +62,11 @@ describe('createEnquiryController', () => {
     };
 
     createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    createActivityContactSpy.mockResolvedValue({
+      activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      contactId: TEST_CONTACT_1.contactId
+    } as ActivityContact);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
     await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);
@@ -61,7 +76,20 @@ describe('createEnquiryController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
-    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_INTAKE.contact);
+    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
+      userId: [TEST_CURRENT_CONTEXT.userId]
+    });
+    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(createActivityContactSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      TEST_CONTACT_1.contactId,
+      ActivityContactRole.PRIMARY
+    );
+    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
+      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date), updatedBy: TEST_CURRENT_CONTEXT.userId }
+    ]);
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
