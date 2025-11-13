@@ -11,6 +11,7 @@ import { AskMyNavigator } from '@/components/common/icons';
 import NoteBanner from '@/components/note/NoteBanner.vue';
 import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
+import ProjectTeamTab from '@/components/projectCommon/submission/ProjectTeamTab.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
@@ -169,7 +170,14 @@ onBeforeMount(async () => {
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-file-circle-question"
             />
-            {{ t('i.common.projectView.tabRelatedEnquiries') }}
+            {{ t('e.common.projectView.tabRelatedEnquiries') }}
+          </Tab>
+          <Tab :value="2">
+            <font-awesome-icon
+              class="mr-2 ellipsis-icon"
+              icon="fa-solid fa-file-circle-question"
+            />
+            {{ t('e.common.projectView.tabProjectTeam') }}
           </Tab>
         </TabList>
         <TabPanels>
@@ -270,6 +278,12 @@ onBeforeMount(async () => {
               />
             </div>
           </TabPanel>
+          <TabPanel :value="2">
+            <ProjectTeamTab
+              v-if="projectStore.getProject"
+              :activity-id="projectStore.getProject.activityId"
+            />
+          </TabPanel>
         </TabPanels>
       </Tabs>
     </div>
@@ -283,11 +297,6 @@ onBeforeMount(async () => {
 <style scoped lang="scss">
 a {
   text-decoration: none;
-}
-
-.disclaimer-block {
-  outline: solid 0.063rem $app-grey;
-  border-radius: 0.5rem;
 }
 
 .ellipsis-icon {

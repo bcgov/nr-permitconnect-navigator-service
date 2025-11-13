@@ -298,11 +298,6 @@ a {
   text-decoration: none;
 }
 
-.disclaimer-block {
-  outline: solid 0.063rem $app-grey;
-  border-radius: 0.5rem;
-}
-
 .ellipsis-icon {
   cursor: pointer;
   width: 1.5rem;
