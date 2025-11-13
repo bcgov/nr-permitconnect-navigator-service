@@ -11,6 +11,7 @@ import { AskMyNavigator } from '@/components/common/icons';
 import NoteBanner from '@/components/note/NoteBanner.vue';
 import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
+import ProjectTeamTable from '@/components/projectCommon/submission/ProjectTeamTable.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
@@ -169,7 +170,14 @@ onBeforeMount(async () => {
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-file-circle-question"
             />
-            {{ t('i.common.projectView.tabRelatedEnquiries') }}
+            {{ t('e.common.projectView.tabRelatedEnquiries') }}
+          </Tab>
+          <Tab :value="2">
+            <font-awesome-icon
+              class="mr-2 ellipsis-icon"
+              icon="fa-solid fa-file-circle-question"
+            />
+            {{ t('e.common.projectView.tabProjectTeam') }}
           </Tab>
         </TabList>
         <TabPanels>
@@ -269,6 +277,26 @@ onBeforeMount(async () => {
                 :project-id="projectId"
               />
             </div>
+          </TabPanel>
+          <TabPanel :value="2">
+            <div class="flex flex-row disclaimer-block p-8 mt-4 mb-8">
+              <div class="basis-5/6">
+                {{ t('e.common.projectView.projectTeamDesc') }}
+              </div>
+              <div class="basis-1/6">
+                <div class="flex justify-center">
+                  <Button
+                    :label="t('e.common.projectView.addUserBtn')"
+                    icon="pi pi-plus"
+                    outlined
+                  />
+                </div>
+              </div>
+            </div>
+            <ProjectTeamTable
+              v-if="projectStore.getProject"
+              :activity-id="projectStore.getProject?.activityId"
+            />
           </TabPanel>
         </TabPanels>
       </Tabs>

@@ -4,6 +4,7 @@ import type { IStamps } from '@/interfaces';
 export type ActivityContact = {
   activityId: string;
   contactId: string;
+  role: string; // TODO: Enum
 
   // Joined
   contact?: Contact;

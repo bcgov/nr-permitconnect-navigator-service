@@ -49,6 +49,7 @@
         "updateHistory": "Update history"
       },
       "projectView": {
+        "addUserBtn": "Add user",
         "agency": "Agency",
         "askMyNavigator": "Ask my Navigator",
         "completedAuths": "Completed authorizations",
@@ -63,6 +64,7 @@
         "noUpdates": "No updates at the moment.",
         "notNeeded": "Not needed",
         "ongoingAuths": "Ongoing authorizations",
+        "projectTeamDesc": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
         "rangeSeparator": "of",
         "requiredAuths": "Potentially required authorizations",
         "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no new authorization is needed at this time.",
@@ -72,6 +74,7 @@
         "statusNotVerified": "This status has not yet been verified by Navigators",
         "submittedDate": "Submitted date",
         "tabAuthorizations": "Authorizations",
+        "tabProjectTeam": "Project team",
         "tabRelatedEnquiries": "Related enquiries",
         "toastEnquiryFailed": "Failed to submit enquiry",
         "toastNoteHistoryLoadFailed": "Unable to load notes for this project, please try again later",
