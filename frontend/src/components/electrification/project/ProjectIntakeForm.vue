@@ -18,10 +18,10 @@ import {
   electrificationProjectService,
   externalApiService
 } from '@/services';
-import { useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
+import { useAppStore, useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
-import { omit, setEmptyStringsToNull } from '@/utils/utils';
+import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
@@ -83,12 +83,14 @@ async function emailConfirmation(actId: string, subId: string, forProjectSubmiss
     const configCC = getConfig.value.ches?.submission?.cc;
     const applicantName = formRef.value?.values.contacts.contactFirstName;
     const applicantEmail = formRef.value?.values.contacts.contactEmail;
+    const initiative = toTitleCase(useAppStore().getInitiative);
     const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
     let body: string;
 
     if (forProjectSubmission) {
       body = confirmationTemplateElectrificationSubmission({
         '{{ contactName }}': applicantName,
+        '{{ initiative }}': initiative,
         '{{ activityId }}': actId,
         '{{ projectId }}': subId
       });
