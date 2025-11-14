@@ -124,7 +124,7 @@ const routes: Array<RouteRecordRaw> = [
               {
                 path: 'permit/:permitId',
                 component: () => import('@/views/GenericView.vue'),
-                meta: { dynamicBreadcrumb: 'permit' },
+                meta: { dynamicBreadcrumb: 'authorization' },
                 children: [
                   {
                     path: '',
