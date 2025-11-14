@@ -67,18 +67,10 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
           return '...Loading';
         }
       }
-      case 'permit': {
-        const permit = getPermit;
-        if (permit.value) {
-          return permit.value.permitType.name;
-        } else {
-          return '...Loading';
-        }
-      }
       case 'authorization': {
-        const permit = getPermit;
-        if (permit.value) {
-          return permit.value.permitType.name;
+        const authorization = getPermit;
+        if (authorization.value) {
+          return authorization.value.permitType.name;
         } else {
           return 'Add authorization';
         }

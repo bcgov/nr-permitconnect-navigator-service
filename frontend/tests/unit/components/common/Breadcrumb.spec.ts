@@ -312,12 +312,12 @@ describe('Breadcrumb.vue', () => {
     expect(links[0]!.text()).toBe(`Enquiry ${testEnquiry.activityId}`.substring(0, 10) + '...');
   });
 
-  test('renders dynamic "permit" breadcrumb (last item)', async () => {
+  test('renders dynamic "authorization" breadcrumb (last item)', async () => {
     mockRoute = {
       meta: { hideBreadcrumb: false },
       matched: [
         { meta: { dynamicBreadcrumb: 'project' }, name: 'project', path: '/housing/project/456' },
-        { meta: { dynamicBreadcrumb: 'permit' }, name: 'permit', path: '/housing/project/456/permit/123' }
+        { meta: { dynamicBreadcrumb: 'authorization' }, name: 'permit', path: '/housing/project/456/permit/123' }
       ]
     };
 
@@ -333,11 +333,11 @@ describe('Breadcrumb.vue', () => {
     expect(currentSpans[0]!.text()).toBe(testPermit.permitType.name);
   });
 
-  test('renders dynamic "permit" breadcrumb as link with truncation (not last item)', async () => {
+  test('renders dynamic "authorization" breadcrumb as link with truncation (not last item)', async () => {
     mockRoute = {
       meta: { hideBreadcrumb: false },
       matched: [
-        { meta: { dynamicBreadcrumb: 'permit' }, name: 'permit', path: '/housing/permit/123' },
+        { meta: { dynamicBreadcrumb: 'authorization' }, name: 'authorization', path: '/housing/authorization/123' },
         { meta: { breadcrumb: 'Last' }, name: 'last', path: '/last' }
       ]
     };
