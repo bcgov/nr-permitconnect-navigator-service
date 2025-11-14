@@ -376,6 +376,11 @@ export type ListPermitsOptions = {
   includeNotes?: boolean;
 } & Partial<IStamps>;
 
+export type PeachPermitSearchParameters = {
+  permitTrackingId: string;
+  sourceSystem: string;
+};
+
 export type StatisticsFilters = {
   dateFrom: string;
   dateTo: string;

@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { ListPermitsOptions, Permit } from '@/types';
+import type { ListPermitsOptions, PeachPermitSearchParameters, Permit } from '@/types';
 import type { Initiative } from '@/utils/enums/application';
 
 const PATH = 'permit';
@@ -13,6 +13,16 @@ export default {
    */
   deletePermit(permitId: string) {
     return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${permitId}`);
+  },
+
+  /**
+   * @function getPeachData
+   * @returns {Promise} An axios response
+   */
+  getPeachData(params: PeachPermitSearchParameters) {
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/peach`, {
+      params: params
+    });
   },
 
   /**

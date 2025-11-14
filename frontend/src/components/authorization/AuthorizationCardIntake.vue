@@ -18,7 +18,7 @@ const { editable } = defineProps<{
 }>();
 
 // Emits
-const emit = defineEmits(['update:uncheckShownToProponent']);
+const emit = defineEmits(['update:uncheckShownToProponent', 'update:peachIntegrated']);
 
 // Composables
 const { locale, t } = useI18n();
@@ -68,6 +68,7 @@ onBeforeMount(async () => {
         :options="getPermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
         :disabled="!editable"
+        @on-change="emit('update:peachIntegrated')"
       />
       <div class="mt-5 mb-3 font-bold text-[var(--p-bcblue-900)]">
         {{ t('authorization.authorizationCardIntake.trackingIds') }}

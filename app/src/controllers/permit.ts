@@ -9,13 +9,20 @@ import { deleteManyPermitTracking, upsertPermitTracking } from '../services/perm
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitTracking, PermitType } from '../types';
+import type { ListPermitsOptions, PeachPermitSearchParameters, Permit, PermitTracking, PermitType } from '../types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     await deletePermit(tx, req.params.permitId);
   });
   res.status(204).end();
+};
+
+export const getPeachController = async (
+  req: Request<never, never, never, PeachPermitSearchParameters>,
+  res: Response
+) => {
+  res.status(200).json(false);
 };
 
 export const getPermitController = async (req: Request<{ permitId: string }>, res: Response) => {

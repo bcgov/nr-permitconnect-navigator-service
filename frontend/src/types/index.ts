@@ -27,6 +27,7 @@ export type { Note } from './Note';
 export type { NoteHistory } from './NoteHistory';
 export type { Pagination } from './Pagination';
 export type { Permission } from './Permission';
+export type { PeachPermitSearchParameters } from './PeachPermitSearchParameters';
 export type { Permit } from './Permit';
 export type { PermitNote } from './PermitNote';
 export type { PermitForm } from './PermitForm';

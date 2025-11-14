@@ -3,6 +3,7 @@ import express from 'express';
 import permitNote from './permitNote';
 import {
   deletePermitController,
+  getPeachController,
   getPermitController,
   getPermitTypesController,
   listPermitsController,
@@ -33,6 +34,9 @@ router.delete(
   permitValidator.deletePermit,
   deletePermitController
 );
+
+/** Search peach */
+router.get('/peach', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.getPeach, getPeachController);
 
 /** Get a list of permit types */
 router.get('/types', hasAuthorization(Resource.PERMIT, Action.READ), getPermitTypesController);

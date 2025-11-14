@@ -36,6 +36,12 @@ const schema = {
       permitId: uuidv4.required()
     })
   },
+  getPeach: {
+    query: Joi.object({
+      sourceSystem: Joi.string().required(),
+      trackingId: Joi.string().required()
+    })
+  },
   getPermit: {
     params: Joi.object({
       permitId: uuidv4.required()
@@ -54,6 +60,7 @@ const schema = {
 
 export default {
   deletePermit: validate(schema.deletePermit),
+  getPeach: validate(schema.getPeach),
   getPermit: validate(schema.getPermit),
   listPermits: validate(schema.listPermits),
   upsertPermit: validate(schema.upsertPermit)

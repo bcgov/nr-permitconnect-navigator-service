@@ -10,10 +10,15 @@ import AuthorizationCardIntake from '@/components/authorization/AuthorizationCar
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { FormNavigationGuard } from '@/components/form';
-import { Button, useConfirm, useToast } from '@/lib/primevue';
+import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { permitService, permitNoteService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
-import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
+import {
+  PEACH_INTEGRATED_BUSINESS_DOMAIN,
+  PERMIT_NEEDED_LIST,
+  PERMIT_STAGE_LIST,
+  PERMIT_STATE_LIST
+} from '@/utils/constants/permit';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
@@ -49,6 +54,7 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const expandPanel: Ref<boolean> = ref(false);
 const updatedBy: Ref<User | undefined> = ref(undefined);
 const disableFormNavigationGuard: Ref<boolean> = ref(false);
+const noPeachDataModalVisible = defineModel<boolean>('visible');
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
@@ -71,6 +77,16 @@ async function onSubmit(data: any) {
   const permitSubmitData = setEmptyStringsToNull(permitData);
 
   try {
+    if (PEACH_INTEGRATED_BUSINESS_DOMAIN.includes(authorizationType.businessDomain)) {
+      const peachIntegratedResponse = await permitService.getPeachData({
+        sourceSystem: 'PEACH',
+        trackingId: '123'
+      });
+      if (!peachIntegratedResponse.data) {
+        noPeachDataModalVisible.value = true;
+        return;
+      }
+    }
     const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
 
     // Prevent creating notes and sending an update email if the above call fails or if note is empty
@@ -94,6 +110,7 @@ async function onSubmit(data: any) {
         initialTab: '2'
       }
     });
+    // }
   } catch (e: any) {
     toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
   }
@@ -277,7 +294,6 @@ onBeforeMount(async () => {
     </h3>
 
     <AuthorizationCardIntake
-      initial-form-values=""
       :editable="editable"
       class="mt-6"
       @update:uncheck-shown-to-proponent="
@@ -289,10 +305,16 @@ onBeforeMount(async () => {
           });
         }
       "
+      @update:peach-integrated="
+        () => {
+          if (PEACH_INTEGRATED_BUSINESS_DOMAIN.includes(values.authorizationType.businessDomain))
+            setFieldValue('needed', PermitNeeded.YES);
+        }
+      "
     />
     <AuthorizationStatusUpdatesCard
-      initial-form-values=""
       :editable="editable"
+      :peach-integrated="PEACH_INTEGRATED_BUSINESS_DOMAIN.includes(values?.authorizationType?.businessDomain)"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date().toISOString())"
     />
@@ -300,7 +322,11 @@ onBeforeMount(async () => {
       <div>
         <Button
           class="mr-2"
-          :label="t('authorization.authorizationForm.publish')"
+          :label="
+            PEACH_INTEGRATED_BUSINESS_DOMAIN.includes(values?.authorizationType?.businessDomain)
+              ? t('authorization.authorizationForm.automatePublish')
+              : t('authorization.authorizationForm.publish')
+          "
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
@@ -357,12 +383,39 @@ onBeforeMount(async () => {
     <h4 class="my-10">{{ t('authorization.authorizationForm.updateHistory') }}</h4>
     <AuthorizationUpdateHistory
       v-if="authorization?.permitId"
-      initial-form-values=""
       :editable="true"
       class="mt-6"
       :authorization-notes="authorization?.permitNote"
     />
   </Form>
+  <Dialog
+    v-model:visible="noPeachDataModalVisible"
+    :draggable="false"
+    :modal="true"
+    class="app-info-dialog w-max"
+  >
+    <template #header>
+      <span class="p-dialog-title app-primary-color">{{ t('authorization.authorizationForm.noRecordsFound') }}</span>
+    </template>
+    <div>
+      <div>{{ t('authorization.authorizationForm.noPeachDataMsgl1') }}</div>
+      <ul class="list-disc px-6">
+        <li>
+          {{ t('authorization.authorizationForm.noPeachDataMsgl2') }}
+        </li>
+        <li>
+          {{ t('authorization.authorizationForm.noPeachDataMsgl3') }}
+        </li>
+      </ul>
+      <div class="flex justify-end mt-6">
+        <Button
+          class="p-button-solid mr-4"
+          :label="t('authorization.authorizationForm.confirm')"
+          @click="noPeachDataModalVisible = false"
+        />
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <style lang="scss" scoped>
