@@ -61,7 +61,7 @@ export const createIdp = async (tx: PrismaTransactionClient, idp: string): Promi
     createdBy: SYSTEM_ID
   };
 
-  const response = tx.identity_provider.create({ data: obj });
+  const response = await tx.identity_provider.create({ data: obj });
 
   return response;
 };
@@ -139,7 +139,7 @@ export const getCurrentUserId = async (
  * @returns A Promise that resolves to an array of identity providers
  */
 export const listIdps = async (tx: PrismaTransactionClient, active: boolean): Promise<IdentityProvider[]> => {
-  return tx.identity_provider.findMany({
+  return await tx.identity_provider.findMany({
     where: {
       active: active
     }

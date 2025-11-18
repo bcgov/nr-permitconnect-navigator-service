@@ -35,7 +35,7 @@ import {
   IntakeStatus,
   SubmissionType
 } from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+import { getCurrentUsername, isTruthy, omit } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
@@ -288,9 +288,7 @@ export const createHousingProjectController = async (
     // Create each permit and tracking IDs
     await Promise.all(
       appliedPermits.map(async (p: Permit) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { permitTracking, ...rest } = p;
-        await upsertPermit(tx, rest);
+        await upsertPermit(tx, omit(p, ['permitTracking']));
       })
     );
     await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
@@ -396,9 +394,7 @@ export const submitHousingProjectDraftController = async (
       // Create each permit and tracking IDs
       await Promise.all(
         appliedPermits.map(async (p: Permit) => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          const { permitTracking, ...rest } = p;
-          await upsertPermit(tx, rest);
+          await upsertPermit(tx, omit(p, ['permitTracking']));
         })
       );
       await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));

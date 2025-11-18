@@ -6,19 +6,20 @@ import {
   deleteElectrificationProjectDraftController,
   emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
-  getElectrificationProjectDraftController,
-  getElectrificationProjectDraftsController,
   getElectrificationProjectController,
   getElectrificationProjectsController,
+  getElectrificationProjectDraftController,
+  getElectrificationProjectDraftsController,
   getElectrificationProjectStatisticsController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
-  upsertElectrificationProjectDraftController,
-  updateElectrificationProjectController
+  updateElectrificationProjectController,
+  upsertElectrificationProjectDraftController
 } from '../../controllers/electrificationProject';
-import { filterActivityResponseByScope, hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+import { filterActivityResponseByScope } from '../../middleware/responseFiltering';
 import { Action, Resource } from '../../utils/enums/application';
 import { electrificationProjectValidator } from '../../validators';
 

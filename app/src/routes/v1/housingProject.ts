@@ -6,19 +6,20 @@ import {
   deleteHousingProjectDraftController,
   emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
-  getHousingProjectDraftController,
-  getHousingProjectDraftsController,
   getHousingProjectController,
   getHousingProjectsController,
+  getHousingProjectDraftController,
+  getHousingProjectDraftsController,
   getHousingProjectStatisticsController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
-  upsertHousingProjectDraftController,
-  updateHousingProjectController
+  updateHousingProjectController,
+  upsertHousingProjectDraftController
 } from '../../controllers/housingProject';
-import { filterActivityResponseByScope, hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+import { filterActivityResponseByScope } from '../../middleware/responseFiltering';
 import { Action, Resource } from '../../utils/enums/application';
 import { housingProjectValidator } from '../../validators';
 
