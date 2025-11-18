@@ -1,4 +1,3 @@
-import prisma from '../db/dataConnection';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { listActivityContacts } from '../services/activityContact';
 import { searchContacts } from '../services/contact';
@@ -23,7 +22,7 @@ import { getCurrentSubject } from '../utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Activity, CurrentAuthorization } from '../types';
+import type { CurrentAuthorization } from '../types';
 
 /**
  * Obtains the groups for the current users identity
@@ -180,44 +179,4 @@ export const hasAccess = (param: string) => {
     // Continue middleware
     next();
   };
-};
-
-/**
- * Filters the response json based on the scope of the current authorization
- * Filtering is based on the current authorizations `contactId` compared against the outgoing
- * `activityContact` data
- * @returns Express middleware function
- * @throws The error encountered upon failure
- */
-export const filterActivityResponseByScope = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // Store the original res.json function
-    const originalJson = res.json;
-
-    const contact = await searchContacts(prisma, { userId: [req.currentContext.userId as string] });
-
-    // Override res.json to intercept the response data
-    type unknownType = unknown & { activity?: Activity };
-    res.json = function (data: unknownType | unknownType[]) {
-      let filtered = data;
-
-      // Check scope and filter as necessary
-      if (req.currentAuthorization?.attributes.includes('scope:self')) {
-        if (Array.isArray(data)) {
-          filtered = data.filter((x: unknown & { activity?: Activity }) =>
-            x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)
-          );
-        } else {
-          if (!data.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)) filtered = {};
-        }
-      }
-
-      return originalJson.call(this, filtered);
-    };
-
-    next();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
-  }
 };

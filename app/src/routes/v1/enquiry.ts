@@ -9,9 +9,10 @@ import {
   searchEnquiriesController,
   updateEnquiryController
 } from '../../controllers/enquiry';
-import { filterActivityResponseByScope, hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+import { filterActivityResponseByScope } from '../../middleware/responseFiltering';
 import { Action, Resource } from '../../utils/enums/application';
 import { enquiryValidator } from '../../validators';
 
