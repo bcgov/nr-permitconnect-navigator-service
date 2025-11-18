@@ -54,7 +54,7 @@ import {
   housingProjectService,
   permitService
 } from '@/services';
-import { useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
+import { useAppStore, useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
@@ -62,7 +62,7 @@ import { ProjectApplicant } from '@/utils/enums/housing';
 import { PermitNeeded, PermitStatus } from '@/utils/enums/permit';
 import { IntakeFormCategory, SubmissionType } from '@/utils/enums/projectCommon';
 import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
-import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
+import { getHTMLElement, omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
@@ -132,26 +132,28 @@ function confirmSubmit(data: GenericObject) {
   });
 }
 
-async function emailConfirmation(actId: string, subId: string, forProjectSubmission: boolean) {
+async function emailConfirmation(actId: string, projectId: string, forProjectSubmission: boolean) {
   try {
     const configCC = getConfig.value.ches?.submission?.cc;
     const applicantName = formRef.value?.values.contacts.contactFirstName;
     const applicantEmail = formRef.value?.values.contacts.contactEmail;
+    const initiative = toTitleCase(useAppStore().getInitiative);
     const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
     let body: string;
 
     if (forProjectSubmission) {
       body = confirmationTemplateHousingSubmission({
         '{{ contactName }}': applicantName,
+        '{{ initiative }}': initiative,
         '{{ activityId }}': actId,
-        '{{ housingProjectId }}': subId
+        '{{ projectId }}': projectId
       });
     } else {
       body = confirmationTemplateEnquiry({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
         '{{ enquiryDescription }}': t('submissionIntakeForm.assistanceMessage'),
-        '{{ enquiryId }}': subId
+        '{{ enquiryId }}': projectId
       });
     }
     const emailData = {

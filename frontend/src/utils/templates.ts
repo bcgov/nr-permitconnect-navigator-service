@@ -75,7 +75,7 @@ export const confirmationTemplateElectrificationSubmission = (replaceConfig: {
     'Dear {{ contactName }},<br><br>' +
     '<b>Project ID: {{ activityId }}</b><br><br>' +
     // eslint-disable-next-line max-len
-    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
+    'Thank you for registering your {{ initiative }} project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
     'View your project submission <a href="' +
     PCNS_URL +
     '/e/electrification/project/{{ projectId }}/intake">here<a>.<br><br>' +
@@ -103,10 +103,10 @@ export const confirmationTemplateHousingSubmission = (replaceConfig: {
     'Dear {{ contactName }},<br><br>' +
     '<b>Project ID: {{ activityId }}</b><br><br>' +
     // eslint-disable-next-line max-len
-    'Thank you for registering your project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
+    'Thank you for registering your {{ initiative }} project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
     'View your project submission <a href="' +
     PCNS_URL +
-    '/e/housing/project/{{ submissionId }}/intake">here<a>.<br><br>' +
+    '/e/housing/project/{{ projectId }}/intake">here<a>.<br><br>' +
     'Regards,<br><br>' +
     '<a href="' +
     PCNS_URL +
