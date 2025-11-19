@@ -611,14 +611,31 @@ export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
     {
       event: { start_datetime: '2024-06-01T00:00:00.000Z' },
       process: {
-        code: 'SOME_FUTURE_STATUS',
-        code_display: 'Some future stage',
-        code_set: ['APPLICATION', 'SOME_FUTURE_STAGE', 'SOME_STATUS'],
+        code: 'PRE_APPLICATION',
+        code_display: 'Pre-Application',
+        code_set: ['APPLICATION', 'PRE_APPLICATION'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'APPLICATION',
+        code_display: 'Application',
+        code_set: ['APPLICATION'],
         code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
       }
     }
   ],
   on_hold_event_set: []
+};
+
+export const TEST_PEACH_SUMMARY = {
+  stage: PermitStage.APPLICATION_SUBMISSION,
+  state: PermitState.INITIAL_REVIEW,
+  submittedDate: new Date('2024-02-01T00:00:00.000Z'),
+  adjudicationDate: undefined,
+  statusLastChanged: new Date('2024-02-01T00:00:00.000Z')
 };
 
 export const TEST_PERMIT_1: Permit = {
@@ -659,10 +676,10 @@ export const TEST_PERMIT_1: Permit = {
         updatedAt: null,
         deletedBy: null,
         deletedAt: null,
-        sourceSystemKindId: 1,
+        sourceSystemKindId: 12,
         sourceSystem: PeachIntegratedSystem.VFCBC,
         kind: null,
-        description: null
+        description: 'Tracking Number'
       }
     }
   ]
@@ -706,10 +723,10 @@ export const TEST_PERMIT_2: Permit = {
         updatedAt: null,
         deletedBy: null,
         deletedAt: null,
-        sourceSystemKindId: 2,
+        sourceSystemKindId: 12,
         sourceSystem: PeachIntegratedSystem.VFCBC,
         kind: null,
-        description: null
+        description: 'Tracking Number'
       }
     }
   ]
@@ -753,10 +770,10 @@ export const TEST_PERMIT_3: Permit = {
         updatedAt: null,
         deletedBy: null,
         deletedAt: null,
-        sourceSystemKindId: 3,
-        sourceSystem: PeachIntegratedSystem.ATS,
+        sourceSystemKindId: 22,
+        sourceSystem: 'ITSM-5314', // ATS
         kind: null,
-        description: null
+        description: 'Project Number'
       }
     }
   ]
