@@ -130,7 +130,7 @@ const routes: Array<RouteRecordRaw> = [
                     component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
-                    meta: { dynamicBreadcrumb: 'permit' }
+                    meta: { dynamicBreadcrumb: 'authorization' }
                   }
                 ]
               }
