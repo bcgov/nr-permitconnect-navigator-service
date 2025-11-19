@@ -168,7 +168,7 @@ export type CurrentContext = {
 };
 
 export type ElectrificationProjectIntake = {
-  contacts?: Array<Contact>;
+  contact: Contact;
   draftId?: string;
   project: {
     activityId?: string;
@@ -247,7 +247,7 @@ export type EnquiryIntake = {
     enquiryDescription?: string;
   };
 
-  contacts: Array<Contact>;
+  contact: Contact;
 };
 
 export type EnquirySearchParameters = {
@@ -318,7 +318,7 @@ export type HousingProjectIntake = {
 
   appliedPermits: Permit[];
   investigatePermits: Permit[];
-  contacts: Contact[];
+  contact: Contact;
 };
 
 export type HousingProjectSearchParameters = {

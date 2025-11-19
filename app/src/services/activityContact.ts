@@ -1,58 +1,65 @@
+import { ActivityContactRole } from '../utils/enums/projectCommon';
+
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ActivityContact, Contact } from '../types';
+import type { ActivityContact } from '../types';
 
 /**
- * Deletes activity_contact records that do not match the provided activityId and contacts
+ * Create an activity_contact record
  * @param tx Prisma transaction client
- * @param activityId The activity ID the contacts are associated to
- * @param contacts Array of contacts to keep
+ * @param activityId The activity ID the contact is associated to
+ * @param contactId The contact ID to associate
+ * @param role The contacts role
+ * @returns A Promise that resolves to the created resource
  */
-export const deleteUnmatchedActivityContacts = async (
+export const createActivityContact = async (
   tx: PrismaTransactionClient,
   activityId: string,
-  contacts: Array<Contact>
+  contactId: string,
+  role: ActivityContactRole
+): Promise<ActivityContact> => {
+  return await tx.activity_contact.create({
+    data: {
+      activityId,
+      contactId,
+      role
+    }
+  });
+};
+
+/**
+ * Delete an activity_contact record
+ * @param tx Prisma transaction client
+ * @param activityId The activity ID the contact is associated to
+ * @param contactId The contact ID to remove
+ */
+export const deleteActivityContact = async (
+  tx: PrismaTransactionClient,
+  activityId: string,
+  contactId: string
 ): Promise<void> => {
-  const requestContactIds = contacts.map((c) => c.contactId);
-  await tx.activity_contact.deleteMany({
+  await tx.activity_contact.delete({
     where: {
-      activityId: activityId,
-      contactId: {
-        notIn: requestContactIds
+      activityId_contactId: {
+        activityId,
+        contactId
       }
     }
   });
 };
 
 /**
- * Upserts activity_contact records for the given activityId and contacts
+ * Gets activity_contact records that match the provided activityId
  * @param tx Prisma transaction client
- * @param activityId The activity ID the contacts are associated to
- * @param contacts Array of contacts to create/update
- * @returns A Promise that resolves to an array of the created/updated ActivityContacts
+ * @param activityId The activity ID
+ * @returns A Promise that resolves to an array of ActivityContacts
  */
-export const upsertActivityContacts = async (
+export const listActivityContacts = async (
   tx: PrismaTransactionClient,
-  activityId: string,
-  contacts: Array<Contact>
+  activityId: string
 ): Promise<ActivityContact[]> => {
-  return await Promise.all(
-    contacts.map(async (x: Contact) => {
-      return await tx.activity_contact.upsert({
-        where: {
-          activityId_contactId: {
-            activityId: activityId,
-            contactId: x.contactId
-          }
-        },
-        update: {
-          activityId: activityId,
-          contactId: x.contactId
-        },
-        create: {
-          activityId: activityId,
-          contactId: x.contactId
-        }
-      });
-    })
-  );
+  return await tx.activity_contact.findMany({
+    where: {
+      activityId: activityId
+    }
+  });
 };

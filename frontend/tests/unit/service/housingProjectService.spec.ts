@@ -43,6 +43,7 @@ const TEST_EMAIL = {
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
 const patchSpy = vi.fn();
+const postSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('vue-router', () => ({
@@ -56,6 +57,7 @@ vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
   patch: patchSpy,
+  post: postSpy,
   put: putSpy
 } as any);
 
@@ -87,15 +89,15 @@ describe('housingProjectService', () => {
     it('calls correct endpoint', () => {
       housingProjectService.createProject();
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, undefined);
+      expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, undefined);
     });
 
     it('passes parameters', () => {
       housingProjectService.createProject({ foo: 'bar' });
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, { foo: 'bar' });
+      expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, { foo: 'bar' });
     });
   });
 
