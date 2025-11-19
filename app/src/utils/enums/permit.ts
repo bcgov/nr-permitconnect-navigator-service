@@ -1,5 +1,5 @@
 export enum PeachIntegratedSystem {
-  ATS = 'ITSM-5314',
+  TANTALIS = 'ITSM-6072',
   WMA = 'ITSM-6197',
   VFCBC = 'ITSM-6117'
 }

@@ -154,6 +154,23 @@ export function mixedQueryToArray(param: string | string[] | undefined): string[
 }
 
 /**
+ * @function omit
+ * Omits the given set of keys from the given object
+ * @param {object} data The object to copy and manipulate
+ * @param {string[]} keys Array of keys to remove
+ * @returns {object} A new object with the given keys removed
+ */
+export function omit<Data extends object, Keys extends keyof Data>(data: Data, keys: Keys[]): Omit<Data, Keys> {
+  const result = { ...data };
+
+  for (const key of keys) {
+    delete result[key];
+  }
+
+  return result as Omit<Data, Keys>;
+}
+
+/**
  * Converts a comma separated value string into an array of string values
  * @param value The CSV string to parse
  * @returns An array of string values, or `value` if it is not a string

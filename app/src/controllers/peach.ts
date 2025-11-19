@@ -4,16 +4,37 @@ import { generateUpdateStamps } from '../db/utils/utils';
 import { parsePeachRecords, summarizeRecord } from '../parsers/peachParser';
 import { getPeachRecord } from '../services/peach';
 import { searchPermits, upsertPermit } from '../services/permit';
-import { compareDates } from '../utils';
+import { compareDates, omit } from '../utils';
 import { PEACH_INTEGRATED_SYSTEMS } from '../utils/constants/permit';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { PeachSummary, Permit, Record as PeachRecord } from '../types';
+import type { PeachSummary, Permit, Record as PeachRecord, PermitTracking } from '../types';
 
 const log = getLogger(module.filename);
 
+/**
+ * Tracking priority for which tracking ids to use, priority is inferred by order of array
+ */
+const PEACH_TRACKING_PRIORITY = [
+  {
+    sourceSystem: PeachIntegratedSystem.TANTALIS,
+    trackingName: 'Disposition Transaction ID'
+  },
+  {
+    sourceSystem: PeachIntegratedSystem.WMA,
+    trackingName: 'Job Number'
+  },
+  {
+    sourceSystem: PeachIntegratedSystem.VFCBC,
+    trackingName: 'Tracking Number'
+  }
+];
+
+/**
+ * Fetches PEACH data for permit tracking
+ */
 export const getPeachRecordController = async (req: Request<{ recordId: string; systemId: string }>, res: Response) => {
   const response = await getPeachRecord(req.params.recordId, req.params.systemId);
 
@@ -22,6 +43,9 @@ export const getPeachRecordController = async (req: Request<{ recordId: string; 
   res.status(200).json(peachSummary);
 };
 
+/**
+ * Syncs PEACH data for permit tracking to PCNS
+ */
 export const syncPeachRecords = async () => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -31,73 +55,78 @@ export const syncPeachRecords = async () => {
       includePermitTracking: true
     });
 
-    // Find permits that have a permit tracking from the vFCBC system
+    // Find permits that have a permit tracking from a PEACH integrataed system
     for (const permit of peachIntegratedPermits) {
       const permitTrackings = permit.permitTracking ?? [];
 
       if (permitTrackings.length === 0) continue;
 
-      // TODO-RELEASE: Ensure that we only going with vFCBC tracking ids
-      // For now just grabbing status info from vFCBC system but may need code below if things change
-      // Filter out trackings that aren't peach integrated
-      // const integratedTrackings = permitTrackings.filter((pt) =>
-      //   PEACH_INTEGRATED_SYSTEMS.includes(pt.sourceSystemKind?.sourceSystem as PeachIntegratedSystem)
-      // );
-      // // Prioritize certain systems over other and get the tracked permit
-      // const permitTracking =
-      //   integratedTrackings.find((it) => {
-      //     const sourceSystem = it.sourceSystemKind?.sourceSystem as PeachIntegratedSystem | undefined;
-      //     return sourceSystem === PeachIntegratedSystem.ATS || sourceSystem === PeachIntegratedSystem.WMA;
-      //   }) ?? integratedTrackings[0];
+      let permitTracking: PermitTracking | undefined;
+      let priorityIndex = PEACH_TRACKING_PRIORITY.length;
 
-      const permitTracking = permitTrackings.find((it) => {
-        const sourceSystem = it.sourceSystemKind?.sourceSystem as PeachIntegratedSystem | undefined;
-        return sourceSystem === PeachIntegratedSystem.VFCBC;
-      });
+      // Prioritize which PEACH integrated permit tracking to use
+      for (const pt of permitTrackings) {
+        const sourceSystem = pt.sourceSystemKind?.sourceSystem;
+        const trackingName = pt.sourceSystemKind?.description;
+        if (!sourceSystem) continue;
+
+        const index = PEACH_TRACKING_PRIORITY.findIndex((ptp) => ptp.sourceSystem === sourceSystem);
+        if (index === -1) continue;
+
+        if (index > priorityIndex) continue;
+
+        const trackingPriority = PEACH_TRACKING_PRIORITY[index];
+        if (trackingPriority.trackingName && trackingPriority.trackingName !== trackingName) continue;
+
+        permitTracking = pt;
+        priorityIndex = index;
+      }
 
       if (!permitTracking) continue;
 
       const recordId = permitTracking.trackingId;
-      const systemId = permitTracking.sourceSystemKind?.sourceSystem;
+      const systemId = permitTracking.sourceSystemKind!.sourceSystem;
 
-      if (recordId && systemId)
+      if (recordId && systemId) {
         systemRecordPermits.push({
           recordId,
           systemId,
           permit: permit
         });
+      }
     }
   });
 
+  // TODO: May need rate limiting in the future
   const results = await Promise.allSettled(
     systemRecordPermits.map((srp) => getPeachRecord(srp.recordId, srp.systemId))
   );
 
   const records: PeachRecord[] = [];
   const failures: { index: number; reason: unknown }[] = [];
-  results.forEach((r, i) => {
-    if (r.status === 'fulfilled') records.push(r.value);
-    else failures.push({ index: i, reason: r.reason });
+  results.forEach((result, index) => {
+    if (result.status === 'fulfilled') records.push(result.value);
+    else failures.push({ index: index, reason: result.reason });
   });
 
-  log.info('PEACH fetch summary', {
+  log.verbose('PEACH fetch summary', {
     total: results.length,
     fetched: records.length,
     failed: failures.length
   });
 
   if (failures.length) {
-    for (const f of failures) {
-      const { recordId, systemId } = systemRecordPermits[f.index];
-      log.warn('PEACH fetch failed', { recordId, systemId, error: f.reason });
+    for (const failure of failures) {
+      const { recordId, systemId } = systemRecordPermits[failure.index];
+      log.warn('PEACH fetch failed', { recordId, systemId, error: failure.reason });
     }
   }
 
   const parsedRecords: Record<string, PeachSummary> = parsePeachRecords(records);
 
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    for (let i = 0; i < systemRecordPermits.length; i++) {
-      const { recordId, systemId, permit: pcnsPermit } = systemRecordPermits[i];
+    for (const systemRecordPermit of systemRecordPermits) {
+      const { recordId, systemId, permit: pcnsPermit } = systemRecordPermit;
       const systemRecordId = systemId + recordId;
       const peachPermit = parsedRecords[systemRecordId];
 
@@ -113,7 +142,7 @@ export const syncPeachRecords = async () => {
       const ajudicationDatesEqual =
         compareDates(peachPermit.adjudicationDate ?? undefined, pcnsPermit.adjudicationDate ?? undefined) === 0;
       const lastChangedDatesEqual =
-        compareDates(peachPermit.statusLastChanged ?? undefined, pcnsPermit.statusLastChanged ?? undefined) === 0;
+        compareDates(peachPermit.statusLastChanged, pcnsPermit.statusLastChanged ?? undefined) === 0;
       const statesEqual = peachPermit.state === pcnsPermit.state;
       const stagesEqual = peachPermit.stage === pcnsPermit.stage;
 
@@ -122,20 +151,26 @@ export const syncPeachRecords = async () => {
 
       if (!hasDiff) continue;
 
-      if (peachPermit.state) pcnsPermit.state = peachPermit.state;
-      if (peachPermit.stage) pcnsPermit.stage = peachPermit.stage;
+      pcnsPermit.state = peachPermit.state;
+      pcnsPermit.stage = peachPermit.stage;
+      pcnsPermit.statusLastChanged = peachPermit.statusLastChanged;
       if (peachPermit.submittedDate) pcnsPermit.submittedDate = peachPermit.submittedDate;
       if (peachPermit.adjudicationDate) pcnsPermit.adjudicationDate = peachPermit.adjudicationDate;
-      if (peachPermit.statusLastChanged) {
-        pcnsPermit.statusLastChanged = peachPermit.statusLastChanged;
-        pcnsPermit.statusLastVerified = peachPermit.statusLastChanged;
-      }
+
+      // Don't update lastVerified if current value is after PEACH's status change
+      // Means that PCNS (a Navigator) has manually updated it since PEACH update
+      const lastVerifiedBeforeStatusChange =
+        compareDates(pcnsPermit.statusLastVerified ?? undefined, peachPermit.statusLastChanged) < 0;
+
+      if (lastVerifiedBeforeStatusChange) pcnsPermit.statusLastVerified = peachPermit.statusLastChanged;
 
       const { updatedBy, updatedAt } = generateUpdateStamps(undefined);
       pcnsPermit.updatedAt = updatedAt;
       pcnsPermit.updatedBy = updatedBy;
 
-      await upsertPermit(tx, pcnsPermit);
+      const cleanedPermit = omit(pcnsPermit, ['permitTracking']);
+
+      await upsertPermit(tx, cleanedPermit);
     }
   });
 };
