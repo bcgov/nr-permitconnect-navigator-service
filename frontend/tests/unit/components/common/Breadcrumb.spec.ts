@@ -317,7 +317,11 @@ describe('Breadcrumb.vue', () => {
       meta: { hideBreadcrumb: false },
       matched: [
         { meta: { dynamicBreadcrumb: 'project' }, name: 'project', path: '/housing/project/456' },
-        { meta: { dynamicBreadcrumb: 'authorization' }, name: 'permit', path: '/housing/project/456/permit/123' }
+        {
+          meta: { dynamicBreadcrumb: 'authorization' },
+          name: 'authorization',
+          path: '/housing/project/456/authorization/123'
+        }
       ]
     };
 
