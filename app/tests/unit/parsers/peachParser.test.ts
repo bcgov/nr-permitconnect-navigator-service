@@ -154,6 +154,30 @@ describe('peachRecordParser', () => {
       expect(summary!.submittedDate).toBeNull();
       expect(summary!.submittedTime).toBeNull();
     });
+
+    it('uses the fallback (first event) when requesting a previous event but only one process event exists', () => {
+      const record = {
+        ...TEST_PEACH_RECORD_1,
+        process_event_set: [
+          {
+            event: { start_datetime: '2024-09-01T00:00:00.000Z' },
+            process: {
+              code: 'SUBMITTED',
+              code_display: 'Submitted',
+              code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
+              code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+            }
+          }
+        ]
+      } as PeachRecord;
+
+      const summary = summarizeRecord(record);
+
+      expect(summary.statusLastChanged?.toISOString()).toBe('2024-09-01T00:00:00.000Z');
+
+      expect(summary.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
+      expect(summary.state).toBe(PermitState.INITIAL_REVIEW);
+    });
   });
 
   describe('parsePeachRecords', () => {

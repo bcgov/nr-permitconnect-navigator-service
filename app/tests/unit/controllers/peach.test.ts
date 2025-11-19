@@ -558,4 +558,280 @@ describe('syncPeachRecords', () => {
     expect(getRecSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).not.toHaveBeenCalled();
   });
+
+  it('respects PEACH_TRACKING_PRIORITY and skips invalid/mismatched trackings', async () => {
+    const baseTracking = TEST_PERMIT_1.permitTracking![0];
+
+    // 1) No sourceSystem -> hits `if (!sourceSystem) continue;`
+    const trackingNoSource = {
+      ...baseTracking,
+      permitTrackingId: 11,
+      sourceSystemKind: {
+        ...baseTracking.sourceSystemKind!,
+        sourceSystem: undefined as unknown as string
+      }
+    };
+
+    // 2) TANTALIS but wrong trackingName -> hits trackingName mismatch branch
+    const trackingWrongName = {
+      ...baseTracking,
+      permitTrackingId: 12,
+      trackingId: 'TANT-WRONG',
+      sourceSystemKind: {
+        ...baseTracking.sourceSystemKind!,
+        sourceSystem: PeachIntegratedSystem.TANTALIS,
+        description: 'Wrong name'
+      }
+    };
+
+    // 3) TANTALIS with correct name -> becomes selected, priorityIndex = 0
+    const trackingTantalis = {
+      ...baseTracking,
+      permitTrackingId: 13,
+      trackingId: 'TANT-123',
+      sourceSystemKind: {
+        ...baseTracking.sourceSystemKind!,
+        sourceSystem: PeachIntegratedSystem.TANTALIS,
+        description: 'Disposition Transaction ID'
+      }
+    };
+
+    // 4) VFCBC after TANTALIS -> index (2) > priorityIndex (0), hits `if (index > priorityIndex) continue;`
+    const trackingVfcbc = {
+      ...baseTracking,
+      permitTrackingId: 14,
+      trackingId: 'REC-123',
+      sourceSystemKind: {
+        ...baseTracking.sourceSystemKind!,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        description: 'Tracking Number'
+      }
+    };
+
+    // IMPORTANT: override the status fields so they differ from the summary
+    const permitWithMultipleTrackings = {
+      ...TEST_PERMIT_1,
+      state: PermitState.NONE,
+      stage: PermitStage.PRE_SUBMISSION,
+      submittedDate: null,
+      adjudicationDate: null,
+      statusLastChanged: null,
+      statusLastVerified: null,
+      permitTracking: [trackingNoSource, trackingWrongName, trackingTantalis, trackingVfcbc]
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithMultipleTrackings]);
+    getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
+
+    const summary = {
+      state: PermitState.IN_PROGRESS,
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      submittedDate: new Date('2024-01-10T00:00:00.000Z'),
+      adjudicationDate: undefined,
+      statusLastChanged: new Date('2024-01-15T00:00:00.000Z')
+    };
+
+    parseSpy.mockReturnValueOnce({
+      [`${PeachIntegratedSystem.TANTALIS}TANT-123`]: summary
+    });
+
+    const fixedNow = new Date('2024-02-03T00:00:00.000Z');
+    stampsSpy.mockReturnValue({ updatedAt: fixedNow, updatedBy: 'user-priority' });
+
+    await syncPeachRecords();
+
+    // Should have called PEACH with the TANTALIS tracking (highest priority)
+    expect(getRecSpy).toHaveBeenCalledTimes(1);
+    expect(getRecSpy).toHaveBeenCalledWith('TANT-123', PeachIntegratedSystem.TANTALIS);
+
+    // And we should have performed an upsert based on that summary
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        permitId: permitWithMultipleTrackings.permitId,
+        state: PermitState.IN_PROGRESS,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        submittedDate: summary.submittedDate,
+        statusLastChanged: summary.statusLastChanged,
+        statusLastVerified: summary.statusLastChanged,
+        updatedAt: fixedNow,
+        updatedBy: 'user-priority'
+      })
+    );
+  });
+
+  it('skips permits when chosen tracking is missing a recordId', async () => {
+    const permitWithMissingTrackingId = {
+      ...TEST_PERMIT_1,
+      permitTracking: [
+        {
+          ...TEST_PERMIT_1.permitTracking![0],
+          trackingId: ''
+        }
+      ]
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithMissingTrackingId]);
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).not.toHaveBeenCalled();
+
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    expect(parseSpy).toHaveBeenCalledWith([]);
+
+    expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it('does not overwrite statusLastVerified when it is more recent than PEACH statusLastChanged', async () => {
+    const permitWithVerifiedLater = {
+      ...TEST_PERMIT_2,
+      statusLastVerified: new Date('2024-01-20T00:00:00.000Z')
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithVerifiedLater]);
+    getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
+
+    const peachStatusChanged = new Date('2024-01-10T00:00:00.000Z');
+
+    parseSpy.mockReturnValueOnce({
+      [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
+        state: permitWithVerifiedLater.state,
+        stage: permitWithVerifiedLater.stage,
+        submittedDate: permitWithVerifiedLater.submittedDate!,
+        adjudicationDate: undefined,
+        statusLastChanged: peachStatusChanged
+      }
+    });
+
+    const fixedNow = new Date('2024-02-05T12:00:00.000Z');
+    stampsSpy.mockReturnValue({ updatedAt: fixedNow, updatedBy: 'user-xyz' });
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).toHaveBeenCalledTimes(1);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        permitId: permitWithVerifiedLater.permitId,
+        statusLastChanged: peachStatusChanged,
+        statusLastVerified: new Date('2024-01-20T00:00:00.000Z'),
+        updatedAt: fixedNow,
+        updatedBy: 'user-xyz'
+      })
+    );
+  });
+
+  it('skips permitTrackings that are missing a sourceSystem', async () => {
+    const permitWithMissingSourceSystem = {
+      ...TEST_PERMIT_1,
+      permitTracking: [
+        {
+          ...TEST_PERMIT_1.permitTracking![0],
+          sourceSystemKind: {
+            ...TEST_PERMIT_1.permitTracking![0].sourceSystemKind!,
+            sourceSystem: undefined as unknown as PeachIntegratedSystem
+          }
+        }
+      ]
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithMissingSourceSystem]);
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).not.toHaveBeenCalled();
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    expect(parseSpy).toHaveBeenCalledWith([]);
+    expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it('handles permits where permitTracking is undefined (nullish-coalescing to [])', async () => {
+    const permitWithoutTrackingProp = {
+      ...TEST_PERMIT_1,
+      permitTracking: undefined
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithoutTrackingProp]);
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).not.toHaveBeenCalled();
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    expect(parseSpy).toHaveBeenCalledWith([]);
+    expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it('skips permitTrackings when sourceSystemKind itself is undefined', async () => {
+    const permitWithNoSourceSystemKind = {
+      ...TEST_PERMIT_1,
+      permitTracking: [
+        {
+          ...TEST_PERMIT_1.permitTracking![0],
+          sourceSystemKind: undefined
+        }
+      ]
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithNoSourceSystemKind]);
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).not.toHaveBeenCalled();
+    expect(parseSpy).toHaveBeenCalledTimes(1);
+    expect(parseSpy).toHaveBeenCalledWith([]);
+    expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it('handles equal adjudication and statusLastChanged but different stage/state', async () => {
+    const baseDate = new Date('2024-03-10T00:00:00.000Z');
+    const permitWithAdjudication = {
+      ...TEST_PERMIT_2,
+      state: PermitState.NONE,
+      stage: PermitStage.PRE_SUBMISSION,
+      adjudicationDate: baseDate,
+      statusLastChanged: baseDate
+    };
+
+    searchSpy.mockResolvedValueOnce([permitWithAdjudication]);
+    getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
+
+    const summary = {
+      state: PermitState.IN_PROGRESS,
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      submittedDate: permitWithAdjudication.submittedDate!,
+      adjudicationDate: baseDate,
+      statusLastChanged: baseDate
+    };
+
+    parseSpy.mockReturnValueOnce({
+      [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: summary
+    });
+
+    const fixedNow = new Date('2024-03-20T12:00:00.000Z');
+    stampsSpy.mockReturnValue({ updatedAt: fixedNow, updatedBy: 'user-adj-same' });
+
+    await syncPeachRecords();
+
+    expect(getRecSpy).toHaveBeenCalledTimes(1);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        permitId: permitWithAdjudication.permitId,
+        state: PermitState.IN_PROGRESS,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        submittedDate: permitWithAdjudication.submittedDate,
+        adjudicationDate: baseDate,
+        statusLastChanged: baseDate,
+        statusLastVerified: baseDate,
+        updatedAt: fixedNow,
+        updatedBy: 'user-adj-same'
+      })
+    );
+  });
 });
