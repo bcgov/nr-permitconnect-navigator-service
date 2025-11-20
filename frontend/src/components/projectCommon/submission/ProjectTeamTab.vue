@@ -1,15 +1,15 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, useToast } from '@/lib/primevue';
 import ProjectTeamTable from './ProjectTeamTable.vue';
 import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
 import { activityContactService } from '@/services';
+import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
-import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 // Props
 const { activityId } = defineProps<{
@@ -71,10 +71,12 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
       </div>
     </div>
   </div>
-  <ProjectTeamTable :activity-contacts="activityContacts" />
-  <ProjectTeamAddModal
-    v-model:visible="createUserModalVisible"
-    :activity-contacts="activityContacts"
-    @project-team-add-modal:add-user="onAddUser"
-  />
+  <span v-if="activityContacts">
+    <ProjectTeamTable :activity-contacts="activityContacts" />
+    <ProjectTeamAddModal
+      v-model:visible="createUserModalVisible"
+      :activity-contacts="activityContacts"
+      @project-team-add-modal:add-user="onAddUser"
+    />
+  </span>
 </template>
