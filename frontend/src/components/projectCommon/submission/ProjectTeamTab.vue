@@ -9,7 +9,7 @@ import { activityContactService } from '@/services';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
-import type { ActivityContactRole } from '@/utils/enums/projectCommon';
+import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 // Props
 const { activityId } = defineProps<{
@@ -28,9 +28,10 @@ const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal vi
 async function onAddUser(contact: Contact, role: ActivityContactRole) {
   try {
     await activityContactService.createActivityContact(activityId, contact.contactId, role);
-    toast.success('User added to project');
+    if (role === ActivityContactRole.ADMIN) toast.success('User has been added as a Project Admin.');
+    else toast.success('User has been added as a project member.');
   } catch (error: any) {
-    if (error.response?.data?.type === 'P2002') toast.error('User already added to project');
+    if (error.response?.data?.type === 'P2002') toast.error('This user is already a part of this project.');
     else toast.error('Failed to add user', error.response?.data?.message ?? error.message);
   }
 }
