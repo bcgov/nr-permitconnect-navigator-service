@@ -34,55 +34,82 @@ describe('requireActivityAdmin middleware', () => {
     app.request.currentContext = TEST_CURRENT_CONTEXT;
   });
 
-  it('allows PRIMARY through', async () => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
+  describe('scope:all', () => {
+    beforeEach(() => {
+      app.request.currentAuthorization = { attributes: ['scope:all'], groups: [] };
+    });
 
-    const res = await request(app)
-      .post('/echo/1/contact/2')
-      .set('content-type', 'application/json')
-      .send({ role: 'PRIMARY' });
+    it('immediately calls next', async () => {
+      searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+      listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
 
-    expect(res.status).toBe(201);
-    expect(res.body).toEqual({ role: 'PRIMARY' });
+      const res = await request(app)
+        .post('/echo/1/contact/2')
+        .set('content-type', 'application/json')
+        .send({ role: 'PRIMARY' });
+
+      expect(searchContactsSpy).toHaveBeenCalledTimes(0);
+      expect(listActivityContactsSpy).toHaveBeenCalledTimes(0);
+      expect(res.status).toBe(201);
+      expect(res.body).toEqual({ role: 'PRIMARY' });
+    });
   });
 
-  it('allows ADMIN through', async () => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    listActivityContactsSpy.mockResolvedValue([{ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN }]);
+  describe('scope:self', () => {
+    beforeEach(() => {
+      app.request.currentAuthorization = { attributes: ['scope:self'], groups: [] };
+    });
 
-    const res = await request(app)
-      .post('/echo/1/contact/2')
-      .set('content-type', 'application/json')
-      .send({ role: 'ADMIN' });
+    it('allows PRIMARY through', async () => {
+      searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+      listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
 
-    expect(res.status).toBe(201);
-    expect(res.body).toEqual({ role: 'ADMIN' });
-  });
+      const res = await request(app)
+        .post('/echo/1/contact/2')
+        .set('content-type', 'application/json')
+        .send({ role: 'PRIMARY' });
 
-  it('does not allow MEMBER through', async () => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    listActivityContactsSpy.mockResolvedValue([{ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.MEMBER }]);
+      expect(res.status).toBe(201);
+      expect(res.body).toEqual({ role: 'PRIMARY' });
+    });
 
-    const res = await request(app)
-      .post('/echo/1/contact/2')
-      .set('content-type', 'application/json')
-      .send({ role: 'MEMBER' });
+    it('allows ADMIN through', async () => {
+      searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+      listActivityContactsSpy.mockResolvedValue([{ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN }]);
 
-    expect(res.status).toBe(403);
-    expect(res.body).toEqual({});
-  });
+      const res = await request(app)
+        .post('/echo/1/contact/2')
+        .set('content-type', 'application/json')
+        .send({ role: 'ADMIN' });
 
-  it('does not allow a non contact through', async () => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    listActivityContactsSpy.mockResolvedValue([]);
+      expect(res.status).toBe(201);
+      expect(res.body).toEqual({ role: 'ADMIN' });
+    });
 
-    const res = await request(app)
-      .post('/echo/1/contact/2')
-      .set('content-type', 'application/json')
-      .send({ role: 'MEMBER' });
+    it('does not allow MEMBER through', async () => {
+      searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+      listActivityContactsSpy.mockResolvedValue([{ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.MEMBER }]);
 
-    expect(res.status).toBe(403);
-    expect(res.body).toEqual({});
+      const res = await request(app)
+        .post('/echo/1/contact/2')
+        .set('content-type', 'application/json')
+        .send({ role: 'MEMBER' });
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({});
+    });
+
+    it('does not allow a non contact through', async () => {
+      searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+      listActivityContactsSpy.mockResolvedValue([]);
+
+      const res = await request(app)
+        .post('/echo/1/contact/2')
+        .set('content-type', 'application/json')
+        .send({ role: 'MEMBER' });
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({});
+    });
   });
 });

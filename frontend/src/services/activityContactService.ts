@@ -13,6 +13,6 @@ export default {
    * @returns {Promise} An axios response
    */
   listActivityContacts(activityId: string): Promise<AxiosResponse<ActivityContact[]>> {
-    return appAxios().get(`activity/${activityId}/contact`, { activityId });
+    return appAxios().get(`activity/${activityId}/contact`);
   }
 };
