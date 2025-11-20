@@ -20,6 +20,7 @@ import {
   HousingProjectIntake,
   Note,
   NoteHistory,
+  Record as PeachRecord,
   Permit,
   PermitNote,
   PermitType,
@@ -27,7 +28,7 @@ import {
 } from '../../../src/types';
 import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
 import { ProjectType } from '../../../src/utils/enums/electrification';
-import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
+import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 import {
   ApplicationStatus,
   ContactPreference,
@@ -501,15 +502,148 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   deletedAt: null
 };
 
+export const TEST_PEACH_RECORD_1: PeachRecord = {
+  transaction_id: '11111111-1111-4111-8111-111111111111',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-SUB',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-02-01T00:00:00.000Z' },
+      process: {
+        code: 'SUBMITTED',
+        code_display: 'Submitted',
+        code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_2: PeachRecord = {
+  transaction_id: '22222222-2222-4222-8222-222222222222',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-DECISION',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-03-01T12:00:00.000Z' },
+      process: {
+        code: 'ALLOWED',
+        code_display: 'Allowed',
+        code_set: ['APPLICATION', 'DECISION', 'ALLOWED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_ISSUED: PeachRecord = {
+  transaction_id: '55555555-5555-4555-8555-555555555555',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-ISSUED',
+  process_event_set: [
+    {
+      // NOTE: start_date only (no start_datetime) so we hit
+      // the piesEventToDate "else" branch.
+      event: { start_date: '2024-07-01' },
+      process: {
+        code: 'ISSUED',
+        code_display: 'Issued',
+        code_set: ['APPLICATION', 'ISSUANCE', 'ISSUED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
+  transaction_id: '33333333-3333-4333-8333-333333333333',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-REJECTED',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-04-01T00:00:00.000Z' },
+      process: {
+        code: 'TECH_REVIEW_COMMENT',
+        code_display: 'Technical Review',
+        code_set: ['APPLICATION', 'TECH_REVIEW_COMMENT', 'TECHNICAL_REVIEW'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-05-01T00:00:00.000Z' },
+      process: {
+        code: 'REJECTED',
+        code_display: 'Rejected',
+        code_set: ['APPLICATION', 'REJECTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
+  transaction_id: '44444444-4444-4444-8444-444444444444',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-UNMAPPED',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'PRE_APPLICATION',
+        code_display: 'Pre-Application',
+        code_set: ['APPLICATION', 'PRE_APPLICATION'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'APPLICATION',
+        code_display: 'Application',
+        code_set: ['APPLICATION'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_SUMMARY = {
+  stage: PermitStage.APPLICATION_SUBMISSION,
+  state: PermitState.INITIAL_REVIEW,
+  submittedDate: new Date('2024-02-01T00:00:00.000Z'),
+  adjudicationDate: undefined,
+  statusLastChanged: new Date('2024-02-01T00:00:00.000Z')
+};
+
 export const TEST_PERMIT_1: Permit = {
   permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  state: PermitState.IN_PROGRESS,
+  state: PermitState.NONE,
   needed: PermitNeeded.YES,
-  stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date(),
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
   adjudicationDate: null,
   statusLastChanged: null,
   statusLastVerified: null,
@@ -518,7 +652,34 @@ export const TEST_PERMIT_1: Permit = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
+      permitTrackingId: 1,
+      trackingId: 'REC-123',
+      sourceSystemKindId: 1,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 12,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        kind: null,
+        description: 'Tracking Number'
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_2: Permit = {
@@ -529,16 +690,43 @@ export const TEST_PERMIT_2: Permit = {
   state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
   stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date(),
+  submittedDate: new Date('2024-01-05T00:00:00.000Z'),
   adjudicationDate: null,
-  statusLastChanged: null,
-  statusLastVerified: null,
+  statusLastChanged: new Date('2024-01-05T00:00:00.000Z'),
+  statusLastVerified: new Date('2024-01-05T00:00:00.000Z'),
   createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: 'fac00e1e-a68e-4fe0-a7bf-43ed3896c751',
+      permitTrackingId: 2,
+      trackingId: 'REC-XYZ',
+      sourceSystemKindId: 2,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 12,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        kind: null,
+        description: 'Tracking Number'
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_3: Permit = {
@@ -558,7 +746,55 @@ export const TEST_PERMIT_3: Permit = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '7530538d-4671-47fe-9b3f-31d70b6b72dc',
+      permitTrackingId: 3,
+      trackingId: 'REC-999',
+      sourceSystemKindId: 3,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 22,
+        sourceSystem: 'ITSM-5314', // ATS
+        kind: null,
+        description: 'Project Number'
+      }
+    }
+  ]
+};
+
+export const TEST_PERMIT_4: Permit = {
+  permitId: '11111111-2222-3333-4444-555555555555',
+  permitTypeId: 1,
+  activityId: 'ACTI1234',
+  issuedPermitId: null,
+  state: PermitState.NONE,
+  needed: PermitNeeded.YES,
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
+  adjudicationDate: null,
+  statusLastChanged: null,
+  statusLastVerified: null,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null,
+  permitTracking: []
 };
 
 export const TEST_PERMIT_NOTE_1: PermitNote = {
