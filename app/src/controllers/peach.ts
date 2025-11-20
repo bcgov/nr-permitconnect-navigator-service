@@ -171,6 +171,8 @@ export const syncPeachRecords = async () => {
       const cleanedPermit = omit(pcnsPermit, ['permitTracking']);
 
       await upsertPermit(tx, cleanedPermit);
+
+      // TODO-PR: Send out notifications on successful upsert
     }
   });
 };
