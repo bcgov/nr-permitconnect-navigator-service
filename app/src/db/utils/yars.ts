@@ -33,10 +33,10 @@ export async function addAttributeGroup(
  * @param groups Array of group names and their associated label
  * @returns The generated Knex function to insert the new data
  */
-export async function addGroups(knex: Knex, initiative: Initiative, groups: Array<{ name: GroupName; label: string }>) {
+export async function addGroups(knex: Knex, initiative: Initiative, groups: { name: GroupName; label: string }[]) {
   const initiativeId = await getInitiativeId(knex, initiative);
 
-  const items: Array<{ initiative_id: number; name: GroupName; label: string }> = [];
+  const items: { initiative_id: number; name: GroupName; label: string }[] = [];
   for (const group of groups) {
     items.push({
       initiative_id: initiativeId,
@@ -53,8 +53,8 @@ export async function addGroups(knex: Knex, initiative: Initiative, groups: Arra
  * @param resources Array of resource names to add
  * @returns The generated Knex function to insert the new data
  */
-export function addResources(knex: Knex, resources: Array<Resource>) {
-  const items: Array<{ name: string }> = [];
+export function addResources(knex: Knex, resources: Resource[]) {
+  const items: { name: string }[] = [];
   for (const resource of resources) {
     items.push({
       name: `${resource.toUpperCase()}`
@@ -71,7 +71,7 @@ export function addResources(knex: Knex, resources: Array<Resource>) {
  * @param actions Array of actions to associated with each resource
  * @returns The generated Knex function to insert the new data
  */
-export async function addPolicies(knex: Knex, resources: Array<Resource>, actions: Array<Action>) {
+export async function addPolicies(knex: Knex, resources: Resource[], actions: Action[]) {
   const items = [];
   for (const resource of resources) {
     for (const action of actions) {
@@ -111,7 +111,7 @@ export async function addPolicyAttributes(knex: Knex, resource: Resource, action
     .whereIn('action_id', actionIds)
     .select('policy_id');
 
-  const items: Array<{ policy_id: number; attribute_id: number }> = [];
+  const items: { policy_id: number; attribute_id: number }[] = [];
 
   for (const policy of policies) {
     for (const attr of attributeIds) {
@@ -129,8 +129,8 @@ export async function addPolicyAttributes(knex: Knex, resource: Resource, action
  * @param actions Array of actions
  * @returns The generated Knex function to insert the new data
  */
-export function addRoles(knex: Knex, resources: Array<Resource>, actions: Array<Action>) {
-  const items: Array<{ name: string; description: string }> = [];
+export function addRoles(knex: Knex, resources: Resource[], actions: Action[]) {
+  const items: { name: string; description: string }[] = [];
   for (const resource of resources) {
     if (actions.includes(Action.CREATE)) {
       items.push({
@@ -162,14 +162,14 @@ export function addRoles(knex: Knex, resources: Array<Resource>, actions: Array<
  * @param actions Array of actions to associated with each resource
  * @returns The generated Knex function to insert the new data
  */
-export async function addRolePolicies(knex: Knex, resources: Array<Resource>, actions: Array<Action>) {
+export async function addRolePolicies(knex: Knex, resources: Resource[], actions: Action[]) {
   const policies = await knex
     .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
     .from({ p: 'yars.policy' })
     .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
     .innerJoin({ a: 'yars.action' }, 'p.action_id', '=', 'a.action_id');
 
-  const items: Array<{ role_id: number; policy_id: number }> = [];
+  const items: { role_id: number; policy_id: number }[] = [];
 
   const addRolePolicies = async (resourceName: string) => {
     const creatorId = await knex('yars.role')
@@ -231,12 +231,12 @@ export async function addGroupRoles(
   initiative: Initiative,
   group: GroupName,
   resource: Resource,
-  actions: Array<Action>
+  actions: Action[]
 ) {
   const initiativeId = await getInitiativeId(knex, initiative);
   const groupId = await getGroupId(knex, initiativeId, group);
 
-  const items: Array<{ group_id: number; role_id: number }> = [];
+  const items: { group_id: number; role_id: number }[] = [];
 
   if (actions.includes(Action.CREATE)) {
     items.push({
@@ -341,11 +341,11 @@ export async function deleteAttributeGroup(
  * @param groups Array of group names to delete
  * @returns The generated Knex function to delete data
  */
-export async function deleteGroups(knex: Knex, initiative: Initiative, groups: Array<GroupName>) {
+export async function deleteGroups(knex: Knex, initiative: Initiative, groups: GroupName[]) {
   const initiativeId = await getInitiativeId(knex, initiative);
 
-  return groups.map(
-    async (group) => await knex('yars.group').where({ initiative_id: initiativeId, name: group }).del()
+  return Promise.all(
+    groups.map(async (group) => await knex('yars.group').where({ initiative_id: initiativeId, name: group }).del())
   );
 }
 
@@ -356,7 +356,7 @@ export async function deleteGroups(knex: Knex, initiative: Initiative, groups: A
  * @param actions Array of actions to delete
  * @returns A promise that resolves when the database calls are complete
  */
-export async function deleteGroupRoles(knex: Knex, resource: Resource, actions: Array<Action>) {
+export async function deleteGroupRoles(knex: Knex, resource: Resource, actions: Action[]) {
   let creatorRole, viewerRole, editorRole;
 
   if (actions.includes(Action.CREATE)) {
@@ -395,7 +395,7 @@ export async function deleteGroupRoles(knex: Knex, resource: Resource, actions: 
  * @param actions Array of actions to delete
  * @returns A promise that resolves when the database calls are complete
  */
-export async function deleteRolePolicies(knex: Knex, resource: Resource, actions: Array<Action>) {
+export async function deleteRolePolicies(knex: Knex, resource: Resource, actions: Action[]) {
   let creatorRole, viewerRole, editorRole;
 
   if (actions.includes(Action.CREATE)) {
@@ -434,7 +434,7 @@ export async function deleteRolePolicies(knex: Knex, resource: Resource, actions
  * @param actions Array of actions to delete
  * @returns A promise that resolves when the database calls are complete
  */
-export async function deleteRoles(knex: Knex, resource: Resource, actions: Array<Action>) {
+export async function deleteRoles(knex: Knex, resource: Resource, actions: Action[]) {
   if (actions.includes(Action.CREATE)) {
     await knex('yars.role')
       .where({ name: `${resource}_CREATOR` })
@@ -460,13 +460,15 @@ export async function deleteRoles(knex: Knex, resource: Resource, actions: Array
  * @param resource Array of resource names to delete
  * @returns The generated Knex function to delete data
  */
-export async function deletePolicies(knex: Knex, resource: Array<Resource>) {
-  resource.map(async (resource) => {
-    const resourceRow = await knex('yars.resource').where({ name: resource }).first('resource_id');
-    if (resourceRow) {
-      return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
-    }
-  });
+export async function deletePolicies(knex: Knex, resource: Resource[]) {
+  Promise.all(
+    resource.map(async (resource) => {
+      const resourceRow = await knex('yars.resource').where({ name: resource }).first('resource_id');
+      if (resourceRow) {
+        return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
+      }
+    })
+  );
 }
 
 /**
@@ -475,6 +477,6 @@ export async function deletePolicies(knex: Knex, resource: Array<Resource>) {
  * @param resource Array of resource names to delete
  * @returns The generated Knex function to delete data
  */
-export async function deleteResources(knex: Knex, resources: Array<Resource>) {
-  return resources.map(async (resource) => await knex('yars.resource').where({ name: resource }).del());
+export async function deleteResources(knex: Knex, resources: Resource[]) {
+  return Promise.all(resources.map(async (resource) => await knex('yars.resource').where({ name: resource }).del()));
 }
