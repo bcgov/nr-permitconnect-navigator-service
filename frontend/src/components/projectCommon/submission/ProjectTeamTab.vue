@@ -16,29 +16,43 @@ const { activityId } = defineProps<{
   activityId: string;
 }>();
 
+const activityContacts = defineModel<ActivityContact[]>('activityContacts');
+
 // Composables
 const { t } = useI18n();
 const toast = useToast();
 
 // State
-const activityContacts: Ref<ActivityContact[]> = ref([]);
 const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal visible
 
 // Actions
 async function onAddUser(contact: Contact, role: ActivityContactRole) {
   try {
-    await activityContactService.createActivityContact(activityId, contact.contactId, role);
-    if (role === ActivityContactRole.ADMIN) toast.success('User has been added as a Project Admin.');
-    else toast.success('User has been added as a project member.');
+    const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
+    activityContacts.value?.push(response);
+
+    if (role === ActivityContactRole.ADMIN)
+      toast.success(
+        t('e.common.projectTeamTab.adminAdded', {
+          first: response.contact?.firstName,
+          last: response.contact?.lastName
+        })
+      );
+    else
+      toast.success(
+        t('e.common.projectTeamTab.memberAdded', {
+          first: response.contact?.firstName,
+          last: response.contact?.lastName
+        })
+      );
+
+    // Close modal on success
+    createUserModalVisible.value = false;
   } catch (error: any) {
-    if (error.response?.data?.type === 'P2002') toast.error('This user is already a part of this project.');
-    else toast.error('Failed to add user', error.response?.data?.message ?? error.message);
+    if (error.response?.data?.type === 'P2002') toast.error(t('e.common.projectTeamTab.userAlreadyExists'));
+    else toast.error(t('e.common.projectTeamTab.failedToAdd'), error.response?.data?.message ?? error.message);
   }
 }
-
-onBeforeMount(async () => {
-  activityContacts.value = (await activityContactService.listActivityContacts(activityId)).data;
-});
 </script>
 
 <template>

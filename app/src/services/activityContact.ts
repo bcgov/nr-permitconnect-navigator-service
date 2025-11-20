@@ -22,7 +22,8 @@ export const createActivityContact = async (
       activityId,
       contactId,
       role
-    }
+    },
+    include: { contact: true }
   });
 };
 

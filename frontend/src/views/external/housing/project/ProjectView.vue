@@ -14,16 +14,23 @@ import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCar
 import ProjectTeamTab from '@/components/projectCommon/submission/ProjectTeamTab.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
 import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
-import { contactService, enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
+import {
+  activityContactService,
+  contactService,
+  enquiryService,
+  housingProjectService,
+  noteHistoryService,
+  permitService
+} from '@/services';
+import { useAuthZStore, useContactStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
-import { SubmissionType } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, SubmissionType } from '@/utils/enums/projectCommon';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Contact } from '@/types';
+import type { ActivityContact, Contact } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -52,8 +59,10 @@ const {
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
+const activityContacts: Ref<ActivityContact[]> = ref([]);
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
+const isAdmin: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryVisible: Ref<boolean> = ref(false);
 
@@ -120,6 +129,15 @@ onBeforeMount(async () => {
   );
   createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
 
+  activityContacts.value = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+
+  // Determine if the current user has admin priviledges
+  const userActivityRole = activityContacts.value.find(
+    (x) => x.contactId === useContactStore().getContact?.contactId
+  )?.role;
+  if (userActivityRole)
+    isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
+
   loading.value = false;
 });
 </script>
@@ -172,7 +190,10 @@ onBeforeMount(async () => {
             />
             {{ t('e.common.projectView.tabRelatedEnquiries') }}
           </Tab>
-          <Tab :value="2">
+          <Tab
+            v-if="isAdmin"
+            :value="2"
+          >
             <font-awesome-icon
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-file-circle-question"
@@ -278,10 +299,14 @@ onBeforeMount(async () => {
               />
             </div>
           </TabPanel>
-          <TabPanel :value="2">
+          <TabPanel
+            v-if="isAdmin"
+            :value="2"
+          >
             <ProjectTeamTab
               v-if="projectStore.getProject"
               :activity-id="projectStore.getProject.activityId"
+              :activity-contacts="activityContacts"
             />
           </TabPanel>
         </TabPanels>

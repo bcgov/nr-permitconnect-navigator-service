@@ -65,7 +65,11 @@
       },
       "projectTeamTab": {
         "addUserBtn": "Add user",
-        "projectTeamDesc": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system."
+        "adminAdded": "{first} {last} has been added as a Project Admin.",
+        "failedToAdd": "Failed to add user",
+        "memberAdded": "{first} {last} has been added as a project member.",
+        "projectTeamDesc": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
+        "userAlreadyExists": "This user is already a part of this project."
       },
       "projectView": {
         "agency": "Agency",

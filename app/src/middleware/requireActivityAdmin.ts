@@ -22,10 +22,10 @@ export const requireActivityAdmin = async (
   next: NextFunction
 ) => {
   try {
-    await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-      // Skip if user has scope:all
-      if (req.currentAuthorization.attributes.includes('scope:all')) return;
+    // Skip if user has scope:all
+    if (req.currentAuthorization.attributes.includes('scope:all')) return next();
 
+    await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
       const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
       const activityContacts = await listActivityContacts(tx, req.params.activityId);
       const activityContact = activityContacts.find((ac) => ac.contactId === contact[0].contactId);
