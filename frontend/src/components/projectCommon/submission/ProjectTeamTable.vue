@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
 import { useContactStore } from '@/store';
@@ -17,7 +17,7 @@ const { activityContacts } = defineProps<{
 const isAdmin: Ref<boolean> = ref(false);
 
 // Actions
-onBeforeMount(async () => {
+watchEffect(async () => {
   // Determine if the current user has admin priviledges
   const userActivityRole = activityContacts.find((x) => x.contactId === useContactStore().getContact?.contactId)?.role;
   if (userActivityRole)
@@ -68,9 +68,8 @@ onBeforeMount(async () => {
       header-class="header-right"
       class="!text-right"
     >
-      <template #body="{ data }">
+      <template #body>
         <Button
-          :disabled="data.role === ActivityContactRole.PRIMARY"
           class="p-button-lg p-button-text p-0"
           aria-label="Manage"
         >
@@ -85,9 +84,8 @@ onBeforeMount(async () => {
       header-class="header-right"
       class="!text-right"
     >
-      <template #body="{ data }">
+      <template #body>
         <Button
-          :disabled="data.role === ActivityContactRole.PRIMARY"
           class="p-button-lg p-button-text p-button-danger p-0"
           aria-label="Revoke"
         >

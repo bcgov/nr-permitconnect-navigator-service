@@ -66,8 +66,6 @@ async function searchProponents() {
               lastName: searchTag.value
             })
           ).data;
-
-          // TODO: Filter out users already in project team?
         } catch (error: any) {
           toast.error(t('userCreateModal.searchError'), error);
         } finally {

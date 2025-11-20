@@ -8,7 +8,7 @@ import {
   generateUpdateStamps
 } from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
-import { createActivityContact } from '../services/activityContact';
+import { createActivityContact, listActivityContacts } from '../services/activityContact';
 import { searchContacts, upsertContacts } from '../services/contact';
 import {
   createEnquiry,
@@ -65,7 +65,6 @@ const generateEnquiryData = async (
     enquiryId: data.enquiryId ?? uuidv4(),
     activityId: activityId as string,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submittedBy: getCurrentUsername(currentContext),
     intakeStatus: IntakeStatus.SUBMITTED,
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
@@ -97,6 +96,21 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     const contactResponse = await upsertContacts(tx, [
       { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
     ]);
+
+    // Create additional activity_contact links if the enquiry is related to a project
+    if (data.relatedActivityId) {
+      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+
+      const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
+        (x) => x.contactId != currentContact[0].contactId
+      );
+
+      await Promise.all(
+        relatedContacts.map(
+          async (x) => await createActivityContact(tx, data.activityId, x.contactId, ActivityContactRole.MEMBER)
+        )
+      );
+    }
 
     return { ...data, contact: contactResponse[0] };
   });
