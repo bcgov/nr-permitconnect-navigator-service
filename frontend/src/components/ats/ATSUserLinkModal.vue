@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
@@ -21,10 +22,11 @@ const { fName, lName, phoneNumber, emailId } = defineProps<{
 }>();
 
 // Composables
+const { t } = useI18n();
 const toast = useToast();
 
 // Emits
-const emit = defineEmits(['atsUserLink:link']);
+const emit = defineEmits(['atsUserLink:link', 'atsUserLink:create']);
 
 // Store
 const appStore = useAppStore();
@@ -33,6 +35,7 @@ const { getInitiative } = storeToRefs(appStore);
 // State
 const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
+const hasSearched: Ref<boolean> = ref(false);
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
@@ -51,6 +54,7 @@ watchEffect(() => {
 // Actions
 async function searchATSUsers() {
   selectedUser.value = undefined;
+  hasSearched.value = true;
   try {
     loading.value = true;
 
@@ -183,19 +187,28 @@ async function searchATSUsers() {
         sortable
       />
     </DataTable>
-    <div class="flex justify-start">
-      <Button
-        class="p-button-solid mr-4"
-        label="Link to PCNS"
-        :disabled="!selectedUser"
-        @click="emit('atsUserLink:link', selectedUser)"
-      />
-      <Button
-        class="mr-0"
-        outlined
-        label="Cancel"
-        @click="visible = false"
-      />
+    <div class="flex justify-between">
+      <div>
+        <Button
+          class="p-button-solid mr-4"
+          label="Link to PCNS"
+          :disabled="!selectedUser"
+          @click="emit('atsUserLink:link', selectedUser)"
+        />
+        <Button
+          class="mr-0"
+          outlined
+          label="Cancel"
+          @click="visible = false"
+        />
+      </div>
+      <div
+        v-if="hasSearched"
+        class="underline text-[var(--p-bcblue-900)] hover-hand"
+        @click="emit('atsUserLink:create')"
+      >
+        {{ t('i.ats.atsUserLinkModal.createATSClient') }}
+      </div>
     </div>
   </Dialog>
 </template>

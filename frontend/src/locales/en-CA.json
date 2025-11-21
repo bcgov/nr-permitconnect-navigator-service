@@ -166,6 +166,15 @@
     }
   },
   "i": {
+    "ats": {
+      "atsInfo": {
+        "atsToolTip": "Please ensure the client info and related submission (if applicable) is correct before saving the submission. Only one ATS enquiry can be created per submission.",
+        "unavailable": "Unavailable"
+      },
+      "atsUserLinkModal": {
+        "createATSClient": "Create new client in ATS"
+      }
+    },
     "common": {
       "form": {
         "cancelMessage": "Your changes have not been saved.",
@@ -238,7 +247,7 @@
         "atsEnquiryPushError": "Error pushing enquiry to ATS",
         "atsClientIdHeader": "Client ID",
         "atsEnquiryIdHeader": "Enquiry #",
-        "atsHeader": "ATS link",
+        "atsHeader": "ATS",
         "atsSearchButton": "Search ATS",
         "atsNewButton": "New ATS Client",
         "atsUpdated": "ATS updated",
@@ -294,7 +303,7 @@
           "atsEnquiryIdHeader": "Enquiry #",
           "atsEnquiryPushed": "New enquiry pushed to ATS",
           "atsEnquiryPushError": "Error pushing enquiry to ATS",
-          "atsHeader": "ATS link",
+          "atsHeader": "ATS",
           "atsNewButton": "New ATS Client",
           "atsSearchButton": "Search ATS",
           "atsUpdated": "ATS updated",
@@ -623,7 +632,8 @@
     "submissionDate": "Submission date",
     "submissionStateHeader": "Submission state",
     "submissionType": "Submission type",
-    "submittedMethod": "Submitted method"
+    "submittedMethod": "Submitted method",
+    "unavailable": "Unavailable"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
@@ -660,7 +670,7 @@
   "enquiryView": {
     "completed": "(Completed)",
     "header": "Enquiry:",
-    "linkedActivity": "This activity is linked to Activity",
+    "linkedActivity": "This enquiry is linked to Project",
     "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
   "groupName": {
