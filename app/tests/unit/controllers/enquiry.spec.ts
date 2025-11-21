@@ -52,6 +52,7 @@ describe('createEnquiryController', () => {
   const createActivitySpy = jest.spyOn(activityService, 'createActivity');
   const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
   const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
+  const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
   const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
   const createEnquirySpy = jest.spyOn(enquiryService, 'createEnquiry');
 
@@ -67,6 +68,12 @@ describe('createEnquiryController', () => {
       activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
+    listActivityContactsSpy.mockResolvedValue([
+      {
+        activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+        contactId: TEST_CONTACT_1.contactId
+      } as ActivityContact
+    ]);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
     await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);
@@ -76,7 +83,7 @@ describe('createEnquiryController', () => {
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
+    expect(searchContactsSpy).toHaveBeenCalledTimes(2);
     expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
       userId: [TEST_CURRENT_CONTEXT.userId]
     });

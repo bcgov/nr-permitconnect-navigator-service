@@ -39,7 +39,7 @@ router.get('/', (_req, res) => {
   });
 });
 
-router.use('/activity', activityContact);
+router.use('/activity/:activityId/contact', activityContact);
 router.use('/ats', ats);
 router.use('/code', code);
 router.use('/contact', contact);
