@@ -1,4 +1,4 @@
-import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';

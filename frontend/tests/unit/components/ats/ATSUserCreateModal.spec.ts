@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
+import ATSUserCreateModal from '@/components/ats/ATSUserCreateModal.vue';
 
 const testFirstName = 'John';
 const testLastName = 'Doe';
