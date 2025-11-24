@@ -61,7 +61,7 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
       {{ t('e.common.projectTeamTab.projectTeamDesc') }}
     </div>
     <div class="basis-1/6">
-      <div class="flex justify-center">
+      <div class="flex justify-end">
         <Button
           :label="t('e.common.projectTeamTab.addUserBtn')"
           icon="pi pi-plus"

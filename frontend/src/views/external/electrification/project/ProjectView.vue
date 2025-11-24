@@ -198,7 +198,7 @@ onBeforeMount(async () => {
           >
             <font-awesome-icon
               class="mr-2 ellipsis-icon"
-              icon="fa-solid fa-file-circle-question"
+              icon="fa-solid fa-user-group"
             />
             {{ t('e.common.projectView.tabProjectTeam') }}
           </Tab>
@@ -300,11 +300,6 @@ onBeforeMount(async () => {
                 :project-id="projectId"
               />
             </div>
-            <RelatedEnquiryListProponent
-              :loading="loading"
-              :enquiries="getRelatedEnquiries"
-              :project-id="projectId"
-            />
           </TabPanel>
           <TabPanel
             v-if="isAdmin"
