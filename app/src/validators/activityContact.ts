@@ -28,11 +28,24 @@ const schema = {
     params: Joi.object({
       activityId: activityId
     })
+  },
+
+  updateActivityContact: {
+    params: Joi.object({
+      activityId: activityId,
+      contactId: uuidv4
+    }),
+    body: Joi.object({
+      role: Joi.string()
+        .required()
+        .valid(...Object.values(ActivityContactRole))
+    })
   }
 };
 
 export default {
   createActivityContact: validate(schema.createActivityContact),
   deleteActivityContact: validate(schema.deleteActivityContact),
-  listActivityContact: validate(schema.listActivityContact)
+  listActivityContact: validate(schema.listActivityContact),
+  updateActivityContact: validate(schema.updateActivityContact)
 };

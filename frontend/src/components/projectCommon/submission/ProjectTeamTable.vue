@@ -17,6 +17,9 @@ const { activityContacts } = defineProps<{
 // Composables
 const { t } = useI18n();
 
+// Emits
+const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revokeUser']);
+
 // State
 const isAdmin: Ref<boolean> = ref(false);
 
@@ -72,10 +75,14 @@ watchEffect(() => {
       header-class="header-right"
       class="!text-right"
     >
-      <template #body>
+      <template #body="{ data }">
         <Button
           class="p-button-lg p-button-text p-0"
           :aria-label="t('e.common.projectTeamTable.headerManage')"
+          :disabled="
+            data.role === ActivityContactRole.PRIMARY || data.contactId === useContactStore().getContact?.contactId
+          "
+          @click="emit('projectTeamTable:manageUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-pen-to-square" />
         </Button>
@@ -88,10 +95,14 @@ watchEffect(() => {
       header-class="header-right"
       class="!text-right"
     >
-      <template #body>
+      <template #body="{ data }">
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           :aria-label="t('e.common.projectTeamTable.headerRevoke')"
+          :disabled="
+            data.role === ActivityContactRole.PRIMARY || data.contactId === useContactStore().getContact?.contactId
+          "
+          @click="emit('projectTeamTable:revokeUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-user-xmark" />
         </Button>
