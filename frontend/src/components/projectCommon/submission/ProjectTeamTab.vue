@@ -2,9 +2,10 @@
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Button, useToast } from '@/lib/primevue';
-import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
+import { Button, useConfirm, useToast } from '@/lib/primevue';
 import ProjectTeamTable from './ProjectTeamTable.vue';
+import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
+import ProjectTeamManageModal from './ProjectTeamManageModal.vue';
 import { activityContactService } from '@/services';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
@@ -19,11 +20,14 @@ const { activityId } = defineProps<{
 const activityContacts = defineModel<ActivityContact[]>('activityContacts');
 
 // Composables
+const confirm = useConfirm();
 const { t } = useI18n();
 const toast = useToast();
 
 // State
-const createUserModalVisible: Ref<boolean> = ref(false); // Create user modal visible
+const createUserModalVisible: Ref<boolean> = ref(false);
+const manageUserModalVisible: Ref<boolean> = ref(false);
+const selectedContact: Ref<ActivityContact | undefined> = ref(undefined);
 
 // Actions
 async function onAddUser(contact: Contact, role: ActivityContactRole) {
@@ -53,6 +57,63 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
     else toast.error(t('e.common.projectTeamTab.failedToAdd'), error.response?.data?.message ?? error.message);
   }
 }
+
+async function onManageUser(contact: ActivityContact, role: ActivityContactRole) {
+  try {
+    const response = (await activityContactService.updateActivityContact(activityId, contact.contactId, role)).data;
+
+    if (activityContacts.value) {
+      const idx = activityContacts.value?.findIndex((x) => x.contactId === contact.contactId);
+      if (idx >= 0) activityContacts.value[idx] = response;
+    }
+
+    // Close modal on success
+    manageUserModalVisible.value = false;
+  } catch (error: any) {
+    toast.error(t('e.common.projectTeamTab.failedToUpdate'), error.response?.data?.message ?? error.message);
+  }
+}
+
+async function onManageUserClick(contact: ActivityContact) {
+  selectedContact.value = contact;
+  manageUserModalVisible.value = true;
+}
+
+async function onRevokeUser(contact: ActivityContact) {
+  try {
+    (await activityContactService.deleteActivityContact(activityId, contact.contactId)).data;
+
+    if (activityContacts.value) {
+      activityContacts.value = activityContacts.value.filter((x) => x.contactId !== contact.contactId);
+    }
+
+    toast.success(
+      t('e.common.projectTeamTab.memberRevoked', {
+        first: contact.contact?.firstName,
+        last: contact.contact?.lastName
+      })
+    );
+  } catch (error: any) {
+    toast.error(t('e.common.projectTeamTab.failedToRevoke'), error.response?.data?.message ?? error.message);
+  }
+}
+
+async function onRevokeUserClick(contact: ActivityContact) {
+  confirm.require({
+    message: t('e.common.projectTeamTab.revokeDesc', {
+      first: contact.contact?.firstName,
+      last: contact.contact?.lastName
+    }),
+    header: t('e.common.projectTeamTab.revokeHeader'),
+    acceptLabel: t('e.common.projectTeamTab.revoke'),
+    acceptClass: 'p-button-danger',
+    rejectLabel: t('e.common.projectTeamTab.cancel'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      onRevokeUser(contact);
+    }
+  });
+}
 </script>
 
 <template>
@@ -72,11 +133,20 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
     </div>
   </div>
   <span v-if="activityContacts">
-    <ProjectTeamTable :activity-contacts="activityContacts" />
+    <ProjectTeamTable
+      :activity-contacts="activityContacts"
+      @project-team-table:manage-user="onManageUserClick"
+      @project-team-table:revoke-user="onRevokeUserClick"
+    />
     <ProjectTeamAddModal
       v-model:visible="createUserModalVisible"
       :activity-contacts="activityContacts"
       @project-team-add-modal:add-user="onAddUser"
+    />
+    <ProjectTeamManageModal
+      v-model:visible="manageUserModalVisible"
+      :activity-contact="selectedContact"
+      @project-team-manage-modal:manage-user="onManageUser"
     />
   </span>
 </template>
