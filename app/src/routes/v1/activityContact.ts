@@ -3,7 +3,8 @@ import express from 'express';
 import {
   createActivityContactController,
   deleteActivityContactController,
-  listActivityContactController
+  listActivityContactController,
+  updateActivityContactController
 } from '../../controllers/activityContact';
 import { requireActivityAdmin } from '../../middleware/requireActivityAdmin';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
@@ -33,6 +34,15 @@ router.post(
   requireActivityAdmin,
   activityContactValidator.createActivityContact,
   createActivityContactController
+);
+
+/** Update an activity_contact linkage for an activity */
+router.put(
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.UPDATE),
+  requireActivityAdmin,
+  activityContactValidator.updateActivityContact,
+  updateActivityContactController
 );
 
 /** Delete an activity_contact linkage for an activity */
