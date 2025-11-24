@@ -196,7 +196,7 @@ onBeforeMount(async () => {
           >
             <font-awesome-icon
               class="mr-2 ellipsis-icon"
-              icon="fa-solid fa-file-circle-question"
+              icon="fa-solid fa-user-group"
             />
             {{ t('e.common.projectView.tabProjectTeam') }}
           </Tab>
