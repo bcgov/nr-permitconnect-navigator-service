@@ -1,6 +1,17 @@
+import axios from 'axios';
+import config from 'config';
+
 import * as emailService from '../../../src/services/email';
 
 import { prismaMock } from '../../__mocks__/prismaMock';
+import { Email } from '../../../src/types';
+
+// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
+jest.mock('config');
+let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+
+jest.mock('axios');
+let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
 
 type Message = {
   msgId: string;
@@ -12,6 +23,12 @@ type EmailData = {
   txId: string;
 };
 
+const postFakeEmail: Email = {
+  to: ['to@test.com'],
+  cc: ['cc@test.com'],
+  bcc: ['bcc@test.com']
+} as Email;
+
 const chesResponse: EmailData = {
   messages: [{ msgId: '9c50c187-4f89-463b-afea-ededc889dd31', to: [] }],
   txId: '508a1f8f-b5a1-4d37-a8c9-f7d7c0a86c00'
@@ -19,16 +36,49 @@ const chesResponse: EmailData = {
 
 const recipientsDefault: Array<string> = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test4@test.com'];
 
-describe('logEmail tests', () => {
-  beforeEach(() => {
-    prismaMock.$transaction.mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (callback: any) => callback(prismaMock)
-    );
+beforeEach(() => {
+  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+
+  // Replace any instances with the mocked instance
+  mockedAxios.create.mockImplementation(() => mockedAxios);
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => {
+    return cfg;
   });
 
+  prismaMock.$transaction.mockImplementationOnce(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (callback: any) => callback(prismaMock)
+  );
+});
+
+describe('email', () => {
+  const logEmailSpy = jest.spyOn(emailService, 'logEmail');
+
+  it('calls POST /email with correct body and returns result', async () => {
+    mockedConfig.get.mockImplementation(() => '');
+    logEmailSpy.mockResolvedValueOnce({ count: 1 });
+    mockedAxios.post.mockResolvedValueOnce({ data: chesResponse, status: 200 });
+
+    const response = await emailService.email(postFakeEmail);
+
+    expect(mockedAxios.post).toHaveBeenCalledWith('/email', postFakeEmail, {
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      maxContentLength: Infinity,
+      maxBodyLength: Infinity
+    });
+    expect(response).toStrictEqual({ data: chesResponse, status: 200 });
+  });
+});
+
+describe('logEmail', () => {
   it('should call $transaction and email_log.createMany once each', async () => {
     prismaMock.email_log.createMany.mockResolvedValueOnce({ count: recipientsDefault.length });
+
     await emailService.logEmail(chesResponse, recipientsDefault, 201);
 
     expect(prismaMock.$transaction).toHaveBeenCalledTimes(1);
@@ -74,5 +124,15 @@ describe('logEmail tests', () => {
         httpStatus: statusCode
       }))
     });
+  });
+});
+
+describe('health', () => {
+  it('calls GET /health and returns result', async () => {
+    mockedAxios.get.mockResolvedValueOnce({ data: {}, status: 200 });
+    const response = await emailService.health();
+
+    expect(mockedAxios.get).toHaveBeenCalledTimes(1);
+    expect(response).toStrictEqual({ data: {}, status: 200 });
   });
 });

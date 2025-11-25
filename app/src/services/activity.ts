@@ -1,4 +1,3 @@
-import prisma from '../db/dataConnection';
 import { generateUniqueActivityId } from '../db/utils/utils';
 import { Initiative } from '../utils/enums/application';
 
@@ -84,7 +83,7 @@ export const getActivities = async (tx: PrismaTransactionClient, initiative?: In
     const allActivities = await tx.activity.findMany({});
     return allActivities;
   } else {
-    const response = await prisma.activity.findMany({
+    const response = await tx.activity.findMany({
       where: {
         initiative: {
           code: initiative
