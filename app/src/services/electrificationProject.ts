@@ -1,5 +1,5 @@
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import { IStamps } from '../interfaces/IStamps';
+import type { IStamps } from '../interfaces/IStamps';
 import type {
   ElectrificationProject,
   ElectrificationProjectBase,
@@ -35,7 +35,7 @@ export const createElectrificationProject = async (
 };
 
 /**
- * Delete an electrification project
+ * Soft delete an electrification project
  * @param tx Prisma transaction client
  * @param electrificationProjectId Unique electrification project ID
  * @param deleteStamp Timestamp information of the delete
@@ -157,18 +157,6 @@ export const searchElectrificationProjects = async (
   params: ElectrificationProjectSearchParameters
 ): Promise<ElectrificationProject[]> => {
   const result = await tx.electrification_project.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      },
-      user: params.includeUser
-    },
     where: {
       AND: [
         {
@@ -190,6 +178,18 @@ export const searchElectrificationProjects = async (
           intakeStatus: { in: params.intakeStatus }
         }
       ]
+    },
+    include: {
+      activity: {
+        include: {
+          activityContact: {
+            include: {
+              contact: true
+            }
+          }
+        }
+      },
+      user: params.includeUser
     }
   });
 

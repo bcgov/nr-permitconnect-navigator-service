@@ -5,7 +5,7 @@ import * as activityContactService from '../../../src/services/activityContact';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
 
 describe('createActivityContact', () => {
-  it('calls activity_contact.create', async () => {
+  it('calls activity_contact.create and returns result', async () => {
     prismaTxMock.activity_contact.create.mockResolvedValueOnce(TEST_ACTIVITY_CONTACT_1);
     const response = await activityContactService.createActivityContact(
       prismaTxMock,
