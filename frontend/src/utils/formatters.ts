@@ -98,8 +98,3 @@ export function formatJwtUsername(value: string | undefined | null) {
 export function formatTime(value: string | undefined | null) {
   return _dateFnsFormat(value, 'hh:mm a');
 }
-
-export function toKebabCase(str: string | undefined | null) {
-  const strs = str && str.match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g);
-  return strs ? strs.join('-').toLocaleLowerCase() : '';
-}

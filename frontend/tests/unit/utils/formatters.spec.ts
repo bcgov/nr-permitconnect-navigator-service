@@ -1,4 +1,4 @@
-import { formatDate, formatDateFilename, formatDateLong, toKebabCase } from '@/utils/formatters';
+import { formatDate, formatDateFilename, formatDateLong } from '@/utils/formatters';
 
 describe('formatters.ts', () => {
   describe('formatDate', () => {
@@ -26,19 +26,6 @@ describe('formatters.ts', () => {
       const dateStr = new Date(2023, 10, 1, 0, 0, 0).toISOString();
 
       expect(formatDateFilename(dateStr)).toEqual('2023-11-01_0000');
-    });
-  });
-
-  describe('toKebabCase', () => {
-    it('returns the expected UUID values', () => {
-      expect(toKebabCase('descriptive Variable name')).toEqual('descriptive-variable-name');
-      expect(toKebabCase('INTERESTING FILE')).toEqual('interesting-file');
-      expect(toKebabCase('abc')).toEqual('abc');
-    });
-
-    it('returns blanks if blank provided', () => {
-      expect(toKebabCase('')).toEqual('');
-      expect(toKebabCase(null)).toEqual('');
     });
   });
 });
