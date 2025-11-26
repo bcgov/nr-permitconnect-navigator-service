@@ -1,4 +1,4 @@
-import { isPlainObject, setEmptyStringsToNull } from '@/utils/utils';
+import { isPlainObject, setEmptyStringsToNull, toKebabCase } from '@/utils/utils';
 
 describe('utils.ts', () => {
   describe('setEmptyStringsToNull', () => {
@@ -97,6 +97,22 @@ describe('utils.ts', () => {
     it('returns false for RegExp instances', () => {
       const re = /foo/i;
       expect(isPlainObject(re)).toBe(false);
+    });
+  });
+
+  describe('toKebabCase', () => {
+    it('returns the expected kebab case string values', () => {
+      expect(toKebabCase('descriptive Variable name')).toEqual('descriptive-variable-name');
+      expect(toKebabCase('INTERESTING FILE')).toEqual('interesting-file');
+      expect(toKebabCase('abc')).toEqual('abc');
+    });
+
+    it('returns blanks if blank provided', () => {
+      expect(toKebabCase('')).toEqual('');
+    });
+
+    it('returns undefined if undefined provided', () => {
+      expect(toKebabCase(undefined)).toEqual(undefined);
     });
   });
 });
