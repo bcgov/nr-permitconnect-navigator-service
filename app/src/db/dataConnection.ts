@@ -1,6 +1,7 @@
 import config from 'config';
 import { PrismaClient } from '@prisma/client';
 
+import permitStatusDatesTransform from './extensions/permitStatusDates';
 import filterDeletedTransform from './extensions/filterDeleted';
 import numericTransform from './extensions/numeric';
 import projectIdTransform from './extensions/projectId';
@@ -27,6 +28,7 @@ const prisma = new PrismaClient({
   errorFormat: 'pretty',
   datasourceUrl: datasourceUrl
 })
+  .$extends(permitStatusDatesTransform)
   .$extends(filterDeletedTransform)
   .$extends(numericTransform)
   .$extends(projectIdTransform);

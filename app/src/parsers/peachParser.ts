@@ -1,7 +1,15 @@
-import { compareDates } from '../utils';
+import { compareDates, splitDateTime } from '../utils';
 import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit';
 
-import type { CodingEvent, Record as PeachRecord, Event as PiesEvent, PeachSummary, ProcessEvent } from '../types';
+import type {
+  CodingEvent,
+  Record as PeachRecord,
+  Event as PiesEvent,
+  NullableDateTimeStrings,
+  PeachSummary,
+  ProcessEvent,
+  DateTimeStrings
+} from '../types';
 
 /**
  * Inferred process ordering from @see {@link https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process}
@@ -218,48 +226,78 @@ const generateStatus = (
  * Normalizes a PIES event into a JavaScript Date
  * If start_datetime is present, it is used directly
  * Otherwise, start_date is treated as midnight UTC for that date
- * @param pe PIES event object
+ * @param piesEvent PIES event object
  * @returns A Date instance representing the event start
  */
-const piesEventToDate = (pe: PiesEvent): Date => {
-  if ('start_datetime' in pe && pe.start_datetime) return new Date(pe.start_datetime);
-  else return new Date(`${pe.start_date}T00:00:00.000Z`);
+const piesEventToDate = (piesEvent: PiesEvent): Date => {
+  const { start_date, start_datetime } = piesEvent;
+
+  if (start_datetime) {
+    return new Date(start_datetime);
+  } else {
+    // Asserting start_date because if a Pies event doesn't have start_datetime it will always have start_date
+    const [year, month, day] = start_date!.split('-').map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+  }
 };
 
 /**
- * Finds the submitted date for an application from its PEACH record
- * @param record PEACH record to search
- * @returns A Date representing the submitted date, or undefined if not found
+ * Normalizes a PIES event into date and time strings
+ * If start_datetime is present, it is used directly to split
+ * Otherwise, returns start_date string and time as null
+ * @param piesEvent PIES event object
+ * @returns An object with two strings representing the event start date and time seperately
  */
-const findSubmittedDate = (record: PeachRecord): Date | undefined => {
+export function piesEventToDateParts(piesEvent: PiesEvent): DateTimeStrings {
+  const { start_date, start_datetime } = piesEvent;
+
+  if (start_datetime) {
+    const startDate = new Date(start_datetime);
+    return splitDateTime(startDate);
+  }
+  return { date: start_date!, time: null };
+}
+
+/**
+ * Finds the submitted date and/or time for an application from its PEACH record
+ * @param record PEACH record to search
+ * @returns A split date representing the submitted date and time, or both null if not found
+ */
+const findSubmittedDate = (record: PeachRecord): NullableDateTimeStrings => {
   for (const pe of record.process_event_set) {
     if (pe.process.code === PEACH_SUBMITTED_STATE) {
-      return piesEventToDate(pe.event);
+      return piesEventToDateParts(pe.event);
     }
   }
-  return undefined;
+  return {
+    date: null,
+    time: null
+  };
 };
 
 /**
- * Finds the adjudication/decision date for an application from its PEACH record
+ * Finds the decision date and/or time for an application from its PEACH record
  * @param record PEACH record to search
- * @returns A Date representing the decision/adjudication date, or undefined if not found
+ * @returns A split date representing the decision date and time, or both null if not found
  */
-const findDecisionDate = (record: PeachRecord): Date | undefined => {
+const findDecisionDate = (record: PeachRecord): NullableDateTimeStrings => {
   for (const pe of record.process_event_set) {
     if (PEACH_DECISION_STATES.includes(pe.process.code)) {
-      return piesEventToDate(pe.event);
+      return piesEventToDateParts(pe.event);
     }
   }
-  return undefined;
+  return {
+    date: null,
+    time: null
+  };
 };
 
 /**
  * Produces a normalized {@link PeachSummary} for a single PEACH record
  * @param record Full PEACH record to summarize
- * @returns A peach summary containing the derived stage, state, and key dates
+ * @returns A peach summary containing the derived stage, state, and key dates, if no stage or state return null
  */
-export function summarizeRecord(record: PeachRecord): PeachSummary {
+export function summarizeRecord(record: PeachRecord): PeachSummary | null {
   // Get latest process even
   const { processEvent } = getRecordEvents(record);
   // TODO: Implement logic, parsing, and mappings for "On Hold Events" once the data has been added to peach
@@ -275,11 +313,23 @@ export function summarizeRecord(record: PeachRecord): PeachSummary {
   // }
 
   const { stage, state } = generateStatus(processEvent, record);
-  const statusLastChanged = piesEventToDate(processEvent.event);
-  const submittedDate = findSubmittedDate(record);
-  const adjudicationDate = findDecisionDate(record);
 
-  return { stage, state, submittedDate, adjudicationDate, statusLastChanged };
+  if (!stage || !state) return null;
+
+  const { date: statusLastChanged, time: statusLastChangedTime } = piesEventToDateParts(processEvent.event);
+  const { date: submittedDate, time: submittedTime } = findSubmittedDate(record);
+  const { date: decisionDate, time: decisionTime } = findDecisionDate(record);
+
+  return {
+    stage,
+    state,
+    submittedDate,
+    submittedTime,
+    decisionDate,
+    decisionTime,
+    statusLastChanged,
+    statusLastChangedTime
+  };
 }
 
 /**
@@ -289,6 +339,10 @@ export function summarizeRecord(record: PeachRecord): PeachSummary {
  */
 export function parsePeachRecords(records: readonly PeachRecord[]): Record<string, PeachSummary> {
   const parsedRecords: Record<string, PeachSummary> = {};
-  for (const record of records) parsedRecords[record.system_id + record.record_id] = summarizeRecord(record);
+  for (const record of records) {
+    const summary = summarizeRecord(record);
+    if (!summary) continue;
+    parsedRecords[record.system_id + record.record_id] = summary;
+  }
   return parsedRecords;
 }

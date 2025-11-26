@@ -105,6 +105,38 @@ describe('utils', () => {
     });
   });
 
+  describe('combineDateTime', () => {
+    it('returns undefined when both date and time are undefined/null', () => {
+      expect(utils.combineDateTime(undefined, undefined)).toBeUndefined();
+      expect(utils.combineDateTime(null, null)).toBeUndefined();
+    });
+
+    it('returns undefined when time is provided but date is missing', () => {
+      const timeOnly = '12:34:56.000Z';
+      expect(utils.combineDateTime(undefined, timeOnly)).toBeUndefined();
+      expect(utils.combineDateTime(null, timeOnly)).toBeUndefined();
+    });
+
+    it('combines date and time using UTC fields', () => {
+      const date = '2025-05-01';
+      const time = '23:59:30.250Z';
+
+      const combined = utils.combineDateTime(date, time);
+
+      expect(combined).toBeInstanceOf(Date);
+      expect(combined!.toISOString()).toBe('2025-05-01T23:59:30.250Z');
+    });
+
+    it('uses midnight when time is omitted', () => {
+      const date = '2025-08-15';
+
+      const combined = utils.combineDateTime(date, undefined);
+
+      expect(combined).toBeInstanceOf(Date);
+      expect(combined!.toISOString()).toBe('2025-08-15T00:00:00.000Z');
+    });
+  });
+
   describe('compareDates', () => {
     const older = new Date('2025-01-01T00:00:00.000Z');
     const newer = new Date('2025-01-02T00:00:00.000Z');
@@ -311,6 +343,26 @@ describe('utils', () => {
     it('returns [] when neither exists', () => {
       (existsSync as jest.Mock).mockReturnValueOnce(false);
       expect(utils.readIdpList()).toEqual([]);
+    });
+  });
+
+  describe('splitDateTime', () => {
+    it('splits a Date into separate UTC date and time string components', () => {
+      const fullDateTime = new Date('2025-03-10T14:30:45.123Z');
+
+      const { date, time } = utils.splitDateTime(fullDateTime);
+
+      expect(date).toBe('2025-03-10');
+      expect(time).toBe('14:30:45.123Z');
+    });
+
+    it('handles midnight correctly (time-only becomes 00:00:00)', () => {
+      const onlyDate = new Date('2025-03-10T00:00:00.000Z');
+
+      const { date, time } = utils.splitDateTime(onlyDate);
+
+      expect(date).toBe('2025-03-10');
+      expect(time).toBe(null);
     });
   });
 

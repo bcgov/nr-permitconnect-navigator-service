@@ -376,12 +376,15 @@ export type ListPermitsOptions = {
   includeNotes?: boolean;
 } & Partial<IStamps>;
 
-export type PeachSummary = {
-  adjudicationDate?: Date;
-  stage: Code;
-  state: Code;
-  statusLastChanged: Date;
-  submittedDate?: Date;
+type PeachSummary = {
+  stage: PermitStage;
+  state: PermitState;
+  submittedDate: string | null;
+  submittedTime: string | null;
+  decisionDate: string | null;
+  decisionTime: string | null;
+  statusLastChanged: string;
+  statusLastChangedTime: string | null;
 };
 
 export type PermitSearchParams = {
@@ -395,6 +398,15 @@ export type PermitSearchParams = {
   includePermitTracking?: boolean;
   includePermitType?: boolean;
 };
+
+type SplitDatetimeBase<T> = {
+  date: T;
+  time: string | null;
+};
+
+export type DateTimeStrings = SplitDatetimeBase<string>;
+
+export type NullableDateTimeStrings = SplitDatetimeBase<string | null>;
 
 export type StatisticsFilters = {
   dateFrom: string;

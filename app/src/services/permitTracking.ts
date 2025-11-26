@@ -30,7 +30,7 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
     response = await Promise.all(
       data.permitTracking.map(async (pt: PermitTracking) => {
         const permitTrackingData = {
-          permitId: pt.permitId,
+          permitId: data.permitId,
           permitTrackingId: pt.permitTrackingId,
           trackingId: pt.trackingId,
           shownToProponent: pt.shownToProponent,

@@ -21,6 +21,7 @@ import {
   Note,
   NoteHistory,
   Record as PeachRecord,
+  PeachSummary,
   Permit,
   PermitNote,
   PermitType,
@@ -514,7 +515,7 @@ export const TEST_PEACH_RECORD_1: PeachRecord = {
   record_id: 'REC-SUB',
   process_event_set: [
     {
-      event: { start_datetime: '2024-02-01T00:00:00.000Z' },
+      event: { start_date: '2024-02-01' },
       process: {
         code: 'SUBMITTED',
         code_display: 'Submitted',
@@ -579,7 +580,7 @@ export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
   record_id: 'REC-REJECTED',
   process_event_set: [
     {
-      event: { start_datetime: '2024-04-01T00:00:00.000Z' },
+      event: { start_date: '2024-04-01' },
       process: {
         code: 'TECH_REVIEW_COMMENT',
         code_display: 'Technical Review',
@@ -588,7 +589,7 @@ export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
       }
     },
     {
-      event: { start_datetime: '2024-05-01T00:00:00.000Z' },
+      event: { start_datetime: '2024-05-01T23:12:00.000Z' },
       process: {
         code: 'REJECTED',
         code_display: 'Rejected',
@@ -630,12 +631,15 @@ export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
   on_hold_event_set: []
 };
 
-export const TEST_PEACH_SUMMARY = {
+export const TEST_PEACH_SUMMARY: PeachSummary = {
   stage: PermitStage.APPLICATION_SUBMISSION,
-  state: PermitState.INITIAL_REVIEW,
-  submittedDate: new Date('2024-02-01T00:00:00.000Z'),
-  adjudicationDate: undefined,
-  statusLastChanged: new Date('2024-02-01T00:00:00.000Z')
+  state: PermitState.IN_PROGRESS,
+  submittedDate: '2024-01-10',
+  decisionDate: '2024-02-01',
+  statusLastChanged: '2024-01-15',
+  submittedTime: null,
+  decisionTime: null,
+  statusLastChangedTime: null
 };
 
 export const TEST_PERMIT_1: Permit = {
@@ -647,9 +651,13 @@ export const TEST_PERMIT_1: Permit = {
   needed: PermitNeeded.YES,
   stage: PermitStage.PRE_SUBMISSION,
   submittedDate: null,
-  adjudicationDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
   statusLastChanged: null,
+  statusLastChangedTime: null,
   statusLastVerified: null,
+  statusLastVerifiedTime: null,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
@@ -693,10 +701,14 @@ export const TEST_PERMIT_2: Permit = {
   state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
   stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date('2024-01-05T00:00:00.000Z'),
-  adjudicationDate: null,
-  statusLastChanged: new Date('2024-01-05T00:00:00.000Z'),
-  statusLastVerified: new Date('2024-01-05T00:00:00.000Z'),
+  submittedDate: '2024-01-05',
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
+  statusLastChangedTime: null,
+  statusLastVerifiedTime: null,
+  statusLastChanged: '2024-01-05',
+  statusLastVerified: '2024-01-05',
   createdAt: null,
   createdBy: null,
   updatedAt: null,
@@ -741,9 +753,13 @@ export const TEST_PERMIT_3: Permit = {
   needed: PermitNeeded.UNDER_INVESTIGATION,
   stage: PermitStage.PRE_SUBMISSION,
   submittedDate: null,
-  adjudicationDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
   statusLastChanged: null,
+  statusLastChangedTime: null,
   statusLastVerified: null,
+  statusLastVerifiedTime: null,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
@@ -788,9 +804,13 @@ export const TEST_PERMIT_4: Permit = {
   needed: PermitNeeded.YES,
   stage: PermitStage.PRE_SUBMISSION,
   submittedDate: null,
-  adjudicationDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
   statusLastChanged: null,
+  statusLastChangedTime: null,
   statusLastVerified: null,
+  statusLastVerifiedTime: null,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
