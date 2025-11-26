@@ -4,12 +4,18 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
+import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 
 const testFName = 'John';
 const testLName = 'Doe';
 const testPhoneNumber = '123-456-7890';
 const testEmailId = 'test@example.com';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 const wrapperSettings = (
   fName: string = testFName,
