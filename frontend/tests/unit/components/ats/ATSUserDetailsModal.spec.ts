@@ -1,4 +1,4 @@
-import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -6,6 +6,12 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 const testAtsClientId = 123456;
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
 
 const wrapperSettings = (testAtsClientIdProp = testAtsClientId) => ({
   props: {
