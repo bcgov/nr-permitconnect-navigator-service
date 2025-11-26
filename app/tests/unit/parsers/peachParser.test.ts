@@ -87,75 +87,72 @@ describe('peachRecordParser', () => {
     it('maps PRE_APPLICATION/SUBMITTED to Application Submission / Initial review and sets sub/status dates', () => {
       const summary = summarizeRecord(TEST_PEACH_RECORD_1);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-02-01T00:00:00.000Z');
-      expect(summary.submittedDate?.toISOString()).toBe('2024-02-01T00:00:00.000Z');
-      expect(summary.adjudicationDate).toBeUndefined();
-      expect(summary.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
-      expect(summary.state).toBe(PermitState.INITIAL_REVIEW);
+      // From SUBMITTED event 2024-02-01T00:00:00.000Z
+      expect(summary!.statusLastChanged).toBe('2024-02-01');
+      expect(summary!.statusLastChangedTime).toBe(null);
+
+      expect(summary!.submittedDate).toBe('2024-02-01');
+      expect(summary!.submittedTime).toBe(null);
+
+      expect(summary!.decisionDate).toBeNull();
+      expect(summary!.decisionTime).toBeNull();
+
+      expect(summary!.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
+      expect(summary!.state).toBe(PermitState.INITIAL_REVIEW);
     });
 
-    it('maps DECISION/ALLOWED to Post Decision / Approved and sets adjudication/status dates', () => {
+    it('maps DECISION/ALLOWED to Post Decision / Approved and sets decision/status dates', () => {
       const summary = summarizeRecord(TEST_PEACH_RECORD_2);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-03-01T12:00:00.000Z');
-      expect(summary.adjudicationDate?.toISOString()).toBe('2024-03-01T12:00:00.000Z');
-      expect(summary.submittedDate).toBeUndefined();
-      expect(summary.stage).toBe(PermitStage.POST_DECISION);
-      expect(summary.state).toBe(PermitState.APPROVED);
+      expect(summary!.statusLastChanged).toBe('2024-03-01');
+      expect(summary!.statusLastChangedTime).toBe('12:00:00.000Z');
+
+      expect(summary!.decisionDate).toBe('2024-03-01');
+      expect(summary!.decisionTime).toBe('12:00:00.000Z');
+
+      expect(summary!.submittedDate).toBeNull();
+      expect(summary!.submittedTime).toBeNull();
+
+      expect(summary!.stage).toBe(PermitStage.POST_DECISION);
+      expect(summary!.state).toBe(PermitState.APPROVED);
     });
 
     it('uses previous stage for terminal REJECTED and maps to Technical review / Rejected', () => {
       const summary = summarizeRecord(TEST_PEACH_RECORD_REJECTED);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-05-01T00:00:00.000Z');
-      expect(summary.stage).toBe(PermitStage.TECHNICAL_REVIEW);
-      expect(summary.state).toBe(PermitState.REJECTED);
-      expect(summary.submittedDate).toBeUndefined();
-      expect(summary.adjudicationDate).toBeUndefined();
+      expect(summary!.statusLastChanged).toBe('2024-05-01');
+      expect(summary!.statusLastChangedTime).toBe('23:12:00.000Z');
+
+      expect(summary!.submittedDate).toBeNull();
+      expect(summary!.submittedTime).toBeNull();
+      expect(summary!.decisionDate).toBeNull();
+      expect(summary!.decisionTime).toBeNull();
+
+      expect(summary!.stage).toBe(PermitStage.TECHNICAL_REVIEW);
+      expect(summary!.state).toBe(PermitState.REJECTED);
     });
 
-    it('returns undefined stage/state for an unmapped PEACH combination but still sets status date', () => {
+    it('returns null summary for an unmapped PEACH combination', () => {
       const summary = summarizeRecord(TEST_PEACH_RECORD_UNMAPPED);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-06-01T00:00:00.000Z');
-      expect(summary.stage).toBeUndefined();
-      expect(summary.state).toBeUndefined();
-      expect(summary.submittedDate).toBeUndefined();
-      expect(summary.adjudicationDate).toBeUndefined();
+      expect(summary).toBe(null);
     });
 
-    it('uses start_date branch in piesEventToDate and ISSUANCE to determine adjudicationDate', () => {
+    it('uses start_date branch in piesEventToDate and ISSUANCE to determine decisionDate', () => {
       const summary = summarizeRecord(TEST_PEACH_RECORD_ISSUED);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-07-01T00:00:00.000Z');
-      expect(summary.adjudicationDate?.toISOString()).toBe('2024-07-01T00:00:00.000Z');
-      expect(summary.stage).toBe(PermitStage.POST_DECISION);
-      expect(summary.state).toBe(PermitState.ISSUED);
-      expect(summary.submittedDate).toBeUndefined();
-    });
+      // start_date only: '2024-07-01'
+      expect(summary!.statusLastChanged).toBe('2024-07-01');
+      expect(summary!.statusLastChangedTime).toBeNull();
 
-    it('uses the fallback (first event) when requesting a previous event but only one process event exists', () => {
-      const record = {
-        ...TEST_PEACH_RECORD_1,
-        process_event_set: [
-          {
-            event: { start_datetime: '2024-09-01T00:00:00.000Z' },
-            process: {
-              code: 'SUBMITTED',
-              code_display: 'Submitted',
-              code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
-              code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
-            }
-          }
-        ]
-      } as PeachRecord;
+      expect(summary!.decisionDate).toBe('2024-07-01');
+      expect(summary!.decisionTime).toBeNull();
 
-      const summary = summarizeRecord(record);
+      expect(summary!.stage).toBe(PermitStage.POST_DECISION);
+      expect(summary!.state).toBe(PermitState.ISSUED);
 
-      expect(summary.statusLastChanged?.toISOString()).toBe('2024-09-01T00:00:00.000Z');
-
-      expect(summary.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
-      expect(summary.state).toBe(PermitState.INITIAL_REVIEW);
+      expect(summary!.submittedDate).toBeNull();
+      expect(summary!.submittedTime).toBeNull();
     });
   });
 
@@ -168,17 +165,37 @@ describe('peachRecordParser', () => {
 
       expect(Object.keys(map).sort()).toEqual([key1, key2].sort());
 
-      expect(map[key1].statusLastChanged?.toISOString()).toBe('2024-02-01T00:00:00.000Z');
-      expect(map[key1].submittedDate?.toISOString()).toBe('2024-02-01T00:00:00.000Z');
-      expect(map[key1].adjudicationDate).toBeUndefined();
-      expect(map[key1].stage).toBe(PermitStage.APPLICATION_SUBMISSION);
-      expect(map[key1].state).toBe(PermitState.INITIAL_REVIEW);
+      const s1 = map[key1];
+      expect(s1.statusLastChanged).toBe('2024-02-01');
+      expect(s1.statusLastChangedTime).toBe(null);
+      expect(s1.submittedDate).toBe('2024-02-01');
+      expect(s1.submittedTime).toBe(null);
+      expect(s1.decisionDate).toBeNull();
+      expect(s1.decisionTime).toBeNull();
+      expect(s1.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
+      expect(s1.state).toBe(PermitState.INITIAL_REVIEW);
 
-      expect(map[key2].statusLastChanged?.toISOString()).toBe('2024-03-01T12:00:00.000Z');
-      expect(map[key2].adjudicationDate?.toISOString()).toBe('2024-03-01T12:00:00.000Z');
-      expect(map[key2].submittedDate).toBeUndefined();
-      expect(map[key2].stage).toBe(PermitStage.POST_DECISION);
-      expect(map[key2].state).toBe(PermitState.APPROVED);
+      const s2 = map[key2];
+      expect(s2.statusLastChanged).toBe('2024-03-01');
+      expect(s2.statusLastChangedTime).toBe('12:00:00.000Z');
+      expect(s2.decisionDate).toBe('2024-03-01');
+      expect(s2.decisionTime).toBe('12:00:00.000Z');
+      expect(s2.submittedDate).toBeNull();
+      expect(s2.submittedTime).toBeNull();
+      expect(s2.stage).toBe(PermitStage.POST_DECISION);
+      expect(s2.state).toBe(PermitState.APPROVED);
+    });
+
+    it('returns only the records that have mapped statuses', () => {
+      const map = parsePeachRecords([TEST_PEACH_RECORD_UNMAPPED, TEST_PEACH_RECORD_2]);
+
+      const key1 = `${PeachIntegratedSystem.VFCBC}REC-UNMAPPED`;
+      const key2 = `${PeachIntegratedSystem.VFCBC}REC-DECISION`;
+
+      expect(Object.keys(map).sort()).toEqual([key2].sort());
+
+      const s1 = map[key1];
+      expect(s1).toBe(undefined);
     });
 
     it('returns an empty object when given an empty record list', () => {
