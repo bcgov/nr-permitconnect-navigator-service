@@ -180,27 +180,31 @@ model knex_migrations_lock {
 }
 
 model permit {
-  permitId           String            @id @map("permit_id") @db.Uuid
-  permitTypeId       Int               @map("permit_type_id")
-  activityId         String            @map("activity_id")
-  issuedPermitId     String?           @map("issued_permit_id")
-  state              String
-  needed             String?
-  stage              String
-  submittedDate      DateTime?         @map("submitted_date") @db.Timestamptz(6)
-  adjudicationDate   DateTime?         @map("adjudication_date") @db.Timestamptz(6)
-  createdBy          String?           @default("00000000-0000-4000-8000-000000000000") @map("created_by")
-  createdAt          DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy          String?           @map("updated_by")
-  updatedAt          DateTime?         @map("updated_at") @db.Timestamptz(6)
-  deletedBy          String?           @map("deleted_by")
-  deletedAt          DateTime?         @map("deleted_at") @db.Timestamptz(6)
-  statusLastVerified DateTime?         @map("status_last_verified") @db.Timestamptz(6)
-  statusLastChanged  DateTime?         @map("status_last_changed") @db.Timestamptz(6)
-  activity           activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
-  permitType         permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
-  permitNote         permit_note[]
-  permitTracking     permit_tracking[]
+  permitId               String            @id @map("permit_id") @db.Uuid
+  permitTypeId           Int               @map("permit_type_id")
+  activityId             String            @map("activity_id")
+  issuedPermitId         String?           @map("issued_permit_id")
+  state                  String
+  needed                 String?
+  stage                  String
+  submittedDate          DateTime?         @map("submitted_date") @db.Date
+  createdBy              String?           @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt              DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?           @map("updated_by")
+  updatedAt              DateTime?         @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?           @map("deleted_by")
+  deletedAt              DateTime?         @map("deleted_at") @db.Timestamptz(6)
+  statusLastVerified     DateTime?         @map("status_last_verified") @db.Date
+  decisionDate           DateTime?         @map("decision_date") @db.Date
+  statusLastChanged      DateTime?         @map("status_last_changed") @db.Date
+  decisionTime           DateTime?         @map("decision_time") @db.Timetz(6)
+  statusLastChangedTime  DateTime?         @map("status_last_changed_time") @db.Timetz(6)
+  statusLastVerifiedTime DateTime?         @map("status_last_verified_time") @db.Timetz(6)
+  submittedTime          DateTime?         @map("submitted_time") @db.Timetz(6)
+  activity               activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
+  permitType             permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permitNote             permit_note[]
+  permitTracking         permit_tracking[]
 
   @@unique([permitId, permitTypeId, activityId], map: "permit_permit_id_permit_type_id_activity_id_unique")
   @@schema("public")
