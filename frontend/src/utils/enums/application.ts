@@ -13,6 +13,7 @@ export enum Action {
 }
 
 export enum ATSCreateTypes {
+  CLIENT = 'CLIENT',
   CLIENT_ENQUIRY = 'CLIENT_ENQUIRY',
   ENQUIRY = 'ENQUIRY'
 }
