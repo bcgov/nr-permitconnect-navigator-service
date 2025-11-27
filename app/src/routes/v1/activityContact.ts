@@ -3,37 +3,52 @@ import express from 'express';
 import {
   createActivityContactController,
   deleteActivityContactController,
-  listActivityContactController
+  listActivityContactController,
+  updateActivityContactController
 } from '../../controllers/activityContact';
 import { requireActivityAdmin } from '../../middleware/requireActivityAdmin';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 
 import { activityContactValidator } from '../../validators';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { Action, Resource } from '../../utils/enums/application';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true });
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** List activity_contact linkages for an activity */
 router.get(
-  '/:activityId/contact',
-  requireActivityAdmin,
+  '/',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.READ),
+  hasAccess('activityId'),
   activityContactValidator.listActivityContact,
   listActivityContactController
 );
 
 /** Create an activity_contact linkage for an activity */
 router.post(
-  '/:activityId/contact/:contactId',
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.CREATE),
   requireActivityAdmin,
   activityContactValidator.createActivityContact,
   createActivityContactController
 );
 
+/** Update an activity_contact linkage for an activity */
+router.put(
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.UPDATE),
+  requireActivityAdmin,
+  activityContactValidator.updateActivityContact,
+  updateActivityContactController
+);
+
 /** Delete an activity_contact linkage for an activity */
 router.delete(
-  '/:activityId/contact/:contactId',
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.DELETE),
   requireActivityAdmin,
   activityContactValidator.deleteActivityContact,
   deleteActivityContactController

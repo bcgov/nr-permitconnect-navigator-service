@@ -5,7 +5,13 @@ import ToastService from 'primevue/toastservice';
 import { StorageKey } from '@/utils/enums/application';
 import { shallowMount } from '@vue/test-utils';
 
-import { contactService, enquiryService, permitService, housingProjectService } from '@/services';
+import {
+  activityContactService,
+  contactService,
+  enquiryService,
+  permitService,
+  housingProjectService
+} from '@/services';
 import ProjectView from '@/views/external/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -80,12 +86,17 @@ describe('ProjectView.vue', () => {
   });
 
   it('renders the component with the provided props', () => {
+    const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
     const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
     const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
     const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
     const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
     const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
     const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
+
+    listActivityContactsSpy.mockResolvedValue({
+      data: []
+    } as AxiosResponse);
 
     listRelatedEnquiriesSpy.mockResolvedValue({
       data: 'notTested'
