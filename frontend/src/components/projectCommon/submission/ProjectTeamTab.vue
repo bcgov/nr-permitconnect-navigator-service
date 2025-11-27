@@ -3,8 +3,8 @@ import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, useToast } from '@/lib/primevue';
-import ProjectTeamTable from './ProjectTeamTable.vue';
 import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
+import ProjectTeamTable from './ProjectTeamTable.vue';
 import { activityContactService } from '@/services';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 

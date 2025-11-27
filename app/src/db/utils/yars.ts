@@ -316,8 +316,8 @@ export async function getGroupId(knex: Knex, initiativeId: number, group: GroupN
 /**
  * Deletes an attribute_group row
  * @param knex Knex instance
- * @param initiativeId Name of the initiative to look under
- * @param groupId Name of the group to look for
+ * @param initiative Name of the initiative to look under
+ * @param groupName Name of the group to look for
  * @param attributeName Name of the attribute to look for
  * @returns The generated Knex function to delete data
  */

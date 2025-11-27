@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
 import { useContactStore } from '@/store';
@@ -12,6 +13,9 @@ import type { ActivityContact } from '@/types';
 const { activityContacts } = defineProps<{
   activityContacts: ActivityContact[];
 }>();
+
+// Composables
+const { t } = useI18n();
 
 // State
 const isAdmin: Ref<boolean> = ref(false);
@@ -33,45 +37,45 @@ watchEffect(async () => {
   >
     <template #empty>
       <div class="flex justify-center">
-        <h5 class="m-0">No users found.</h5>
+        <h5 class="m-0">{{ t('e.common.projectTeamTable.noUsers') }}</h5>
       </div>
     </template>
     <Column
       field="contact.firstName"
-      header="First Name"
+      :header="t('e.common.projectTeamTable.headerFirstName')"
       sortable
     />
     <Column
       field="contact.lastName"
-      header="Last Name"
+      :header="t('e.common.projectTeamTable.headerLastName')"
       sortable
     />
     <Column
       field="contact.email"
-      header="Email"
+      :header="t('e.common.projectTeamTable.headerEmail')"
       sortable
     />
     <Column
       field="contact.phoneNumber"
-      header="Phone"
+      :header="t('e.common.projectTeamTable.headerPhone')"
       sortable
     />
     <Column
       field="role"
-      header="Role"
+      :header="t('e.common.projectTeamTable.headerRole')"
       sortable
     />
     <Column
       v-if="isAdmin"
       field="manage"
-      header="Manage"
+      :header="t('e.common.projectTeamTable.headerManage')"
       header-class="header-right"
       class="!text-right"
     >
       <template #body>
         <Button
           class="p-button-lg p-button-text p-0"
-          aria-label="Manage"
+          :aria-label="t('e.common.projectTeamTable.headerManage')"
         >
           <font-awesome-icon icon="fa-solid fa-pen-to-square" />
         </Button>
@@ -80,14 +84,14 @@ watchEffect(async () => {
     <Column
       v-if="isAdmin"
       field="revoke"
-      header="Revoke"
+      :header="t('e.common.projectTeamTable.headerRevoke')"
       header-class="header-right"
       class="!text-right"
     >
       <template #body>
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
-          aria-label="Revoke"
+          :aria-label="t('e.common.projectTeamTable.headerRevoke')"
         >
           <font-awesome-icon icon="fa-solid fa-user-xmark" />
         </Button>

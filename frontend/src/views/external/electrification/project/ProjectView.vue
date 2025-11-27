@@ -15,12 +15,12 @@ import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/Rela
 import ProjectTeamTab from '@/components/projectCommon/submission/ProjectTeamTab.vue';
 import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import {
+  activityContactService,
   contactService,
   enquiryService,
   electrificationProjectService,
   noteHistoryService,
-  permitService,
-  activityContactService
+  permitService
 } from '@/services';
 import { useAuthZStore, useContactStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
