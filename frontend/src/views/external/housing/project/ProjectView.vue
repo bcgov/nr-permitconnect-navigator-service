@@ -11,8 +11,8 @@ import { AskMyNavigator } from '@/components/common/icons';
 import NoteBanner from '@/components/note/NoteBanner.vue';
 import ShownToProponentModal from '@/components/note/ShownToProponentModal.vue';
 import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCard.vue';
-import ProjectTeamTab from '@/components/projectCommon/submission/ProjectTeamTab.vue';
 import RelatedEnquiryListProponent from '@/components/projectCommon/enquiry/RelatedEnquiryListProponent.vue';
+import ProjectTeamTab from '@/components/projectCommon/submission/ProjectTeamTab.vue';
 import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib/primevue';
 import {
   activityContactService,
