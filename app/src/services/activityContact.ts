@@ -22,7 +22,8 @@ export const createActivityContact = async (
       activityId,
       contactId,
       role
-    }
+    },
+    include: { contact: true }
   });
 };
 
@@ -60,6 +61,7 @@ export const listActivityContacts = async (
   return await tx.activity_contact.findMany({
     where: {
       activityId: activityId
-    }
+    },
+    include: { contact: true }
   });
 };

@@ -29,14 +29,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import {
-  activityContactService,
-  atsService,
-  contactService,
-  housingProjectService,
-  mapService,
-  userService
-} from '@/services';
+import { atsService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -356,17 +349,6 @@ const onSubmit = async (values: any) => {
       atsCreateType.value = undefined;
     }
 
-    // Grab the contact information
-    const contact = {
-      contactId: values.contact.contactId,
-      firstName: values.contact.firstName,
-      lastName: values.contact.lastName,
-      phoneNumber: values.contact.phoneNumber,
-      email: values.contact.email,
-      contactApplicantRelationship: values.contact.contactApplicantRelationship,
-      contactPreference: values.contact.contactPreference
-    };
-
     // Generate final submission object
     const dataOmitted = omit(
       setEmptyStringsToNull({
@@ -407,11 +389,7 @@ const onSubmit = async (values: any) => {
       ]
     );
 
-    // Update project - order of calls is important
-    const contactResponse = (await contactService.updateContact(contact)).data;
-    await activityContactService.updateActivityContact(project.activityId, [
-      { ...contact, contactId: contactResponse.contactId }
-    ]);
+    // Update project
     const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
 
     // Update store with returned data

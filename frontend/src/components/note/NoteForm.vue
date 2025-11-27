@@ -428,7 +428,7 @@ onBeforeMount(async () => {
       </div>
       <div
         v-if="noteHistory"
-        class="flex justify-content-right"
+        class="flex justify-end"
       >
         <Button
           class="p-button-outlined p-button-danger mr-2"
