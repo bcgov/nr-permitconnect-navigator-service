@@ -5,7 +5,7 @@ import { validate, version } from 'uuid';
 
 import { getLogger } from '../components/log';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes, DateTimeStrings } from '../types';
 
 const log = getLogger(module.filename);
 
@@ -33,6 +33,22 @@ export function camelCaseToTitleCase(input: string | null): string | null {
   const result = input.replace(/([A-Z])/g, ' $1');
   return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
 }
+
+/**
+ * Combines separate date and time strings into a single UTC Date object
+ * @param date date string
+ * @param time time string
+ * @returns A constructed date object
+ */
+export const combineDateTime = (date?: string | null, time?: string | null): Date | undefined => {
+  if (!date) return undefined;
+
+  if (!time) {
+    return new Date(`${date}T00:00:00.000Z`);
+  }
+
+  return new Date(`${date}T${time}`);
+};
 
 /**
  * Comparator function for sorting dates
@@ -266,6 +282,25 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: string[]
     });
   }
   return data;
+}
+
+/**
+ * Splits a single Date object into separate UTC date and time strings
+ * @param value The Date instance to split
+ * @returns An object containing `date` and `time` strings
+ */
+export function splitDateTime(value: Date): DateTimeStrings {
+  const isDateOnly =
+    value.getUTCHours() === 0 &&
+    value.getUTCMinutes() === 0 &&
+    value.getUTCSeconds() === 0 &&
+    value.getUTCMilliseconds() === 0;
+
+  const [date, time] = value.toISOString().split('T');
+
+  if (isDateOnly) return { date, time: null };
+
+  return { date, time };
 }
 
 /**

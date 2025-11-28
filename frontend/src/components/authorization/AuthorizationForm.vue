@@ -4,7 +4,7 @@ import { Form } from 'vee-validate';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { array, date, boolean, number, object, string } from 'yup';
+import { array, boolean, number, object, string } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
@@ -18,7 +18,8 @@ import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
-import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { combineDateTime, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
+import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
 import type { Permit, User } from '@/types';
@@ -58,14 +59,24 @@ const projectService = inject(projectServiceKey);
 
 async function onSubmit(data: any) {
   disableFormNavigationGuard.value = true;
+  const decision = splitDateTime(data.decisionDate);
+  const submitted = splitDateTime(data.submittedDate);
+  const statusLastChanged = splitDateTime(data.statusLastChanged);
+  const statusLastVerified = splitDateTime(data.statusLastVerified);
 
   const { authorizationType, permitNote, ...rest } = data;
   const permitData: Permit = {
     ...rest,
     activityId: getProject.value?.activityId,
     permitTypeId: authorizationType?.permitTypeId,
-    submittedDate: data.submittedDate?.toISOString(),
-    adjudicationDate: data.adjudicationDate?.toISOString()
+    submittedDate: submitted.date,
+    submittedTime: submitted.time,
+    decisionDate: decision.date,
+    decisionTime: decision.time,
+    statusLastVerified: statusLastVerified.date,
+    statusLastVerifiedTime: statusLastVerified.time,
+    statusLastChanged: statusLastChanged.date,
+    statusLastChangedTime: statusLastChanged.time
   };
 
   const permitSubmitData = setEmptyStringsToNull(permitData);
@@ -204,30 +215,26 @@ const formSchema = object({
       const { stage } = this.parent;
       return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
     }),
-  submittedDate: date()
-    .max(new Date(), t('authorization.authorizationForm.submittedDateFutureError'))
-    .nullable()
-    .label(t('authorization.authorizationForm.submittedDate')),
-  adjudicationDate: date()
-    .max(new Date(), t('authorization.authorizationForm.adjudicationDateFutureError'))
-    .nullable()
-    .label(t('authorization.authorizationForm.adjudicationDate'))
+  submittedDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.submittedDate')),
+  decisionDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.decisionDate')),
+  statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
+  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
 });
 
 function initializeFormValues() {
   if (authorization) {
     initialFormValues.value = {
       authorizationType: authorization.permitType,
-      adjudicationDate: authorization.adjudicationDate ? new Date(authorization.adjudicationDate) : null,
-      submittedDate: authorization.submittedDate ? new Date(authorization.submittedDate) : null,
+      decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
+      submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
       permitTracking: authorization.permitTracking.map((x) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sourceSystemKind, ...tracking } = x;
         return tracking;
       }),
       issuedPermitId: authorization.issuedPermitId,
-      statusLastChanged: authorization.statusLastChanged ? new Date(authorization.statusLastChanged) : null,
-      statusLastVerified: authorization.statusLastVerified ? new Date(authorization.statusLastVerified) : null,
+      statusLastChanged: combineDateTime(authorization.statusLastChanged, authorization.statusLastChangedTime),
+      statusLastVerified: combineDateTime(authorization.statusLastVerified, authorization.statusLastVerifiedTime),
       stage: authorization.stage,
       state: authorization.state,
       needed: authorization.needed,
@@ -294,7 +301,7 @@ onBeforeMount(async () => {
       initial-form-values=""
       :editable="editable"
       class="mt-7"
-      @update:set-verified-date="setFieldValue('statusLastVerified', new Date().toISOString())"
+      @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
     />
     <div class="mt-8 flex justify-between">
       <div>

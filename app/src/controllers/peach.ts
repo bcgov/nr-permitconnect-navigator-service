@@ -4,7 +4,7 @@ import { generateUpdateStamps } from '../db/utils/utils';
 import { parsePeachRecords, summarizeRecord } from '../parsers/peachParser';
 import { getPeachRecord } from '../services/peach';
 import { searchPermits, upsertPermit } from '../services/permit';
-import { compareDates, omit } from '../utils';
+import { combineDateTime, compareDates, omit, Problem } from '../utils';
 import { PEACH_INTEGRATED_SYSTEMS } from '../utils/constants/permit';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 
@@ -29,6 +29,10 @@ const PEACH_TRACKING_PRIORITY = [
   {
     sourceSystem: PeachIntegratedSystem.VFCBC,
     trackingName: 'Tracking Number'
+  },
+  {
+    sourceSystem: PeachIntegratedSystem.ATS,
+    trackingName: 'Authorization Id'
   }
 ];
 
@@ -38,7 +42,11 @@ const PEACH_TRACKING_PRIORITY = [
 export const getPeachRecordController = async (req: Request<{ recordId: string; systemId: string }>, res: Response) => {
   const response = await getPeachRecord(req.params.recordId, req.params.systemId);
 
-  const peachSummary: PeachSummary = summarizeRecord(response);
+  const peachSummary: PeachSummary | null = summarizeRecord(response);
+
+  // TODO-RELEASE: make sure that we properly handle this case, not a 404
+  if (!peachSummary)
+    throw new Problem(404, { type: 'NoStatusAvailable', detail: 'Record was found but no status available.' });
 
   res.status(200).json(peachSummary);
 };
@@ -49,7 +57,7 @@ export const getPeachRecordController = async (req: Request<{ recordId: string; 
 export const syncPeachRecords = async () => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    // Only fetch permits that have tracking with peach integrated systems
+    // Only fetch permits that have a peach integrated system permit type
     const peachIntegratedPermits: Permit[] = await searchPermits(tx, {
       sourceSystems: PEACH_INTEGRATED_SYSTEMS,
       includePermitTracking: true
@@ -128,41 +136,59 @@ export const syncPeachRecords = async () => {
     for (const systemRecordPermit of systemRecordPermits) {
       const { recordId, systemId, permit: pcnsPermit } = systemRecordPermit;
       const systemRecordId = systemId + recordId;
-      const peachPermit = parsedRecords[systemRecordId];
+      const peachSummary = parsedRecords[systemRecordId];
 
-      if (!peachPermit) continue;
+      if (!peachSummary) continue;
 
-      // If parser didn't return proper status mappings skip upsert
-      if (peachPermit.stage === undefined || peachPermit.state === undefined) {
-        continue;
-      }
+      const peachSubmittedDatetime = combineDateTime(peachSummary.submittedDate, peachSummary.submittedTime);
+      const peachDecisionDatetime = combineDateTime(peachSummary.decisionDate, peachSummary.decisionTime);
+      const peachStatusChangedDatetime = combineDateTime(
+        peachSummary.statusLastChanged,
+        peachSummary.statusLastChangedTime
+      );
+      const pcnsSubmittedDatetime = combineDateTime(pcnsPermit.submittedDate, pcnsPermit.submittedTime);
+      const pcnsDecisionDatetime = combineDateTime(pcnsPermit.decisionDate, pcnsPermit.decisionTime);
+      const pcnsStatusChangedDatetime = combineDateTime(pcnsPermit.statusLastChanged, pcnsPermit.statusLastChangedTime);
+      const pcnsLastVerifiedDatetime = combineDateTime(
+        pcnsPermit.statusLastVerified,
+        pcnsPermit.statusLastVerifiedTime
+      );
 
-      const submittedDatesEqual =
-        compareDates(peachPermit.submittedDate ?? undefined, pcnsPermit.submittedDate ?? undefined) === 0;
-      const ajudicationDatesEqual =
-        compareDates(peachPermit.adjudicationDate ?? undefined, pcnsPermit.adjudicationDate ?? undefined) === 0;
-      const lastChangedDatesEqual =
-        compareDates(peachPermit.statusLastChanged, pcnsPermit.statusLastChanged ?? undefined) === 0;
-      const statesEqual = peachPermit.state === pcnsPermit.state;
-      const stagesEqual = peachPermit.stage === pcnsPermit.stage;
+      // Check differentials for PEACH vs PCNS status data
+      const submittedDatesEqual = compareDates(peachSubmittedDatetime, pcnsSubmittedDatetime) === 0;
+      const decisionDatesEqual = compareDates(peachDecisionDatetime, pcnsDecisionDatetime) === 0;
+      const lastChangedDatesEqual = compareDates(peachStatusChangedDatetime, pcnsStatusChangedDatetime) === 0;
+      const statesEqual = peachSummary.state === pcnsPermit.state;
+      const stagesEqual = peachSummary.stage === pcnsPermit.stage;
 
       const hasDiff =
-        !stagesEqual || !statesEqual || !submittedDatesEqual || !ajudicationDatesEqual || !lastChangedDatesEqual;
+        !stagesEqual || !statesEqual || !submittedDatesEqual || !decisionDatesEqual || !lastChangedDatesEqual;
 
       if (!hasDiff) continue;
 
-      pcnsPermit.state = peachPermit.state;
-      pcnsPermit.stage = peachPermit.stage;
-      pcnsPermit.statusLastChanged = peachPermit.statusLastChanged;
-      if (peachPermit.submittedDate) pcnsPermit.submittedDate = peachPermit.submittedDate;
-      if (peachPermit.adjudicationDate) pcnsPermit.adjudicationDate = peachPermit.adjudicationDate;
+      pcnsPermit.state = peachSummary.state;
+      pcnsPermit.stage = peachSummary.stage;
+
+      if (peachSummary.submittedDate) {
+        pcnsPermit.submittedDate = peachSummary.submittedDate;
+        pcnsPermit.submittedTime = peachSummary.submittedTime;
+      }
+
+      if (peachSummary.decisionDate) {
+        pcnsPermit.decisionDate = peachSummary.decisionDate;
+        pcnsPermit.decisionTime = peachSummary.decisionTime;
+      }
+
+      pcnsPermit.statusLastChanged = peachSummary.statusLastChanged;
+      pcnsPermit.statusLastChangedTime = peachSummary.statusLastChangedTime;
 
       // Don't update lastVerified if current value is after PEACH's status change
-      // Means that PCNS (a Navigator) has manually updated it since PEACH update
-      const lastVerifiedBeforeStatusChange =
-        compareDates(pcnsPermit.statusLastVerified ?? undefined, peachPermit.statusLastChanged) < 0;
+      const lastVerifiedBeforeStatusChange = compareDates(pcnsLastVerifiedDatetime, peachStatusChangedDatetime) < 0;
 
-      if (lastVerifiedBeforeStatusChange) pcnsPermit.statusLastVerified = peachPermit.statusLastChanged;
+      if (lastVerifiedBeforeStatusChange) {
+        pcnsPermit.statusLastVerified = peachSummary.statusLastChanged;
+        pcnsPermit.statusLastVerifiedTime = peachSummary.statusLastChangedTime;
+      }
 
       const { updatedBy, updatedAt } = generateUpdateStamps(undefined);
       pcnsPermit.updatedAt = updatedAt;

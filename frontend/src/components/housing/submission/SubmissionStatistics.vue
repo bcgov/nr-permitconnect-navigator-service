@@ -83,7 +83,7 @@ async function onDownloadProjectPermitData() {
       val = val.toString();
 
       // convert date fields to readable format
-      if (header === 'submitted_date' || header === 'adjudication_date' || header === 'status_last_verified') {
+      if (header === 'submitted_date' || header === 'decision_date' || header === 'status_last_verified') {
         val = formatDate(val);
       }
 

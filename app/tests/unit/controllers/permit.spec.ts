@@ -175,7 +175,7 @@ describe('upsertPermitController', () => {
         needed: PermitNeeded.YES,
         stage: PermitStage.PRE_SUBMISSION,
         submittedDate: now,
-        adjudicationDate: now
+        decisionDate: now
       },
       currentContext: TEST_CURRENT_CONTEXT
     };

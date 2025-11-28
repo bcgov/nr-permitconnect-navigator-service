@@ -11,6 +11,7 @@ export const permitTypeSchema = Joi.object({
   name: Joi.string().max(255).required(),
   nameSubtype: Joi.string().max(255).allow(null),
   acronym: Joi.string().max(255).allow(null),
+  infoUrl: Joi.string().max(255).allow(null),
   trackedInAts: Joi.boolean().required(),
   sourceSystem: Joi.string().max(255).allow(null),
   sourceSystemAcronym: Joi.string().max(255).allow(null)

@@ -114,7 +114,7 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
 export const searchPermits = async (tx: PrismaTransactionClient, params: PermitSearchParams): Promise<Permit[]> => {
   let permitTrackingInclude: object = {};
 
-  // Only include the matching params.sourceSystemKinds if given
+  // Only include the filtered params.sourceSystemKinds if given
   if (params.includePermitTracking) {
     permitTrackingInclude = {
       permitTracking: {
@@ -134,9 +134,7 @@ export const searchPermits = async (tx: PrismaTransactionClient, params: PermitS
         params.permitTypeId ? { permitTypeId: { in: params.permitTypeId } } : {},
         params.stage ? { stage: { in: params.stage } } : {},
         params.state ? { state: { in: params.state } } : {},
-        params.sourceSystems
-          ? { permitTracking: { some: { sourceSystemKind: { sourceSystem: { in: params.sourceSystems } } } } }
-          : {}
+        params.sourceSystems ? { permitType: { sourceSystem: { in: params.sourceSystems } } } : {}
       ]
     },
     include: {

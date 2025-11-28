@@ -7,7 +7,6 @@ import type { PermitStage, PermitState } from '@/utils/enums/permit';
 export type Permit = {
   permitId: string; // Primary Key
   activityId: string;
-  adjudicationDate?: string;
   issuedPermitId?: string;
   needed: string;
   permitNote: Array<PermitNote>;
@@ -16,7 +15,12 @@ export type Permit = {
   permitTypeId: number;
   stage: PermitStage;
   state: PermitState;
-  statusLastChanged?: string;
-  statusLastVerified?: string;
-  submittedDate?: string;
+  submittedDate?: string | null;
+  submittedTime?: string | null;
+  statusLastChanged?: string | null;
+  statusLastChangedTime?: string | null;
+  statusLastVerified?: string | null;
+  statusLastVerifiedTime?: string | null;
+  decisionDate?: string | null;
+  decisionTime?: string | null;
 } & Partial<IStamps>;
