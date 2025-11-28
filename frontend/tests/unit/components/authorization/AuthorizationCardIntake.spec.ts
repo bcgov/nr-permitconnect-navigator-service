@@ -11,19 +11,18 @@ import { SYSTEM_ID } from '@/utils/constants/application';
 import { StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
+import type { SourceSystemKind } from '@/types';
 
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
 const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
-const sampleSourceSystemKind = {
+const sampleSourceSystemKind: SourceSystemKind = {
   description: 'ATS Project Number',
-  kind: null,
-  sourceSystemCode: 'ITSM-5314',
+  kind: undefined,
+  sourceSystem: 'ITSM-5314',
   sourceSystemKindId: 2,
   createdAt: '2025-06-18T15:56:00.515Z',
-  createdBy: SYSTEM_ID,
-  updatedAt: null,
-  updatedBy: null
+  createdBy: SYSTEM_ID
 };
 
 const permitTypesList = [
@@ -58,8 +57,7 @@ vi.mock('vue-router', () => ({
 
 const wrapperSettings = () => ({
   props: {
-    activityId: 'activityUUID',
-    projectId: 'projectUUID'
+    sourceSystemKinds: [sampleSourceSystemKind]
   },
   global: {
     plugins: [
