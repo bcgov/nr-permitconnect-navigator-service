@@ -6,7 +6,7 @@ import AuthorizationStatusPill from '@/components/authorization/AuthorizationSta
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
 import { PermitState } from '@/utils/enums/permit';
-import { formatDate, formatDateTime } from '@/utils/formatters';
+import { formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -116,15 +116,15 @@ function toCopy(toCopy: string) {
           <div class="text-xs">{{ t('authorization.authorizationCard.dates') }}</div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.statusVerified') }}:</span>
-            {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
+            {{ permit.statusLastVerified ? formatDateOnly(permit.statusLastVerified) : undefined }}
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
-            {{ permit.submittedDate ? formatDate(permit.submittedDate) : undefined }}
+            {{ permit.submittedDate ? formatDateOnly(permit.submittedDate) : undefined }}
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
-            {{ permit.adjudicationDate ? formatDate(permit.adjudicationDate) : undefined }}
+            {{ permit.decisionDate ? formatDateOnly(permit.decisionDate) : undefined }}
           </div>
         </div>
         <div

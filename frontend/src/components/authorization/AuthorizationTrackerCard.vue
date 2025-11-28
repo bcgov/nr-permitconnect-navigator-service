@@ -2,11 +2,12 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { PermitStage, PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
 import { Card, Timeline } from '@/lib/primevue';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
-import { formatDateTime } from '@/utils/formatters';
+import { formatDateOnly, formatDateTime } from '@/utils/formatters';
+import { PermitStage, PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
+
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
 
@@ -232,6 +233,20 @@ const timelineDescription = computed(() => (iconClass: string) => {
               :state="permit?.state"
               :enlarge="true"
             />
+            <<<<<<< HEAD =======
+            <div v-if="permit?.statusLastVerified">
+              <p class="verified-text my-0 italic">
+                {{ t('authorization.authorizationTrackerCard.statusLastVerified') }}
+                {{ formatDateOnly(permit.statusLastVerified) }}
+                {{ t('authorization.authorizationTrackerCard.byYourNavigator') }}
+              </p>
+            </div>
+            <div v-else>
+              <p class="verified-text my-0 italic">
+                {{ t('authorization.authorizationTrackerCard.statusNotVerified') }}
+              </p>
+            </div>
+            >>>>>>> e9a3e2bf (Make changes to frontend to reflect migration changes)
           </div>
           <div class="status-help">
             <font-awesome-icon

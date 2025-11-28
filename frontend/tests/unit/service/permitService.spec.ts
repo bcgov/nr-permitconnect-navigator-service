@@ -36,7 +36,7 @@ const TEST_PERMIT_1: Permit = {
   needed: 'needed',
   stage: PermitStage.APPLICATION_SUBMISSION,
   submittedDate: new Date().toISOString(),
-  adjudicationDate: new Date().toISOString(),
+  decisionDate: new Date().toISOString(),
   permitType: TEST_PERMIT_TYPE,
   permitTypeId: TEST_PERMIT_TYPE.permitTypeId,
   permitNote: [],
