@@ -12,6 +12,7 @@ router.use(requireSomeGroup);
 
 // TODO-RELEASE: Is permit resource and read sufficient for has auth on a peach route?
 /** Fetch PEACH Record from PEACH */
-router.get('/record/:recordId/:systemId', hasAuthorization(Resource.PERMIT, Action.READ), getPeachRecordController);
+// TODO-RELEASE: add validation
+router.post('/record', hasAuthorization(Resource.PERMIT, Action.READ), getPeachRecordController);
 
 export default router;

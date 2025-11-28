@@ -34,9 +34,9 @@ export const getPeachRecord = async (recordId: string, systemId?: string): Promi
     return data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
-      const message = e.response?.data.message;
+      const detail = e.response?.data.detail;
       const status = e.response ? e.response.status : 500;
-      throw new Problem(status, { detail: message });
+      throw new Problem(status, { detail });
     } else {
       throw new Problem(500, { detail: 'Server Error' });
     }

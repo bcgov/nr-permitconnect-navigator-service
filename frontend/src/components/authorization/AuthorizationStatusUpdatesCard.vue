@@ -7,8 +7,9 @@ import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/util
 import { PermitState } from '@/utils/enums/permit';
 
 // Props
-const { editable } = defineProps<{
+const { editable, peachIntegrated = false } = defineProps<{
   editable?: boolean;
+  peachIntegrated?: boolean;
 }>();
 
 // Emits
@@ -54,7 +55,7 @@ const stateDisplayText = {
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
             :options="PERMIT_STATE_LIST"
             :option-label="(option) => stateDisplayText[option as keyof typeof stateDisplayText] ?? option"
-            :disabled="!editable"
+            :disabled="peachIntegrated || !editable"
           />
         </div>
         <div>
@@ -62,7 +63,7 @@ const stateDisplayText = {
             name="stage"
             :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
             :options="PERMIT_STAGE_LIST"
-            :disabled="!editable"
+            :disabled="peachIntegrated || !editable"
           />
         </div>
       </div>
@@ -72,7 +73,7 @@ const stateDisplayText = {
             name="needed"
             :label="t('authorization.authorizationStatusUpdatesCard.needed')"
             :options="PERMIT_NEEDED_LIST"
-            :disabled="!editable"
+            :disabled="peachIntegrated || !editable"
           />
         </div>
         <div>
@@ -80,7 +81,15 @@ const stateDisplayText = {
             name="submittedDate"
             :label="t('authorization.authorizationStatusUpdatesCard.submittedDate')"
             :max-date="new Date()"
-            :disabled="!editable"
+            :disabled="peachIntegrated || !editable"
+          />
+        </div>
+        <div>
+          <DatePicker
+            name="statusLastChanged"
+            :label="t('authorization.authorizationStatusUpdatesCard.statusChangeDate')"
+            :max-date="new Date()"
+            :disabled="peachIntegrated || !editable"
           />
         </div>
         <div>
@@ -88,7 +97,7 @@ const stateDisplayText = {
             name="decisionDate"
             :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
             :max-date="new Date()"
-            :disabled="!editable"
+            :disabled="peachIntegrated || !editable"
           />
         </div>
       </div>

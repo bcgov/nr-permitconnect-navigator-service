@@ -1,3 +1,17 @@
+export enum BusinessDomain {
+  ARCHAEOLOGY = 'Archaeology',
+  CONTAMINATED_SITES = 'Contaminated Sites',
+  ENVIRONMENT = 'Environment',
+  FISH_AND_WILDLIFE = 'Fish and Wildlife',
+  FORESTRY = 'Forestry',
+  LANDS = 'Lands',
+  MINING = 'Mining',
+  PARKS = 'Parks',
+  RAPR = 'RAPR',
+  TRANSPORTATION = 'Transportation',
+  WATER = 'Water'
+}
+
 export enum PermitNeeded {
   YES = 'Yes',
   UNDER_INVESTIGATION = 'Under investigation',

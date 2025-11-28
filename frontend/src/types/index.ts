@@ -29,6 +29,7 @@ export type { Pagination } from './Pagination';
 export type { Permission } from './Permission';
 export type { Permit } from './Permit';
 export type { PermitNote } from './PermitNote';
+export type { PermitTracking } from './PermitTracking';
 export type { PermitType } from './PermitType';
 export type { SourceSystemKind } from './SourceSystemKind';
 export type { DateTimeStrings } from './DateTimeStrings';
