@@ -85,7 +85,7 @@ const stateDisplayText = {
         </div>
         <div>
           <DatePicker
-            name="adjudicationDate"
+            name="decisionDate"
             :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
             :max-date="new Date()"
             :disabled="!editable"

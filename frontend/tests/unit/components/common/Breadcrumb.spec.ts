@@ -119,7 +119,7 @@ const testPermit: Permit = {
   issuedPermitId: 'issued Permit ID',
   state: PermitState.IN_PROGRESS,
   submittedDate: currentDate,
-  adjudicationDate: currentDate,
+  decisionDate: currentDate,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

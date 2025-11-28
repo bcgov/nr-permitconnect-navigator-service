@@ -2,7 +2,7 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { formatDate } from '@/utils/formatters';
+import { formatDateOnly } from '@/utils/formatters';
 import { PermitStage, PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
 import { Card, Timeline } from '@/lib/primevue';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
@@ -236,7 +236,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
             <div v-if="permit?.statusLastVerified">
               <p class="verified-text my-0 italic">
                 {{ t('authorization.authorizationTrackerCard.statusLastVerified') }}
-                {{ formatDate(permit.statusLastVerified) }}
+                {{ formatDateOnly(permit.statusLastVerified) }}
                 {{ t('authorization.authorizationTrackerCard.byYourNavigator') }}
               </p>
             </div>
