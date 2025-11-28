@@ -119,6 +119,10 @@ function toCopy(toCopy: string) {
             {{ permit.statusLastVerified ? formatDateOnly(permit.statusLastVerified) : undefined }}
           </div>
           <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.statusChangeDate') }}:</span>
+            {{ permit.statusLastChanged ? formatDateOnly(permit.statusLastChanged) : undefined }}
+          </div>
+          <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
             {{ permit.submittedDate ? formatDateOnly(permit.submittedDate) : undefined }}
           </div>

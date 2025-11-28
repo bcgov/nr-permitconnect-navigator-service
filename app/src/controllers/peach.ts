@@ -36,14 +36,42 @@ const PEACH_TRACKING_PRIORITY = [
   }
 ];
 
+const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTracking | undefined => {
+  let permitTracking: PermitTracking | undefined;
+  let priorityIndex = PEACH_TRACKING_PRIORITY.length;
+
+  // Prioritize which PEACH integrated permit tracking to use
+  for (const pt of permitTrackings) {
+    if (!pt.sourceSystemKind) continue;
+    const sourceSystem = pt.sourceSystemKind.sourceSystem;
+    const trackingName = pt.sourceSystemKind.description;
+    if (!trackingName) continue;
+
+    const index = PEACH_TRACKING_PRIORITY.findIndex((ptp) => ptp.sourceSystem === sourceSystem);
+    if (index === -1) continue;
+
+    if (index > priorityIndex) continue;
+
+    const trackingPriority = PEACH_TRACKING_PRIORITY[index];
+    if (trackingPriority.trackingName && trackingPriority.trackingName !== trackingName) continue;
+
+    permitTracking = pt;
+    priorityIndex = index;
+  }
+  return permitTracking;
+};
+
 /**
  * Fetches PEACH data for permit tracking
  */
-export const getPeachRecordController = async (req: Request<{ recordId: string; systemId: string }>, res: Response) => {
-  const response = await getPeachRecord(req.params.recordId, req.params.systemId);
 
-  const peachSummary: PeachSummary | null = summarizeRecord(response);
-
+export const getPeachRecordController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
+  const permitTracking = findPriorityPermitTracking(req.body);
+  let peachSummary;
+  if (permitTracking && permitTracking.trackingId && permitTracking?.sourceSystemKind?.sourceSystem) {
+    const response = await getPeachRecord(permitTracking.trackingId, permitTracking.sourceSystemKind.sourceSystem);
+    peachSummary = summarizeRecord(response);
+  }
   // TODO-RELEASE: make sure that we properly handle this case, not a 404
   if (!peachSummary)
     throw new Problem(404, { type: 'NoStatusAvailable', detail: 'Record was found but no status available.' });
@@ -69,26 +97,7 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
 
       if (permitTrackings.length === 0) continue;
 
-      let permitTracking: PermitTracking | undefined;
-      let priorityIndex = PEACH_TRACKING_PRIORITY.length;
-
-      // Prioritize which PEACH integrated permit tracking to use
-      for (const pt of permitTrackings) {
-        const sourceSystem = pt.sourceSystemKind?.sourceSystem;
-        const trackingName = pt.sourceSystemKind?.description;
-        if (!sourceSystem) continue;
-
-        const index = PEACH_TRACKING_PRIORITY.findIndex((ptp) => ptp.sourceSystem === sourceSystem);
-        if (index === -1) continue;
-
-        if (index > priorityIndex) continue;
-
-        const trackingPriority = PEACH_TRACKING_PRIORITY[index];
-        if (trackingPriority.trackingName && trackingPriority.trackingName !== trackingName) continue;
-
-        permitTracking = pt;
-        priorityIndex = index;
-      }
+      const permitTracking = findPriorityPermitTracking(permitTrackings);
 
       if (!permitTracking) continue;
 
