@@ -21,8 +21,8 @@ const { t } = useI18n();
 const isAdmin: Ref<boolean> = ref(false);
 
 // Actions
-watchEffect(async () => {
-  // Determine if the current user has admin priviledges
+watchEffect(() => {
+  // Determine if the current user has admin privileges
   const userActivityRole = activityContacts.find((x) => x.contactId === useContactStore().getContact?.contactId)?.role;
   if (userActivityRole)
     isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);

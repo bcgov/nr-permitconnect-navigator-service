@@ -779,7 +779,7 @@ view group_role_policy_vw {
   policyId       Int?    @map("policy_id")
   resourceName   String? @map("resource_name")
   actionName     String? @map("action_name")
-  attribute_name String?
+  attributeName  String? @map("attribute_name")
 
   @@schema("yars")
 }

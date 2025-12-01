@@ -361,19 +361,19 @@ export async function deleteGroupRoles(knex: Knex, resource: Resource, actions: 
 
   if (actions.includes(Action.CREATE)) {
     creatorRole = await knex('yars.role')
-      .where({ name: `${resource}_CREATOR` })
+      .where({ name: `${resource.toUpperCase()}_CREATOR` })
       .first('role_id');
   }
 
   if (actions.includes(Action.READ)) {
     viewerRole = await knex('yars.role')
-      .where({ name: `${resource}_VIEWER` })
+      .where({ name: `${resource.toUpperCase()}_VIEWER` })
       .first('role_id');
   }
 
   if (actions.includes(Action.UPDATE) || actions.includes(Action.DELETE)) {
     editorRole = await knex('yars.role')
-      .where({ name: `${resource}_EDITOR` })
+      .where({ name: `${resource.toUpperCase()}_EDITOR` })
       .first('role_id');
   }
 
@@ -400,19 +400,19 @@ export async function deleteRolePolicies(knex: Knex, resource: Resource, actions
 
   if (actions.includes(Action.CREATE)) {
     creatorRole = await knex('yars.role')
-      .where({ name: `${resource}_CREATOR` })
+      .where({ name: `${resource.toUpperCase()}_CREATOR` })
       .first('role_id');
   }
 
   if (actions.includes(Action.READ)) {
     viewerRole = await knex('yars.role')
-      .where({ name: `${resource}_VIEWER` })
+      .where({ name: `${resource.toUpperCase()}_VIEWER` })
       .first('role_id');
   }
 
   if (actions.includes(Action.UPDATE) || actions.includes(Action.DELETE)) {
     editorRole = await knex('yars.role')
-      .where({ name: `${resource}_EDITOR` })
+      .where({ name: `${resource.toUpperCase()}_EDITOR` })
       .first('role_id');
   }
 
@@ -437,19 +437,19 @@ export async function deleteRolePolicies(knex: Knex, resource: Resource, actions
 export async function deleteRoles(knex: Knex, resource: Resource, actions: Action[]) {
   if (actions.includes(Action.CREATE)) {
     await knex('yars.role')
-      .where({ name: `${resource}_CREATOR` })
+      .where({ name: `${resource.toUpperCase()}_CREATOR` })
       .del();
   }
 
   if (actions.includes(Action.READ)) {
     await knex('yars.role')
-      .where({ name: `${resource}_VIEWER` })
+      .where({ name: `${resource.toUpperCase()}_VIEWER` })
       .del();
   }
 
   if (actions.includes(Action.UPDATE) || actions.includes(Action.DELETE)) {
     await knex('yars.role')
-      .where({ name: `${resource}_EDITOR` })
+      .where({ name: `${resource.toUpperCase()}_EDITOR` })
       .del();
   }
 }
@@ -461,9 +461,9 @@ export async function deleteRoles(knex: Knex, resource: Resource, actions: Actio
  * @returns The generated Knex function to delete data
  */
 export async function deletePolicies(knex: Knex, resource: Resource[]) {
-  Promise.all(
+  return Promise.all(
     resource.map(async (resource) => {
-      const resourceRow = await knex('yars.resource').where({ name: resource }).first('resource_id');
+      const resourceRow = await knex('yars.resource').where({ name: resource.toUpperCase() }).first('resource_id');
       if (resourceRow) {
         return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
       }
@@ -478,5 +478,7 @@ export async function deletePolicies(knex: Knex, resource: Resource[]) {
  * @returns The generated Knex function to delete data
  */
 export async function deleteResources(knex: Knex, resources: Resource[]) {
-  return Promise.all(resources.map(async (resource) => await knex('yars.resource').where({ name: resource }).del()));
+  return Promise.all(
+    resources.map(async (resource) => await knex('yars.resource').where({ name: resource.toUpperCase() }).del())
+  );
 }
