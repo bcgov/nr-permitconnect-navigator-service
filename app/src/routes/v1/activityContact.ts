@@ -13,7 +13,7 @@ import { activityContactValidator } from '../../validators';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization';
 import { Action, Resource } from '../../utils/enums/application';
 
-const router = express.Router({ mergeParams: true });
+const router = express.Router({ mergeParams: true }); // mergeParams allows parent router to pass route params down
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 

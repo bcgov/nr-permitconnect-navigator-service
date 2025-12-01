@@ -32,6 +32,9 @@ const { activityContacts } = defineProps<{
 const { t } = useI18n();
 const toast = useToast();
 
+// Constants
+const SELECTABLE_ROLES = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
+
 // Emits
 const emit = defineEmits(['projectTeamAddModal:addUser']);
 
@@ -45,43 +48,41 @@ const contacts: Ref<Contact[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 const searchMutex = new Mutex();
-let timeoutId: NodeJS.Timeout;
-
-const selectableRoles = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
 
 // Actions
 async function searchProponents() {
   selectedUser.value = undefined;
 
   if (searchTag.value.length >= MIN_SEARCH_INPUT_LENGTH) {
-    clearTimeout(timeoutId);
-    timeoutId = setTimeout(async () => {
-      await searchMutex.runExclusive(async () => {
-        try {
-          loading.value = true;
+    await searchMutex.runExclusive(async () => {
+      try {
+        loading.value = true;
 
-          contacts.value = (
-            await contactService.matchContacts({
-              firstName: searchTag.value,
-              lastName: searchTag.value
-            })
-          ).data;
-        } catch (error: any) {
-          toast.error(t('userCreateModal.searchError'), error);
-        } finally {
-          loading.value = false;
-        }
-      });
-    }, 500);
+        contacts.value = (
+          await contactService.matchContacts({
+            firstName: searchTag.value,
+            lastName: searchTag.value
+          })
+        ).data;
+      } catch (error: any) {
+        toast.error(t('userCreateModal.searchError'), error);
+      } finally {
+        loading.value = false;
+      }
+    });
   } else {
     contacts.value = [];
-    clearTimeout(timeoutId);
     loading.value = false;
   }
 }
 
 watch(selectedUser, () => {
-  selectedUserExists.value = !!activityContacts.find((x) => x.contactId === selectedUser.value?.contactId);
+  selectedUserExists.value = activityContacts.some((x) => x.contactId === selectedUser.value?.contactId);
+});
+
+watch(visible, () => {
+  contacts.value = [];
+  searchTag.value = '';
 });
 </script>
 
@@ -181,7 +182,7 @@ watch(selectedUser, () => {
       v-model="selectedRole"
       class="w-full"
       name="assignRole"
-      :options="selectableRoles"
+      :options="SELECTABLE_ROLES"
       :disabled="!selectedUser || selectedUserExists"
     />
     <div class="mt-6">
