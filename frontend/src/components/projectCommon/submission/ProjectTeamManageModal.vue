@@ -13,16 +13,18 @@ const { activityContact } = defineProps<{
   activityContact?: ActivityContact;
 }>();
 
-// Composables
-const { t } = useI18n();
 // Emits
 const emit = defineEmits(['projectTeamManageModal:manageUser']);
+
+// Composables
+const { t } = useI18n();
+
+// Constants
+const SELECTABLE_ROLES = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
 
 // State
 const selectedRole: Ref<ActivityContactRole | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
-
-const selectableRoles = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
 
 // Actions
 watchEffect(() => {
@@ -59,7 +61,7 @@ watchEffect(() => {
       v-model="selectedRole"
       class="w-full"
       name="assignRole"
-      :options="selectableRoles"
+      :options="SELECTABLE_ROLES"
       :disabled="!activityContact"
     />
     <div class="mt-6">

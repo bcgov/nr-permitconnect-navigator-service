@@ -74,14 +74,14 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
   }
 }
 
-async function onManageUserClick(contact: ActivityContact) {
+function onManageUserClick(contact: ActivityContact) {
   selectedContact.value = contact;
   manageUserModalVisible.value = true;
 }
 
 async function onRevokeUser(contact: ActivityContact) {
   try {
-    (await activityContactService.deleteActivityContact(activityId, contact.contactId)).data;
+    await activityContactService.deleteActivityContact(activityId, contact.contactId);
 
     if (activityContacts.value) {
       activityContacts.value = activityContacts.value.filter((x) => x.contactId !== contact.contactId);
@@ -98,7 +98,7 @@ async function onRevokeUser(contact: ActivityContact) {
   }
 }
 
-async function onRevokeUserClick(contact: ActivityContact) {
+function onRevokeUserClick(contact: ActivityContact) {
   confirm.require({
     message: t('e.common.projectTeamTab.revokeDesc', {
       first: contact.contact?.firstName,
@@ -132,7 +132,7 @@ async function onRevokeUserClick(contact: ActivityContact) {
       </div>
     </div>
   </div>
-  <span v-if="activityContacts">
+  <div v-if="activityContacts">
     <ProjectTeamTable
       :activity-contacts="activityContacts"
       @project-team-table:manage-user="onManageUserClick"
@@ -148,5 +148,5 @@ async function onRevokeUserClick(contact: ActivityContact) {
       :activity-contact="selectedContact"
       @project-team-manage-modal:manage-user="onManageUser"
     />
-  </span>
+  </div>
 </template>

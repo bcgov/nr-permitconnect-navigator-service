@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -15,10 +16,14 @@ const { activityContacts } = defineProps<{
 }>();
 
 // Composables
+const contactStore = useContactStore();
 const { t } = useI18n();
 
 // Emits
 const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revokeUser']);
+
+// Store
+const { getContact } = storeToRefs(contactStore);
 
 // State
 const isAdmin: Ref<boolean> = ref(false);
@@ -26,7 +31,7 @@ const isAdmin: Ref<boolean> = ref(false);
 // Actions
 watchEffect(() => {
   // Determine if the current user has admin privileges
-  const userActivityRole = activityContacts.find((x) => x.contactId === useContactStore().getContact?.contactId)?.role;
+  const userActivityRole = activityContacts.find((x) => x.contactId === getContact.value?.contactId)?.role;
   if (userActivityRole)
     isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
 });
@@ -79,9 +84,7 @@ watchEffect(() => {
         <Button
           class="p-button-lg p-button-text p-0"
           :aria-label="t('e.common.projectTeamTable.headerManage')"
-          :disabled="
-            data.role === ActivityContactRole.PRIMARY || data.contactId === useContactStore().getContact?.contactId
-          "
+          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
           @click="emit('projectTeamTable:manageUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-pen-to-square" />
@@ -99,9 +102,7 @@ watchEffect(() => {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           :aria-label="t('e.common.projectTeamTable.headerRevoke')"
-          :disabled="
-            data.role === ActivityContactRole.PRIMARY || data.contactId === useContactStore().getContact?.contactId
-          "
+          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
           @click="emit('projectTeamTable:revokeUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-user-xmark" />
