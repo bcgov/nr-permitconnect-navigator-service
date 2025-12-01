@@ -45,15 +45,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import {
-  activityContactService,
-  contactService,
-  documentService,
-  enquiryService,
-  externalApiService,
-  housingProjectService,
-  permitService
-} from '@/services';
+import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';

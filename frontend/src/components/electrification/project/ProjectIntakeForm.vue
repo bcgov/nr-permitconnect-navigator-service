@@ -11,13 +11,7 @@ import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, 
 import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
 import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
-import {
-  activityContactService,
-  contactService,
-  documentService,
-  electrificationProjectService,
-  externalApiService
-} from '@/services';
+import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useAppStore, useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
