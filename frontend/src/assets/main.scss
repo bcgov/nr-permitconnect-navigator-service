@@ -262,3 +262,9 @@ label {
   width: 0px !important;
   height: 0px !important;
 }
+
+/* common */
+.disclaimer-block {
+  outline: solid 0.063rem $app-grey;
+  border-radius: 0.5rem;
+}

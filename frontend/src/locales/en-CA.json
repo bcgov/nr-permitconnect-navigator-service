@@ -48,6 +48,39 @@
         "unableToLoad": "Unable to load permit or project, please try again later",
         "updateHistory": "Update history"
       },
+      "projectTeamAddModal": {
+        "header": "Add user",
+        "searchPlaceholder": "Search by First and Last name",
+        "empty": "No users found",
+        "headerFirstName": "First name",
+        "headerLastName": "Last name",
+        "headerPhone": "Contact phone",
+        "headerEmail": "Contact email",
+        "assign": "Assign role",
+        "addUser": "Add user",
+        "cancel": "Cancel",
+        "adminSelectedWarning": "This user will also have access to Project Team Management",
+        "search": "Search",
+        "contactAlreadyExists": "This user is already a part of this project."
+      },
+      "projectTeamTab": {
+        "addUserBtn": "Add user",
+        "adminAdded": "{first} {last} has been added as a Project Admin.",
+        "failedToAdd": "Failed to add user",
+        "memberAdded": "{first} {last} has been added as a project member.",
+        "projectTeamDesc": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
+        "userAlreadyExists": "This user is already a part of this project."
+      },
+      "projectTeamTable": {
+        "headerEmail": "Email",
+        "headerFirstName": "First Name",
+        "headerLastName": "Last Name",
+        "headerManage": "Manage",
+        "headerPhone": "Phone",
+        "headerRevoke": "Revoke",
+        "headerRole": "Role",
+        "noUsers": "No users found."
+      },
       "projectView": {
         "agency": "Agency",
         "askMyNavigator": "Ask my Navigator",
@@ -72,6 +105,7 @@
         "statusNotVerified": "This status has not yet been verified by Navigators",
         "submittedDate": "Submitted date",
         "tabAuthorizations": "Authorizations",
+        "tabProjectTeam": "Project team",
         "tabRelatedEnquiries": "Related enquiries",
         "toastEnquiryFailed": "Failed to submit enquiry",
         "toastNoteHistoryLoadFailed": "Unable to load notes for this project, please try again later",
@@ -397,27 +431,27 @@
     },
     "projectView": {
       "seePropViewButtonLabel": "See Proponent's View"
-    }
-  },
-  "user": {
-    "userManagementView": {
-      "cancel": "Cancel",
-      "confirm": "Confirm",
-      "createUser": "Create new user",
-      "errorIdpCfg": "Failed to obtain IDP config",
-      "header": "User Management",
-      "requestError": "Failed to request access",
-      "requestSuccess": "Access requested",
-      "revokeAdmin1": "The user will now lose all access to the system.",
-      "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
-      "revokeError": "Error revoking user access",
-      "revokeRequested": "Revoke requested",
-      "searchPlaceholder": "Search all",
-      "tab0": "Manage users",
-      "tab1": "User access requests",
-      "updateError": "Error updating user role",
-      "updateSuccess": "User role updated",
-      "userRevoked": "User revoked"
+    },
+    "user": {
+      "userManagementView": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "createUser": "Create new user",
+        "errorIdpCfg": "Failed to obtain IDP config",
+        "header": "User Management",
+        "requestError": "Failed to request access",
+        "requestSuccess": "Access requested",
+        "revokeAdmin1": "The user will now lose all access to the system.",
+        "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
+        "revokeError": "Error revoking user access",
+        "revokeRequested": "Revoke requested",
+        "searchPlaceholder": "Search all",
+        "tab0": "Manage users",
+        "tab1": "User access requests",
+        "updateError": "Error updating user role",
+        "updateSuccess": "User role updated",
+        "userRevoked": "User revoked"
+      }
     }
   },
   "authorization": {

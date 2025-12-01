@@ -10,22 +10,26 @@ import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
 
 import { activityContactValidator } from '../../validators';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization';
+import { Action, Resource } from '../../utils/enums/application';
 
-const router = express.Router();
+const router = express.Router({ mergeParams: true }); // mergeParams allows parent router to pass route params down
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** List activity_contact linkages for an activity */
 router.get(
-  '/:activityId/contact',
-  requireActivityAdmin,
+  '/',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.READ),
+  hasAccess('activityId'),
   activityContactValidator.listActivityContact,
   listActivityContactController
 );
 
 /** Create an activity_contact linkage for an activity */
 router.post(
-  '/:activityId/contact/:contactId',
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.CREATE),
   requireActivityAdmin,
   activityContactValidator.createActivityContact,
   createActivityContactController
@@ -33,7 +37,8 @@ router.post(
 
 /** Delete an activity_contact linkage for an activity */
 router.delete(
-  '/:activityId/contact/:contactId',
+  '/:contactId',
+  hasAuthorization(Resource.ACTIVITY_CONTACT, Action.DELETE),
   requireActivityAdmin,
   activityContactValidator.deleteActivityContact,
   deleteActivityContactController
