@@ -13,23 +13,23 @@ import type { ATSClientResource } from '@/types';
 const {
   atsClientId,
   disabled = false,
-  relatedEnquiry = false
+  isRelatedEnquiry = false
 } = defineProps<{
   atsClientId: string | number | null;
   disabled?: boolean;
-  relatedEnquiry?: boolean;
+  isRelatedEnquiry?: boolean;
 }>();
 
 // Emits
 const emit = defineEmits(['atsUserDetails:unLink']);
 
+// Composables
+const { t } = useI18n();
+
 // State
 const loading: Ref<boolean> = ref(false);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
-
-// Composables
-const { t } = useI18n();
 
 // Actions
 const toast = useToast();
@@ -46,11 +46,11 @@ async function getATSClientInformation() {
 
     users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
+      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
     });
   } catch (error) {
-    toast.error(t('i.ats.atsUserDetailsModal.errorSearchingUsers') + error);
+    toast.error(t('i.ats.common.errorSearchingUsers') + error);
   } finally {
     loading.value = false;
   }
@@ -82,7 +82,7 @@ watch(visible, () => {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h5 class="m-0">{{ t('i.ats.atsUserDetailsModal.noUsersFound') }}</h5>
+          <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
         </div>
       </template>
       <template #loading>
@@ -95,11 +95,11 @@ watch(visible, () => {
       />
       <Column
         field="firstName"
-        :header="t('i.ats.atsUserDetailsModal.firstName')"
+        :header="t('i.ats.common.firstName')"
       />
       <Column
         field="surName"
-        :header="t('i.ats.atsUserDetailsModal.lastName')"
+        :header="t('i.ats.common.lastName')"
       />
       <Column
         field="address.primaryPhone"
@@ -111,7 +111,7 @@ watch(visible, () => {
       />
       <Column
         field="formattedAddress"
-        :header="t('i.ats.atsUserDetailsModal.locationAddress')"
+        :header="t('i.ats.common.locationAddress')"
       />
       <Column
         field="action"
@@ -121,8 +121,8 @@ watch(visible, () => {
         <template #body="{ data }">
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
-            :aria-label="t('i.ats.atsUserDetailsModal.deleteUser')"
-            :disabled="disabled || relatedEnquiry"
+            :aria-label="t('i.ats.common.deleteUser')"
+            :disabled="disabled || isRelatedEnquiry"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >
             <font-awesome-icon icon="fa-solid fa-trash" />
@@ -141,7 +141,7 @@ watch(visible, () => {
       <Button
         class="mr-0"
         outlined
-        :label="t('i.ats.atsUserDetailsModal.cancel')"
+        :label="t('i.ats.common.cancel')"
         @click="visible = false"
       />
     </div>

@@ -2,13 +2,13 @@
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Button, useConfirm, useToast } from '@/lib/primevue';
-import Tooltip from '@/components/common/Tooltip.vue';
-import { atsService } from '@/services';
-import { ATSCreateTypes } from '@/utils/enums/application';
-import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/ats/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
+import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
+import Tooltip from '@/components/common/Tooltip.vue';
+import { Button, useConfirm, useToast } from '@/lib/primevue';
+import { atsService } from '@/services';
+import { ATSCreateTypes } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
@@ -17,40 +17,39 @@ import type { ATSClientResource } from '@/types';
 const {
   atsClientId,
   atsEnquiryId,
-  relatedEnquiry = false,
   editable = true,
+  email,
   firstName,
   lastName,
   phoneNumber,
-  email
+  isRelatedEnquiry = false
 } = defineProps<{
   atsClientId?: string | number;
   atsEnquiryId?: string | number;
-  relatedEnquiry?: boolean;
   editable?: boolean;
+  email?: string;
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
-  email?: string;
+  isRelatedEnquiry?: boolean;
 }>();
 
 // Emits
 const emit = defineEmits(['atsInfo:setClientId', 'atsInfo:setAddedToAts', 'atsInfo:create', 'atsInfo:createEnquiry']);
 
-// State
-const atsUserLinkModalVisible: Ref<boolean> = ref(false);
-const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
-const atsUserCreateModalVisible: Ref<boolean> = ref(false);
-const loading: Ref<boolean> = ref(false);
-const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
-const users: Ref<Array<ATSClientResource>> = ref([]);
-
-const visible = defineModel<boolean>('visible');
-
 // Composables
 const { t } = useI18n();
 const confirm = useConfirm();
 const toast = useToast();
+
+// State
+const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
+const atsUserCreateModalVisible: Ref<boolean> = ref(false);
+const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
+const atsUserLinkModalVisible: Ref<boolean> = ref(false);
+const loading: Ref<boolean> = ref(false);
+const users: Ref<Array<ATSClientResource>> = ref([]);
+const visible = defineModel<boolean>('visible');
 
 // Actions
 async function getATSClientInformation() {
@@ -65,11 +64,11 @@ async function getATSClientInformation() {
 
     users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
+      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
     });
   } catch (error) {
-    toast.error('Error searching for users ' + error);
+    toast.error(t('i.ats.common.errorSearchingUsers') + error);
   } finally {
     loading.value = false;
   }
@@ -80,7 +79,7 @@ function onNewATSEnquiry() {
     message: t('i.ats.atsInfo.atsEnquiryConfirmMsg'),
     header: t('i.ats.atsInfo.atsEnquiryConfirmTitle'),
     acceptLabel: t('i.ats.atsInfo.confirm'),
-    rejectLabel: t('i.ats.atsInfo.cancel'),
+    rejectLabel: t('i.ats.common.cancel'),
     rejectProps: { outlined: true },
     accept: () => {
       atsCreateType.value = ATSCreateTypes.ENQUIRY;
@@ -121,7 +120,7 @@ watch(visible, () => {
           atsClientId ||
           atsCreateType === ATSCreateTypes.CLIENT ||
           atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY ||
-          relatedEnquiry
+          isRelatedEnquiry
         "
         class="flex items-center mb-4"
       >
@@ -135,7 +134,7 @@ watch(visible, () => {
         >
           {{ atsClientId }}
         </a>
-        <span v-else-if="relatedEnquiry">
+        <span v-else-if="isRelatedEnquiry">
           {{ t('i.ats.atsInfo.unavailable') }}
         </span>
         <span v-else>{{ t('i.ats.atsInfo.pendingSave') }}</span>
@@ -180,8 +179,8 @@ watch(visible, () => {
   </div>
   <ATSUserLinkModal
     v-model:visible="atsUserLinkModalVisible"
-    :f-name="firstName"
-    :l-name="lastName"
+    :first-name="firstName"
+    :last-name="lastName"
     :phone-number="phoneNumber"
     :email-id="email"
     @ats-user-link:link="
@@ -203,7 +202,7 @@ watch(visible, () => {
     v-if="atsClientId"
     v-model:visible="atsUserDetailsModalVisible"
     :ats-client-id="atsClientId"
-    :related-enquiry="relatedEnquiry"
+    :is-related-enquiry="isRelatedEnquiry"
     @ats-user-details:un-link="
       () => {
         atsUserDetailsModalVisible = false;

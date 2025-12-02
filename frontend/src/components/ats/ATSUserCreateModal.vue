@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
@@ -9,7 +9,6 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import { computed } from 'vue';
 
 // Props
 const { address, firstName, lastName, phone, email } = defineProps<{
@@ -54,7 +53,7 @@ const atsUser = computed(() => {
     class="app-info-dialog w-max"
   >
     <template #header>
-      <span class="p-dialog-title app-primary-color">{{ t('i.ats.atsUserCreateModal.createATSClient') }}</span>
+      <span class="p-dialog-title app-primary-color">{{ t('i.ats.common.createATSClient') }}</span>
     </template>
     <div>
       <DataTable
@@ -66,7 +65,7 @@ const atsUser = computed(() => {
       >
         <template #empty>
           <div class="flex justify-center">
-            <h5 class="m-0">{{ t('i.ats.atsUserCreateModal.noUsersFound') }}</h5>
+            <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
           </div>
         </template>
         <template #loading>
@@ -75,11 +74,11 @@ const atsUser = computed(() => {
 
         <Column
           field="firstName"
-          :header="t('i.ats.atsUserCreateModal.firstName')"
+          :header="t('i.ats.common.firstName')"
         />
         <Column
           field="lastName"
-          :header="t('i.ats.atsUserCreateModal.lastName')"
+          :header="t('i.ats.common.lastName')"
         />
         <Column
           field="phone"
@@ -92,7 +91,7 @@ const atsUser = computed(() => {
         <Column
           v-if="getInitiative === Initiative.HOUSING"
           field="address"
-          :header="t('i.ats.atsUserCreateModal.locationAddress')"
+          :header="t('i.ats.common.locationAddress')"
         />
       </DataTable>
       <div
@@ -108,7 +107,7 @@ const atsUser = computed(() => {
         <Button
           class="mr-0"
           outlined
-          :label="t('i.ats.atsUserCreateModal.cancel')"
+          :label="t('i.ats.common.cancel')"
           @click="visible = false"
         />
       </div>

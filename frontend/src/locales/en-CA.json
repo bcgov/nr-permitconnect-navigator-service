@@ -226,57 +226,40 @@
         "atsNewEnquiryBtn": "New ATS Enquiry",
         "atsSearchButton": "Search ATS",
         "atsToolTip": "Please ensure the client info and related submission (if applicable) is correct before saving the submission. Only one ATS enquiry can be created per submission.",
-        "cancel": "Cancel",
         "confirm": "Confirm",
         "pendingSave": "Pending save",
         "unavailable": "Unavailable"
       },
       "atsUserCreateModal": {
-        "cancel": "Cancel",
-        "createATSClient": "Create new client in ATS",
         "email": "Email",
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "locationAddress": "Location Address",
-        "noUsersFound": "No users found.",
         "phone": "Phone",
         "pushToATS": "Push to ATS"
       },
       "atsUserDetailsModal": {
         "action": "Action",
         "atsClientLink": "ATS Client Link",
-        "cancel": "Cancel",
         "clientNo": "Client #",
-        "createATSClient": "Create new client in ATS",
         "deleteUser": "Delete user",
         "email": "Email",
-        "errorSearchingUsers": "Error searching for users ",
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "locationAddress": "Location Address",
-        "noUsersFound": "No users found.",
         "phone": "Phone",
-        "pushToATS": "Push to ATS",
         "save": "Save"
       },
       "atsUserLinkModal": {
-        "action": "Action",
         "atsClientLink": "ATS Client Link",
-        "cancel": "Cancel",
         "clientNo": "ATS client # (optional)",
-        "createATSClient": "Create new client in ATS",
-        "deleteUser": "Delete user",
         "email": "Email (optional)",
-        "errorSearchingUsers": "Error searching for users ",
+        "linkToPCNS": "Link to PCNS",
+        "phone": "Phone (optional)",
+        "search": "Search"
+      },
+      "common": {
+        "cancel": "Cancel",
+        "createATSClient": "Create new client in ATS",
         "firstName": "First Name",
         "lastName": "Last Name",
         "locationAddress": "Location Address",
-        "linkToPCNS": "Link to PCNS",
         "noUsersFound": "No users found.",
-        "phone": "Phone (optional)",
-        "pushToATS": "Push to ATS",
-        "save": "Save",
-        "search": "Search"
+        "errorSearchingUsers": "Error searching for users "
       }
     },
     "common": {

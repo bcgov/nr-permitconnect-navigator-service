@@ -205,7 +205,6 @@ function onReOpen() {
 
 async function onRelatedActivityChange(e: SelectChangeEvent) {
   formRef.value?.setFieldValue('atsClientId', null);
-  // formRef.value?.setFieldValue('atsEnquiryId', null);
   formRef.value?.setFieldValue('addedToAts', false);
   atsCreateType.value = undefined;
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
@@ -11,12 +11,11 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
-import { watchEffect } from 'vue';
 
 // Props
-const { fName, lName, phoneNumber, emailId } = defineProps<{
-  fName?: string;
-  lName?: string;
+const { firstName, lastName, phoneNumber, emailId } = defineProps<{
+  firstName?: string;
+  lastName?: string;
   phoneNumber?: string;
   emailId?: string;
 }>();
@@ -39,14 +38,14 @@ const hasSearched: Ref<boolean> = ref(false);
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
-const firstName: Ref<string> = ref('');
-const lastName: Ref<string> = ref('');
+const fName: Ref<string> = ref('');
+const lName: Ref<string> = ref('');
 const phone: Ref<string> = ref('');
 const email: Ref<string> = ref('');
 
 watchEffect(() => {
-  firstName.value = fName ?? '';
-  lastName.value = lName ?? '';
+  fName.value = firstName ?? '';
+  lName.value = lastName ?? '';
   phone.value = phoneNumber ?? '';
   email.value = emailId ?? '';
 });
@@ -59,8 +58,8 @@ async function searchATSUsers() {
     loading.value = true;
 
     const response = await atsService.searchATSUsers({
-      firstName: firstName.value,
-      lastName: lastName.value,
+      firstName: fName.value,
+      lastName: lName.value,
       clientId: atsClientId.value,
       phone: phone.value,
       email: email.value
@@ -69,11 +68,11 @@ async function searchATSUsers() {
 
     users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
+      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
     });
   } catch (error) {
-    toast.error(t('i.ats.atsUserLinkModal.errorSearchingUsers') + error);
+    toast.error(t('i.ats.common.errorSearchingUsers') + error);
   } finally {
     loading.value = false;
   }
@@ -93,15 +92,15 @@ async function searchATSUsers() {
     <div class="pt-1 mb-6 mr-1 grid grid-cols-6 gap-4">
       <div class="col pr-0">
         <InputText
-          v-model="firstName"
-          :placeholder="t('i.ats.atsUserLinkModal.firstName')"
+          v-model="fName"
+          :placeholder="t('i.ats.common.firstName')"
           class="w-full"
         />
       </div>
       <div class="col pr-0">
         <InputText
-          v-model="lastName"
-          :placeholder="t('i.ats.atsUserLinkModal.lastName')"
+          v-model="lName"
+          :placeholder="t('i.ats.common.lastName')"
           class="w-full"
         />
       </div>
@@ -148,7 +147,7 @@ async function searchATSUsers() {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h5 class="m-0">{{ t('i.ats.atsUserLinkModal.noUsersFound') }}</h5>
+          <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
         </div>
       </template>
       <template #loading>
@@ -162,12 +161,12 @@ async function searchATSUsers() {
       />
       <Column
         field="firstName"
-        :header="t('i.ats.atsUserLinkModal.firstName')"
+        :header="t('i.ats.common.firstName')"
         sortable
       />
       <Column
         field="surName"
-        :header="t('i.ats.atsUserLinkModal.lastName')"
+        :header="t('i.ats.common.lastName')"
         sortable
       />
       <Column
@@ -183,7 +182,7 @@ async function searchATSUsers() {
       <Column
         v-if="getInitiative === Initiative.HOUSING"
         field="formattedAddress"
-        :header="t('i.ats.atsUserLinkModal.locationAddress')"
+        :header="t('i.ats.common.locationAddress')"
         sortable
       />
     </DataTable>
@@ -198,7 +197,7 @@ async function searchATSUsers() {
         <Button
           class="mr-0"
           outlined
-          :label="t('i.ats.atsUserLinkModal.cancel')"
+          :label="t('i.ats.common.cancel')"
           @click="visible = false"
         />
       </div>
@@ -207,7 +206,7 @@ async function searchATSUsers() {
         class="underline text-[var(--p-bcblue-900)] hover-hand"
         @click="emit('atsUserLink:create')"
       >
-        {{ t('i.ats.atsUserLinkModal.createATSClient') }}
+        {{ t('i.ats.common.createATSClient') }}
       </div>
     </div>
   </Dialog>

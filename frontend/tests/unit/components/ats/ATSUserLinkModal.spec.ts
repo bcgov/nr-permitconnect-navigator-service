@@ -18,14 +18,14 @@ vi.mock('vue-i18n', () => ({
 }));
 
 const wrapperSettings = (
-  fName: string = testFName,
-  lName: string = testLName,
+  firstName: string = testFName,
+  lastName: string = testLName,
   phoneNumber: string = testPhoneNumber,
   emailId: string = testEmailId
 ) => ({
   props: {
-    fName,
-    lName,
+    firstName,
+    lastName,
     phoneNumber,
     emailId
   },
