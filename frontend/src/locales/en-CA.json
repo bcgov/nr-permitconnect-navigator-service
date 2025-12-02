@@ -216,6 +216,52 @@
     }
   },
   "i": {
+    "ats": {
+      "atsInfo": {
+        "atsClientIdHeader": "Client ID",
+        "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
+        "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
+        "atsEnquiryIdHeader": "Enquiry #",
+        "atsHeader": "ATS",
+        "atsNewEnquiryBtn": "New ATS Enquiry",
+        "atsSearchButton": "Search ATS",
+        "atsToolTip": "Please ensure the client info and related submission (if applicable) is correct before saving the submission. Only one ATS enquiry can be created per submission.",
+        "confirm": "Confirm",
+        "pendingSave": "Pending save",
+        "unavailable": "Unavailable"
+      },
+      "atsUserCreateModal": {
+        "email": "Email",
+        "phone": "Phone",
+        "pushToATS": "Push to ATS"
+      },
+      "atsUserDetailsModal": {
+        "action": "Action",
+        "atsClientLink": "ATS Client Link",
+        "clientNo": "Client #",
+        "deleteUser": "Delete user",
+        "email": "Email",
+        "phone": "Phone",
+        "save": "Save"
+      },
+      "atsUserLinkModal": {
+        "atsClientLink": "ATS Client Link",
+        "clientNo": "ATS client # (optional)",
+        "email": "Email (optional)",
+        "linkToPCNS": "Link to PCNS",
+        "phone": "Phone (optional)",
+        "search": "Search"
+      },
+      "common": {
+        "cancel": "Cancel",
+        "createATSClient": "Create new client in ATS",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "locationAddress": "Location Address",
+        "noUsersFound": "No users found.",
+        "errorSearchingUsers": "Error searching for users "
+      }
+    },
     "common": {
       "form": {
         "cancelMessage": "Your changes have not been saved.",
@@ -282,15 +328,8 @@
         "atsClientLinkedEnquiryPushed": "Client linked and enquiry pushed to ATS",
         "atsClientPushed": "New client pushed to ATS",
         "atsClientPushError": "Error pushing client to ATS",
-        "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
-        "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
         "atsEnquiryPushed": "New enquiry pushed to ATS",
         "atsEnquiryPushError": "Error pushing enquiry to ATS",
-        "atsClientIdHeader": "Client ID",
-        "atsEnquiryIdHeader": "Enquiry #",
-        "atsHeader": "ATS link",
-        "atsSearchButton": "Search ATS",
-        "atsNewButton": "New ATS Client",
         "atsUpdated": "ATS updated",
         "basicInfoMissing": "Basic information is required. Please scroll up and fill it out.",
         "cancel": "Cancel",
@@ -314,7 +353,6 @@
         "submissionTypeLabel": "Submission type",
         "priorityLabel": "Priority",
         "aaiUpdateLabel": "AAI Update",
-        "pendingSave": "Pending save",
         "searchContacts": "Search Contacts"
       }
     },
@@ -335,18 +373,11 @@
           "assignedToLabel": "Assigned to",
           "astNotesHeader": "Automated Status Tool (AST) Notes",
           "atsClientEnquiryPushed": "New client and enquiry pushed to ATS",
-          "atsClientIdHeader": "Client ID",
           "atsClientLinkedEnquiryPushed": "Client linked and enquiry pushed to ATS",
           "atsClientPushed": "New client pushed to ATS",
           "atsClientPushError": "Error pushing client to ATS",
-          "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
-          "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
-          "atsEnquiryIdHeader": "Enquiry #",
           "atsEnquiryPushed": "New enquiry pushed to ATS",
           "atsEnquiryPushError": "Error pushing enquiry to ATS",
-          "atsHeader": "ATS link",
-          "atsNewButton": "New ATS Client",
-          "atsSearchButton": "Search ATS",
           "atsUpdated": "ATS updated",
           "autoGenPids": "Auto-generated PID(s)",
           "basicInfoMissing": "Basic information is required. Please scroll up and fill it out.",
@@ -380,7 +411,6 @@
           "nonProfitHousingSociety": "Non-profit housing society",
           "otherType": "Other type",
           "otherTypeUnits": "Other type units",
-          "pendingSave": "Pending save",
           "priorityLabel": "Priority",
           "projectNameLabel": "Project name",
           "projectStateLabel": "Project state",
@@ -641,13 +671,8 @@
     "atsClientLinkedEnquiryPushed": "Client linked and enquiry pushed to ATS",
     "atsClientPushed": "New client pushed to ATS",
     "atsClientPushError": "Error pushing client to ATS",
-    "atsEnquiryConfirmMsg": "Please ensure the client info is correct before proceeding. Confirm if you want to create a new ATS enquiry.",
-    "atsEnquiryConfirmTitle": "Add new ATS enquiry?",
     "atsEnquiryPushed": "New enquiry pushed to ATS",
     "atsEnquiryPushError": "Error pushing enquiry to ATS",
-    "atsHeader": "ATS",
-    "atsNewClientBtn": "New ATS Client",
-    "atsNewEnquiryBtn": "New ATS Enquiry",
     "atsSearchBtn": "Search ATS",
     "basicInfoHeader": "Basic information",
     "basicInfoMissing": "Basic information is required. Please scroll up and fill it out.",
@@ -663,7 +688,6 @@
     "formReopenBtn": "Re-open enquiry",
     "formSaveBtn": "Save",
     "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
-    "pendingSave": "Pending save",
     "relatedSubmission": "Related submission",
     "reopenAccept": "Confirm",
     "reopenSubmission": "Re-open submission",
@@ -673,7 +697,8 @@
     "submissionDate": "Submission date",
     "submissionStateHeader": "Submission state",
     "submissionType": "Submission type",
-    "submittedMethod": "Submitted method"
+    "submittedMethod": "Submitted method",
+    "unavailable": "Unavailable"
   },
   "enquiryIntakeForm": {
     "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
@@ -710,7 +735,7 @@
   "enquiryView": {
     "completed": "(Completed)",
     "header": "Enquiry:",
-    "linkedActivity": "This activity is linked to Activity",
+    "linkedActivity": "This enquiry is linked to Project",
     "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
   "groupName": {

@@ -6,9 +6,7 @@ import { boolean, mixed, object, string } from 'yup';
 
 import { CancelButton, EditableSelect, FormNavigationGuard, Select, TextArea } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
-import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
-import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
-import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
+import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
@@ -65,9 +63,6 @@ const enquiryStore = useEnquiryStore();
 
 // State
 const assigneeOptions: Ref<Array<User>> = ref([]);
-const atsUserCreateModalVisible: Ref<boolean> = ref(false);
-const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
-const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const basicInfoManualEntry: Ref<boolean> = ref(false);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
@@ -210,7 +205,6 @@ function onReOpen() {
 
 async function onRelatedActivityChange(e: SelectChangeEvent) {
   formRef.value?.setFieldValue('atsClientId', null);
-  formRef.value?.setFieldValue('atsEnquiryId', null);
   formRef.value?.setFieldValue('addedToAts', false);
   atsCreateType.value = undefined;
 
@@ -242,19 +236,6 @@ function setBasicInfo(contact?: Contact) {
   basicInfoManualEntry.value = false;
 }
 
-function onNewATSEnquiry() {
-  confirm.require({
-    message: t('enquiryForm.atsEnquiryConfirmMsg'),
-    header: t('enquiryForm.atsEnquiryConfirmTitle'),
-    acceptLabel: t('enquiryForm.confirm'),
-    rejectLabel: t('enquiryForm.cancel'),
-    rejectProps: { outlined: true },
-    accept: () => {
-      atsCreateType.value = ATSCreateTypes.ENQUIRY;
-    }
-  });
-}
-
 const onSubmit = async (values: any) => {
   try {
     // Create ATS data as necessary
@@ -269,6 +250,13 @@ const onSubmit = async (values: any) => {
     } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
       values.atsEnquiryId = await createATSEnquiry();
       if (values.atsEnquiryId) {
+        values.addedToAts = true;
+      }
+      atsCreateType.value = undefined;
+    } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
+      const response = await createATSClientEnquiry();
+      values.atsClientId = response?.atsClientId;
+      if (values.atsEnquiryId && values.atsClientId) {
         values.addedToAts = true;
       }
       atsCreateType.value = undefined;
@@ -391,7 +379,9 @@ async function createATSClientEnquiry() {
     const submitData: ATSClientResource = setEmptyStringsToNull(data);
     const response = await atsService.createATSClient(submitData);
     if (response.status === 201) {
-      const atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      let atsEnquiryId = undefined;
+      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
+        atsEnquiryId = await createATSEnquiry(response.data.clientId);
       if (atsEnquiryId) toast.success(t('enquiryForm.atsClientEnquiryPushed'));
       else toast.success(t('enquiryForm.atsClientPushed'));
       return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
@@ -530,130 +520,20 @@ async function createATSClientEnquiry() {
             />
           </div>
         </div>
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('enquiryForm.atsHeader') }}
-          </h4>
-          <div
-            v-if="values.atsClientId || atsCreateType !== undefined"
-            class="flex flex-col gap-y-3"
-          >
-            <input
-              type="hidden"
-              name="atsClientId"
-            />
-            <div class="flex items-center">
-              <p class="text-[var(--p-primary-900)] mr-3">
-                <b>{{ t('enquiryForm.clientId') }}</b>
-              </p>
-              <button
-                class="hover-hand underline text-[var(--p-bcblue-950)]"
-                @click="atsUserDetailsModalVisible = true"
-              >
-                {{ values.atsClientId }}
-              </button>
-              <span v-if="atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY">
-                {{ t('enquiryForm.pendingSave') }}
-              </span>
-            </div>
-            <input
-              type="hidden"
-              name="atsEnquiryId"
-            />
-            <div
-              v-if="values.atsEnquiryId || atsCreateType !== undefined"
-              class="flex items-center"
-            >
-              <p class="text-[var(--p-primary-900)] mr-2">
-                <b>{{ t('enquiryForm.enquiryNo') }}</b>
-              </p>
-
-              {{ values.atsEnquiryId }}
-              <span v-if="atsCreateType !== undefined">
-                {{ t('enquiryForm.pendingSave') }}
-              </span>
-            </div>
-          </div>
-          <div
-            v-else
-            class="flex flex-col gap-y-6"
-          >
-            <Button
-              v-if="!values.atsClientId && atsCreateType === undefined"
-              class="ats-button"
-              :aria-label="t('enquiryForm.atsSearchBtn')"
-              outlined
-              :label="t('enquiryForm.atsSearchBtn')"
-              :disabled="!editable"
-              @click="atsUserLinkModalVisible = true"
-            />
-            <Button
-              v-if="!values.atsClientId && atsCreateType === undefined"
-              class="ats-button"
-              :aria-label="t('enquiryForm.atsNewClientBtn')"
-              outlined
-              :label="t('enquiryForm.atsNewClientBtn')"
-              :disabled="!editable"
-              @click="atsUserCreateModalVisible = true"
-            />
-          </div>
-          <Button
-            v-if="values.atsClientId && !values.atsEnquiryId && atsCreateType === undefined"
-            class="mt-4"
-            :aria-label="t('enquiryForm.atsNewEnquiryBtn')"
-            :disabled="!editable"
-            @click="onNewATSEnquiry()"
-          >
-            {{ t('enquiryForm.atsNewEnquiryBtn') }}
-          </Button>
-        </div>
+        <ATSInfo
+          :ats-client-id="values.atsClientId"
+          :ats-enquiry-id="values.atsEnquiryId"
+          :first-name="values.contact.firstName"
+          :last-name="values.contact.lastName"
+          :phone-number="values.contact.phoneNumber"
+          :email="values.contact.email"
+          :related-enquiry="!!values.relatedActivityId"
+          @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsClientId', atsClientId)"
+          @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('addedToAts', addedToATS)"
+          @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
+          @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
+        />
       </div>
     </div>
-
-    <ATSUserLinkModal
-      v-model:visible="atsUserLinkModalVisible"
-      :f-name="values.contact.firstName"
-      :l-name="values.contact.lastName"
-      :phone-number="values.contact.phoneNumber"
-      :email-id="values.contact.email"
-      @ats-user-link:link="
-        (atsClientResource: ATSClientResource) => {
-          atsUserLinkModalVisible = false;
-          setFieldValue('atsClientId', atsClientResource.clientId);
-          atsCreateType = ATSCreateTypes.ENQUIRY;
-        }
-      "
-    />
-    <ATSUserDetailsModal
-      v-model:visible="atsUserDetailsModalVisible"
-      :ats-client-id="values.atsClientId"
-      @ats-user-details:un-link="
-        () => {
-          atsUserDetailsModalVisible = false;
-          setFieldValue('atsClientId', null);
-          setFieldValue('atsEnquiryId', null);
-          setFieldValue('addedToAts', false);
-          atsCreateType = undefined;
-        }
-      "
-    />
-    <ATSUserCreateModal
-      v-model:visible="atsUserCreateModalVisible"
-      :first-name="values.contact.firstName"
-      :last-name="values.contact.lastName"
-      :phone="values.contact.phoneNumber"
-      :email="values.contact.email"
-      @ats-user-create:create="
-        () => {
-          atsUserCreateModalVisible = false;
-          atsCreateType = ATSCreateTypes.CLIENT_ENQUIRY;
-        }
-      "
-    />
   </Form>
 </template>
-<style scoped lang="scss">
-.ats-button {
-  background-color: white;
-}
-</style>

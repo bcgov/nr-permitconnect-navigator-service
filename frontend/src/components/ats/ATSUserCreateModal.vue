@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog } from '@/lib/primevue';
@@ -8,7 +9,6 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import { computed } from 'vue';
 
 // Props
 const { address, firstName, lastName, phone, email } = defineProps<{
@@ -30,6 +30,9 @@ const { getInitiative } = storeToRefs(appStore);
 const loading: Ref<boolean> = ref(false);
 const visible = defineModel<boolean>('visible');
 
+// Composables
+const { t } = useI18n();
+
 // Actions
 const atsUser = computed(() => {
   return {
@@ -50,7 +53,7 @@ const atsUser = computed(() => {
     class="app-info-dialog w-max"
   >
     <template #header>
-      <span class="p-dialog-title app-primary-color">Create new client in ATS</span>
+      <span class="p-dialog-title app-primary-color">{{ t('i.ats.common.createATSClient') }}</span>
     </template>
     <div>
       <DataTable
@@ -62,7 +65,7 @@ const atsUser = computed(() => {
       >
         <template #empty>
           <div class="flex justify-center">
-            <h5 class="m-0">No users found.</h5>
+            <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
           </div>
         </template>
         <template #loading>
@@ -71,24 +74,24 @@ const atsUser = computed(() => {
 
         <Column
           field="firstName"
-          header="First Name"
+          :header="t('i.ats.common.firstName')"
         />
         <Column
           field="lastName"
-          header="Last Name"
+          :header="t('i.ats.common.lastName')"
         />
         <Column
           field="phone"
-          header="Phone"
+          :header="t('i.ats.atsUserCreateModal.phone')"
         />
         <Column
           field="email"
-          header="Email"
+          :header="t('i.ats.atsUserCreateModal.email')"
         />
         <Column
           v-if="getInitiative === Initiative.HOUSING"
           field="address"
-          header="Location address"
+          :header="t('i.ats.common.locationAddress')"
         />
       </DataTable>
       <div
@@ -97,14 +100,14 @@ const atsUser = computed(() => {
       >
         <Button
           class="p-button-solid mr-4"
-          label="Push to ATS"
+          :label="t('i.ats.atsUserCreateModal.pushToATS')"
           icon="pi pi-upload"
           @click="emit('atsUserCreate:create')"
         />
         <Button
           class="mr-0"
           outlined
-          label="Cancel"
+          :label="t('i.ats.common.cancel')"
           @click="visible = false"
         />
       </div>

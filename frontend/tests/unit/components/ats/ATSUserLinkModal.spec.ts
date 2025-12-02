@@ -1,16 +1,33 @@
-import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-const testAtsClientId = 123456;
+import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 
-const wrapperSettings = (testAtsClientIdProp = testAtsClientId) => ({
+const testFName = 'John';
+const testLName = 'Doe';
+const testPhoneNumber = '123-456-7890';
+const testEmailId = 'test@example.com';
+
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
+const wrapperSettings = (
+  firstName: string = testFName,
+  lastName: string = testLName,
+  phoneNumber: string = testPhoneNumber,
+  emailId: string = testEmailId
+) => ({
   props: {
-    atsClientId: testAtsClientIdProp,
-    disabled: false
+    firstName,
+    lastName,
+    phoneNumber,
+    emailId
   },
   global: {
     plugins: [
@@ -30,13 +47,13 @@ const wrapperSettings = (testAtsClientIdProp = testAtsClientId) => ({
   }
 });
 
-describe('ATSUserDetailsModal.vue', () => {
+describe('ATSUserLinkModal.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(ATSUserDetailsModal, wrapperSettings());
+    const wrapper = mount(ATSUserLinkModal, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

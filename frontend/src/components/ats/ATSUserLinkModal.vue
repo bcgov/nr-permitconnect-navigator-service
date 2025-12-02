@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref } from 'vue';
+import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, InputText, useToast } from '@/lib/primevue';
@@ -10,21 +11,21 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
-import { watchEffect } from 'vue';
 
 // Props
-const { fName, lName, phoneNumber, emailId } = defineProps<{
-  fName?: string;
-  lName?: string;
+const { firstName, lastName, phoneNumber, emailId } = defineProps<{
+  firstName?: string;
+  lastName?: string;
   phoneNumber?: string;
   emailId?: string;
 }>();
 
 // Composables
+const { t } = useI18n();
 const toast = useToast();
 
 // Emits
-const emit = defineEmits(['atsUserLink:link']);
+const emit = defineEmits(['atsUserLink:link', 'atsUserLink:create']);
 
 // Store
 const appStore = useAppStore();
@@ -33,17 +34,18 @@ const { getInitiative } = storeToRefs(appStore);
 // State
 const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
+const hasSearched: Ref<boolean> = ref(false);
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
 const users: Ref<Array<ATSClientResource>> = ref([]);
 const visible = defineModel<boolean>('visible');
-const firstName: Ref<string> = ref('');
-const lastName: Ref<string> = ref('');
+const fName: Ref<string> = ref('');
+const lName: Ref<string> = ref('');
 const phone: Ref<string> = ref('');
 const email: Ref<string> = ref('');
 
 watchEffect(() => {
-  firstName.value = fName ?? '';
-  lastName.value = lName ?? '';
+  fName.value = firstName ?? '';
+  lName.value = lastName ?? '';
   phone.value = phoneNumber ?? '';
   email.value = emailId ?? '';
 });
@@ -51,12 +53,13 @@ watchEffect(() => {
 // Actions
 async function searchATSUsers() {
   selectedUser.value = undefined;
+  hasSearched.value = true;
   try {
     loading.value = true;
 
     const response = await atsService.searchATSUsers({
-      firstName: firstName.value,
-      lastName: lastName.value,
+      firstName: fName.value,
+      lastName: lName.value,
       clientId: atsClientId.value,
       phone: phone.value,
       email: email.value
@@ -65,11 +68,11 @@ async function searchATSUsers() {
 
     users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
+      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
     });
   } catch (error) {
-    toast.error('Error searching for users ' + error);
+    toast.error(t('i.ats.common.errorSearchingUsers') + error);
   } finally {
     loading.value = false;
   }
@@ -89,42 +92,42 @@ async function searchATSUsers() {
     <div class="pt-1 mb-6 mr-1 grid grid-cols-6 gap-4">
       <div class="col pr-0">
         <InputText
-          v-model="firstName"
-          placeholder="First name"
+          v-model="fName"
+          :placeholder="t('i.ats.common.firstName')"
           class="w-full"
         />
       </div>
       <div class="col pr-0">
         <InputText
-          v-model="lastName"
-          placeholder="Last name"
+          v-model="lName"
+          :placeholder="t('i.ats.common.lastName')"
           class="w-full"
         />
       </div>
       <div class="col pr-0">
         <InputText
           v-model="atsClientId"
-          placeholder="ATS client # (optional)"
+          :placeholder="t('i.ats.atsUserLinkModal.clientNo')"
           class="w-full"
         />
       </div>
       <div class="col pr-0">
         <InputText
           v-model="phone"
-          placeholder="Phone (optional)"
+          :placeholder="t('i.ats.atsUserLinkModal.phone')"
           class="w-full"
         />
       </div>
       <div class="col pr-0">
         <InputText
           v-model="email"
-          placeholder="Email (optional)"
+          :placeholder="t('i.ats.atsUserLinkModal.email')"
           class="w-full"
         />
       </div>
       <Button
         class="col p-button-solid"
-        label="Search"
+        :label="t('i.ats.atsUserLinkModal.search')"
         @click="searchATSUsers"
       />
     </div>
@@ -144,7 +147,7 @@ async function searchATSUsers() {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h5 class="m-0">No users found.</h5>
+          <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
         </div>
       </template>
       <template #loading>
@@ -153,49 +156,58 @@ async function searchATSUsers() {
 
       <Column
         field="clientId"
-        header="Client #"
+        :header="t('i.ats.atsUserLinkModal.clientNo')"
         sortable
       />
       <Column
         field="firstName"
-        header="First Name"
+        :header="t('i.ats.common.firstName')"
         sortable
       />
       <Column
         field="surName"
-        header="Last Name"
+        :header="t('i.ats.common.lastName')"
         sortable
       />
       <Column
         field="address.primaryPhone"
-        header="Phone"
+        :header="t('i.ats.atsUserLinkModal.phone')"
         sortable
       />
       <Column
         field="address.email"
-        header="Email"
+        :header="t('i.ats.atsUserLinkModal.email')"
         sortable
       />
       <Column
         v-if="getInitiative === Initiative.HOUSING"
         field="formattedAddress"
-        header="Location address"
+        :header="t('i.ats.common.locationAddress')"
         sortable
       />
     </DataTable>
-    <div class="flex justify-start">
-      <Button
-        class="p-button-solid mr-4"
-        label="Link to PCNS"
-        :disabled="!selectedUser"
-        @click="emit('atsUserLink:link', selectedUser)"
-      />
-      <Button
-        class="mr-0"
-        outlined
-        label="Cancel"
-        @click="visible = false"
-      />
+    <div class="flex justify-between">
+      <div>
+        <Button
+          class="p-button-solid mr-4"
+          :label="t('i.ats.atsUserLinkModal.linkToPCNS')"
+          :disabled="!selectedUser"
+          @click="emit('atsUserLink:link', selectedUser)"
+        />
+        <Button
+          class="mr-0"
+          outlined
+          :label="t('i.ats.common.cancel')"
+          @click="visible = false"
+        />
+      </div>
+      <div
+        v-if="hasSearched"
+        class="underline text-[var(--p-bcblue-900)] hover-hand"
+        @click="emit('atsUserLink:create')"
+      >
+        {{ t('i.ats.common.createATSClient') }}
+      </div>
     </div>
   </Dialog>
 </template>

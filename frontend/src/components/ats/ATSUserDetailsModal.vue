@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
@@ -9,18 +10,25 @@ import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
 
 // Props
-const { atsClientId, disabled = false } = defineProps<{
+const {
+  atsClientId,
+  disabled = false,
+  isRelatedEnquiry = false
+} = defineProps<{
   atsClientId: string | number | null;
   disabled?: boolean;
+  isRelatedEnquiry?: boolean;
 }>();
 
 // Emits
 const emit = defineEmits(['atsUserDetails:unLink']);
 
+// Composables
+const { t } = useI18n();
+
 // State
 const loading: Ref<boolean> = ref(false);
 const users: Ref<Array<ATSClientResource>> = ref([]);
-
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -38,11 +46,11 @@ async function getATSClientInformation() {
 
     users.value.forEach((client: ATSClientResource) => {
       // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter((line) => line).join(', ');
+      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
     });
   } catch (error) {
-    toast.error('Error searching for users ' + error);
+    toast.error(t('i.ats.common.errorSearchingUsers') + error);
   } finally {
     loading.value = false;
   }
@@ -61,7 +69,7 @@ watch(visible, () => {
     class="app-info-dialog w-7/12"
   >
     <template #header>
-      <span class="p-dialog-title app-primary-color">ATS Client link</span>
+      <span class="p-dialog-title app-primary-color">{{ t('i.ats.atsUserDetailsModal.atsClientLink') }}</span>
     </template>
     <DataTable
       :row-hover="true"
@@ -74,7 +82,7 @@ watch(visible, () => {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h5 class="m-0">No users found.</h5>
+          <h5 class="m-0">{{ t('i.ats.common.noUsersFound') }}</h5>
         </div>
       </template>
       <template #loading>
@@ -83,38 +91,38 @@ watch(visible, () => {
 
       <Column
         field="clientId"
-        header="Client #"
+        :header="t('i.ats.atsUserDetailsModal.clientNo')"
       />
       <Column
         field="firstName"
-        header="First Name"
+        :header="t('i.ats.common.firstName')"
       />
       <Column
         field="surName"
-        header="Last Name"
+        :header="t('i.ats.common.lastName')"
       />
       <Column
         field="address.primaryPhone"
-        header="Phone"
+        :header="t('i.ats.atsUserDetailsModal.phone')"
       />
       <Column
         field="address.email"
-        header="Email"
+        :header="t('i.ats.atsUserDetailsModal.email')"
       />
       <Column
         field="formattedAddress"
-        header="Location address"
+        :header="t('i.ats.common.locationAddress')"
       />
       <Column
         field="action"
-        header="Action"
+        :header="t('i.ats.atsUserDetailsModal.action')"
         class="text-center header-center"
       >
         <template #body="{ data }">
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
-            aria-label="Delete user"
-            :disabled="disabled"
+            :aria-label="t('i.ats.common.deleteUser')"
+            :disabled="disabled || isRelatedEnquiry"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >
             <font-awesome-icon icon="fa-solid fa-trash" />
@@ -126,14 +134,14 @@ watch(visible, () => {
       <Button
         class="p-button-solid mr-4"
         :class="{ 'no-underline': disabled }"
-        label="Save"
+        :label="t('i.ats.atsUserDetailsModal.save')"
         :disabled="disabled"
         @click="users.length == 0 ? emit('atsUserDetails:unLink') : (visible = false)"
       />
       <Button
         class="mr-0"
         outlined
-        label="Cancel"
+        :label="t('i.ats.common.cancel')"
         @click="visible = false"
       />
     </div>
