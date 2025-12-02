@@ -8,7 +8,8 @@ import {
   generateUpdateStamps
 } from '../db/utils/utils';
 import { createActivity, deleteActivity } from '../services/activity';
-import { upsertContacts } from '../services/contact';
+import { createActivityContact, listActivityContacts } from '../services/activityContact';
+import { searchContacts, upsertContacts } from '../services/contact';
 import {
   createEnquiry,
   deleteEnquiry,
@@ -19,22 +20,34 @@ import {
   updateEnquiry
 } from '../services/enquiry';
 import { Initiative } from '../utils/enums/application';
-import { ApplicationStatus, EnquirySubmittedMethod, IntakeStatus, SubmissionType } from '../utils/enums/projectCommon';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  EnquirySubmittedMethod,
+  IntakeStatus,
+  SubmissionType
+} from '../utils/enums/projectCommon';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
+import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,
   data: EnquiryIntake,
   currentContext: CurrentContext
 ) => {
-  const activityId =
-    data.activityId ??
-    (await createActivity(tx, currentContext.initiative as Initiative, generateCreateStamps(currentContext)))
-      ?.activityId;
+  let activityId = data.activityId;
+
+  // Create activity and link contact if required
+  if (!activityId) {
+    activityId = (
+      await createActivity(tx, currentContext.initiative as Initiative, generateCreateStamps(currentContext))
+    )?.activityId;
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
+  }
 
   let basic;
 
@@ -52,7 +65,6 @@ const generateEnquiryData = async (
     enquiryId: data.enquiryId ?? uuidv4(),
     activityId: activityId as string,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     submittedBy: getCurrentUsername(currentContext),
     intakeStatus: IntakeStatus.SUBMITTED,
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
@@ -61,17 +73,14 @@ const generateEnquiryData = async (
 };
 
 export const createEnquiryController = async (req: Request<never, never, EnquiryIntake>, res: Response) => {
-  // TODO: Remove when create PUT calls get switched to POST
-  if (req.body === undefined) req.body = { contacts: [] };
+  // Provide an empty body if POST body is given undefined
+  if (req.body === undefined) req.body = {} as EnquiryIntake;
 
-  const result = await transactionWrapper<Enquiry>(async (tx: PrismaTransactionClient) => {
+  const result = await transactionWrapper<Enquiry & { contact: Contact }>(async (tx: PrismaTransactionClient) => {
     const enquiry = await generateEnquiryData(tx, req.body, req.currentContext);
 
-    // Create or update contacts
-    if (req.body.contacts) await upsertContacts(tx, req.body.contacts);
-
     // Create new enquiry
-    return await createEnquiry(tx, {
+    const data = await createEnquiry(tx, {
       ...enquiry,
       assignedUserId: null,
       addedToAts: false,
@@ -82,6 +91,28 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       ...generateCreateStamps(req.currentContext),
       ...generateNullUpdateStamps()
     });
+
+    // Update the contact
+    const contactResponse = await upsertContacts(tx, [
+      { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+    ]);
+
+    // Create additional activity_contact links if the enquiry is related to a project
+    if (data.relatedActivityId) {
+      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+
+      const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
+        (x) => x.contactId != currentContact[0].contactId
+      );
+
+      await Promise.all(
+        relatedContacts.map(
+          async (x) => await createActivityContact(tx, data.activityId, x.contactId, ActivityContactRole.MEMBER)
+        )
+      );
+    }
+
+    return { ...data, contact: contactResponse[0] };
   });
 
   res.status(201).json(result);
@@ -98,17 +129,9 @@ export const deleteEnquiryController = async (req: Request<{ enquiryId: string }
 
 export const getEnquiriesController = async (req: Request, res: Response) => {
   // Pull from PCNS database
-  let response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
+  const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
     return await getEnquiries(tx);
   });
-
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    response = response.filter(
-      (x) => x?.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
-    );
-  }
-
   res.status(200).json(response);
 };
 
@@ -130,7 +153,7 @@ export const searchEnquiriesController = async (
   req: Request<never, never, never, EnquirySearchParameters>,
   res: Response
 ) => {
-  let response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
+  const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
     return await searchEnquiries(
       tx,
       {
@@ -140,12 +163,6 @@ export const searchEnquiriesController = async (
       req.currentContext.initiative as Initiative
     );
   });
-
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
-    response = response.filter(
-      (x) => x.submittedBy.toUpperCase() === getCurrentUsername(req.currentContext)?.toUpperCase()
-    );
-  }
 
   res.status(200).json(response);
 };

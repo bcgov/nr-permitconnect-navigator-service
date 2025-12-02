@@ -10,7 +10,7 @@ import ATSUserLinkModal from '@/components/user/ATSUserLinkModal.vue';
 import ATSUserCreateModal from '@/components/user/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/user/ATSUserDetailsModal.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
+import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
@@ -274,17 +274,6 @@ const onSubmit = async (values: any) => {
       atsCreateType.value = undefined;
     }
 
-    // Grab the contact information
-    const contact = {
-      contactId: values.contact.contactId,
-      firstName: values.contact.firstName,
-      lastName: values.contact.lastName,
-      phoneNumber: values.contact.phoneNumber,
-      email: values.contact.email,
-      contactApplicantRelationship: values.contact.contactApplicantRelationship,
-      contactPreference: values.contact.contactPreference
-    };
-
     // Omit all the fields we dont want to send
     const dataOmitted = omit({ ...values }, ['contact']);
 
@@ -298,11 +287,7 @@ const onSubmit = async (values: any) => {
     const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
 
-    // Update enquiry - order of calls is important
-    const contactResponse = (await contactService.updateContact(contact)).data;
-    await activityContactService.updateActivityContact(values.activityId, [
-      { ...contact, contactId: contactResponse.contactId }
-    ]);
+    // Update enquiry
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
 
     // Update store with returned data

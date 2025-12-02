@@ -23,7 +23,7 @@ router.use(currentContext(Initiative.PCNS));
 router.get('/', (_req, res) => {
   res.status(200).json({
     endpoints: [
-      '/activityContact',
+      '/activity',
       '/ats',
       '/code',
       '/contact',
@@ -39,7 +39,7 @@ router.get('/', (_req, res) => {
   });
 });
 
-router.use('/activityContact', activityContact);
+router.use('/activity/:activityId/contact', activityContact);
 router.use('/ats', ats);
 router.use('/code', code);
 router.use('/contact', contact);

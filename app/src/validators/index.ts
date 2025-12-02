@@ -1,4 +1,5 @@
 export { default as accessRequestValidator } from './accessRequest';
+export { default as activityContactValidator } from './activityContact';
 export { default as atsValidator } from './ats';
 export { default as contactValidator } from './contact';
 export { default as documentValidator } from './document';

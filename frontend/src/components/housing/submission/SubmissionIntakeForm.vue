@@ -45,15 +45,7 @@ import {
   useConfirm,
   useToast
 } from '@/lib/primevue';
-import {
-  activityContactService,
-  contactService,
-  documentService,
-  enquiryService,
-  externalApiService,
-  housingProjectService,
-  permitService
-} from '@/services';
+import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
@@ -314,7 +306,7 @@ async function onSubmit(data: any) {
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit(setEmptyStringsToNull({ ...data }), ['contacts']);
+    const dataOmitted = omit(setEmptyStringsToNull({ ...data, contact }), ['contacts']);
 
     // Show the trackingNumber of all appliedPermits to the proponent
     dataOmitted.appliedPermits?.forEach((x: Permit) => {
@@ -332,17 +324,13 @@ async function onSubmit(data: any) {
     const response = await housingProjectService.submitDraft({ ...dataOmitted, draftId });
 
     if (response.data.activityId && response.data.housingProjectId) {
-      // Link activity contact
-      const contactResponse = (await contactService.updateContact(contact)).data;
-      await activityContactService.updateActivityContact(response.data.activityId, [contactResponse]);
-
       assignedActivityId.value = response.data.activityId;
 
       // Send confirmation email
       emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
-      contactStore.setContact(contactResponse);
+      contactStore.setContact(response.data.contact);
 
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
