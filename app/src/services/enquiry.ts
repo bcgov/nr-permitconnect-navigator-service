@@ -115,19 +115,6 @@ export const searchEnquiries = async (
   initiative: Initiative
 ): Promise<Enquiry[]> => {
   const result = await tx.enquiry.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          },
-          initiative: true
-        }
-      },
-      user: params.includeUser
-    },
     where: {
       AND: [
         {
@@ -150,6 +137,19 @@ export const searchEnquiries = async (
           intakeStatus: { in: params.intakeStatus }
         }
       ]
+    },
+    include: {
+      activity: {
+        include: {
+          activityContact: {
+            include: {
+              contact: true
+            }
+          },
+          initiative: true
+        }
+      },
+      user: params.includeUser
     }
   });
 

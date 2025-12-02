@@ -75,17 +75,17 @@ export const email = async (emailData: Email) => {
       maxBodyLength: Infinity
     });
 
-    logEmail(data, uniqueEmails, status);
+    await logEmail(data, uniqueEmails, status);
     return { data, status };
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
-      logEmail(null, uniqueEmails, e.response ? e.response.status : 500);
+      await logEmail(null, uniqueEmails, e.response ? e.response.status : 500);
       return {
         data: e.response?.data.errors[0].message,
         status: e.response ? e.response.status : 500
       };
     } else {
-      logEmail(null, uniqueEmails, 500);
+      await logEmail(null, uniqueEmails, 500);
       return {
         data: 'Email error',
         status: 500

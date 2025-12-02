@@ -9,11 +9,11 @@ import type { ListPermitsOptions, Permit, PermitBase, PermitType } from '../type
  */
 export const deletePermit = async (tx: PrismaTransactionClient, permitId: string): Promise<void> => {
   await tx.permit.delete({
-    include: {
-      permitType: true
-    },
     where: {
       permitId: permitId
+    },
+    include: {
+      permitType: true
     }
   });
 };
@@ -47,6 +47,9 @@ export const getPermit = async (tx: PrismaTransactionClient, permitId: string): 
  */
 export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: Initiative): Promise<PermitType[]> => {
   const initiativeResult = await tx.initiative.findFirstOrThrow({
+    where: {
+      code: initiative
+    },
     include: {
       permitTypeInitiativeXref: {
         include: {
@@ -65,9 +68,6 @@ export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: In
           }
         ]
       }
-    },
-    where: {
-      code: initiative
     }
   });
 
@@ -83,6 +83,14 @@ export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: In
  */
 export const listPermits = async (tx: PrismaTransactionClient, options?: ListPermitsOptions): Promise<Permit[]> => {
   const response = await tx.permit.findMany({
+    where: {
+      activityId: options?.activityId || undefined
+    },
+    orderBy: {
+      permitType: {
+        name: 'asc'
+      }
+    },
     include: {
       permitType: true,
       permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
@@ -90,14 +98,6 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
         include: {
           sourceSystemKind: true
         }
-      }
-    },
-    where: {
-      activityId: options?.activityId || undefined
-    },
-    orderBy: {
-      permitType: {
-        name: 'asc'
       }
     }
   });
@@ -113,14 +113,14 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
  */
 export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase): Promise<Permit> => {
   const response = await tx.permit.upsert({
-    include: {
-      permitType: true
-    },
+    update: data,
+    create: data,
     where: {
       permitId: data.permitId
     },
-    update: data,
-    create: data
+    include: {
+      permitType: true
+    }
   });
 
   return response;

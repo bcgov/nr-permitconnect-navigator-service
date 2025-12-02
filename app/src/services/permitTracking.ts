@@ -31,10 +31,10 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
       data.permitTracking.map(async (x: PermitTracking) => {
         if (x.permitTrackingId) {
           return await tx.permit_tracking.update({
+            data: { ...x, permitId: data.permitId },
             where: {
               permitTrackingId: x.permitTrackingId
-            },
-            data: { ...x, permitId: data.permitId }
+            }
           });
         } else {
           return await tx.permit_tracking.create({

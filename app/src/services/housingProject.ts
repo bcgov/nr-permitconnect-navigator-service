@@ -163,18 +163,6 @@ export const searchHousingProjects = async (
   params: HousingProjectSearchParameters
 ): Promise<HousingProject[]> => {
   const result = await tx.housing_project.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      },
-      user: params.includeUser
-    },
     where: {
       AND: [
         {
@@ -193,6 +181,18 @@ export const searchHousingProjects = async (
           intakeStatus: { in: params.intakeStatus }
         }
       ]
+    },
+    include: {
+      activity: {
+        include: {
+          activityContact: {
+            include: {
+              contact: true
+            }
+          }
+        }
+      },
+      user: params.includeUser
     }
   });
 
