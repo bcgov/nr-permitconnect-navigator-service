@@ -7,8 +7,6 @@ const schema = {
     body: Joi.array().items(
       Joi.object({
         trackingId: Joi.string().required(),
-        shownToProponent: Joi.boolean().allow(null),
-        sourceSystemKindId: Joi.number().required(),
         sourceSystemKind: Joi.object({
           sourceSystem: Joi.string().required(),
           description: Joi.string().required(),
