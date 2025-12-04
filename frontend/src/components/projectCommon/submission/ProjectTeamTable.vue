@@ -4,7 +4,8 @@ import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import { useContactStore } from '@/store';
+import { useAppStore, useContactStore } from '@/store';
+import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -16,6 +17,7 @@ const { activityContacts } = defineProps<{
 }>();
 
 // Composables
+const appStore = useAppStore();
 const contactStore = useContactStore();
 const { t } = useI18n();
 
@@ -23,6 +25,7 @@ const { t } = useI18n();
 const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revokeUser']);
 
 // Store
+const { getZone } = storeToRefs(appStore);
 const { getContact } = storeToRefs(contactStore);
 
 // State
@@ -59,6 +62,12 @@ watchEffect(() => {
       sortable
     />
     <Column
+      v-if="getZone === Zone.INTERNAL"
+      field="contact.contactApplicantRelationship"
+      :header="t('e.common.projectTeamTable.headerRelationship')"
+      sortable
+    />
+    <Column
       field="contact.email"
       :header="t('e.common.projectTeamTable.headerEmail')"
       sortable
@@ -68,46 +77,48 @@ watchEffect(() => {
       :header="t('e.common.projectTeamTable.headerPhone')"
       sortable
     />
-    <Column
-      field="role"
-      :header="t('e.common.projectTeamTable.headerRole')"
-      sortable
-    />
-    <Column
-      v-if="isAdmin"
-      field="manage"
-      :header="t('e.common.projectTeamTable.headerManage')"
-      header-class="header-right"
-      class="!text-right"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-0"
-          :aria-label="t('e.common.projectTeamTable.headerManage')"
-          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
-          @click="emit('projectTeamTable:manageUser', data)"
-        >
-          <font-awesome-icon icon="fa-solid fa-pen-to-square" />
-        </Button>
-      </template>
-    </Column>
-    <Column
-      v-if="isAdmin"
-      field="revoke"
-      :header="t('e.common.projectTeamTable.headerRevoke')"
-      header-class="header-right"
-      class="!text-right"
-    >
-      <template #body="{ data }">
-        <Button
-          class="p-button-lg p-button-text p-button-danger p-0"
-          :aria-label="t('e.common.projectTeamTable.headerRevoke')"
-          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
-          @click="emit('projectTeamTable:revokeUser', data)"
-        >
-          <font-awesome-icon icon="fa-solid fa-user-xmark" />
-        </Button>
-      </template>
-    </Column>
+    <span v-if="getZone === Zone.EXTERNAL">
+      <Column
+        field="role"
+        :header="t('e.common.projectTeamTable.headerRole')"
+        sortable
+      />
+      <Column
+        v-if="isAdmin"
+        field="manage"
+        :header="t('e.common.projectTeamTable.headerManage')"
+        header-class="header-right"
+        class="!text-right"
+      >
+        <template #body="{ data }">
+          <Button
+            class="p-button-lg p-button-text p-0"
+            :aria-label="t('e.common.projectTeamTable.headerManage')"
+            :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+            @click="emit('projectTeamTable:manageUser', data)"
+          >
+            <font-awesome-icon icon="fa-solid fa-pen-to-square" />
+          </Button>
+        </template>
+      </Column>
+      <Column
+        v-if="isAdmin"
+        field="revoke"
+        :header="t('e.common.projectTeamTable.headerRevoke')"
+        header-class="header-right"
+        class="!text-right"
+      >
+        <template #body="{ data }">
+          <Button
+            class="p-button-lg p-button-text p-button-danger p-0"
+            :aria-label="t('e.common.projectTeamTable.headerRevoke')"
+            :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+            @click="emit('projectTeamTable:revokeUser', data)"
+          >
+            <font-awesome-icon icon="fa-solid fa-user-xmark" />
+          </Button>
+        </template>
+      </Column>
+    </span>
   </DataTable>
 </template>

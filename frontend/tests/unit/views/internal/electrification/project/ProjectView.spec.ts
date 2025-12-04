@@ -5,6 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import {
+  activityContactService,
   documentService,
   enquiryService,
   electrificationProjectService,
@@ -31,6 +32,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
+const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 const listNotesSpy = vi.spyOn(noteHistoryService, 'listNoteHistories');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
@@ -44,6 +46,9 @@ getProjectSpy.mockResolvedValue({
     projectName: 'Test Project',
     applicationStatus: null
   }
+} as AxiosResponse);
+listActivityContactsSpy.mockResolvedValue({
+  data: []
 } as AxiosResponse);
 listDocumentsSpy.mockResolvedValue({ data: [{ filename: 'foo', activityId: 'activity456' }] } as AxiosResponse);
 listNotesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);

@@ -93,6 +93,7 @@
         "headerLastName": "Last Name",
         "headerManage": "Manage",
         "headerPhone": "Phone",
+        "headerRelationship": "Relationship to project",
         "headerRevoke": "Revoke",
         "headerRole": "Role",
         "noUsers": "No users found."
@@ -274,10 +275,11 @@
         "needed": "Needed",
         "notNeeded": "Not needed",
         "seePropViewButtonLabel": "See Proponent's View",
+        "tabAuthorizations": "Authorizations",
         "tabFiles": "Files",
         "tabInformation": "Information",
         "tabNotes": "Notes",
-        "tabAuthorizations": "Authorizations",
+        "tabProjectTeam": "Project team",
         "tabRelatedEnquiries": "Related enquiries",
         "tabRoadmap": "Roadmap",
         "underInvestigation": "Under investigation"

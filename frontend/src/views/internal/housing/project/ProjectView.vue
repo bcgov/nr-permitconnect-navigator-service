@@ -13,6 +13,7 @@ import FileUpload from '@/components/file/FileUpload.vue';
 import ProjectForm from '@/components/housing/project/ProjectForm.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
+import ProjectTeamTable from '@/components/projectCommon/submission/ProjectTeamTable.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
   Button,
@@ -28,6 +29,7 @@ import {
   TabPanels
 } from '@/lib/primevue';
 import {
+  activityContactService,
   documentService,
   enquiryService,
   housingProjectService,
@@ -43,7 +45,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, Enquiry, HousingProject, User } from '@/types';
+import type { ActivityContact, Document, Enquiry, HousingProject, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -87,6 +89,7 @@ const {
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
+const activityContacts: Ref<ActivityContact[]> = ref([]);
 const activityId: Ref<string | undefined> = ref(undefined);
 const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
@@ -162,15 +165,17 @@ function toEditNote(noteHistoryId: string) {
 function updateLiveName(name: string) {
   liveName.value = name;
 }
+
 onBeforeMount(async () => {
   const project = (await housingProjectService.getProject(projectId)).data;
   activityId.value = project.activityId;
-  const [documents, notes, permits, relatedEnquiries] = (
+  const [documents, notes, permits, relatedEnquiries, contacts] = (
     await Promise.all([
       documentService.listDocuments(project.activityId),
       noteHistoryService.listNoteHistories(project.activityId),
       permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
-      enquiryService.listRelatedEnquiries(project.activityId)
+      enquiryService.listRelatedEnquiries(project.activityId),
+      activityContactService.listActivityContacts(project.activityId)
     ])
   ).map((r) => r.data);
 
@@ -211,6 +216,8 @@ onBeforeMount(async () => {
       createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
     }));
   }
+
+  activityContacts.value = contacts;
 
   loading.value = false;
 });
@@ -259,6 +266,7 @@ onBeforeMount(async () => {
       <Tab :value="3">{{ t('i.common.projectView.tabNotes') }}</Tab>
       <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
       <Tab :value="5">{{ t('i.common.projectView.tabRelatedEnquiries') }}</Tab>
+      <Tab :value="6">{{ t('i.common.projectView.tabProjectTeam') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
@@ -641,6 +649,12 @@ onBeforeMount(async () => {
         >
           <EnquiryCard :enquiry="enquiry" />
         </div>
+      </TabPanel>
+      <TabPanel :value="6">
+        <ProjectTeamTable
+          v-if="projectStore.getProject"
+          :activity-contacts="activityContacts"
+        />
       </TabPanel>
     </TabPanels>
   </Tabs>
