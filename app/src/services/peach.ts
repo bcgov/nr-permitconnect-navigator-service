@@ -36,7 +36,7 @@ export const getPeachRecord = async (recordId: string, systemId?: string): Promi
     if (axios.isAxiosError(e)) {
       const detail = e.response?.data.detail;
       const status = e.response ? e.response.status : 500;
-      throw new Problem(status, { detail });
+      throw new Problem(status, { detail }, { extra: { peachError: e.response?.data } });
     } else {
       throw new Problem(500, { detail: 'Server Error' });
     }
