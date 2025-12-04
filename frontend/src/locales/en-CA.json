@@ -93,6 +93,7 @@
         "headerLastName": "Last Name",
         "headerManage": "Manage",
         "headerPhone": "Phone",
+        "headerRelationship": "Relationship to project",
         "headerRevoke": "Revoke",
         "headerRole": "Role",
         "noUsers": "No users found."
@@ -280,6 +281,7 @@
         "tabAuthorizations": "Authorizations",
         "tabRelatedEnquiries": "Related enquiries",
         "tabRoadmap": "Roadmap",
+        "tabProjectTeam": "Project team",
         "underInvestigation": "Under investigation"
       },
       "projectForm": {
