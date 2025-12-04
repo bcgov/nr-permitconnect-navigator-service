@@ -1,15 +1,8 @@
-export enum BusinessDomain {
-  ARCHAEOLOGY = 'Archaeology',
-  CONTAMINATED_SITES = 'Contaminated Sites',
-  ENVIRONMENT = 'Environment',
-  FISH_AND_WILDLIFE = 'Fish and Wildlife',
-  FORESTRY = 'Forestry',
-  LANDS = 'Lands',
-  MINING = 'Mining',
-  PARKS = 'Parks',
-  RAPR = 'RAPR',
-  TRANSPORTATION = 'Transportation',
-  WATER = 'Water'
+export enum PeachIntegratedSystem {
+  ATS = 'ITSM-5314',
+  TANTALIS = 'ITSM-6072',
+  WMA = 'ITSM-6197',
+  VFCBC = 'ITSM-6117'
 }
 
 export enum PermitNeeded {

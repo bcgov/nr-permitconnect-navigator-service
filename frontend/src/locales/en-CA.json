@@ -561,7 +561,7 @@
       "noPeachDataMsgl3": "It could take up to 24 hours after the application submission to load. Please check back again later.",
       "noRecordsFound": "No records found",
       "noteRequired": "The status of this application has changed. Please add an update for the proponent.",
-      "peachNoteUpdate": "You can now track your application progress here. You will receive an email if the status or stage changes, or if your Navigator adds an update.",
+      "peachNoteUpdate": "You can now track your application progress here. You will receive an email if the status or stage changes, or when your Navigator posts an update.",
       "permitSaved": "Permit saved",
       "permitSaveFailed": "Failed to save permit",
       "publish": "Publish",

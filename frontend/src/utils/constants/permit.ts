@@ -1,6 +1,11 @@
-import { BusinessDomain, PermitState, PermitNeeded, PermitStage } from '@/utils/enums/permit';
+import { PeachIntegratedSystem, PermitState, PermitNeeded, PermitStage } from '@/utils/enums/permit';
 
-export const PEACH_INTEGRATED_BUSINESS_DOMAIN = [BusinessDomain.LANDS, BusinessDomain.WATER];
+export const PEACH_INTEGRATED_SYSTEMS = [
+  PeachIntegratedSystem.ATS,
+  PeachIntegratedSystem.TANTALIS,
+  PeachIntegratedSystem.WMA,
+  PeachIntegratedSystem.VFCBC
+];
 
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 

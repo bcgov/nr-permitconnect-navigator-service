@@ -64,11 +64,10 @@ const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTr
 /**
  * Fetches PEACH data for permit tracking
  */
-
 export const getPeachRecordController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
   const permitTracking = findPriorityPermitTracking(req.body);
   let peachSummary;
-  if (permitTracking && permitTracking.trackingId && permitTracking?.sourceSystemKind?.sourceSystem) {
+  if (permitTracking?.trackingId && permitTracking?.sourceSystemKind?.sourceSystem) {
     const response = await getPeachRecord(permitTracking.trackingId, permitTracking.sourceSystemKind.sourceSystem);
     peachSummary = summarizeRecord(response);
   }
