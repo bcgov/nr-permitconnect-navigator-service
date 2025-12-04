@@ -1,4 +1,4 @@
-import { Initiative } from '@/utils/enums/application';
+import { Initiative, Zone } from '@/utils/enums/application';
 import { defineStore } from 'pinia';
 import { computed, readonly, ref } from 'vue';
 
@@ -10,6 +10,7 @@ export type AppStoreState = {
   loadingInterval: Ref<ReturnType<typeof setTimeout> | undefined>;
   loadingMode: Ref<'determinate' | 'indeterminate'>;
   loadingValue: Ref<number>;
+  zone: Ref<Zone>;
 };
 
 export const useAppStore = defineStore('app', () => {
@@ -19,7 +20,8 @@ export const useAppStore = defineStore('app', () => {
     loadingCalls: ref(0),
     loadingInterval: ref(undefined),
     loadingMode: ref('indeterminate'),
-    loadingValue: ref(0)
+    loadingValue: ref(0),
+    zone: ref(Zone.GLOBAL)
   };
 
   // Getters
@@ -28,12 +30,17 @@ export const useAppStore = defineStore('app', () => {
     getIsLoading: computed(() => state.loadingCalls.value > 0),
     getLoadingCalls: computed(() => state.loadingCalls.value),
     getLoadingMode: computed(() => state.loadingMode.value),
-    getLoadingValue: computed(() => state.loadingValue.value)
+    getLoadingValue: computed(() => state.loadingValue.value),
+    getZone: computed(() => state.zone.value)
   };
 
   // Actions
   function setInitiative(initiative: Initiative) {
     state.initiative.value = initiative;
+  }
+
+  function setZone(zone: Zone) {
+    state.zone.value = zone;
   }
 
   function beginDeterminateLoading() {
@@ -76,6 +83,7 @@ export const useAppStore = defineStore('app', () => {
 
     // Actions
     setInitiative,
+    setZone,
     beginDeterminateLoading,
     beginIndeterminateLoading,
     endDeterminateLoading,
