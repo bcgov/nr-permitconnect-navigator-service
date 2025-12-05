@@ -367,6 +367,8 @@ watchEffect(() => {
     // Clear permit note only if the form is dirty
     if (formRef.value.getMeta().dirty) formRef.value?.setFieldValue('permitNote', '');
   }
+
+  console.log(formRef.value?.values.authorizationType.sourceSystem);
 });
 </script>
 
@@ -390,7 +392,9 @@ watchEffect(() => {
 
     <AuthorizationCardIntake
       :editable="editable"
-      :source-system-kinds="sourceSystemKinds"
+      :source-system-kinds="
+        sourceSystemKinds.filter((ssk) => ssk.sourceSystem === values?.authorizationType.sourceSystem)
+      "
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
