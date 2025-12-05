@@ -16,7 +16,13 @@ describe('utils.ts', () => {
       const result = combineDateTime('2024-01-10', null);
 
       expect(result).not.toBeNull();
-      expect(result!.toISOString()).toBe('2024-01-10T00:00:00.000Z');
+      expect(result!.getFullYear()).toBe(2024);
+      expect(result!.getMonth()).toBe(0); // January
+      expect(result!.getDate()).toBe(10);
+      expect(result!.getHours()).toBe(0);
+      expect(result!.getMinutes()).toBe(0);
+      expect(result!.getSeconds()).toBe(0);
+      expect(result!.getMilliseconds()).toBe(0);
     });
 
     it('combines date and full time with milliseconds', () => {
