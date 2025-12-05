@@ -14,7 +14,7 @@ import { Initiative } from '../../../src/utils/enums/application';
 
 import type { Request, Response } from 'express';
 import type { Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
-import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_ACTIVITY, TEST_ENQUIRY_1, TEST_ENQUIRY_INTAKE } from '../data';
+import { TEST_CURRENT_CONTEXT, TEST_ACTIVITY_ELECTRIFICATION, TEST_ENQUIRY_1, TEST_ENQUIRY_INTAKE } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
@@ -51,7 +51,7 @@ describe('createEnquiryController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
     await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);

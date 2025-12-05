@@ -52,9 +52,9 @@ export const getPeachRecordController = async (req: Request<{ recordId: string; 
 };
 
 /**
- * Syncs PEACH data for permit tracking to PCNS
+ * Syncs PEACH data for permit tracking to PCNS, returns a list of permits used for sending update notifications
  */
-export const syncPeachRecords = async () => {
+export const syncPeachRecords = async (): Promise<Permit[]> => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     // Only fetch permits that have a peach integrated system permit type
@@ -132,6 +132,8 @@ export const syncPeachRecords = async () => {
 
   const parsedRecords: Record<string, PeachSummary> = parsePeachRecords(records);
 
+  const updatedPermits: Permit[] = [];
+
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     for (const systemRecordPermit of systemRecordPermits) {
       const { recordId, systemId, permit: pcnsPermit } = systemRecordPermit;
@@ -158,31 +160,27 @@ export const syncPeachRecords = async () => {
       const submittedDatesEqual = compareDates(peachSubmittedDatetime, pcnsSubmittedDatetime) === 0;
       const decisionDatesEqual = compareDates(peachDecisionDatetime, pcnsDecisionDatetime) === 0;
       const lastChangedDatesEqual = compareDates(peachStatusChangedDatetime, pcnsStatusChangedDatetime) === 0;
-      const statesEqual = peachSummary.state === pcnsPermit.state;
       const stagesEqual = peachSummary.stage === pcnsPermit.stage;
+      const statesEqual = peachSummary.state === pcnsPermit.state;
 
       const hasDiff =
         !stagesEqual || !statesEqual || !submittedDatesEqual || !decisionDatesEqual || !lastChangedDatesEqual;
 
       if (!hasDiff) continue;
 
-      pcnsPermit.state = peachSummary.state;
       pcnsPermit.stage = peachSummary.stage;
+      pcnsPermit.state = peachSummary.state;
 
-      if (peachSummary.submittedDate) {
-        pcnsPermit.submittedDate = peachSummary.submittedDate;
-        pcnsPermit.submittedTime = peachSummary.submittedTime;
-      }
+      pcnsPermit.submittedDate = peachSummary.submittedDate;
+      pcnsPermit.submittedTime = peachSummary.submittedTime;
 
-      if (peachSummary.decisionDate) {
-        pcnsPermit.decisionDate = peachSummary.decisionDate;
-        pcnsPermit.decisionTime = peachSummary.decisionTime;
-      }
+      pcnsPermit.decisionDate = peachSummary.decisionDate;
+      pcnsPermit.decisionTime = peachSummary.decisionTime;
 
       pcnsPermit.statusLastChanged = peachSummary.statusLastChanged;
       pcnsPermit.statusLastChangedTime = peachSummary.statusLastChangedTime;
 
-      // Don't update lastVerified if current value is after PEACH's status change
+      // Only update pcns' last verified date if current value is before peach status change
       const lastVerifiedBeforeStatusChange = compareDates(pcnsLastVerifiedDatetime, peachStatusChangedDatetime) < 0;
 
       if (lastVerifiedBeforeStatusChange) {
@@ -194,9 +192,14 @@ export const syncPeachRecords = async () => {
       pcnsPermit.updatedAt = updatedAt;
       pcnsPermit.updatedBy = updatedBy;
 
-      const cleanedPermit = omit(pcnsPermit, ['permitTracking']);
+      const cleanedPermit = omit(pcnsPermit, ['permitTracking', 'permitType']);
 
-      await upsertPermit(tx, cleanedPermit);
+      const updatedPermit = await upsertPermit(tx, cleanedPermit);
+
+      // Only return permits and notes that have had a status change for notifications
+      if (!stagesEqual || !statesEqual) updatedPermits.push(updatedPermit);
     }
   });
+
+  return updatedPermits;
 };

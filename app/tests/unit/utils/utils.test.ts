@@ -167,6 +167,12 @@ describe('utils', () => {
     });
   });
 
+  describe('formatDateOnly', () => {
+    it('returns the expected date format if given a valid date only string', () => {
+      expect(utils.formatDateOnly('2025-11-28')).toEqual('November 28, 2025');
+    });
+  });
+
   describe('getChefsApiKey', () => {
     it('returns apiKey that matches form id', () => {
       (config.get as jest.Mock).mockReturnValue(CHES_CONFIG);

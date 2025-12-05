@@ -6,6 +6,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon'
 
 import type { AccessRequest, Contact, Permit, User } from './models';
 import type { IStamps } from '../interfaces/IStamps';
+import type { PermitEmailTemplate } from '../utils/templates';
 
 type AddressResource = {
   '@type': string;
@@ -376,7 +377,7 @@ export type ListPermitsOptions = {
   includeNotes?: boolean;
 } & Partial<IStamps>;
 
-type PeachSummary = {
+export type PeachSummary = {
   stage: PermitStage;
   state: PermitState;
   submittedDate: string | null;
@@ -397,6 +398,15 @@ export type PermitSearchParams = {
   includePermitNotes?: boolean;
   includePermitTracking?: boolean;
   includePermitType?: boolean;
+};
+
+export type PermitUpdateEmailParams = {
+  permit: Permit;
+  initiative: Initiative;
+  dearName: string;
+  projectId: string;
+  toEmails: string[];
+  emailTemplate: PermitEmailTemplate;
 };
 
 type SplitDatetimeBase<T> = {

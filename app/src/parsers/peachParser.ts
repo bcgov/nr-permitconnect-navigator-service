@@ -49,7 +49,7 @@ const APPLICATION_PROCESS_ORDERING_MAP: Record<string, number> = APPLICATION_PRO
   {} as Record<string, number>
 );
 
-const PEACH_DECISION_STATES = ['ALLOWED', 'DISALLOWED', 'OFFERED', 'ISSUED', 'DECLINED'];
+const PEACH_DECISION_STATES = new Set(['ALLOWED', 'DISALLOWED', 'OFFERED', 'ISSUED', 'DECLINED']);
 
 const PEACH_SUBMITTED_STATE = 'SUBMITTED';
 
@@ -282,7 +282,7 @@ const findSubmittedDate = (record: PeachRecord): NullableDateTimeStrings => {
  */
 const findDecisionDate = (record: PeachRecord): NullableDateTimeStrings => {
   for (const pe of record.process_event_set) {
-    if (PEACH_DECISION_STATES.includes(pe.process.code)) {
+    if (PEACH_DECISION_STATES.has(pe.process.code)) {
       return piesEventToDateParts(pe.event);
     }
   }
@@ -301,12 +301,12 @@ export function summarizeRecord(record: PeachRecord): PeachSummary | null {
   // Get latest process even
   const { processEvent } = getRecordEvents(record);
   // TODO: Implement logic, parsing, and mappings for "On Hold Events" once the data has been added to peach
-  // May need following variables and if checks to see whether to set permit w/ process or onHold
+  // May need following variables and if checks to see whether to set permit status w/ process or onHold
   // const onHoldEnded = onHoldEvent.event.end_date || onHoldEvent.event.end_datetime; // check if dates too?
   // const onHoldStartDate = piesEventToDate(onHoldEvent.event);
   // const onHoldIsLatestEvent = compareDates(onHoldStartDate, processStartDate) > 0;
 
-  // if (onHoldEnded || onHoldIsLatestEvent) {
+  // if (!onHoldEnded || onHoldIsLatestEvent) {
   //   // set set permit values based on onHold
   // } else {
   //   // set set permit values based on process

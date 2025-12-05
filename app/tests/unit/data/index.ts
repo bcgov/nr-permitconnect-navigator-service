@@ -14,10 +14,12 @@ import {
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
+  Email,
   Enquiry,
   EnquiryIntake,
   HousingProject,
   HousingProjectIntake,
+  Initiative as InitiativeModel,
   Note,
   NoteHistory,
   Record as PeachRecord,
@@ -42,12 +44,18 @@ import {
 } from '../../../src/utils/enums/projectCommon';
 import { NumResidentialUnits } from '../../../src/utils/enums/housing';
 
-export const TEST_CURRENT_CONTEXT: CurrentContext = {
-  authType: AuthType.BEARER,
-  userId: '811896a0-e1fe-4c38-8cd3-86245c79e8f8'
+export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
+  activityId: 'ACTI1234',
+  contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
-export const TEST_ELECTRIFICATION_ACTIVITY: Activity = {
+export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
   createdAt: null,
@@ -58,7 +66,7 @@ export const TEST_ELECTRIFICATION_ACTIVITY: Activity = {
   deletedAt: null
 };
 
-export const TEST_HOUSING_ACTIVITY: Activity = {
+export const TEST_ACTIVITY_HOUSING: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.HOUSING,
   createdAt: null,
@@ -91,6 +99,31 @@ export const TEST_CONTACT_NO_ID = {
   contactId: null
 };
 
+export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
+  ...TEST_CONTACT_1,
+  activityContact: [TEST_ACTIVITY_CONTACT_1]
+};
+
+export const TEST_CURRENT_CONTEXT: CurrentContext = {
+  authType: AuthType.BEARER,
+  userId: '811896a0-e1fe-4c38-8cd3-86245c79e8f8'
+};
+
+export const TEST_DOCUMENT_1: Document = {
+  documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
+  activityId: 'ACTI1234',
+  filename: 'testfile',
+  mimeType: 'imgjpg',
+  filesize: 1234567,
+  createdByFullName: undefined,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
 export const TEST_ELECTRIFICATION_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
@@ -114,38 +147,6 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
     submissionType: SubmissionType.GUIDANCE
   },
   contacts: [TEST_CONTACT_1]
-};
-
-export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
-  electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: 'ACTI1234',
-  submittedAt: new Date(),
-  projectName: null,
-  projectDescription: null,
-  companyNameRegistered: null,
-  projectType: null,
-  bcHydroNumber: null,
-  submissionType: SubmissionType.GUIDANCE,
-  intakeStatus: IntakeStatus.SUBMITTED,
-  applicationStatus: ApplicationStatus.NEW,
-  aaiUpdated: false,
-  addedToAts: false,
-  projectCategory: null,
-  locationDescription: null,
-  hasEpa: null,
-  megawatts: null,
-  bcEnvironmentAssessNeeded: null,
-  assignedUserId: null,
-  astNotes: null,
-  queuePriority: null,
-  atsClientId: null,
-  atsEnquiryId: null,
-  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
-  createdAt: new Date(),
-  updatedBy: null,
-  updatedAt: null,
-  deletedBy: null,
-  deletedAt: null
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
@@ -180,13 +181,50 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
   deletedAt: null
 };
 
-export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
-  contacts: [TEST_CONTACT_1],
-  basic: {
-    submissionType: SubmissionType.GENERAL_ENQUIRY,
-    relatedActivityId: 'ACTI1234',
-    enquiryDescription: 'Test enquiry description'
-  }
+export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
+  electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  submittedAt: new Date(),
+  projectName: null,
+  projectDescription: null,
+  companyNameRegistered: null,
+  projectType: null,
+  bcHydroNumber: null,
+  submissionType: SubmissionType.GUIDANCE,
+  intakeStatus: IntakeStatus.SUBMITTED,
+  applicationStatus: ApplicationStatus.NEW,
+  aaiUpdated: false,
+  addedToAts: false,
+  projectCategory: null,
+  locationDescription: null,
+  hasEpa: null,
+  megawatts: null,
+  bcEnvironmentAssessNeeded: null,
+  assignedUserId: null,
+  astNotes: null,
+  queuePriority: null,
+  atsClientId: null,
+  atsEnquiryId: null,
+  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
+  createdAt: new Date(),
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_EMAIL: Email = {
+  to: ['nav@example.com'],
+  from: 'noreply@example.com',
+  cc: ['noreply@example.com'],
+  subject: 'Updates for project ACTI1234, Test Permit',
+  bodyType: 'html',
+  body: '<html>email body</html>'
+};
+
+export const TEST_EMAIL_RESPONSE = {
+  data: TEST_EMAIL,
+  status: 201
 };
 
 export const TEST_ENQUIRY_1: Enquiry = {
@@ -237,6 +275,15 @@ export const TEST_ENQUIRY_1: Enquiry = {
   user: null
 };
 
+export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
+  contacts: [TEST_CONTACT_1],
+  basic: {
+    submissionType: SubmissionType.GENERAL_ENQUIRY,
+    relatedActivityId: 'ACTI1234',
+    enquiryDescription: 'Test enquiry description'
+  }
+};
+
 export const TEST_HOUSING_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
@@ -246,6 +293,67 @@ export const TEST_HOUSING_DRAFT: Draft = {
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_HOUSING_PROJECT_1: HousingProject = {
+  housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  submittedBy: 'Doe, John',
+  locationPids: null,
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectDescription: 'DESCRIPTION',
+  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: 3,
+  relatedPermits: null,
+  astNotes: null,
+  astUpdated: false,
+  addedToAts: false,
+  atsClientId: null,
+  ltsaCompleted: false,
+  bcOnlineCompleted: false,
+  naturalDisaster: false,
+  financiallySupported: false,
+  financiallySupportedBc: BasicResponse.NO,
+  financiallySupportedIndigenous: BasicResponse.NO,
+  financiallySupportedNonProfit: BasicResponse.NO,
+  financiallySupportedHousingCoop: BasicResponse.NO,
+  aaiUpdated: false,
+  waitingOn: null,
+  intakeStatus: IntakeStatus.SUBMITTED,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  consentToFeedback: false,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  hasRentalUnits: BasicResponse.NO,
+  housingCoopDescription: null,
+  indigenousDescription: null,
+  isDevelopedInBc: BasicResponse.YES,
+  locality: 'Place',
+  multiFamilyUnits: BasicResponse.NO,
+  nonProfitDescription: null,
+  otherUnits: BasicResponse.NO,
+  otherUnitsDescription: null,
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  rentalUnits: BasicResponse.NO,
+  submissionType: SubmissionType.GUIDANCE,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
   deletedBy: null,
   deletedAt: null
 };
@@ -361,94 +469,26 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   }
 };
 
-export const TEST_HOUSING_PROJECT_1: HousingProject = {
-  housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: 'ACTI1234',
-  assignedUserId: null,
-  submittedAt: new Date(),
-  submittedBy: 'Doe, John',
-  locationPids: null,
-  companyNameRegistered: 'COMPANY',
-  projectName: 'NAME',
-  projectDescription: 'DESCRIPTION',
-  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
-  streetAddress: '123 Street',
-  latitude: null,
-  longitude: null,
-  queuePriority: 3,
-  relatedPermits: null,
-  astNotes: null,
-  astUpdated: false,
-  addedToAts: false,
-  atsClientId: null,
-  ltsaCompleted: false,
-  bcOnlineCompleted: false,
-  naturalDisaster: false,
-  financiallySupported: false,
-  financiallySupportedBc: BasicResponse.NO,
-  financiallySupportedIndigenous: BasicResponse.NO,
-  financiallySupportedNonProfit: BasicResponse.NO,
-  financiallySupportedHousingCoop: BasicResponse.NO,
-  aaiUpdated: false,
-  waitingOn: null,
-  intakeStatus: IntakeStatus.SUBMITTED,
-  applicationStatus: ApplicationStatus.NEW,
-  atsEnquiryId: null,
-  checkProvincialPermits: null,
-  consentToFeedback: false,
-  geoJson: null,
-  geomarkUrl: null,
-  hasAppliedProvincialPermits: null,
-  hasRentalUnits: BasicResponse.NO,
-  housingCoopDescription: null,
-  indigenousDescription: null,
-  isDevelopedInBc: BasicResponse.YES,
-  locality: 'Place',
-  multiFamilyUnits: BasicResponse.NO,
-  nonProfitDescription: null,
-  otherUnits: BasicResponse.NO,
-  otherUnitsDescription: null,
-  projectApplicantType: null,
-  projectLocation: 'Location',
-  projectLocationDescription: 'Location description',
-  province: 'AA',
-  rentalUnits: BasicResponse.NO,
-  submissionType: SubmissionType.GUIDANCE,
+export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {
+  initiativeId: 'initiative123',
+  code: Initiative.ELECTRIFICATION,
+  label: '',
   createdAt: null,
   createdBy: null,
-  updatedBy: null,
   updatedAt: null,
+  updatedBy: null,
   deletedBy: null,
   deletedAt: null
 };
 
-export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
-  activityId: 'ACTI1234',
-  contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+export const TEST_INITIATIVE_HOUSING: InitiativeModel = {
+  initiativeId: 'initiative123',
+  code: Initiative.HOUSING,
+  label: '',
   createdAt: null,
   createdBy: null,
-  updatedBy: null,
   updatedAt: null,
-  deletedBy: null,
-  deletedAt: null
-};
-
-export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
-  ...TEST_CONTACT_1,
-  activityContact: [TEST_ACTIVITY_CONTACT_1]
-};
-
-export const TEST_DOCUMENT_1: Document = {
-  documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
-  activityId: 'ACTI1234',
-  filename: 'testfile',
-  mimeType: 'imgjpg',
-  filesize: 1234567,
-  createdByFullName: undefined,
-  createdAt: null,
-  createdBy: null,
   updatedBy: null,
-  updatedAt: null,
   deletedBy: null,
   deletedAt: null
 };
@@ -817,6 +857,8 @@ export const TEST_PERMIT_4: Permit = {
   permitTracking: []
 };
 
+export const TEST_PERMIT_LIST: Permit[] = [TEST_PERMIT_1];
+
 export const TEST_PERMIT_NOTE_1: PermitNote = {
   permitNoteId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',
   permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
@@ -827,6 +869,11 @@ export const TEST_PERMIT_NOTE_1: PermitNote = {
   updatedBy: null,
   deletedBy: null,
   deletedAt: null
+};
+
+export const TEST_PERMIT_NOTE_UPDATE: PermitNote = {
+  ...TEST_PERMIT_NOTE_1,
+  note: `This application is ${TEST_PERMIT_1.state.toLocaleLowerCase()} in the ${TEST_PERMIT_1.stage.toLocaleLowerCase()}.` // eslint-disable-line max-len
 };
 
 export const TEST_PERMIT_TYPE_1: PermitType = {
@@ -851,7 +898,6 @@ export const TEST_PERMIT_TYPE_1: PermitType = {
   deletedAt: null
 };
 
-export const TEST_PERMIT_LIST: Permit[] = [TEST_PERMIT_1];
 export const TEST_PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE_1];
 
 export const TEST_IDIR_USER_1: User = {
