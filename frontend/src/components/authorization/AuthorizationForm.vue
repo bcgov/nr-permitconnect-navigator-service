@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { inject, onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { array, boolean, number, object, string } from 'yup';
@@ -10,19 +10,24 @@ import AuthorizationCardIntake from '@/components/authorization/AuthorizationCar
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { FormNavigationGuard } from '@/components/form';
-import { Button, useConfirm, useToast } from '@/lib/primevue';
-import { permitService, permitNoteService, userService } from '@/services';
-import { useConfigStore, useProjectStore } from '@/store';
-import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
-import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
-import { formatDate, formatDateTime } from '@/utils/formatters';
+import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
+import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
+import { useCodeStore, useConfigStore, useProjectStore } from '@/store';
+import {
+  PEACH_INTEGRATED_SYSTEMS,
+  PERMIT_NEEDED_LIST,
+  PERMIT_STAGE_LIST,
+  PERMIT_STATE_LIST
+} from '@/utils/constants/permit';
+import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
+import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
-import { permitNoteNotificationTemplate } from '@/utils/templates';
+import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '@/utils/templates';
 import { combineDateTime, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
-import type { Permit, User } from '@/types';
+import type { Permit, PermitTracking, SourceSystemKind, User } from '@/types';
 
 // Props
 const { authorization, editable } = defineProps<{
@@ -32,30 +37,51 @@ const { authorization, editable } = defineProps<{
 
 // Constants
 const AUTHORIZATION_TAB = '2';
+const PEACH_INTEGRATED_TRACKING = new Set([
+  'Disposition Transaction ID',
+  'Job Number',
+  'Tracking Number',
+  'Authorization ID'
+]);
 
 // Composables
-const { t } = useI18n();
+const codeStore = useCodeStore();
+const { locale, t } = useI18n();
 const confirmDialog = useConfirm();
 const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
 
 // Store
+const { codeDisplay } = codeStore;
 const { getConfig } = storeToRefs(useConfigStore());
 const { getProject } = storeToRefs(projectStore);
 
 // State
+const disableFormNavigationGuard: Ref<boolean> = ref(false);
+const expandPanel: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const expandPanel: Ref<boolean> = ref(false);
+const isValidPeachPermit: Ref<boolean> = ref(false);
+const noPeachDataModalVisible = defineModel<boolean>('visible');
+const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 const updatedBy: Ref<User | undefined> = ref(undefined);
-const disableFormNavigationGuard: Ref<boolean> = ref(false);
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Actions
+
+const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
+  const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
+  const sourceB = codeDisplay.SourceSystem[b.sourceSystem];
+  if (sourceA && sourceB) {
+    const srcSysCompare = sourceA.localeCompare(sourceB, locale.value, { sensitivity: 'base' });
+    if (srcSysCompare !== 0) return srcSysCompare;
+  }
+  return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
+};
 
 async function onSubmit(data: any) {
   disableFormNavigationGuard.value = true;
@@ -79,9 +105,24 @@ async function onSubmit(data: any) {
     statusLastChangedTime: statusLastChanged.time
   };
 
-  const permitSubmitData = setEmptyStringsToNull(permitData);
-
   try {
+    if (isPeachIntegratedAuthType(authorizationType.sourceSystem) && isPeachIntegratedTrackingId(data.permitTracking)) {
+      const response = await getPeachSummary(permitData?.permitTracking);
+      if (response) {
+        isValidPeachPermit.value = true;
+        permitData.decisionDate = response.decisionDate;
+        permitData.state = response.state;
+        permitData.stage = response.stage;
+        permitData.statusLastChanged = response.statusLastChanged;
+        permitData.submittedDate = response.submittedDate;
+        // Set statusLastVerified to statusLastChanged if statusLastChanged is more recent
+        permitData.statusLastVerified =
+          !permitData.statusLastVerified || response.statusLastChanged > permitData.statusLastVerified
+            ? response.statusLastChanged
+            : permitData.statusLastVerified;
+      } else return;
+    }
+    const permitSubmitData = setEmptyStringsToNull(permitData);
     const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
 
     // Prevent creating notes and sending an update email if the above call fails or if note is empty
@@ -92,7 +133,7 @@ async function onSubmit(data: any) {
       });
 
       // Send email to the user if permit is needed or if permit stage is new
-      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(data);
+      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(result);
     }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
@@ -110,18 +151,48 @@ async function onSubmit(data: any) {
   }
 }
 
+async function getPeachSummary(permitTrackings: PermitTracking[]) {
+  try {
+    const data: PermitTracking[] = permitTrackings.map((pt) => {
+      const systemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
+      return {
+        sourceSystemKind: {
+          sourceSystem: systemKind?.sourceSystem as string,
+          description: systemKind?.description as string,
+          sourceSystemKindId: systemKind?.sourceSystemKindId as number
+        },
+        trackingId: pt.trackingId
+      };
+    });
+    const peachIntegratedResponse = await peachService.getPeachSummary(data);
+    return peachIntegratedResponse.data;
+  } catch (e: any) {
+    const systemRecordNotFound =
+      e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
+    if (e.status === 404 && systemRecordNotFound) {
+      noPeachDataModalVisible.value = true;
+    } else {
+      toast.error(e.message);
+    }
+  }
+}
+
 async function emailNotification(data?: any) {
-  const configCC = getConfig.value.ches?.submission?.cc;
-  const body = permitNoteNotificationTemplate({
+  const emailTemplateData = {
     '{{ contactName }}':
       getProject.value?.contacts?.[0]?.firstName ||
       getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
     '{{ activityId }}': getProject.value?.activityId,
-    '{{ permitName }}': data.authorizationType.name,
-    '{{ submittedDate }}': formatDate(data.submittedDate?.toISOString() ?? data.createdAt?.toISOString()),
+    '{{ permitName }}': data.permitType.name,
+    '{{ submittedDate }}': data.submittedDate ? formatDateOnly(data.submittedDate) : formatDate(data.createdAt),
     '{{ projectId }}': getProject.value?.projectId,
     '{{ permitId }}': data.permitId
-  });
+  };
+  const configCC = getConfig.value.ches?.submission?.cc;
+  let body;
+  if (isValidPeachPermit.value) body = peachPermitNoteNotificationTemplate(emailTemplateData);
+  else body = permitNoteNotificationTemplate(emailTemplateData);
+
   let applicantEmail =
     (getProject.value?.contacts?.[0]?.email as string) ||
     (getProject.value?.activity?.activityContact?.[0]?.contact?.email as string);
@@ -129,7 +200,7 @@ async function emailNotification(data?: any) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: `Updates for project ${getProject.value?.activityId}, ${data.authorizationType.name}`,
+    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType.name}`,
     bodyType: 'html',
     body: body
   };
@@ -227,9 +298,9 @@ function initializeFormValues() {
       authorizationType: authorization.permitType,
       decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
       submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
-      permitTracking: authorization.permitTracking.map((x) => {
+      permitTracking: authorization.permitTracking.map((pt) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { sourceSystemKind, ...tracking } = x;
+        const { sourceSystemKind, ...tracking } = pt;
         return tracking;
       }),
       issuedPermitId: authorization.issuedPermitId,
@@ -253,14 +324,48 @@ function initializeFormValues() {
   }
 }
 
+const isPeachIntegratedAuthType = (sourceSystem: PeachIntegratedSystem): boolean => {
+  return PEACH_INTEGRATED_SYSTEMS.includes(sourceSystem);
+};
+
+const isPeachIntegratedTrackingId = (permitTrackings: PermitTracking[]): boolean => {
+  if (!permitTrackings || permitTrackings.length === 0) return false;
+  // If any of the selected tracking IDs are peach integrated, return true
+  return permitTrackings.some((pt) => {
+    const systemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
+    const description = systemKind?.description as string;
+    return PEACH_INTEGRATED_TRACKING.has(description);
+  });
+};
+
 function onInvalidSubmit(e: any) {
   scrollToFirstError(e.errors);
 }
 
 onBeforeMount(async () => {
   initializeFormValues();
+  const response = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  sourceSystemKinds.value = response.sort(sortForDisplayOrder);
   if (authorization?.updatedBy) {
     updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] })).data[0];
+  }
+});
+
+watchEffect(() => {
+  // Ensure that form values are loaded
+  if (!formRef?.value?.values) return;
+  // Set Needed to YES and add automated peach note if peach integrated auth type and tracking id are selected
+  if (
+    isPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem) &&
+    isPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
+  ) {
+    formRef.value?.setFieldValue('needed', PermitNeeded.YES);
+    // Set automated peach note only if none exists
+    if (!authorization?.permitNote || authorization?.permitNote.length == 0)
+      formRef.value?.setFieldValue('permitNote', t('authorization.authorizationForm.peachNoteUpdate'));
+  } else {
+    // Clear permit note only if the form is dirty
+    if (formRef.value.getMeta().dirty) formRef.value?.setFieldValue('permitNote', '');
   }
 });
 </script>
@@ -284,8 +389,8 @@ onBeforeMount(async () => {
     </h3>
 
     <AuthorizationCardIntake
-      initial-form-values=""
       :editable="editable"
+      :source-system-kinds="sourceSystemKinds"
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
@@ -298,8 +403,9 @@ onBeforeMount(async () => {
       "
     />
     <AuthorizationStatusUpdatesCard
-      initial-form-values=""
       :editable="editable"
+      :peach-integrated-auth-type="isPeachIntegratedAuthType(values?.authorizationType?.sourceSystem)"
+      :peach-integrated-tracking-id="isPeachIntegratedTrackingId(values?.permitTracking)"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
     />
@@ -307,7 +413,12 @@ onBeforeMount(async () => {
       <div>
         <Button
           class="mr-2"
-          :label="t('authorization.authorizationForm.publish')"
+          :label="
+            isPeachIntegratedTrackingId(values?.permitTracking) &&
+            isPeachIntegratedAuthType(values?.authorizationType?.sourceSystem)
+              ? t('authorization.authorizationForm.automatePublish')
+              : t('authorization.authorizationForm.publish')
+          "
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
@@ -364,12 +475,39 @@ onBeforeMount(async () => {
     <h4 class="my-10">{{ t('authorization.authorizationForm.updateHistory') }}</h4>
     <AuthorizationUpdateHistory
       v-if="authorization?.permitId"
-      initial-form-values=""
       :editable="true"
       class="mt-6"
       :authorization-notes="authorization?.permitNote"
     />
   </Form>
+  <Dialog
+    v-model:visible="noPeachDataModalVisible"
+    :draggable="false"
+    :modal="true"
+    class="app-info-dialog w-max"
+  >
+    <template #header>
+      <span class="p-dialog-title app-primary-color">{{ t('authorization.authorizationForm.noRecordsFound') }}</span>
+    </template>
+    <div>
+      <div>{{ t('authorization.authorizationForm.noPeachDataMsgl1') }}</div>
+      <ul class="list-disc px-6">
+        <li>
+          {{ t('authorization.authorizationForm.noPeachDataMsgl2') }}
+        </li>
+        <li>
+          {{ t('authorization.authorizationForm.noPeachDataMsgl3') }}
+        </li>
+      </ul>
+      <div class="flex justify-end mt-6">
+        <Button
+          class="p-button-solid mr-4"
+          :label="t('authorization.authorizationForm.confirm')"
+          @click="noPeachDataModalVisible = false"
+        />
+      </div>
+    </div>
+  </Dialog>
 </template>
 
 <style lang="scss" scoped>

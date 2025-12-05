@@ -18,6 +18,7 @@ import * as stamps from '../../../src/db/utils/utils';
 import { splitDateTime, Problem } from '../../../src/utils';
 
 import type { Request, Response } from 'express';
+import type { PermitTracking } from '../../../src/types';
 
 jest.mock('config');
 
@@ -54,17 +55,22 @@ describe('getPeachRecordController', () => {
 
   it('should call service, summarize, and respond with 200 and summary', async () => {
     const req = {
-      params: {
-        recordId: TEST_PEACH_RECORD_1.record_id,
-        systemId: TEST_PEACH_RECORD_1.system_id
-      }
+      body: [
+        {
+          trackingId: TEST_PEACH_RECORD_1.record_id,
+          sourceSystemKind: {
+            sourceSystem: TEST_PEACH_RECORD_1.system_id,
+            description: 'Tracking Number'
+          }
+        }
+      ]
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
     await getPeachRecordController(
-      req as unknown as Request<{ recordId: string; systemId: string }>,
+      req as unknown as Request<never, never, PermitTracking[], never>,
       res as unknown as Response
     );
 
@@ -80,10 +86,15 @@ describe('getPeachRecordController', () => {
 
   it('throws Problem(404) when summarizeRecord returns null-ish', async () => {
     const req = {
-      params: {
-        recordId: TEST_PEACH_RECORD_1.record_id,
-        systemId: TEST_PEACH_RECORD_1.system_id
-      }
+      body: [
+        {
+          trackingId: TEST_PEACH_RECORD_1.record_id,
+          sourceSystemKind: {
+            sourceSystem: TEST_PEACH_RECORD_1.system_id,
+            description: 'Tracking Number'
+          }
+        }
+      ]
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
@@ -91,7 +102,7 @@ describe('getPeachRecordController', () => {
 
     await expect(
       getPeachRecordController(
-        req as unknown as Request<{ recordId: string; systemId: string }>,
+        req as unknown as Request<never, never, PermitTracking[], never>,
         res as unknown as Response
       )
     ).rejects.toBeInstanceOf(Problem);
