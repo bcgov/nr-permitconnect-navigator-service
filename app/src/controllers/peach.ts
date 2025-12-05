@@ -32,7 +32,7 @@ const PEACH_TRACKING_PRIORITY = [
   },
   {
     sourceSystem: PeachIntegratedSystem.ATS,
-    trackingName: 'Authorization Id'
+    trackingName: 'Authorization ID'
   }
 ];
 
