@@ -2,56 +2,39 @@
 import { storeToRefs } from 'pinia';
 import { FieldArray } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
-import { onBeforeMount, ref } from 'vue';
+import { onBeforeMount } from 'vue';
 
 import { Checkbox, InputText, Select } from '@/components/form';
 import { Button, Panel } from '@/lib/primevue';
-import { permitService, sourceSystemKindService } from '@/services';
+import { permitService } from '@/services';
 import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 
-import type { Ref } from 'vue';
 import type { SourceSystemKind } from '@/types';
 
 // Props
-const { editable } = defineProps<{
+const { editable, sourceSystemKinds } = defineProps<{
   editable?: boolean;
+  sourceSystemKinds: SourceSystemKind[];
 }>();
 
 // Emits
 const emit = defineEmits(['update:uncheckShownToProponent']);
 
 // Composables
-const { locale, t } = useI18n();
+const { t } = useI18n();
 const codeStore = useCodeStore();
 const permitStore = usePermitStore();
 
 // Store
-
 const { codeDisplay } = codeStore;
 const { getPermitTypes } = storeToRefs(permitStore);
 
-// State
-const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
-
 // Actions
-const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
-  const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
-  const sourceB = codeDisplay.SourceSystem[b.sourceSystem];
-  if (sourceA && sourceB) {
-    const srcSysCompare = sourceA.localeCompare(sourceB, locale.value, { sensitivity: 'base' });
-    if (srcSysCompare !== 0) return srcSysCompare;
-  }
-  return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
-};
-
 onBeforeMount(async () => {
   if (getPermitTypes.value.length === 0) {
     const permitTypes = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
     permitStore.setPermitTypes(permitTypes);
   }
-
-  const data = (await sourceSystemKindService.getSourceSystemKinds()).data;
-  sourceSystemKinds.value = data.sort(sortForDisplayOrder);
 });
 </script>
 
