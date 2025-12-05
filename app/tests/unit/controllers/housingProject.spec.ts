@@ -42,7 +42,7 @@ import type {
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
-  TEST_HOUSING_ACTIVITY,
+  TEST_ACTIVITY_HOUSING,
   TEST_HOUSING_DRAFT,
   TEST_HOUSING_PROJECT_1,
   TEST_HOUSING_PROJECT_CREATE,
@@ -230,10 +230,10 @@ describe('createHousingProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
@@ -257,7 +257,7 @@ describe('createHousingProjectController', () => {
     expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
     expect(createActivityContactSpy).toHaveBeenCalledWith(
       prismaTxMock,
-      TEST_HOUSING_ACTIVITY.activityId,
+      TEST_ACTIVITY_HOUSING.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
@@ -295,7 +295,7 @@ describe('createHousingProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
@@ -313,7 +313,7 @@ describe('createHousingProjectController', () => {
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
       ...permit1NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Application submission',
       state: 'In progress',
       needed: 'Yes',
@@ -330,7 +330,7 @@ describe('createHousingProjectController', () => {
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
       ...permit2NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Application submission',
       state: 'In progress',
       needed: 'Yes',
@@ -347,7 +347,7 @@ describe('createHousingProjectController', () => {
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
       ...permit3NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Pre-submission',
       state: 'None',
       needed: 'Under investigation',
@@ -660,10 +660,10 @@ describe('submitHousingProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
@@ -686,7 +686,7 @@ describe('submitHousingProjectDraftController', () => {
     expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
     expect(createActivityContactSpy).toHaveBeenCalledWith(
       prismaTxMock,
-      TEST_HOUSING_ACTIVITY.activityId,
+      TEST_ACTIVITY_HOUSING.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
@@ -711,7 +711,7 @@ describe('submitHousingProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
     deleteDraftSpy.mockResolvedValue();
 
@@ -740,7 +740,7 @@ describe('submitHousingProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
@@ -759,7 +759,7 @@ describe('submitHousingProjectDraftController', () => {
     expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
       ...permit1NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Application submission',
       state: 'In progress',
       needed: 'Yes',
@@ -776,7 +776,7 @@ describe('submitHousingProjectDraftController', () => {
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
       ...permit2NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Application submission',
       state: 'In progress',
       needed: 'Yes',
@@ -793,7 +793,7 @@ describe('submitHousingProjectDraftController', () => {
     });
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
       ...permit3NoTracking,
-      activityId: TEST_HOUSING_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_HOUSING.activityId,
       stage: 'Pre-submission',
       state: 'None',
       needed: 'Under investigation',
@@ -841,7 +841,7 @@ describe('updateHousingProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_HOUSING_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
     createDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
 
     await upsertHousingProjectDraftController(

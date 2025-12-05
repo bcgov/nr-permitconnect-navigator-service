@@ -1,15 +1,30 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { isTruthy } from '../utils/utils';
-import { Initiative } from '../utils/enums/application';
+import { searchElectrificationProjects } from '../services/electrificationProject';
+import { email } from '../services/email';
+import { getInitiativeByActivity } from '../services/initiative';
+import { searchHousingProjects } from '../services/housingProject';
 import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit';
+import { createPermitNote } from '../services/permitNote';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking';
+import { readUser } from '../services/user';
+import { Initiative } from '../utils/enums/application';
+import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../utils/templates';
+import { formatDateOnly, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitTracking, PermitType } from '../types';
+import type {
+  Contact,
+  ListPermitsOptions,
+  Permit,
+  PermitTracking,
+  PermitType,
+  PermitUpdateEmailParams
+} from '../types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -48,6 +63,126 @@ export const listPermitsController = async (
     return await listPermits(tx, options);
   });
   res.status(200).json(response);
+};
+
+/**
+ * Sends out an email notification for the given update email params
+ */
+export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => {
+  const { permit, initiative, dearName, projectId, toEmails, emailTemplate } = params;
+  const { permitId, activityId } = permit;
+  const permitName = permit.permitType?.name;
+  const submittedDate = formatDateOnly(permit.submittedDate);
+
+  const nrmPermitEmail = config.get('frontend.ches.submission.cc') as string;
+
+  const emailBody = emailTemplate({
+    '{{ activityId }}': activityId,
+    '{{ dearName }}': dearName,
+    '{{ initiative }}': initiative.toLowerCase(),
+    '{{ permitId }}': permitId,
+    '{{ permitName }}': permitName,
+    '{{ projectId }}': projectId,
+    '{{ submittedDate }}': submittedDate
+  });
+
+  const emailData = {
+    to: toEmails,
+    from: nrmPermitEmail,
+    cc: [nrmPermitEmail],
+    subject: `Updates for project ${activityId}, ${permitName}`,
+    bodyType: 'html',
+    body: emailBody
+  };
+
+  await email(emailData);
+};
+
+/**
+ * Creates update notes and sends out email notifications for updated permits
+ */
+export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
+  const emailJobs: PermitUpdateEmailParams[] = [];
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    for (const permit of permits) {
+      const { activityId } = permit;
+
+      const initiative = (await getInitiativeByActivity(tx, activityId)).code as Initiative;
+
+      let projectId: string | undefined;
+      let navigatorId: string | null | undefined;
+      let contact: Contact | undefined;
+
+      switch (initiative) {
+        case Initiative.ELECTRIFICATION: {
+          const project = (await searchElectrificationProjects(tx, { activityId: [activityId] }))[0];
+          projectId = project.electrificationProjectId;
+          navigatorId = project.assignedUserId;
+          contact = project.activity?.activityContact?.[0].contact;
+          break;
+        }
+        case Initiative.HOUSING: {
+          const project = (await searchHousingProjects(tx, { activityId: [activityId] }))[0];
+          projectId = project.housingProjectId;
+          navigatorId = project.assignedUserId;
+          contact = project.activity?.activityContact?.[0].contact;
+          break;
+        }
+        default:
+          break;
+      }
+
+      if (!projectId) continue;
+
+      // Add navigator update email to email jobs
+      let navigatorName = 'Navigator';
+      if (navigatorId) {
+        const navigator = await readUser(tx, navigatorId);
+        navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
+      }
+      const navEmail = config.get('server.pcns.navEmail') as string;
+
+      emailJobs.push({
+        permit,
+        initiative,
+        dearName: navigatorName,
+        projectId,
+        toEmails: [navEmail],
+        emailTemplate: permitStatusUpdateTemplate
+      });
+
+      // Create update note for status change
+      await createPermitNote(tx, {
+        permitNoteId: uuidv4(),
+        permitId: permit.permitId,
+        note: `This application is ${permit.state.toLocaleLowerCase()} in the ${permit.stage.toLocaleLowerCase()}.`,
+        ...generateCreateStamps(undefined),
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null
+      });
+
+      // Add proponent update email to email jobs
+      const contactName = contact?.firstName ?? '';
+
+      if (contact?.email) {
+        emailJobs.push({
+          permit,
+          initiative,
+          dearName: contactName,
+          projectId,
+          toEmails: [contact.email],
+          emailTemplate: permitNoteUpdateTemplate
+        });
+      }
+    }
+  });
+
+  // Send out permit update emails
+  for (const emailJob of emailJobs) {
+    await sendPermitUpdateEmail(emailJob);
+  }
 };
 
 export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {

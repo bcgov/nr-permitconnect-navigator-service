@@ -233,7 +233,6 @@ const timelineDescription = computed(() => (iconClass: string) => {
               :state="permit?.state"
               :enlarge="true"
             />
-            <<<<<<< HEAD =======
             <div v-if="permit?.statusLastVerified">
               <p class="verified-text my-0 italic">
                 {{ t('authorization.authorizationTrackerCard.statusLastVerified') }}
