@@ -15,7 +15,7 @@ import { permitService, permitNoteService, userService } from '@/services';
 import { useConfigStore, useProjectStore } from '@/store';
 import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
-import { formatDate, formatDateTime } from '@/utils/formatters';
+import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { permitNoteNotificationTemplate } from '@/utils/templates';
 import { combineDateTime, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
@@ -91,8 +91,8 @@ async function onSubmit(data: any) {
         note: permitNote
       });
 
-      // Send email to the user if permit is needed or if permit stage is new
-      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(data);
+      // Send email to the user if permit is needed or if permit stage is not pre-submission
+      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(result);
     }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
@@ -110,17 +110,19 @@ async function onSubmit(data: any) {
   }
 }
 
-async function emailNotification(data?: any) {
+async function emailNotification(authorization: Permit) {
   const configCC = getConfig.value.ches?.submission?.cc;
   const body = permitNoteNotificationTemplate({
     '{{ contactName }}':
       getProject.value?.contacts?.[0]?.firstName ||
       getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
     '{{ activityId }}': getProject.value?.activityId,
-    '{{ permitName }}': data.authorizationType.name,
-    '{{ submittedDate }}': formatDate(data.submittedDate?.toISOString() ?? data.createdAt?.toISOString()),
+    '{{ permitName }}': authorization.permitType.name,
+    '{{ submittedDate }}': authorization.submittedDate
+      ? formatDateOnly(authorization.submittedDate)
+      : formatDate(authorization.createdAt),
     '{{ projectId }}': getProject.value?.projectId,
-    '{{ permitId }}': data.permitId
+    '{{ permitId }}': authorization.permitId
   });
   let applicantEmail =
     (getProject.value?.contacts?.[0]?.email as string) ||
@@ -129,7 +131,7 @@ async function emailNotification(data?: any) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: `Updates for project ${getProject.value?.activityId}, ${data.authorizationType.name}`,
+    subject: `Updates for project ${getProject.value?.activityId}, ${authorization.permitType.name}`,
     bodyType: 'html',
     body: body
   };
