@@ -9,6 +9,21 @@ import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttribute
 
 const log = getLogger(module.filename);
 
+const MONTHS: Record<string, string> = {
+  '01': 'January',
+  '02': 'February',
+  '03': 'March',
+  '04': 'April',
+  '05': 'May',
+  '06': 'June',
+  '07': 'July',
+  '08': 'August',
+  '09': 'September',
+  '10': 'October',
+  '11': 'November',
+  '12': 'December'
+};
+
 /**
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
  * @param str The input string uuid
@@ -51,12 +66,13 @@ export const combineDateTime = (date?: string | null, time?: string | null): Dat
 };
 
 /**
- * Comparator function for sorting dates
+ * Date comparator function
  * Defaults to ascending order: oldest to newest
+ * Undefined dates are treated as oldest, or newest if desc=true
  * @param a Optional first date to compare
  * @param b Optional second date to compare
  * @param desc If true, sorts in descending order: newest to oldest
- * @returns A negative number if a before b, positive if a after b, or 0 if equal
+ * @returns A negative number if a before b, positive if a after b, or 0 if equal (reversed if desc=true)
  */
 export function compareDates(a?: Date, b?: Date, desc = false): number {
   // Both dates undefined
@@ -76,6 +92,28 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
 export function getChefsApiKey(formId: string): string | undefined {
   const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
   return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
+}
+
+/**
+ * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
+ * @param value A date only string
+ * @returns {String} A string representation of `value`
+ */
+export function formatDateOnly(value: string | null | undefined): string {
+  if (!value) return '';
+
+  // Must be exactly YYYY-MM-DD
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return '';
+
+  const [, year, month, day] = match;
+
+  const monthName = MONTHS[month!];
+  if (!monthName) return '';
+
+  const dayNum = String(Number(day));
+
+  return `${monthName} ${dayNum}, ${year}`;
 }
 
 /**

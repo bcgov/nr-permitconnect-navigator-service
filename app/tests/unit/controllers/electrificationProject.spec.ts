@@ -1,7 +1,7 @@
 import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE,
-  TEST_ELECTRIFICATION_ACTIVITY,
+  TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT
@@ -87,7 +87,7 @@ describe('createElectrificationProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
 
     await createElectrificationProjectController(
@@ -398,7 +398,7 @@ describe('submitElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
 
     await submitElectrificationProjectDraftController(
@@ -432,7 +432,7 @@ describe('submitElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
     deleteDraftSpy.mockResolvedValue();
 
@@ -474,7 +474,7 @@ describe('updateElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
     await updateElectrificationProjectDraftController(

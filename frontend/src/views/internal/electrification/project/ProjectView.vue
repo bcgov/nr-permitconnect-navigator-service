@@ -488,6 +488,7 @@ onBeforeMount(async () => {
         <!-- On going Authorizations -->
         <div
           v-for="(permit, index) in getAuthsOnGoing"
+          :id="permit.permitId"
           :key="permit.permitId"
           :index="index"
           class="mb-6 mt-6"
@@ -506,6 +507,7 @@ onBeforeMount(async () => {
           <h4 class="mb-6">{{ t('i.common.projectView.underInvestigation') }}</h4>
           <div
             v-for="(permit, index) in getAuthsUnderInvestigation"
+            :id="permit.permitId"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -544,6 +546,7 @@ onBeforeMount(async () => {
           <h4 class="mb-6">{{ t('i.common.projectView.completed') }}</h4>
           <div
             v-for="(permit, index) in getAuthsCompleted"
+            :id="permit.permitId"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -563,6 +566,7 @@ onBeforeMount(async () => {
           <h4 class="mb-6">{{ t('i.common.projectView.notNeeded') }}</h4>
           <div
             v-for="(permit, index) in getAuthsNotNeeded"
+            :id="permit.permitId"
             :key="permit.permitId"
             :index="index"
             class="my-2"

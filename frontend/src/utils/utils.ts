@@ -16,8 +16,10 @@ import type { DateTimeStrings, IdentityProvider } from '@/types';
 export function combineDateTime(date?: string | null, time?: string | null): Date | null {
   if (!date) return null;
 
-  if (!time) {
-    return new Date(`${date}T00:00:00.000Z`);
+  const [y, m, d] = date.split('-').map(Number);
+
+  if (!time && y && m) {
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
   }
 
   return new Date(`${date}T${time}`);

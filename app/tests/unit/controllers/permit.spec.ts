@@ -1,19 +1,48 @@
-import { TEST_CURRENT_CONTEXT, TEST_PERMIT_1, TEST_PERMIT_LIST, TEST_PERMIT_TYPE_LIST } from '../data';
+import config from 'config';
+import {
+  TEST_ACTIVITY_CONTACT_1,
+  TEST_ACTIVITY_ELECTRIFICATION,
+  TEST_ACTIVITY_HOUSING,
+  TEST_ELECTRIFICATION_PROJECT_1,
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_HOUSING_PROJECT_1,
+  TEST_IDIR_USER_1,
+  TEST_INITIATIVE_ELECTRIFICATION,
+  TEST_INITIATIVE_HOUSING,
+  TEST_PERMIT_1,
+  TEST_PERMIT_LIST,
+  TEST_PERMIT_TYPE_1,
+  TEST_PERMIT_TYPE_LIST,
+  TEST_EMAIL_RESPONSE,
+  TEST_PERMIT_NOTE_UPDATE
+} from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
   deletePermitController,
   getPermitController,
   getPermitTypesController,
   listPermitsController,
-  upsertPermitController
+  upsertPermitController,
+  sendPermitUpdateNotifications,
+  sendPermitUpdateEmail
 } from '../../../src/controllers/permit';
+import * as permitController from '../../../src/controllers/permit';
 import * as permitService from '../../../src/services/permit';
+import * as initiativeService from '../../../src/services/initiative';
+import * as electrificationProjectService from '../../../src/services/electrificationProject';
+import * as housingProjectService from '../../../src/services/housingProject';
+import * as userService from '../../../src/services/user';
+import * as permitNoteService from '../../../src/services/permitNote';
+import * as emailService from '../../../src/services/email';
+import * as txWrapper from '../../../src/db/utils/transactionWrapper';
 import { Initiative } from '../../../src/utils/enums/application';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
 import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
+import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../../../src/utils/templates';
 
 import type { Request, Response } from 'express';
-import type { ListPermitsOptions, Permit } from '../../../src/types';
+import type { ListPermitsOptions, Permit, PermitUpdateEmailParams } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -27,12 +56,16 @@ const mockResponse = () => {
 };
 
 let res = mockResponse();
+let txWrapperSpy: jest.SpyInstance;
+
 beforeEach(() => {
   res = mockResponse();
+  txWrapperSpy = jest.spyOn(txWrapper, 'transactionWrapper').mockImplementation(async (fn) => fn(prismaTxMock));
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  txWrapperSpy.mockRestore();
+  jest.clearAllMocks();
 });
 
 describe('deletePermitController', () => {
@@ -197,5 +230,243 @@ describe('upsertPermitController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_1);
+  });
+});
+
+describe('sendPermitUpdateEmail', () => {
+  const emailSpy = jest.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
+
+  it('builds the template context and sends an email', async () => {
+    (config.get as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      return '';
+    });
+
+    const templateMock = jest.fn().mockReturnValue('<html>email body</html>');
+
+    const permit: Permit = {
+      ...TEST_PERMIT_1,
+      permitType: TEST_PERMIT_TYPE_1,
+      submittedDate: '2024-01-01'
+    };
+
+    const job: PermitUpdateEmailParams = {
+      permit,
+      initiative: Initiative.ELECTRIFICATION,
+      dearName: 'Jane Navigator',
+      projectId: 'proj-123',
+      toEmails: ['nav@example.com'],
+      emailTemplate: templateMock
+    };
+
+    await sendPermitUpdateEmail(job);
+
+    expect(templateMock).toHaveBeenCalledTimes(1);
+    const ctxArg = templateMock.mock.calls[0][0];
+    expect(ctxArg).toMatchObject({
+      '{{ activityId }}': permit.activityId,
+      '{{ dearName }}': 'Jane Navigator',
+      '{{ initiative }}': 'electrification',
+      '{{ permitId }}': permit.permitId,
+      '{{ permitName }}': 'PERMIT1',
+      '{{ projectId }}': 'proj-123',
+      '{{ submittedDate }}': 'January 1, 2024'
+    });
+
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(emailSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        to: ['nav@example.com'],
+        from: 'noreply@example.com',
+        cc: ['noreply@example.com'],
+        subject: `Updates for project ${permit.activityId}, PERMIT1`,
+        bodyType: 'html',
+        body: '<html>email body</html>'
+      })
+    );
+  });
+});
+
+describe('sendPermitUpdateNotifications', () => {
+  const getInitiativeSpy = jest.spyOn(initiativeService, 'getInitiativeByActivity');
+  const searchElectrificationSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+  const searchHousingSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
+  const readUserSpy = jest.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
+  const createNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
+  const sendEmailJobSpy = jest.spyOn(permitController, 'sendPermitUpdateEmail');
+
+  beforeEach(() => {
+    (config.get as jest.Mock).mockImplementation((key: string) => {
+      if (key === 'server.pcns.navEmail') return 'navteam@example.com';
+      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      return '';
+    });
+
+    getInitiativeSpy.mockResolvedValue(TEST_INITIATIVE_ELECTRIFICATION);
+    searchElectrificationSpy.mockResolvedValue([
+      {
+        ...TEST_ELECTRIFICATION_PROJECT_1,
+        electrificationProjectId: 'proj-123',
+        assignedUserId: TEST_IDIR_USER_1.userId,
+        activity: {
+          ...TEST_ACTIVITY_ELECTRIFICATION,
+          activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }]
+        }
+      }
+    ]);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('creates notes and enqueues both navigator and proponent emails when contact email exists', async () => {
+    const permit: Permit = {
+      ...TEST_PERMIT_1,
+      permitType: TEST_PERMIT_TYPE_1,
+      submittedDate: '2024-01-01'
+    };
+
+    await sendPermitUpdateNotifications([permit]);
+
+    expect(getInitiativeSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
+    expect(searchElectrificationSpy).toHaveBeenCalledWith(prismaTxMock, {
+      activityId: [permit.activityId]
+    });
+    expect(searchHousingSpy).not.toHaveBeenCalled();
+
+    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, TEST_IDIR_USER_1.userId);
+
+    expect(createNoteSpy).toHaveBeenCalledTimes(1);
+    expect(createNoteSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        permitId: permit.permitId,
+        note: `This application is ${permit.state.toLocaleLowerCase()} in the ${permit.stage.toLocaleLowerCase()}.`
+      })
+    );
+
+    expect(sendEmailJobSpy).toHaveBeenCalledTimes(2);
+
+    const firstJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
+    const secondJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[1][0];
+
+    expect(firstJob).toMatchObject({
+      permit,
+      initiative: Initiative.ELECTRIFICATION,
+      dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
+      projectId: 'proj-123',
+      toEmails: ['navteam@example.com'],
+      emailTemplate: permitStatusUpdateTemplate
+    });
+
+    expect(secondJob).toMatchObject({
+      permit,
+      initiative: Initiative.ELECTRIFICATION,
+      dearName: TEST_CONTACT_1.firstName,
+      projectId: 'proj-123',
+      toEmails: [TEST_CONTACT_1.email],
+      emailTemplate: permitNoteUpdateTemplate
+    });
+  });
+
+  it('skips proponent email when contact email is missing but still sends navigator email', async () => {
+    searchElectrificationSpy.mockResolvedValueOnce([
+      {
+        ...TEST_ELECTRIFICATION_PROJECT_1,
+        electrificationProjectId: 'proj-999',
+        assignedUserId: 'user-2',
+        activity: {
+          ...TEST_ACTIVITY_ELECTRIFICATION,
+          activityContact: [
+            { ...TEST_ACTIVITY_CONTACT_1, contact: { ...TEST_CONTACT_1, firstName: 'NoEmail', email: null } }
+          ]
+        }
+      }
+    ]);
+
+    (readUserSpy as jest.Mock).mockResolvedValueOnce({
+      ...TEST_IDIR_USER_1,
+      firstName: 'Another',
+      lastName: 'Navigator'
+    });
+
+    const permit: Permit = {
+      ...TEST_PERMIT_1,
+      permitType: TEST_PERMIT_TYPE_1,
+      submittedDate: '2024-02-01'
+    };
+
+    await sendPermitUpdateNotifications([permit]);
+
+    expect(createNoteSpy).toHaveBeenCalledTimes(1);
+
+    expect(sendEmailJobSpy).toHaveBeenCalledTimes(1);
+    const job: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
+
+    expect(job).toMatchObject({
+      permit,
+      dearName: 'Another Navigator',
+      projectId: 'proj-999',
+      toEmails: ['navteam@example.com'],
+      emailTemplate: permitStatusUpdateTemplate
+    });
+  });
+
+  it('creates notes and email jobs for HOUSING initiative', async () => {
+    getInitiativeSpy.mockResolvedValueOnce(TEST_INITIATIVE_HOUSING);
+
+    searchHousingSpy.mockResolvedValueOnce([
+      {
+        ...TEST_HOUSING_PROJECT_1,
+        housingProjectId: 'housing-123',
+        assignedUserId: TEST_IDIR_USER_1.userId,
+        activity: {
+          ...TEST_ACTIVITY_HOUSING,
+          activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }]
+        }
+      }
+    ]);
+
+    const permit: Permit = {
+      ...TEST_PERMIT_1,
+      permitType: TEST_PERMIT_TYPE_1,
+      submittedDate: '2024-03-01'
+    };
+
+    await sendPermitUpdateNotifications([permit]);
+
+    expect(getInitiativeSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
+    expect(searchHousingSpy).toHaveBeenCalledWith(prismaTxMock, {
+      activityId: [permit.activityId]
+    });
+    expect(searchElectrificationSpy).not.toHaveBeenCalled();
+
+    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, TEST_IDIR_USER_1.userId);
+
+    expect(createNoteSpy).toHaveBeenCalledTimes(1);
+
+    expect(sendEmailJobSpy).toHaveBeenCalledTimes(2);
+
+    const firstJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
+    const secondJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[1][0];
+
+    expect(firstJob).toMatchObject({
+      permit,
+      initiative: Initiative.HOUSING,
+      dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
+      projectId: 'housing-123',
+      toEmails: ['navteam@example.com'],
+      emailTemplate: permitStatusUpdateTemplate
+    });
+
+    expect(secondJob).toMatchObject({
+      permit,
+      initiative: Initiative.HOUSING,
+      dearName: TEST_CONTACT_1.firstName,
+      projectId: 'housing-123',
+      toEmails: [TEST_CONTACT_1.email],
+      emailTemplate: permitNoteUpdateTemplate
+    });
   });
 });

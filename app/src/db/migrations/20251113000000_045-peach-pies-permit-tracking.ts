@@ -63,7 +63,7 @@ export async function up(knex: Knex): Promise<void> {
       // Add new source_system_kind row
       .then(() =>
         knex('source_system_kind').insert({
-          description: 'Authorization Id',
+          description: 'Authorization ID',
           source_system: 'ITSM-5314'
         })
       )
