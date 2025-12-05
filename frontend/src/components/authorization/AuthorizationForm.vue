@@ -364,7 +364,8 @@ watchEffect(() => {
     if (!authorization?.permitNote || authorization?.permitNote.length == 0)
       formRef.value?.setFieldValue('permitNote', t('authorization.authorizationForm.peachNoteUpdate'));
   } else {
-    formRef.value?.setFieldValue('permitNote', '');
+    // Clear permit note only if the form is dirty
+    if (formRef.value.getMeta().dirty) formRef.value?.setFieldValue('permitNote', '');
   }
 });
 </script>
