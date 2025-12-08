@@ -9,21 +9,6 @@ import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttribute
 
 const log = getLogger(module.filename);
 
-const MONTHS: Record<string, string> = {
-  '01': 'January',
-  '02': 'February',
-  '03': 'March',
-  '04': 'April',
-  '05': 'May',
-  '06': 'June',
-  '07': 'July',
-  '08': 'August',
-  '09': 'September',
-  '10': 'October',
-  '11': 'November',
-  '12': 'December'
-};
-
 /**
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
  * @param str The input string uuid
@@ -107,10 +92,11 @@ export function formatDateOnly(value: string | null | undefined): string {
   if (!match) return '';
 
   const [, year, month, day] = match;
+  const monthNumber = Number(month) - 1;
 
-  const monthName = MONTHS[month!];
-  if (!monthName) return '';
+  if (monthNumber > 11 || monthNumber < 0) return '';
 
+  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date().setMonth(monthNumber));
   const dayNum = String(Number(day));
 
   return `${monthName} ${dayNum}, ${year}`;
