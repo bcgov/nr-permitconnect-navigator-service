@@ -48,6 +48,7 @@ import { NumResidentialUnits } from '../../../src/utils/enums/housing';
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   activityId: 'ACTI1234',
   contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+  role: ActivityContactRole.PRIMARY,
   createdAt: null,
   createdBy: null,
   updatedBy: null,
@@ -278,7 +279,7 @@ export const TEST_ENQUIRY_1: Enquiry = {
 };
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
-  contacts: [TEST_CONTACT_1],
+  contact: TEST_CONTACT_1,
   basic: {
     submissionType: SubmissionType.GENERAL_ENQUIRY,
     relatedActivityId: 'ACTI1234',

@@ -7,6 +7,11 @@ import router from '../../../src/routes';
 const app = express();
 app.use(router);
 
+jest.mock('config', () => ({
+  has: jest.fn(),
+  get: jest.fn()
+}));
+
 describe('GET /', () => {
   it('should return the root information', async () => {
     const response = await request(app).get('/');

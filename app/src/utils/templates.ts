@@ -10,26 +10,17 @@ export const replacePlaceholders = (
   baseText: string,
   replacementConfig: { [key: string]: string | string[] | undefined }
 ) => {
-  if (!baseText || !Object.keys(replacementConfig)) return baseText;
+  if (!baseText || Object.keys(replacementConfig).length === 0) return baseText;
 
   let newText = baseText;
 
   for (const [key, value] of Object.entries(replacementConfig)) {
+    const pattern = `{{ ${key} }}`;
     if (typeof value === 'string') {
-      // Workaround: str.replaceAll() isn't available in ES2020
-      newText = newText.replace(new RegExp(key, 'g'), value);
+      newText = newText.replaceAll(pattern, value);
     } else if (Array.isArray(value)) {
-      let listString: string = '';
-
-      value.forEach((element, index) => {
-        if (index) {
-          listString += `\n${element}`;
-        } else {
-          listString = element;
-        }
-      });
-      // Workaround: str.replaceAll() isn't available in ES2020
-      newText = newText.replace(new RegExp(key, 'g'), listString);
+      const listString = value.join('\n');
+      newText = newText.replaceAll(pattern, listString);
     }
   }
   return newText;

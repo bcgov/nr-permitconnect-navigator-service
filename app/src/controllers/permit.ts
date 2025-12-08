@@ -77,13 +77,13 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   const nrmPermitEmail = config.get('frontend.ches.submission.cc') as string;
 
   const emailBody = emailTemplate({
-    '{{ activityId }}': activityId,
-    '{{ dearName }}': dearName,
-    '{{ initiative }}': initiative.toLowerCase(),
-    '{{ permitId }}': permitId,
-    '{{ permitName }}': permitName,
-    '{{ projectId }}': projectId,
-    '{{ submittedDate }}': submittedDate
+    activityId,
+    dearName,
+    initiative: initiative.toLowerCase(),
+    permitId,
+    permitName,
+    projectId,
+    submittedDate
   });
 
   const emailData = {
@@ -102,7 +102,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
  * Creates update notes and sends out email notifications for updated permits
  */
 export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
-  const emailJobs: PermitUpdateEmailParams[] = [];
+  const permitUpdateEmails: PermitUpdateEmailParams[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     for (const permit of permits) {
       const { activityId } = permit;
@@ -142,7 +142,7 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
       }
       const navEmail = config.get('server.pcns.navEmail') as string;
 
-      emailJobs.push({
+      permitUpdateEmails.push({
         permit,
         initiative,
         dearName: navigatorName,
@@ -167,7 +167,7 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
       const contactName = contact?.firstName ?? '';
 
       if (contact?.email) {
-        emailJobs.push({
+        permitUpdateEmails.push({
           permit,
           initiative,
           dearName: contactName,
@@ -180,7 +180,7 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
   });
 
   // Send out permit update emails
-  for (const emailJob of emailJobs) {
+  for (const emailJob of permitUpdateEmails) {
     await sendPermitUpdateEmail(emailJob);
   }
 };

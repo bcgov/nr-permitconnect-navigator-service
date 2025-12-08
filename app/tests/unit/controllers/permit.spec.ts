@@ -264,13 +264,13 @@ describe('sendPermitUpdateEmail', () => {
     expect(templateMock).toHaveBeenCalledTimes(1);
     const ctxArg = templateMock.mock.calls[0][0];
     expect(ctxArg).toMatchObject({
-      '{{ activityId }}': permit.activityId,
-      '{{ dearName }}': 'Jane Navigator',
-      '{{ initiative }}': 'electrification',
-      '{{ permitId }}': permit.permitId,
-      '{{ permitName }}': 'PERMIT1',
-      '{{ projectId }}': 'proj-123',
-      '{{ submittedDate }}': 'January 1, 2024'
+      activityId: permit.activityId,
+      dearName: 'Jane Navigator',
+      initiative: 'electrification',
+      permitId: permit.permitId,
+      permitName: 'PERMIT1',
+      projectId: 'proj-123',
+      submittedDate: 'January 1, 2024'
     });
 
     expect(emailSpy).toHaveBeenCalledTimes(1);
