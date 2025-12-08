@@ -84,6 +84,13 @@
     "openMaps": {
       "apiPath": "SERVER_OPENMAPS_APIPATH"
     },
+    "pcns": {
+      "appUrl": "SERVER_PCNS_APPURL",
+      "navEmail": "SERVER_PCNS_NAVEMAIL"
+    },
+    "peach": {
+      "apiPath": "SERVER_PEACH_APIPATH"
+    },
     "port": "SERVER_PORT",
     "sso": {
       "apiPath": "SERVER_SSO_APIPATH",
