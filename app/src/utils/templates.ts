@@ -6,7 +6,10 @@ const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e
 
 export type PermitEmailTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => string;
 
-const replacePlaceholders = (baseText: string, replacementConfig: { [key: string]: string | string[] | undefined }) => {
+export const replacePlaceholders = (
+  baseText: string,
+  replacementConfig: { [key: string]: string | string[] | undefined }
+) => {
   if (!baseText || !Object.keys(replacementConfig)) return baseText;
 
   let newText = baseText;
@@ -33,53 +36,75 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
 };
 
 export const permitStatusUpdateTemplate: PermitEmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ dearName }},<br><br>' +
-    'The status or stage of the following authorization from your project has changed.<br><br>' +
-    '<b>Project ID: {{ activityId }}</b><br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '/i/{{ initiative }}/project/{{ projectId }}?initialTab=2#{{ permitId }}' +
-    '">{{ permitName }}<a> (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+      <img
+        src="${BC_EMAIL_BANNER_IMG}"
+        height="120rem" width="880px"
+        alt="B.C. Government Logo"
+      /><br><br>
+
+      <div style="margin-left: 3rem; margin-right: 3rem;">
+        Dear {{ dearName }},<br><br>
+
+        The status or stage of the following authorization from your project has changed.<br><br>
+
+        <b>Project ID: {{ activityId }}</b><br><br>
+        <a href="${PCNS_URL}/i/{{ initiative }}/project/{{ projectId }}?initialTab=2#{{ permitId }}">
+          {{ permitName }}
+        <a>
+        (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>
+
+        Regards,<br><br>
+
+        <a href="${PCNS_URL}">
+          Navigator Service
+        <a><br><br><br>
+      </div>
+
+      <img
+        src="${BC_EMAIL_FOOTER_IMG}"
+        width="100%"
+        alt="B.C. Government Footer"
+      /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
 export const permitNoteUpdateTemplate: PermitEmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ dearName }},<br><br>' +
-    'Your navigator has an update for you.<br><br>' +
-    '<b>Project ID: {{ activityId }}</b><br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '/e/{{ initiative }}/project/{{ projectId }}#{{ permitId }}' +
-    '">{{ permitName }}<a> (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+      <img
+        src="${BC_EMAIL_BANNER_IMG}"
+        height="120rem"
+        width="880px"
+        alt="B.C. Government Logo"
+      /><br><br>
+
+      <div style="margin-left: 3rem; margin-right: 3rem;">
+        Dear {{ dearName }},<br><br>
+
+        Your navigator has an update for you.<br><br>
+
+        <b>Project ID: {{ activityId }}</b><br><br>
+
+        <a href="${PCNS_URL}/e/{{ initiative }}/project/{{ projectId }}#{{ permitId }}">
+          {{ permitName }}
+        <a>
+        (submitted on {{ submittedDate }}): A new note has been added to this application.<br><br>
+
+        Regards,<br><br>
+
+        <a href="${PCNS_URL}">
+          Navigator Service
+        <a><br><br><br>
+      </div>
+
+      <img
+        src="${BC_EMAIL_FOOTER_IMG}"
+        width="100%"
+        alt="B.C. Government Footer"
+      /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };

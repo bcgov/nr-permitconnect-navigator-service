@@ -171,6 +171,29 @@ describe('utils', () => {
     it('returns the expected date format if given a valid date only string', () => {
       expect(utils.formatDateOnly('2025-11-28')).toEqual('November 28, 2025');
     });
+
+    it('strips leading zeros from the day component', () => {
+      expect(utils.formatDateOnly('2025-01-05')).toEqual('January 5, 2025');
+    });
+
+    it('returns an empty string when value is null', () => {
+      expect(utils.formatDateOnly(null)).toEqual('');
+    });
+
+    it('returns an empty string when value is undefined', () => {
+      expect(utils.formatDateOnly(undefined as unknown as string)).toEqual('');
+    });
+
+    it('returns an empty string when value is an empty string', () => {
+      expect(utils.formatDateOnly('')).toEqual('');
+    });
+
+    it('returns an empty string when value does not match YYYY-MM-DD format', () => {
+      expect(utils.formatDateOnly('2025/11/28')).toEqual('');
+      expect(utils.formatDateOnly('2025-1-05')).toEqual('');
+      expect(utils.formatDateOnly('2025-13-05')).toEqual('');
+      expect(utils.formatDateOnly('not-a-date')).toEqual('');
+    });
   });
 
   describe('getChefsApiKey', () => {
