@@ -1,7 +1,10 @@
 import {
   permitNoteUpdateTemplate,
   permitStatusUpdateTemplate,
-  replacePlaceholders
+  replacePlaceholders,
+  teamAdminAddedTemplate,
+  teamMemberAddedTemplate,
+  teamMemberRevokedTemplate
 } from '../../../src/utils/templates';
 
 jest.mock('config', () => ({
@@ -130,5 +133,47 @@ describe('permit email templates', () => {
     expect(html).not.toContain('{{ permitId }}');
     expect(html).not.toContain('{{ permitName }}');
     expect(html).not.toContain('{{ submittedDate }}');
+  });
+});
+
+describe('add team member templates', () => {
+  const replaceConfig = {
+    dearName: 'John Doe',
+    adminName: 'Bob Smith',
+    projectName: 'The Project'
+  };
+
+  it('teamMemberAddedTemplate replaces placeholders', () => {
+    const html = teamMemberAddedTemplate(replaceConfig);
+
+    expect(html).toContain('Dear John Doe');
+    expect(html).toContain('Bob Smith (project admin)');
+    expect(html).toContain('The Project project');
+
+    expect(html).not.toContain('{{ dearName }}');
+    expect(html).not.toContain('{{ adminName }}');
+    expect(html).not.toContain('{{ projectName }}');
+  });
+
+  it('teamAdminAddedTemplate replaces placeholders', () => {
+    const html = teamAdminAddedTemplate(replaceConfig);
+
+    expect(html).toContain('Dear John Doe');
+    expect(html).toContain('the Admin role for The Project');
+
+    expect(html).not.toContain('{{ dearName }}');
+    expect(html).not.toContain('{{ projectName }}');
+  });
+
+  it('teamMemberRevokedTemplate replaces placeholders', () => {
+    const html = teamMemberRevokedTemplate(replaceConfig);
+
+    expect(html).toContain('Dear John Doe');
+    expect(html).toContain('Bob Smith (project admin)');
+    expect(html).toContain('The Project project');
+
+    expect(html).not.toContain('{{ dearName }}');
+    expect(html).not.toContain('{{ adminName }}');
+    expect(html).not.toContain('{{ projectName }}');
   });
 });
