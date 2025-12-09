@@ -30,7 +30,7 @@ function peachAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  */
 export const getPeachRecord = async (recordId: string, systemId?: string): Promise<PeachRecord> => {
   try {
-    const { data } = await peachAxios().get('/records', { params: { recordId, systemId } });
+    const { data } = await peachAxios().get('/records', { params: { record_id: recordId, system_id: systemId } });
     return data;
   } catch (e) {
     if (axios.isAxiosError(e)) {
