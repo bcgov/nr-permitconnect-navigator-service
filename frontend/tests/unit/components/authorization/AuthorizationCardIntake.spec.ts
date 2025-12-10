@@ -21,6 +21,7 @@ const sampleSourceSystemKind: SourceSystemKind = {
   kind: undefined,
   sourceSystem: 'ITSM-5314',
   sourceSystemKindId: 2,
+  integrated: false,
   createdAt: '2025-06-18T15:56:00.515Z',
   createdBy: SYSTEM_ID
 };

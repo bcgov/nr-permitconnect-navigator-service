@@ -5,4 +5,5 @@ export type SourceSystemKind = {
   description: string;
   kind?: string;
   sourceSystem: string;
+  integrated: boolean;
 } & Partial<IStamps>;

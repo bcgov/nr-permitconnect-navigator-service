@@ -726,6 +726,7 @@ model source_system_kind {
   updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
   deletedBy          String?            @map("deleted_by")
   deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  integrated         Boolean            @default(false)
   permitTracking     permit_tracking[]
   sourceSystemCode   source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 

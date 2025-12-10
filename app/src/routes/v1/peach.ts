@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getPeachRecordController } from '../../controllers/peach';
+import { getPeachSummaryController } from '../../controllers/peach';
 import { hasAuthorization } from '../../middleware/authorization';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup';
@@ -16,7 +16,7 @@ router.post(
   '/record',
   hasAuthorization(Resource.PERMIT, Action.READ),
   peachValidator.permitTrackings,
-  getPeachRecordController
+  getPeachSummaryController
 );
 
 export default router;

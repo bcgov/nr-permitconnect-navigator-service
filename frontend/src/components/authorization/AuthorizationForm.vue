@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { inject, onBeforeMount, ref, watchEffect } from 'vue';
+import { computed, inject, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 import { array, boolean, number, object, string } from 'yup';
@@ -13,13 +13,8 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
 import { useCodeStore, useConfigStore, useProjectStore } from '@/store';
-import {
-  PEACH_INTEGRATED_SYSTEMS,
-  PERMIT_NEEDED_LIST,
-  PERMIT_STAGE_LIST,
-  PERMIT_STATE_LIST
-} from '@/utils/constants/permit';
-import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
+import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
+import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '@/utils/templates';
@@ -37,12 +32,6 @@ const { authorization, editable } = defineProps<{
 
 // Constants
 const AUTHORIZATION_TAB = '2';
-const PEACH_INTEGRATED_TRACKING = new Set([
-  'Disposition Transaction ID',
-  'Job Number',
-  'Tracking Number',
-  'Authorization ID'
-]);
 
 // Composables
 const codeStore = useCodeStore();
@@ -59,13 +48,20 @@ const { getProject } = storeToRefs(projectStore);
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);
-const expandPanel: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const isValidPeachPermit: Ref<boolean> = ref(false);
 const noPeachDataModalVisible = defineModel<boolean>('visible');
 const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
 const updatedBy: Ref<User | undefined> = ref(undefined);
+
+const isPeachIntegratedAuthType = computed(() =>
+  checkIfPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem)
+);
+const isPeachIntegratedTrackingId = computed(() =>
+  checkIfPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
+);
+const isPeachIntegrated = computed(() => isPeachIntegratedAuthType.value && isPeachIntegratedTrackingId.value);
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
@@ -82,6 +78,22 @@ const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
   }
   return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
 };
+
+function checkIfPeachIntegratedAuthType(sourceSystem: string): boolean {
+  const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
+  return !!sourceSystemKind;
+}
+
+function checkIfPeachIntegratedTrackingId(permitTrackings: PermitTracking[]): boolean {
+  if (!permitTrackings || permitTrackings.length === 0) return false;
+
+  return permitTrackings.some((pt) => {
+    const sourceSystemKind = sourceSystemKinds.value.find(
+      (ssk) => ssk.integrated && ssk.sourceSystemKindId === pt.sourceSystemKindId
+    );
+    return !!sourceSystemKind;
+  });
+}
 
 async function onSubmit(data: any) {
   disableFormNavigationGuard.value = true;
@@ -106,7 +118,10 @@ async function onSubmit(data: any) {
   };
 
   try {
-    if (isPeachIntegratedAuthType(authorizationType.sourceSystem) && isPeachIntegratedTrackingId(data.permitTracking)) {
+    if (
+      checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
+      checkIfPeachIntegratedTrackingId(data.permitTracking)
+    ) {
       const response = await getPeachSummary(permitData?.permitTracking);
       if (response) {
         isValidPeachPermit.value = true;
@@ -154,18 +169,14 @@ async function onSubmit(data: any) {
 async function getPeachSummary(permitTrackings: PermitTracking[]) {
   try {
     const data: PermitTracking[] = permitTrackings.map((pt) => {
-      const systemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
+      const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
       return {
-        sourceSystemKind: {
-          sourceSystem: systemKind?.sourceSystem as string,
-          description: systemKind?.description as string,
-          sourceSystemKindId: systemKind?.sourceSystemKindId as number
-        },
-        trackingId: pt.trackingId
+        ...pt,
+        sourceSystemKind
       };
     });
-    const peachIntegratedResponse = await peachService.getPeachSummary(data);
-    return peachIntegratedResponse.data;
+    const peachSummary = await peachService.getPeachSummary(data);
+    return peachSummary.data;
   } catch (e: any) {
     const systemRecordNotFound =
       e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
@@ -324,20 +335,6 @@ function initializeFormValues() {
   }
 }
 
-const isPeachIntegratedAuthType = (sourceSystem: PeachIntegratedSystem): boolean => {
-  return PEACH_INTEGRATED_SYSTEMS.includes(sourceSystem);
-};
-
-const isPeachIntegratedTrackingId = (permitTrackings: PermitTracking[]): boolean => {
-  if (!permitTrackings || permitTrackings.length === 0) return false;
-  // If any of the selected tracking IDs are peach integrated, return true
-  return permitTrackings.some((pt) => {
-    const systemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
-    const description = systemKind?.description as string;
-    return PEACH_INTEGRATED_TRACKING.has(description);
-  });
-};
-
 function onInvalidSubmit(e: any) {
   scrollToFirstError(e.errors);
 }
@@ -351,23 +348,33 @@ onBeforeMount(async () => {
   }
 });
 
-watchEffect(() => {
-  // Ensure that form values are loaded
-  if (!formRef?.value?.values) return;
-  // Set Needed to YES and add automated peach note if peach integrated auth type and tracking id are selected
-  if (
-    isPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem) &&
-    isPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
-  ) {
-    formRef.value?.setFieldValue('needed', PermitNeeded.YES);
-    // Set automated peach note only if none exists
-    if (!authorization?.permitNote || authorization?.permitNote.length == 0)
-      formRef.value?.setFieldValue('permitNote', t('authorization.authorizationForm.peachNoteUpdate'));
-  } else {
-    // Clear permit note only if the form is dirty
-    if (formRef.value.getMeta().dirty) formRef.value?.setFieldValue('permitNote', '');
-  }
-});
+watch(
+  isPeachIntegrated,
+  (now, prev) => {
+    if (!formRef.value?.values) return;
+
+    // Changed into a PEACH integrate authorization, add template to note
+    if (now && !prev) {
+      formRef.value?.setFieldValue('needed', PermitNeeded.YES);
+
+      const hasExistingNotes = !!authorization?.permitNote && authorization.permitNote.length > 0;
+      if (!hasExistingNotes) {
+        formRef.value.setFieldValue('permitNote', t('authorization.authorizationForm.peachNoteUpdate'));
+      }
+    }
+
+    // Changed into a non PEACH integrated authorization, remove template from note
+    if (!now && prev) {
+      const note = formRef.value.values.permitNote ?? '';
+      const template = t('authorization.authorizationForm.peachNoteUpdate');
+
+      const cleanedNote = note.replaceAll(template, '').trim();
+
+      formRef.value.setFieldValue('permitNote', cleanedNote);
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
@@ -404,8 +411,8 @@ watchEffect(() => {
     />
     <AuthorizationStatusUpdatesCard
       :editable="editable"
-      :peach-integrated-auth-type="isPeachIntegratedAuthType(values?.authorizationType?.sourceSystem)"
-      :peach-integrated-tracking-id="isPeachIntegratedTrackingId(values?.permitTracking)"
+      :peach-integrated-auth-type="isPeachIntegratedAuthType"
+      :peach-integrated-tracking-id="isPeachIntegratedTrackingId"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
     />
@@ -414,15 +421,13 @@ watchEffect(() => {
         <Button
           class="mr-2"
           :label="
-            isPeachIntegratedTrackingId(values?.permitTracking) &&
-            isPeachIntegratedAuthType(values?.authorizationType?.sourceSystem)
+            isPeachIntegrated
               ? t('authorization.authorizationForm.automatePublish')
               : t('authorization.authorizationForm.publish')
           "
           type="submit"
           icon="pi pi-check"
           :disabled="!editable"
-          @click="expandPanel = true"
         />
         <Button
           class="p-button-outlined mr-2"

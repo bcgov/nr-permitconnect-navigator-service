@@ -40,15 +40,6 @@ const { t } = useI18n();
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />
-          <div v-if="permit.statusLastVerified">
-            <span class="label-verified mr-1">{{ t('authorization.authorizationCardProponent.statusVerified') }}</span>
-            <span class="label-date">{{ formatDateOnly(permit.statusLastVerified) }}</span>
-          </div>
-          <div v-else>
-            <span class="label-verified mr-1">
-              {{ t('authorization.authorizationCardProponent.statusNotVerified') }}
-            </span>
-          </div>
         </div>
         <div class="col-span-6">
           <div class="label-field">{{ t('authorization.authorizationCardProponent.latestUpdates') }}</div>

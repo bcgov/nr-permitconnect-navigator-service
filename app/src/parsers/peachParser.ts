@@ -297,7 +297,7 @@ const findDecisionDate = (record: PeachRecord): NullableDateTimeStrings => {
  * @param record Full PEACH record to summarize
  * @returns A peach summary containing the derived stage, state, and key dates, if no stage or state return null
  */
-export function summarizeRecord(record: PeachRecord): PeachSummary | null {
+export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   // Get latest process even
   const { processEvent } = getRecordEvents(record);
   // TODO: Implement logic, parsing, and mappings for "On Hold Events" once the data has been added to peach
@@ -340,7 +340,7 @@ export function summarizeRecord(record: PeachRecord): PeachSummary | null {
 export function parsePeachRecords(records: readonly PeachRecord[]): Record<string, PeachSummary> {
   const parsedRecords: Record<string, PeachSummary> = {};
   for (const record of records) {
-    const summary = summarizeRecord(record);
+    const summary = summarizePeachRecord(record);
     if (!summary) continue;
     parsedRecords[record.system_id + record.record_id] = summary;
   }

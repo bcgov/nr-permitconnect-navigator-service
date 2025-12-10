@@ -60,12 +60,34 @@ export async function up(knex: Knex): Promise<void> {
         `)
       )
 
+      // Add `integrated` flag to source_system_kind
+      .then(() =>
+        knex.schema.alterTable('source_system_kind', (table) => {
+          table.boolean('integrated').notNullable().defaultTo(false);
+        })
+      )
+
       // Add new source_system_kind row
       .then(() =>
         knex('source_system_kind').insert({
           description: 'Authorization ID',
           source_system: 'ITSM-5314'
         })
+      )
+
+      // Flag PEACH-integrated source system kinds
+      .then(() =>
+        knex('source_system_kind')
+          .whereIn(
+            ['source_system', 'description'],
+            [
+              ['ITSM-6072', 'Disposition Transaction ID'],
+              ['ITSM-6197', 'Job Number'],
+              ['ITSM-6117', 'Tracking Number'],
+              ['ITSM-5314', 'Authorization ID']
+            ]
+          )
+          .update({ integrated: true })
       )
 
       // Add CHECK constraints (NOT VALID to keep lock time low)
@@ -168,10 +190,17 @@ export async function down(knex: Knex): Promise<void> {
       .then(() =>
         knex('source_system_kind')
           .where({
-            description: 'Authorization Id',
+            description: 'Authorization ID',
             source_system: 'ITSM-5314'
           })
           .del()
+      )
+
+      // Drop `integrated` column from source_system_kind
+      .then(() =>
+        knex.schema.alterTable('source_system_kind', (table) => {
+          table.dropColumn('integrated');
+        })
       )
 
       // Withdrawn by client -> Withdrawn

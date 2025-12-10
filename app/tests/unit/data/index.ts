@@ -715,7 +715,7 @@ export const TEST_PERMIT_1: Permit = {
       shownToProponent: true,
       permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
       permitTrackingId: 1,
-      trackingId: 'REC-123',
+      trackingId: 'REC-SUB',
       sourceSystemKindId: 1,
       sourceSystemKind: {
         createdBy: null,
@@ -726,6 +726,7 @@ export const TEST_PERMIT_1: Permit = {
         deletedAt: null,
         sourceSystemKindId: 12,
         sourceSystem: PeachIntegratedSystem.VFCBC,
+        integrated: true,
         kind: null,
         description: 'Tracking Number'
       }
@@ -777,6 +778,7 @@ export const TEST_PERMIT_2: Permit = {
         deletedAt: null,
         sourceSystemKindId: 12,
         sourceSystem: PeachIntegratedSystem.VFCBC,
+        integrated: true,
         kind: null,
         description: 'Tracking Number'
       }
@@ -827,7 +829,8 @@ export const TEST_PERMIT_3: Permit = {
         deletedBy: null,
         deletedAt: null,
         sourceSystemKindId: 22,
-        sourceSystem: 'ITSM-5314', // ATS
+        sourceSystem: 'ITSM-5644', // FTA
+        integrated: false,
         kind: null,
         description: 'Project Number'
       }
