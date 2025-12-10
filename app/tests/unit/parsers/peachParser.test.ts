@@ -9,7 +9,7 @@ import {
   compareProcessEvents,
   getRecordEvents,
   parsePeachRecords,
-  summarizeRecord
+  summarizePeachRecord
 } from '../../../src/parsers/peachParser';
 import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 
@@ -83,11 +83,10 @@ describe('peachRecordParser', () => {
     });
   });
 
-  describe('summarizeRecord', () => {
+  describe('summarizePeachRecord', () => {
     it('maps PRE_APPLICATION/SUBMITTED to Application Submission / Initial review and sets sub/status dates', () => {
-      const summary = summarizeRecord(TEST_PEACH_RECORD_1);
+      const summary = summarizePeachRecord(TEST_PEACH_RECORD_1);
 
-      // From SUBMITTED event 2024-02-01T00:00:00.000Z
       expect(summary!.statusLastChanged).toBe('2024-02-01');
       expect(summary!.statusLastChangedTime).toBe(null);
 
@@ -102,7 +101,7 @@ describe('peachRecordParser', () => {
     });
 
     it('maps DECISION/ALLOWED to Post Decision / Approved and sets decision/status dates', () => {
-      const summary = summarizeRecord(TEST_PEACH_RECORD_2);
+      const summary = summarizePeachRecord(TEST_PEACH_RECORD_2);
 
       expect(summary!.statusLastChanged).toBe('2024-03-01');
       expect(summary!.statusLastChangedTime).toBe('12:00:00.000Z');
@@ -118,7 +117,7 @@ describe('peachRecordParser', () => {
     });
 
     it('uses previous stage for terminal REJECTED and maps to Technical review / Rejected', () => {
-      const summary = summarizeRecord(TEST_PEACH_RECORD_REJECTED);
+      const summary = summarizePeachRecord(TEST_PEACH_RECORD_REJECTED);
 
       expect(summary!.statusLastChanged).toBe('2024-05-01');
       expect(summary!.statusLastChangedTime).toBe('23:12:00.000Z');
@@ -133,15 +132,14 @@ describe('peachRecordParser', () => {
     });
 
     it('returns null summary for an unmapped PEACH combination', () => {
-      const summary = summarizeRecord(TEST_PEACH_RECORD_UNMAPPED);
+      const summary = summarizePeachRecord(TEST_PEACH_RECORD_UNMAPPED);
 
       expect(summary).toBe(null);
     });
 
     it('uses start_date branch in piesEventToDate and ISSUANCE to determine decisionDate', () => {
-      const summary = summarizeRecord(TEST_PEACH_RECORD_ISSUED);
+      const summary = summarizePeachRecord(TEST_PEACH_RECORD_ISSUED);
 
-      // start_date only: '2024-07-01'
       expect(summary!.statusLastChanged).toBe('2024-07-01');
       expect(summary!.statusLastChangedTime).toBeNull();
 

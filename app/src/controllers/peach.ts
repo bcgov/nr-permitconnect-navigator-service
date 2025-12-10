@@ -1,11 +1,10 @@
 import { getLogger } from '../components/log';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateUpdateStamps } from '../db/utils/utils';
-import { parsePeachRecords, summarizeRecord } from '../parsers/peachParser';
+import { parsePeachRecords, summarizePeachRecord } from '../parsers/peachParser';
 import { getPeachRecord } from '../services/peach';
 import { searchPermits, upsertPermit } from '../services/permit';
 import { combineDateTime, compareDates, omit, Problem } from '../utils';
-import { PEACH_INTEGRATED_SYSTEMS } from '../utils/constants/permit';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 
 import type { Request, Response } from 'express';
@@ -18,35 +17,51 @@ const log = getLogger(module.filename);
  * Tracking priority for which tracking ids to use, priority is inferred by order of array
  */
 const PEACH_TRACKING_PRIORITY = [
-  {
-    sourceSystem: PeachIntegratedSystem.TANTALIS,
-    trackingName: 'Disposition Transaction ID'
-  },
-  {
-    sourceSystem: PeachIntegratedSystem.WMA,
-    trackingName: 'Job Number'
-  },
-  {
-    sourceSystem: PeachIntegratedSystem.VFCBC,
-    trackingName: 'Tracking Number'
-  },
-  {
-    sourceSystem: PeachIntegratedSystem.ATS,
-    trackingName: 'Authorization ID'
-  }
+  PeachIntegratedSystem.TANTALIS,
+  PeachIntegratedSystem.WMA,
+  PeachIntegratedSystem.VFCBC,
+  PeachIntegratedSystem.ATS
 ];
+
+/**
+ * Finds the permit tracking with the highest priority, used for fetching PEACH data
+ */
+const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTracking | undefined => {
+  let permitTracking: PermitTracking | undefined;
+  let priorityIndex = PEACH_TRACKING_PRIORITY.length;
+
+  // Prioritize which PEACH integrated permit tracking to use
+  for (const pt of permitTrackings) {
+    if (!pt.sourceSystemKind?.integrated) continue;
+    const sourceSystem = pt.sourceSystemKind.sourceSystem as PeachIntegratedSystem;
+
+    const index = PEACH_TRACKING_PRIORITY.indexOf(sourceSystem);
+    if (index === -1) continue;
+
+    if (index > priorityIndex) continue;
+
+    permitTracking = pt;
+    priorityIndex = index;
+  }
+
+  return permitTracking;
+};
 
 /**
  * Fetches PEACH data for permit tracking
  */
-export const getPeachRecordController = async (req: Request<{ recordId: string; systemId: string }>, res: Response) => {
-  const response = await getPeachRecord(req.params.recordId, req.params.systemId);
+export const getPeachSummaryController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
+  const permitTracking = findPriorityPermitTracking(req.body);
 
-  const peachSummary: PeachSummary | null = summarizeRecord(response);
+  if (!permitTracking?.trackingId || !permitTracking?.sourceSystemKind?.sourceSystem) {
+    throw new Problem(422, { detail: 'No PEACH-integrated tracking ID and/or system were found in the request body.' });
+  }
 
-  // TODO-RELEASE: make sure that we properly handle this case, not a 404
+  const response = await getPeachRecord(permitTracking.trackingId, permitTracking.sourceSystemKind.sourceSystem);
+  const peachSummary = summarizePeachRecord(response);
+
   if (!peachSummary)
-    throw new Problem(404, { type: 'NoStatusAvailable', detail: 'Record was found but no status available.' });
+    throw new Problem(422, { detail: 'No status data could be derived from the PEACH record that was found.' });
 
   res.status(200).json(peachSummary);
 };
@@ -59,8 +74,8 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     // Only fetch permits that have a peach integrated system permit type
     const peachIntegratedPermits: Permit[] = await searchPermits(tx, {
-      sourceSystems: PEACH_INTEGRATED_SYSTEMS,
-      includePermitTracking: true
+      includePermitTracking: true,
+      onlyPeachIntegratedTrackings: true
     });
 
     // Find permits that have a permit tracking from a PEACH integrataed system
@@ -69,26 +84,7 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
 
       if (permitTrackings.length === 0) continue;
 
-      let permitTracking: PermitTracking | undefined;
-      let priorityIndex = PEACH_TRACKING_PRIORITY.length;
-
-      // Prioritize which PEACH integrated permit tracking to use
-      for (const pt of permitTrackings) {
-        const sourceSystem = pt.sourceSystemKind?.sourceSystem;
-        const trackingName = pt.sourceSystemKind?.description;
-        if (!sourceSystem) continue;
-
-        const index = PEACH_TRACKING_PRIORITY.findIndex((ptp) => ptp.sourceSystem === sourceSystem);
-        if (index === -1) continue;
-
-        if (index > priorityIndex) continue;
-
-        const trackingPriority = PEACH_TRACKING_PRIORITY[index];
-        if (trackingPriority.trackingName && trackingPriority.trackingName !== trackingName) continue;
-
-        permitTracking = pt;
-        priorityIndex = index;
-      }
+      const permitTracking = findPriorityPermitTracking(permitTrackings);
 
       if (!permitTracking) continue;
 

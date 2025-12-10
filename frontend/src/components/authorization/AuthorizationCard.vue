@@ -116,15 +116,39 @@ function toCopy(toCopy: string) {
           <div class="text-xs">{{ t('authorization.authorizationCard.dates') }}</div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.statusVerified') }}:</span>
-            {{ permit.statusLastVerified ? formatDateOnly(permit.statusLastVerified) : undefined }}
+            <span
+              v-if="permit.statusLastVerified"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.statusLastVerified) }}
+            </span>
+          </div>
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.statusChangeDate') }}:</span>
+            <span
+              v-if="permit.statusLastChanged"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.statusLastChanged) }}
+            </span>
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
-            {{ permit.submittedDate ? formatDateOnly(permit.submittedDate) : undefined }}
+            <span
+              v-if="permit.submittedDate"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.submittedDate) }}
+            </span>
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
-            {{ permit.decisionDate ? formatDateOnly(permit.decisionDate) : undefined }}
+            <span
+              v-if="permit.decisionDate"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.decisionDate) }}
+            </span>
           </div>
         </div>
         <div

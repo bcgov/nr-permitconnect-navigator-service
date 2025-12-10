@@ -13,6 +13,7 @@ export { default as externalApiService } from './externalApiService';
 export { default as housingProjectService } from './housingProjectService';
 export { default as mapService } from './mapService';
 export { default as noteHistoryService } from './noteHistoryService';
+export { default as peachService } from './peachService';
 export { default as permitNoteService } from './permitNoteService';
 export { default as permitService } from './permitService';
 export { default as reportingService } from './reportingService';

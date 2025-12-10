@@ -113,14 +113,31 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
  */
 export const searchPermits = async (tx: PrismaTransactionClient, params: PermitSearchParams): Promise<Permit[]> => {
   let permitTrackingInclude: object = {};
+  const {
+    permitId,
+    activityId,
+    permitTypeId,
+    stage,
+    state,
+    sourceSystems,
+    includePermitNotes,
+    includePermitTracking,
+    includePermitType,
+    onlyPeachIntegratedTrackings
+  } = params;
 
-  // Only include the filtered params.sourceSystemKinds if given
-  if (params.includePermitTracking) {
+  // Build permitTracking filter/include
+  if (includePermitTracking) {
+    const sourceSystemAndClause = sourceSystems ? { sourceSystemKind: { sourceSystem: { in: sourceSystems } } } : {};
+    const peachIntegratedAndClause = onlyPeachIntegratedTrackings ? { sourceSystemKind: { integrated: true } } : {};
+    const permitTrackingWhere =
+      sourceSystems || onlyPeachIntegratedTrackings
+        ? { AND: [sourceSystemAndClause, peachIntegratedAndClause] }
+        : undefined;
+
     permitTrackingInclude = {
       permitTracking: {
-        ...(params.sourceSystems
-          ? { where: { sourceSystemKind: { sourceSystem: { in: params.sourceSystems } } } }
-          : {}),
+        ...(permitTrackingWhere ? { where: permitTrackingWhere } : {}),
         include: { sourceSystemKind: true }
       }
     };
@@ -129,17 +146,18 @@ export const searchPermits = async (tx: PrismaTransactionClient, params: PermitS
   const response = await tx.permit.findMany({
     where: {
       AND: [
-        params.permitId ? { permitId: { in: params.permitId } } : {},
-        params.activityId ? { activityId: { in: params.activityId } } : {},
-        params.permitTypeId ? { permitTypeId: { in: params.permitTypeId } } : {},
-        params.stage ? { stage: { in: params.stage } } : {},
-        params.state ? { state: { in: params.state } } : {},
-        params.sourceSystems ? { permitType: { sourceSystem: { in: params.sourceSystems } } } : {}
+        permitId ? { permitId: { in: permitId } } : {},
+        activityId ? { activityId: { in: activityId } } : {},
+        permitTypeId ? { permitTypeId: { in: permitTypeId } } : {},
+        stage ? { stage: { in: stage } } : {},
+        state ? { state: { in: state } } : {},
+        sourceSystems ? { permitType: { sourceSystem: { in: sourceSystems } } } : {},
+        onlyPeachIntegratedTrackings ? { permitTracking: { some: { sourceSystemKind: { integrated: true } } } } : {}
       ]
     },
     include: {
-      ...(params.includePermitType ? { permitType: true } : {}),
-      ...(params.includePermitNotes ? { permitNote: true } : {}),
+      ...(includePermitType ? { permitType: true } : {}),
+      ...(includePermitNotes ? { permitNote: true } : {}),
       ...permitTrackingInclude
     }
   });

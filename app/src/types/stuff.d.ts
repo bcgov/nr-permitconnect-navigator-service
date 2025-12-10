@@ -398,6 +398,7 @@ export type PermitSearchParams = {
   includePermitNotes?: boolean;
   includePermitTracking?: boolean;
   includePermitType?: boolean;
+  onlyPeachIntegratedTrackings?: boolean;
 };
 
 export type PermitUpdateEmailParams = {

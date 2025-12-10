@@ -7,6 +7,7 @@ export { default as electrificationProjectValidator } from './electrificationPro
 export { default as enquiryValidator } from './enquiry';
 export { default as housingProjectValidator } from './housingProject';
 export { default as noteHistoryValidator } from './noteHistory';
+export { default as peachValidator } from './peach';
 export { default as permitValidator } from './permit';
 export { default as permitNoteValidator } from './permitNote';
 export { default as roadmapValidator } from './roadmap';

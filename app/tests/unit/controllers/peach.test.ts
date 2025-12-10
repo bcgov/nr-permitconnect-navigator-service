@@ -8,7 +8,7 @@ import {
   TEST_PERMIT_4
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { syncPeachRecords, getPeachRecordController } from '../../../src/controllers/peach';
+import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach';
 import * as parser from '../../../src/parsers/peachParser';
 import * as permitService from '../../../src/services/permit';
 import * as peachService from '../../../src/services/peach';
@@ -18,6 +18,7 @@ import * as stamps from '../../../src/db/utils/utils';
 import { splitDateTime, Problem } from '../../../src/utils';
 
 import type { Request, Response } from 'express';
+import type { PermitTracking } from '../../../src/types';
 
 jest.mock('config');
 
@@ -48,23 +49,20 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('getPeachRecordController', () => {
+describe('getPeachSummaryController', () => {
   const getPeachRecordSpy = jest.spyOn(peachService, 'getPeachRecord');
-  const summarizeSpy = jest.spyOn(parser, 'summarizeRecord');
+  const summarizeSpy = jest.spyOn(parser, 'summarizePeachRecord');
 
   it('should call service, summarize, and respond with 200 and summary', async () => {
     const req = {
-      params: {
-        recordId: TEST_PEACH_RECORD_1.record_id,
-        systemId: TEST_PEACH_RECORD_1.system_id
-      }
+      body: TEST_PERMIT_1.permitTracking
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
-    await getPeachRecordController(
-      req as unknown as Request<{ recordId: string; systemId: string }>,
+    await getPeachSummaryController(
+      req as unknown as Request<never, never, PermitTracking[], never>,
       res as unknown as Response
     );
 
@@ -78,23 +76,95 @@ describe('getPeachRecordController', () => {
     expect(payload).toEqual(TEST_PEACH_SUMMARY);
   });
 
-  it('throws Problem(404) when summarizeRecord returns null-ish', async () => {
+  it('throws Problem(404) when no permit tracking found', async () => {
     const req = {
-      params: {
-        recordId: TEST_PEACH_RECORD_1.record_id,
-        systemId: TEST_PEACH_RECORD_1.system_id
-      }
+      body: []
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(null);
 
     await expect(
-      getPeachRecordController(
-        req as unknown as Request<{ recordId: string; systemId: string }>,
+      getPeachSummaryController(
+        req as unknown as Request<never, never, PermitTracking[], never>,
         res as unknown as Response
       )
     ).rejects.toBeInstanceOf(Problem);
+  });
+
+  it('throws Problem(404) when summarizePeachRecord returns null-ish', async () => {
+    const req = {
+      body: [
+        {
+          trackingId: TEST_PEACH_RECORD_1.record_id,
+          sourceSystemKind: {
+            sourceSystem: TEST_PEACH_RECORD_1.system_id
+          }
+        }
+      ]
+    };
+
+    getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
+    summarizeSpy.mockReturnValue(null);
+
+    await expect(
+      getPeachSummaryController(
+        req as unknown as Request<never, never, PermitTracking[], never>,
+        res as unknown as Response
+      )
+    ).rejects.toBeInstanceOf(Problem);
+  });
+
+  it('throws Problem(404) when permitTracking exists but trackingId is missing', async () => {
+    const req = {
+      body: [
+        {
+          sourceSystemKind: {
+            sourceSystem: TEST_PEACH_RECORD_1.system_id
+          }
+        }
+      ]
+    };
+
+    getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
+    summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
+
+    await expect(
+      getPeachSummaryController(
+        req as unknown as Request<never, never, PermitTracking[], never>,
+        res as unknown as Response
+      )
+    ).rejects.toBeInstanceOf(Problem);
+
+    expect(getPeachRecordSpy).not.toHaveBeenCalled();
+    expect(summarizeSpy).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
+  });
+
+  it('throws Problem(404) when permitTracking exists but sourceSystemKind.sourceSystem is missing', async () => {
+    const req = {
+      body: [
+        {
+          trackingId: TEST_PEACH_RECORD_1.record_id
+        }
+      ]
+    };
+
+    getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
+    summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
+
+    await expect(
+      getPeachSummaryController(
+        req as unknown as Request<never, never, PermitTracking[], never>,
+        res as unknown as Response
+      )
+    ).rejects.toBeInstanceOf(Problem);
+
+    expect(getPeachRecordSpy).not.toHaveBeenCalled();
+    expect(summarizeSpy).not.toHaveBeenCalled();
+    expect(res.status).not.toHaveBeenCalled();
+    expect(res.json).not.toHaveBeenCalled();
   });
 });
 
@@ -110,7 +180,7 @@ describe('syncPeachRecords', () => {
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     parseSpy.mockReturnValueOnce({
-      [`${PeachIntegratedSystem.VFCBC}REC-123`]: TEST_PEACH_SUMMARY
+      [`${PeachIntegratedSystem.VFCBC}REC-SUB`]: TEST_PEACH_SUMMARY
     });
 
     const fixedNow = new Date('2024-02-01T12:00:00.000Z');
@@ -122,7 +192,7 @@ describe('syncPeachRecords', () => {
     expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, expect.objectContaining({ includePermitTracking: true }));
 
     expect(getRecSpy).toHaveBeenCalledTimes(1);
-    expect(getRecSpy).toHaveBeenCalledWith('REC-123', PeachIntegratedSystem.VFCBC);
+    expect(getRecSpy).toHaveBeenCalledWith('REC-SUB', PeachIntegratedSystem.VFCBC);
 
     expect(parseSpy).toHaveBeenCalledTimes(1);
     expect(parseSpy).toHaveBeenCalledWith([TEST_PEACH_RECORD_1]);
@@ -201,7 +271,7 @@ describe('syncPeachRecords', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('ignores permits without a VFCBC tracking', async () => {
+  it('ignores permits without a integrated tracking', async () => {
     searchSpy.mockResolvedValueOnce([TEST_PERMIT_4, TEST_PERMIT_3]);
 
     await syncPeachRecords();
