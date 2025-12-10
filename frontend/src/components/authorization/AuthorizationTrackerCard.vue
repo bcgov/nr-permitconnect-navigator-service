@@ -245,7 +245,6 @@ const timelineDescription = computed(() => (iconClass: string) => {
                 {{ t('authorization.authorizationTrackerCard.statusNotVerified') }}
               </p>
             </div>
-            >>>>>>> e9a3e2bf (Make changes to frontend to reflect migration changes)
           </div>
           <div class="status-help">
             <font-awesome-icon

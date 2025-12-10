@@ -60,14 +60,17 @@ export const combineDateTime = (date?: string | null, time?: string | null): Dat
  * @returns A negative number if a before b, positive if a after b, or 0 if equal (reversed if desc=true)
  */
 export function compareDates(a?: Date, b?: Date, desc = false): number {
+  const direction = desc ? -1 : 1;
+
   // Both dates undefined
   if (!a && !b) return 0;
 
   // One date undefined
-  if (!a || !b) return desc ? (a ? -1 : 1) : a ? 1 : -1;
+  if (!a) return -1 * direction;
+  if (!b) return 1 * direction;
 
   // Both dates defined
-  return desc ? b.getTime() - a.getTime() : a.getTime() - b.getTime();
+  return (a.getTime() - b.getTime()) * direction;
 }
 
 /**

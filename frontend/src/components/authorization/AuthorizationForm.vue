@@ -68,6 +68,59 @@ const projectRouteName = inject(projectRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Actions
+const formSchema = object({
+  permitNote: string()
+    .when('stage', {
+      is: (stage: string) => stage !== initialFormValues.value?.stage,
+      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
+    })
+    .when('state', {
+      is: (state: string) => state !== initialFormValues.value?.state,
+      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
+    }),
+  authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
+  needed: string()
+    .required()
+    .oneOf(PERMIT_NEEDED_LIST)
+    .label(t('authorization.authorizationForm.needed'))
+    .test('valid-needed', t('authorization.authorizationForm.neededCondition'), function (value) {
+      const { state } = this.parent;
+      return (
+        (value === PermitNeeded.UNDER_INVESTIGATION && state === PermitState.NONE) ||
+        value !== PermitNeeded.UNDER_INVESTIGATION
+      );
+    }),
+  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
+  permitTracking: array().of(
+    object({
+      sourceSystemKindId: number().required().label(t('authorization.authorizationForm.trackingIdType')),
+      trackingId: string().max(255).required().label(t('authorization.authorizationForm.trackingId')),
+      shownToProponent: boolean()
+        .oneOf([true, false])
+        .default(false)
+        .label(t('authorization.authorizationForm.shownToProponent'))
+    })
+  ),
+  state: string()
+    .required()
+    .oneOf(PERMIT_STATE_LIST)
+    .label(t('authorization.authorizationForm.authorizationStatus'))
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
+      const { stage } = this.parent;
+      return (
+        (stage === PermitStage.PRE_SUBMISSION && value === PermitState.NONE) ||
+        (stage !== PermitStage.PRE_SUBMISSION && value !== PermitState.NONE)
+      );
+    })
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
+      const { stage } = this.parent;
+      return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
+    }),
+  submittedDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.submittedDate')),
+  decisionDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.decisionDate')),
+  statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
+  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
+});
 
 const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
   const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
@@ -93,6 +146,169 @@ function checkIfPeachIntegratedTrackingId(permitTrackings: PermitTracking[]): bo
     );
     return !!sourceSystemKind;
   });
+}
+
+async function emailNotification(data: Permit, permitNote: string) {
+  const emailTemplateData = {
+    '{{ contactName }}':
+      getProject.value?.contacts?.[0]?.firstName ||
+      getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
+    '{{ activityId }}': getProject.value?.activityId,
+    '{{ permitName }}': data.permitType.name,
+    '{{ submittedDate }}': data.submittedDate ? formatDateOnly(data.submittedDate) : formatDate(data.createdAt),
+    '{{ projectId }}': getProject.value?.projectId,
+    '{{ permitId }}': data.permitId
+  };
+  const configCC = getConfig.value.ches?.submission?.cc;
+
+  const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
+  const isOnlyTemplate = permitNote.trim() === peachUpdateNotePlaceholder;
+
+  let body;
+  if (isValidPeachPermit.value && isOnlyTemplate) body = peachPermitNoteNotificationTemplate(emailTemplateData);
+  else body = permitNoteNotificationTemplate(emailTemplateData);
+
+  let applicantEmail =
+    (getProject.value?.contacts?.[0]?.email as string) ||
+    (getProject.value?.activity?.activityContact?.[0]?.contact?.email as string);
+  let emailData = {
+    from: configCC,
+    to: [applicantEmail],
+    cc: configCC,
+    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType.name}`,
+    bodyType: 'html',
+    body: body
+  };
+
+  if (!projectService?.value) throw new Error('No service');
+  await projectService.value.emailConfirmation(emailData);
+}
+
+async function getPeachSummary(permitTrackings: PermitTracking[]) {
+  try {
+    const data: PermitTracking[] = permitTrackings.map((pt) => {
+      const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
+      return {
+        ...pt,
+        sourceSystemKind
+      };
+    });
+    const peachSummary = await peachService.getPeachSummary(data);
+    return peachSummary.data;
+  } catch (e: any) {
+    const systemRecordNotFound =
+      e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
+    if (e.status === 404 && systemRecordNotFound) {
+      noPeachDataModalVisible.value = true;
+    } else {
+      toast.error(e.message);
+    }
+  }
+}
+
+function handlePeachIntegrationChange(now: boolean, prev?: boolean) {
+  if (!formRef.value?.values) return;
+
+  const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
+  const currentNote = formRef.value.values.permitNote ?? '';
+
+  const wasPeachIntegrated = !!prev;
+
+  // Entering a PEACH-integrated state, add template to note
+  if (now && !wasPeachIntegrated) {
+    formRef.value?.setFieldValue('needed', PermitNeeded.YES);
+
+    const hasExistingNotes = !!authorization?.permitNote?.length;
+    if (!hasExistingNotes) {
+      // If note is empty, just template
+      if (!currentNote.trim()) {
+        formRef.value.setFieldValue('permitNote', peachUpdateNotePlaceholder);
+      } else if (!currentNote.includes(peachUpdateNotePlaceholder)) {
+        // If note already has content, append template once
+        const combined = `${currentNote.trim()}\n\n${peachUpdateNotePlaceholder}`;
+        formRef.value.setFieldValue('permitNote', combined);
+      }
+    }
+  }
+
+  // Leaving a PEACH-integrated state, remove template from note
+  if (!now && wasPeachIntegrated) {
+    if (!currentNote) return;
+
+    if (currentNote.includes(peachUpdateNotePlaceholder)) {
+      const cleanedNote = currentNote
+        .replaceAll(peachUpdateNotePlaceholder, '')
+        .replace(/\n{2,}/g, '\n\n') // normalize excess newlines
+        .trim();
+
+      formRef.value.setFieldValue('permitNote', cleanedNote);
+    }
+  }
+}
+
+function initializeFormValues() {
+  if (authorization) {
+    initialFormValues.value = {
+      authorizationType: authorization.permitType,
+      decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
+      submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
+      permitTracking: authorization.permitTracking.map((pt) => {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { sourceSystemKind, ...tracking } = pt;
+        return tracking;
+      }),
+      issuedPermitId: authorization.issuedPermitId,
+      statusLastChanged: combineDateTime(authorization.statusLastChanged, authorization.statusLastChangedTime),
+      statusLastVerified: combineDateTime(authorization.statusLastVerified, authorization.statusLastVerifiedTime),
+      stage: authorization.stage,
+      state: authorization.state,
+      needed: authorization.needed,
+      permitId: authorization?.permitId,
+      createdAt: authorization.createdAt,
+      createdBy: authorization.createdBy,
+      updatedAt: authorization.updatedAt,
+      updatedBy: authorization.updatedBy
+    };
+  } else {
+    // Set default values
+    initialFormValues.value = {
+      state: PermitState.NONE,
+      stage: PermitStage.PRE_SUBMISSION
+    };
+  }
+}
+
+function onDelete() {
+  confirmDialog.require({
+    message: t('authorization.authorizationForm.deleteAuthMessage'),
+    header: t('authorization.authorizationForm.deleteAuth'),
+    acceptLabel: t('authorization.authorizationForm.confirm'),
+    acceptClass: 'p-button-danger',
+    acceptIcon: 'pi pi-trash',
+    rejectLabel: t('authorization.authorizationForm.cancel'),
+    rejectIcon: 'pi pi-times',
+    rejectProps: { outlined: true },
+    accept: async () => {
+      try {
+        await permitService.deletePermit(authorization?.permitId as string);
+        toast.success(t('authorization.authorizationForm.authDeleted'));
+        if (!projectRouteName?.value) throw new Error('No route');
+        router.push({
+          name: projectRouteName?.value,
+          params: { projectId: getProject.value?.projectId },
+          query: {
+            initialTab: AUTHORIZATION_TAB
+          }
+        });
+      } catch (e: any) {
+        toast.error(t('authorization.authorizationForm.authDeletionError'), e.message);
+      }
+    }
+  });
+}
+
+function onInvalidSubmit(e: any) {
+  scrollToFirstError(e.errors);
 }
 
 async function onSubmit(data: any) {
@@ -148,7 +364,8 @@ async function onSubmit(data: any) {
       });
 
       // Send email to the user if permit is needed or if permit stage is not pre-submission
-      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION) emailNotification(result);
+      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION)
+        emailNotification(result, permitNote);
     }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
@@ -166,179 +383,6 @@ async function onSubmit(data: any) {
   }
 }
 
-async function getPeachSummary(permitTrackings: PermitTracking[]) {
-  try {
-    const data: PermitTracking[] = permitTrackings.map((pt) => {
-      const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
-      return {
-        ...pt,
-        sourceSystemKind
-      };
-    });
-    const peachSummary = await peachService.getPeachSummary(data);
-    return peachSummary.data;
-  } catch (e: any) {
-    const systemRecordNotFound =
-      e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
-    if (e.status === 404 && systemRecordNotFound) {
-      noPeachDataModalVisible.value = true;
-    } else {
-      toast.error(e.message);
-    }
-  }
-}
-
-async function emailNotification(data: Permit) {
-  const emailTemplateData = {
-    '{{ contactName }}':
-      getProject.value?.contacts?.[0]?.firstName ||
-      getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
-    '{{ activityId }}': getProject.value?.activityId,
-    '{{ permitName }}': data.permitType.name,
-    '{{ submittedDate }}': data.submittedDate ? formatDateOnly(data.submittedDate) : formatDate(data.createdAt),
-    '{{ projectId }}': getProject.value?.projectId,
-    '{{ permitId }}': data.permitId
-  };
-  const configCC = getConfig.value.ches?.submission?.cc;
-  let body;
-  if (isValidPeachPermit.value) body = peachPermitNoteNotificationTemplate(emailTemplateData);
-  else body = permitNoteNotificationTemplate(emailTemplateData);
-
-  let applicantEmail =
-    (getProject.value?.contacts?.[0]?.email as string) ||
-    (getProject.value?.activity?.activityContact?.[0]?.contact?.email as string);
-  let emailData = {
-    from: configCC,
-    to: [applicantEmail],
-    cc: configCC,
-    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType.name}`,
-    bodyType: 'html',
-    body: body
-  };
-
-  if (!projectService?.value) throw new Error('No service');
-  await projectService.value.emailConfirmation(emailData);
-}
-
-function onDelete() {
-  confirmDialog.require({
-    message: t('authorization.authorizationForm.deleteAuthMessage'),
-    header: t('authorization.authorizationForm.deleteAuth'),
-    acceptLabel: t('authorization.authorizationForm.confirm'),
-    acceptClass: 'p-button-danger',
-    acceptIcon: 'pi pi-trash',
-    rejectLabel: t('authorization.authorizationForm.cancel'),
-    rejectIcon: 'pi pi-times',
-    rejectProps: { outlined: true },
-    accept: async () => {
-      try {
-        await permitService.deletePermit(authorization?.permitId as string);
-        toast.success(t('authorization.authorizationForm.authDeleted'));
-        if (!projectRouteName?.value) throw new Error('No route');
-        router.push({
-          name: projectRouteName?.value,
-          params: { projectId: getProject.value?.projectId },
-          query: {
-            initialTab: AUTHORIZATION_TAB
-          }
-        });
-      } catch (e: any) {
-        toast.error(t('authorization.authorizationForm.authDeletionError'), e.message);
-      }
-    }
-  });
-}
-
-const formSchema = object({
-  permitNote: string()
-    .when('stage', {
-      is: (stage: string) => stage !== initialFormValues.value?.stage,
-      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
-    })
-    .when('state', {
-      is: (state: string) => state !== initialFormValues.value?.state,
-      then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
-    }),
-  authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
-  needed: string()
-    .required()
-    .oneOf(PERMIT_NEEDED_LIST)
-    .label(t('authorization.authorizationForm.needed'))
-    .test('valid-needed', t('authorization.authorizationForm.neededCondition'), function (value) {
-      const { state } = this.parent;
-      return (
-        (value === PermitNeeded.UNDER_INVESTIGATION && state === PermitState.NONE) ||
-        value !== PermitNeeded.UNDER_INVESTIGATION
-      );
-    }),
-  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
-  permitTracking: array().of(
-    object({
-      sourceSystemKindId: number().required().label(t('authorization.authorizationForm.trackingIdType')),
-      trackingId: string().max(255).required().label(t('authorization.authorizationForm.trackingId')),
-      shownToProponent: boolean()
-        .oneOf([true, false])
-        .default(false)
-        .label(t('authorization.authorizationForm.shownToProponent'))
-    })
-  ),
-  state: string()
-    .required()
-    .oneOf(PERMIT_STATE_LIST)
-    .label(t('authorization.authorizationForm.authorizationStatus'))
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
-      const { stage } = this.parent;
-      return (
-        (stage === PermitStage.PRE_SUBMISSION && value === PermitState.NONE) ||
-        (stage !== PermitStage.PRE_SUBMISSION && value !== PermitState.NONE)
-      );
-    })
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
-      const { stage } = this.parent;
-      return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
-    }),
-  submittedDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.submittedDate')),
-  decisionDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.decisionDate')),
-  statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
-  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
-});
-
-function initializeFormValues() {
-  if (authorization) {
-    initialFormValues.value = {
-      authorizationType: authorization.permitType,
-      decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
-      submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
-      permitTracking: authorization.permitTracking.map((pt) => {
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        const { sourceSystemKind, ...tracking } = pt;
-        return tracking;
-      }),
-      issuedPermitId: authorization.issuedPermitId,
-      statusLastChanged: combineDateTime(authorization.statusLastChanged, authorization.statusLastChangedTime),
-      statusLastVerified: combineDateTime(authorization.statusLastVerified, authorization.statusLastVerifiedTime),
-      stage: authorization.stage,
-      state: authorization.state,
-      needed: authorization.needed,
-      permitId: authorization?.permitId,
-      createdAt: authorization.createdAt,
-      createdBy: authorization.createdBy,
-      updatedAt: authorization.updatedAt,
-      updatedBy: authorization.updatedBy
-    };
-  } else {
-    // Set default values
-    initialFormValues.value = {
-      state: PermitState.NONE,
-      stage: PermitStage.PRE_SUBMISSION
-    };
-  }
-}
-
-function onInvalidSubmit(e: any) {
-  scrollToFirstError(e.errors);
-}
-
 onBeforeMount(async () => {
   initializeFormValues();
   const response = (await sourceSystemKindService.getSourceSystemKinds()).data;
@@ -348,33 +392,7 @@ onBeforeMount(async () => {
   }
 });
 
-watch(
-  isPeachIntegrated,
-  (now, prev) => {
-    if (!formRef.value?.values) return;
-
-    // Changed into a PEACH integrate authorization, add template to note
-    if (now && !prev) {
-      formRef.value?.setFieldValue('needed', PermitNeeded.YES);
-
-      const hasExistingNotes = !!authorization?.permitNote && authorization.permitNote.length > 0;
-      if (!hasExistingNotes) {
-        formRef.value.setFieldValue('permitNote', t('authorization.authorizationForm.peachNoteUpdate'));
-      }
-    }
-
-    // Changed into a non PEACH integrated authorization, remove template from note
-    if (!now && prev) {
-      const note = formRef.value.values.permitNote ?? '';
-      const template = t('authorization.authorizationForm.peachNoteUpdate');
-
-      const cleanedNote = note.replaceAll(template, '').trim();
-
-      formRef.value.setFieldValue('permitNote', cleanedNote);
-    }
-  },
-  { immediate: true }
-);
+watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: true });
 </script>
 
 <template>
