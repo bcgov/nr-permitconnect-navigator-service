@@ -1,4 +1,5 @@
 import { createTestingPinia } from '@pinia/testing';
+import { setActivePinia } from 'pinia';
 import { shallowMount } from '@vue/test-utils';
 
 import PrimeVue from 'primevue/config';
@@ -8,6 +9,7 @@ import Tooltip from 'primevue/tooltip';
 
 import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
 import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
+import { useConfigStore } from '@/store';
 import { StorageKey } from '@/utils/enums/application';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
@@ -62,52 +64,14 @@ const testSourceSystemKinds = [
   }
 ];
 
+let pinia: ReturnType<typeof createTestingPinia>;
+
 const wrapperSettings = () => ({
   props: {
     editable: true
   },
   global: {
-    plugins: [
-      createTestingPinia({
-        initialState: {
-          auth: {
-            user: {}
-          },
-          config: {
-            config: {
-              oidc: {
-                authority: 'abc',
-                clientId: '123'
-              },
-              ches: {
-                submission: { cc: 'test@example.com' }
-              }
-            }
-          },
-          project: {
-            project: {
-              activityId: 'CE0756D0',
-              projectId: 'project-123',
-              projectName: 'Test Project',
-              assignedUserId: undefined,
-              contacts: []
-            }
-          },
-          code: {
-            codes: {
-              ElectrificationProjectCategory: [],
-              ElectrificationProjectType: [],
-              EscalationType: [],
-              SourceSystem: []
-            }
-          }
-        },
-        stubActions: false
-      }),
-      PrimeVue,
-      ConfirmationService,
-      ToastService
-    ],
+    plugins: [pinia, PrimeVue, ConfirmationService, ToastService],
     provide: {
       [projectRouteNameKey as symbol]: { value: 'housing-project' },
       [projectServiceKey as symbol]: {
@@ -129,7 +93,7 @@ const wrapperSettings = () => ({
   }
 });
 
-beforeEach(() => {
+beforeEach(async () => {
   sessionStorage.setItem(
     StorageKey.CONFIG,
     JSON.stringify({
@@ -141,9 +105,41 @@ beforeEach(() => {
         submission: {
           cc: 'test@example.com'
         }
-      }
+      },
+      features: { peach: true }
     })
   );
+
+  pinia = createTestingPinia({
+    stubActions: false,
+    createSpy: vi.fn,
+    initialState: {
+      auth: {
+        user: {}
+      },
+      project: {
+        project: {
+          activityId: 'CE0756D0',
+          projectId: 'project-123',
+          projectName: 'Test Project',
+          assignedUserId: undefined,
+          contacts: []
+        }
+      },
+      code: {
+        codes: {
+          ElectrificationProjectCategory: [],
+          ElectrificationProjectType: [],
+          EscalationType: [],
+          SourceSystem: []
+        }
+      }
+    }
+  });
+  setActivePinia(pinia);
+
+  const configStore = useConfigStore();
+  await configStore.init();
 
   vi.clearAllMocks();
 
@@ -215,7 +211,6 @@ describe('AuthorizationForm', () => {
           sourceSystemKindId: 10,
           trackingId: 'ABC-123',
           shownToProponent: true,
-          // this field should be stripped by initializeFormValues
           sourceSystemKind: { sourceSystemKindId: 10 }
         }
       ],
@@ -251,7 +246,6 @@ describe('AuthorizationForm', () => {
     expect(vm.initialFormValues.state).toBe(auth.state);
     expect(vm.initialFormValues.needed).toBe(auth.needed);
 
-    // make sure permitTracking was mapped and sourceSystemKind removed
     expect(vm.initialFormValues.permitTracking).toEqual([
       {
         sourceSystemKindId: 10,
@@ -333,20 +327,9 @@ describe('AuthorizationForm', () => {
   it('submits a non-PEACH permit, creates note, and triggers email notification', async () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
-
     const vm: any = wrapper.vm;
 
-    (vm as any).getConfig = {
-      value: {
-        ches: {
-          submission: {
-            cc: 'test@example.com'
-          }
-        }
-      }
-    };
-
-    const projectService = (wrapper.vm as any).projectService.value;
+    const projectService = vm.projectService.value;
     const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
 
     const submitPayload = {
@@ -598,25 +581,14 @@ describe('AuthorizationForm', () => {
   it('uses peachPermitNoteNotificationTemplate when note is only the Peach template and permit is valid', async () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
-
     const vm: any = wrapper.vm;
 
-    (vm as any).getConfig = {
-      value: {
-        ches: {
-          submission: {
-            cc: 'test@example.com'
-          }
-        }
-      }
-    };
-
-    vm.isValidPeachPermit = { value: true };
+    vm.isValidPeachPermit = true;
 
     const template = 'PEACH TEMPLATE ONLY';
     (vm.t as any).mockReturnValue(template);
 
-    const projectService = (wrapper.vm as any).projectService.value;
+    const projectService = vm.projectService.value;
     const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
 
     const permit = {
