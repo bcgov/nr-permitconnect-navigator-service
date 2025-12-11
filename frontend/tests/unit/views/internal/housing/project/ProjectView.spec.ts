@@ -4,7 +4,14 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { documentService, enquiryService, noteHistoryService, permitService, housingProjectService } from '@/services';
+import {
+  activityContactService,
+  documentService,
+  enquiryService,
+  noteHistoryService,
+  permitService,
+  housingProjectService
+} from '@/services';
 import ProjectView from '@/views/internal/housing/project/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
@@ -25,6 +32,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
+const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 const listNotesSpy = vi.spyOn(noteHistoryService, 'listNoteHistories');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
@@ -32,6 +40,9 @@ const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
 const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 
 getProjectSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+listActivityContactsSpy.mockResolvedValue({
+  data: []
+} as AxiosResponse);
 listDocumentsSpy.mockResolvedValue({
   data: [{ filename: 'foo', activityId: 'activity456' }]
 } as AxiosResponse);

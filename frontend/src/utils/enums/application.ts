@@ -186,3 +186,9 @@ export enum UserSearchParams {
   LAST_NAME = 'Last name',
   EMAIL = 'Email'
 }
+
+export enum Zone {
+  EXTERNAL = 'external',
+  GLOBAL = 'global',
+  INTERNAL = 'internal'
+}

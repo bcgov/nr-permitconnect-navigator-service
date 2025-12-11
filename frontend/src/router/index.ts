@@ -16,7 +16,7 @@ import {
   useProjectStore
 } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { Initiative, RouteName, StorageKey } from '@/utils/enums/application';
+import { Initiative, RouteName, StorageKey, Zone } from '@/utils/enums/application';
 import { isEmptyObject } from '@/utils/utils';
 
 import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
@@ -91,13 +91,26 @@ const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
-    beforeEnter: [bootstrap, () => useAppStore().setInitiative(Initiative.PCNS), entryRedirect, accessHandler],
+    beforeEnter: [
+      bootstrap,
+      () => {
+        useAppStore().setInitiative(Initiative.PCNS);
+        useAppStore().setZone(Zone.GLOBAL);
+      },
+      entryRedirect,
+      accessHandler
+    ],
     children: [
       {
         path: '/',
         name: RouteName.HOME,
         component: () => import('@/views/HomeView.vue'),
-        beforeEnter: [() => useAppStore().setInitiative(Initiative.PCNS)],
+        beforeEnter: [
+          () => {
+            useAppStore().setInitiative(Initiative.PCNS);
+            useAppStore().setZone(Zone.GLOBAL);
+          }
+        ],
         meta: { hideBreadcrumb: true, hideNavbar: true }
       },
       {
