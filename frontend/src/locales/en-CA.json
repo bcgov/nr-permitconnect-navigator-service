@@ -509,6 +509,7 @@
       "ids": "IDs",
       "issuedPermitId": "Issued Permit ID",
       "more": "More",
+      "statusChangeDate": "Status change date",
       "statusVerified": "Status verified date",
       "submittedDate": "Submitted date"
     },
@@ -536,8 +537,7 @@
     },
     "authorizationForm": {
       "addAuthorization": "Add authorization",
-      "adjudicationDate": "Adjudication date",
-      "adjudicationDateFutureError": "Adjudication date cannot be in the future",
+      "agency": "Agency",
       "applicationStage": "Application stage",
       "authDeleted": "Authorization deleted",
       "authDeletionError": "Error deleting authorization",
@@ -545,21 +545,29 @@
       "authorizationStatus": "Authorization status",
       "authStatusConditionNewNone": "Authorization status can only be 'None' if the authorization state is 'Pre-submission'.",
       "authStatusConditionInProPre": "Authorization status cannot be 'In progress' if the authorization state is 'Post-decision'.",
-      "agency": "Agency:",
+      "automatePublish": "Automate and Publish",
       "businessDomain": "Business domain:",
       "cancel": "Cancel",
       "confirm": "Confirm",
+      "decisionDate": "Decision date",
       "delete": "Delete",
       "deleteAuth": "Delete authorization?",
       "deleteAuthMessage": "Deleting this permit will remove it on the Proponent’s side as well. Please confirm that you want to delete this permit.",
       "lastUpdated": "Last updated:",
       "needed": "Needed",
       "neededCondition": "When under investigation, status and stage should only be 'None' and 'Pre-submission'",
+      "noPeachDataMsgl1": "This may be because:",
+      "noPeachDataMsgl2": "The Tracking ID type or value you entered is incorrect. Please check and try again.",
+      "noPeachDataMsgl3": "It could take up to 24 hours after the application submission to load. Please check back again later.",
+      "noRecordsFound": "No records found",
       "noteRequired": "The status of this application has changed. Please add an update for the proponent.",
+      "peachNoteUpdate": "You can now track your application progress here. You will receive an email if the status or stage changes, or when your Navigator posts an update.",
       "permitSaved": "Permit saved",
       "permitSaveFailed": "Failed to save permit",
       "publish": "Publish",
       "shownToProponent": "Shown to proponent",
+      "statusLastChanged": "Status last changed",
+      "statusLastVerified": "Status last verified",
       "submittedDate": "Submitted date",
       "submittedDateFutureError": "Submitted date cannot be in the future",
       "trackingId": "Tracking ID",
@@ -577,23 +585,25 @@
       "uponDecision": "Upon decision"
     },
     "authorizationStatusPill": {
-      "abandonedByClient": "Abandoned by client",
-      "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
-      "withdrawnByClient": "Withdrawn by client"
+      "cancelledByReviewingAuthority": "Cancelled by reviewing authority"
     },
     "authorizationStatusUpdatesCard": {
-      "abandonedByClient": "Abandoned by client",
       "applicationStage": "Application stage",
       "authorizationStatus": "Authorization status",
       "decisionDate": "Decision date",
       "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
       "needed": "Needed",
       "statusUpdates": "Status updates",
+      "statusChangeDate": "Status change date",
       "statusVerifiedDate": "Status verified date",
       "submittedDate": "Submitted date",
       "updateNoteForProponent": "Update note for Proponent",
-      "updateToToday": "Update to today",
-      "withdrawnByClient": "Withdrawn by client"
+      "updateToToday": "Update to today"
+    },
+    "authorizationTrackerCard": {
+      "byYourNavigator": "by your Navigator",
+      "statusLastVerified": "Status last verified on",
+      "statusNotVerified": "This status has not yet been verified."
     },
     "requiredAuths": {
       "areNotNeeded": "are not needed. ",
@@ -819,7 +829,7 @@
   },
   "permitCard": {
     "addUpdates": "Add updates",
-    "adjudicationDate": "Adjudication date:",
+    "decisionDate": "Decision date:",
     "agency": "Agency:",
     "businessDomain": "Business domain:",
     "issuedPermitId": "Issued Permit ID:",

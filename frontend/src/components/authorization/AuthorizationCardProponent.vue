@@ -4,7 +4,7 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
-import { formatDate, formatDateTime } from '@/utils/formatters';
+import { formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -32,11 +32,11 @@ const { t } = useI18n();
         <div class="col-span-12 flex mb-4">
           <AuthorizationStatusPill
             class="mr-2"
-            :auth-status="permit.authStatus"
+            :state="permit.state"
           />
           <StatusPill
             class="mr-2"
-            :status="permit.status"
+            :stage="permit.stage"
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />
@@ -62,7 +62,7 @@ const { t } = useI18n();
         <div class="col-span-3">
           <div class="label-field">{{ t('authorization.authorizationCardProponent.submittedOn') }}</div>
           <div class="permit-data">
-            {{ formatDate(permit?.submittedDate) }}
+            {{ formatDateOnly(permit?.submittedDate) }}
           </div>
         </div>
         <div class="col-span-3">

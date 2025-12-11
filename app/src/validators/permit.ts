@@ -1,10 +1,11 @@
 import Joi from 'joi';
 
-import { activityId, uuidv4 } from './common';
+import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common';
 import { validate } from '../middleware/validation';
 import { permitTrackingSchema } from './permitTracking';
 import { permitTypeSchema } from './permitType';
 import { createStamps } from './stamps';
+import { PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '../utils/constants/permit';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
@@ -13,14 +14,27 @@ const sharedPermitSchema = {
   activityId: activityId,
   issuedPermitId: Joi.string().allow(null),
   permitTracking: permitTrackingSchema,
-  authStatus: Joi.string().max(255).allow(null),
-  statusLastVerified: Joi.date().iso().max('now').allow(null),
   needed: Joi.string().max(255).required(),
-  status: Joi.string().max(255).required(),
-  submittedDate: Joi.date().iso().max('now'),
-  adjudicationDate: Joi.date().iso().max('now'),
+  state: Joi.string()
+    .max(255)
+    .required()
+    .valid(...PERMIT_STATE_LIST),
+  stage: Joi.string()
+    .max(255)
+    .required()
+    .valid(...PERMIT_STAGE_LIST),
+  submittedDate: dateOnlyString.allow(null),
+  submittedTime: timeTzString.allow(null),
+  decisionDate: dateOnlyString.allow(null),
+  decisionTime: timeTzString.allow(null),
+  statusLastChanged: dateOnlyString.allow(null),
+  statusLastChangedTime: timeTzString.allow(null),
+  statusLastVerified: dateOnlyString.allow(null),
+  statusLastVerifiedTime: timeTzString.allow(null),
   ...createStamps
 };
+
+export const upsertPermitBodySchema = Joi.object(sharedPermitSchema);
 
 const schema = {
   deletePermit: {
@@ -40,7 +54,7 @@ const schema = {
     })
   },
   upsertPermit: {
-    body: Joi.object(sharedPermitSchema)
+    body: upsertPermitBodySchema
   }
 };
 

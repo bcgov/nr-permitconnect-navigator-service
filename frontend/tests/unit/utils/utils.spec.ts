@@ -1,6 +1,45 @@
-import { isPlainObject, setEmptyStringsToNull } from '@/utils/utils';
+import { combineDateTime, isPlainObject, setEmptyStringsToNull, splitDateTime, toKebabCase } from '@/utils/utils';
 
 describe('utils.ts', () => {
+  describe('combineDateTime', () => {
+    it('returns null when date is null', () => {
+      const result = combineDateTime(null, '07:00:00Z');
+      expect(result).toBeNull();
+    });
+
+    it('returns null when date is empty string (falsy guard)', () => {
+      const result = combineDateTime('', '07:00:00Z' as any);
+      expect(result).toBeNull();
+    });
+
+    it('produces midnight UTC when time is null', () => {
+      const result = combineDateTime('2024-01-10', null);
+
+      expect(result).not.toBeNull();
+      expect(result!.getFullYear()).toBe(2024);
+      expect(result!.getMonth()).toBe(0); // January
+      expect(result!.getDate()).toBe(10);
+      expect(result!.getHours()).toBe(0);
+      expect(result!.getMinutes()).toBe(0);
+      expect(result!.getSeconds()).toBe(0);
+      expect(result!.getMilliseconds()).toBe(0);
+    });
+
+    it('combines date and full time with milliseconds', () => {
+      const result = combineDateTime('2024-01-10', '07:30:15.123Z');
+
+      expect(result).not.toBeNull();
+      expect(result!.toISOString()).toBe('2024-01-10T07:30:15.123Z');
+    });
+
+    it('combines date and time without milliseconds (adds .000Z in ISO output)', () => {
+      const result = combineDateTime('2024-01-10', '07:00:00Z');
+
+      expect(result).not.toBeNull();
+      expect(result!.toISOString()).toBe('2024-01-10T07:00:00.000Z');
+    });
+  });
+
   describe('setEmptyStringsToNull', () => {
     it('returns null when given an empty string', () => {
       expect(setEmptyStringsToNull('')).toBeNull();
@@ -97,6 +136,62 @@ describe('utils.ts', () => {
     it('returns false for RegExp instances', () => {
       const re = /foo/i;
       expect(isPlainObject(re)).toBe(false);
+    });
+  });
+
+  describe('splitDateTime', () => {
+    it('returns { date: null, time: null } for undefined', () => {
+      const result = splitDateTime(undefined);
+      expect(result).toEqual({ date: null, time: null });
+    });
+
+    it('returns { date: null, time: null } for null', () => {
+      const result = splitDateTime(null);
+      expect(result).toEqual({ date: null, time: null });
+    });
+
+    it('returns { date: null, time: null } for an invalid Date', () => {
+      const invalid = new Date('not-a-real-date');
+      const result = splitDateTime(invalid);
+      expect(result).toEqual({ date: null, time: null });
+    });
+
+    it('treats a midnight Date as date-only (time = null)', () => {
+      const d = new Date('2025-01-02T00:00:00.000Z');
+
+      const result = splitDateTime(d);
+
+      expect(result).toEqual({
+        date: '2025-01-02',
+        time: null
+      });
+    });
+
+    it('returns date and full time (including millis) when time is not midnight', () => {
+      const d = new Date('2025-01-02T15:30:45.123Z');
+
+      const result = splitDateTime(d);
+
+      expect(result).toEqual({
+        date: '2025-01-02',
+        time: '15:30:45.123Z'
+      });
+    });
+  });
+
+  describe('toKebabCase', () => {
+    it('returns the expected kebab case string values', () => {
+      expect(toKebabCase('descriptive Variable name')).toEqual('descriptive-variable-name');
+      expect(toKebabCase('INTERESTING FILE')).toEqual('interesting-file');
+      expect(toKebabCase('abc')).toEqual('abc');
+    });
+
+    it('returns blanks if blank provided', () => {
+      expect(toKebabCase('')).toEqual('');
+    });
+
+    it('returns undefined if undefined provided', () => {
+      expect(toKebabCase(undefined)).toEqual(undefined);
     });
   });
 });

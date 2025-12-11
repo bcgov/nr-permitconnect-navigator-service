@@ -42,8 +42,10 @@ export enum Regex {
    * Generic email regex modified to require domain of at least 2 characters
    * @see {@link https://emailregex.com/}
    */
+  DATE_ONLY = '^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$',
   EMAIL = '^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\\.[a-zA-Z0-9-]{2,})+$',
-  PHONE_NUMBER = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$'
+  PHONE_NUMBER = '^(\\+\\d{1,2}\\s?)?\\(?\\d{3}\\)?[\\s.-]?\\d{3}[\\s.-]?\\d{4}$',
+  TIMETZ = '^([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])(\\.\\d{1,7})?Z$'
 }
 
 export enum Resource {

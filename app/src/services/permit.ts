@@ -1,7 +1,7 @@
 import { Initiative } from '../utils/enums/application';
 
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitBase, PermitType } from '../types';
+import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types';
 
 /** Delete a specific permit
  * @param tx Prisma transaction client
@@ -102,6 +102,65 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
     }
   });
 
+  return response;
+};
+
+/**
+ * Retrieve permits matching the given params
+ * @param tx Prisma transaction client
+ * @param params Search params
+ * @returns A Promise that resolves to a list of permits matching the search params
+ */
+export const searchPermits = async (tx: PrismaTransactionClient, params: PermitSearchParams): Promise<Permit[]> => {
+  let permitTrackingInclude: object = {};
+  const {
+    permitId,
+    activityId,
+    permitTypeId,
+    stage,
+    state,
+    sourceSystems,
+    includePermitNotes,
+    includePermitTracking,
+    includePermitType,
+    onlyPeachIntegratedTrackings
+  } = params;
+
+  // Build permitTracking filter/include
+  if (includePermitTracking) {
+    const sourceSystemAndClause = sourceSystems ? { sourceSystemKind: { sourceSystem: { in: sourceSystems } } } : {};
+    const peachIntegratedAndClause = onlyPeachIntegratedTrackings ? { sourceSystemKind: { integrated: true } } : {};
+    const permitTrackingWhere =
+      sourceSystems || onlyPeachIntegratedTrackings
+        ? { AND: [sourceSystemAndClause, peachIntegratedAndClause] }
+        : undefined;
+
+    permitTrackingInclude = {
+      permitTracking: {
+        ...(permitTrackingWhere ? { where: permitTrackingWhere } : {}),
+        include: { sourceSystemKind: true }
+      }
+    };
+  }
+
+  const response = await tx.permit.findMany({
+    where: {
+      AND: [
+        permitId ? { permitId: { in: permitId } } : {},
+        activityId ? { activityId: { in: activityId } } : {},
+        permitTypeId ? { permitTypeId: { in: permitTypeId } } : {},
+        stage ? { stage: { in: stage } } : {},
+        state ? { state: { in: state } } : {},
+        sourceSystems ? { permitType: { sourceSystem: { in: sourceSystems } } } : {},
+        onlyPeachIntegratedTrackings ? { permitTracking: { some: { sourceSystemKind: { integrated: true } } } } : {}
+      ]
+    },
+    include: {
+      ...(includePermitType ? { permitType: true } : {}),
+      ...(includePermitNotes ? { permitNote: true } : {}),
+      ...permitTrackingInclude
+    }
+  });
   return response;
 };
 

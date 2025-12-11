@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { formatDate } from '@/utils/formatters';
+import { formatDateOnly } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -34,7 +34,7 @@ const { t } = useI18n();
       <div>
         <b>{{ t('authorization.authorizationInfoProponent.submittedDate') }}:</b>
         <span class="ml-1">
-          {{ formatDate(permit?.submittedDate) }}
+          {{ formatDateOnly(permit?.submittedDate) }}
         </span>
       </div>
       <!-- TODO: To be enabled in PADS-611, currently we do not have the processing time in db-->
@@ -50,8 +50,8 @@ const { t } = useI18n();
       <div>
         <b>{{ t('authorization.authorizationInfoProponent.decisionDate') }}:</b>
         <span class="ml-1">
-          <span v-if="permit.adjudicationDate">
-            {{ formatDate(permit.adjudicationDate) }}
+          <span v-if="permit.decisionDate">
+            {{ formatDateOnly(permit.decisionDate) }}
           </span>
           <span v-else>{{ t('authorization.authorizationInfoProponent.uponDecision') }}</span>
         </span>

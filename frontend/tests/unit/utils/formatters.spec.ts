@@ -1,4 +1,4 @@
-import { formatDate, formatDateFilename, formatDateLong, toKebabCase } from '@/utils/formatters';
+import { formatDate, formatDateFilename, formatDateLong, formatDateOnly } from '@/utils/formatters';
 
 describe('formatters.ts', () => {
   describe('formatDate', () => {
@@ -29,16 +29,9 @@ describe('formatters.ts', () => {
     });
   });
 
-  describe('toKebabCase', () => {
-    it('returns the expected UUID values', () => {
-      expect(toKebabCase('descriptive Variable name')).toEqual('descriptive-variable-name');
-      expect(toKebabCase('INTERESTING FILE')).toEqual('interesting-file');
-      expect(toKebabCase('abc')).toEqual('abc');
-    });
-
-    it('returns blanks if blank provided', () => {
-      expect(toKebabCase('')).toEqual('');
-      expect(toKebabCase(null)).toEqual('');
+  describe('formatDateOnly', () => {
+    it('returns the expected date format if given a valid date only string', () => {
+      expect(formatDateOnly('2025-11-28')).toEqual('November 28, 2025');
     });
   });
 });

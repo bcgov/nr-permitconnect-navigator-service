@@ -18,7 +18,7 @@ import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters }
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
-  TEST_ELECTRIFICATION_ACTIVITY,
+  TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE
 } from '../data';
@@ -62,15 +62,15 @@ describe('createEnquiryController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
     listActivityContactsSpy.mockResolvedValue([
       {
-        activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+        activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
         contactId: TEST_CONTACT_1.contactId
       } as ActivityContact
     ]);
@@ -90,7 +90,7 @@ describe('createEnquiryController', () => {
     expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
     expect(createActivityContactSpy).toHaveBeenCalledWith(
       prismaTxMock,
-      TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      TEST_ACTIVITY_ELECTRIFICATION.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );

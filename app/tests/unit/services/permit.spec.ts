@@ -110,6 +110,117 @@ describe('listPermits', () => {
   });
 });
 
+describe('searchPermits', () => {
+  it('calls permit.findMany with no filters or includes and returns result', async () => {
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
+
+    const response = await permitService.searchPermits(
+      prismaTxMock as any, // eslint-disable-line @typescript-eslint/no-explicit-any
+      {}
+    );
+
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
+      where: {
+        AND: [{}, {}, {}, {}, {}, {}, {}]
+      },
+      include: {}
+    });
+    expect(response).toStrictEqual([TEST_PERMIT_1]);
+  });
+
+  it('calls permit.findMany with full filters and integrated tracking and returns result', async () => {
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
+
+    const params = {
+      permitId: ['PERMIT-1'],
+      activityId: ['ACTIVITY-1'],
+      permitTypeId: [123],
+      stage: ['Technical review'],
+      state: ['In progress'],
+      sourceSystems: ['ITSM-6072'],
+      includePermitNotes: true,
+      includePermitTracking: true,
+      includePermitType: true,
+      onlyPeachIntegratedTrackings: true
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const response = await permitService.searchPermits(prismaTxMock, params);
+
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
+      where: {
+        AND: [
+          { permitId: { in: ['PERMIT-1'] } },
+          { activityId: { in: ['ACTIVITY-1'] } },
+          { permitTypeId: { in: [123] } },
+          { stage: { in: ['Technical review'] } },
+          { state: { in: ['In progress'] } },
+          { permitType: { sourceSystem: { in: ['ITSM-6072'] } } },
+          {
+            permitTracking: {
+              some: {
+                sourceSystemKind: {
+                  integrated: true
+                }
+              }
+            }
+          }
+        ]
+      },
+      include: {
+        permitType: true,
+        permitNote: true,
+        permitTracking: {
+          where: {
+            AND: [
+              {
+                sourceSystemKind: {
+                  sourceSystem: {
+                    in: ['ITSM-6072']
+                  }
+                }
+              },
+              {
+                sourceSystemKind: {
+                  integrated: true
+                }
+              }
+            ]
+          },
+          include: { sourceSystemKind: true }
+        }
+      }
+    });
+    expect(response).toStrictEqual([TEST_PERMIT_1]);
+  });
+
+  it('calls permit.findMany with includePermitTracking but no filters and returns result', async () => {
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
+
+    const params = {
+      includePermitTracking: true
+    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+    const response = await permitService.searchPermits(prismaTxMock, params);
+
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
+      where: {
+        AND: [{}, {}, {}, {}, {}, {}, {}]
+      },
+      include: {
+        permitTracking: {
+          include: {
+            sourceSystemKind: true
+          }
+        }
+      }
+    });
+    expect(response).toStrictEqual([TEST_PERMIT_1]);
+  });
+});
+
 describe('upsertPermit', () => {
   it('calls permit.upsert with correct data and returns result', async () => {
     prismaTxMock.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1);

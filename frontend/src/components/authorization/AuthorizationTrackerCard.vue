@@ -2,11 +2,12 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions, PermitStatus } from '@/utils/enums/permit';
 import { Card, Timeline } from '@/lib/primevue';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
-import { formatDateTime } from '@/utils/formatters';
+import { formatDateOnly, formatDateTime } from '@/utils/formatters';
+import { PermitStage, PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
+
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
 
@@ -53,118 +54,122 @@ const previous = (trackerStatus: string) => ({
 // State
 const descriptionModalVisible: Ref<boolean> = ref(false);
 const statusBoxStates = {
-  [PermitAuthorizationStatus.ABANDONED]: {
-    boxClass: 'grey',
-    message: PermitAuthorizationStatusDescriptions.ABANDONED
-  },
-  [PermitAuthorizationStatus.CANCELLED]: {
+  [PermitState.CANCELLED]: {
     boxClass: 'red',
-    message: PermitAuthorizationStatusDescriptions.CANCELLED
+    message: PermitStateDescriptions.CANCELLED
   },
-  [PermitAuthorizationStatus.DENIED]: {
+  [PermitState.DENIED]: {
     boxClass: 'red',
-    message: PermitAuthorizationStatusDescriptions.DENIED
+    message: PermitStateDescriptions.DENIED
   },
-  [PermitAuthorizationStatus.ISSUED]: {
+  [PermitState.APPROVED]: {
     boxClass: 'green',
-    message: PermitAuthorizationStatusDescriptions.ISSUED
+    message: PermitStateDescriptions.APPROVED
   },
-  [PermitAuthorizationStatus.IN_REVIEW]: {
+  [PermitState.IN_PROGRESS]: {
     boxClass: 'green',
-    message: PermitAuthorizationStatusDescriptions.IN_REVIEW
+    message: PermitStateDescriptions.IN_PROGRESS
   },
-  [PermitAuthorizationStatus.NONE]: {
+  [PermitState.INITIAL_REVIEW]: {
+    boxClass: 'green',
+    message: PermitStateDescriptions.IN_PROGRESS
+  },
+  [PermitState.ISSUED]: {
+    boxClass: 'green',
+    message: PermitStateDescriptions.ISSUED
+  },
+  [PermitState.NONE]: {
     boxClass: 'grey',
-    message: PermitAuthorizationStatusDescriptions.NONE
+    message: PermitStateDescriptions.NONE
   },
-  [PermitAuthorizationStatus.PENDING]: {
+  [PermitState.PENDING_CLIENT]: {
     boxClass: 'yellow',
-    message: PermitAuthorizationStatusDescriptions.PENDING
+    message: PermitStateDescriptions.PENDING_CLIENT
   },
-  [PermitAuthorizationStatus.WITHDRAWN]: {
+  [PermitState.REJECTED]: {
+    boxClass: 'red',
+    message: PermitStateDescriptions.REJECTED
+  },
+  [PermitState.WITHDRAWN]: {
     boxClass: 'grey',
-    message: PermitAuthorizationStatusDescriptions.WITHDRAWN
+    message: PermitStateDescriptions.WITHDRAWN
   }
 };
 
 const timelineStages = {
-  [PermitStatus.APPLIED]: [
-    current(PermitStatus.APPLIED),
-    empty(PermitStatus.TECHNICAL_REVIEW),
-    empty(PermitStatus.PENDING),
-    empty(PermitStatus.COMPLETED)
+  [PermitStage.APPLICATION_SUBMISSION]: [
+    current(PermitStage.APPLICATION_SUBMISSION),
+    empty(PermitStage.TECHNICAL_REVIEW),
+    empty(PermitStage.PENDING_DECISION),
+    empty(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.TECHNICAL_REVIEW]: [
-    previous(PermitStatus.APPLIED),
-    current(PermitStatus.TECHNICAL_REVIEW),
-    empty(PermitStatus.PENDING),
-    empty(PermitStatus.COMPLETED)
+  [PermitStage.TECHNICAL_REVIEW]: [
+    previous(PermitStage.APPLICATION_SUBMISSION),
+    current(PermitStage.TECHNICAL_REVIEW),
+    empty(PermitStage.PENDING_DECISION),
+    empty(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.PENDING]: [
-    previous(PermitStatus.APPLIED),
-    previous(PermitStatus.TECHNICAL_REVIEW),
-    current(PermitStatus.PENDING),
-    empty(PermitStatus.COMPLETED)
+  [PermitStage.PENDING_DECISION]: [
+    previous(PermitStage.APPLICATION_SUBMISSION),
+    previous(PermitStage.TECHNICAL_REVIEW),
+    current(PermitStage.PENDING_DECISION),
+    empty(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.COMPLETED]: [
-    complete(PermitStatus.APPLIED),
-    complete(PermitStatus.TECHNICAL_REVIEW),
-    complete(PermitStatus.PENDING),
-    complete(PermitStatus.COMPLETED)
+  [PermitStage.POST_DECISION]: [
+    complete(PermitStage.APPLICATION_SUBMISSION),
+    complete(PermitStage.TECHNICAL_REVIEW),
+    complete(PermitStage.PENDING_DECISION),
+    complete(PermitStage.POST_DECISION)
   ],
-  emptyStatus: [
-    empty(PermitStatus.APPLIED),
-    empty(PermitStatus.TECHNICAL_REVIEW),
-    empty(PermitStatus.PENDING),
-    empty(PermitStatus.COMPLETED)
+  emptyStage: [
+    empty(PermitStage.APPLICATION_SUBMISSION),
+    empty(PermitStage.TECHNICAL_REVIEW),
+    empty(PermitStage.PENDING_DECISION),
+    empty(PermitStage.POST_DECISION)
   ]
 };
 
 const terminatedTimelineStages = {
-  [PermitStatus.APPLIED]: [
-    current(PermitStatus.APPLIED),
-    crossedCircle(PermitStatus.TECHNICAL_REVIEW),
-    crossedCircle(PermitStatus.PENDING),
-    crossedCircle(PermitStatus.COMPLETED)
+  [PermitStage.APPLICATION_SUBMISSION]: [
+    current(PermitStage.APPLICATION_SUBMISSION),
+    crossedCircle(PermitStage.TECHNICAL_REVIEW),
+    crossedCircle(PermitStage.PENDING_DECISION),
+    crossedCircle(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.TECHNICAL_REVIEW]: [
-    previous(PermitStatus.APPLIED),
-    current(PermitStatus.TECHNICAL_REVIEW),
-    crossedCircle(PermitStatus.PENDING),
-    crossedCircle(PermitStatus.COMPLETED)
+  [PermitStage.TECHNICAL_REVIEW]: [
+    previous(PermitStage.APPLICATION_SUBMISSION),
+    current(PermitStage.TECHNICAL_REVIEW),
+    crossedCircle(PermitStage.PENDING_DECISION),
+    crossedCircle(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.PENDING]: [
-    previous(PermitStatus.APPLIED),
-    previous(PermitStatus.TECHNICAL_REVIEW),
-    current(PermitStatus.PENDING),
-    crossedCircle(PermitStatus.COMPLETED)
+  [PermitStage.PENDING_DECISION]: [
+    previous(PermitStage.APPLICATION_SUBMISSION),
+    previous(PermitStage.TECHNICAL_REVIEW),
+    current(PermitStage.PENDING_DECISION),
+    crossedCircle(PermitStage.POST_DECISION)
   ],
-  [PermitStatus.COMPLETED]: [
-    previous(PermitStatus.APPLIED),
-    previous(PermitStatus.TECHNICAL_REVIEW),
-    previous(PermitStatus.PENDING),
-    current(PermitStatus.COMPLETED)
+  [PermitStage.POST_DECISION]: [
+    previous(PermitStage.APPLICATION_SUBMISSION),
+    previous(PermitStage.TECHNICAL_REVIEW),
+    previous(PermitStage.PENDING_DECISION),
+    current(PermitStage.POST_DECISION)
   ]
 };
 
 // Actions
-function getStatusBoxState(authStatus: string | undefined) {
-  return authStatus && authStatus in statusBoxStates
-    ? statusBoxStates[authStatus as keyof typeof statusBoxStates]
+function getStatusBoxState(state: string | undefined) {
+  return state && state in statusBoxStates
+    ? statusBoxStates[state as keyof typeof statusBoxStates]
     : { boxClass: 'grey', message: 'Status not available.' };
 }
 
-function getTimelineStage(authStatus: string, status: string) {
-  if (
-    authStatus === PermitAuthorizationStatus.ABANDONED ||
-    authStatus === PermitAuthorizationStatus.CANCELLED ||
-    authStatus === PermitAuthorizationStatus.WITHDRAWN
-  ) {
-    return terminatedTimelineStages[status as keyof typeof terminatedTimelineStages];
+function getTimelineStage(state: string, stage: string) {
+  if (state === PermitState.CANCELLED || state === PermitState.WITHDRAWN) {
+    return terminatedTimelineStages[stage as keyof typeof terminatedTimelineStages];
   } else {
-    return status && status in timelineStages
-      ? timelineStages[status as keyof typeof timelineStages]
-      : timelineStages.emptyStatus;
+    return stage && stage in timelineStages
+      ? timelineStages[stage as keyof typeof timelineStages]
+      : timelineStages.emptyStage;
   }
 }
 
@@ -189,7 +194,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
         <div class="status-timeline">
           <Timeline
             class="pl-4"
-            :value="getTimelineStage(permit.authStatus, permit.status)"
+            :value="getTimelineStage(permit.state, permit.stage)"
             layout="horizontal"
           >
             <template #marker="slotProps">
@@ -220,14 +225,26 @@ const timelineDescription = computed(() => (iconClass: string) => {
       </div>
       <div
         class="status-tracker-header pb-8 pt-4"
-        :class="[getStatusBoxState(permit?.authStatus).boxClass]"
+        :class="[getStatusBoxState(permit?.state).boxClass]"
       >
         <div class="flex justify-between items-center">
           <div class="py-4 px-6 flex">
             <AuthorizationStatusPill
-              :auth-status="permit?.authStatus"
+              :state="permit?.state"
               :enlarge="true"
             />
+            <div v-if="permit?.statusLastVerified">
+              <p class="verified-text my-0 italic">
+                {{ t('authorization.authorizationTrackerCard.statusLastVerified') }}
+                {{ formatDateOnly(permit.statusLastVerified) }}
+                {{ t('authorization.authorizationTrackerCard.byYourNavigator') }}
+              </p>
+            </div>
+            <div v-else>
+              <p class="verified-text my-0 italic">
+                {{ t('authorization.authorizationTrackerCard.statusNotVerified') }}
+              </p>
+            </div>
           </div>
           <div class="status-help">
             <font-awesome-icon

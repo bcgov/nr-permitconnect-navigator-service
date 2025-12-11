@@ -3,12 +3,18 @@ import { useI18n } from 'vue-i18n';
 
 import { DatePicker, Select, TextArea } from '@/components/form';
 import { Panel } from '@/lib/primevue';
-import { PERMIT_AUTHORIZATION_STATUS_LIST, PERMIT_NEEDED_LIST, PERMIT_STATUS_LIST } from '@/utils/constants/permit';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
+import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
+import { PermitState } from '@/utils/enums/permit';
 
 // Props
-const { editable } = defineProps<{
+const {
+  editable,
+  peachIntegratedAuthType = false,
+  peachIntegratedTrackingId = false
+} = defineProps<{
   editable?: boolean;
+  peachIntegratedAuthType?: boolean;
+  peachIntegratedTrackingId?: boolean;
 }>();
 
 // Emits
@@ -17,10 +23,8 @@ const emit = defineEmits(['update:setVerifiedDate']);
 // Composables
 const { t } = useI18n();
 
-const authStatusDisplayText = {
-  [PermitAuthorizationStatus.ABANDONED]: t('authorization.authorizationStatusPill.abandonedByClient'),
-  [PermitAuthorizationStatus.WITHDRAWN]: t('authorization.authorizationStatusPill.withdrawnByClient'),
-  [PermitAuthorizationStatus.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+const stateDisplayText = {
+  [PermitState.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
 };
 </script>
 
@@ -52,19 +56,19 @@ const authStatusDisplayText = {
         </div>
         <div>
           <Select
-            name="authStatus"
+            name="state"
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
-            :options="PERMIT_AUTHORIZATION_STATUS_LIST"
-            :option-label="(option) => authStatusDisplayText[option as keyof typeof authStatusDisplayText] ?? option"
-            :disabled="!editable"
+            :options="PERMIT_STATE_LIST"
+            :option-label="(option) => stateDisplayText[option as keyof typeof stateDisplayText] ?? option"
+            :disabled="peachIntegratedAuthType || !editable"
           />
         </div>
         <div>
           <Select
-            name="status"
+            name="stage"
             :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
-            :options="PERMIT_STATUS_LIST"
-            :disabled="!editable"
+            :options="PERMIT_STAGE_LIST"
+            :disabled="peachIntegratedAuthType || !editable"
           />
         </div>
       </div>
@@ -74,7 +78,7 @@ const authStatusDisplayText = {
             name="needed"
             :label="t('authorization.authorizationStatusUpdatesCard.needed')"
             :options="PERMIT_NEEDED_LIST"
-            :disabled="!editable"
+            :disabled="(peachIntegratedAuthType && peachIntegratedTrackingId) || !editable"
           />
         </div>
         <div>
@@ -82,15 +86,23 @@ const authStatusDisplayText = {
             name="submittedDate"
             :label="t('authorization.authorizationStatusUpdatesCard.submittedDate')"
             :max-date="new Date()"
-            :disabled="!editable"
+            :disabled="peachIntegratedAuthType || !editable"
           />
         </div>
         <div>
           <DatePicker
-            name="adjudicationDate"
+            name="statusLastChanged"
+            :label="t('authorization.authorizationStatusUpdatesCard.statusChangeDate')"
+            :max-date="new Date()"
+            :disabled="peachIntegratedAuthType || !editable"
+          />
+        </div>
+        <div>
+          <DatePicker
+            name="decisionDate"
             :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
             :max-date="new Date()"
-            :disabled="!editable"
+            :disabled="peachIntegratedAuthType || !editable"
           />
         </div>
       </div>

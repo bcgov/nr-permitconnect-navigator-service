@@ -7,7 +7,7 @@ import Tooltip from 'primevue/tooltip';
 
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import { StorageKey } from '@/utils/enums/application';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '@/utils/enums/permit';
+import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 
 import type { Permit, PermitType } from '@/types';
 
@@ -46,11 +46,11 @@ const testPermit: Permit = {
   permitId: 'permitUUID',
   activityId: 'activityUUID',
   needed: PermitNeeded.YES,
-  status: PermitStatus.APPLIED,
+  stage: PermitStage.APPLICATION_SUBMISSION,
   issuedPermitId: 'issued Permit ID',
-  authStatus: PermitAuthorizationStatus.IN_REVIEW,
+  state: PermitState.IN_PROGRESS,
   submittedDate: currentDate,
-  adjudicationDate: currentDate,
+  decisionDate: currentDate,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

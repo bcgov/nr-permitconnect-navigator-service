@@ -14,12 +14,16 @@ import {
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
+  Email,
   Enquiry,
   EnquiryIntake,
   HousingProject,
   HousingProjectIntake,
+  Initiative as InitiativeModel,
   Note,
   NoteHistory,
+  Record as PeachRecord,
+  PeachSummary,
   Permit,
   PermitNote,
   PermitType,
@@ -27,7 +31,7 @@ import {
 } from '../../../src/types';
 import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
 import { ProjectType } from '../../../src/utils/enums/electrification';
-import { PermitAuthorizationStatus, PermitNeeded, PermitStatus } from '../../../src/utils/enums/permit';
+import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
 import {
   ActivityContactRole,
   ApplicationStatus,
@@ -41,12 +45,19 @@ import {
 } from '../../../src/utils/enums/projectCommon';
 import { NumResidentialUnits } from '../../../src/utils/enums/housing';
 
-export const TEST_CURRENT_CONTEXT: CurrentContext = {
-  authType: AuthType.BEARER,
-  userId: '811896a0-e1fe-4c38-8cd3-86245c79e8f8'
+export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
+  activityId: 'ACTI1234',
+  contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
+  role: ActivityContactRole.PRIMARY,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
-export const TEST_ELECTRIFICATION_ACTIVITY: Activity = {
+export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
   createdAt: null,
@@ -57,7 +68,7 @@ export const TEST_ELECTRIFICATION_ACTIVITY: Activity = {
   deletedAt: null
 };
 
-export const TEST_HOUSING_ACTIVITY: Activity = {
+export const TEST_ACTIVITY_HOUSING: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.HOUSING,
   createdAt: null,
@@ -90,6 +101,31 @@ export const TEST_CONTACT_NO_ID = {
   contactId: null
 };
 
+export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
+  ...TEST_CONTACT_1,
+  activityContact: [TEST_ACTIVITY_CONTACT_1]
+};
+
+export const TEST_CURRENT_CONTEXT: CurrentContext = {
+  authType: AuthType.BEARER,
+  userId: '811896a0-e1fe-4c38-8cd3-86245c79e8f8'
+};
+
+export const TEST_DOCUMENT_1: Document = {
+  documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
+  activityId: 'ACTI1234',
+  filename: 'testfile',
+  mimeType: 'imgjpg',
+  filesize: 1234567,
+  createdByFullName: undefined,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
 export const TEST_ELECTRIFICATION_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
@@ -113,38 +149,6 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
     submissionType: SubmissionType.GUIDANCE
   },
   contact: TEST_CONTACT_1
-};
-
-export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
-  electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: 'ACTI1234',
-  submittedAt: new Date(),
-  projectName: null,
-  projectDescription: null,
-  companyNameRegistered: null,
-  projectType: null,
-  bcHydroNumber: null,
-  submissionType: SubmissionType.GUIDANCE,
-  intakeStatus: IntakeStatus.SUBMITTED,
-  applicationStatus: ApplicationStatus.NEW,
-  aaiUpdated: false,
-  addedToAts: false,
-  projectCategory: null,
-  locationDescription: null,
-  hasEpa: null,
-  megawatts: null,
-  bcEnvironmentAssessNeeded: null,
-  assignedUserId: null,
-  astNotes: null,
-  queuePriority: null,
-  atsClientId: null,
-  atsEnquiryId: null,
-  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
-  createdAt: new Date(),
-  updatedBy: null,
-  updatedAt: null,
-  deletedBy: null,
-  deletedAt: null
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
@@ -179,13 +183,50 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
   deletedAt: null
 };
 
-export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
-  contact: TEST_CONTACT_1,
-  basic: {
-    submissionType: SubmissionType.GENERAL_ENQUIRY,
-    relatedActivityId: 'ACTI1234',
-    enquiryDescription: 'Test enquiry description'
-  }
+export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
+  electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  submittedAt: new Date(),
+  projectName: null,
+  projectDescription: null,
+  companyNameRegistered: null,
+  projectType: null,
+  bcHydroNumber: null,
+  submissionType: SubmissionType.GUIDANCE,
+  intakeStatus: IntakeStatus.SUBMITTED,
+  applicationStatus: ApplicationStatus.NEW,
+  aaiUpdated: false,
+  addedToAts: false,
+  projectCategory: null,
+  locationDescription: null,
+  hasEpa: null,
+  megawatts: null,
+  bcEnvironmentAssessNeeded: null,
+  assignedUserId: null,
+  astNotes: null,
+  queuePriority: null,
+  atsClientId: null,
+  atsEnquiryId: null,
+  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
+  createdAt: new Date(),
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_EMAIL: Email = {
+  to: ['nav@example.com'],
+  from: 'noreply@example.com',
+  cc: ['noreply@example.com'],
+  subject: 'Updates for project ACTI1234, Test Permit',
+  bodyType: 'html',
+  body: '<html>email body</html>'
+};
+
+export const TEST_EMAIL_RESPONSE = {
+  data: TEST_EMAIL,
+  status: 201
 };
 
 export const TEST_ENQUIRY_1: Enquiry = {
@@ -237,6 +278,15 @@ export const TEST_ENQUIRY_1: Enquiry = {
   user: null
 };
 
+export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
+  contact: TEST_CONTACT_1,
+  basic: {
+    submissionType: SubmissionType.GENERAL_ENQUIRY,
+    relatedActivityId: 'ACTI1234',
+    enquiryDescription: 'Test enquiry description'
+  }
+};
+
 export const TEST_HOUSING_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
@@ -246,6 +296,67 @@ export const TEST_HOUSING_DRAFT: Draft = {
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_HOUSING_PROJECT_1: HousingProject = {
+  housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  submittedBy: 'Doe, John',
+  locationPids: null,
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectDescription: 'DESCRIPTION',
+  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: 3,
+  relatedPermits: null,
+  astNotes: null,
+  astUpdated: false,
+  addedToAts: false,
+  atsClientId: null,
+  ltsaCompleted: false,
+  bcOnlineCompleted: false,
+  naturalDisaster: false,
+  financiallySupported: false,
+  financiallySupportedBc: BasicResponse.NO,
+  financiallySupportedIndigenous: BasicResponse.NO,
+  financiallySupportedNonProfit: BasicResponse.NO,
+  financiallySupportedHousingCoop: BasicResponse.NO,
+  aaiUpdated: false,
+  waitingOn: null,
+  intakeStatus: IntakeStatus.SUBMITTED,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  consentToFeedback: false,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  hasRentalUnits: BasicResponse.NO,
+  housingCoopDescription: null,
+  indigenousDescription: null,
+  isDevelopedInBc: BasicResponse.YES,
+  locality: 'Place',
+  multiFamilyUnits: BasicResponse.NO,
+  nonProfitDescription: null,
+  otherUnits: BasicResponse.NO,
+  otherUnitsDescription: null,
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  rentalUnits: BasicResponse.NO,
+  submissionType: SubmissionType.GUIDANCE,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
   deletedBy: null,
   deletedAt: null
 };
@@ -361,95 +472,26 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   }
 };
 
-export const TEST_HOUSING_PROJECT_1: HousingProject = {
-  housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  activityId: 'ACTI1234',
-  assignedUserId: null,
-  submittedAt: new Date(),
-  submittedBy: 'Doe, John',
-  locationPids: null,
-  companyNameRegistered: 'COMPANY',
-  projectName: 'NAME',
-  projectDescription: 'DESCRIPTION',
-  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
-  streetAddress: '123 Street',
-  latitude: null,
-  longitude: null,
-  queuePriority: 3,
-  relatedPermits: null,
-  astNotes: null,
-  astUpdated: false,
-  addedToAts: false,
-  atsClientId: null,
-  ltsaCompleted: false,
-  bcOnlineCompleted: false,
-  naturalDisaster: false,
-  financiallySupported: false,
-  financiallySupportedBc: BasicResponse.NO,
-  financiallySupportedIndigenous: BasicResponse.NO,
-  financiallySupportedNonProfit: BasicResponse.NO,
-  financiallySupportedHousingCoop: BasicResponse.NO,
-  aaiUpdated: false,
-  waitingOn: null,
-  intakeStatus: IntakeStatus.SUBMITTED,
-  applicationStatus: ApplicationStatus.NEW,
-  atsEnquiryId: null,
-  checkProvincialPermits: null,
-  consentToFeedback: false,
-  geoJson: null,
-  geomarkUrl: null,
-  hasAppliedProvincialPermits: null,
-  hasRentalUnits: BasicResponse.NO,
-  housingCoopDescription: null,
-  indigenousDescription: null,
-  isDevelopedInBc: BasicResponse.YES,
-  locality: 'Place',
-  multiFamilyUnits: BasicResponse.NO,
-  nonProfitDescription: null,
-  otherUnits: BasicResponse.NO,
-  otherUnitsDescription: null,
-  projectApplicantType: null,
-  projectLocation: 'Location',
-  projectLocationDescription: 'Location description',
-  province: 'AA',
-  rentalUnits: BasicResponse.NO,
-  submissionType: SubmissionType.GUIDANCE,
+export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {
+  initiativeId: 'initiative123',
+  code: Initiative.ELECTRIFICATION,
+  label: '',
   createdAt: null,
   createdBy: null,
-  updatedBy: null,
   updatedAt: null,
+  updatedBy: null,
   deletedBy: null,
   deletedAt: null
 };
 
-export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
-  activityId: 'ACTI1234',
-  contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
-  role: ActivityContactRole.PRIMARY,
+export const TEST_INITIATIVE_HOUSING: InitiativeModel = {
+  initiativeId: 'initiative123',
+  code: Initiative.HOUSING,
+  label: '',
   createdAt: null,
   createdBy: null,
-  updatedBy: null,
   updatedAt: null,
-  deletedBy: null,
-  deletedAt: null
-};
-
-export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
-  ...TEST_CONTACT_1,
-  activityContact: [TEST_ACTIVITY_CONTACT_1]
-};
-
-export const TEST_DOCUMENT_1: Document = {
-  documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
-  activityId: 'ACTI1234',
-  filename: 'testfile',
-  mimeType: 'imgjpg',
-  filesize: 1234567,
-  createdByFullName: undefined,
-  createdAt: null,
-  createdBy: null,
   updatedBy: null,
-  updatedAt: null,
   deletedBy: null,
   deletedAt: null
 };
@@ -504,23 +546,192 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   deletedAt: null
 };
 
+export const TEST_PEACH_RECORD_1: PeachRecord = {
+  transaction_id: '11111111-1111-4111-8111-111111111111',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-SUB',
+  process_event_set: [
+    {
+      event: { start_date: '2024-02-01' },
+      process: {
+        code: 'SUBMITTED',
+        code_display: 'Submitted',
+        code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_2: PeachRecord = {
+  transaction_id: '22222222-2222-4222-8222-222222222222',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-DECISION',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-03-01T12:00:00.000Z' },
+      process: {
+        code: 'ALLOWED',
+        code_display: 'Allowed',
+        code_set: ['APPLICATION', 'DECISION', 'ALLOWED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_ISSUED: PeachRecord = {
+  transaction_id: '55555555-5555-4555-8555-555555555555',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-ISSUED',
+  process_event_set: [
+    {
+      // NOTE: start_date only (no start_datetime) so we hit
+      // the piesEventToDate "else" branch.
+      event: { start_date: '2024-07-01' },
+      process: {
+        code: 'ISSUED',
+        code_display: 'Issued',
+        code_set: ['APPLICATION', 'ISSUANCE', 'ISSUED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
+  transaction_id: '33333333-3333-4333-8333-333333333333',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-REJECTED',
+  process_event_set: [
+    {
+      event: { start_date: '2024-04-01' },
+      process: {
+        code: 'TECH_REVIEW_COMMENT',
+        code_display: 'Technical Review',
+        code_set: ['APPLICATION', 'TECH_REVIEW_COMMENT', 'TECHNICAL_REVIEW'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-05-01T23:12:00.000Z' },
+      process: {
+        code: 'REJECTED',
+        code_display: 'Rejected',
+        code_set: ['APPLICATION', 'REJECTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
+  transaction_id: '44444444-4444-4444-8444-444444444444',
+  version: '0.1.0',
+  kind: 'Record',
+  record_kind: 'Permit',
+  system_id: PeachIntegratedSystem.VFCBC,
+  record_id: 'REC-UNMAPPED',
+  process_event_set: [
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'PRE_APPLICATION',
+        code_display: 'Pre-Application',
+        code_set: ['APPLICATION', 'PRE_APPLICATION'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+      process: {
+        code: 'APPLICATION',
+        code_display: 'Application',
+        code_set: ['APPLICATION'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    }
+  ],
+  on_hold_event_set: []
+};
+
+export const TEST_PEACH_SUMMARY: PeachSummary = {
+  stage: PermitStage.APPLICATION_SUBMISSION,
+  state: PermitState.IN_PROGRESS,
+  submittedDate: '2024-01-10',
+  decisionDate: '2024-02-01',
+  statusLastChanged: '2024-01-15',
+  submittedTime: null,
+  decisionTime: null,
+  statusLastChangedTime: null
+};
+
 export const TEST_PERMIT_1: Permit = {
   permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.IN_REVIEW,
+  state: PermitState.NONE,
   needed: PermitNeeded.YES,
-  status: PermitStatus.APPLIED,
-  submittedDate: new Date(),
-  adjudicationDate: null,
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
+  statusLastChanged: null,
+  statusLastChangedTime: null,
   statusLastVerified: null,
+  statusLastVerifiedTime: null,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066',
+      permitTrackingId: 1,
+      trackingId: 'REC-SUB',
+      sourceSystemKindId: 1,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 12,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        integrated: true,
+        kind: null,
+        description: 'Tracking Number'
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_2: Permit = {
@@ -528,18 +739,51 @@ export const TEST_PERMIT_2: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.IN_REVIEW,
+  state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
-  status: PermitStatus.APPLIED,
-  submittedDate: new Date(),
-  adjudicationDate: null,
-  statusLastVerified: null,
+  stage: PermitStage.APPLICATION_SUBMISSION,
+  submittedDate: '2024-01-05',
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
+  statusLastChangedTime: null,
+  statusLastVerifiedTime: null,
+  statusLastChanged: '2024-01-05',
+  statusLastVerified: '2024-01-05',
   createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: 'fac00e1e-a68e-4fe0-a7bf-43ed3896c751',
+      permitTrackingId: 2,
+      trackingId: 'REC-XYZ',
+      sourceSystemKindId: 2,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 12,
+        sourceSystem: PeachIntegratedSystem.VFCBC,
+        integrated: true,
+        kind: null,
+        description: 'Tracking Number'
+      }
+    }
+  ]
 };
 
 export const TEST_PERMIT_3: Permit = {
@@ -547,19 +791,79 @@ export const TEST_PERMIT_3: Permit = {
   permitTypeId: 1,
   activityId: 'ACTI1234',
   issuedPermitId: null,
-  authStatus: PermitAuthorizationStatus.NONE,
+  state: PermitState.NONE,
   needed: PermitNeeded.UNDER_INVESTIGATION,
-  status: PermitStatus.NEW,
+  stage: PermitStage.PRE_SUBMISSION,
   submittedDate: null,
-  adjudicationDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
+  statusLastChanged: null,
+  statusLastChangedTime: null,
   statusLastVerified: null,
+  statusLastVerifiedTime: null,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  permitTracking: [
+    {
+      createdBy: null,
+      createdAt: null,
+      updatedBy: null,
+      updatedAt: null,
+      deletedBy: null,
+      deletedAt: null,
+      shownToProponent: true,
+      permitId: '7530538d-4671-47fe-9b3f-31d70b6b72dc',
+      permitTrackingId: 3,
+      trackingId: 'REC-999',
+      sourceSystemKindId: 3,
+      sourceSystemKind: {
+        createdBy: null,
+        createdAt: null,
+        updatedBy: null,
+        updatedAt: null,
+        deletedBy: null,
+        deletedAt: null,
+        sourceSystemKindId: 22,
+        sourceSystem: 'ITSM-5644', // FTA
+        integrated: false,
+        kind: null,
+        description: 'Project Number'
+      }
+    }
+  ]
 };
+
+export const TEST_PERMIT_4: Permit = {
+  permitId: '11111111-2222-3333-4444-555555555555',
+  permitTypeId: 1,
+  activityId: 'ACTI1234',
+  issuedPermitId: null,
+  state: PermitState.NONE,
+  needed: PermitNeeded.YES,
+  stage: PermitStage.PRE_SUBMISSION,
+  submittedDate: null,
+  submittedTime: null,
+  decisionDate: null,
+  decisionTime: null,
+  statusLastChanged: null,
+  statusLastChangedTime: null,
+  statusLastVerified: null,
+  statusLastVerifiedTime: null,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null,
+  permitTracking: []
+};
+
+export const TEST_PERMIT_LIST: Permit[] = [TEST_PERMIT_1];
 
 export const TEST_PERMIT_NOTE_1: PermitNote = {
   permitNoteId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',
@@ -571,6 +875,11 @@ export const TEST_PERMIT_NOTE_1: PermitNote = {
   updatedBy: null,
   deletedBy: null,
   deletedAt: null
+};
+
+export const TEST_PERMIT_NOTE_UPDATE: PermitNote = {
+  ...TEST_PERMIT_NOTE_1,
+  note: `This application is ${TEST_PERMIT_1.state.toLocaleLowerCase()} in the ${TEST_PERMIT_1.stage.toLocaleLowerCase()}.` // eslint-disable-line max-len
 };
 
 export const TEST_PERMIT_TYPE_1: PermitType = {
@@ -595,7 +904,6 @@ export const TEST_PERMIT_TYPE_1: PermitType = {
   deletedAt: null
 };
 
-export const TEST_PERMIT_LIST: Permit[] = [TEST_PERMIT_1];
 export const TEST_PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE_1];
 
 export const TEST_IDIR_USER_1: User = {

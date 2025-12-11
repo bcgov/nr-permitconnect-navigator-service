@@ -807,15 +807,7 @@ paths:
               schema:
                 type: array
                 items:
-                  allOf:
-                    - $ref: '#/components/schemas/DB-Permit'
-                    - type: object
-                      properties:
-                        permitNotes:
-                          type: array
-                          description: List of notes associated with the permit (if `includeNotes` is true)
-                          items:
-                            $ref: '#/components/schemas/DB-PermitNote'
+                  $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -838,7 +830,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Permit'
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -857,12 +849,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Path-PermitId'
       responses:
-        '200':
-          description: Permit deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
+        '204':
+          description: No Content – permit deleted successfully.
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1764,15 +1752,7 @@ paths:
               schema:
                 type: array
                 items:
-                  allOf:
-                    - $ref: '#/components/schemas/DB-Permit'
-                    - type: object
-                      properties:
-                        permitNotes:
-                          type: array
-                          description: List of notes associated with the permit (if `includeNotes` is true)
-                          items:
-                            $ref: '#/components/schemas/DB-PermitNote'
+                  $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1795,7 +1775,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DB-Permit'
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1814,12 +1794,8 @@ paths:
       parameters:
         - $ref: '#/components/parameters/Path-PermitId'
       responses:
-        '200':
-          description: Permit deleted successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-Permit'
+        '204':
+          description: No Content – permit deleted successfully.
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -3020,7 +2996,8 @@ components:
         - permitId
         - activityId
         - permitTypeId
-        - status
+        - stage
+        - state
         - needed
         - updatedAt
         - updatedBy
@@ -3042,37 +3019,66 @@ components:
           type: string
           description: ID of the issued permit
           example: '123'
-        trackingId:
-          type: string
-          description: ID for tracking permit
-          example: H7kidnhd948594
-        authStatus:
-          type: string
-          description: Status of authentication for the permit
-          example: Pending
         needed:
           type: string
           description: Whether permit is needed, or still uner investigation
-          example: Under Investigation
-        status:
+          example: 'Yes'
+        state:
           type: string
-          description: Status of the permit
-          example: New
+          description: State of the permit
+          example: In progress
+        stage:
+          type: string
+          description: Stage of the permit
+          example: Application submission
         submittedDate:
           type: string
           description: Date the permit was submitted
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
-        adjudicationDate:
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        submittedTime:
           type: string
-          description: Date of the permit's adjudication
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
+          description: Time the permit was submitted
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        decisionDate:
+          type: string
+          description: Date of the permit's decision
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        decisionTime:
+          type: string
+          description: Time of the permit's decision
+          format: timetz
+          nullable: true
+          example: '2024-08-14'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastChangedTime:
+          type: string
+          description: Time of the last time the status of permit was changed
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
         statusLastVerified:
           type: string
           description: Date of the last verified status of permit
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastVerifiedTime:
+          type: string
+          description: Time of the last verified status of permit
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
         updatedAt:
           type: string
           format: date-time
@@ -3083,11 +3089,6 @@ components:
           description: UUID for user that updated permit
           format: uuid
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
-        permitNotes:
-          type: array
-          description: A list of notes associated with the permit (if `includeNotes` is true)
-          items:
-            $ref: '#/components/schemas/DB-PermitNote'
     DB-PermitNote:
       title: DB Permit Note
       type: object
@@ -3122,6 +3123,69 @@ components:
           description: The ID of the user who created the note
           format: uuid
           example: b76469a3-896c-4435-aa83-b8b87db6f701
+    DB-PermitTracking:
+      title: DB Permit Tracking
+      type: object
+      required:
+        - permitTrackingId
+        - permitId
+        - shownToProponent
+      properties:
+        permitTrackingId:
+          type: integer
+          description: Autoincrementing primary key for the permit tracking row
+          example: 1
+        permitId:
+          type: string
+          format: uuid
+          description: UUID of the associated permit
+          example: 1381438d-0c7a-46bf-8ae2-d1febbf27066
+        trackingId:
+          type: string
+          description: External tracking identifier from the source system
+          example: REC-123
+        sourceSystemKindId:
+          type: integer
+          description: Foreign key to the source_system_kind row
+          example: 12
+        shownToProponent:
+          type: boolean
+          description: Whether this tracking entry is visible to the proponent
+          example: true
+        createdBy:
+          type: string
+          format: uuid
+          description: UUID of the user that created the record
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        createdAt:
+          type: string
+          format: date-time
+          description: Timestamp when the record was created
+          example: '2024-08-14T07:00:00.000Z'
+        updatedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of the user that last updated the record
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the record was last updated
+          example: '2024-09-01T10:15:30.000Z'
+        deletedBy:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID of the user that soft-deleted the record, if applicable
+          example: 68a9a188-4d67-46e3-92a4-b5717435cda8
+        deletedAt:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the record was soft-deleted, if applicable
+          example: '2024-10-01T12:00:00.000Z'
     DB-PermitType:
       title: DB Permit Type
       type: object
@@ -3403,61 +3467,6 @@ components:
           type: string
           description: A reason for the escalation
           example: Time-sensitive
-    Request-Permit:
-      title: Request Permit
-      type: object
-      required:
-        - activityId
-        - needed
-        - permitType
-        - permitTypeId
-        - status
-      properties:
-        activityId:
-          type: string
-          description: The ID of the activity associated with the permit
-          example: 2DE67F13
-        needed:
-          type: string
-          description: Whether permit is needed, or still uner investigation
-          example: Under Investigation
-        permitType:
-          $ref: '#/components/schemas/DB-PermitType'
-        permitTypeId:
-          type: number
-          description: ID for the associated permit type
-          example: 1
-        status:
-          type: string
-          description: Status of the permit
-          example: New
-        adjudicationDate:
-          type: string
-          description: Date of the permit's adjudication
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
-        authStatus:
-          type: string
-          description: Status of authentication for the permit
-          example: Pending
-        issuedPermitId:
-          type: string
-          description: ID of the issued permit
-          example: '123'
-        statusLastVerified:
-          type: string
-          description: Date of the last verified status of permit
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
-        submittedDate:
-          type: string
-          description: Date the permit was submitted
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
-        trackingId:
-          type: string
-          description: ID for tracking permit
-          example: H7kidnhd948594
     Request-PermitNote:
       title: Request Permit Note
       type: object
@@ -4155,6 +4164,29 @@ components:
               example: Not Found
             type:
               example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
+    Response-Permit:
+     title: Response of Permit
+     type: object
+     allOf:
+      - $ref: '#/components/schemas/DB-Permit'
+      - type: object
+        properties:
+          permitNotes:
+            type: array
+            description: Notes associated with this permit (if `include` is set to true in service call)
+            items:
+              $ref: '#/components/schemas/DB-PermitNote'
+
+          permitTracking:
+            type: array
+            description: Tracking entries associated with this permit (if `include` is set to true in service call)
+            items:
+              $ref: '#/components/schemas/DB-PermitTracking'
+
+          permitType:
+            type: object
+            description: The permit type associated with this permit (if `include` is set to true in service call)
+            $ref: '#/components/schemas/DB-PermitType'
     Response-Problem:
       title: Response Problem
       type: object
@@ -4293,33 +4325,66 @@ components:
           type: string
           description: ID for tracking permit
           example: H7kidnhd948594
-        authStatus:
+        state:
           type: string
-          description: Status of authentication for the permit
+          description: State of the permit
           example: Pending
         needed:
           type: string
           description: Whether permit is needed, or still uner investigation
           example: Under Investigation
-        status:
+        stage:
           type: string
-          description: Status of the permit
+          description: Stage of the permit
           example: New
         submittedDate:
           type: string
           description: Date the permit was submitted
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
-        adjudicationDate:
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        submittedTime:
           type: string
-          description: Date of the permit's adjudication
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
+          description: Time the permit was submitted
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        decisionDate:
+          type: string
+          description: Date of the permit's decision
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        decisionTime:
+          type: string
+          description: Time of the permit's decision
+          format: timetz
+          nullable: true
+          example: '2024-08-14'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastChangedTime:
+          type: string
+          description: Time of the last time the status of permit was changed
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
         statusLastVerified:
           type: string
           description: Date of the last verified status of permit
-          format: date-time
-          example: '2024-08-14T07:00:00.000Z'
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastVerifiedTime:
+          type: string
+          description: Time of the last verified status of permit
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
         acronym:
           type: string
           description: Acronym for permit type name

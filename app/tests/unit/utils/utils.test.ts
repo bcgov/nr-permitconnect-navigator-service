@@ -83,6 +83,16 @@ describe('utils', () => {
     (config.has as jest.Mock).mockReset();
   });
 
+  describe('addDashesToUuid', () => {
+    it('inserts dashes and lowercases for 32-hex strings', () => {
+      const raw = 'AABBCCDDEEFF00112233445566778899';
+      expect(utils.addDashesToUuid(raw)).toBe('aabbccdd-eeff-0011-2233-445566778899');
+    });
+    it('returns original if not length 32', () => {
+      expect(utils.addDashesToUuid('123')).toBe('123');
+    });
+  });
+
   describe('camelCaseToTitleCase', () => {
     it('returns null for null', () => {
       expect(utils.camelCaseToTitleCase(null)).toBeNull();
@@ -95,13 +105,94 @@ describe('utils', () => {
     });
   });
 
-  describe('addDashesToUuid', () => {
-    it('inserts dashes and lowercases for 32-hex strings', () => {
-      const raw = 'AABBCCDDEEFF00112233445566778899';
-      expect(utils.addDashesToUuid(raw)).toBe('aabbccdd-eeff-0011-2233-445566778899');
+  describe('combineDateTime', () => {
+    it('returns undefined when both date and time are undefined/null', () => {
+      expect(utils.combineDateTime(undefined, undefined)).toBeUndefined();
+      expect(utils.combineDateTime(null, null)).toBeUndefined();
     });
-    it('returns original if not length 32', () => {
-      expect(utils.addDashesToUuid('123')).toBe('123');
+
+    it('returns undefined when time is provided but date is missing', () => {
+      const timeOnly = '12:34:56.000Z';
+      expect(utils.combineDateTime(undefined, timeOnly)).toBeUndefined();
+      expect(utils.combineDateTime(null, timeOnly)).toBeUndefined();
+    });
+
+    it('combines date and time using UTC fields', () => {
+      const date = '2025-05-01';
+      const time = '23:59:30.250Z';
+
+      const combined = utils.combineDateTime(date, time);
+
+      expect(combined).toBeInstanceOf(Date);
+      expect(combined!.toISOString()).toBe('2025-05-01T23:59:30.250Z');
+    });
+
+    it('uses midnight when time is omitted', () => {
+      const date = '2025-08-15';
+
+      const combined = utils.combineDateTime(date, undefined);
+
+      expect(combined).toBeInstanceOf(Date);
+      expect(combined!.toISOString()).toBe('2025-08-15T00:00:00.000Z');
+    });
+  });
+
+  describe('compareDates', () => {
+    const older = new Date('2025-01-01T00:00:00.000Z');
+    const newer = new Date('2025-01-02T00:00:00.000Z');
+
+    it('returns 0 for equal dates', () => {
+      expect(utils.compareDates(older, new Date(older))).toBe(0);
+    });
+
+    it('sorts ascending by default (oldest to newest)', () => {
+      expect(utils.compareDates(older, newer)).toBeLessThan(0);
+      expect(utils.compareDates(newer, older)).toBeGreaterThan(0);
+    });
+
+    it('treats undefined as the oldest value', () => {
+      expect(utils.compareDates(undefined, newer)).toBeLessThan(0);
+      expect(utils.compareDates(newer, undefined)).toBeGreaterThan(0);
+      expect(utils.compareDates(undefined, undefined)).toBe(0);
+    });
+
+    it('sorts descending when desc=true (newest to oldest)', () => {
+      expect(utils.compareDates(older, newer, true)).toBeGreaterThan(0);
+      expect(utils.compareDates(newer, older, true)).toBeLessThan(0);
+    });
+
+    it('in descending order, undefined still counts as oldest (comes last)', () => {
+      expect(utils.compareDates(undefined, newer, true)).toBeGreaterThan(0);
+      expect(utils.compareDates(newer, undefined, true)).toBeLessThan(0);
+    });
+  });
+
+  describe('formatDateOnly', () => {
+    it('returns the expected date format if given a valid date only string', () => {
+      expect(utils.formatDateOnly('2025-11-28')).toEqual('November 28, 2025');
+    });
+
+    it('strips leading zeros from the day component', () => {
+      expect(utils.formatDateOnly('2025-01-05')).toEqual('January 5, 2025');
+    });
+
+    it('returns an empty string when value is null', () => {
+      expect(utils.formatDateOnly(null)).toEqual('');
+    });
+
+    it('returns an empty string when value is undefined', () => {
+      expect(utils.formatDateOnly(undefined as unknown as string)).toEqual('');
+    });
+
+    it('returns an empty string when value is an empty string', () => {
+      expect(utils.formatDateOnly('')).toEqual('');
+    });
+
+    it('returns an empty string when value does not match YYYY-MM-DD format', () => {
+      expect(utils.formatDateOnly('2025/11/28')).toEqual('');
+      expect(utils.formatDateOnly('2025-1-05')).toEqual('');
+      expect(utils.formatDateOnly('2025-13-05')).toEqual('');
+      expect(utils.formatDateOnly('not-a-date')).toEqual('');
     });
   });
 
@@ -281,6 +372,26 @@ describe('utils', () => {
     it('returns [] when neither exists', () => {
       (existsSync as jest.Mock).mockReturnValueOnce(false);
       expect(utils.readIdpList()).toEqual([]);
+    });
+  });
+
+  describe('splitDateTime', () => {
+    it('splits a Date into separate UTC date and time string components', () => {
+      const fullDateTime = new Date('2025-03-10T14:30:45.123Z');
+
+      const { date, time } = utils.splitDateTime(fullDateTime);
+
+      expect(date).toBe('2025-03-10');
+      expect(time).toBe('14:30:45.123Z');
+    });
+
+    it('handles midnight correctly (time-only becomes 00:00:00)', () => {
+      const onlyDate = new Date('2025-03-10T00:00:00.000Z');
+
+      const { date, time } = utils.splitDateTime(onlyDate);
+
+      expect(date).toBe('2025-03-10');
+      expect(time).toBe(null);
     });
   });
 

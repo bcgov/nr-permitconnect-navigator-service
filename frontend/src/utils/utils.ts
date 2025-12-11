@@ -4,7 +4,26 @@ import { useConfigStore } from '@/store';
 import { DELIMITER } from '@/utils/constants/application';
 import { FileCategory, IdentityProviderKind } from '@/utils/enums/application';
 
-import type { IdentityProvider } from '@/types';
+import type { DateTimeStrings, IdentityProvider } from '@/types';
+
+/**
+ * @function combineDateTime
+ * Combines separate date and time strings into a single UTC Date object
+ * @param date date string
+ * @param time time string
+ * @returns A constructed date object
+ */
+export function combineDateTime(date?: string | null, time?: string | null): Date | null {
+  if (!date) return null;
+
+  const [y, m, d] = date.split('-').map(Number);
+
+  if (!time && y && m) {
+    return new Date(y, m - 1, d, 0, 0, 0, 0);
+  }
+
+  return new Date(`${date}T${time}`);
+}
 
 /**
  * @function deepToRaw
@@ -334,6 +353,32 @@ export function setEmptyStringsToNull(data: any): any {
   }
 
   return data;
+}
+
+/**
+ * @function splitDateTime
+ * Splits a single Date object into separate UTC date and time strings
+ * @param value The Date instance to split
+ * @returns An object containing `date` and `time` strings
+ */
+export function splitDateTime(value?: Date | null): DateTimeStrings {
+  if (!value || Number.isNaN(value.getTime())) {
+    return { date: null, time: null };
+  }
+
+  const isDateOnly =
+    value.getUTCHours() === 0 &&
+    value.getUTCMinutes() === 0 &&
+    value.getUTCSeconds() === 0 &&
+    value.getUTCMilliseconds() === 0;
+
+  const [date, time] = value.toISOString().split('T');
+
+  if (isDateOnly) {
+    return { date: date!, time: null };
+  }
+
+  return { date: date!, time: time! };
 }
 
 /**

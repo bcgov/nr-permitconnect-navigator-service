@@ -2,15 +2,15 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
+import { PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
 
 // Props
 const {
-  authStatus,
+  state,
   enlarge = false,
   displayText
 } = defineProps<{
-  authStatus?: string;
+  state?: string;
   enlarge?: boolean;
   displayText?: string;
 }>();
@@ -29,53 +29,65 @@ const enlargedDimensions = {
 };
 
 const pillState = {
-  [PermitAuthorizationStatus.ABANDONED]: {
-    badgeClass: 'grey',
-    iconClass: '',
-    iconString: '',
-    toolTip: PermitAuthorizationStatusDescriptions.ABANDONED
-  },
-  [PermitAuthorizationStatus.CANCELLED]: {
+  [PermitState.CANCELLED]: {
     badgeClass: 'red',
     iconClass: '',
     iconString: 'fas fa-circle-xmark',
-    toolTip: PermitAuthorizationStatusDescriptions.CANCELLED
+    toolTip: PermitStateDescriptions.CANCELLED
   },
-  [PermitAuthorizationStatus.DENIED]: {
+  [PermitState.DENIED]: {
     badgeClass: 'red',
     iconClass: '',
     iconString: 'fas fa-circle-xmark',
-    toolTip: PermitAuthorizationStatusDescriptions.DENIED
+    toolTip: PermitStateDescriptions.DENIED
   },
-  [PermitAuthorizationStatus.ISSUED]: {
+  [PermitState.APPROVED]: {
     badgeClass: 'green',
     iconClass: '',
     iconString: 'fas fa-circle-check',
-    toolTip: PermitAuthorizationStatusDescriptions.ISSUED
+    toolTip: PermitStateDescriptions.APPROVED
   },
-  [PermitAuthorizationStatus.IN_REVIEW]: {
+  [PermitState.IN_PROGRESS]: {
     badgeClass: 'green',
     iconClass: '',
     iconString: '',
-    toolTip: PermitAuthorizationStatusDescriptions.IN_REVIEW
+    toolTip: PermitStateDescriptions.IN_PROGRESS
   },
-  [PermitAuthorizationStatus.NONE]: {
+  [PermitState.INITIAL_REVIEW]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: '',
+    toolTip: PermitStateDescriptions.INITIAL_REVIEW
+  },
+  [PermitState.ISSUED]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: 'fas fa-circle-check',
+    toolTip: PermitStateDescriptions.ISSUED
+  },
+  [PermitState.NONE]: {
     badgeClass: 'grey',
     iconClass: '',
     iconString: '',
-    toolTip: PermitAuthorizationStatusDescriptions.NONE
+    toolTip: PermitStateDescriptions.NONE
   },
-  [PermitAuthorizationStatus.PENDING]: {
+  [PermitState.PENDING_CLIENT]: {
     badgeClass: 'yellow',
     iconClass: '',
     iconString: 'fas fa-circle-exclamation',
-    toolTip: PermitAuthorizationStatusDescriptions.PENDING
+    toolTip: PermitStateDescriptions.PENDING_CLIENT
   },
-  [PermitAuthorizationStatus.WITHDRAWN]: {
+  [PermitState.REJECTED]: {
+    badgeClass: 'red',
+    iconClass: '',
+    iconString: 'fas fa-circle-xmark',
+    toolTip: PermitStateDescriptions.REJECTED
+  },
+  [PermitState.WITHDRAWN]: {
     badgeClass: 'grey',
     iconClass: '',
     iconString: '',
-    toolTip: PermitAuthorizationStatusDescriptions.WITHDRAWN
+    toolTip: PermitStateDescriptions.WITHDRAWN
   }
 };
 
@@ -84,13 +96,11 @@ const { t } = useI18n();
 
 const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensions));
 const getState = computed(() => {
-  return pillState[authStatus as keyof typeof pillState];
+  return pillState[state as keyof typeof pillState];
 });
 
-const authStatusPillDisplayText = {
-  [PermitAuthorizationStatus.ABANDONED]: t('authorization.authorizationStatusPill.abandonedByClient'),
-  [PermitAuthorizationStatus.WITHDRAWN]: t('authorization.authorizationStatusPill.withdrawnByClient'),
-  [PermitAuthorizationStatus.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+const statePillDisplayText = {
+  [PermitState.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
 };
 </script>
 
@@ -122,9 +132,7 @@ const authStatusPillDisplayText = {
           :icon="getState?.iconString"
         />
         <span class="text-color">
-          {{
-            displayText ?? authStatusPillDisplayText[authStatus as keyof typeof authStatusPillDisplayText] ?? authStatus
-          }}
+          {{ displayText ?? statePillDisplayText[state as keyof typeof statePillDisplayText] ?? state }}
         </span>
       </div>
     </div>

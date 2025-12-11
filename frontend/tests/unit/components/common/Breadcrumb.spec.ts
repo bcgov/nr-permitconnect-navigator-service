@@ -7,6 +7,7 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
 import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
+import { PermitStage, PermitState } from '@/utils/enums/permit';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
@@ -114,11 +115,11 @@ const testPermit: Permit = {
   permitId: '123',
   activityId: 'activityUUID',
   needed: 'yes',
-  status: 'status',
+  stage: PermitStage.APPLICATION_SUBMISSION,
   issuedPermitId: 'issued Permit ID',
-  authStatus: 'test auth status',
+  state: PermitState.IN_PROGRESS,
   submittedDate: currentDate,
-  adjudicationDate: currentDate,
+  decisionDate: currentDate,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

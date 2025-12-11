@@ -5,8 +5,8 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
-import { PermitAuthorizationStatus } from '@/utils/enums/permit';
-import { formatDate, formatDateTime } from '@/utils/formatters';
+import { PermitState } from '@/utils/enums/permit';
+import { formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -51,14 +51,14 @@ function toCopy(toCopy: string) {
     </template>
     <template #content>
       <div class="flex gap-2">
-        <span :class="{ 'pb-4': permit.authStatus !== PermitAuthorizationStatus.NONE }">
+        <span :class="permit.state !== PermitState.NONE ? 'pb-4' : ''">
           <AuthorizationStatusPill
-            v-if="permit.authStatus !== PermitAuthorizationStatus.NONE"
-            :auth-status="permit.authStatus"
+            v-if="permit.state !== PermitState.NONE"
+            :state="permit.state"
           />
         </span>
         <StatusPill
-          :status="permit.status"
+          :stage="permit.stage"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />
@@ -116,15 +116,39 @@ function toCopy(toCopy: string) {
           <div class="text-xs">{{ t('authorization.authorizationCard.dates') }}</div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.statusVerified') }}:</span>
-            {{ permit.statusLastVerified ? formatDate(permit.statusLastVerified) : undefined }}
+            <span
+              v-if="permit.statusLastVerified"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.statusLastVerified) }}
+            </span>
+          </div>
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.authorizationCard.statusChangeDate') }}:</span>
+            <span
+              v-if="permit.statusLastChanged"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.statusLastChanged) }}
+            </span>
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
-            {{ permit.submittedDate ? formatDate(permit.submittedDate) : undefined }}
+            <span
+              v-if="permit.submittedDate"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.submittedDate) }}
+            </span>
           </div>
           <div class="my-2">
             <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
-            {{ permit.adjudicationDate ? formatDate(permit.adjudicationDate) : undefined }}
+            <span
+              v-if="permit.decisionDate"
+              class="ml-1"
+            >
+              {{ formatDateOnly(permit.decisionDate) }}
+            </span>
           </div>
         </div>
         <div

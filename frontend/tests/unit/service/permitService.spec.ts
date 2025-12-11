@@ -1,8 +1,10 @@
 import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+
 import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
+import { PermitStage, PermitState } from '@/utils/enums/permit';
 
 import type { Permit, PermitType } from '@/types';
 
@@ -30,11 +32,11 @@ const TEST_PERMIT_1: Permit = {
   permitId: 'permitId',
   activityId: 'activityId',
   issuedPermitId: 'issuedPermitId',
-  authStatus: 'authStatus',
+  state: PermitState.IN_PROGRESS,
   needed: 'needed',
-  status: 'status',
+  stage: PermitStage.APPLICATION_SUBMISSION,
   submittedDate: new Date().toISOString(),
-  adjudicationDate: new Date().toISOString(),
+  decisionDate: new Date().toISOString(),
   permitType: TEST_PERMIT_TYPE,
   permitTypeId: TEST_PERMIT_TYPE.permitTypeId,
   permitNote: [],

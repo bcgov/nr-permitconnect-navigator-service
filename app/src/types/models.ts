@@ -73,8 +73,18 @@ const noteHistoryBase = Prisma.validator<Prisma.note_historyDefaultArgs>()({});
 export type NoteHistoryBase = Prisma.note_historyGetPayload<typeof noteHistoryBase>;
 export type NoteHistory = NoteHistoryBase & { note?: Note[] };
 
+type PermitDateTimeKeys =
+  | 'submittedDate'
+  | 'decisionDate'
+  | 'statusLastVerified'
+  | 'statusLastChanged'
+  | 'submittedTime'
+  | 'decisionTime'
+  | 'statusLastVerifiedTime'
+  | 'statusLastChangedTime';
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
-export type PermitBase = Prisma.permitGetPayload<typeof permitBase>;
+type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
+export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & { [K in PermitDateTimeKeys]: string | null };
 export type Permit = PermitBase & {
   permitNote?: PermitNote[];
   permitTracking?: PermitTracking[];
@@ -87,7 +97,7 @@ export type PermitNote = PermitNoteBase;
 
 const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
 export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
-export type PermitTracking = PermitTrackingBase;
+export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSystemKind | null };
 
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;

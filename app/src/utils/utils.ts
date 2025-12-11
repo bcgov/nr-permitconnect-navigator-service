@@ -5,21 +5,9 @@ import { validate, version } from 'uuid';
 
 import { getLogger } from '../components/log';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes } from '../types';
+import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes, DateTimeStrings } from '../types';
 
 const log = getLogger(module.filename);
-
-/**
- * Converts a CamelCase string to title case that can handle camel case
- * @param str The string to convert
- * @returns A string in title case
- */
-export function camelCaseToTitleCase(input: string | null): string | null {
-  if (!input) return input;
-
-  const result = input.replace(/([A-Z])/g, ' $1');
-  return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
-}
 
 /**
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
@@ -35,12 +23,86 @@ export function addDashesToUuid(str: string): string {
 }
 
 /**
+ * Converts a CamelCase string to title case that can handle camel case
+ * @param str The string to convert
+ * @returns A string in title case
+ */
+export function camelCaseToTitleCase(input: string | null): string | null {
+  if (!input) return input;
+
+  const result = input.replace(/([A-Z])/g, ' $1');
+  return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
+}
+
+/**
+ * Combines separate date and time strings into a single UTC Date object
+ * @param date date string
+ * @param time time string
+ * @returns A constructed date object
+ */
+export const combineDateTime = (date?: string | null, time?: string | null): Date | undefined => {
+  if (!date) return undefined;
+
+  if (!time) {
+    return new Date(`${date}T00:00:00.000Z`);
+  }
+
+  return new Date(`${date}T${time}`);
+};
+
+/**
+ * Date comparator function
+ * Defaults to ascending order: oldest to newest
+ * Undefined dates are treated as oldest, or newest if desc=true
+ * @param a Optional first date to compare
+ * @param b Optional second date to compare
+ * @param desc If true, sorts in descending order: newest to oldest
+ * @returns A negative number if a before b, positive if a after b, or 0 if equal (reversed if desc=true)
+ */
+export function compareDates(a?: Date, b?: Date, desc = false): number {
+  const direction = desc ? -1 : 1;
+
+  // Both dates undefined
+  if (!a && !b) return 0;
+
+  // One date undefined
+  if (!a) return -1 * direction;
+  if (!b) return 1 * direction;
+
+  // Both dates defined
+  return (a.getTime() - b.getTime()) * direction;
+}
+
+/**
  * Search for a CHEFS form Api Key
  * @returns The CHEFS form Api Key if it exists
  */
 export function getChefsApiKey(formId: string): string | undefined {
   const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
   return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
+}
+
+/**
+ * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
+ * @param value A date only string
+ * @returns {String} A string representation of `value`
+ */
+export function formatDateOnly(value: string | null | undefined): string {
+  if (!value) return '';
+
+  // Must be exactly YYYY-MM-DD
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return '';
+
+  const [, year, month, day] = match;
+  const monthNumber = Number(month) - 1;
+
+  if (monthNumber > 11 || monthNumber < 0) return '';
+
+  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date().setMonth(monthNumber));
+  const dayNum = String(Number(day));
+
+  return `${monthName} ${dayNum}, ${year}`;
 }
 
 /**
@@ -247,6 +309,25 @@ export function redactSecrets(data: { [key: string]: unknown }, fields: string[]
     });
   }
   return data;
+}
+
+/**
+ * Splits a single Date object into separate UTC date and time strings
+ * @param value The Date instance to split
+ * @returns An object containing `date` and `time` strings
+ */
+export function splitDateTime(value: Date): DateTimeStrings {
+  const isDateOnly =
+    value.getUTCHours() === 0 &&
+    value.getUTCMinutes() === 0 &&
+    value.getUTCSeconds() === 0 &&
+    value.getUTCMilliseconds() === 0;
+
+  const [date, time] = value.toISOString().split('T');
+
+  if (isDateOnly) return { date, time: null };
+
+  return { date, time };
 }
 
 /**

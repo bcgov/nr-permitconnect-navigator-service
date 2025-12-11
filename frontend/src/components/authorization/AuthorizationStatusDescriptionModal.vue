@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import { Dialog } from '@/lib/primevue';
-import { PermitAuthorizationStatus, PermitAuthorizationStatusDescriptions } from '@/utils/enums/permit';
+import { PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
 
 const visible = defineModel<boolean>('visible');
 </script>
@@ -51,50 +51,66 @@ const visible = defineModel<boolean>('visible');
     <h4 class="mb-6">Application statuses</h4>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.IN_REVIEW" />
+        <AuthorizationStatusPill :state="PermitState.INITIAL_REVIEW" />
       </div>
-      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.IN_REVIEW }}</div>
+      <div class="mt-2">{{ PermitStateDescriptions.INITIAL_REVIEW }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.PENDING" />
+        <AuthorizationStatusPill :state="PermitState.IN_PROGRESS" />
+      </div>
+      <div class="mt-2">{{ PermitStateDescriptions.IN_PROGRESS }}</div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.PENDING_CLIENT" />
       </div>
       <div class="mt-2">
-        {{ PermitAuthorizationStatusDescriptions.PENDING }}
+        {{ PermitStateDescriptions.PENDING_CLIENT }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.ABANDONED" />
+        <AuthorizationStatusPill :state="PermitState.WITHDRAWN" />
       </div>
-      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.ABANDONED }}</div>
+      <div class="mt-2">{{ PermitStateDescriptions.WITHDRAWN }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.WITHDRAWN" />
+        <AuthorizationStatusPill :state="PermitState.CANCELLED" />
       </div>
-      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.WITHDRAWN }}</div>
+      <div class="mt-2">{{ PermitStateDescriptions.CANCELLED }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.CANCELLED" />
-      </div>
-      <div class="mt-2">{{ PermitAuthorizationStatusDescriptions.CANCELLED }}</div>
-    </div>
-    <div class="my-6">
-      <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.DENIED" />
+        <AuthorizationStatusPill :state="PermitState.REJECTED" />
       </div>
       <div class="mt-2">
-        {{ PermitAuthorizationStatusDescriptions.DENIED }}
+        {{ PermitStateDescriptions.REJECTED }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :auth-status="PermitAuthorizationStatus.ISSUED" />
+        <AuthorizationStatusPill :state="PermitState.DENIED" />
       </div>
       <div class="mt-2">
-        {{ PermitAuthorizationStatusDescriptions.ISSUED }}
+        {{ PermitStateDescriptions.DENIED }}
+      </div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.APPROVED" />
+      </div>
+      <div class="mt-2">
+        {{ PermitStateDescriptions.APPROVED }}
+      </div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
+        <AuthorizationStatusPill :state="PermitState.ISSUED" />
+      </div>
+      <div class="mt-2">
+        {{ PermitStateDescriptions.ISSUED }}
       </div>
     </div>
   </Dialog>

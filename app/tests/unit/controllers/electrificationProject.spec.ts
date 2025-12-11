@@ -1,7 +1,7 @@
 import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE,
-  TEST_ELECTRIFICATION_ACTIVITY,
+  TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT,
@@ -93,10 +93,10 @@ describe('createElectrificationProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
@@ -118,7 +118,7 @@ describe('createElectrificationProjectController', () => {
     expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
     expect(createActivityContactSpy).toHaveBeenCalledWith(
       prismaTxMock,
-      TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      TEST_ACTIVITY_ELECTRIFICATION.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
@@ -427,10 +427,10 @@ describe('submitElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
@@ -453,7 +453,7 @@ describe('submitElectrificationProjectDraftController', () => {
     expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
     expect(createActivityContactSpy).toHaveBeenCalledWith(
       prismaTxMock,
-      TEST_ELECTRIFICATION_ACTIVITY.activityId,
+      TEST_ACTIVITY_ELECTRIFICATION.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
@@ -478,7 +478,7 @@ describe('submitElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
     deleteDraftSpy.mockResolvedValue();
 
@@ -520,7 +520,7 @@ describe('updateElectrificationProjectDraftController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    createActivitySpy.mockResolvedValue(TEST_ELECTRIFICATION_ACTIVITY);
+    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     createDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
     await upsertElectrificationProjectDraftController(

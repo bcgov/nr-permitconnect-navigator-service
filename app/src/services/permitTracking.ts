@@ -28,17 +28,25 @@ export const upsertPermitTracking = async (tx: PrismaTransactionClient, data: Pe
   let response: PermitTracking[] = [];
   if (data.permitTracking?.length) {
     response = await Promise.all(
-      data.permitTracking.map(async (x: PermitTracking) => {
-        if (x.permitTrackingId) {
+      data.permitTracking.map(async (pt: PermitTracking) => {
+        const permitTrackingData = {
+          permitId: data.permitId,
+          permitTrackingId: pt.permitTrackingId,
+          trackingId: pt.trackingId,
+          shownToProponent: pt.shownToProponent,
+          sourceSystemKindId: pt.sourceSystemKindId
+        };
+
+        if (pt.permitTrackingId) {
           return await tx.permit_tracking.update({
-            data: { ...x, permitId: data.permitId },
             where: {
-              permitTrackingId: x.permitTrackingId
-            }
+              permitTrackingId: pt.permitTrackingId
+            },
+            data: permitTrackingData
           });
         } else {
           return await tx.permit_tracking.create({
-            data: { ...x, permitId: data.permitId }
+            data: permitTrackingData
           });
         }
       })
