@@ -56,7 +56,7 @@ vi.mocked(appAxios).mockReturnValue({
 const createObjectSpy = vi.spyOn(comsService, 'createObject');
 const deleteObjectSpy = vi.spyOn(comsService, 'deleteObject');
 const getObjectSpy = vi.spyOn(comsService, 'getObject');
-const fileSpy = vi.spyOn(global, 'File');
+let fileSpy = vi.spyOn(global, 'File');
 
 // Tests
 beforeEach(() => {
@@ -76,6 +76,22 @@ describe('documentService', () => {
     ({ initiative }) => {
       beforeEach(() => {
         appStore.setInitiative(initiative);
+
+        // Mock the global File constructor
+        const FileMock = vi.fn(
+          class {
+            name = testFile1.name;
+            type = testFile1.type;
+          }
+        );
+
+        vi.stubGlobal('File', FileMock);
+
+        fileSpy = vi.spyOn(global, 'File');
+      });
+
+      afterEach(() => {
+        vi.unstubAllGlobals();
       });
 
       describe('createDocument', () => {
@@ -83,7 +99,6 @@ describe('documentService', () => {
           createObjectSpy.mockResolvedValue({
             data: testFileData
           } as AxiosResponse);
-          fileSpy.mockReturnValue(testFile1 as File);
 
           await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
           expect(fileSpy).toHaveBeenCalledTimes(1);
@@ -94,7 +109,6 @@ describe('documentService', () => {
           createObjectSpy.mockResolvedValue({
             data: testFileData
           } as AxiosResponse);
-          fileSpy.mockReturnValue(testFile1 as File);
 
           await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
           expect(createObjectSpy).toHaveBeenCalledTimes(1);
@@ -110,7 +124,6 @@ describe('documentService', () => {
           createObjectSpy.mockResolvedValue({
             data: testFileData
           } as AxiosResponse);
-          fileSpy.mockReturnValue(testFile1 as File);
 
           await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
           expect(putSpy).toHaveBeenCalledTimes(1);
@@ -133,7 +146,7 @@ describe('documentService', () => {
               versionId: testVersionId
             }
           } as AxiosResponse);
-          fileSpy.mockReturnValue(testFile1 as File);
+
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
           vi.mocked(appAxios().put).mockImplementationOnce(() => {
@@ -150,7 +163,7 @@ describe('documentService', () => {
           createObjectSpy.mockImplementation(() => {
             throw new Error();
           });
-          fileSpy.mockReturnValue(testFile1 as File);
+
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
           expect(
