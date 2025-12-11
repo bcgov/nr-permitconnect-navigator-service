@@ -3,13 +3,11 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { searchElectrificationProjects } from '../services/electrificationProject';
 import { email } from '../services/email';
-import { getInitiativeByActivity } from '../services/initiative';
-import { searchHousingProjects } from '../services/housingProject';
 import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit';
 import { createPermitNote } from '../services/permitNote';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking';
+import { getProjectByActivityId } from '../services/project';
 import { readUser } from '../services/user';
 import { Initiative } from '../utils/enums/application';
 import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../utils/templates';
@@ -17,14 +15,7 @@ import { formatDateOnly, isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type {
-  Contact,
-  ListPermitsOptions,
-  Permit,
-  PermitTracking,
-  PermitType,
-  PermitUpdateEmailParams
-} from '../types';
+import type { ListPermitsOptions, Permit, PermitTracking, PermitType, PermitUpdateEmailParams } from '../types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -105,34 +96,13 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     for (const permit of permits) {
-      const { activityId } = permit;
+      const project = await getProjectByActivityId(tx, permit.activityId);
 
-      const initiative = (await getInitiativeByActivity(tx, activityId)).code as Initiative;
-
-      let projectId: string | undefined;
-      let navigatorId: string | null | undefined;
-      let contact: Contact | undefined;
-
-      switch (initiative) {
-        case Initiative.ELECTRIFICATION: {
-          const project = (await searchElectrificationProjects(tx, { activityId: [activityId] }))[0];
-          projectId = project.electrificationProjectId;
-          navigatorId = project.assignedUserId;
-          contact = project.activity?.activityContact?.[0].contact;
-          break;
-        }
-        case Initiative.HOUSING: {
-          const project = (await searchHousingProjects(tx, { activityId: [activityId] }))[0];
-          projectId = project.housingProjectId;
-          navigatorId = project.assignedUserId;
-          contact = project.activity?.activityContact?.[0].contact;
-          break;
-        }
-        default:
-          break;
-      }
-
-      if (!projectId) continue;
+      const projectId =
+        'electrificationProjectId' in project ? project.electrificationProjectId : project.housingProjectId;
+      const contact = project.activity?.activityContact?.[0].contact;
+      const initiative = project.activity!.initiative!.code as Initiative;
+      const navigatorId = project.assignedUserId;
 
       // Add navigator update email to email jobs
       let navigatorName = 'Navigator';

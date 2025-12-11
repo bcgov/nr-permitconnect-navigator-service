@@ -8,8 +8,8 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_HOUSING_PROJECT_1,
   TEST_IDIR_USER_1,
-  TEST_INITIATIVE_ELECTRIFICATION,
   TEST_INITIATIVE_HOUSING,
+  TEST_INITIATIVE_ELECTRIFICATION,
   TEST_PERMIT_1,
   TEST_PERMIT_LIST,
   TEST_PERMIT_TYPE_1,
@@ -29,9 +29,7 @@ import {
 } from '../../../src/controllers/permit';
 import * as permitController from '../../../src/controllers/permit';
 import * as permitService from '../../../src/services/permit';
-import * as initiativeService from '../../../src/services/initiative';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import * as housingProjectService from '../../../src/services/housingProject';
+import * as projectService from '../../../src/services/project';
 import * as userService from '../../../src/services/user';
 import * as permitNoteService from '../../../src/services/permitNote';
 import * as emailService from '../../../src/services/email';
@@ -288,9 +286,7 @@ describe('sendPermitUpdateEmail', () => {
 });
 
 describe('sendPermitUpdateNotifications', () => {
-  const getInitiativeSpy = jest.spyOn(initiativeService, 'getInitiativeByActivity');
-  const searchElectrificationSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
-  const searchHousingSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
+  const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
   const readUserSpy = jest.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
   const createNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
   const sendEmailJobSpy = jest.spyOn(permitController, 'sendPermitUpdateEmail');
@@ -302,18 +298,15 @@ describe('sendPermitUpdateNotifications', () => {
       return '';
     });
 
-    getInitiativeSpy.mockResolvedValue(TEST_INITIATIVE_ELECTRIFICATION);
-    searchElectrificationSpy.mockResolvedValue([
-      {
-        ...TEST_ELECTRIFICATION_PROJECT_1,
-        electrificationProjectId: 'proj-123',
-        assignedUserId: TEST_IDIR_USER_1.userId,
-        activity: {
-          ...TEST_ACTIVITY_ELECTRIFICATION,
-          activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }]
-        }
+    getProjectSpy.mockResolvedValue({
+      ...TEST_ELECTRIFICATION_PROJECT_1,
+      assignedUserId: TEST_IDIR_USER_1.userId,
+      activity: {
+        ...TEST_ACTIVITY_ELECTRIFICATION,
+        activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }],
+        initiative: TEST_INITIATIVE_ELECTRIFICATION
       }
-    ]);
+    });
   });
 
   afterEach(() => {
@@ -329,11 +322,7 @@ describe('sendPermitUpdateNotifications', () => {
 
     await sendPermitUpdateNotifications([permit]);
 
-    expect(getInitiativeSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
-    expect(searchElectrificationSpy).toHaveBeenCalledWith(prismaTxMock, {
-      activityId: [permit.activityId]
-    });
-    expect(searchHousingSpy).not.toHaveBeenCalled();
+    expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 
     expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, TEST_IDIR_USER_1.userId);
 
@@ -355,7 +344,7 @@ describe('sendPermitUpdateNotifications', () => {
       permit,
       initiative: Initiative.ELECTRIFICATION,
       dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
-      projectId: 'proj-123',
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       toEmails: ['navteam@example.com'],
       emailTemplate: permitStatusUpdateTemplate
     });
@@ -364,26 +353,24 @@ describe('sendPermitUpdateNotifications', () => {
       permit,
       initiative: Initiative.ELECTRIFICATION,
       dearName: TEST_CONTACT_1.firstName,
-      projectId: 'proj-123',
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       toEmails: [TEST_CONTACT_1.email],
       emailTemplate: permitNoteUpdateTemplate
     });
   });
 
   it('skips proponent email when contact email is missing but still sends navigator email', async () => {
-    searchElectrificationSpy.mockResolvedValueOnce([
-      {
-        ...TEST_ELECTRIFICATION_PROJECT_1,
-        electrificationProjectId: 'proj-999',
-        assignedUserId: 'user-2',
-        activity: {
-          ...TEST_ACTIVITY_ELECTRIFICATION,
-          activityContact: [
-            { ...TEST_ACTIVITY_CONTACT_1, contact: { ...TEST_CONTACT_1, firstName: 'NoEmail', email: null } }
-          ]
-        }
+    getProjectSpy.mockResolvedValueOnce({
+      ...TEST_ELECTRIFICATION_PROJECT_1,
+      assignedUserId: 'user-2',
+      activity: {
+        ...TEST_ACTIVITY_ELECTRIFICATION,
+        activityContact: [
+          { ...TEST_ACTIVITY_CONTACT_1, contact: { ...TEST_CONTACT_1, firstName: 'NoEmail', email: null } }
+        ],
+        initiative: TEST_INITIATIVE_ELECTRIFICATION
       }
-    ]);
+    });
 
     (readUserSpy as jest.Mock).mockResolvedValueOnce({
       ...TEST_IDIR_USER_1,
@@ -407,26 +394,22 @@ describe('sendPermitUpdateNotifications', () => {
     expect(job).toMatchObject({
       permit,
       dearName: 'Another Navigator',
-      projectId: 'proj-999',
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       toEmails: ['navteam@example.com'],
       emailTemplate: permitStatusUpdateTemplate
     });
   });
 
   it('creates notes and email jobs for HOUSING initiative', async () => {
-    getInitiativeSpy.mockResolvedValueOnce(TEST_INITIATIVE_HOUSING);
-
-    searchHousingSpy.mockResolvedValueOnce([
-      {
-        ...TEST_HOUSING_PROJECT_1,
-        housingProjectId: 'housing-123',
-        assignedUserId: TEST_IDIR_USER_1.userId,
-        activity: {
-          ...TEST_ACTIVITY_HOUSING,
-          activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }]
-        }
+    getProjectSpy.mockResolvedValueOnce({
+      ...TEST_HOUSING_PROJECT_1,
+      assignedUserId: TEST_IDIR_USER_1.userId,
+      activity: {
+        ...TEST_ACTIVITY_HOUSING,
+        activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }],
+        initiative: TEST_INITIATIVE_HOUSING
       }
-    ]);
+    });
 
     const permit: Permit = {
       ...TEST_PERMIT_1,
@@ -436,11 +419,7 @@ describe('sendPermitUpdateNotifications', () => {
 
     await sendPermitUpdateNotifications([permit]);
 
-    expect(getInitiativeSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
-    expect(searchHousingSpy).toHaveBeenCalledWith(prismaTxMock, {
-      activityId: [permit.activityId]
-    });
-    expect(searchElectrificationSpy).not.toHaveBeenCalled();
+    expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 
     expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, TEST_IDIR_USER_1.userId);
 
@@ -455,7 +434,7 @@ describe('sendPermitUpdateNotifications', () => {
       permit,
       initiative: Initiative.HOUSING,
       dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
-      projectId: 'housing-123',
+      projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
       toEmails: ['navteam@example.com'],
       emailTemplate: permitStatusUpdateTemplate
     });
@@ -464,7 +443,7 @@ describe('sendPermitUpdateNotifications', () => {
       permit,
       initiative: Initiative.HOUSING,
       dearName: TEST_CONTACT_1.firstName,
-      projectId: 'housing-123',
+      projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
       toEmails: [TEST_CONTACT_1.email],
       emailTemplate: permitNoteUpdateTemplate
     });

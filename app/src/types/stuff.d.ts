@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 import { AuthType, GroupName, Initiative } from '../utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 
-import type { AccessRequest, Contact, Permit, User } from './models';
+import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
 import type { IStamps } from '../interfaces/IStamps';
 import type { PermitEmailTemplate } from '../utils/templates';
 
@@ -409,6 +409,7 @@ export type PermitUpdateEmailParams = {
   toEmails: string[];
   emailTemplate: PermitEmailTemplate;
 };
+export type Project = HousingProject | ElectrificationProject;
 
 type SplitDatetimeBase<T> = {
   date: T;

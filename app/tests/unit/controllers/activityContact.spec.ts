@@ -12,9 +12,8 @@ import {
 } from '../../../src/controllers/activityContact';
 import * as activityContactService from '../../../src/services/activityContact';
 import * as contactService from '../../../src/services/contact';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
 import * as emailService from '../../../src/services/email';
-import * as housingProjectService from '../../../src/services/housingProject';
+import * as projectService from '../../../src/services/project';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
 
 jest.mock('config');
@@ -34,8 +33,7 @@ const FAKE_PRIMARY_ACTIVITY_CONTACT = { ...TEST_ACTIVITY_CONTACT_1, contact: TES
 
 const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
 const emailSpy = jest.spyOn(emailService, 'email');
-const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
-const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
+const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
 
 let app: express.Express;
 
@@ -52,8 +50,9 @@ beforeEach(() => {
   mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
 
   searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-  searchElectrificationProjectsSpy.mockResolvedValueOnce([]);
-  searchHousingProjectsSpy.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1]);
+  getProjectSpy.mockResolvedValueOnce({
+    ...TEST_HOUSING_PROJECT_1
+  });
 });
 
 afterEach(() => {
@@ -108,8 +107,7 @@ describe('DELETE /activity/:activityId/contact/:contactId', () => {
       .expect(204);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -162,8 +160,7 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
       .expect(201);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -176,8 +173,7 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
       .expect(201);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -232,8 +228,7 @@ describe('PUT /activity/:activityId/contact/:contactId', () => {
       .expect(200);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 

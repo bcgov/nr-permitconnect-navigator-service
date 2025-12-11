@@ -10,9 +10,8 @@ import {
   updateActivityContact
 } from '../services/activityContact';
 import { searchContacts } from '../services/contact';
-import { searchElectrificationProjects } from '../services/electrificationProject';
 import { email } from '../services/email';
-import { searchHousingProjects } from '../services/housingProject';
+import { getProjectByActivityId } from '../services/project';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates';
 
@@ -33,9 +32,8 @@ const getTeamMemberEmailTemplateData = async (
     });
   }
 
-  const hp = await searchHousingProjects(tx, { activityId: [activityId] });
-  const ep = await searchElectrificationProjects(tx, { activityId: [activityId] });
-  const projectName = hp[0]?.projectName ?? ep[0]?.projectName ?? '';
+  const project = await getProjectByActivityId(tx, activityId);
+  const projectName = project.projectName ?? '';
 
   const templateParams = {
     dearName: `${contact.firstName} ${contact.lastName}`,
