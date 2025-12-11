@@ -23,7 +23,8 @@ const sampleSourceSystemKind: SourceSystemKind = {
   sourceSystemKindId: 2,
   integrated: false,
   createdAt: '2025-06-18T15:56:00.515Z',
-  createdBy: SYSTEM_ID
+  createdBy: SYSTEM_ID,
+  permitTypeIds: [26]
 };
 
 const permitTypesList = [
