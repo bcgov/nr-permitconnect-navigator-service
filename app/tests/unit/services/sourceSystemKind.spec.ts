@@ -13,8 +13,15 @@ describe('getSourceSystemKinds', () => {
     expect(prismaTxMock.source_system_kind.findMany).toHaveBeenCalledWith({
       orderBy: {
         sourceSystem: 'asc'
+      },
+      include: {
+        permitTypeSourceSystemKindXref: {
+          select: {
+            permitTypeId: true
+          }
+        }
       }
     });
-    expect(response).toStrictEqual([{ sourceSystemKindId: 1 }]);
+    expect(response).toStrictEqual([{ sourceSystemKindId: 1, permitTypeIds: undefined }]);
   });
 });

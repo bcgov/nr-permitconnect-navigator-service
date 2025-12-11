@@ -109,7 +109,7 @@ export type SourceSystemCode = SourceSystemCodeBase;
 
 const sourceSystemKindBase = Prisma.validator<Prisma.source_system_kindDefaultArgs>()({});
 export type SourceSystemKindBase = Prisma.source_system_kindGetPayload<typeof sourceSystemKindBase>;
-export type SourceSystemKind = SourceSystemKindBase;
+export type SourceSystemKind = SourceSystemKindBase & { permitTypeIds?: number[] };
 
 const user = Prisma.validator<Prisma.userDefaultArgs>()({});
 export type UserBase = Prisma.userGetPayload<typeof user>;
