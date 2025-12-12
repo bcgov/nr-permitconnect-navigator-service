@@ -64,10 +64,13 @@ const generateElectrificationProjectData = async (
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
+  const newUUID = uuidv4();
+
   // Put new electrification project together
   const electrificationProjectData: ElectrificationProject = {
     ...data.project,
-    electrificationProjectId: uuidv4(),
+    electrificationProjectId: newUUID,
+    projectId: newUUID,
     activityId: activityId,
     submittedAt: new Date(),
     submissionType: SubmissionType.GUIDANCE,

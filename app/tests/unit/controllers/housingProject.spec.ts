@@ -265,6 +265,7 @@ describe('createHousingProjectController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_CREATE,
       housingProjectId: expect.stringMatching(uuidv4Pattern),
+      projectId: expect.stringMatching(uuidv4Pattern),
       submittedAt: expect.any(Date),
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
@@ -273,6 +274,7 @@ describe('createHousingProjectController', () => {
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_HOUSING_PROJECT_1,
       housingProjectId: expect.stringMatching(uuidv4Pattern),
+      projectId: expect.stringMatching(uuidv4Pattern),
       submittedAt: expect.any(Date),
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId
@@ -694,6 +696,7 @@ describe('submitHousingProjectDraftController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_1,
       housingProjectId: expect.stringMatching(uuidv4Pattern),
+      projectId: expect.stringMatching(uuidv4Pattern),
       submittedAt: expect.any(Date),
       createdAt: expect.any(Date),
       createdBy: TEST_CURRENT_CONTEXT.userId

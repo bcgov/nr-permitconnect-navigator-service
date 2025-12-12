@@ -98,8 +98,8 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
     for (const permit of permits) {
       const project = await getProjectByActivityId(tx, permit.activityId);
 
-      const projectId =
-        'electrificationProjectId' in project ? project.electrificationProjectId : project.housingProjectId;
+      const projectId = project.projectId;
+      // 'electrificationProjectId' in project ? project.electrificationProjectId : project.housingProjectId;
       const contact = project.activity?.activityContact?.[0].contact;
       const initiative = project.activity!.initiative!.code as Initiative;
       const navigatorId = project.assignedUserId;

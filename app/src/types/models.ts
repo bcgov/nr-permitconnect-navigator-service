@@ -25,7 +25,9 @@ export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;
 export type Document = Omit<DocumentBase, 'filesize'> & { createdByFullName?: string; filesize: number };
 
 const electrificationProjectBase = Prisma.validator<Prisma.electrification_projectDefaultArgs>()({});
-export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase>;
+export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase> & {
+  projectId: string;
+};
 export type ElectrificationProject = ElectrificationProjectBase & { activity?: Activity; user?: User | null };
 
 const electrificationProjectCategoryCodeBase =
@@ -54,7 +56,7 @@ export type EscalationTypeCodeBase = Prisma.escalation_type_codeGetPayload<typeo
 export type EscalationTypeCode = EscalationTypeCodeBase;
 
 const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
-export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
+export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase> & { projectId: string };
 export type HousingProject = HousingProjectBase & { activity?: Activity; user?: User | null };
 
 const identityProviderBase = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});

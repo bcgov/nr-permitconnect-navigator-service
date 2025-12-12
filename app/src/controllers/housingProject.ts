@@ -211,6 +211,7 @@ const generateHousingProjectData = async (
     }));
   }
 
+  const newUUID = uuidv4();
   // Put new housing project together
   const housingProjectData = {
     housingProject: {
@@ -218,7 +219,8 @@ const generateHousingProjectData = async (
       ...housing,
       ...location,
       ...permits,
-      housingProjectId: uuidv4(),
+      housingProjectId: newUUID,
+      projectId: newUUID,
       activityId: activityId,
       submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
       submittedBy: getCurrentUsername(currentContext),
