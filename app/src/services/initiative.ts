@@ -17,22 +17,3 @@ export const getInitiative = async (tx: PrismaTransactionClient, initiative: EIn
   });
   return result;
 };
-
-/**
- * Fetches an initiative for the given activity id
- * @param tx Prisma transaction client
- * @param activityId The activityId
- * @returns A Promise that resolves to the specific initiative
- */
-export const getInitiativeByActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<Initiative> => {
-  const activity = await tx.activity.findFirstOrThrow({
-    where: {
-      activityId: activityId
-    },
-    include: {
-      initiative: true
-    }
-  });
-
-  return activity.initiative;
-};

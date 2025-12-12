@@ -33,7 +33,9 @@ const selectedContact: Ref<ActivityContact | undefined> = ref(undefined);
 async function onAddUser(contact: Contact, role: ActivityContactRole) {
   try {
     const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
-    activityContacts.value?.push(response);
+
+    // Explicitly update ref to force prop updates
+    activityContacts.value = activityContacts.value?.concat([response]);
 
     if (role === ActivityContactRole.ADMIN)
       toast.success(

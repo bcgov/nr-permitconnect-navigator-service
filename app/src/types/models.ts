@@ -6,7 +6,7 @@ export type AccessRequest = AccessRequestBase;
 
 const activityBase = Prisma.validator<Prisma.activityDefaultArgs>()({});
 export type ActivityBase = Prisma.activityGetPayload<typeof activityBase>;
-export type Activity = ActivityBase & { activityContact?: ActivityContact[] };
+export type Activity = ActivityBase & { activityContact?: ActivityContact[]; initiative?: Initiative };
 
 const activityContactBase = Prisma.validator<Prisma.activity_contactDefaultArgs>()({});
 export type ActivityContactBase = Prisma.activity_contactGetPayload<typeof activityContactBase>;
