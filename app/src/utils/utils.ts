@@ -262,7 +262,8 @@ export function parseIdentityKeyClaims(): string[] {
  */
 export function readFeatureList(): { [key: string]: unknown } {
   const configDir = '../../config';
-  const defaultFile = 'features-default.json';
+  const env = config.get('server.env');
+  const defaultFile = `features-${env}.json`;
   const overrideFile = 'features-local.json';
 
   let features;

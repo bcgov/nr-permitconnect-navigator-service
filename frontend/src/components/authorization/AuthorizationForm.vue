@@ -12,7 +12,7 @@ import AuthorizationUpdateHistory from '@/components/authorization/Authorization
 import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
-import { useCodeStore, useConfigStore, useProjectStore } from '@/store';
+import { useCodeStore, useConfigStore, useFeatureStore, useProjectStore } from '@/store';
 import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
@@ -35,15 +35,18 @@ const AUTHORIZATION_TAB = '2';
 
 // Composables
 const codeStore = useCodeStore();
-const { locale, t } = useI18n();
+const configStore = useConfigStore();
 const confirmDialog = useConfirm();
+const featureStore = useFeatureStore();
+const { locale, t } = useI18n();
 const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
 
 // Store
 const { codeDisplay } = codeStore;
-const { getConfig } = storeToRefs(useConfigStore());
+const { isPeachEnabled } = storeToRefs(featureStore);
+const { getConfig } = storeToRefs(configStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
@@ -165,8 +168,11 @@ async function emailNotification(data: Permit, permitNote: string) {
   const isOnlyTemplate = permitNote.trim() === peachUpdateNotePlaceholder;
 
   let body;
-  if (isValidPeachPermit.value && isOnlyTemplate) body = peachPermitNoteNotificationTemplate(emailTemplateData);
-  else body = permitNoteNotificationTemplate(emailTemplateData);
+  if (isValidPeachPermit.value && isOnlyTemplate && isPeachEnabled.value) {
+    body = peachPermitNoteNotificationTemplate(emailTemplateData);
+  } else {
+    body = permitNoteNotificationTemplate(emailTemplateData);
+  }
 
   let applicantEmail =
     (getProject.value?.contacts?.[0]?.email as string) ||
@@ -199,7 +205,7 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
     const systemRecordNotFound =
       e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
     if (e.status === 404 && systemRecordNotFound) {
-      noPeachDataModalVisible.value = true;
+      noPeachDataModalVisible.value = isPeachEnabled.value; // Change to `true1 once toggle removed
     } else {
       toast.error(e.message);
     }
@@ -207,6 +213,7 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
 }
 
 function handlePeachIntegrationChange(now: boolean, prev?: boolean) {
+  if (!isPeachEnabled.value) return;
   if (!formRef.value?.values) return;
 
   const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
@@ -335,6 +342,7 @@ async function onSubmit(data: any) {
 
   try {
     if (
+      isPeachEnabled.value &&
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
       checkIfPeachIntegratedTrackingId(data.permitTracking)
     ) {
@@ -429,8 +437,8 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     />
     <AuthorizationStatusUpdatesCard
       :editable="editable"
-      :peach-integrated-auth-type="isPeachIntegratedAuthType"
-      :peach-integrated-tracking-id="isPeachIntegratedTrackingId"
+      :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
+      :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
     />
@@ -439,7 +447,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
         <Button
           class="mr-2"
           :label="
-            isPeachIntegrated
+            isPeachIntegrated && isPeachEnabled
               ? t('authorization.authorizationForm.automatePublish')
               : t('authorization.authorizationForm.publish')
           "
