@@ -227,28 +227,29 @@ model permit_note {
 }
 
 model permit_type {
-  permitTypeId             Int                           @id @default(autoincrement()) @map("permit_type_id")
-  agency                   String
-  division                 String?
-  branch                   String?
-  businessDomain           String                        @map("business_domain")
-  type                     String
-  family                   String?
-  name                     String
-  nameSubtype              String?                       @map("name_subtype")
-  acronym                  String?
-  trackedInAts             Boolean                       @default(false) @map("tracked_in_ats")
-  createdBy                String?                       @default("00000000-0000-4000-8000-000000000000") @map("created_by")
-  createdAt                DateTime?                     @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy                String?                       @map("updated_by")
-  updatedAt                DateTime?                     @map("updated_at") @db.Timestamptz(6)
-  deletedBy                String?                       @map("deleted_by")
-  deletedAt                DateTime?                     @map("deleted_at") @db.Timestamptz(6)
-  sourceSystem             String?                       @map("source_system")
-  infoUrl                  String?                       @map("info_url")
-  permit                   permit[]
-  sourceSystemCode         source_system_code?           @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
-  permitTypeInitiativeXref permit_type_initiative_xref[]
+  permitTypeId                   Int                                   @id @default(autoincrement()) @map("permit_type_id")
+  agency                         String
+  division                       String?
+  branch                         String?
+  businessDomain                 String                                @map("business_domain")
+  type                           String
+  family                         String?
+  name                           String
+  nameSubtype                    String?                               @map("name_subtype")
+  acronym                        String?
+  trackedInAts                   Boolean                               @default(false) @map("tracked_in_ats")
+  createdBy                      String?                               @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt                      DateTime?                             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                      String?                               @map("updated_by")
+  updatedAt                      DateTime?                             @map("updated_at") @db.Timestamptz(6)
+  deletedBy                      String?                               @map("deleted_by")
+  deletedAt                      DateTime?                             @map("deleted_at") @db.Timestamptz(6)
+  sourceSystem                   String?                               @map("source_system")
+  infoUrl                        String?                               @map("info_url")
+  permit                         permit[]
+  sourceSystemCode               source_system_code?                   @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
+  permitTypeInitiativeXref       permit_type_initiative_xref[]
+  permitTypeSourceSystemKindXref permit_type_source_system_kind_xref[]
 
   @@unique([agency, division, branch, name], map: "permit_type_agency_division_branch_name_unique")
   @@schema("public")
@@ -716,19 +717,20 @@ model source_system_code {
 }
 
 model source_system_kind {
-  sourceSystemKindId Int                @id @default(autoincrement()) @map("source_system_kind_id")
-  kind               String?
-  description        String?
-  sourceSystem       String             @map("source_system")
-  createdBy          String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
-  createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy          String?            @map("updated_by")
-  updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
-  deletedBy          String?            @map("deleted_by")
-  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
-  integrated         Boolean            @default(false)
-  permitTracking     permit_tracking[]
-  sourceSystemCode   source_system_code @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
+  sourceSystemKindId             Int                                   @id @default(autoincrement()) @map("source_system_kind_id")
+  kind                           String?
+  description                    String?
+  sourceSystem                   String                                @map("source_system")
+  createdBy                      String?                               @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt                      DateTime?                             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                      String?                               @map("updated_by")
+  updatedAt                      DateTime?                             @map("updated_at") @db.Timestamptz(6)
+  deletedBy                      String?                               @map("deleted_by")
+  deletedAt                      DateTime?                             @map("deleted_at") @db.Timestamptz(6)
+  integrated                     Boolean                               @default(false)
+  permitTracking                 permit_tracking[]
+  permitTypeSourceSystemKindXref permit_type_source_system_kind_xref[]
+  sourceSystemCode               source_system_code                    @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
 
   @@schema("public")
 }
@@ -771,6 +773,22 @@ model escalation_type_code {
   deletedAt   DateTime?      @map("deleted_at") @db.Timestamptz(6)
   noteHistory note_history[]
 
+  @@schema("public")
+}
+
+model permit_type_source_system_kind_xref {
+  permitTypeId       Int                @map("permit_type_id")
+  sourceSystemKindId Int                @map("source_system_kind_id")
+  createdBy          String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt          DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy          String?            @map("updated_by")
+  updatedAt          DateTime?          @map("updated_at") @db.Timestamptz(6)
+  deletedBy          String?            @map("deleted_by")
+  deletedAt          DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  permitType         permit_type        @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_type_source_system_kind_xref_permit_type_id_foreign")
+  sourceSystemKind   source_system_kind @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_type_source_system_kind_xref_source_system_kind_id_forei")
+
+  @@id([permitTypeId, sourceSystemKindId])
   @@schema("public")
 }
 

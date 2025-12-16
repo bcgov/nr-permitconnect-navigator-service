@@ -18,7 +18,7 @@ import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '@/utils/templates';
-import { combineDateTime, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
+import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
@@ -193,10 +193,11 @@ async function emailNotification(data: Permit, permitNote: string) {
 async function getPeachSummary(permitTrackings: PermitTracking[]) {
   try {
     const data: PermitTracking[] = permitTrackings.map((pt) => {
-      const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId);
+      const found =
+        sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) || ({} as any);
       return {
         ...pt,
-        sourceSystemKind
+        sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
       };
     });
     const peachSummary = await peachService.getPeachSummary(data);
@@ -393,7 +394,7 @@ async function onSubmit(data: any) {
 
 onBeforeMount(async () => {
   initializeFormValues();
-  const response = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  const response: SourceSystemKind[] = (await sourceSystemKindService.getSourceSystemKinds()).data;
   sourceSystemKinds.value = response.sort(sortForDisplayOrder);
   if (authorization?.updatedBy) {
     updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] })).data[0];
@@ -420,10 +421,11 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     <h3 class="mt-4">
       {{ authorization ? authorization.permitType.name : t('authorization.authorizationForm.addAuthorization') }}
     </h3>
-
     <AuthorizationCardIntake
       :editable="editable"
-      :source-system-kinds="sourceSystemKinds"
+      :source-system-kinds="
+        sourceSystemKinds.filter((ssk) => ssk.permitTypeIds.includes(values?.authorizationType?.permitTypeId))
+      "
       class="mt-6"
       @update:uncheck-shown-to-proponent="
         (checkedIndex) => {
