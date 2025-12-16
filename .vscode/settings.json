@@ -17,6 +17,7 @@
   "[vue]": {
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
+  "coverage-gutters.partialHighlightDark": "rgba(0, 255, 255, 0.2)",
   "coverage-gutters.showGutterCoverage": false,
   "coverage-gutters.showLineCoverage": true,
   "editor.defaultFormatter": "dbaeumer.vscode-eslint",
