@@ -77,11 +77,15 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
     submittedDate
   });
 
+  const appEnv = config.get('server.env');
+  let subject = `Updates for project ${activityId}, ${permitName}`;
+  if (appEnv === 'dev' || appEnv === 'test') subject = `TEST -- ${subject} -- TEST`;
+
   const emailData = {
     to: toEmails,
     from: nrmPermitEmail,
     cc: [nrmPermitEmail],
-    subject: `Updates for project ${activityId}, ${permitName}`,
+    subject: subject,
     bodyType: 'html',
     body: emailBody
   };

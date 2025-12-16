@@ -18,7 +18,15 @@ import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '@/utils/templates';
-import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
+import {
+  combineDateTime,
+  differential,
+  isEmptyObject,
+  omit,
+  scrollToFirstError,
+  setEmptyStringsToNull,
+  splitDateTime
+} from '@/utils/utils';
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
@@ -125,6 +133,15 @@ const formSchema = object({
   statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
 });
 
+const snapshotPermitStatus = (p: any) => ({
+  state: p.state,
+  stage: p.stage,
+  decisionDate: p.decisionDate,
+  submittedDate: p.submittedDate,
+  statusLastChanged: p.statusLastChanged,
+  statusLastVerified: p.statusLastVerified
+});
+
 const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
   const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
   const sourceB = codeDisplay.SourceSystem[b.sourceSystem];
@@ -166,9 +183,10 @@ async function emailNotification(data: Permit, permitNote: string) {
 
   const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
   const isOnlyTemplate = permitNote.trim() === peachUpdateNotePlaceholder;
+  const isFirstNote = !authorization?.permitNote?.length;
 
   let body;
-  if (isValidPeachPermit.value && isOnlyTemplate && isPeachEnabled.value) {
+  if (isValidPeachPermit.value && isOnlyTemplate && isFirstNote && isPeachEnabled.value) {
     body = peachPermitNoteNotificationTemplate(emailTemplateData);
   } else {
     body = permitNoteNotificationTemplate(emailTemplateData);
@@ -365,16 +383,27 @@ async function onSubmit(data: any) {
     const permitSubmitData = setEmptyStringsToNull(permitData);
     const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
 
+    const before = snapshotPermitStatus(authorization ?? {});
+    const after = snapshotPermitStatus(result);
+    const diff = differential(before, after);
+
+    const statusChanged = !isEmptyObject(diff);
+    const permitNoteText = (permitNote ?? '').trim();
+    const isEmptyPermitNote = permitNoteText.length === 0;
+
     // Prevent creating notes and sending an update email if the above call fails or if note is empty
-    if (result?.permitId && permitNote?.trim().length > 0) {
+    if (result?.permitId && (!isEmptyPermitNote || (isValidPeachPermit.value && statusChanged))) {
+      const note = isEmptyPermitNote
+        ? `This application is ${result.state.toLocaleLowerCase()} in the ${result.stage.toLocaleLowerCase()}.`
+        : permitNoteText;
       await permitNoteService.createPermitNote({
         permitId: result.permitId,
-        note: permitNote
+        note
       });
 
       // Send email to the user if permit is needed or if permit stage is not pre-submission
-      if (data.needed === PermitNeeded.YES || data.stage !== PermitStage.PRE_SUBMISSION)
-        emailNotification(result, permitNote);
+      if (result.needed === PermitNeeded.YES || result.stage !== PermitStage.PRE_SUBMISSION)
+        await emailNotification(result, note);
     }
 
     toast.success(t('authorization.authorizationForm.permitSaved'));
