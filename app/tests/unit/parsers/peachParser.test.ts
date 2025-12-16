@@ -16,7 +16,7 @@ import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/ut
 import type { ProcessEvent, Record as PeachRecord } from '../../../src/types';
 
 jest.mock('config');
-jest.mock('../../../src/components/log', () => ({
+jest.mock('../../../src/utils/log', () => ({
   getLogger: () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), verbose: jest.fn(), log: jest.fn() })
 }));
 

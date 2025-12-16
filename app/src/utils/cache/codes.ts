@@ -1,6 +1,6 @@
-import { getLogger } from '../../components/log';
 import { transactionWrapper } from '../../db/utils/transactionWrapper';
 import { listAllCodeTables } from '../../services/code';
+import { getLogger } from '../../utils/log';
 
 import type { PrismaTransactionClient } from '../../db/dataConnection';
 import type {

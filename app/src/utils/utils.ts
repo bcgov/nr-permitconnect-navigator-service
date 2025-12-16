@@ -3,7 +3,8 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { validate, version } from 'uuid';
 
-import { getLogger } from '../components/log';
+import { getLogger } from '../utils/log';
+
 import type { JwtPayload } from 'jsonwebtoken';
 import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes, DateTimeStrings } from '../types';
 

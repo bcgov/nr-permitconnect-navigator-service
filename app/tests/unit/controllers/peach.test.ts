@@ -22,7 +22,7 @@ import type { PermitTracking } from '../../../src/types';
 
 jest.mock('config');
 
-jest.mock('../../../src/components/log', () => ({
+jest.mock('../../../src/utils/log', () => ({
   getLogger: () => ({
     info: jest.fn(),
     warn: jest.fn(),

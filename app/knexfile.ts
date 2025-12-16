@@ -2,7 +2,7 @@ import config from 'config';
 import { format, parseJSON } from 'date-fns';
 import { Knex } from 'knex';
 
-import { getLogger } from './src/components/log';
+import { getLogger } from './src/utils/log';
 const log = getLogger(module.filename);
 
 /**

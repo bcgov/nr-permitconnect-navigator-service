@@ -64,10 +64,8 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
   try {
     const response = (await activityContactService.updateActivityContact(activityId, contact.contactId, role)).data;
 
-    if (activityContacts.value) {
-      const idx = activityContacts.value?.findIndex((x) => x.contactId === contact.contactId);
-      if (idx >= 0) activityContacts.value[idx] = response;
-    }
+    // Explicitly update ref to force prop updates
+    activityContacts.value = activityContacts.value?.map((x) => (x.contactId === response.contactId ? response : x));
 
     // Close modal on success
     manageUserModalVisible.value = false;
