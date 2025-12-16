@@ -1,10 +1,10 @@
-import { getLogger } from '../components/log';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateUpdateStamps } from '../db/utils/utils';
 import { parsePeachRecords, summarizePeachRecord } from '../parsers/peachParser';
 import { getPeachRecord } from '../services/peach';
 import { searchPermits, upsertPermit } from '../services/permit';
 import { combineDateTime, compareDates, omit, Problem } from '../utils';
+import { getLogger } from '../utils/log';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 
 import type { Request, Response } from 'express';

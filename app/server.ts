@@ -5,9 +5,9 @@ import config from 'config';
 import { createServer } from 'node:http';
 
 import app from './app';
-import getLogger from './src/components/log';
-import { refreshCodeCaches } from './src/utils/cache/codes';
 import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils';
+import { refreshCodeCaches } from './src/utils/cache/codes';
+import getLogger from './src/utils/log';
 import { state } from './state';
 
 const log = getLogger(module.filename);

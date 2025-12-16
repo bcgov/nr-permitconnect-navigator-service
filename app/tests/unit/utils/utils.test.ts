@@ -17,7 +17,7 @@ jest.mock('fs', () => ({
   readFileSync: jest.fn()
 }));
 
-jest.mock('../../../src/components/log', () => ({
+jest.mock('../../../src/utils/log', () => ({
   getLogger: () => ({ warn: jest.fn(), info: jest.fn(), error: jest.fn() })
 }));
 

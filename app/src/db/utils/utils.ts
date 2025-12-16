@@ -2,9 +2,9 @@ import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
-import { getLogger } from '../../components/log';
 import { getActivity } from '../../services/activity';
 import { SYSTEM_ID } from '../../utils/constants/application';
+import { getLogger } from '../../utils/log';
 import { uuidToActivityId } from '../../utils/utils';
 
 import type { CurrentContext } from '../../types';

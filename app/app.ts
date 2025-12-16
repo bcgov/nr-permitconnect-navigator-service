@@ -9,11 +9,11 @@ import { join } from 'path';
 import querystring from 'querystring';
 
 import { version as appVersion } from './package.json';
-import { getLogger, httpLogger } from './src/components/log';
 import { requestSanitizer } from './src/middleware/requestSanitizer';
 import router from './src/routes';
 import { Problem } from './src/utils';
 import { DEFAULTCORS } from './src/utils/constants/application';
+import { getLogger, httpLogger } from './src/utils/log';
 import { readIdpList } from './src/utils/utils';
 import { state } from './state';
 
