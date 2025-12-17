@@ -86,6 +86,7 @@ const testSubmission: HousingProject = {
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
+  companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
   isDevelopedInBc: 'Yes',
@@ -184,7 +185,7 @@ describe('ProjectForm.vue', () => {
 
     // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(15);
+    expect(elements.length).toBe(17);
   });
 
   it('renders the correct amount of input mask components (phone number)', async () => {

@@ -26,6 +26,7 @@ const testProject: ElectrificationProject = {
   submittedAt: new Date().toISOString(),
   intakeStatus: 'Pending',
   applicationStatus: ApplicationStatus.IN_PROGRESS,
+  companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Test Co',
   hasRelatedEnquiry: false,
   queuePriority: 1,

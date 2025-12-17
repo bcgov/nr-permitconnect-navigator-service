@@ -80,6 +80,7 @@ const testSubmission: HousingProject = {
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
+  companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
   isDevelopedInBc: 'Yes',

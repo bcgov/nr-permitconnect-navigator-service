@@ -52,6 +52,7 @@ const testProject: HousingProject = {
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
   companyNameRegistered: 'Example Company',
+  companyIdRegistered: 'FM0281610',
   consentToFeedback: true,
   isDevelopedInBc: 'Yes',
   projectName: 'Super Long Project Name',
