@@ -17,6 +17,7 @@ export const basicIntake = Joi.object({
       .valid(...YES_NO_LIST),
     otherwise: Joi.string().allow(null)
   }),
+  registeredId: Joi.string().allow(null),
   registeredName: Joi.when('projectApplicantType', {
     is: ProjectApplicant.BUSINESS,
     then: Joi.string().required().max(255).trim(),
