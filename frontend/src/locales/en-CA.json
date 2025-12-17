@@ -291,6 +291,7 @@
         "confirmReopenMessage": "Please confirm that you want to re-open this project",
         "confirmReopenHeader": "Re-open project?",
         "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
+        "orgBookRegistration": "OrgBook Registration #",
         "searchContacts": "Search Contacts"
       }
     },
