@@ -4,7 +4,7 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from './ProjectFormSchema';
-import { AdditionalInfo, AstNote, Electrification, Location } from '@/components/common/icons';
+import { AdditionalInfo, AstNote, Company, Electrification, Location } from '@/components/common/icons';
 import {
   AutoComplete,
   CancelButton,
@@ -428,9 +428,9 @@ onBeforeMount(async () => {
         <Panel toggleable>
           <template #header>
             <div class="flex items-center gap-x-2.5">
-              <Electrification />
+              <Company />
               <h3 class="section-header m-0">
-                {{ t('i.electrification.projectForm.projectHeader') }}
+                {{ t('i.housing.project.projectForm.companyProject') }}
               </h3>
             </div>
           </template>
@@ -453,15 +453,15 @@ onBeforeMount(async () => {
               "
             />
             <InputText
+              name="project.companyIdRegistered"
+              :label="t('i.common.projectForm.bcRegistryId')"
+              :disabled="true"
+            />
+            <InputText
               name="project.projectName"
               :label="t('i.electrification.projectForm.projectNameLabel')"
               :disabled="!editable"
               @on-input="emitProjectNameChange"
-            />
-            <InputText
-              name="project.companyIdRegistered"
-              :label="t('i.common.projectForm.orgBookRegistration')"
-              :disabled="true"
             />
           </div>
         </Panel>

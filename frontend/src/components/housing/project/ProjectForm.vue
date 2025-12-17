@@ -545,13 +545,19 @@ onBeforeMount(async () => {
               </h3>
             </div>
           </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
+          <div class="grid grid-cols-2 gap-x-6 gap-y-6">
             <Select
               name="project.isDevelopedInBc"
               :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
               :disabled="!editable"
               :options="YES_NO_LIST"
               @on-change="setFieldValue('project.companyIdRegistered', null)"
+            />
+            <InputText
+              name="project.projectName"
+              :label="t('i.housing.project.projectForm.projectNameLabel')"
+              :disabled="!editable"
+              @on-input="emitProjectNameChange"
             />
             <AutoComplete
               v-if="values.project.isDevelopedInBc === BasicResponse.YES"
@@ -586,16 +592,11 @@ onBeforeMount(async () => {
                 }
               "
             />
-            <InputText
-              name="project.projectName"
-              :label="t('i.housing.project.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
-            />
+
             <InputText
               v-if="values.project.isDevelopedInBc === BasicResponse.YES"
               name="project.companyIdRegistered"
-              :label="t('i.common.projectForm.orgBookRegistration')"
+              :label="t('i.common.projectForm.bcRegistryId')"
               :disabled="true"
             />
           </div>
