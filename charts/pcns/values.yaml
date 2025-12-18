@@ -219,3 +219,28 @@ patroni:
 
   # persistentVolume:
   #   enabled: false
+
+peachSync:
+  enabled: true
+
+  # -- Cron schedule for PEACH sync
+  schedule: "5 3 * * *"
+
+  # -- Suspend subsequent runs of the CronJob without deleting it
+  suspend: false
+
+  # -- How long the controller can miss the schedule before it gives up starting the job
+  startingDeadlineSeconds: 600
+  concurrencyPolicy: Forbid
+
+  successfulJobsHistoryLimit: 5
+  failedJobsHistoryLimit: 3
+
+  backoffLimit: 1
+  activeDeadlineSeconds: 1800
+  terminationGracePeriodSeconds: 30
+
+  resources:
+    requests:
+      cpu: 10m
+      memory: 128Mi
