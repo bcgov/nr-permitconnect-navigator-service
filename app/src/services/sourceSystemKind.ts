@@ -1,6 +1,6 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
-import type { SourceSystemKind } from '../types';
+import type { SourceSystemKind } from '../types/index.ts';
 
 /**
  * Get all source system kinds and include their associated permit type ids

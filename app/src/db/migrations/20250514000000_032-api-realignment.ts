@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
 

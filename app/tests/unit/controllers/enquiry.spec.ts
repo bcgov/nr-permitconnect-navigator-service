@@ -6,24 +6,24 @@ import {
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
-} from '../../../src/controllers/enquiry';
-import * as activityService from '../../../src/services/activity';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as contactService from '../../../src/services/contact';
-import { Initiative } from '../../../src/utils/enums/application';
+} from '../../../src/controllers/enquiry.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
+import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types/index.ts';
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
   TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

@@ -1,10 +1,10 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps';
+import stamps from '../stamps.ts';
 
 import type { Knex } from 'knex';
-import { Action, GroupName, Initiative, Resource, ResourceLegacy } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource, ResourceLegacy } from '../../utils/enums/application.ts';
 
 const resources = [
   {

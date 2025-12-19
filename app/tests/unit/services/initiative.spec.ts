@@ -1,9 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as initiativeService from '../../../src/services/initiative.ts';
+import { Initiative as EInitiative } from '../../../src/utils/enums/application.ts';
 
-import * as initiativeService from '../../../src/services/initiative';
-import { Initiative as EInitiative } from '../../../src/utils/enums/application';
-
-import type { Initiative } from '../../../src/types';
+import type { Initiative } from '../../../src/types/index.ts';
 
 describe('getInitiative', () => {
   it('calls initiative.findFirstOrThrow and returns result', async () => {

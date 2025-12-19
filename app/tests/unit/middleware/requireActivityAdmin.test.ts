@@ -1,12 +1,14 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import request from 'supertest';
 
-import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin';
-import * as contactService from '../../../src/services/contact';
-import * as activityContactService from '../../../src/services/activityContact';
+import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
 
-import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
+import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
+
+import type { Request, Response } from 'express';
 
 function buildApp() {
   const app = express();

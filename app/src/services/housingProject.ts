@@ -1,15 +1,15 @@
 import { Prisma } from '@prisma/client';
 
-import { jsonToPrismaInputJson } from '../db/utils/utils';
+import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import type {
   HousingProject,
   HousingProjectBase,
   HousingProjectSearchParameters,
   HousingProjectStatistics
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * Creates a new housing project

@@ -1,7 +1,7 @@
-import { Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types/index.ts';
 
 /** Delete a specific permit
  * @param tx Prisma transaction client

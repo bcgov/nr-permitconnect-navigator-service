@@ -1,13 +1,13 @@
-import { TEST_CURRENT_CONTEXT } from '../data';
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import {
   createATSClientController,
   createATSEnquiryController,
   searchATSUsersController
-} from '../../../src/controllers/ats';
-import * as atsService from '../../../src/services/ats';
+} from '../../../src/controllers/ats.ts';
+import * as atsService from '../../../src/services/ats.ts';
 
 import type { Request, Response } from 'express';
-import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types';
+import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

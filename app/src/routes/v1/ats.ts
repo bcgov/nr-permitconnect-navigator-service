@@ -1,11 +1,15 @@
 import express from 'express';
 
-import { createATSClientController, createATSEnquiryController, searchATSUsersController } from '../../controllers/ats';
-import { hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { atsValidator } from '../../validators';
+import {
+  createATSClientController,
+  createATSEnquiryController,
+  searchATSUsersController
+} from '../../controllers/ats.ts';
+import { hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { atsValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

@@ -1,6 +1,6 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Document } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Document } from '../types/index.ts';
 
 /**
  * Creates a link between an activity and a previously existing object in COMS

@@ -1,17 +1,17 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
-} from '../db/utils/utils';
-import { searchElectrificationProjects } from '../services/electrificationProject';
-import { searchEnquiries } from '../services/enquiry';
-import { searchHousingProjects } from '../services/housingProject';
-import { createNote } from '../services/note';
+} from '../db/utils/utils.ts';
+import { searchElectrificationProjects } from '../services/electrificationProject.ts';
+import { searchEnquiries } from '../services/enquiry.ts';
+import { searchHousingProjects } from '../services/housingProject.ts';
+import { createNote } from '../services/note.ts';
 import {
   createNoteHistory,
   deleteNoteHistory,
@@ -19,14 +19,14 @@ import {
   listBringForward,
   listNoteHistory,
   updateNoteHistory
-} from '../services/noteHistory';
-import { searchUsers } from '../services/user';
-import { Initiative } from '../utils/enums/application';
-import { BringForwardType } from '../utils/enums/projectCommon';
+} from '../services/noteHistory.ts';
+import { searchUsers } from '../services/user.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { BringForward, Note, NoteHistory } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { BringForward, Note, NoteHistory } from '../types/index.ts';
 
 /**
  * Create a new note history and add the given note to it

@@ -1,10 +1,10 @@
-import axios from 'axios';
+import axios, { AxiosError } from 'axios';
 import config from 'config';
 
-import * as atsService from '../../../src/services/ats';
-import { ATSClientResource, ATSEnquiryResource } from '../../../src/types';
-import { AxiosError } from 'axios';
-import { InternalAxiosRequestConfig } from 'axios';
+import * as atsService from '../../../src/services/ats.ts';
+
+import type { InternalAxiosRequestConfig } from 'axios';
+import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

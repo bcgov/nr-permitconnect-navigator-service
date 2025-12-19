@@ -1,21 +1,21 @@
 import express from 'express';
 
-import { currentContext } from '../../middleware/authentication';
-import { Initiative } from '../../utils/enums/application';
+import { currentContext } from '../../middleware/authentication.ts';
+import { Initiative } from '../../utils/enums/application.ts';
 
-import activityContact from './activityContact';
-import ats from './ats';
-import code from './code';
-import contact from './contact';
-import docs from './docs';
-import electrification from './electrification';
-import housing from './housing';
-import peach from './peach';
-import reporting from './reporting';
-import sso from './sso';
-import sourceSystemKind from './sourceSystemKind';
-import user from './user';
-import yars from './yars';
+import activityContact from './activityContact.ts';
+import ats from './ats.ts';
+import code from './code.ts';
+import contact from './contact.ts';
+import docs from './docs.ts';
+import electrification from './electrification.ts';
+import housing from './housing.ts';
+import peach from './peach.ts';
+import reporting from './reporting.ts';
+import sso from './sso.ts';
+import sourceSystemKind from './sourceSystemKind.ts';
+import user from './user.ts';
+import yars from './yars.ts';
 
 const router = express.Router();
 router.use(currentContext(Initiative.PCNS));

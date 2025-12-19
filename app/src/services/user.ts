@@ -1,15 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-import { searchContacts, upsertContacts } from './contact';
-import { SYSTEM_ID } from '../utils/constants/application';
-import { IdentityProvider as enumIDP } from '../utils/enums/application';
-import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
-import { Problem } from '../utils';
+import { searchContacts, upsertContacts } from './contact.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { IdentityProvider as enumIDP } from '../utils/enums/application.ts';
+import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
+import { Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, IdentityProvider, User } from '../types/models';
-import type { UserSearchParameters } from '../types/stuff';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, IdentityProvider, User } from '../types/models.ts';
+import type { UserSearchParameters } from '../types/stuff.ts';
 
 /**
  * The User DB Service

@@ -1,4 +1,4 @@
-import { SYSTEM_ID } from '../utils/constants/application';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
 
 // TODO: Figure out these Knex types
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

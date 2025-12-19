@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
-import type { Knex } from 'knex';
+import stamps from '../stamps.ts';
 
-import stamps from '../stamps';
+import type { Knex } from 'knex';
 
 const permitTypeSystemsKinds = [
   {

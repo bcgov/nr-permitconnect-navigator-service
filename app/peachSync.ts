@@ -1,6 +1,6 @@
-import { syncPeachRecords } from './src/controllers/peach';
-import { sendPermitUpdateNotifications } from './src/controllers/permit';
-import { getLogger } from './src/utils/log';
+import { syncPeachRecords } from './src/controllers/peach.ts';
+import { sendPermitUpdateNotifications } from './src/controllers/permit.ts';
+import { getLogger } from './src/utils/log.ts';
 
 const log = getLogger(module.filename);
 

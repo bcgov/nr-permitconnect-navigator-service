@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
-import { activityId, uuidv4 } from './common';
-import { validate } from '../middleware/validation';
+import { activityId, uuidv4 } from './common.ts';
+import { validate } from '../middleware/validation.ts';
 
 const schema = {
   createDocument: {

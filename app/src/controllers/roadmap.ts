@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
-import { getObject } from '../services/coms';
-import { email } from '../services/email';
-import { createNote } from '../services/note';
-import { createNoteHistory } from '../services/noteHistory';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
+import { getObject } from '../services/coms.ts';
+import { email } from '../services/email.ts';
+import { createNote } from '../services/note.ts';
+import { createNoteHistory } from '../services/noteHistory.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Email, EmailAttachment } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Email, EmailAttachment } from '../types/index.ts';
 
 /**
  * Send an email with the roadmap data

@@ -1,9 +1,9 @@
-import prisma from '../db/dataConnection';
-import { searchContacts } from '../services/contact';
-import { Problem } from '../utils';
+import prisma from '../db/dataConnection.ts';
+import { searchContacts } from '../services/contact.ts';
+import { Problem } from '../utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Activity } from '../types';
+import type { Activity } from '../types/index.ts';
 
 /**
  * Filters the response json based on the scope of the current authorization

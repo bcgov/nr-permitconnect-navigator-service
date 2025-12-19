@@ -3,11 +3,11 @@ import express from 'express';
 import {
   getElectrificationProjectPermitDataController,
   getHousingProjectPermitDataController
-} from '../../controllers/reporting';
-import { hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
+} from '../../controllers/reporting.ts';
+import { hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

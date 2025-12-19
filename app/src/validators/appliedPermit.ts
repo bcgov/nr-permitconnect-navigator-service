@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
-import { permitTrackingSchema } from './permitTracking';
-import { PERMIT_STAGE_LIST } from '../utils/constants/permit';
+import { permitTrackingSchema } from './permitTracking.ts';
+import { PERMIT_STAGE_LIST } from '../utils/constants/permit.ts';
 
 export const appliedPermit = Joi.object({
   permitTypeId: Joi.number().required(),

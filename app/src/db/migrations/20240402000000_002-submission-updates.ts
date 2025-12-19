@@ -1,4 +1,4 @@
-import { BasicResponse } from '../../utils/enums/application';
+import { BasicResponse } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
 

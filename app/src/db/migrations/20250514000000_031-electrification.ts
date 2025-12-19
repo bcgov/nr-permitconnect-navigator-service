@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import stamps from '../stamps.ts';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
 

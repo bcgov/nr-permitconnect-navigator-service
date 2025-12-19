@@ -1,5 +1,5 @@
 import type { Knex } from 'knex';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 const resources = [
   {

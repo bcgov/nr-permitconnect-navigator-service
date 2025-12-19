@@ -5,14 +5,14 @@ import {
   deleteActivityContactController,
   listActivityContactController,
   updateActivityContactController
-} from '../../controllers/activityContact';
-import { requireActivityAdmin } from '../../middleware/requireActivityAdmin';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
+} from '../../controllers/activityContact.ts';
+import { requireActivityAdmin } from '../../middleware/requireActivityAdmin.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
 
-import { activityContactValidator } from '../../validators';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { Action, Resource } from '../../utils/enums/application';
+import { activityContactValidator } from '../../validators/index.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
 
 const router = express.Router({ mergeParams: true }); // mergeParams allows parent router to pass route params down
 router.use(requireSomeAuth);

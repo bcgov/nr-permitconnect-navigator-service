@@ -1,5 +1,5 @@
-import { Problem } from '../utils';
-import { AuthType } from '../utils/enums/application';
+import { Problem } from '../utils/index.ts';
+import { AuthType } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

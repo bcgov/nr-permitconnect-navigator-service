@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { YES_NO_LIST } from '../utils/constants/application';
-import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
-import { ENQUIRY_TYPE_LIST } from '../utils/constants/projectCommon';
-import { ProjectApplicant } from '../utils/enums/housing';
+import { YES_NO_LIST } from '../utils/constants/application.ts';
+import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
+import { ENQUIRY_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { ProjectApplicant } from '../utils/enums/housing.ts';
 
 export const basicIntake = Joi.object({
   consentToFeedback: Joi.boolean(),

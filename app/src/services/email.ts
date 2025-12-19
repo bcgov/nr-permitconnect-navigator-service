@@ -2,10 +2,10 @@ import axios from 'axios';
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma from '../db/dataConnection';
+import prisma from '../db/dataConnection.ts';
 
 import type { AxiosInstance } from 'axios';
-import type { Email } from '../types';
+import type { Email } from '../types/index.ts';
 
 type Message = {
   msgId: string;

@@ -1,7 +1,6 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_PERMIT_NOTE_1 } from '../data';
-import * as permitNoteService from '../../../src/services/permitNote';
+import { TEST_PERMIT_NOTE_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as permitNoteService from '../../../src/services/permitNote.ts';
 
 describe('createPermitNote', () => {
   it('calls permit_note.create and returns result', async () => {

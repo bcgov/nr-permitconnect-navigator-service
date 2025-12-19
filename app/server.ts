@@ -4,11 +4,11 @@
 import config from 'config';
 import { createServer } from 'node:http';
 
-import app from './app';
-import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils';
-import { refreshCodeCaches } from './src/utils/cache/codes';
-import getLogger from './src/utils/log';
-import { state } from './state';
+import app from './app.ts';
+import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils.ts';
+import { refreshCodeCaches } from './src/utils/cache/codes.ts';
+import getLogger from './src/utils/log.ts';
+import { state } from './state.ts';
 
 const log = getLogger(module.filename);
 const port = normalizePort(config.get('server.port') ?? '3000');

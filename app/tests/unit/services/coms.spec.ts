@@ -1,8 +1,8 @@
 import axios from 'axios';
 import config from 'config';
 
-import * as comsService from '../../../src/services/coms';
-import { Action } from '../../../src/utils/enums/application';
+import * as comsService from '../../../src/services/coms.ts';
+import { Action } from '../../../src/utils/enums/application.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

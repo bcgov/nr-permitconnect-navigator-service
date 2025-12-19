@@ -1,4 +1,4 @@
-import { BasicResponse, GroupName } from '../enums/application';
+import { BasicResponse, GroupName } from '../enums/application.ts';
 
 /** Default CORS settings used across the entire application */
 export const DEFAULTCORS = Object.freeze({
