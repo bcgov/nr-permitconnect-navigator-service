@@ -81,11 +81,13 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
+const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-const projectFormSchema = createProjectFormSchema(codeList, enums);
+const projectFormSchema = computed(() => {
+  return createProjectFormSchema(codeList, enums, orgBookOptions.value);
+});
 
 function emitProjectNameChange(e: Event) {
   emit('input-project-name', (e.target as HTMLInputElement).value);
@@ -255,11 +257,11 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((x: { [key: string]: string }) => ({
-        registeredName: x.value,
-        registeredId: x.topic_source_id
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
       }));
   }
 }
@@ -435,13 +437,19 @@ onBeforeMount(async () => {
             </div>
           </template>
           <div class="grid grid-cols-3 gap-x-6 gap-y-6">
+            <InputText
+              name="project.projectName"
+              :label="t('i.electrification.projectForm.projectNameLabel')"
+              :disabled="!editable"
+              @on-input="emitProjectNameChange"
+            />
             <AutoComplete
               name="project.companyNameRegistered"
               :label="t('i.electrification.projectForm.companyLabel')"
               :bold="true"
               :disabled="!editable"
               :editable="true"
-              :placeholder="'Type to search the B.C registered name'"
+              :placeholder="t('i.common.projectForm.searchBCRegistered')"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
               :suggestions="orgBookOptions"
               @on-complete="onRegisteredNameInput"
@@ -456,12 +464,6 @@ onBeforeMount(async () => {
               name="project.companyIdRegistered"
               :label="t('i.common.projectForm.bcRegistryId')"
               :disabled="true"
-            />
-            <InputText
-              name="project.projectName"
-              :label="t('i.electrification.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
             />
           </div>
         </Panel>

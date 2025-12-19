@@ -13,10 +13,12 @@ import { assignedToValidator, atsClientIdValidator } from '@/validators';
 import { emailValidator } from '@/validators/common';
 
 import type { CodeName } from '@/store/codeStore';
+import type { OrgBookOption } from '@/types';
 
 export function createProjectFormSchema(
   codeList: Record<CodeName, string[]>,
-  enums: Record<CodeName, Record<string, string>>
+  enums: Record<CodeName, Record<string, string>>,
+  orgBookOptions: OrgBookOption[]
 ) {
   return object({
     aaiUpdated: boolean().required().label('Authorization and Approvals Insight (AAI) updated'),
@@ -37,7 +39,14 @@ export function createProjectFormSchema(
     project: object({
       bcEnvironmentAssessNeeded: string().notRequired().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
       bcHydroNumber: string().required().max(255).label('BC Hydro Call for Power project number'),
-      companyNameRegistered: string().notRequired().max(255).label('Company name'),
+      companyNameRegistered: string()
+        .required()
+        .max(255)
+        .test('valid-company-name', 'Company name must be a valid value from the list of suggestions', (value) => {
+          if (!value) return false;
+          return orgBookOptions.some((option) => option.registeredName === value);
+        })
+        .label('Company name'),
       hasEpa: string().notRequired().oneOf(YES_NO_LIST).label('Do they have an EPA?'),
       megawatts: number()
         .notRequired()

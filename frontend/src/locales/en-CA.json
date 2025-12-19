@@ -292,6 +292,7 @@
         "confirmReopenHeader": "Re-open project?",
         "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
         "bcRegistryId": "BC Registry ID",
+        "searchBCRegistered": "Type to search the B.C registered name",
         "searchContacts": "Search Contacts"
       }
     },

@@ -263,11 +263,11 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((x: { [key: string]: string }) => ({
-        registeredName: x.value,
-        registeredId: x.topic_source_id
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
       }));
   }
 }
