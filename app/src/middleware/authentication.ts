@@ -1,14 +1,14 @@
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { login } from '../services/user';
-import { Problem } from '../utils';
-import { AuthType, Initiative } from '../utils/enums/application';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { login } from '../services/user.ts';
+import { Problem } from '../utils/index.ts';
+import { AuthType, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentContext } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { CurrentContext } from '../types/index.ts';
 
 // TODO: Implement a 401 for unrecognized users.
 

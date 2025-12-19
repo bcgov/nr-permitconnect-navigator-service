@@ -1,23 +1,23 @@
 import config from 'config';
 
-import { Problem } from '../utils';
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { Problem } from '../utils/index.ts';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   createActivityContact,
   deleteActivityContact,
   getActivityContact,
   listActivityContacts,
   updateActivityContact
-} from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { email } from '../services/email';
-import { getProjectByActivityId } from '../services/project';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
-import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates';
+} from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { email } from '../services/email.ts';
+import { getProjectByActivityId } from '../services/project.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
+import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ActivityContact, Contact } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { ActivityContact, Contact } from '../types/index.ts';
 
 const getTeamMemberEmailTemplateData = async (
   tx: PrismaTransactionClient,

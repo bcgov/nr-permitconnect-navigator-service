@@ -4,7 +4,7 @@
 import config from 'config';
 import type { Logger } from 'winston';
 
-import getLogger, { httpLogger } from '../../../src/utils/log';
+import getLogger, { httpLogger } from '../../../src/utils/log.ts';
 
 describe('getLogger', () => {
   const assertLogger = (log: Logger): void => {

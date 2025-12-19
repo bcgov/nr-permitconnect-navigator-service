@@ -1,15 +1,15 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateUpdateStamps } from '../db/utils/utils';
-import { parsePeachRecords, summarizePeachRecord } from '../parsers/peachParser';
-import { getPeachRecord } from '../services/peach';
-import { searchPermits, upsertPermit } from '../services/permit';
-import { combineDateTime, compareDates, omit, Problem } from '../utils';
-import { getLogger } from '../utils/log';
-import { PeachIntegratedSystem } from '../utils/enums/permit';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { generateUpdateStamps } from '../db/utils/utils.ts';
+import { parsePeachRecords, summarizePeachRecord } from '../parsers/peachParser.ts';
+import { getPeachRecord } from '../services/peach.ts';
+import { searchPermits, upsertPermit } from '../services/permit.ts';
+import { combineDateTime, compareDates, omit, Problem } from '../utils/index.ts';
+import { getLogger } from '../utils/log.ts';
+import { PeachIntegratedSystem } from '../utils/enums/permit.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { PeachSummary, Permit, Record as PeachRecord, PermitTracking } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PeachSummary, Permit, Record as PeachRecord, PermitTracking } from '../types/index.ts';
 
 const log = getLogger(module.filename);
 

@@ -1,12 +1,12 @@
-import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   createDocumentController,
   deleteDocumentController,
   listDocumentsController
-} from '../../../src/controllers/document';
-import * as documentService from '../../../src/services/document';
-import * as userService from '../../../src/services/user';
+} from '../../../src/controllers/document.ts';
+import * as documentService from '../../../src/services/document.ts';
+import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
 

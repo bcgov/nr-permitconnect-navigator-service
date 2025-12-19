@@ -1,10 +1,10 @@
 import config from 'config';
 import { PrismaClient } from '@prisma/client';
 
-import permitStatusDatesTransform from './extensions/permitStatusDates';
-import filterDeletedTransform from './extensions/filterDeleted';
-import numericTransform from './extensions/numeric';
-import projectIdTransform from './extensions/projectId';
+import permitStatusDatesTransform from './extensions/permitStatusDates.ts';
+import filterDeletedTransform from './extensions/filterDeleted.ts';
+import numericTransform from './extensions/numeric.ts';
+import projectIdTransform from './extensions/projectId.ts';
 
 const db = {
   host: config.get('server.db.host'),

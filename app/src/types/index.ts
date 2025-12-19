@@ -1,5 +1,5 @@
-export type { Middleware } from './Middleware';
+export type { Middleware } from './Middleware.ts';
 
-export type * from './models';
-export type * from './pies';
-export type * from './stuff';
+export type * from './models.ts';
+export type * from './pies.ts';
+export type * from './stuff.ts';

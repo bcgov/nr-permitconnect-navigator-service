@@ -1,7 +1,7 @@
-import { generateCreateStamps } from '../db/utils/utils';
+import { generateCreateStamps } from '../db/utils/utils.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types/index.ts';
 
 /**
  * Deletes a specific contact from the PCNS database

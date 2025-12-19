@@ -1,10 +1,10 @@
-import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '../data';
-import { searchUsersController } from '../../../src/controllers/user';
-import * as userService from '../../../src/services/user';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { searchUsersController } from '../../../src/controllers/user.ts';
+import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
-import type { UserSearchParameters } from '../../../src/types';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import type { UserSearchParameters } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

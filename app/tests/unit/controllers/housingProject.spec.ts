@@ -14,19 +14,19 @@ import {
   submitHousingProjectDraftController,
   updateHousingProjectController,
   upsertHousingProjectDraftController
-} from '../../../src/controllers/housingProject';
-import * as activityService from '../../../src/services/activity';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as contactService from '../../../src/services/contact';
-import * as draftService from '../../../src/services/draft';
-import * as emailService from '../../../src/services/email';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as housingProjectService from '../../../src/services/housingProject';
-import * as permitService from '../../../src/services/permit';
-import * as permitTrackingService from '../../../src/services/permitTracking';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon';
-import { Initiative } from '../../../src/utils/enums/application';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+} from '../../../src/controllers/housingProject.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as draftService from '../../../src/services/draft.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import * as permitTrackingService from '../../../src/services/permitTracking.ts';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type {
@@ -38,7 +38,7 @@ import type {
   HousingProjectSearchParameters,
   HousingProjectStatistics,
   StatisticsFilters
-} from '../../../src/types';
+} from '../../../src/types/index.ts';
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { listAllCodeTablesController } from '../../controllers/code';
+import { listAllCodeTablesController } from '../../controllers/code.ts';
 
 const router = express.Router();
 

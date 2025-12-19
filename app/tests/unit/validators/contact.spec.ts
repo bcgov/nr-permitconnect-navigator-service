@@ -1,4 +1,4 @@
-import { contacts as contactsSchema } from '../../../src/validators/contact';
+import { contacts as contactsSchema } from '../../../src/validators/contact.ts';
 
 describe('contactsSchema', () => {
   it('should only accept string values for each field', () => {

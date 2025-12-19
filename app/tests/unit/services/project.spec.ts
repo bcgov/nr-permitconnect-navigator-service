@@ -1,8 +1,7 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_HOUSING_PROJECT_1, TEST_ELECTRIFICATION_PROJECT_1 } from '../data';
-import * as projectService from '../../../src/services/project';
-import { Problem } from '../../../src/utils';
+import { TEST_HOUSING_PROJECT_1, TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as projectService from '../../../src/services/project.ts';
+import { Problem } from '../../../src/utils/index.ts';
 
 describe('getProjectByActivityId', () => {
   const ACTIVITY_ID = 'ACTI1234';

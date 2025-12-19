@@ -1,19 +1,19 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   createUserAccessRequest,
   getAccessRequest,
   getAccessRequests,
   updateAccessRequest
-} from '../services/accessRequest';
-import { getInitiative } from '../services/initiative';
-import { createUser, readUser } from '../services/user';
-import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars';
-import { Problem } from '../utils';
-import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
+} from '../services/accessRequest.ts';
+import { getInitiative } from '../services/initiative.ts';
+import { createUser, readUser } from '../services/user.ts';
+import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
+import { Problem } from '../utils/index.ts';
+import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { AccessRequest, Group, User } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { AccessRequest, Group, User } from '../types/index.ts';
 
 // Request to create user & access
 export const createUserAccessRequestController = async (

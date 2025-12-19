@@ -1,9 +1,8 @@
 import config from 'config';
 import { Router } from 'express';
 
-import { name as appName, version as appVersion } from '../../package.json';
-import { state } from '../../state';
-import v1 from './v1';
+import v1 from './v1/index.ts';
+import { state } from '../../state.ts';
 
 import type { Request, Response } from 'express';
 
@@ -12,13 +11,8 @@ const router = Router();
 /** Root Endpoint */
 router.get('/', (_req: Request, res: Response): void => {
   res.status(200).json({
-    app: {
-      gitRev: state.gitRev,
-      name: appName,
-      nodeVersion: process.version,
-      version: appVersion
-    },
     endpoints: ['/live', '/ready', '/v1'],
+    gitRev: state.gitRev,
     versions: [1]
   });
 });

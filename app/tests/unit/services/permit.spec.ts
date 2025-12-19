@@ -1,8 +1,7 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_PERMIT_1 } from '../data';
-import * as permitService from '../../../src/services/permit';
-import { Initiative } from '../../../src/utils/enums/application';
+import { TEST_PERMIT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
 describe('deletePermit', () => {
   it('calls permit.delete', async () => {

@@ -1,11 +1,11 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { Problem } from '../utils';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { Problem } from '../utils/index.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity

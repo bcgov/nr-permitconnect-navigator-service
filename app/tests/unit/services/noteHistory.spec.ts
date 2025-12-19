@@ -1,10 +1,9 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '../data';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
-import * as noteHistoryService from '../../../src/services/noteHistory';
-import { Initiative } from '../../../src/utils/enums/application';
-import { BringForwardType } from '../../../src/utils/enums/projectCommon';
+import { TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
 
 describe('createNoteHistory', () => {
   it('calls note_history.create and returns result', async () => {

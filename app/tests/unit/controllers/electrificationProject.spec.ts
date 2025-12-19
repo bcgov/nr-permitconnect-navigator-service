@@ -24,17 +24,17 @@ import {
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
-} from '../../../src/controllers/electrificationProject';
-import * as activityService from '../../../src/services/activity';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as contactService from '../../../src/services/contact';
-import * as emailService from '../../../src/services/email';
-import * as draftService from '../../../src/services/draft';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import { Initiative } from '../../../src/utils/enums/application';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+} from '../../../src/controllers/electrificationProject.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as draftService from '../../../src/services/draft.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type {
@@ -47,7 +47,7 @@ import type {
   ElectrificationProjectStatistics,
   Email,
   StatisticsFilters
-} from '../../../src/types';
+} from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

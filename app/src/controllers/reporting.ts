@@ -1,8 +1,8 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { getElectrificationProjectPermitData, getHousingProjectPermitData } from '../services/reporting';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { getElectrificationProjectPermitData, getHousingProjectPermitData } from '../services/reporting.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 export const getElectrificationProjectPermitDataController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<unknown>(async (tx: PrismaTransactionClient) => {

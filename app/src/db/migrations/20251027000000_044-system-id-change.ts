@@ -1,7 +1,6 @@
-/* eslint-disable max-len */
 import { NIL } from 'uuid';
 
-import { SYSTEM_ID } from '../../utils/constants/application';
+import { SYSTEM_ID } from '../../utils/constants/application.ts';
 
 import type { Knex } from 'knex';
 

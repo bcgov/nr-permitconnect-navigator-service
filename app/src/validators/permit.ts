@@ -1,11 +1,11 @@
 import Joi from 'joi';
 
-import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common';
-import { validate } from '../middleware/validation';
-import { permitTrackingSchema } from './permitTracking';
-import { permitTypeSchema } from './permitType';
-import { createStamps } from './stamps';
-import { PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '../utils/constants/permit';
+import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
+import { validate } from '../middleware/validation.ts';
+import { permitTrackingSchema } from './permitTracking.ts';
+import { permitTypeSchema } from './permitType.ts';
+import { createStamps } from './stamps.ts';
+import { PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '../utils/constants/permit.ts';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,

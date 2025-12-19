@@ -1,9 +1,9 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { AccessRequestStatus, Initiative } from '../utils/enums/application';
+import { AccessRequestStatus, Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { AccessRequest, AccessRequestBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { AccessRequest, AccessRequestBase } from '../types/index.ts';
 
 /**
  * Create an access request record

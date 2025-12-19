@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
-import { activityId, uuidv4 } from './common';
-import { validate } from '../middleware/validation';
-import { escalationTypeCodes } from '../utils/cache/codes';
-import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon';
+import { activityId, uuidv4 } from './common.ts';
+import { validate } from '../middleware/validation.ts';
+import { escalationTypeCodes } from '../utils/cache/codes.ts';
+import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 
 const schema = {
   createNoteHistory: {
