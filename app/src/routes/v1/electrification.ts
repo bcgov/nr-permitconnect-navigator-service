@@ -1,15 +1,15 @@
 import express from 'express';
 
-import { currentContext } from '../../middleware/authentication';
-import { Initiative } from '../../utils/enums/application';
+import { currentContext } from '../../middleware/authentication.ts';
+import { Initiative } from '../../utils/enums/application.ts';
 
-import accessRequest from './accessRequest';
-import document from './document';
-import electrificationProject from './electrificationProject';
-import enquiry from './enquiry';
-import noteHistory from './noteHistory';
-import permit from './permit';
-import roadmap from './roadmap';
+import accessRequest from './accessRequest.ts';
+import document from './document.ts';
+import electrificationProject from './electrificationProject.ts';
+import enquiry from './enquiry.ts';
+import noteHistory from './noteHistory.ts';
+import permit from './permit.ts';
+import roadmap from './roadmap.ts';
 
 const router = express.Router();
 router.use(currentContext(Initiative.ELECTRIFICATION));

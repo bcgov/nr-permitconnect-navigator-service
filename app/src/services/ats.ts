@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types';
+import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types/index.ts';
 
 /**
  * Gets Auth token using ATS client credentials

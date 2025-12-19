@@ -1,10 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { readFileSync } from 'fs';
 import helmet from 'helmet';
 import yaml from 'js-yaml';
 import { join } from 'path';
 
-import docs from '../../docs/docs';
+import docs from '../../docs/docs.ts';
+
+import type { Request, Response } from 'express';
 
 const router = Router();
 

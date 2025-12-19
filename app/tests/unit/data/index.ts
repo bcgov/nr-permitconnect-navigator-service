@@ -5,7 +5,23 @@
  */
 import { Prisma } from '@prisma/client';
 
+import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application.ts';
+import { ProjectType } from '../../../src/utils/enums/electrification.ts';
+import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
 import {
+  ActivityContactRole,
+  ApplicationStatus,
+  ContactPreference,
+  DraftCode,
+  EnquirySubmittedMethod,
+  IntakeStatus,
+  NoteType,
+  ProjectRelationship,
+  SubmissionType
+} from '../../../src/utils/enums/projectCommon.ts';
+import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
+
+import type {
   Activity,
   ActivityContact,
   Contact,
@@ -28,21 +44,7 @@ import {
   PermitNote,
   PermitType,
   User
-} from '../../../src/types';
-import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
-import { ProjectType } from '../../../src/utils/enums/electrification';
-import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  ContactPreference,
-  DraftCode,
-  EnquirySubmittedMethod,
-  NoteType,
-  ProjectRelationship,
-  SubmissionType
-} from '../../../src/utils/enums/projectCommon';
-import { NumResidentialUnits } from '../../../src/utils/enums/housing';
+} from '../../../src/types/index.ts';
 
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   activityId: 'ACTI1234',

@@ -6,12 +6,12 @@ import {
   listBringForwardController,
   listNoteHistoryController,
   updateNoteHistoryController
-} from '../../controllers/noteHistory';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { noteHistoryValidator } from '../../validators';
+} from '../../controllers/noteHistory.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { noteHistoryValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

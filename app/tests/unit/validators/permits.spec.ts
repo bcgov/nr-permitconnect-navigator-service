@@ -1,5 +1,5 @@
-import { BasicResponse } from '../../../src/utils/enums/application';
-import { permits } from '../../../src/validators/permits';
+import { BasicResponse } from '../../../src/utils/enums/application.ts';
+import { permits } from '../../../src/validators/permits.ts';
 
 describe('permitsSchema', () => {
   it('should validate when hasAppliedProvincialPermits is YES', () => {

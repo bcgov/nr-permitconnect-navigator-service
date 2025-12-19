@@ -4,12 +4,12 @@ import {
   createDocumentController,
   deleteDocumentController,
   listDocumentsController
-} from '../../controllers/document';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { documentValidator } from '../../validators';
+} from '../../controllers/document.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { documentValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

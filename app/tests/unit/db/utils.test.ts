@@ -1,5 +1,5 @@
-import { prismaMock } from '../../__mocks__/prismaMock';
-import { checkDatabaseHealth, checkDatabaseSchema } from '../../../src/db/utils/utils';
+import { prismaMock } from '../../__mocks__/prismaMock.ts';
+import { checkDatabaseHealth, checkDatabaseSchema } from '../../../src/db/utils/utils.ts';
 
 describe('checkDatabaseHealth', () => {
   it('should return true when the database is healthy', async () => {

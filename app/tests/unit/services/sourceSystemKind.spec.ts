@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { getSourceSystemKinds } from '../../../src/services/sourceSystemKind';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { getSourceSystemKinds } from '../../../src/services/sourceSystemKind.ts';
 
 describe('sourceSystemKind', () => {
   describe('getSourceSystemKinds', () => {

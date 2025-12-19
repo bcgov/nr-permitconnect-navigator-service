@@ -1,4 +1,4 @@
-import { IStamps } from '../interfaces/IStamps';
+import type { IStamps } from '../interfaces/IStamps.ts';
 
 export interface IProject extends IStamps {
   projectId?: string; // Auto populated from the projects PK - for front end use only

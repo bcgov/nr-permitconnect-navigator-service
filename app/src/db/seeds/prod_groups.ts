@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { GroupName, Initiative } from '../../utils/enums/application';
+import { GroupName, Initiative } from '../../utils/enums/application.ts';
 
 export async function seed(knex: Knex): Promise<void> {
   const pcns_id = knex('initiative')

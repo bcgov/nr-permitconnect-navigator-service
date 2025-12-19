@@ -1,9 +1,9 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { getHousingProject } from '../services/housingProject';
-import { getPIDs } from '../services/map';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { getHousingProject } from '../services/housingProject.ts';
+import { getPIDs } from '../services/map.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 export const getPIDsController = async (req: Request<{ projectId: string }>, res: Response) => {
   const response = await transactionWrapper<string | void>(async (tx: PrismaTransactionClient) => {

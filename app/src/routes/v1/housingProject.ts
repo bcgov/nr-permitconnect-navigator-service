@@ -15,13 +15,13 @@ import {
   submitHousingProjectDraftController,
   updateHousingProjectController,
   upsertHousingProjectDraftController
-} from '../../controllers/housingProject';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering';
-import { Action, Resource } from '../../utils/enums/application';
-import { housingProjectValidator } from '../../validators';
+} from '../../controllers/housingProject.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { housingProjectValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

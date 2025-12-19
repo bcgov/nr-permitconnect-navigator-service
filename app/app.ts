@@ -8,14 +8,13 @@ import helmet from 'helmet';
 import { join } from 'path';
 import querystring from 'querystring';
 
-import { version as appVersion } from './package.json';
-import { requestSanitizer } from './src/middleware/requestSanitizer';
-import router from './src/routes';
-import { Problem } from './src/utils';
-import { DEFAULTCORS } from './src/utils/constants/application';
-import { getLogger, httpLogger } from './src/utils/log';
-import { readIdpList } from './src/utils/utils';
-import { state } from './state';
+import { requestSanitizer } from './src/middleware/requestSanitizer.ts';
+import router from './src/routes/index.ts';
+import { Problem } from './src/utils/index.ts';
+import { DEFAULTCORS } from './src/utils/constants/application.ts';
+import { getLogger, httpLogger } from './src/utils/log.ts';
+import { readIdpList } from './src/utils/utils.ts';
+import { state } from './state.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 
@@ -81,8 +80,7 @@ appRouter.get('/config', (_req: Request, res: Response, next: NextFunction): voi
       features: state.features,
       ...config.get('frontend'),
       gitRev: state.gitRev,
-      idpList: readIdpList(),
-      version: appVersion
+      idpList: readIdpList()
     });
   } catch (err) {
     next(err);

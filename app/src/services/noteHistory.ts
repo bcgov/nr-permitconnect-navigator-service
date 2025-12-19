@@ -1,9 +1,9 @@
-import { BringForwardType } from '../utils/enums/projectCommon';
-import { Initiative } from '../utils/enums/application';
+import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { NoteHistory, NoteHistoryBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { NoteHistory, NoteHistoryBase } from '../types/index.ts';
 
 /**
  * Create a note history

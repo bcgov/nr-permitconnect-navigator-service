@@ -2,8 +2,8 @@ import config from 'config';
 import { existsSync, readFileSync } from 'fs';
 import { validate, version } from 'uuid';
 
-import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
-import * as utils from '../../../src/utils/utils';
+import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums/application.ts';
+import * as utils from '../../../src/utils/utils.ts';
 
 import type { JwtPayload } from 'jsonwebtoken';
 

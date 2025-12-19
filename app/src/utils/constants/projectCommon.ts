@@ -6,7 +6,7 @@ import {
   NoteType,
   ProjectRelationship,
   SubmissionType
-} from '../enums/projectCommon';
+} from '../enums/projectCommon.ts';
 
 export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.NEW,

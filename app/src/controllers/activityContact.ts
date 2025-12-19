@@ -1,7 +1,7 @@
 import config from 'config';
 
-import { Problem } from '../utils';
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { Problem } from '../utils/index.ts';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   createActivityContact,
   deleteActivityContact,
@@ -19,8 +19,8 @@ import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ActivityContact, Contact } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { ActivityContact, Contact } from '../types/index.ts';
 
 const getTeamMemberEmailTemplateData = async (
   tx: PrismaTransactionClient,

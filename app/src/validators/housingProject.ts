@@ -1,18 +1,18 @@
 import Joi from 'joi';
 
-import { appliedPermit } from './appliedPermit';
-import atsValidator from './ats';
-import { basicIntake } from './basic';
-import { activityId, email, uuidv4 } from './common';
-import { contactSchema } from './contact';
+import { appliedPermit } from './appliedPermit.ts';
+import atsValidator from './ats.ts';
+import { basicIntake } from './basic.ts';
+import { activityId, email, uuidv4 } from './common.ts';
+import { contactSchema } from './contact.ts';
 
-import { housing } from './housing';
-import { permits } from './permits';
-import { validate } from '../middleware/validation';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
-import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
-import { BasicResponse } from '../utils/enums/application';
+import { housing } from './housing.ts';
+import { permits } from './permits.ts';
+import { validate } from '../middleware/validation.ts';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing.ts';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { BasicResponse } from '../utils/enums/application.ts';
 
 const schema = {
   createHousingProject: {

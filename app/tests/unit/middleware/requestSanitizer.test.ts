@@ -1,7 +1,9 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import request from 'supertest';
 
-import { requestSanitizer } from '../../../src/middleware/requestSanitizer';
+import { requestSanitizer } from '../../../src/middleware/requestSanitizer.ts';
+
+import type { Request, Response } from 'express';
 
 function buildApp() {
   const app = express();

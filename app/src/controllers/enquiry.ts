@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
-} from '../db/utils/utils';
-import { createActivity, deleteActivity } from '../services/activity';
-import { createActivityContact, listActivityContacts } from '../services/activityContact';
-import { searchContacts, upsertContacts } from '../services/contact';
+} from '../db/utils/utils.ts';
+import { createActivity, deleteActivity } from '../services/activity.ts';
+import { createActivityContact, listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts, upsertContacts } from '../services/contact.ts';
 import {
   createEnquiry,
   deleteEnquiry,
@@ -18,19 +18,19 @@ import {
   getRelatedEnquiries,
   searchEnquiries,
   updateEnquiry
-} from '../services/enquiry';
-import { Initiative } from '../utils/enums/application';
+} from '../services/enquiry.ts';
+import { Initiative } from '../utils/enums/application.ts';
 import {
   ActivityContactRole,
   ApplicationStatus,
   EnquirySubmittedMethod,
   SubmissionType
-} from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+} from '../utils/enums/projectCommon.ts';
+import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,

@@ -1,5 +1,5 @@
 import Joi from 'joi';
-import { createStamps } from './stamps';
+import { createStamps } from './stamps.ts';
 
 export const permitTrackingSchema = Joi.array()
   .items(

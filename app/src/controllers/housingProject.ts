@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
@@ -8,12 +8,12 @@ import {
   generateNullUpdateStamps,
   generateUpdateStamps,
   jsonToPrismaInputJson
-} from '../db/utils/utils';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity';
-import { createActivityContact } from '../services/activityContact';
-import { searchContacts, upsertContacts } from '../services/contact';
-import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
-import { email } from '../services/email';
+} from '../db/utils/utils.ts';
+import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivityContact } from '../services/activityContact.ts';
+import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
+import { email } from '../services/email.ts';
 import {
   createHousingProject,
   deleteHousingProject,
@@ -22,17 +22,22 @@ import {
   getHousingProjectStatistics,
   searchHousingProjects,
   updateHousingProject
-} from '../services/housingProject';
-import { upsertPermit } from '../services/permit';
-import { upsertPermitTracking } from '../services/permitTracking';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { NumResidentialUnits } from '../utils/enums/housing';
-import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit';
-import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy, omit } from '../utils/utils';
+} from '../services/housingProject.ts';
+import { upsertPermit } from '../services/permit.ts';
+import { upsertPermitTracking } from '../services/permitTracking.ts';
+import { BasicResponse, Initiative } from '../utils/enums/application.ts';
+import { NumResidentialUnits } from '../utils/enums/housing.ts';
+import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  DraftCode,
+  SubmissionType
+} from '../utils/enums/projectCommon.ts';
+import { getCurrentUsername, isTruthy, omit } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type {
   Contact,
   CurrentContext,
@@ -44,7 +49,7 @@ import type {
   HousingProjectStatistics,
   Permit,
   StatisticsFilters
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * Assigns a priority level to a housing project based on given criteria

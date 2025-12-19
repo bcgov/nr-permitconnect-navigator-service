@@ -1,8 +1,8 @@
-import { Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types/index.ts';
 
 /**
  * Creates a new enquiry

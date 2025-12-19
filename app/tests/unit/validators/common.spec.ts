@@ -1,4 +1,11 @@
-import { activityId, dateOnlyString, email, phoneNumber, timeTzString, uuidv4 } from '../../../src/validators/common';
+import {
+  activityId,
+  dateOnlyString,
+  email,
+  phoneNumber,
+  timeTzString,
+  uuidv4
+} from '../../../src/validators/common.ts';
 
 describe('common validators', () => {
   describe('activityId', () => {

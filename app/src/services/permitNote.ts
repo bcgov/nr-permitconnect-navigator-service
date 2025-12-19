@@ -1,5 +1,5 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { PermitNote, PermitNoteBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PermitNote, PermitNoteBase } from '../types/index.ts';
 
 /**
  * Create a permit note

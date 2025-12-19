@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import router from '../../../../src/routes/v1/docs';
+import router from '../../../../src/routes/v1/docs.ts';
 
 const app = express();
 app.use(router);

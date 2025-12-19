@@ -5,7 +5,7 @@
  */
 
 import type { Knex } from 'knex';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 const CONTACT_EDITOR = 'CONTACT_EDITOR';
 const CONTACT_UPDATER = 'CONTACT_UPDATER';

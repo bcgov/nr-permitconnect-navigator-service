@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
-import * as contactService from '../../../src/services/contact';
-import * as userService from '../../../src/services/user';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { SYSTEM_ID } from '../../../src/utils/constants/application';
-import { IdentityProvider } from '../../../src/utils/enums/application';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as userService from '../../../src/services/user.ts';
+import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
+import { IdentityProvider } from '../../../src/utils/enums/application.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
-import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types';
+import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types/index.ts';
 
 const idirIdentityProvider: IDPType = {
   idp: IdentityProvider.IDIR,
@@ -324,7 +324,7 @@ describe('readIdp', () => {
 describe('readUser', () => {
   it('calls user.findUnique', async () => {
     prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    await userService.readUser(prismaTxMock, idirUser.userId as string);
+    await userService.readUser(prismaTxMock, idirUser.userId);
 
     expect(prismaTxMock.user.findUnique).toHaveBeenCalledTimes(1);
   });

@@ -1,11 +1,11 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import type {
   ElectrificationProject,
   ElectrificationProjectBase,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics
-} from '../types';
+} from '../types/index.ts';
 
 /**
  *  Creates a new electrification project

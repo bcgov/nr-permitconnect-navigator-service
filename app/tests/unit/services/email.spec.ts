@@ -1,10 +1,10 @@
 import axios from 'axios';
 import config from 'config';
 
-import * as emailService from '../../../src/services/email';
+import { prismaMock } from '../../__mocks__/prismaMock.ts';
+import * as emailService from '../../../src/services/email.ts';
 
-import { prismaMock } from '../../__mocks__/prismaMock';
-import { Email } from '../../../src/types';
+import type { Email } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

@@ -3,10 +3,16 @@ import { existsSync, readFileSync } from 'fs';
 import { join } from 'path';
 import { validate, version } from 'uuid';
 
-import { getLogger } from '../utils/log';
+import { getLogger } from '../utils/log.ts';
 
 import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes, DateTimeStrings } from '../types';
+import type {
+  ChefsFormConfig,
+  ChefsFormConfigData,
+  CurrentContext,
+  IdpAttributes,
+  DateTimeStrings
+} from '../types/index.ts';
 
 const log = getLogger(module.filename);
 

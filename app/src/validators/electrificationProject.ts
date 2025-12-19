@@ -1,13 +1,13 @@
 import Joi from 'joi';
 
-import atsValidator from './ats';
-import { email, uuidv4 } from './common';
-import { contactSchema } from './contact';
-import { validate } from '../middleware/validation';
-import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes';
-import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
-import { ProjectType } from '../utils/enums/electrification';
-import { YES_NO_LIST } from '../utils/constants/application';
+import atsValidator from './ats.ts';
+import { email, uuidv4 } from './common.ts';
+import { contactSchema } from './contact.ts';
+import { validate } from '../middleware/validation.ts';
+import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes.ts';
+import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { ProjectType } from '../utils/enums/electrification.ts';
+import { YES_NO_LIST } from '../utils/constants/application.ts';
 
 const electrificationIntake = {
   activityId: Joi.string().min(8).max(8).allow(null),

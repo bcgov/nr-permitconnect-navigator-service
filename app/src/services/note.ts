@@ -1,5 +1,5 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Note, NoteBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Note, NoteBase } from '../types/index.ts';
 
 /**
  * Create a Note

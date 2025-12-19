@@ -1,10 +1,10 @@
 import axios from 'axios';
 import config from 'config';
 
-import { Problem } from '../utils';
+import { Problem } from '../utils/index.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { Record as PeachRecord } from '../types/pies';
+import type { Record as PeachRecord } from '../types/pies.d.ts';
 
 /**
  * Returns an Axios instance for the PEACH API

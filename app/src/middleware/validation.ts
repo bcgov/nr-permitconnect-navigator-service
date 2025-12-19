@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import { Problem } from '../utils';
+import { Problem } from '../utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

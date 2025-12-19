@@ -1,13 +1,14 @@
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
-import { getActivity } from '../../services/activity';
-import { SYSTEM_ID } from '../../utils/constants/application';
-import { getLogger } from '../../utils/log';
-import { uuidToActivityId } from '../../utils/utils';
+import prisma from '../../db/dataConnection.ts';
+import { getActivity } from '../../services/activity.ts';
+import { SYSTEM_ID } from '../../utils/constants/application.ts';
+import { getLogger } from '../../utils/log.ts';
+import { uuidToActivityId } from '../../utils/utils.ts';
 
-import type { CurrentContext } from '../../types';
+import type { PrismaTransactionClient } from '../../db/dataConnection.ts';
+import type { CurrentContext } from '../../types/index.ts';
 
 const log = getLogger(module.filename);
 

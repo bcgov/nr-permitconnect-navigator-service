@@ -1,5 +1,5 @@
-import { compareDates, splitDateTime } from '../utils';
-import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit';
+import { compareDates, splitDateTime } from '../utils/index.ts';
+import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit.ts';
 
 import type {
   CodingEvent,
@@ -9,7 +9,7 @@ import type {
   PeachSummary,
   ProcessEvent,
   DateTimeStrings
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * Inferred process ordering from @see {@link https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process}

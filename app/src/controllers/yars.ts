@@ -1,9 +1,9 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { getGroupPermissions, getGroups, getSubjectGroups, removeGroup } from '../services/yars';
-import { Initiative } from '../utils/enums/application';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { getGroupPermissions, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,

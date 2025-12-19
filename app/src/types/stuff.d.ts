@@ -1,11 +1,11 @@
 import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
-import { AuthType, GroupName, Initiative } from '../utils/enums/application';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
+import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 
 import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
-import type { IStamps } from '../interfaces/IStamps';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import type { PermitEmailTemplate } from '../utils/templates';
 
 type AddressResource = {

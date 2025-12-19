@@ -1,13 +1,13 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { GroupName, Initiative } from '../utils/enums/application';
-import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils';
-import { getInitiative } from '../services/initiative';
-import { searchUsers } from '../services/user';
-import { getSubjectGroups } from '../services/yars';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { GroupName, Initiative } from '../utils/enums/application.ts';
+import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils.ts';
+import { getInitiative } from '../services/initiative.ts';
+import { searchUsers } from '../services/user.ts';
+import { getSubjectGroups } from '../services/yars.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Group, User, UserSearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Group, User, UserSearchParameters } from '../types/index.ts';
 
 export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {
   type UserWithGroup = User & { groups?: Array<Group> };

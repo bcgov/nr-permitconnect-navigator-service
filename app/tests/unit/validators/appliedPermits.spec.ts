@@ -1,5 +1,5 @@
-import { PermitStage } from '../../../src/utils/enums/permit';
-import { appliedPermit } from '../../../src/validators/appliedPermit';
+import { PermitStage } from '../../../src/utils/enums/permit.ts';
+import { appliedPermit } from '../../../src/validators/appliedPermit.ts';
 
 describe('appliedPermitsSchema', () => {
   it('should only accept numbers for permitTypeId', () => {

@@ -1,32 +1,32 @@
 import {
-  createNoteHistoryController,
-  deleteNoteHistoryController,
-  listBringForwardController,
-  listNoteHistoryController,
-  updateNoteHistoryController
-} from '../../../src/controllers/noteHistory';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as housingProjectService from '../../../src/services/housingProject';
-import * as noteService from '../../../src/services/note';
-import * as noteHistoryService from '../../../src/services/noteHistory';
-import * as userService from '../../../src/services/user';
-import { Initiative } from '../../../src/utils/enums/application';
-import { BringForwardType } from '../../../src/utils/enums/projectCommon';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
-
-import type { Request, Response } from 'express';
-import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types';
-import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_IDIR_USER_1,
   TEST_NOTE_1,
   TEST_NOTE_HISTORY_1,
   TEST_NOTE_HISTORY_2
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import {
+  createNoteHistoryController,
+  deleteNoteHistoryController,
+  listBringForwardController,
+  listNoteHistoryController,
+  updateNoteHistoryController
+} from '../../../src/controllers/noteHistory.ts';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import * as noteService from '../../../src/services/note.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import * as userService from '../../../src/services/user.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+
+import type { Request, Response } from 'express';
+import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

@@ -1,8 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { IntakeStatus } from '../../../src/utils/enums/projectCommon.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();

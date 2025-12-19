@@ -1,8 +1,8 @@
 import axios from 'axios';
 import config from 'config';
 
-import { Action } from '../utils/enums/application';
-import { Problem, uuidValidateV4 } from '../utils';
+import { Action } from '../utils/enums/application.ts';
+import { Problem, uuidValidateV4 } from '../utils/index.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 

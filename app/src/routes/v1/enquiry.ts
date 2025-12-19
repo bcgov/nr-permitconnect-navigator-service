@@ -8,13 +8,13 @@ import {
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
-} from '../../controllers/enquiry';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering';
-import { Action, Resource } from '../../utils/enums/application';
-import { enquiryValidator } from '../../validators';
+} from '../../controllers/enquiry.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { enquiryValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

@@ -1,18 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
-} from '../db/utils/utils';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity';
-import { createActivityContact } from '../services/activityContact';
-import { searchContacts, upsertContacts } from '../services/contact';
-import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
-import { email } from '../services/email';
+} from '../db/utils/utils.ts';
+import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivityContact } from '../services/activityContact.ts';
+import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
+import { email } from '../services/email.ts';
 import {
   createElectrificationProject,
   deleteElectrificationProject,
@@ -21,13 +21,18 @@ import {
   getElectrificationProjectStatistics,
   searchElectrificationProjects,
   updateElectrificationProject
-} from '../services/electrificationProject';
-import { Initiative } from '../utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon';
-import { isTruthy } from '../utils/utils';
+} from '../services/electrificationProject.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  DraftCode,
+  SubmissionType
+} from '../utils/enums/projectCommon.ts';
+import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type {
   Contact,
   CurrentContext,
@@ -38,7 +43,7 @@ import type {
   ElectrificationProjectStatistics,
   Email,
   StatisticsFilters
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * Handles creating a project from intake data

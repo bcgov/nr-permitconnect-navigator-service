@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
-import { validate } from '../middleware/validation';
-import { createStamps } from './stamps';
+import { validate } from '../middleware/validation.ts';
+import { createStamps } from './stamps.ts';
 
 const schema = {
   permitTrackings: {

@@ -1,10 +1,10 @@
 /* TODO: Create group policy details type and set explicit return types */
 
-import { createBucket } from './coms';
-import { Initiative, GroupName, Action } from '../utils/enums/application';
+import { createBucket } from './coms.ts';
+import { Initiative, GroupName, Action } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Group } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Group } from '../types/index.ts';
 
 /**
  * Assigns an identity to the given group

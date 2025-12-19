@@ -1,7 +1,7 @@
-import { searchBasicBceidUsers, searchBusinessBceidUsers, searchIdirUsers } from '../services/sso';
+import { searchBasicBceidUsers, searchBusinessBceidUsers, searchIdirUsers } from '../services/sso.ts';
 
 import type { Request, Response } from 'express';
-import type { BceidSearchParameters, IdirSearchParameters } from '../types';
+import type { BceidSearchParameters, IdirSearchParameters } from '../types/index.ts';
 
 export const searchIdirUsersController = async (
   req: Request<never, never, never, IdirSearchParameters>,

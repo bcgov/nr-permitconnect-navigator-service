@@ -1,5 +1,5 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Permit, PermitTracking } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Permit, PermitTracking } from '../types/index.ts';
 
 /**
  * Deletes many Permit Tracking from a Permit

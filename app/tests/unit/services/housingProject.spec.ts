@@ -1,8 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data';
-import * as housingProjectService from '../../../src/services/housingProject';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
+import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { IntakeStatus } from '../../../src/utils/enums/projectCommon.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();

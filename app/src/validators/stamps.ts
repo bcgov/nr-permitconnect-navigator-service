@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { uuidv4 } from './common';
+import { uuidv4 } from './common.ts';
 
 export const createStamps = {
   createdAt: Joi.date().max('now').allow(null),

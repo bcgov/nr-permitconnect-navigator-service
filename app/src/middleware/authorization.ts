@@ -1,28 +1,28 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { getDocument } from '../services/document';
-import { getDraft } from '../services/draft';
-import { getElectrificationProject } from '../services/electrificationProject';
-import { getEnquiry } from '../services/enquiry';
-import { getHousingProject } from '../services/housingProject';
-import { getNoteHistory } from '../services/noteHistory';
-import { getPermit } from '../services/permit';
-import { getCurrentUserId } from '../services/user';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { getDocument } from '../services/document.ts';
+import { getDraft } from '../services/draft.ts';
+import { getElectrificationProject } from '../services/electrificationProject.ts';
+import { getEnquiry } from '../services/enquiry.ts';
+import { getHousingProject } from '../services/housingProject.ts';
+import { getNoteHistory } from '../services/noteHistory.ts';
+import { getPermit } from '../services/permit.ts';
+import { getCurrentUserId } from '../services/user.ts';
 import {
   getGroupPolicyDetails,
   getPCNSGroupPolicyDetails,
   getPolicyAttributes,
   getSubjectGroups
-} from '../services/yars';
-import { SYSTEM_ID } from '../utils/constants/application';
-import { Initiative, GroupName } from '../utils/enums/application';
-import { Problem } from '../utils';
-import { getCurrentSubject } from '../utils/utils';
+} from '../services/yars.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { Problem } from '../utils/index.ts';
+import { getCurrentSubject } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentAuthorization } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { CurrentAuthorization } from '../types/index.ts';
 
 /**
  * Obtains the groups for the current users identity
