@@ -16,7 +16,7 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Create a permit note */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.PERMIT, Action.CREATE),
   permitNoteValidator.createPermitNote,

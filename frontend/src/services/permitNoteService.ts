@@ -11,7 +11,7 @@ export default {
    * @returns {Promise} An axios response
    */
   createPermitNote(data: Partial<PermitNote>) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
+    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
   /**

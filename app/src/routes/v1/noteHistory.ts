@@ -18,7 +18,7 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Create a note history */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.NOTE, Action.CREATE),
   noteHistoryValidator.createNoteHistory,

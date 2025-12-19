@@ -22,7 +22,7 @@ router.use('/note', permitNote);
 /** Get a list of permits */
 router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);
 
-/** Create a permit */
+/** Create or update a permit */
 router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, upsertPermitController);
 
 /** Delete a permit */
