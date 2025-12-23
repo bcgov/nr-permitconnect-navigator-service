@@ -53,13 +53,15 @@ import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitle
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, HousingProject, User } from '@/types';
-
-// Types
-type GeocoderEntry = {
-  geometry: { coordinates: number[]; [key: string]: any };
-  properties: { [key: string]: string };
-};
+import type {
+  ATSAddressResource,
+  ATSClientResource,
+  ATSEnquiryResource,
+  Contact,
+  GeocoderEntry,
+  HousingProject,
+  User
+} from '@/types';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -81,10 +83,10 @@ const confirm = useConfirm();
 const toast = useToast();
 
 // Store
-const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const projectStore = useProjectStore();
 
 // State
+const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const geoJson = ref(null);

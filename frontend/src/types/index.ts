@@ -16,6 +16,7 @@ export type { ElectrificationProjectSearchParameters } from './ElectrificationPr
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';
 export type { EnquirySearchParameters } from './EnquirySearchParameters';
+export type { GeocoderEntry } from './GeocoderEntry';
 export type { Group } from './Group';
 export type { HousingProject } from './HousingProject';
 export type { HousingProjectIntake } from './HousingProjectIntake';
