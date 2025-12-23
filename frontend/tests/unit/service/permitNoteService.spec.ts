@@ -21,6 +21,7 @@ const TEST_PERMIT_NOTE = {
 // Mocks
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
+const postSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('vue-router', () => ({
@@ -34,6 +35,7 @@ vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
+  post: postSpy,
   put: putSpy
 } as any);
 
@@ -59,8 +61,8 @@ describe('permitNoteService', () => {
         it('calls with given data', () => {
           permitNoteService.createPermitNote(TEST_PERMIT_NOTE);
 
-          expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_NOTE);
+          expect(postSpy).toHaveBeenCalledTimes(1);
+          expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_NOTE);
         });
       });
 

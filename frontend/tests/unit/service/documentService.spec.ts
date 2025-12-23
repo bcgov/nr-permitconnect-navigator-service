@@ -32,7 +32,7 @@ const modifiedFileName = `${FILE_NAME}_${mockTruncatedId}.txt`;
 // Mocks
 const deleteSpy = vi.fn();
 const getSpy = vi.fn();
-const putSpy = vi.fn();
+const postSpy = vi.fn();
 
 vi.mock('uuid', () => ({
   v4: () => mockedUuid
@@ -49,7 +49,7 @@ vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
-  put: putSpy
+  post: postSpy
 } as any);
 
 // Spies
@@ -126,8 +126,8 @@ describe('documentService', () => {
           } as AxiosResponse);
 
           await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
-          expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
+          expect(postSpy).toHaveBeenCalledTimes(1);
+          expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
             activityId: testActivityId,
             documentId: testFileData.id,
             filename: testFileData.name,
@@ -149,7 +149,7 @@ describe('documentService', () => {
 
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
-          vi.mocked(appAxios().put).mockImplementationOnce(() => {
+          vi.mocked(appAxios().post).mockImplementationOnce(() => {
             throw new Error();
           });
 
