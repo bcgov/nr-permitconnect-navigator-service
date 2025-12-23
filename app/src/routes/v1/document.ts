@@ -16,7 +16,7 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Create a document */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.DOCUMENT, Action.CREATE),
   documentValidator.createDocument,

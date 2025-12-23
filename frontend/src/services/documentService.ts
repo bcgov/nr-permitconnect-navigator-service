@@ -37,7 +37,7 @@ export default {
       );
 
       // Create document link
-      return await appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+      return await appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
         activityId: activityId,
         documentId: comsResponse.data.id,
         filename: comsResponse.data.name,
