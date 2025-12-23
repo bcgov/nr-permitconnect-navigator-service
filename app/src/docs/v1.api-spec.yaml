@@ -384,7 +384,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/document:
-    put:
+    post:
       summary: Create a document
       description: >-
         Creates a link between an activity and a previously existing object in
@@ -653,7 +653,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/note:
-    put:
+    post:
       summary: Create a note history
       operationId: createElectrificationNoteHistory
       tags:
@@ -883,7 +883,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/permit/note:
-    put:
+    post:
       summary: Create a permit note
       description: Creates a new permit note for a specified permit.
       operationId: createElectrificationPermitNote
@@ -1329,7 +1329,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/document:
-    put:
+    post:
       summary: Create a document
       description: >-
         Creates a link between an activity and a previously existing object in
@@ -1598,7 +1598,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/note:
-    put:
+    post:
       summary: Create a note history
       operationId: createHousingNoteHistory
       tags:
@@ -1828,7 +1828,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/permit/note:
-    put:
+    post:
       summary: Create a permit note
       description: Creates a new permit note for a specified permit.
       operationId: createHousingPermitNote
