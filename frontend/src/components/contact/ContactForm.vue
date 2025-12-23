@@ -3,6 +3,7 @@ import { ErrorMessage, Form } from 'vee-validate';
 
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { FormNavigationGuard, InputText, InputMask, Select } from '@/components/form';
@@ -38,6 +39,7 @@ const emit = defineEmits<{
 
 // Composables
 const { t } = useI18n();
+const router = useRouter();
 const toast = useToast();
 
 // State
@@ -76,6 +78,7 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
         }
       });
       emit('update-contact', result.data);
+      router.back();
     } else toast.error(t('contactForm.failedToSaveTheForm'));
   } catch (e: any) {
     toast.error(t('contactForm.failedToSaveTheForm'), e);

@@ -261,12 +261,42 @@ onBeforeMount(async () => {
   <Tabs :value="activeTab">
     <TabList>
       <Tab :value="0">{{ t('i.common.projectView.tabInformation') }}</Tab>
-      <Tab :value="1">{{ t('i.common.projectView.tabFiles') }}</Tab>
-      <Tab :value="2">{{ t('i.common.projectView.tabAuthorizations') }}</Tab>
-      <Tab :value="3">{{ t('i.common.projectView.tabNotes') }}</Tab>
+      <Tab
+        :value="1"
+        class="no-underline"
+      >
+        <span class="underline">{{ t('i.common.projectView.tabFiles') }}</span>
+        ({{ getDocuments.length }})
+      </Tab>
+      <Tab
+        :value="2"
+        class="no-underline"
+      >
+        <span class="underline">{{ t('i.common.projectView.tabAuthorizations') }}</span>
+        ({{ getPermits.length }})
+      </Tab>
+      <Tab
+        :value="3"
+        class="no-underline"
+      >
+        <span class="underline">{{ t('i.common.projectView.tabNotes') }}</span>
+        ({{ getNoteHistory.length }})
+      </Tab>
       <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
-      <Tab :value="5">{{ t('i.common.projectView.tabRelatedEnquiries') }}</Tab>
-      <Tab :value="6">{{ t('i.common.projectView.tabProjectTeam') }}</Tab>
+      <Tab
+        :value="5"
+        class="no-underline"
+      >
+        <span class="underline">{{ t('i.common.projectView.tabRelatedEnquiries') }}</span>
+        ({{ getRelatedEnquiries.length }})
+      </Tab>
+      <Tab
+        :value="6"
+        class="no-underline"
+      >
+        <span class="underline">{{ t('i.common.projectView.tabProjectTeam') }}</span>
+        ({{ activityContacts.length }})
+      </Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">
@@ -670,6 +700,12 @@ onBeforeMount(async () => {
 
 :deep(.remove-padding.p-datatable .p-datatable-tbody > tr > td) {
   display: none;
+}
+
+:deep(.p-tab) {
+  &.no-underline {
+    text-decoration: none;
+  }
 }
 
 .p-button.p-component.view-switch-button {
