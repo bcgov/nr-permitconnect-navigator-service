@@ -11,3 +11,7 @@ patroni:
       memory: 192Mi
   persistentVolume:
     enabled: false
+
+peachSync:
+  enabled: false
+  suspend: true
