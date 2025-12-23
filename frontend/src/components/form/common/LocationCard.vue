@@ -15,13 +15,9 @@ import { ProjectLocation } from '@/utils/enums/housing';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
+import type { GeocoderEntry } from '@/types';
 
 // Types
-type GeocoderEntry = {
-  geometry: { coordinates: Array<number>; [key: string]: any };
-  properties: { [key: string]: string };
-};
-
 type PinUpdateEvent = {
   longitude: number;
   latitude: number;

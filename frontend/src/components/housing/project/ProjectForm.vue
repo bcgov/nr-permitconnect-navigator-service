@@ -27,7 +27,7 @@ import {
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, housingProjectService, mapService, userService } from '@/services';
+import { atsService, externalApiService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -53,7 +53,15 @@ import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitle
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, HousingProject, User } from '@/types';
+import type {
+  ATSAddressResource,
+  ATSClientResource,
+  ATSEnquiryResource,
+  Contact,
+  GeocoderEntry,
+  HousingProject,
+  User
+} from '@/types';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -78,6 +86,7 @@ const toast = useToast();
 const projectStore = useProjectStore();
 
 // State
+const addressGeocoderOptions: Ref<Array<any>> = ref([]);
 const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const geoJson = ref(null);
@@ -313,6 +322,35 @@ function onReOpen() {
       onSubmit(formRef.value?.values);
     }
   });
+}
+
+const getAddressSearchLabel = (e: GeocoderEntry) => {
+  return e?.properties?.fullAddress;
+};
+
+async function onAddressSearchInput(e: IInputEvent) {
+  const input = e.target.value;
+  if (input.length == 0) {
+    formRef.value?.setFieldValue('location.streetAddress', null);
+    formRef.value?.setFieldValue('location.locality', null);
+    formRef.value?.setFieldValue('location.province', null);
+  } else {
+    addressGeocoderOptions.value =
+      ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+  }
+}
+
+async function onAddressSelect(e: SelectChangeEvent) {
+  if (e.originalEvent instanceof InputEvent) return;
+  if (e.value as GeocoderEntry) {
+    const properties = e.value?.properties;
+    formRef.value?.setFieldValue(
+      'location.streetAddress',
+      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
+    );
+    formRef.value?.setFieldValue('location.locality', properties?.localityName);
+    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
+  }
 }
 
 const onSubmit = async (values: any) => {
@@ -673,33 +711,38 @@ onBeforeMount(async () => {
               </h3>
             </div>
           </template>
+          <EditableSelect
+            class="mb-6"
+            name="addressSearch"
+            :get-option-label="getAddressSearchLabel"
+            :options="addressGeocoderOptions"
+            :placeholder="t('i.housing.project.projectForm.addressSearchPlaceholder')"
+            :bold="false"
+            :disabled="!editable"
+            @on-input="onAddressSearchInput"
+            @on-change="onAddressSelect"
+          />
           <div class="grid grid-row-3 gap-y-6">
-            <div class="grid grid-cols-6 gap-x-6 gap-y-6">
-              <InputText
-                class="col-span-2"
-                name="location.locationAddress"
-                :label="t('i.housing.project.projectForm.locationAddress')"
-                :disabled="true"
-              />
+            <div class="grid grid-cols-4 gap-x-6 gap-y-6">
               <InputText
                 class="col-span-2"
                 name="location.streetAddress"
                 :label="t('i.housing.project.projectForm.streetAddress')"
-                :disabled="!editable"
+                :disabled="true"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
               <InputText
                 class="col-span-1"
                 name="location.locality"
                 :label="t('i.housing.project.projectForm.locality')"
-                :disabled="!editable"
+                :disabled="true"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
               <InputText
                 class="col-span-1"
                 name="location.province"
                 :label="t('i.housing.project.projectForm.province')"
-                :disabled="!editable"
+                :disabled="true"
                 @on-change="updateLocationAddress(values, setFieldValue)"
               />
             </div>

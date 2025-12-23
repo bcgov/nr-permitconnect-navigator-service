@@ -174,7 +174,7 @@ describe('ProjectForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(16);
+    expect(elements.length).toBe(17);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -184,7 +184,7 @@ describe('ProjectForm.vue', () => {
 
     // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(16);
+    expect(elements.length).toBe(15);
   });
 
   it('renders the correct amount of input mask components (phone number)', async () => {
@@ -231,7 +231,7 @@ describe('ProjectForm.vue', () => {
 
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(20);
+    expect(elements.length).toBe(21);
   });
 
   it('geojson download btn not visible when no geojson', async () => {

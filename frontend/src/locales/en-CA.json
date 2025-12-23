@@ -371,6 +371,7 @@
         "projectForm": {
           "aaiUpdateLabel": "AAI Update",
           "additionalInfoHeader": "Additional information about project",
+          "addressSearchPlaceholder": "Type to search the address of your housing project",
           "affectedByNaturalDisaster": "Affected by natural disaster?",
           "assignedToLabel": "Assigned to",
           "astNotesHeader": "Automated Status Tool (AST) Notes",
