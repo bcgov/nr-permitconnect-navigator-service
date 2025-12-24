@@ -6,10 +6,12 @@ import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
 import { array, boolean, mixed, number, object, string } from 'yup';
 
+import type { OrgBookOption } from '@/types';
+
 // Form validation schema
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 
-export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
+export function createProjectIntakeSchema(orgBookOptions: Array<OrgBookOption>) {
   return object({
     [IntakeFormCategory.CONTACTS]: object(contactValidator),
     [IntakeFormCategory.BASIC]: object({
@@ -26,7 +28,14 @@ export function createProjectIntakeSchema(orgBookOptions: Array<string>) {
           schema
             .required()
             .max(255)
-            .oneOf(orgBookOptions, 'Business name must be a valid value from the list of suggestions')
+            .test(
+              'valid-business-name',
+              'Business name must be a valid value from the list of suggestions',
+              (value) => {
+                if (!value) return false;
+                return orgBookOptions.some((option) => option.registeredName === value);
+              }
+            )
             .label('Business name'),
         otherwise: (schema) => schema.notRequired().nullable().label('Business name')
       })

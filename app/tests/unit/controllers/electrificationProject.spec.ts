@@ -85,6 +85,7 @@ describe('createElectrificationProjectController', () => {
         project: {
           projectName: null,
           projectDescription: null,
+          companyIdRegistered: null,
           companyNameRegistered: null,
           projectType: null,
           bcHydroNumber: null

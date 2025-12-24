@@ -4,8 +4,9 @@ import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from './ProjectFormSchema';
-import { AdditionalInfo, AstNote, Electrification, Location } from '@/components/common/icons';
+import { AdditionalInfo, AstNote, Company, Electrification, Location } from '@/components/common/icons';
 import {
+  AutoComplete,
   CancelButton,
   Checkbox,
   EditableSelect,
@@ -17,7 +18,7 @@ import {
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, userService } from '@/services';
+import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import {
@@ -39,6 +40,7 @@ import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type {
@@ -47,6 +49,7 @@ import type {
   ATSEnquiryResource,
   Contact,
   ElectrificationProject,
+  OrgBookOption,
   User
 } from '@/types';
 
@@ -78,10 +81,13 @@ const assigneeOptions: Ref<Array<User>> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-const projectFormSchema = createProjectFormSchema(codeList, enums);
+const projectFormSchema = computed(() => {
+  return createProjectFormSchema(codeList, enums, orgBookOptions.value);
+});
 
 function emitProjectNameChange(e: Event) {
   emit('input-project-name', (e.target as HTMLInputElement).value);
@@ -128,6 +134,7 @@ function initilizeFormValues(project: ElectrificationProject) {
       userId: firstContact?.userId
     },
     project: {
+      companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
       projectName: project.projectName,
       bcHydroNumber: project.bcHydroNumber,
@@ -244,6 +251,19 @@ function onInvalidSubmit(e: any) {
     toast.warn(t('i.electrification.projectForm.basicInfoMissing'));
   }
   scrollToFirstError(e.errors);
+}
+
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
+  if (e?.query?.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    orgBookOptions.value = results
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      // map value and topic_source_id for AutoComplete display and selection
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
+      }));
+  }
 }
 
 function onReOpen() {
@@ -392,6 +412,7 @@ onBeforeMount(async () => {
             <span class="text-[var(--p-bcblue-900)]">{{ formatDate(project.submittedAt) }}</span>
           </div>
         </div>
+
         <ContactCardNavForm
           :editable="editable"
           :form-values="initialFormValues"
@@ -406,6 +427,46 @@ onBeforeMount(async () => {
             }
           "
         />
+        <Panel toggleable>
+          <template #header>
+            <div class="flex items-center gap-x-2.5">
+              <Company />
+              <h3 class="section-header m-0">
+                {{ t('i.housing.project.projectForm.companyProject') }}
+              </h3>
+            </div>
+          </template>
+          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
+            <InputText
+              name="project.projectName"
+              :label="t('i.electrification.projectForm.projectNameLabel')"
+              :disabled="!editable"
+              @on-input="emitProjectNameChange"
+            />
+            <AutoComplete
+              name="project.companyNameRegistered"
+              :label="t('i.electrification.projectForm.companyLabel')"
+              :bold="true"
+              :disabled="!editable"
+              :editable="true"
+              :placeholder="t('i.common.projectForm.searchBCRegistered')"
+              :get-option-label="(option: OrgBookOption) => option.registeredName"
+              :suggestions="orgBookOptions"
+              @on-complete="onRegisteredNameInput"
+              @on-select="
+                (orgBookOption: OrgBookOption) => {
+                  setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
+                  setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
+                }
+              "
+            />
+            <InputText
+              name="project.companyIdRegistered"
+              :label="t('i.common.projectForm.bcRegistryId')"
+              :disabled="true"
+            />
+          </div>
+        </Panel>
         <Panel toggleable>
           <template #header>
             <div class="flex items-center gap-x-2.5">
@@ -429,12 +490,6 @@ onBeforeMount(async () => {
               :label="t('i.electrification.projectForm.bcHydroNumberLabel')"
               :disabled="!editable"
             />
-            <InputText
-              name="project.projectName"
-              :label="t('i.electrification.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
-            />
             <Select
               name="project.hasEpa"
               :label="t('i.electrification.projectForm.hasEpaLabel')"
@@ -445,19 +500,6 @@ onBeforeMount(async () => {
               name="project.megawatts"
               :label="t('i.electrification.projectForm.megawattsLabel')"
               :disabled="!editable"
-            />
-            <InputText
-              name="project.companyNameRegistered"
-              :label="t('i.electrification.projectForm.companyLabel')"
-              :disabled="!editable"
-              @on-change="
-                (e) => {
-                  if (!e.target.value) {
-                    setFieldValue('companyNameRegistered', null);
-                    setFieldValue('isDevelopedInBc', null);
-                  }
-                }
-              "
             />
             <Select
               name="project.bcEnvironmentAssessNeeded"

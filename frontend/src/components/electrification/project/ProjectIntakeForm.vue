@@ -20,7 +20,7 @@ import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Document } from '@/types';
+import type { Document, OrgBookOption } from '@/types';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{
@@ -50,7 +50,7 @@ const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
-const orgBookOptions: Ref<Array<any>> = ref([]);
+const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
   if (!formRef?.value?.errors) return [];
@@ -131,8 +131,12 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
-      .map((x: { [key: string]: string }) => x?.value);
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      // map value and topic_source_id for AutoComplete display and selection
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
+      }));
   }
 }
 
@@ -363,8 +367,19 @@ onBeforeMount(async () => {
             :disabled="!editable"
             :editable="true"
             :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
+            :get-option-label="(option: OrgBookOption) => option.registeredName"
             :suggestions="orgBookOptions"
             @on-complete="onRegisteredNameInput"
+            @on-select="
+              (orgBookOption: OrgBookOption) => {
+                setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
+                setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
+              }
+            "
+          />
+          <input
+            hidden
+            name="project.companyIdRegistered"
           />
         </template>
       </Card>

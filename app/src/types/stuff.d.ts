@@ -176,6 +176,7 @@ export type ElectrificationProjectIntake = {
     projectName: string | null;
     projectDescription: string | null;
     companyNameRegistered: string | null;
+    companyIdRegistered: string | null;
     projectType: string | null;
     bcHydroNumber: string | null;
     submissionType?: string;
@@ -278,6 +279,7 @@ export type HousingProjectIntake = {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
     isDevelopedInBc: string | null;
+    registeredId: string | null;
     registeredName: string | null;
   };
 

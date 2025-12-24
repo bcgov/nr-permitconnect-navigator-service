@@ -214,10 +214,13 @@ describe('SubmissionIntakeForm', () => {
     //   }
     // );
 
-    const basicTest = createProjectIntakeSchema(['testString3']).validateAt('basic', {
+    const basicTest = createProjectIntakeSchema([
+      { registeredName: 'testString3', registeredId: 'FM0281610' }
+    ]).validateAt('basic', {
       basic: {
         projectApplicantType: ProjectApplicant.BUSINESS,
         isDevelopedInBc: BasicResponse.NO,
+        registeredId: 'FM0281610',
         registeredName: 'testString3'
       }
     });

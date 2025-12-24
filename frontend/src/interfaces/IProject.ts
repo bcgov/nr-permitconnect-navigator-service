@@ -12,6 +12,7 @@ export type IProject = {
   intakeStatus: string;
   applicationStatus: ApplicationStatus;
 
+  companyIdRegistered: string;
   companyNameRegistered: string;
   hasRelatedEnquiry: boolean;
   queuePriority: number;

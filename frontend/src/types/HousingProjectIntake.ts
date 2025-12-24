@@ -6,6 +6,7 @@ export type HousingProjectIntake = {
     consentToFeedback?: boolean;
     projectApplicantType?: string;
     isDevelopedInBc?: string;
+    registeredId?: string;
     registeredName?: string;
   };
 
