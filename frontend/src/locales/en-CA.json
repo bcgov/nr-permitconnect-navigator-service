@@ -477,6 +477,9 @@
           "unitsHasRentalUnits": "Rental included",
           "unitsRentalUnits": "Rental units",
           "validContact": "Contact email must be valid"
+        },
+        "roadmap": {
+          "attached": "Attached"
         }
       }
     },
