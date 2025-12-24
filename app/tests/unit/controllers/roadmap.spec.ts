@@ -62,8 +62,10 @@ describe('send', () => {
       note: req.body.emailData.body
     };
 
+    createdHistory.note = [createdNote];
+
     const emailResponse = {
-      data: 'foo',
+      data: createdHistory,
       status: 201
     };
 
@@ -98,11 +100,6 @@ describe('send', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -112,6 +109,13 @@ describe('send', () => {
     const createdNote: Note = {
       ...TEST_NOTE_1,
       note: req.body.emailData.body
+    };
+
+    createdHistory.note = [createdNote];
+
+    const emailResponse = {
+      data: createdHistory,
+      status: 201
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
@@ -187,11 +191,6 @@ describe('send', () => {
       status: 200
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -201,6 +200,13 @@ describe('send', () => {
     const createdNote: Note = {
       ...TEST_NOTE_1,
       note: req.body.emailData.body
+    };
+
+    createdHistory.note = [createdNote];
+
+    const emailResponse = {
+      data: createdHistory,
+      status: 201
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
@@ -253,11 +259,6 @@ describe('send', () => {
       headers: {}
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -267,6 +268,13 @@ describe('send', () => {
     const createdNote: Note = {
       ...TEST_NOTE_1,
       note: req.body.emailData.body
+    };
+
+    createdHistory.note = [createdNote];
+
+    const emailResponse = {
+      data: createdHistory,
+      status: 201
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
@@ -316,11 +324,6 @@ describe('send', () => {
       headers: {}
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const getObjectResponse1 = {
       data: 'foo',
       headers: {
@@ -351,6 +354,13 @@ describe('send', () => {
     const createdNote: Note = {
       ...TEST_NOTE_1,
       note: `Some message text\n\nAttachments:\n${note1Name}\n${note2Name}\n`
+    };
+
+    createdHistory.note = [createdNote];
+
+    const emailResponse = {
+      data: createdHistory,
+      status: 201
     };
 
     createHistorySpy.mockResolvedValue(createdHistory);
