@@ -64,7 +64,7 @@ export const sendRoadmapController = async (
         });
       }
 
-      const history = await createNoteHistory(tx, {
+      const noteHistory = await createNoteHistory(tx, {
         noteHistoryId: uuidv4(),
         activityId: req.body.activityId,
         type: 'Roadmap',
@@ -80,14 +80,17 @@ export const sendRoadmapController = async (
         ...generateNullDeleteStamps()
       });
 
-      await createNote(tx, {
+      const note = await createNote(tx, {
         noteId: uuidv4(),
-        noteHistoryId: history.noteHistoryId,
+        noteHistoryId: noteHistory.noteHistoryId,
         note: noteBody,
         ...generateCreateStamps(req.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
+
+      noteHistory.note = [note];
+      data.noteHistory = noteHistory;
     }
 
     return { data, status };
