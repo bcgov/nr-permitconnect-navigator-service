@@ -59,7 +59,7 @@ import { getHTMLElement, omit, setEmptyStringsToNull, toTitleCase } from '@/util
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Document, HousingProjectIntake, Permit, PermitType } from '@/types';
+import type { Document, HousingProjectIntake, OrgBookOption, Permit, PermitType } from '@/types';
 
 // Types
 type HousingProjectForm = {
@@ -99,7 +99,7 @@ const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
 const locationRef: Ref<InstanceType<typeof LocationCard> | null> = ref(null);
-const orgBookOptions: Ref<Array<any>> = ref([]);
+const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
@@ -263,8 +263,12 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((x: { [key: string]: string }) => x.type === 'name')
-      .map((x: { [key: string]: string }) => x?.value);
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      // map value and topic_source_id for AutoComplete display and selection
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
+      }));
   }
 }
 
@@ -662,20 +666,35 @@ watchEffect(() => {
                       :disabled="!editable"
                       :options="YES_NO_LIST"
                       @on-change="
-                        () => setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName)
+                        () => {
+                          setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName);
+                          setFieldValue('basic.registeredId', null);
+                        }
                       "
                     />
-                    <AutoComplete
-                      v-if="values.basic.isDevelopedInBc === BasicResponse.YES"
-                      class="col-span-6 mt-4 pl-0"
-                      name="basic.registeredName"
-                      :bold="false"
-                      :disabled="!editable"
-                      :editable="true"
-                      :placeholder="'Type to search the B.C registered name'"
-                      :suggestions="orgBookOptions"
-                      @on-complete="onRegisteredNameInput"
-                    />
+                    <div v-if="values.basic.isDevelopedInBc === BasicResponse.YES">
+                      <AutoComplete
+                        class="col-span-6 mt-4 pl-0"
+                        name="basic.registeredName"
+                        :bold="false"
+                        :disabled="!editable"
+                        :editable="true"
+                        :placeholder="'Type to search the B.C registered name'"
+                        :get-option-label="(option: OrgBookOption) => option.registeredName"
+                        :suggestions="orgBookOptions"
+                        @on-complete="onRegisteredNameInput"
+                        @on-select="
+                          (orgBookOption: OrgBookOption) => {
+                            setFieldValue('basic.registeredId', orgBookOption.registeredId);
+                            setFieldValue('basic.registeredName', orgBookOption.registeredName);
+                          }
+                        "
+                      />
+                      <input
+                        hidden
+                        name="basic.registeredId"
+                      />
+                    </div>
                     <InputText
                       v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
                       class="col-span-6 mt-4 pl-0"
@@ -683,6 +702,7 @@ watchEffect(() => {
                       :placeholder="'Type the business/company/organization name'"
                       :bold="false"
                       :disabled="!editable"
+                      @on-change="setFieldValue('basic.registeredId', null)"
                     />
                   </span>
                 </div>

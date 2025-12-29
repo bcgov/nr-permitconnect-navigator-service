@@ -15,6 +15,7 @@ import {
   Location
 } from '@/components/common/icons';
 import {
+  AutoComplete,
   CancelButton,
   Checkbox,
   EditableSelect,
@@ -50,6 +51,7 @@ import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
+import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
@@ -60,6 +62,7 @@ import type {
   Contact,
   GeocoderEntry,
   HousingProject,
+  OrgBookOption,
   User
 } from '@/types';
 
@@ -93,6 +96,7 @@ const geoJson = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
+const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
@@ -202,6 +206,7 @@ function initializeFormValues(project: HousingProject) {
     },
     locationPidsAuto: locationPidsAuto.value,
     project: {
+      companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
       isDevelopedInBc: project.isDevelopedInBc,
       projectName: project.projectName
@@ -288,6 +293,19 @@ function onInvalidSubmit(e: any) {
     toast.warn(t('i.housing.project.projectForm.basicInfoMissing'));
   }
   scrollToFirstError(e.errors);
+}
+
+async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
+  if (e?.query?.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    orgBookOptions.value = results
+      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      // map value and topic_source_id for AutoComplete display and selection
+      .map((obo: { [key: string]: string }) => ({
+        registeredName: obo.value,
+        registeredId: obo.topic_source_id
+      }));
+  }
 }
 
 const onSaveGeoJson = () => {
@@ -527,13 +545,46 @@ onBeforeMount(async () => {
               </h3>
             </div>
           </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
+          <div class="grid grid-cols-2 gap-x-6 gap-y-6">
+            <Select
+              name="project.isDevelopedInBc"
+              :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
+              :disabled="!editable"
+              :options="YES_NO_LIST"
+              @on-change="setFieldValue('project.companyIdRegistered', null)"
+            />
             <InputText
+              name="project.projectName"
+              :label="t('i.housing.project.projectForm.projectNameLabel')"
+              :disabled="!editable"
+              @on-input="emitProjectNameChange"
+            />
+            <AutoComplete
+              v-if="values.project.isDevelopedInBc === BasicResponse.YES"
+              name="project.companyNameRegistered"
+              :label="t('i.housing.project.projectForm.companyLabel')"
+              :bold="true"
+              :disabled="!editable"
+              :editable="true"
+              :placeholder="t('i.common.projectForm.searchBCRegistered')"
+              :get-option-label="(option: OrgBookOption) => option.registeredName"
+              :suggestions="orgBookOptions"
+              @on-complete="onRegisteredNameInput"
+              @on-select="
+                (orgBookOption: OrgBookOption) => {
+                  setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
+                  setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
+                }
+              "
+            />
+            <InputText
+              v-else
               name="project.companyNameRegistered"
               :label="t('i.housing.project.projectForm.companyLabel')"
               :disabled="!editable"
               @on-change="
                 (e) => {
+                  setFieldValue('project.companyIdRegistered', null);
                   if (!e.target.value) {
                     setFieldValue('project.companyNameRegistered', null);
                     setFieldValue('project.isDevelopedInBc', null);
@@ -541,17 +592,12 @@ onBeforeMount(async () => {
                 }
               "
             />
-            <Select
-              name="project.isDevelopedInBc"
-              :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
-              :disabled="!editable || !values.project.companyNameRegistered"
-              :options="YES_NO_LIST"
-            />
+
             <InputText
-              name="project.projectName"
-              :label="t('i.housing.project.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
+              v-if="values.project.isDevelopedInBc === BasicResponse.YES"
+              name="project.companyIdRegistered"
+              :label="t('i.common.projectForm.bcRegistryId')"
+              :disabled="true"
             />
           </div>
         </Panel>

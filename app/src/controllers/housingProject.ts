@@ -115,6 +115,7 @@ const generateHousingProjectData = async (
       consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       isDevelopedInBc: data.basic.isDevelopedInBc,
+      companyIdRegistered: data.basic.registeredId,
       companyNameRegistered: data.basic.registeredName
     };
   }
