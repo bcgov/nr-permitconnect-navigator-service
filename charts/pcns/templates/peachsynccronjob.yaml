@@ -1,0 +1,86 @@
+{{- if .Values.peachSync.enabled }}
+
+{{ $dbHostName := .Values.config.configMap.SERVER_DB_HOST }}
+{{ $dbSecretName := printf "%s-%s" (include "pcns.fullname" .) "passphrase" }}
+{{- if .Values.patroni.enabled }}
+{{ $dbHostName = include "patroni.fullname" .Subcharts.patroni }}
+{{ $dbSecretName = include "patroni.fullname" .Subcharts.patroni }}
+{{- end }}
+
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: peach-sync
+  labels:
+    {{- include "pcns.peachSyncLabels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.peachSync.schedule | quote }}
+  suspend: {{ .Values.peachSync.suspend }}
+  startingDeadlineSeconds: {{ .Values.peachSync.startingDeadlineSeconds  }}
+  concurrencyPolicy: {{ .Values.peachSync.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ .Values.peachSync.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ .Values.peachSync.failedJobsHistoryLimit }}
+  jobTemplate:
+    metadata:
+      labels:
+        {{- include "pcns.peachSyncLabels" . | nindent 6 }}
+    spec:
+      backoffLimit: {{ .Values.peachSync.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.peachSync.activeDeadlineSeconds }}
+      template:
+        metadata:
+          labels:
+            {{- include "pcns.peachSyncLabels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          terminationGracePeriodSeconds: {{ .Values.peachSync.terminationGracePeriodSeconds }}
+          {{- with .Values.imagePullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          containers:
+            - name: peach-sync
+              image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              command: ["sh","-lc"]
+              args:
+                - "npm run peach:sync"
+              resources:
+                {{- toYaml .Values.peachSync.resources | nindent 16 }}
+              env:
+                - name: NODE_ENV
+                  value: production
+                - name: SERVER_LOGLEVEL
+                  value: "verbose"
+                # Note: PEACH currently unauthenticated. If/when PEACH requires auth, add the required secrets here.
+                - name: SERVER_DB_DATABASE
+                  valueFrom:
+                    secretKeyRef:
+                      key: app-db-name
+                      name: {{ $dbSecretName }}
+                - name: SERVER_DB_HOST
+                  value: {{ $dbHostName }}
+                - name: SERVER_DB_USERNAME
+                  valueFrom:
+                    secretKeyRef:
+                      key: app-db-username
+                      name: {{ $dbSecretName }}
+                - name: SERVER_DB_PASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      key: app-db-password
+                      name: {{ $dbSecretName }}
+                - name: SERVER_CHES_CLIENTID
+                  valueFrom:
+                    secretKeyRef:
+                      key: username
+                      name: {{ include "pcns.configname" . }}-ches-service-account
+                - name: SERVER_CHES_CLIENTSECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: {{ include "pcns.configname" . }}-ches-service-account
+              envFrom:
+                - configMapRef:
+                    name: {{ include "pcns.configname" . }}-config
+{{- end }}
