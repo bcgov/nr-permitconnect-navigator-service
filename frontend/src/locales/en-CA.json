@@ -477,6 +477,9 @@
           "unitsHasRentalUnits": "Rental included",
           "unitsRentalUnits": "Rental units",
           "validContact": "Contact email must be valid"
+        },
+        "roadmap": {
+          "attached": "Attached"
         }
       }
     },
@@ -752,6 +755,9 @@
     "header": "Enquiry:",
     "linkedActivity": "This enquiry is linked to Project",
     "invalidLinkedActivity": "This activity is linked to an invalid Activity"
+  },
+  "fileSelectModal": {
+    "noFilesAvailable": "No files available."
   },
   "groupName": {
     "developer": "DEVELOPER",

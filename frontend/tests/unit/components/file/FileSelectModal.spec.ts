@@ -20,6 +20,12 @@ vi.mock('vue-router', () => ({
   })
 }));
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 const currentDate = new Date().toISOString();
 
 const testDocument: Array<Document> = [

@@ -4,7 +4,15 @@ import jwt from 'jsonwebtoken';
 import { AuthType, GroupName, Initiative } from '../utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 
-import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
+import type {
+  AccessRequest,
+  Contact,
+  ElectrificationProject,
+  HousingProject,
+  NoteHistory,
+  Permit,
+  User
+} from './models';
 import type { IStamps } from '../interfaces/IStamps';
 import type { PermitEmailTemplate } from '../utils/templates';
 
@@ -142,6 +150,17 @@ export type ChefsSubmissionExport = {
   dataGrid: any; // eslint-disable-line @typescript-eslint/no-explicit-any
 };
 
+type ChesEmailData = {
+  messages: [
+    {
+      msgId: string;
+      tag: string;
+      to: [string];
+    }
+  ];
+  txId: string;
+};
+
 export type ContactSearchParameters = {
   contactApplicantRelationship?: string;
   contactPreference?: string;
@@ -233,6 +252,11 @@ export type EmailAttachment = {
   contentType: string;
   encoding: string;
   filename: string;
+};
+
+export type EmailResponse = {
+  data: ChesEmailData | string;
+  status: number;
 };
 
 export type EnquiryIntake = {
@@ -411,7 +435,13 @@ export type PermitUpdateEmailParams = {
   toEmails: string[];
   emailTemplate: PermitEmailTemplate;
 };
+
 export type Project = HousingProject | ElectrificationProject;
+
+export type RoadmapResponse = {
+  emailResponse: EmailResponse.data;
+  noteHistory: NoteHistory | null;
+};
 
 type SplitDatetimeBase<T> = {
   date: T;

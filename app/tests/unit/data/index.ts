@@ -15,6 +15,7 @@ import {
   ElectrificationProject,
   ElectrificationProjectIntake,
   Email,
+  EmailResponse,
   Enquiry,
   EnquiryIntake,
   HousingProject,
@@ -227,8 +228,17 @@ export const TEST_EMAIL: Email = {
   body: '<html>email body</html>'
 };
 
-export const TEST_EMAIL_RESPONSE = {
-  data: TEST_EMAIL,
+export const TEST_EMAIL_RESPONSE: EmailResponse = {
+  data: {
+    messages: [
+      {
+        msgId: '212112221',
+        tag: 'tag',
+        to: ['abc@abc.com']
+      }
+    ],
+    txId: 'txid12345'
+  },
   status: 201
 };
 

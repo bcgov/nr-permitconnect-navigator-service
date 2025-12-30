@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import { Button, Dialog } from '@/lib/primevue';
@@ -21,6 +22,7 @@ const visible = defineModel<boolean>('visible');
 const selectedFiles: Ref<Array<Document>> = ref(selectedDocuments);
 
 // Actions
+const { t } = useI18n();
 function onDocumentClicked(data: { document: Document; selected: boolean }) {
   if (data.selected) {
     if (!selectedFiles.value.includes(data.document)) {
@@ -52,7 +54,10 @@ watchEffect(() => {
       <span class="p-dialog-title">Select files</span>
     </template>
     <div class="col-span-12">
-      <div class="grid grid-cols-12 gap-4">
+      <div
+        v-if="documents.length > 0"
+        class="grid grid-cols-12 gap-4"
+      >
         <div
           v-for="(document, index) in documents"
           :key="document.documentId"
@@ -68,6 +73,12 @@ watchEffect(() => {
             @document:clicked="onDocumentClicked"
           />
         </div>
+      </div>
+      <div
+        v-else
+        class="flex justify-center mb-8"
+      >
+        <h3>{{ t('fileSelectModal.noFilesAvailable') }}</h3>
       </div>
       <div class="field col-span-12 flex">
         <div class="flex-auto">
