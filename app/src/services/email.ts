@@ -5,7 +5,7 @@ import { v4 as uuidv4 } from 'uuid';
 import prisma from '../db/dataConnection';
 
 import type { AxiosInstance } from 'axios';
-import type { Email } from '../types';
+import type { Email, EmailResponse } from '../types';
 
 type Message = {
   msgId: string;
@@ -62,7 +62,7 @@ function chesAxios(): AxiosInstance {
  * @param emailData
  * @returns A Promise that resolves to the response from the external api
  */
-export const email = async (emailData: Email) => {
+export const email = async (emailData: Email): Promise<EmailResponse> => {
   // Generate list of unique emails to be sent
   const uniqueEmails = Array.from(new Set([...emailData.to, ...(emailData?.cc || []), ...(emailData?.bcc || [])]));
 
@@ -81,7 +81,7 @@ export const email = async (emailData: Email) => {
     if (axios.isAxiosError(e)) {
       await logEmail(null, uniqueEmails, e.response ? e.response.status : 500);
       return {
-        data: e.response?.data.errors[0].message,
+        data: e.response ? e.response?.data.errors[0].message : e.message,
         status: e.response ? e.response.status : 500
       };
     } else {

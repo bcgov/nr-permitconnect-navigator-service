@@ -9,7 +9,8 @@ import { createNoteHistory } from '../services/noteHistory';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Email, EmailAttachment } from '../types';
+import type { Email, EmailAttachment, RoadmapResponse } from '../types';
+import { Problem } from '../utils';
 
 /**
  * Send an email with the roadmap data
@@ -19,82 +20,82 @@ export const sendRoadmapController = async (
   res: Response
 ) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const response = await transactionWrapper<{ data: any; status: number }>(async (tx: PrismaTransactionClient) => {
-    if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
-      const attachments: EmailAttachment[] = [];
 
-      if (req.currentContext?.bearerToken) {
-        // Attempt to get the requested documents from COMS
-        // If succesful it is converted to base64 encoding and added to the attachment list
-        const objectPromises = req.body.selectedFileIds.map(async (id) => {
-          const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
+  if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
+    const attachments: EmailAttachment[] = [];
 
-          if (status === 200) {
-            const filename = headers['x-amz-meta-name'];
-            if (filename) {
-              attachments.push({
-                content: Buffer.from(data).toString('base64'),
-                contentType: headers['content-type'],
-                encoding: 'base64',
-                filename: filename
-              });
-            } else {
-              throw new Error(`Unable to obtain filename for file ${id}`);
-            }
+    if (req.currentContext?.bearerToken) {
+      // Attempt to get the requested documents from COMS
+      // If succesful it is converted to base64 encoding and added to the attachment list
+      const objectPromises = req.body.selectedFileIds.map(async (id) => {
+        const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
+
+        if (status === 200) {
+          const filename = headers['x-amz-meta-name'];
+          if (filename) {
+            attachments.push({
+              content: Buffer.from(data).toString('base64'),
+              contentType: headers['content-type'],
+              encoding: 'base64',
+              filename: filename
+            });
+          } else {
+            throw new Error(`Unable to obtain filename for file ${id}`);
           }
-        });
-
-        await Promise.all(objectPromises);
-      }
-
-      // All succesful so attachment list is added to payload
-      req.body.emailData.attachments = attachments;
-    }
-
-    // Send the email
-    const { data, status } = await email(req.body.emailData);
-
-    // Add a new note on success
-    if (status === 201) {
-      let noteBody = req.body.emailData.body;
-      if (req.body.emailData.attachments) {
-        noteBody += '\n\nAttachments:\n';
-        req.body.emailData.attachments.forEach((x) => {
-          noteBody += `${x.filename}\n`;
-        });
-      }
-
-      const noteHistory = await createNoteHistory(tx, {
-        noteHistoryId: uuidv4(),
-        activityId: req.body.activityId,
-        type: 'Roadmap',
-        title: 'Sent roadmap',
-        bringForwardDate: null,
-        bringForwardState: null,
-        escalateToSupervisor: false,
-        escalateToDirector: false,
-        escalationType: null,
-        shownToProponent: false,
-        ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
+        }
       });
 
-      const note = await createNote(tx, {
-        noteId: uuidv4(),
-        noteHistoryId: noteHistory.noteHistoryId,
-        note: noteBody,
-        ...generateCreateStamps(req.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      });
-
-      noteHistory.note = [note];
-      data.noteHistory = noteHistory;
+      await Promise.all(objectPromises);
     }
 
-    return { data, status };
-  });
+    // All succesful so attachment list is added to payload
+    req.body.emailData.attachments = attachments;
+  }
 
+  // Send the email
+  const { data, status } = await email(req.body.emailData);
+
+  const response = await transactionWrapper<{ data: RoadmapResponse; status: number }>(
+    async (tx: PrismaTransactionClient) => {
+      // Add a new note on success
+      if (status === 201) {
+        let noteBody = req.body.emailData.body;
+        if (req.body.emailData.attachments) {
+          noteBody += '\n\nAttachments:\n';
+          req.body.emailData.attachments.forEach((x) => {
+            noteBody += `${x.filename}\n`;
+          });
+        }
+
+        const noteHistory = await createNoteHistory(tx, {
+          noteHistoryId: uuidv4(),
+          activityId: req.body.activityId,
+          type: 'Roadmap',
+          title: 'Sent roadmap',
+          bringForwardDate: null,
+          bringForwardState: null,
+          escalateToSupervisor: false,
+          escalateToDirector: false,
+          escalationType: null,
+          shownToProponent: false,
+          ...generateCreateStamps(req.currentContext),
+          ...generateNullUpdateStamps(),
+          ...generateNullDeleteStamps()
+        });
+
+        const note = await createNote(tx, {
+          noteId: uuidv4(),
+          noteHistoryId: noteHistory.noteHistoryId,
+          note: noteBody,
+          ...generateCreateStamps(req.currentContext),
+          ...generateNullUpdateStamps(),
+          ...generateNullDeleteStamps()
+        });
+        return { data: { emailResponse: data, noteHistory: { ...noteHistory, note: [note] } }, status };
+      } else {
+        throw new Problem(500, { detail: 'Failed to send roadmap email.' });
+      }
+    }
+  );
   res.status(response.status).json(response.data);
 };
