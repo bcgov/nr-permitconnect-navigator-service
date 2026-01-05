@@ -345,7 +345,6 @@ export const TEST_HOUSING_PROJECT_1: HousingProject = {
   hasRentalUnits: BasicResponse.NO,
   housingCoopDescription: null,
   indigenousDescription: null,
-  isDevelopedInBc: BasicResponse.YES,
   locality: 'Place',
   multiFamilyUnits: BasicResponse.NO,
   nonProfitDescription: null,
@@ -407,7 +406,6 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
   hasRentalUnits: BasicResponse.NO,
   housingCoopDescription: null,
   indigenousDescription: null,
-  isDevelopedInBc: BasicResponse.YES,
   locality: 'Place',
   multiFamilyUnits: BasicResponse.NO,
   nonProfitDescription: null,
@@ -434,7 +432,6 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   appliedPermits: [],
   basic: {
     consentToFeedback: false,
-    isDevelopedInBc: BasicResponse.YES,
     projectApplicantType: null,
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
