@@ -312,6 +312,9 @@ async function onSubmit(data: any) {
     // Omit all the fields we dont want to send
     const dataOmitted = omit(setEmptyStringsToNull({ ...data, contact }), ['contacts']);
 
+    // Remove isDevelopedInBc
+    delete dataOmitted.basic.isDevelopedInBc;
+
     // Show the trackingNumber of all appliedPermits to the proponent
     dataOmitted.appliedPermits?.forEach((x: Permit) => {
       if (x.permitTracking) x.permitTracking = x.permitTracking.filter((pt) => pt.trackingId);
@@ -427,7 +430,7 @@ onBeforeMount(async () => {
         basic: {
           consentToFeedback: response?.consentToFeedback,
           projectApplicantType: response?.projectApplicantType,
-          isDevelopedInBc: response?.isDevelopedInBc,
+          isDevelopedInBc: response?.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
           registeredName: response?.companyNameRegistered
         },
         housing: {
