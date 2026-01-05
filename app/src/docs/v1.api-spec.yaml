@@ -2772,10 +2772,6 @@ components:
           enum: [Business, Individual]
           description: Are you applying as an individual or as a business?
           example: 'Business'
-        isDevelopedInBc:
-          type: string
-          description: Is the project developed in BC?
-          example: 'Yes'
         multiFamilyUnits:
           type: string
           description: Range of multi-family units in the project
@@ -3507,12 +3503,6 @@ components:
               enum: [Business, Individual]
               description: Are you applying as an individual or as a business?
               example: 'Business'
-            isDevelopedInBc:
-              type: boolean
-              description: >-
-                Indicates if the project is being developed in British Columbia
-                (BC)
-              example: true
             companyNameRegistered:
               type: string
               description: Name of the company associated with the project
@@ -3767,10 +3757,6 @@ components:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
-        isDevelopedInBc:
-          type: string
-          description: Is the project developed in BC?
-          example: 'Yes'
         projectName:
           type: string
           description: Name of the Project

@@ -275,7 +275,6 @@ export type HousingProjectIntake = {
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
-    isDevelopedInBc: string | null;
     registeredId: string | null;
     registeredName: string | null;
   };
