@@ -238,14 +238,35 @@ describe('ProjectForm.vue', () => {
     expect(getPIDsSpy).toHaveBeenCalledWith(testSubmission.housingProjectId);
   });
 
-  it('there are correct numbers of disabled components when editable prop is false', async () => {
+  it('disables all fields when editable is false', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings(undefined, false));
     await nextTick();
     await nextTick();
 
-    const elements = wrapper.findAll('.p-disabled');
-    expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(22);
+    // Note: if different form fields components are added to template they will need to be added to this
+    const fieldComponentNames = [
+      'Select',
+      'InputText',
+      'InputNumber',
+      'TextArea',
+      'Checkbox',
+      'EditableSelect',
+      'AutoComplete'
+    ] as const;
+
+    const fields = fieldComponentNames.flatMap((name) => wrapper.findAllComponents({ name }));
+
+    expect(fields.length).toBeGreaterThan(0);
+
+    const notDisabled = fields
+      .filter((c) => c.props('disabled') !== true)
+      .map((c) => ({
+        component: c.vm?.$options?.name,
+        name: c.props('name'),
+        disabled: c.props('disabled')
+      }));
+
+    expect(notDisabled).toEqual([]);
   });
 
   it('geojson download btn not visible when no geojson', async () => {

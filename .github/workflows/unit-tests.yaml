@@ -58,17 +58,17 @@ jobs:
           - '22.x'
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Check Sonar Secrets
         id: check-secrets
         run: |
           echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_APP != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-app
         env:
           cache-name: cache-node-modules
@@ -90,7 +90,7 @@ jobs:
           CI: true
       - name: Save Coverage Results
         if: matrix.node-version == '22.x'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
@@ -126,17 +126,17 @@ jobs:
           - '22.x'
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
       - name: Check Sonar Secrets
         id: check-secrets
         run: |
           echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_FRONTEND != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         id: cache-frontend
         env:
           cache-name: cache-node-modules
@@ -156,7 +156,7 @@ jobs:
           CI: true
       - name: Save Coverage Results
         if: matrix.node-version == '22.x'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
@@ -184,14 +184,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6
       - name: Restore Coverage Results
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v6
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@1a6d90ebcb0e6a6b1d87e37ba693fe453195ae25 # v5.3.1
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_APP }}
         with:
@@ -208,14 +208,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v6
       - name: Restore Coverage Results
-        uses: actions/download-artifact@v4.3.0
+        uses: actions/download-artifact@v6
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@1a6d90ebcb0e6a6b1d87e37ba693fe453195ae25 # v5.3.1
+        uses: SonarSource/sonarqube-scan-action@a31c9398be7ace6bbfaf30c0bd5d415f843d45e9 # v7.0.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
