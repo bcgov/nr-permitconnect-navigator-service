@@ -217,7 +217,7 @@ function initializeFormValues(project: HousingProject) {
     project: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      isDevelopedInBc: project.isDevelopedInBc,
+      isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
       projectName: project.projectName
     },
 
@@ -424,12 +424,13 @@ const onSubmit = async (values: any) => {
         addedToAts: values.addedToAts,
         ltsaCompleted: values.ltsaCompleted,
         bcOnlineCompleted: values.bcOnlineCompleted,
+        companyIdRegistered: values.project?.companyIdRegistered ?? null,
         submittedAt: values.submittedAt,
         consentToFeedback: values.consentToFeedback === BasicResponse.YES,
         naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
         assignedUserId: values.submissionState.assignedUser?.userId ?? undefined
       }),
-      ['contact', 'assignedUser', 'submissionState', 'locationAddress', 'relatedEnquiries']
+      ['contact', 'assignedUser', 'isDevelopedInBc', 'submissionState', 'locationAddress', 'relatedEnquiries']
     );
 
     // Deal with Nav contact change nonsense
