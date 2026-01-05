@@ -102,7 +102,6 @@ const testSubmission: HousingProject = {
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
-  isDevelopedInBc: 'Yes',
   projectName: 'Project Alpha',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
@@ -313,7 +312,7 @@ describe('onRegisteredNameInput', () => {
   });
 
   it('should not call searchOrgBook when query length is less than 2', async () => {
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -341,7 +340,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -372,7 +371,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -408,7 +407,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -433,7 +432,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -463,7 +462,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
@@ -490,7 +489,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
+    const modifiedSubmission = { ...testSubmission };
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
     await nextTick();
     await nextTick();
