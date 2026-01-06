@@ -135,7 +135,6 @@ const testSubmission: HousingProject = {
   bcOnlineCompleted: true,
   aaiUpdated: true,
   astNotes: 'AST notes.',
-  intakeStatus: 'Pending',
   applicationStatus: ApplicationStatus.COMPLETED,
   contacts: [exampleContact],
   user: testUser,
