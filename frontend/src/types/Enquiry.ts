@@ -17,9 +17,7 @@ export type Enquiry = {
   submittedBy: string;
   relatedActivityId?: string;
   enquiryDescription?: string;
-  intakeStatus: string;
   enquiryStatus: ApplicationStatus;
-  waitingOn?: string;
   contacts: Array<Contact>;
   submittedMethod: EnquirySubmittedMethod;
 

@@ -7,7 +7,7 @@ import { Spinner } from '@/components/layout';
 import { Column, DataTable, useToast } from '@/lib/primevue';
 import { contactService } from '@/services';
 import { useAuthZStore } from '@/store/authzStore';
-import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
@@ -149,7 +149,7 @@ onBeforeMount(async () => {
       class="!text-right"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        <!-- {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }} -->
       </template>
     </Column>
   </DataTable>

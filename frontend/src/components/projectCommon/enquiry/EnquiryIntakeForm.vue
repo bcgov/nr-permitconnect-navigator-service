@@ -14,7 +14,7 @@ import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { useAppStore, useConfigStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
-import { IntakeFormCategory, IntakeStatus } from '@/utils/enums/projectCommon';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import {
   enquiryConfirmRouteNameKey,
   enquiryPermitConfirmRouteNameKey,
@@ -163,7 +163,7 @@ async function loadEnquiry() {
     if (enquiryId) {
       response = (await enquiryService.getEnquiry(enquiryId)).data;
       firstContact = response?.activity?.activityContact?.[0]?.contact;
-      editable.value = response?.intakeStatus !== IntakeStatus.SUBMITTED;
+      editable.value = false;
     } else {
       // Load contact data for new enquiry
       firstContact = contactStore.getContact;

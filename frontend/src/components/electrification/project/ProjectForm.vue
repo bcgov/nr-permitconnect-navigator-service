@@ -159,8 +159,7 @@ function initilizeFormValues(project: ElectrificationProject) {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
       assignedUser: assigneeOptions.value[0] ?? null,
-      applicationStatus: project.applicationStatus,
-      intakeStatus: project.intakeStatus
+      applicationStatus: project.applicationStatus
     },
 
     // ATS link
