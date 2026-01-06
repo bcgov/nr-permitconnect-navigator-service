@@ -3,7 +3,6 @@ import {
   BringForwardType,
   ContactPreference,
   EnquirySubmittedMethod,
-  IntakeStatus,
   NoteType,
   ProjectRelationship,
   SubmissionType
@@ -37,8 +36,6 @@ export const ENQUIRY_TYPE_LIST = [
   SubmissionType.ESCALATION,
   SubmissionType.INAPPLICABLE
 ];
-
-export const INTAKE_STATUS_LIST = [IntakeStatus.SUBMITTED, IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ENQUIRY, NoteType.ROADMAP];
 
