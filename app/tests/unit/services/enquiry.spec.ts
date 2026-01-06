@@ -3,7 +3,6 @@ import { prismaTxMock } from '../../__mocks__/prismaMock';
 import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data';
 import * as enquiryService from '../../../src/services/enquiry';
 import { generateDeleteStamps } from '../../../src/db/utils/utils';
-import { IntakeStatus } from '../../../src/utils/enums/projectCommon';
 import { Initiative } from '../../../src/utils/enums/application';
 
 beforeEach(() => {
@@ -127,9 +126,6 @@ describe('searchEnquiries', () => {
           },
           {
             enquiryId: { in: undefined }
-          },
-          {
-            intakeStatus: { in: undefined }
           }
         ]
       },
@@ -156,7 +152,6 @@ describe('searchEnquiries', () => {
       activityId: ['123'],
       createdBy: ['456'],
       enquiryId: ['789'],
-      intakeStatus: [IntakeStatus.SUBMITTED],
       includeUser: true
     };
 
@@ -181,9 +176,6 @@ describe('searchEnquiries', () => {
           },
           {
             enquiryId: { in: params.enquiryId }
-          },
-          {
-            intakeStatus: { in: params.intakeStatus }
           }
         ]
       },
