@@ -30,5 +30,4 @@ export type HousingProject = {
   naturalDisaster: boolean;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
-  waitingOn?: string;
 } & IProject;

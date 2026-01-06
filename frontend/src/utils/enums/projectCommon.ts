@@ -47,13 +47,6 @@ export enum IntakeFormCategory {
   INVESTIGATE_PERMIS = 'investigatePermits'
 }
 
-export enum IntakeStatus {
-  SUBMITTED = 'Submitted',
-  ASSIGNED = 'Assigned',
-  COMPLETED = 'Completed',
-  DRAFT = 'Draft'
-}
-
 export enum NoteType {
   GENERAL = 'General',
   BRING_FORWARD = 'Bring forward',

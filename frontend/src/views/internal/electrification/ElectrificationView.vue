@@ -8,7 +8,7 @@ import { electrificationProjectService, enquiryService, noteHistoryService, perm
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Resource, RouteName } from '@/utils/enums/application';
-import { BringForwardType, IntakeStatus } from '@/utils/enums/projectCommon';
+import { BringForwardType } from '@/utils/enums/projectCommon';
 import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
@@ -41,8 +41,7 @@ onBeforeMount(async () => {
       enquiryService.searchEnquiries(),
       permitService.listPermits(),
       electrificationProjectService.searchProjects({
-        includeUser: true,
-        intakeStatus: [IntakeStatus.ASSIGNED, IntakeStatus.COMPLETED, IntakeStatus.SUBMITTED]
+        includeUser: true
       }),
       electrificationProjectService.getStatistics(),
       noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)

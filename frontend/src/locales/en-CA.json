@@ -467,7 +467,6 @@
           "projectDescription": "Additional information about project",
           "relatedEnquiries": "Related enquiries",
           "submissionStateApplicationStatus": "Project state",
-          "submissionStateIntakeStatus": "Intake state",
           "submissionStateQueuePriority": "Priority",
           "submissionStateSubmissionType": "Submission type",
           "unitsSingleFamilyUnits": "Single family units",
