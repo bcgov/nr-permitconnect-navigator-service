@@ -5,7 +5,6 @@ export interface IProject extends IStamps {
   activityId: string;
   assignedUserId: string | null;
   submittedAt: Date;
-  intakeStatus: string | null;
   applicationStatus: string | null;
   projectName: string | null;
   projectDescription: string | null;

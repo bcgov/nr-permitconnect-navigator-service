@@ -108,7 +108,6 @@ export type ChefsSubmissionExport = {
   financiallySupported: boolean;
   housingCoopName: string;
   IndigenousHousingProviderName: string;
-  intakeStatus: string;
   isBCHousingSupported: string;
   isCompany: string;
   isCompanyRegistered: string;
@@ -189,7 +188,6 @@ export type ElectrificationProjectSearchParameters = {
   electrificationProjectId?: Array<string>;
   projectType?: Array<string>;
   projectCategory?: Array<string>;
-  intakeStatus?: Array<string>;
   includeUser?: boolean;
 };
 
@@ -256,7 +254,6 @@ export type EnquirySearchParameters = {
   activityId?: Array<string>;
   createdBy?: Array<string>;
   enquiryId?: Array<string>;
-  intakeStatus?: Array<string>;
   includeUser?: boolean;
 };
 
@@ -329,7 +326,6 @@ export type HousingProjectSearchParameters = {
   createdBy?: Array<string>;
   housingProjectId?: Array<string>;
   submissionType?: Array<string>;
-  intakeStatus?: Array<string>;
   includeUser?: boolean;
 };
 
@@ -349,7 +345,6 @@ export type HousingProjectStatistics = {
   supported_indigenous: number;
   supported_non_profit: number;
   supported_housing_coop: number;
-  waiting_on: number;
   queue_1: number;
   queue_2: number;
   queue_3: number;

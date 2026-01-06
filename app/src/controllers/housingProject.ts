@@ -28,13 +28,7 @@ import { upsertPermitTracking } from '../services/permitTracking';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  DraftCode,
-  IntakeStatus,
-  SubmissionType
-} from '../utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon';
 import { getCurrentUsername, isTruthy, omit } from '../utils/utils';
 
 import type { Request, Response } from 'express';
@@ -223,7 +217,6 @@ const generateHousingProjectData = async (
       activityId: activityId,
       submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
       submittedBy: getCurrentUsername(currentContext),
-      intakeStatus: IntakeStatus.SUBMITTED,
       applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
       submissionType: data?.submissionType ?? SubmissionType.GUIDANCE,
       createdAt: null,
@@ -248,7 +241,6 @@ const generateHousingProjectData = async (
         data.housing?.financiallySupportedNonProfit,
         data.housing?.financiallySupportedHousingCoop
       ].includes(BasicResponse.YES),
-      waitingOn: null,
       checkProvincialPermits: null,
       atsEnquiryId: null
     } as HousingProject,

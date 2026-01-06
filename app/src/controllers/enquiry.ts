@@ -24,7 +24,6 @@ import {
   ActivityContactRole,
   ApplicationStatus,
   EnquirySubmittedMethod,
-  IntakeStatus,
   SubmissionType
 } from '../utils/enums/projectCommon';
 import { getCurrentUsername, isTruthy } from '../utils/utils';
@@ -66,7 +65,6 @@ const generateEnquiryData = async (
     activityId: activityId as string,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
     submittedBy: getCurrentUsername(currentContext),
-    intakeStatus: IntakeStatus.SUBMITTED,
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
     submissionType: data?.basic?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
   } as Enquiry;
@@ -86,7 +84,6 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       addedToAts: false,
       atsClientId: null,
       atsEnquiryId: null,
-      waitingOn: null,
       submittedMethod: EnquirySubmittedMethod.PCNS,
       ...generateCreateStamps(req.currentContext),
       ...generateNullUpdateStamps()
