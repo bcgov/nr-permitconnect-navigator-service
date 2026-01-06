@@ -42,19 +42,13 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Common labels
+PCNS labels
 */}}
 {{- define "pcns.labels" -}}
-helm.sh/chart: {{ include "pcns.chart" . }}
-app: {{ include "pcns.fullname" . }}
 {{ include "pcns.selectorLabels" . }}
-{{- if .Chart.AppVersion }}
-app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
-{{- end }}
+{{ include "common.labels" . }}
+app: {{ include "pcns.fullname" . }}
 app.kubernetes.io/component: backend
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/part-of: {{ .Release.Name }}
-app.openshift.io/runtime: nodejs
 {{- end }}
 
 {{/*
@@ -66,6 +60,19 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Common labels
+*/}}
+{{- define "common.labels" -}}
+helm.sh/chart: {{ include "pcns.chart" . }}
+{{- if .Chart.AppVersion }}
+app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
+{{- end }}
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/part-of: {{ .Release.Name }}
+app.openshift.io/runtime: nodejs
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "pcns.serviceAccountName" -}}
@@ -74,4 +81,20 @@ Create the name of the service account to use
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
+{{- end }}
+
+{{/*
+PEACH labels
+*/}}
+{{- define "pcns.peachSyncLabels" -}}
+{{ include "pcns.peachSyncSelectorLabels" . }}
+{{ include "common.labels" . }}
+{{- end }}
+
+{{/*
+PEACH selector labels
+*/}}
+{{- define "pcns.peachSyncSelectorLabels" -}}
+{{ include "pcns.selectorLabels" . }}
+app.kubernetes.io/component: peach-sync
 {{- end }}
