@@ -3,7 +3,6 @@ import { prismaTxMock } from '../../__mocks__/prismaMock';
 import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data';
 import * as housingProjectService from '../../../src/services/housingProject';
 import { generateDeleteStamps } from '../../../src/db/utils/utils';
-import { IntakeStatus } from '../../../src/utils/enums/projectCommon';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -146,9 +145,6 @@ describe('searchHousingProjects', () => {
           },
           {
             submissionType: { in: undefined }
-          },
-          {
-            intakeStatus: { in: undefined }
           }
         ]
       },
@@ -175,7 +171,6 @@ describe('searchHousingProjects', () => {
       createdBy: ['456'],
       housingProjectId: ['789'],
       submissionType: ['TYPE'],
-      intakeStatus: [IntakeStatus.SUBMITTED],
       includeUser: true
     };
 
@@ -195,9 +190,6 @@ describe('searchHousingProjects', () => {
           },
           {
             submissionType: { in: params.submissionType }
-          },
-          {
-            intakeStatus: { in: params.intakeStatus }
           }
         ]
       },
