@@ -18,7 +18,6 @@ const testEnquiry = {
   submittedBy: 'WILSWONG',
   relatedActivityId: 'D95F1DE6',
   enquiryDescription: 'D95F1DE6 Test enquiry info',
-  intakeStatus: 'Submitted',
   updatedAt: '2024-06-13T00:00:00.000Z',
   submissionType: 'General enquiry',
   contacts: [

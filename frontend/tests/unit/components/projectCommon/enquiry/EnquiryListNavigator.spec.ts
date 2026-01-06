@@ -42,7 +42,6 @@ const testEnquiry = {
   submissionType: 'General Inquiry',
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
-  intakeStatus: 'Pending',
   enquiryStatus: ApplicationStatus.NEW,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   contacts: [exampleContact],
