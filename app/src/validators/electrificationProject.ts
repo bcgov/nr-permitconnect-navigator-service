@@ -88,11 +88,7 @@ const schema = {
         projectCategory: Joi.string()
           .valid(...electrificationProjectCategoryCodes)
           .allow(null),
-        // assignedUserId: Joi.when('intakeStatus', {
-        //   is: IntakeStatus.SUBMITTED,
-        //   then: uuidv4,
-        //   otherwise: uuidv4.allow(null)
-        // }),
+        assignedUserId: uuidv4.allow(null),
         hasEpa: Joi.string()
           .valid(...YES_NO_LIST)
           .allow(null),

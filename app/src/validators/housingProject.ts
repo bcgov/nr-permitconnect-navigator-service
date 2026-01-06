@@ -159,11 +159,7 @@ const schema = {
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),
       astNotes: Joi.string().allow(null).max(4000),
-      // assignedUserId: Joi.when('intakeStatus', {
-      //   is: IntakeStatus.SUBMITTED,
-      //   then: uuidv4,
-      //   otherwise: uuidv4.allow(null)
-      // }),
+      assignedUserId: uuidv4.allow(null),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
     }),
     params: Joi.object({
