@@ -117,7 +117,7 @@ function getRouteToObject(data: Enquiry) {
       class="!text-right"
     >
       <template #body="{ data }">
-        <!-- {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }} -->
+        {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
   </DataTable>

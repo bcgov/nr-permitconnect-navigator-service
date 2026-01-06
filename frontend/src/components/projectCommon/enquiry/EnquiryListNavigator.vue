@@ -297,7 +297,7 @@ function updateQueryParams() {
       style="min-width: 200px"
     >
       <template #body="{ data }">
-        <!-- {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }} -->
+        {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
     <Column

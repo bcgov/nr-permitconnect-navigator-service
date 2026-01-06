@@ -3,7 +3,7 @@ import { boolean, number, object, string } from 'yup';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { assignedToValidator, atsClientIdValidator } from '@/validators';
+import { atsClientIdValidator } from '@/validators';
 import { emailValidator } from '@/validators/common';
 
 import type { CodeName } from '@/store/codeStore';
@@ -57,7 +57,6 @@ export function createProjectFormSchema(
     }),
     submissionState: object({
       applicationStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Project state'),
-      // assignedUser: assignedToValidator('intakeStatus', IntakeStatus.SUBMITTED),
       queuePriority: number()
         .required()
         .integer()
