@@ -3,6 +3,9 @@
 import axios from 'axios';
 
 import prisma from './src/db/dataConnection';
+import { getLogger } from './src/utils/log';
+
+const log = getLogger(module.filename);
 
 const ORG_BOOK_API_PATH = 'https://orgbook.gov.bc.ca/api/v4';
 const ORG_BOOK_QUERY_PARAMS = {
@@ -14,24 +17,23 @@ const ORG_BOOK_QUERY_PARAMS = {
 };
 
 async function searchOrgBook(nameSearch: string) {
-  try {
-    const response = await axios.get(`${ORG_BOOK_API_PATH}/search/autocomplete`, {
-      params: { q: nameSearch, ...ORG_BOOK_QUERY_PARAMS }
-    });
-    return response.data;
-  } catch (error) {
-    console.error(`Error searching OrgBook for "${nameSearch}":`, error);
-    return null;
-  }
+  const response = await axios.get(`${ORG_BOOK_API_PATH}/search/autocomplete`, {
+    params: { q: nameSearch, ...ORG_BOOK_QUERY_PARAMS },
+    timeout: 10000
+  });
+  // Add half a second delay after each API call to avoid rate limiting
+  await new Promise((resolve) => setTimeout(resolve, 500));
+  return response.data;
 }
 
 async function backfillCompanyIds() {
-  console.log('\nStarting backfill of company_id_registered for housing_project...\n');
+  log.info('\nStarting backfill of company_id_registered for housing_project...\n');
 
   // Fetch housing projects with company_name_registered but missing company_id_registered
   const projects = await prisma.housing_project.findMany({
     where: {
       companyNameRegistered: { not: null },
+      isDevelopedInBc: 'Yes',
       OR: [{ companyIdRegistered: null }, { companyIdRegistered: '' }]
     },
     select: {
@@ -40,7 +42,7 @@ async function backfillCompanyIds() {
     }
   });
 
-  console.log(`Found ${projects.length} housing projects to backfill\n`);
+  log.info(`Found ${projects.length} housing projects to backfill\n`);
 
   let updated = 0;
   let notFound = 0;
@@ -48,7 +50,7 @@ async function backfillCompanyIds() {
 
   for (const project of projects) {
     try {
-      console.log(`Processing: ${project.companyNameRegistered}`);
+      log.info(`Processing: ${project.companyNameRegistered}`);
 
       const orgBookData = await searchOrgBook(project.companyNameRegistered as string);
 
@@ -67,37 +69,33 @@ async function backfillCompanyIds() {
             data: { companyIdRegistered: companyId }
           });
 
-          console.log(`✓ Updated with ID: ${companyId}\n`);
+          log.info(`✓ Updated with ID: ${companyId}\n`);
           updated++;
         } else {
-          console.log('✗ No exact match found\n');
+          log.warn('✗ No exact match found\n');
           notFound++;
         }
       } else {
-        console.log('✗ No results from API\n');
+        log.warn('✗ No results from API\n');
         notFound++;
       }
-
-      // Add delay to avoid rate limiting
-      await new Promise((resolve) => setTimeout(resolve, 1000));
     } catch (error) {
-      console.error(`✗ Error processing ${project.companyNameRegistered}:`, error);
-      console.log('');
+      log.error(`✗ Error processing ${project.companyNameRegistered}:`, error);
       errors++;
     }
   }
 
-  console.log('\n=== Backfill Summary ===');
-  console.log(`Total processed: ${projects.length}`);
-  console.log(`Successfully updated: ${updated}`);
-  console.log(`Not found: ${notFound}`);
-  console.log(`Errors: ${errors}\n`);
+  log.info('\n=== Backfill Summary ===');
+  log.info(`Total processed: ${projects.length}`);
+  log.info(`Successfully updated: ${updated}`);
+  log.info(`Not found: ${notFound}`);
+  log.info(`Errors: ${errors}\n`);
 
   await prisma.$disconnect();
 }
 
-backfillCompanyIds().catch((error) => {
-  console.error('Fatal error:', error);
-  prisma.$disconnect();
+backfillCompanyIds().catch(async (error) => {
+  log.error('Fatal error:', error);
+  await prisma.$disconnect();
   process.exit(1);
 });
