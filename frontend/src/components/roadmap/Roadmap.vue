@@ -23,6 +23,9 @@ const { activityId, editable = true } = defineProps<{
   editable?: boolean;
 }>();
 
+// Composables
+const { t } = useI18n();
+
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
 const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
@@ -61,7 +64,6 @@ const formSchema = object({
 
 // Actions
 const confirm = useConfirm();
-const { t } = useI18n();
 const toast = useToast();
 
 const confirmSubmit = (data: any) => {
@@ -80,7 +82,7 @@ const confirmSubmit = (data: any) => {
             setEmptyStringsToNull(data)
           )
         ).data;
-        projectStore.addNoteHistory(response.noteHistory);
+        projectStore.addNoteHistory(response);
         toast.success('Roadmap sent');
       } catch (e: any) {
         toast.error('Failed to send roadmap', e?.response?.statusText);

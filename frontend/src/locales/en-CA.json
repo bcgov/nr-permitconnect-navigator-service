@@ -756,6 +756,9 @@
     "linkedActivity": "This enquiry is linked to Project",
     "invalidLinkedActivity": "This activity is linked to an invalid Activity"
   },
+  "fileSelectModal": {
+    "noFilesAvailable": "No files available."
+  },
   "groupName": {
     "developer": "DEVELOPER",
     "proponent": "PROPONENT",
