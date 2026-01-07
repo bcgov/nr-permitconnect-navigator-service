@@ -186,7 +186,7 @@ describe('ProjectForm.vue', () => {
     await nextTick();
 
     const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(17);
+    expect(elements.length).toBe(16);
   });
 
   it('renders the correct amount of input components', async () => {
@@ -265,6 +265,9 @@ describe('ProjectForm.vue', () => {
       }));
 
     expect(notDisabled).toEqual([]);
+    const elements = wrapper.findAll('.p-disabled');
+    expect(wrapper.vm.$props?.editable).toBe(false);
+    expect(elements.length).toBe(21);
   });
 
   it('geojson download btn not visible when no geojson', async () => {
@@ -311,8 +314,7 @@ describe('onRegisteredNameInput', () => {
   });
 
   it('should not call searchOrgBook when query length is less than 2', async () => {
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -339,8 +341,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -370,8 +371,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -406,8 +406,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -431,8 +430,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -461,8 +459,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 
@@ -488,8 +485,7 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const wrapper = mount(ProjectForm, wrapperSettings(testSubmission));
     await nextTick();
     await nextTick();
 

@@ -462,7 +462,6 @@
           "priorityNumber": "Priority must be a number",
           "projectLocationDescription": "Additional information about location",
           "projectCompanyNameRegistered": "Company name",
-          "projectIsDevelopedInBc": "Company registered in B.C",
           "projectProjectName": "Project name",
           "projectDescription": "Additional information about project",
           "relatedEnquiries": "Related enquiries",
