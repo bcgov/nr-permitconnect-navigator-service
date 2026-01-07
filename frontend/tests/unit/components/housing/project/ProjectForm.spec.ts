@@ -267,7 +267,7 @@ describe('ProjectForm.vue', () => {
     expect(notDisabled).toEqual([]);
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(21);
+    expect(elements.length).toBe(20);
   });
 
   it('geojson download btn not visible when no geojson', async () => {
