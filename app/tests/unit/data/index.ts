@@ -228,7 +228,16 @@ export const TEST_EMAIL: Email = {
 };
 
 export const TEST_EMAIL_RESPONSE = {
-  data: TEST_EMAIL,
+  data: {
+    messages: [
+      {
+        msgId: '212112221',
+        tag: 'tag',
+        to: ['abc@abc.com']
+      }
+    ],
+    txId: 'txid12345'
+  },
   status: 201
 };
 
