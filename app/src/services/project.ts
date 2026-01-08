@@ -4,7 +4,7 @@ import type { Project } from '../types';
 import { Problem } from '../utils';
 
 /**
- * Gets a specific project from the PCNS database by gicen ActivityId
+ * Gets a specific project from the PCNS database by given ActivityId
  * @param tx Prisma transaction client
  * @param activityId PCNS project Activity ID
  * @returns A Promise that resolves to the specific project

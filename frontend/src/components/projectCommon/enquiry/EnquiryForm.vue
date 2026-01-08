@@ -8,7 +8,7 @@ import { CancelButton, EditableSelect, FormNavigationGuard, Select, TextArea } f
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, enquiryService, userService } from '@/services';
+import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
@@ -27,7 +27,7 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
@@ -37,7 +37,15 @@ import { emailValidator } from '@/validators/common';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, Enquiry, User } from '@/types';
+import type {
+  ActivityContact,
+  ATSAddressResource,
+  ATSClientResource,
+  ATSEnquiryResource,
+  Contact,
+  Enquiry,
+  User
+} from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -275,14 +283,34 @@ const onSubmit = async (values: any) => {
     const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
 
+    // Get the current primary contact from the result
+    let primaryContact = enquiry?.activity?.activityContact?.find(
+      (x) => x.role === ActivityContactRole.PRIMARY
+    )?.contact;
+
+    // Deal with Nav contact change nonsense
+    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
+    if (primaryContact?.contactId !== values.contact.contactId) {
+      const newContact = (await contactService.updateContact(values.contact)).data;
+      if (newContact.contactId) {
+        await activityContactService.createActivityContact(
+          enquiry.activityId,
+          newContact.contactId,
+          ActivityContactRole.PRIMARY
+        );
+
+        setBasicInfo(newContact);
+      }
+    }
+
     // Update enquiry
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
-
-    // Update store with returned data
     enquiryStore.setEnquiry(result.data);
 
     // TODO: Create one function for creating initial values and reset values
-    const firstContact = result.data?.activity?.activityContact?.[0]?.contact;
+    primaryContact = result.data?.activity?.activityContact?.find(
+      (x: ActivityContact) => x.role === ActivityContactRole.PRIMARY
+    )?.contact;
 
     let atsClientId;
     if (submitData?.relatedActivityId) atsClientId = await getRelatedATSClientID(submitData?.relatedActivityId);
@@ -291,14 +319,14 @@ const onSubmit = async (values: any) => {
       values: {
         ...submitData,
         contact: {
-          contactId: firstContact?.contactId,
-          firstName: firstContact?.firstName,
-          lastName: firstContact?.lastName,
-          phoneNumber: firstContact?.phoneNumber,
-          email: firstContact?.email,
-          contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-          contactPreference: firstContact?.contactPreference,
-          userId: firstContact?.userId
+          contactId: primaryContact?.contactId,
+          firstName: primaryContact?.firstName,
+          lastName: primaryContact?.lastName,
+          phoneNumber: primaryContact?.phoneNumber,
+          email: primaryContact?.email,
+          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
+          contactPreference: primaryContact?.contactPreference,
+          userId: primaryContact?.userId
         },
         atsClientId: values.atsClientId || atsClientId,
         atsEnquiryId: values.atsEnquiryId,
@@ -322,7 +350,9 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }
 
-  const firstContact = enquiry?.activity?.activityContact?.[0]?.contact;
+  const primaryContact = enquiry?.activity?.activityContact?.find(
+    (x) => x.role === ActivityContactRole.PRIMARY
+  )?.contact;
 
   let atsClientId;
   if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
@@ -338,14 +368,14 @@ onBeforeMount(async () => {
     submittedMethod: enquiry?.submittedMethod,
     enquiryDescription: enquiry?.enquiryDescription,
     contact: {
-      contactId: firstContact?.contactId,
-      firstName: firstContact?.firstName,
-      lastName: firstContact?.lastName,
-      phoneNumber: firstContact?.phoneNumber,
-      email: firstContact?.email,
-      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-      contactPreference: firstContact?.contactPreference,
-      userId: firstContact?.userId
+      contactId: primaryContact?.contactId,
+      firstName: primaryContact?.firstName,
+      lastName: primaryContact?.lastName,
+      phoneNumber: primaryContact?.phoneNumber,
+      email: primaryContact?.email,
+      contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
+      contactPreference: primaryContact?.contactPreference,
+      userId: primaryContact?.userId
     },
 
     addedToAts: enquiry?.addedToAts,

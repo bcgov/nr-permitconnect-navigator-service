@@ -59,7 +59,6 @@ const {
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
-const activityContacts: Ref<ActivityContact[]> = ref([]);
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
 const isAdmin: Ref<boolean> = ref(false);
@@ -130,12 +129,11 @@ onBeforeMount(async () => {
   );
   createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
 
-  activityContacts.value = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+  const activityContacts = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+  projectStore.setActivityContacts(activityContacts);
 
   // Determine if the current user has admin priviledges
-  const userActivityRole = activityContacts.value.find(
-    (x) => x.contactId === useContactStore().getContact?.contactId
-  )?.role;
+  const userActivityRole = activityContacts.find((x) => x.contactId === useContactStore().getContact?.contactId)?.role;
   if (userActivityRole)
     isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
 
@@ -308,7 +306,6 @@ onBeforeMount(async () => {
             <ProjectTeamTab
               v-if="projectStore.getProject"
               :activity-id="projectStore.getProject.activityId"
-              :activity-contacts="activityContacts"
             />
           </TabPanel>
         </TabPanels>
