@@ -45,7 +45,7 @@ import { projectServiceKey } from '@/utils/keys';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Document, Enquiry, HousingProject, User } from '@/types';
+import type { Document, Enquiry, HousingProject, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{

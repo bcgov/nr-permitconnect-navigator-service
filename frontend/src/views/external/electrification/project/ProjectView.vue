@@ -30,7 +30,7 @@ import { ActivityContactRole, SubmissionType } from '@/utils/enums/projectCommon
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Contact } from '@/types';
+import type { Contact } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
