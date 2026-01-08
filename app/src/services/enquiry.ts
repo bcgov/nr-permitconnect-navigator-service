@@ -120,7 +120,7 @@ export const searchEnquiries = async (
         {
           activity: {
             initiative: {
-              code: initiative
+              code: initiative !== Initiative.PCNS ? initiative : undefined
             }
           }
         },

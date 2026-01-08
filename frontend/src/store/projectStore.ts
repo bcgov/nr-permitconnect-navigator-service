@@ -4,12 +4,21 @@ import { computed, readonly, ref } from 'vue';
 import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
 
 import type { Ref } from 'vue';
-import type { Document, ElectrificationProject, Enquiry, HousingProject, NoteHistory, Permit } from '@/types';
+import type {
+  ActivityContact,
+  Document,
+  ElectrificationProject,
+  Enquiry,
+  HousingProject,
+  NoteHistory,
+  Permit
+} from '@/types';
 
 // Types
 export type ProjectType = ElectrificationProject | HousingProject | undefined;
 
 export type ProjectStoreState = {
+  activityContacts: Ref<ActivityContact[]>;
   documents: Ref<Document[]>;
   relatedEnquiries: Ref<Enquiry[]>;
   noteHistory: Ref<NoteHistory[]>;
@@ -20,6 +29,7 @@ export type ProjectStoreState = {
 export const useProjectStore = defineStore('project', () => {
   // State
   const state: ProjectStoreState = {
+    activityContacts: ref([]),
     documents: ref([]),
     relatedEnquiries: ref([]),
     noteHistory: ref([]),
@@ -29,6 +39,7 @@ export const useProjectStore = defineStore('project', () => {
 
   // Getters
   const getters = {
+    getActivityContacts: computed(() => state.activityContacts.value),
     getAuthsOnGoing: computed(() =>
       state.permits.value
         .filter(
@@ -115,6 +126,27 @@ export const useProjectStore = defineStore('project', () => {
     return a.permitType.name > b.permitType.name ? 1 : -1;
   }
 
+  function addActivityContact(data: ActivityContact) {
+    state.activityContacts.value.push(data);
+  }
+
+  function removeActivityContact(data: ActivityContact) {
+    state.activityContacts.value = state.activityContacts.value.filter(
+      (x) => x.activityId !== data.activityId || (x.activityId === data.activityId && x.contactId !== data.contactId)
+    );
+  }
+
+  function updateActivityContact(data: ActivityContact) {
+    const idx = state.activityContacts.value.findIndex(
+      (x: ActivityContact) => x.activityId === data.activityId && x.contactId === data.contactId
+    );
+    if (idx >= 0) state.activityContacts.value[idx] = data;
+  }
+
+  function setActivityContacts(data: Array<ActivityContact>) {
+    state.activityContacts.value = data;
+  }
+
   function addDocument(data: Document) {
     state.documents.value.push(data);
   }
@@ -194,6 +226,10 @@ export const useProjectStore = defineStore('project', () => {
     ...getters,
 
     // Actions
+    addActivityContact,
+    removeActivityContact,
+    setActivityContacts,
+    updateActivityContact,
     addDocument,
     removeDocument,
     setDocuments,

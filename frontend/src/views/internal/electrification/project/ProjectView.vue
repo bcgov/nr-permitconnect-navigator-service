@@ -75,6 +75,7 @@ const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
 const {
+  getActivityContacts,
   getAuthsCompleted,
   getAuthsNeeded,
   getAuthsNotNeeded,
@@ -89,7 +90,6 @@ const {
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
-const activityContacts: Ref<ActivityContact[]> = ref([]);
 const activityId: Ref<string | undefined> = ref(undefined);
 const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
@@ -185,6 +185,7 @@ onBeforeMount(async () => {
   });
 
   projectStore.setProject(project);
+  projectStore.setActivityContacts(contacts);
   projectStore.setDocuments(documents);
   projectStore.setNoteHistory(notes);
   projectStore.setPermits(permits);
@@ -215,8 +216,6 @@ onBeforeMount(async () => {
       createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
     }));
   }
-
-  activityContacts.value = contacts;
 
   loading.value = false;
 });
@@ -294,7 +293,7 @@ onBeforeMount(async () => {
         class="no-underline"
       >
         <span class="underline">{{ t('i.common.projectView.tabProjectTeam') }}</span>
-        ({{ activityContacts.length }})
+        ({{ getActivityContacts.length }})
       </Tab>
     </TabList>
     <TabPanels>
@@ -688,7 +687,7 @@ onBeforeMount(async () => {
       <TabPanel :value="6">
         <ProjectTeamTable
           v-if="projectStore.getProject"
-          :activity-contacts="activityContacts"
+          :activity-contacts="projectStore.getActivityContacts"
         />
       </TabPanel>
     </TabPanels>

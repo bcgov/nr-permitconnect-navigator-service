@@ -18,7 +18,14 @@ import {
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
+import {
+  activityContactService,
+  atsService,
+  contactService,
+  electrificationProjectService,
+  externalApiService,
+  userService
+} from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import {
@@ -36,7 +43,7 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
@@ -337,19 +344,13 @@ const onSubmit = async (values: any) => {
           addedToAts: values.addedToAts
         }
       }),
-      [
-        'contactId',
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactUserId',
-        'assignedUser',
-        'submissionState'
-      ]
+      ['contact', 'assignedUser', 'submissionState']
     );
+
+    // Get the current primary contact from the prop
+    const primaryContact = project?.activity?.activityContact?.find(
+      (x) => x.role === ActivityContactRole.PRIMARY
+    )?.contact;
 
     // Update project
     const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
@@ -363,6 +364,22 @@ const onSubmit = async (values: any) => {
         ...initilizeFormValues(result.data)
       }
     });
+
+    // Deal with Nav contact change nonsense
+    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
+    if (primaryContact?.contactId !== values.contact.contactId) {
+      const newContact = (await contactService.updateContact(values.contact)).data;
+      if (newContact.contactId) {
+        const ac = await activityContactService.createActivityContact(
+          result.data.activityId,
+          newContact.contactId,
+          ActivityContactRole.PRIMARY
+        );
+
+        setBasicInfo(newContact);
+        projectStore.addActivityContact(ac.data);
+      }
+    }
 
     toast.success(t('i.common.form.savedMessage'));
   } catch (e: any) {
