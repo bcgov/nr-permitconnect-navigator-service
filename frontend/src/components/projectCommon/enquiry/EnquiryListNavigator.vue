@@ -17,7 +17,7 @@ import {
   useToast
 } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { useAppStore, useAuthZStore } from '@/store';
+import { useAppStore, useAuthZStore, useContactStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Resource } from '@/utils/enums/application';
 import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
@@ -94,7 +94,20 @@ function handleCreateNewActivity() {
     message: t('enquiryListNavigator.confirmCreateMsg'),
     accept: async () => {
       try {
-        const response = (await enquiryService.createEnquiry()).data;
+        const userContact = useContactStore().getContact;
+        const response = (
+          await enquiryService.createEnquiry({
+            contact: {
+              contactId: userContact?.contactId,
+              firstName: userContact?.firstName,
+              lastName: userContact?.lastName,
+              phoneNumber: userContact?.phoneNumber,
+              email: userContact?.email,
+              contactApplicantRelationship: userContact?.contactApplicantRelationship,
+              contactPreference: userContact?.contactPreference
+            }
+          })
+        ).data;
         if (response?.activityId) {
           router.push({
             name: enquiryRouteName,
