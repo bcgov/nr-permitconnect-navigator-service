@@ -50,7 +50,8 @@ import {
   TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_3
+  TEST_PERMIT_3,
+  TEST_EMAIL_RESPONSE
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import * as utils from '../../../src/utils/utils';
@@ -443,7 +444,7 @@ describe('emailHousingProjectConfirmationController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    emailSpy.mockResolvedValue({ data: { text: '1234' }, status: 200 });
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await emailHousingProjectConfirmationController(
       req as unknown as Request<never, never, Email>,
@@ -452,8 +453,8 @@ describe('emailHousingProjectConfirmationController', () => {
 
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ text: '1234' });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 

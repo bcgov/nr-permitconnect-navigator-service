@@ -411,6 +411,7 @@ export type PermitUpdateEmailParams = {
   toEmails: string[];
   emailTemplate: PermitEmailTemplate;
 };
+
 export type Project = HousingProject | ElectrificationProject;
 
 type SplitDatetimeBase<T> = {

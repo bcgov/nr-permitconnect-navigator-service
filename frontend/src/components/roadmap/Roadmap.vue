@@ -2,6 +2,7 @@
 import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { ref, watchEffect } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { array, object, string } from 'yup';
 
 import FileSelectModal from '@/components/file/FileSelectModal.vue';
@@ -22,9 +23,13 @@ const { activityId, editable = true } = defineProps<{
   editable?: boolean;
 }>();
 
+// Composables
+const { t } = useI18n();
+
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
 const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
+const projectStore = useProjectStore();
 
 // State
 const fileSelectModalVisible: Ref<boolean> = ref(false);
@@ -70,11 +75,14 @@ const confirmSubmit = (data: any) => {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        await roadmapService.send(
-          activityId,
-          selectedFiles.value.map((x: Document) => x.documentId),
-          setEmptyStringsToNull(data)
-        );
+        const response = (
+          await roadmapService.send(
+            activityId,
+            selectedFiles.value.map((x: Document) => x.documentId),
+            setEmptyStringsToNull(data)
+          )
+        ).data;
+        projectStore.addNoteHistory(response);
         toast.success('Roadmap sent');
       } catch (e: any) {
         toast.error('Failed to send roadmap', e?.response?.statusText);
@@ -238,7 +246,10 @@ watchEffect(async () => {
                 <font-awesome-icon icon="fa-solid fa-times" />
               </Button>
             </div>
-            <div>{{ document.filename }}</div>
+            <div>
+              {{ document.filename }}
+              <span class="text-[var(--p-bcblue-900)] font-bold">{{ t('i.housing.project.roadmap.attached') }}</span>
+            </div>
           </div>
         </div>
       </div>

@@ -5,7 +5,8 @@ import {
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT,
-  TEST_CONTACT_1
+  TEST_CONTACT_1,
+  TEST_EMAIL_RESPONSE
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
@@ -218,7 +219,7 @@ describe('emailElectrificationProjectConfirmationController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    emailSpy.mockResolvedValue({ data: { text: '1234' }, status: 200 });
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await emailElectrificationProjectConfirmationController(
       req as unknown as Request<never, never, Email>,
@@ -227,8 +228,8 @@ describe('emailElectrificationProjectConfirmationController', () => {
 
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({ text: '1234' });
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 

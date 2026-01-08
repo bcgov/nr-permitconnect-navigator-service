@@ -16,6 +16,7 @@ type EmailData = {
   messages: Array<Message>;
   txId: string;
 };
+
 /**
  * Gets Auth token using CHES client credentials
  * @returns A valid access token
@@ -81,7 +82,7 @@ export const email = async (emailData: Email) => {
     if (axios.isAxiosError(e)) {
       await logEmail(null, uniqueEmails, e.response ? e.response.status : 500);
       return {
-        data: e.response?.data.errors[0].message,
+        data: e.response ? e.response.data.errors[0].message : e.message,
         status: e.response ? e.response.status : 500
       };
     } else {

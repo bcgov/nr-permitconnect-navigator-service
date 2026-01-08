@@ -4,7 +4,7 @@ import * as noteHistoryService from '../../../src/services/noteHistory';
 import * as noteService from '../../../src/services/note';
 import { sendRoadmapController } from '../../../src/controllers/roadmap';
 import type { Request, Response } from 'express';
-import { TEST_CURRENT_CONTEXT, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data';
+import { TEST_CURRENT_CONTEXT, TEST_EMAIL_RESPONSE, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data';
 import { Email, Note, NoteHistory } from '../../../src/types';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import { uuidv4Pattern } from '../../../src/utils/regexp';
@@ -62,14 +62,9 @@ describe('send', () => {
       note: req.body.emailData.body
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
-    emailSpy.mockResolvedValue(emailResponse);
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await sendRoadmapController(
       req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
@@ -80,7 +75,7 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+    expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
   });
 
   it('should create a note on success', async () => {
@@ -98,11 +93,6 @@ describe('send', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -116,7 +106,7 @@ describe('send', () => {
 
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
-    emailSpy.mockResolvedValue(emailResponse);
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await sendRoadmapController(
       req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
@@ -144,7 +134,7 @@ describe('send', () => {
       ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+    expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
   });
 
   it('should get coms objects and attach', async () => {
@@ -187,11 +177,6 @@ describe('send', () => {
       status: 200
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -206,7 +191,7 @@ describe('send', () => {
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     getObjectSpy.mockResolvedValue(getObjectResponse);
-    emailSpy.mockResolvedValue(emailResponse);
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await sendRoadmapController(
       req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
@@ -219,7 +204,7 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+    expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
   });
 
   it('should not call COMS without a bearer token', async () => {
@@ -253,11 +238,6 @@ describe('send', () => {
       headers: {}
     };
 
-    const emailResponse = {
-      data: 'foo',
-      status: 201
-    };
-
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -271,7 +251,7 @@ describe('send', () => {
 
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
-    emailSpy.mockResolvedValue(emailResponse);
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await sendRoadmapController(
       req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
@@ -282,7 +262,7 @@ describe('send', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+    expect(res.json).toHaveBeenCalledWith({ ...createdHistory, note: [createdNote] });
   });
 
   it('should append attachments to note', async () => {
@@ -314,11 +294,6 @@ describe('send', () => {
       },
       currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' },
       headers: {}
-    };
-
-    const emailResponse = {
-      data: 'foo',
-      status: 201
     };
 
     const getObjectResponse1 = {
@@ -355,7 +330,7 @@ describe('send', () => {
 
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
-    emailSpy.mockResolvedValue(emailResponse);
+    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
     getObjectSpy.mockResolvedValueOnce(getObjectResponse1);
     getObjectSpy.mockResolvedValueOnce(getObjectResponse2);
 
@@ -387,6 +362,9 @@ describe('send', () => {
       ...generateNullDeleteStamps()
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(emailResponse.data);
+    expect(res.json).toHaveBeenCalledWith({
+      ...createdHistory,
+      note: [createdNote]
+    });
   });
 });
