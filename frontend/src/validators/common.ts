@@ -1,6 +1,16 @@
-import { date, number, string } from 'yup';
+import { date, mixed, number, string } from 'yup';
 
 import { Regex } from '@/utils/enums/application';
+
+export const assignedToValidator = mixed()
+  .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
+    if (typeof obj === 'object') return true;
+    if (typeof obj === 'string') {
+      return obj === null || obj === undefined || obj.length === 0;
+    }
+  })
+  .nullable()
+  .label('Assigned to');
 
 export const atsClientIdValidator = number().notRequired().min(0).integer().label('ATS Client #');
 
