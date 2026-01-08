@@ -3,10 +3,11 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
+import { nextTick } from 'vue';
+import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
 
 import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
-import { contactService, housingProjectService } from '@/services';
+import { contactService, enquiryService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
@@ -191,5 +192,21 @@ describe('EnquiryIntakeForm', () => {
       expect(Object.keys(result.errors).length).toBe(1);
       expect(result.errors['contactFirstName']).toBeTruthy();
     });
+  });
+  it('sets editable to false when enquiry ID given', async () => {
+    const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
+
+    getEnquirySpy.mockResolvedValue({ data: { activityId: '123', enquiryId: '456' } } as any);
+
+    const wrapper = shallowMount(EnquiryIntakeForm, {
+      ...wrapperSettings(),
+      props: { enquiryId: '456' }
+    });
+
+    await nextTick();
+    await flushPromises();
+
+    const editable = (wrapper.vm as any)?.editable;
+    expect(editable).toBeFalsy();
   });
 });

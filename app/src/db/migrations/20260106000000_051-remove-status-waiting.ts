@@ -4,7 +4,7 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
-      // Remove intake_status & waiting_on from enquiry, housing_project, electrification_project & statistics functions
+      // Remove intake_status & waiting_on from enquiry & housing_project
       .then(() =>
         knex.schema.alterTable('enquiry', function (table) {
           table.dropColumn('intake_status');
@@ -17,11 +17,13 @@ export async function up(knex: Knex): Promise<void> {
           table.dropColumn('waiting_on');
         })
       )
+      // Remove intake_status from electrification_project
       .then(() =>
         knex.schema.alterTable('electrification_project', function (table) {
           table.dropColumn('intake_status');
         })
       )
+      // Remove intake_status from statistics functions
       .then(() =>
         knex.schema
           .raw(`create or replace function public.get_housing_statistics(date_from text, date_to text, month_year text, user_id uuid)
@@ -175,7 +177,7 @@ AS $$
 export async function down(knex: Knex): Promise<void> {
   return (
     Promise.resolve()
-      // Add intake_status & waiting_on columns to enquiry, housing_project, electrification_project & statistics functions
+      // Add intake_status column to statistics functions
       .then(() =>
         knex.schema
           .raw(`create or replace function public.get_electrification_statistics(date_from text, date_to text, month_year text, user_id uuid)
@@ -323,20 +325,19 @@ AS $$
         from housing_project_counts, enquiry_counts;
         end; $$`)
       )
-
+      // Add intake_status column to electrification_project
       .then(() =>
         knex.schema.alterTable('electrification_project', function (table) {
           table.text('intake_status');
         })
       )
-
+      // Add intake_status & waiting_on columns to enquiry & housing_project
       .then(() =>
         knex.schema.alterTable('housing_project', function (table) {
           table.text('intake_status');
           table.text('waiting_on');
         })
       )
-
       .then(() =>
         knex.schema.alterTable('enquiry', function (table) {
           table.text('intake_status');

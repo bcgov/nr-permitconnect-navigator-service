@@ -6,7 +6,7 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/cons
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
-import { atsClientIdValidator, latitudeValidator, longitudeValidator } from '@/validators';
+import { assignedToValidator, atsClientIdValidator, latitudeValidator, longitudeValidator } from '@/validators';
 
 import { emailValidator } from '@/validators/common';
 
@@ -117,6 +117,7 @@ export function createProjectFormSchema() {
       applicationStatus: string()
         .oneOf(APPLICATION_STATUS_LIST)
         .label(t('i.housing.project.projectFormSchema.submissionStateApplicationStatus')),
+      assignedUser: assignedToValidator,
       queuePriority: number()
         .required()
         .integer()
