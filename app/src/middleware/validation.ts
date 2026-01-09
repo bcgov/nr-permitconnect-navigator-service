@@ -6,7 +6,7 @@ import type { NextFunction, Request, Response } from 'express';
  * Performs express request validation against a specified `schema`
  * @param schema An object containing Joi validation schema definitions
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const validate = (schema: object) => {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -16,7 +16,7 @@ export const validate = (schema: object) => {
         return result ? [prop, result?.details] : undefined;
       })
       .filter((error) => !!error)
-      .map((x) => x as Array<Array<string>>);
+      .map((x) => x as string[][]);
 
     if (Object.keys(validationErrors).length) {
       new Problem(

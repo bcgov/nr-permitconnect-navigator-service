@@ -9,11 +9,11 @@ import type { Email } from '../types/index.ts';
 
 type Message = {
   msgId: string;
-  to: Array<string>;
+  to: string[];
 };
 
 type EmailData = {
-  messages: Array<Message>;
+  messages: Message[];
   txId: string;
 };
 
@@ -60,7 +60,7 @@ function chesAxios(): AxiosInstance {
 
 /**
  * Sends an email with CHES service
- * @param emailData
+ * @param emailData The email information
  * @returns A Promise that resolves to the response from the external api
  */
 export const email = async (emailData: Email) => {

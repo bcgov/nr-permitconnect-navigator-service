@@ -225,8 +225,8 @@ describe('syncPeachRecords', () => {
     const sameDate = TEST_PERMIT_2.submittedDate!;
     parseSpy.mockReturnValueOnce({
       [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
-        state: TEST_PERMIT_2.state,
-        stage: TEST_PERMIT_2.stage,
+        state: TEST_PERMIT_2.state as PermitState,
+        stage: TEST_PERMIT_2.stage as PermitStage,
         submittedDate: sameDate,
         submittedTime: null,
         decisionDate: null,
@@ -410,8 +410,8 @@ describe('syncPeachRecords', () => {
 
     parseSpy.mockReturnValueOnce({
       [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
-        state: permitWithVerifiedLater.state,
-        stage: permitWithVerifiedLater.stage,
+        state: permitWithVerifiedLater.state as PermitState,
+        stage: permitWithVerifiedLater.stage as PermitStage,
         submittedDate: permitWithVerifiedLater.submittedDate!,
         submittedTime: null,
         decisionDate: null,

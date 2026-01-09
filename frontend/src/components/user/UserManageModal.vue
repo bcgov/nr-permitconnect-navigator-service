@@ -22,12 +22,12 @@ const authzStore = useAuthZStore();
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectableGroups: Ref<Array<Group>> = ref([]);
+const selectableGroups: Ref<Group[]> = ref([]);
 const group: Ref<Group | undefined> = ref(undefined);
 
 // Actions
 watchEffect(async () => {
-  const yarsGroups: Array<Group> = (await yarsService.getGroups(useAppStore().getInitiative)).data;
+  const yarsGroups: Group[] = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
   const allowedGroups: Array<GroupName> = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {

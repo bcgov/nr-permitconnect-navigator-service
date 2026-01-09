@@ -59,7 +59,7 @@ export const currentContext = (initiative: Initiative) => {
             currentContext.bearerToken = bearerToken;
             currentContext.tokenPayload = isValid as jwt.JwtPayload;
             const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-              return await login(tx, currentContext.tokenPayload as jwt.JwtPayload);
+              return await login(tx, currentContext.tokenPayload!);
             });
 
             if (user && user.userId) currentContext.userId = user.userId;

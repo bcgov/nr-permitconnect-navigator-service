@@ -41,7 +41,7 @@ export const getContact = async (
  */
 export const insertContacts = async (
   tx: PrismaTransactionClient,
-  data: Array<ContactBase>,
+  data: ContactBase[],
   currentContext: CurrentContext
 ): Promise<Contact[]> => {
   return await Promise.all(
@@ -143,10 +143,9 @@ export const searchContacts = async (
  * Creates or updates the given contacts
  * @param tx Prisma transaction client
  * @param data - The contact objects to create or update
- * @param activityId - The ID of the activity to associated the contacts with
  * @returns A promise that resolves when the operation is complete
  */
-export const upsertContacts = async (tx: PrismaTransactionClient, data: Array<ContactBase>): Promise<Contact[]> => {
+export const upsertContacts = async (tx: PrismaTransactionClient, data: ContactBase[]): Promise<Contact[]> => {
   return await Promise.all(
     data.map(async (x: ContactBase) => {
       return await tx.contact.upsert({

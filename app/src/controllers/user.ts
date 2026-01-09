@@ -10,7 +10,7 @@ import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { Group, User, UserSearchParameters } from '../types/index.ts';
 
 export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {
-  type UserWithGroup = User & { groups?: Array<Group> };
+  type UserWithGroup = User & { groups?: Group[] };
 
   const response = await transactionWrapper<UserWithGroup[]>(async (tx: PrismaTransactionClient) => {
     const reqGroup = mixedQueryToArray(req.query.group) as GroupName[];

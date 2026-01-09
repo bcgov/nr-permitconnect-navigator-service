@@ -59,9 +59,12 @@ export const deleteHousingProject = async (
 };
 
 /**
- * Gets a set of housing project related statistics
  * @param tx Prisma transaction client
  * @param filters The filters to apply to the statistics
+ * @param filters.dateFrom Beginning date
+ * @param filters.dateTo End date
+ * @param filters.monthYear Month/Year to search
+ * @param filters.userId User ID
  * @returns A Promise that resolves to the housing project statistics
  */
 export const getHousingProjectStatistics = async (
@@ -74,7 +77,7 @@ export const getHousingProjectStatistics = async (
   }
 ): Promise<HousingProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
-  const val = (value: unknown) => (value ? `'${value}'` : null);
+  const val = (value: string) => (value ? `'${value}'` : null);
 
   const date_from = val(filters.dateFrom);
   const date_to = val(filters.dateTo);
@@ -87,7 +90,9 @@ export const getHousingProjectStatistics = async (
   // count() returns BigInt
   // JSON.stringify() doesn't know how to serialize BigInt
   // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
-  return JSON.parse(JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : value)));
+  return JSON.parse(
+    JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : (value as unknown)))
+  ) as HousingProjectStatistics[];
 };
 
 /**
@@ -150,6 +155,7 @@ export const getHousingProjects = async (tx: PrismaTransactionClient): Promise<H
 /**
  * Search and filter for specific housing projects
  * @param tx Prisma transaction client
+ * @param params Optional filtering parameters
  * @param params.activityId Optional array of uuids representing the activity ID
  * @param params.createdBy Optional array of uuids representing users who created housing projects
  * @param params.housingProjectId Optional array of uuids representing the housing project ID

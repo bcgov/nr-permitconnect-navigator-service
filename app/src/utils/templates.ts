@@ -1,14 +1,14 @@
 import config from 'config';
 
-const PCNS_URL = config.get('server.pcns.appUrl');
+const PCNS_URL: string = config.get('server.pcns.appUrl');
 const BC_EMAIL_BANNER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/446ee8ee-e302-4cb8-b44d-24a1f583edba';
 const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e62f-41f5-81fd-6eff6cb66d52';
 
-export type EmailTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => string;
+export type EmailTemplate = (replaceConfig: Record<string, string | string[] | undefined>) => string;
 
 export const replacePlaceholders = (
   baseText: string,
-  replacementConfig: { [key: string]: string | string[] | undefined }
+  replacementConfig: Record<string, string | string[] | undefined>
 ) => {
   if (!baseText || Object.keys(replacementConfig).length === 0) return baseText;
 

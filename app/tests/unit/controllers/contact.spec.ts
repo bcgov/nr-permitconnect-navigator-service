@@ -209,8 +209,8 @@ describe('updateContactController', () => {
       expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
         {
           ...req.body,
-          contactId: expect.stringMatching(uuidv4Pattern),
-          updatedAt: expect.any(Date),
+          contactId: expect.stringMatching(uuidv4Pattern) as string,
+          updatedAt: expect.any(Date) as Date,
           updatedBy: TEST_CURRENT_CONTEXT.userId
         }
       ]);
@@ -243,7 +243,7 @@ describe('updateContactController', () => {
         {
           ...req.body,
           contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
-          updatedAt: expect.any(Date),
+          updatedAt: expect.any(Date) as Date,
           updatedBy: TEST_CURRENT_CONTEXT.userId
         }
       ]);

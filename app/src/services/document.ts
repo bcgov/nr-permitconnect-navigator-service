@@ -10,6 +10,7 @@ import type { Document } from '../types/index.ts';
  * @param filename Original filename of the document
  * @param mimeType Type of document
  * @param filesize Size of document
+ * @param createStamp CreatedAt timestamp
  * @returns A Promise that resolves to the created resource
  */
 export const createDocument = async (

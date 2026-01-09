@@ -25,7 +25,7 @@ describe('deleteNoteHistory', () => {
     expect(prismaTxMock.note_history.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.note_history.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.note_history.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { noteHistoryId: '1' }
     });
   });

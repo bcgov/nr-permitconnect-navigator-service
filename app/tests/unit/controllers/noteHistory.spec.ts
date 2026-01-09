@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 const CURRENT_AUTHORIZATION = {
-  attributes: [] as Array<string>
+  attributes: [] as string[]
 };
 
 TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
@@ -75,16 +75,16 @@ describe('createNoteHistoryController', () => {
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_NOTE_HISTORY_1,
-      noteHistoryId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.any(Date),
+      noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
@@ -109,7 +109,7 @@ describe('deleteNoteHistoryController', () => {
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -244,7 +244,7 @@ describe('updateNoteHistoryController', () => {
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...UPDATED_HISTORY,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: req.currentContext.userId
     });
     expect(getNoteHistorySpy).toHaveBeenCalledTimes(1);
@@ -272,10 +272,10 @@ describe('updateNoteHistoryController', () => {
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: req.params.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()

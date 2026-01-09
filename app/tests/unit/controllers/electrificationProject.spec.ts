@@ -110,7 +110,7 @@ describe('createElectrificationProjectController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -127,17 +127,17 @@ describe('createElectrificationProjectController', () => {
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ELECTRIFICATION_PROJECT_CREATE,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_ELECTRIFICATION_PROJECT_CREATE,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
   });
@@ -166,12 +166,12 @@ describe('deleteElectrificationProjectController', () => {
     expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
     expect(deleteElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -445,7 +445,7 @@ describe('submitElectrificationProjectDraftController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -462,9 +462,9 @@ describe('submitElectrificationProjectDraftController', () => {
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ELECTRIFICATION_PROJECT_1,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
@@ -533,11 +533,11 @@ describe('updateElectrificationProjectDraftController', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern),
+      draftId: expect.stringMatching(uuidv4Pattern) as string,
       activityId: 'ACTI1234',
       draftCode: DraftCode.ELECTRIFICATION_PROJECT,
       data: req.body.data,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: null,
       updatedBy: null,
@@ -584,7 +584,7 @@ describe('updateElectrificationProjectDraftController', () => {
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
     expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
@@ -609,14 +609,14 @@ describe('updateElectrificationProjectController', () => {
     updateSpy.mockResolvedValue(updated);
 
     await updateElectrificationProjectController(
-      req as unknown as Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
+      req as unknown as Request<never, never, { project: ElectrificationProject; contacts: Contact[] }>,
       res as unknown as Response
     );
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body.project,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

@@ -7,7 +7,7 @@ import {
 import * as atsService from '../../../src/services/ats.ts';
 
 import type { Request, Response } from 'express';
-import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types/index.ts';
+import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -222,8 +222,10 @@ describe('searchATSUsersController', () => {
 
     searchATSUsersSpy.mockResolvedValue(atsUsers);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await searchATSUsersController(req as any, res as unknown as Response);
+    await searchATSUsersController(
+      req as unknown as Request<never, never, never, ATSUserSearchParameters>,
+      res as unknown as Response
+    );
 
     expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
     expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });

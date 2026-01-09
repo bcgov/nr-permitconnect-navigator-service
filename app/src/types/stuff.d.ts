@@ -2,6 +2,7 @@ import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 
 import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
+import { PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 
 import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
@@ -155,8 +156,8 @@ export type ContactSearchParameters = {
 };
 
 export type CurrentAuthorization = {
-  attributes: Array<string>;
-  groups: Array<Group>;
+  attributes: string[];
+  groups: Group[];
 };
 
 export type CurrentContext = {
@@ -183,11 +184,11 @@ export type ElectrificationProjectIntake = {
 };
 
 export type ElectrificationProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  electrificationProjectId?: Array<string>;
-  projectType?: Array<string>;
-  projectCategory?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
+  electrificationProjectId?: string[];
+  projectType?: string[];
+  projectCategory?: string[];
   includeUser?: boolean;
 };
 
@@ -212,18 +213,18 @@ export type ElectrificationProjectStatistics = {
 };
 
 export type Email = {
-  bcc?: Array<string>;
+  bcc?: string[];
   bodyType: string;
   body: string;
-  cc?: Array<string>;
+  cc?: string[];
   delayTS?: number;
   encoding?: string;
   from: string;
   priority?: string;
   subject: string;
-  to: Array<string>;
+  to: string[];
   tag?: string;
-  attachments?: Array<EmailAttachment>;
+  attachments?: EmailAttachment[];
 };
 
 export type EmailAttachment = {
@@ -251,9 +252,9 @@ export type EnquiryIntake = {
 };
 
 export type EnquirySearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  enquiryId?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
+  enquiryId?: string[];
   includeUser?: boolean;
 };
 
@@ -322,10 +323,10 @@ export type HousingProjectIntake = {
 };
 
 export type HousingProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  housingProjectId?: Array<string>;
-  submissionType?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
+  housingProjectId?: string[];
+  submissionType?: string[];
   includeUser?: boolean;
 };
 

@@ -43,7 +43,7 @@ describe('deleteEnquiry', () => {
     expect(prismaTxMock.enquiry.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { enquiryId: '1' }
     });
   });

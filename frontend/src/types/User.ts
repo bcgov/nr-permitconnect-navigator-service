@@ -8,7 +8,7 @@ export type User = {
   fullName: string;
   idp: string;
   lastName: string;
-  groups: Array<Group>;
+  groups: Group[];
   status?: string;
   userId: string;
   sub: string;

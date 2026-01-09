@@ -80,7 +80,7 @@ describe('createEnquiryController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(2);
@@ -95,7 +95,7 @@ describe('createEnquiryController', () => {
       ActivityContactRole.PRIMARY
     );
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date), updatedBy: TEST_CURRENT_CONTEXT.userId }
+      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date) as Date, updatedBy: TEST_CURRENT_CONTEXT.userId }
     ]);
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
@@ -123,12 +123,12 @@ describe('deleteEnquiryController', () => {
     expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
     expect(deleteEnquirySpy).toHaveBeenCalledTimes(1);
     expect(deleteEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_1.activityId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -240,7 +240,7 @@ describe('updateEnquiryController', () => {
 
     expect(updateEnquirySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ENQUIRY_1,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

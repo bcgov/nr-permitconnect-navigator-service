@@ -38,7 +38,7 @@ export async function up(knex: Knex): Promise<void> {
 
       // Add roles (only add the VIEWER role for a read-only resource)
       .then(() => {
-        const items: Array<{ name: string; description: string }> = [];
+        const items: { name: string; description: string }[] = [];
         for (const resource of resources) {
           items.push({
             name: `${resource.name.toUpperCase()}_VIEWER`,
@@ -56,7 +56,7 @@ export async function up(knex: Knex): Promise<void> {
           .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
           .innerJoin({ a: 'yars.action' }, 'p.action_id', '=', 'a.action_id');
 
-        const items: Array<{ role_id: number; policy_id: number }> = [];
+        const items: { role_id: number; policy_id: number }[] = [];
 
         const addRolePolicies = async (resourceName: string) => {
           const viewerId = await knex('yars.role')
@@ -94,9 +94,9 @@ export async function up(knex: Knex): Promise<void> {
           .where({ initiative_id: housing_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const items: Array<{ group_id: number; role_id: number }> = [];
+        const items: { group_id: number; role_id: number }[] = [];
 
-        const addResourceRoles = async (group_id: number, resourceName: string, actionNames: Array<string>) => {
+        const addResourceRoles = async (group_id: number, resourceName: string, actionNames: string[]) => {
           if (actionNames.includes(Action.READ)) {
             const role = await knex('yars.role')
               .where({ name: `${resourceName.toUpperCase()}_VIEWER` })

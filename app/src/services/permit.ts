@@ -3,7 +3,8 @@ import { Initiative } from '../utils/enums/application.ts';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types/index.ts';
 
-/** Delete a specific permit
+/**
+ * Delete a specific permit
  * @param tx Prisma transaction client
  * @param permitId Permit ID
  */
@@ -77,6 +78,7 @@ export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: In
 /**
  * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
  * @param tx Prisma transaction client
+ * @param options Optional filtering parameters
  * @param options.activityId Optional PCNS Activity ID
  * @param options.includeNotes Optional flag to include permit notes
  * @returns A Promise that resolves to an array of permits
@@ -84,7 +86,7 @@ export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: In
 export const listPermits = async (tx: PrismaTransactionClient, options?: ListPermitsOptions): Promise<Permit[]> => {
   const response = await tx.permit.findMany({
     where: {
-      activityId: options?.activityId || undefined
+      activityId: options?.activityId ?? undefined
     },
     orderBy: {
       permitType: {

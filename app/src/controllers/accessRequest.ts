@@ -47,7 +47,7 @@ export const createUserAccessRequestController = async (
     if (!existingUser) userResponse = await createUser(tx, user);
     else userResponse = await readUser(tx, user.userId);
 
-    let accessUserGroups: Array<Group> = [];
+    let accessUserGroups: Group[] = [];
 
     if (!userResponse) {
       throw new Problem(404, { detail: 'User not found' });
@@ -146,7 +146,7 @@ export const processUserAccessRequestController = async (
         const groups = await getGroups(tx, req.currentContext.initiative as Initiative);
         const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
 
-        const userGroups: Array<Group> = await getSubjectGroups(tx, userResponse.sub);
+        const userGroups: Group[] = await getSubjectGroups(tx, userResponse.sub);
 
         // If request is approved then grant or remove access
         if (req.body.approve) {

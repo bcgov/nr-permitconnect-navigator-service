@@ -65,7 +65,7 @@ describe('createDocumentController', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.filesize,
-      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT_1);
@@ -105,7 +105,7 @@ describe('createDocumentController', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.filesize,
-      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(readUserSpy).toHaveBeenCalledTimes(1);
     expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);

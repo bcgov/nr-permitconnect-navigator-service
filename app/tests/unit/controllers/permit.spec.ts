@@ -218,12 +218,12 @@ describe('upsertPermitController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      permitId: expect.stringMatching(uuidv4Pattern),
+      permitId: expect.stringMatching(uuidv4Pattern) as string,
       permitNote: undefined,
       permitTracking: undefined,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

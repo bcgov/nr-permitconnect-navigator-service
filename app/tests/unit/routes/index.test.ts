@@ -13,19 +13,24 @@ jest.mock('config', () => ({
 }));
 
 describe('GET /', () => {
-  it('should return the root information', async () => {
+  it('should return the root endpoints', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      app: {
-        gitRev: expect.anything(),
-        name: expect.anything(),
-        nodeVersion: expect.anything(),
-        version: expect.anything()
-      },
-      endpoints: ['/live', '/ready', '/v1'],
-      versions: [1]
-    });
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        endpoints: ['/api', '/docs', '/live', '/ready']
+      })
+    );
+  });
+
+  it('should return the git revision', async () => {
+    const response = await request(app).get('/');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        gitRev: state.gitRev
+      })
+    );
   });
 });
 

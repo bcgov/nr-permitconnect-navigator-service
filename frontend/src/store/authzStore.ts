@@ -117,7 +117,7 @@ const NavigationAuthorizationMap: Array<NavigationAuthorizationMapT> = [
 NavigationAuthorizationMap.forEach((auth) => auth.permissions.push(...GlobalNavigations));
 
 export type AuthZStoreState = {
-  groups: Ref<Array<Group>>;
+  groups: Ref<Group[]>;
   permissions: Ref<Array<Permission>>;
   groupOverride: Ref<GroupName | undefined>;
   initiativeOverride: Ref<Initiative | undefined>;
