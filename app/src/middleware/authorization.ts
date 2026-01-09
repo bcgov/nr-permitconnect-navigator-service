@@ -95,7 +95,7 @@ export const hasAuthorization = (resource: string, action: string) => {
               })
             ).then((x) => x.flat());
 
-            const matchingAttributes: Array<string> = [];
+            const matchingAttributes: string[] = [];
             for (const attribute of policyAttributes) {
               if (attribute.groupId.length === 0) {
                 matchingAttributes.push(attribute.attributeName);

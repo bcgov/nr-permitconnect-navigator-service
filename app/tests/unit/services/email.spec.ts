@@ -15,11 +15,11 @@ let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
 
 type Message = {
   msgId: string;
-  to: Array<string>;
+  to: string[];
 };
 
 type EmailData = {
-  messages: Array<Message>;
+  messages: Message[];
   txId: string;
 };
 
@@ -34,7 +34,7 @@ const chesResponse: EmailData = {
   txId: '508a1f8f-b5a1-4d37-a8c9-f7d7c0a86c00'
 };
 
-const recipientsDefault: Array<string> = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test4@test.com'];
+const recipientsDefault: string[] = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test4@test.com'];
 
 beforeEach(() => {
   mockedConfig = config as jest.MockedObjectDeep<typeof config>;
@@ -92,7 +92,7 @@ describe('logEmail', () => {
   });
 
   it('should call createMany with the correct parameters', async () => {
-    const recipients: Array<string> = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test3@test.com'];
+    const recipients: string[] = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test3@test.com'];
 
     prismaMock.email_log.createMany.mockResolvedValueOnce({ count: recipients.length });
     await emailService.logEmail(chesResponse, recipients, 201);
@@ -109,7 +109,7 @@ describe('logEmail', () => {
   });
 
   it('should call createMany with the right http status code', async () => {
-    const recipients: Array<string> = ['test1@test.com'];
+    const recipients: string[] = ['test1@test.com'];
     const statusCode: number = 451;
 
     prismaMock.email_log.createMany.mockResolvedValueOnce({ count: recipients.length });

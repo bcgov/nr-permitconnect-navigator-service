@@ -54,7 +54,7 @@ describe('deleteElectrificationProject', () => {
     expect(prismaTxMock.electrification_project.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { electrificationProjectId: '1' }
     });
   });

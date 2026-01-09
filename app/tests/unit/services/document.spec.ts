@@ -31,7 +31,7 @@ describe('createDocument', () => {
         filename: 'FILE.txt',
         mimeType: 'MIME',
         filesize: 12345,
-        createdAt: expect.any(Date),
+        createdAt: expect.any(Date) as Date,
         createdBy: TEST_CURRENT_CONTEXT.userId
       }
     });

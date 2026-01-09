@@ -244,7 +244,7 @@ describe('login', () => {
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
       {
-        contactId: expect.stringMatching(uuidv4Pattern),
+        contactId: expect.stringMatching(uuidv4Pattern) as string,
         userId: bceidUser.userId as string,
         firstName: 'BCeID',
         lastName: 'User',
@@ -252,8 +252,8 @@ describe('login', () => {
         phoneNumber: null,
         contactApplicantRelationship: null,
         contactPreference: null,
-        createdAt: expect.any(Date),
-        createdBy: expect.stringMatching(uuidv4Pattern),
+        createdAt: expect.any(Date) as Date,
+        createdBy: expect.stringMatching(uuidv4Pattern) as string,
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       }
@@ -278,7 +278,7 @@ describe('login', () => {
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
       {
-        contactId: expect.stringMatching(uuidv4Pattern),
+        contactId: expect.stringMatching(uuidv4Pattern) as string,
         userId: bceidUser.userId as string,
         firstName: 'Blank',
         lastName: ' ',
@@ -286,8 +286,8 @@ describe('login', () => {
         phoneNumber: null,
         contactApplicantRelationship: null,
         contactPreference: null,
-        createdAt: expect.any(Date),
-        createdBy: expect.stringMatching(uuidv4Pattern),
+        createdAt: expect.any(Date) as Date,
+        createdBy: expect.stringMatching(uuidv4Pattern) as string,
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       }

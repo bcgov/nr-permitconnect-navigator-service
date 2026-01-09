@@ -8,13 +8,13 @@ import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } f
  * Gets Auth token using ATS client credentials
  * @returns A valid access token
  */
-async function getToken() {
+async function getToken(): Promise<string> {
   const response = await axios({
     method: 'GET',
     url: config.get('server.ats.tokenUrl'),
     auth: {
-      username: config.get('server.ats.clientId') as string,
-      password: config.get('server.ats.clientSecret') as string
+      username: config.get('server.ats.clientId'),
+      password: config.get('server.ats.clientSecret')
     },
     headers: {
       'Content-type': 'application/x-www-form-urlencoded'
@@ -27,7 +27,6 @@ async function getToken() {
 
 /**
  * Returns an Axios instance with Authorization header
- * @param options Axios request config options
  * @returns An axios instance
  */
 function atsAxios(): AxiosInstance {
@@ -40,7 +39,7 @@ function atsAxios(): AxiosInstance {
   atsAxios.interceptors.request.use(async (config) => {
     const token = await getToken();
     const auth = token ? `Bearer ${token}` : '';
-    config.headers['Authorization'] = auth;
+    config.headers.Authorization = auth;
     return config;
   });
   return atsAxios;
@@ -96,7 +95,7 @@ export const createATSClient = async (atsClient: ATSClientResource) => {
 
 /**
  * Creates a enquiry in ATS
- * @param atsEnquiryThe client data
+ * @param atsEnquiry The client data
  * @returns A Promise that resolves to the response from the external api
  */
 export const createATSEnquiry = async (atsEnquiry: ATSEnquiryResource) => {

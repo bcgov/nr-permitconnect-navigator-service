@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
     // "types": ["vitest/globals"],
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": false
   },
   "exclude": [
     "node_modules"

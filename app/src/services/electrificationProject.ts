@@ -55,6 +55,10 @@ export const deleteElectrificationProject = async (
  * Gets a set of electrification project related statistics
  * @param tx Prisma transaction client
  * @param filters The filters to apply to the statistics
+ * @param filters.dateFrom Beginning date
+ * @param filters.dateTo End date
+ * @param filters.monthYear Month/Year to search
+ * @param filters.userId User ID
  * @returns A Promise that resolves to the electrification project statistics
  */
 export const getElectrificationProjectStatistics = async (
@@ -67,7 +71,7 @@ export const getElectrificationProjectStatistics = async (
   }
 ): Promise<ElectrificationProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
-  const val = (value: unknown) => (value ? `'${value}'` : null);
+  const val = (value: string) => (value ? `'${value}'` : null);
 
   const dFrom = val(filters.dateFrom);
   const dTo = val(filters.dateTo);
@@ -80,7 +84,9 @@ export const getElectrificationProjectStatistics = async (
   // count() returns BigInt
   // JSON.stringify() doesn't know how to serialize BigInt
   // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
-  return JSON.parse(JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : value)));
+  return JSON.parse(
+    JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : (value as unknown)))
+  ) as ElectrificationProjectStatistics[];
 };
 
 /**
@@ -143,6 +149,7 @@ export const getElectrificationProjects = async (tx: PrismaTransactionClient): P
 /**
  * Search and filter for specific electrification projects
  * @param tx Prisma transaction client
+ * @param params Optional filtering parameters
  * @param params.activityId Optional array of uuids representing the activity ID
  * @param params.createdBy Optional array of uuids representing users who created electrification projects
  * @param params.electrificationProjectId Optional array of uuids representing the electrification project ID

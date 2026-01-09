@@ -1,8 +1,8 @@
 export type HousingProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  intakeStatus?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
+  intakeStatus?: string[];
   includeUser?: boolean;
-  housingProjectId?: Array<string>;
-  submissionType?: Array<string>;
+  housingProjectId?: string[];
+  submissionType?: string[];
 };

@@ -69,7 +69,7 @@ describe('insertContacts', () => {
     expect(prismaTxMock.contact.create).toHaveBeenCalledWith({
       data: {
         contactId: '1',
-        createdAt: expect.any(Date),
+        createdAt: expect.any(Date) as Date,
         createdBy: TEST_CURRENT_CONTEXT.userId
       }
     });

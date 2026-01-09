@@ -239,7 +239,7 @@ describe('createHousingProjectController', () => {
     } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
     upsertPermitTrackingSpy.mockResolvedValue([]);
-    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName as string);
+    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName!);
 
     await createHousingProjectController(
       req as unknown as Request<never, never, HousingProjectIntake>,
@@ -248,7 +248,7 @@ describe('createHousingProjectController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -265,17 +265,17 @@ describe('createHousingProjectController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_CREATE,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
   });
@@ -322,9 +322,9 @@ describe('createHousingProjectController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -339,9 +339,9 @@ describe('createHousingProjectController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -357,9 +357,9 @@ describe('createHousingProjectController', () => {
       issuedPermitId: null,
       submittedDate: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -391,12 +391,12 @@ describe('deleteHousingProjectController', () => {
     expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
     expect(deleteHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -677,7 +677,7 @@ describe('submitHousingProjectDraftController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -694,9 +694,9 @@ describe('submitHousingProjectDraftController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
@@ -768,9 +768,9 @@ describe('submitHousingProjectDraftController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -785,9 +785,9 @@ describe('submitHousingProjectDraftController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -803,9 +803,9 @@ describe('submitHousingProjectDraftController', () => {
       issuedPermitId: null,
       submittedDate: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -853,11 +853,11 @@ describe('updateHousingProjectDraftController', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern),
+      draftId: expect.stringMatching(uuidv4Pattern) as string,
       activityId: 'ACTI1234',
       draftCode: DraftCode.HOUSING_PROJECT,
       data: req.body.data,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: null,
       updatedBy: null,
@@ -904,7 +904,7 @@ describe('updateHousingProjectDraftController', () => {
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
     expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
@@ -936,7 +936,7 @@ describe('updateHousingProjectController', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...UPDATED_PROJECT,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

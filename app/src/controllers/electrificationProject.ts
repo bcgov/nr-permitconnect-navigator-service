@@ -285,7 +285,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
 };
 
 export const updateElectrificationProjectController = async (
-  req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
+  req: Request<never, never, { project: ElectrificationProject; contacts: Contact[] }>,
   res: Response
 ) => {
   const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {

@@ -65,9 +65,9 @@ const enquiryStore = useEnquiryStore();
 const assigneeOptions: Ref<Array<User>> = ref([]);
 const basicInfoManualEntry: Ref<boolean> = ref(false);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
-const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
+const filteredProjectActivityIds: Ref<string[]> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const projectActivityIds: Ref<Array<string>> = ref([]);
+const projectActivityIds: Ref<string[]> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const showCancelMessage: Ref<boolean> = ref(false);
 

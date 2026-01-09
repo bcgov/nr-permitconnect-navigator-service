@@ -1,6 +1,3 @@
-// TODO: Figure out how to prevent this another way?
-// Without this export line you'll see the below error, something to do with global variable clashing in TS
-//  Cannot redeclare block-scoped variable 'config'.ts(2451)
 import config from 'config';
 import type { Logger } from 'winston';
 

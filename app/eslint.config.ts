@@ -22,7 +22,7 @@ export default tseslint.config(
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: import.meta.dirname
+        tsconfigRootDir: __dirname //TODO when type:module => import.meta.dirname
       }
     },
     rules: {

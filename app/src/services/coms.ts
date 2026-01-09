@@ -29,6 +29,7 @@ function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * This endpoint can be used to grant the current user permission to upload to a new or existing bucket.
  * @param bearerToken The bearer token of the authorized user
  * @param permissions An array of permissions to grant the user
+ * @returns The created bucket data
  */
 export const createBucket = async (bearerToken: string, permissions: Action[]) => {
   const { data } = await comsAxios({
@@ -49,6 +50,7 @@ export const createBucket = async (bearerToken: string, permissions: Action[]) =
  * Get an object
  * @param bearerToken The bearer token of the authorized user
  * @param objectId The id for the object to get
+ * @returns The obtained object data
  */
 export const getObject = async (bearerToken: string, objectId: string) => {
   if (!uuidValidateV4(objectId)) {

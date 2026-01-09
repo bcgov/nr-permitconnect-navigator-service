@@ -46,14 +46,14 @@ describe('createPermitNoteController', () => {
     expect(createPermitNoteSpy).toHaveBeenCalledTimes(1);
     expect(createPermitNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      permitNoteId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.any(Date),
+      permitNoteId: expect.stringMatching(uuidv4Pattern) as string,
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_PERMIT_NOTE_1,
-      permitNoteId: expect.stringMatching(uuidv4Pattern)
+      permitNoteId: expect.stringMatching(uuidv4Pattern) as string
     });
   });
 });

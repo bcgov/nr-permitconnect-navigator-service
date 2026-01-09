@@ -107,8 +107,8 @@ const generateHousingProjectData = async (
   }
 
   let basic, housing, location, permits;
-  let appliedPermits: Array<Permit> = [],
-    investigatePermits: Array<Permit> = [];
+  let appliedPermits: Permit[] = [],
+    investigatePermits: Permit[] = [];
 
   if (data.basic) {
     basic = {
