@@ -50,7 +50,7 @@ export async function up(knex: Knex): Promise<void> {
 
       // Map the REPORTING_VIEWER role to the REPORTING READ policy
       .then(async () => {
-        const policies = await knex
+        const policies: { policy_id: number; resource_name: string; action_name: Action }[] = await knex
           .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
           .from({ p: 'yars.policy' })
           .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
@@ -59,7 +59,7 @@ export async function up(knex: Knex): Promise<void> {
         const items: { role_id: number; policy_id: number }[] = [];
 
         const addRolePolicies = async (resourceName: string) => {
-          const viewerId = await knex('yars.role')
+          const viewerId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
             .select('role_id');
           const resourcePolicies = policies.filter((x) => x.resource_name === resourceName);
@@ -78,19 +78,19 @@ export async function up(knex: Knex): Promise<void> {
       .then(async () => {
         const housing_id = knex('initiative').where({ code: Initiative.HOUSING }).select('initiative_id');
 
-        const navigator_group_id = await knex('yars.group')
+        const navigator_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const navigator_read_group_id = await knex('yars.group')
+        const navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const superviser_group_id = await knex('yars.group')
+        const superviser_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const admin_group_id = await knex('yars.group')
+        const admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.ADMIN })
           .select('group_id');
 
@@ -98,12 +98,13 @@ export async function up(knex: Knex): Promise<void> {
 
         const addResourceRoles = async (group_id: number, resourceName: string, actionNames: string[]) => {
           if (actionNames.includes(Action.READ)) {
-            const role = await knex('yars.role')
-              .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
+            const read_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_VIEWER` })
               .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: role[0].role_id
+              role_id: read_role_id[0].role_id
             });
           }
         };
@@ -127,7 +128,7 @@ export async function down(knex: Knex): Promise<void> {
     Promise.resolve()
       // Remove group to role mappings for REPORTING
       .then(async () => {
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.REPORTING}_VIEWER` })
           .select('role_id');
         if (viewerRole && viewerRole.length > 0) {
@@ -136,7 +137,7 @@ export async function down(knex: Knex): Promise<void> {
       })
       // Remove role to policy mappings for REPORTING
       .then(async () => {
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.REPORTING}_VIEWER` })
           .select('role_id');
         if (viewerRole && viewerRole.length > 0) {
@@ -151,10 +152,10 @@ export async function down(knex: Knex): Promise<void> {
       })
       // Remove the REPORTING policy (the READ policy)
       .then(async () => {
-        const resourceRow = await knex('yars.resource')
+        const resourceRow: { resource_id: number } = await knex('yars.resource')
           .where({ name: Resource.REPORTING })
           .select('resource_id')
-          .first();
+          .first<{ resource_id: number }>(); // TODO: This might be an issue templating this?
         if (resourceRow) {
           return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
         }

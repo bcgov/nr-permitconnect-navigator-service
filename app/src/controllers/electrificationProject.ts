@@ -271,7 +271,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
       });
 
       // Update the contact and link to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
       if (contacts[0])
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
 

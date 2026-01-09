@@ -7,7 +7,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.
 
 import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
 import type { IStamps } from '../interfaces/IStamps.ts';
-import type { PermitEmailTemplate } from '../utils/templates';
+import type { EmailTemplate } from '../utils/templates';
 
 type AddressResource = {
   '@type': string;
@@ -61,12 +61,12 @@ export type BceidSearchParameters = {
 export type BringForward = {
   activityId: string;
   noteId: string;
-  electrificationProjectId: string;
-  housingProjectId: string;
-  enquiryId: string;
+  electrificationProjectId?: string;
+  housingProjectId?: string;
+  enquiryId?: string;
   title: string;
   projectName: string | null;
-  bringForwardDate: string;
+  bringForwardDate?: string;
   createdByFullName: string | null;
 };
 
@@ -405,7 +405,7 @@ export type PermitUpdateEmailParams = {
   dearName: string;
   projectId: string;
   toEmails: string[];
-  emailTemplate: PermitEmailTemplate;
+  emailTemplate: EmailTemplate;
 };
 
 export type Project = HousingProject | ElectrificationProject;

@@ -54,6 +54,7 @@ import type {
 /**
  * Assigns a priority level to a housing project based on given criteria
  * Criteria defined below
+ * @param housingProject Housing data
  */
 export const assignPriority = (housingProject: Partial<HousingProject>) => {
   const matchesPriorityOneCriteria = // Priority 1 Criteria:
@@ -101,7 +102,7 @@ const generateHousingProjectData = async (
   // Create activity and link contact if required
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -141,7 +142,7 @@ const generateHousingProjectData = async (
 
   if (data.location) {
     location = {
-      naturalDisaster: data.location.naturalDisaster === BasicResponse.YES ? true : false,
+      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES ? true : false,
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
@@ -161,11 +162,11 @@ const generateHousingProjectData = async (
     };
   }
 
-  if (data.appliedPermits && data.appliedPermits.length) {
+  if (data.appliedPermits?.length) {
     appliedPermits = data.appliedPermits.map((x: Permit) => ({
       permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId,
-      activityId: activityId as string,
+      activityId: activityId,
       stage: PermitStage.APPLICATION_SUBMISSION,
       needed: PermitNeeded.YES,
       statusLastChanged: null,
@@ -188,11 +189,11 @@ const generateHousingProjectData = async (
     }));
   }
 
-  if (data.investigatePermits && data.investigatePermits.length) {
+  if (data.investigatePermits?.length) {
     investigatePermits = data.investigatePermits.map((x: Permit) => ({
       permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId as number,
-      activityId: activityId as string,
+      permitTypeId: x.permitTypeId,
+      activityId: activityId,
       stage: PermitStage.PRE_SUBMISSION,
       needed: PermitNeeded.UNDER_INVESTIGATION,
       statusLastChanged: null,
@@ -260,6 +261,8 @@ const generateHousingProjectData = async (
 
 /**
  * Send an email with the confirmation of housing project
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const emailHousingProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
   const { data, status } = await email(req.body);
@@ -278,7 +281,7 @@ export const createHousingProjectController = async (
   res: Response
 ) => {
   // Provide an empty body if POST body is given undefined
-  if (req.body === undefined) req.body = {} as HousingProjectIntake;
+  req.body ??= {} as HousingProjectIntake;
 
   const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
     const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
@@ -453,7 +456,7 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
       });
 
       // Link contact to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
       if (contacts[0]) {
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
       }

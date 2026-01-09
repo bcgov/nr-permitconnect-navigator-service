@@ -566,7 +566,7 @@ export async function up(knex: Knex): Promise<void> {
          * Add role to policy mappings
          */
 
-        const policies = await knex
+        const policies: { policy_id: number; resource_name: string; action_name: Action }[] = await knex
           .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
           .from({ p: 'yars.policy' })
           .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
@@ -575,13 +575,13 @@ export async function up(knex: Knex): Promise<void> {
         const items: { role_id: number; policy_id: number }[] = [];
 
         const addRolePolicies = async (resourceName: string) => {
-          const creatorId = await knex('yars.role')
+          const creatorId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_CREATOR` })
             .select('role_id');
-          const viewerId = await knex('yars.role')
+          const viewerId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
             .select('role_id');
-          const editorId = await knex('yars.role')
+          const editorId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_EDITOR` })
             .select('role_id');
 
@@ -589,20 +589,20 @@ export async function up(knex: Knex): Promise<void> {
           items.push(
             {
               role_id: creatorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.CREATE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.CREATE)!.policy_id
             },
             {
               role_id: viewerId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ)!.policy_id
             },
             {
               role_id: editorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.UPDATE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.UPDATE)!.policy_id
             },
 
             {
               role_id: editorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE)!.policy_id
             }
           );
         };
@@ -631,23 +631,23 @@ export async function up(knex: Knex): Promise<void> {
           })
           .select('initiative_id');
 
-        const navigator_group_id = await knex('yars.group')
+        const navigator_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const navigator_read_group_id = await knex('yars.group')
+        const navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const superviser_group_id = await knex('yars.group')
+        const superviser_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const admin_group_id = await knex('yars.group')
+        const admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const proponent_group_id = await knex('yars.group')
+        const proponent_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.PROPONENT })
           .select('group_id');
 
@@ -659,35 +659,35 @@ export async function up(knex: Knex): Promise<void> {
           actionNames: Action[]
         ) => {
           if (actionNames.includes(Action.CREATE)) {
+            const creator_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_CREATOR` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_CREATOR` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: creator_role_id[0].role_id
             });
           }
 
           if (actionNames.includes(Action.READ)) {
+            const read_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_VIEWER` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_VIEWER` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: read_role_id[0].role_id
             });
           }
 
           if (actionNames.includes(Action.UPDATE) || actionNames.includes(Action.DELETE)) {
+            const update_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_EDITOR` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_EDITOR` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: update_role_id[0].role_id
             });
           }
         };
@@ -752,12 +752,18 @@ export async function up(knex: Knex): Promise<void> {
          * Attach attributes to all non CREATE policies
          */
 
-        const action_create_id = await knex('yars.action').where({ name: Action.CREATE }).select('action_id');
+        const action_create_id: { action_id: number }[] = await knex('yars.action')
+          .where({ name: Action.CREATE })
+          .select('action_id');
 
-        const scopeAllId = await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id');
-        const scopeSelfId = await knex('yars.attribute').where({ name: 'scope:self' }).select('attribute_id');
+        const scopeAllId: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:all' })
+          .select('attribute_id');
+        const scopeSelfId: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:self' })
+          .select('attribute_id');
 
-        const policies = await knex('yars.policy')
+        const policies: { policy_id: number }[] = await knex('yars.policy')
           .whereNot({ action_id: action_create_id[0].action_id })
           .select('policy_id');
 
@@ -782,50 +788,53 @@ export async function up(knex: Knex): Promise<void> {
           })
           .select('initiative_id');
 
-        const navigator_group_id = await knex('yars.group')
+        const navigator_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const navigator_read_group_id = await knex('yars.group')
+        const navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const superviser_group_id = await knex('yars.group')
+        const superviser_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const admin_group_id = await knex('yars.group')
+        const admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const proponent_group_id = await knex('yars.group')
+        const proponent_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id, name: GroupName.PROPONENT })
           .select('group_id');
 
+        const scope_all_attribute_id: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:all' })
+          .select('attribute_id');
+
+        const scope_self_attribute_id: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:self' })
+          .select('attribute_id');
+
         return knex('yars.attribute_group').insert([
           {
-            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
-              .attribute_id,
+            attribute_id: scope_all_attribute_id[0].attribute_id,
             group_id: navigator_group_id[0].group_id
           },
           {
-            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
-              .attribute_id,
+            attribute_id: scope_all_attribute_id[0].attribute_id,
             group_id: navigator_read_group_id[0].group_id
           },
           {
-            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
-              .attribute_id,
+            attribute_id: scope_all_attribute_id[0].attribute_id,
             group_id: superviser_group_id[0].group_id
           },
           {
-            attribute_id: (await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id'))[0]
-              .attribute_id,
+            attribute_id: scope_all_attribute_id[0].attribute_id,
             group_id: admin_group_id[0].group_id
           },
           {
-            attribute_id: (await knex('yars.attribute').where({ name: 'scope:self' }).select('attribute_id'))[0]
-              .attribute_id,
+            attribute_id: scope_self_attribute_id[0].attribute_id,
             group_id: proponent_group_id[0].group_id
           }
         ]);

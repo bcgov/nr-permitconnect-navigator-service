@@ -24,7 +24,7 @@ export const createUserAccessRequestController = async (
     const { accessRequest, user } = req.body;
 
     // Check if the requestee is an admin
-    const initiative = await getInitiative(tx, req.currentContext.initiative as Initiative);
+    const initiative = await getInitiative(tx, req.currentContext.initiative!);
     const isAdmin =
       req.currentAuthorization?.groups.some(
         (group: Group) =>
@@ -33,7 +33,7 @@ export const createUserAccessRequestController = async (
       ) ?? false;
 
     // Groups the current user can modify
-    const groups = await getGroups(tx, req.currentContext.initiative as Initiative);
+    const groups = await getGroups(tx, req.currentContext.initiative);
     const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
     const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
     if (isAdmin) {
@@ -83,7 +83,7 @@ export const createUserAccessRequestController = async (
       // Remove all user groups for initiative
       const groupsToRemove = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
       for (const g of groupsToRemove) {
-        data = await removeGroup(tx, userResponse?.sub as string, g.groupId);
+        data = await removeGroup(tx, userResponse?.sub, g.groupId);
       }
 
       // Assign new group
@@ -112,13 +112,13 @@ export const createUserAccessRequestController = async (
           ? [accessRequest.groupId]
           : accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId).map((x) => x.groupId);
         for (const groupId of groupsToRemove) {
-          data = await removeGroup(tx, userResponse?.sub as string, groupId);
+          data = await removeGroup(tx, userResponse?.sub, groupId);
         }
       }
     } else {
       data = await createUserAccessRequest(tx, {
         ...accessRequest,
-        userId: userResponse?.userId as string
+        userId: userResponse?.userId
       });
     }
 
@@ -133,17 +133,13 @@ export const processUserAccessRequestController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const accessRequest = await getAccessRequest(
-      tx,
-      req.currentContext.initiative as Initiative,
-      req.params.accessRequestId
-    );
+    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative!, req.params.accessRequestId);
 
     if (accessRequest) {
       const userResponse = await readUser(tx, accessRequest.userId);
 
       if (userResponse) {
-        const groups = await getGroups(tx, req.currentContext.initiative as Initiative);
+        const groups = await getGroups(tx, req.currentContext.initiative);
         const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
 
         const userGroups: Group[] = await getSubjectGroups(tx, userResponse.sub);
@@ -190,7 +186,7 @@ export const processUserAccessRequestController = async (
 
 export const getAccessRequestsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<AccessRequest[]>(async (tx: PrismaTransactionClient) => {
-    return await getAccessRequests(tx, req.currentContext.initiative as Initiative);
+    return await getAccessRequests(tx, req.currentContext.initiative!);
   });
   res.status(200).json(response);
 };

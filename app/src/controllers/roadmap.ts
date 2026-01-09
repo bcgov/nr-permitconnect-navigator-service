@@ -14,28 +14,28 @@ import type { Email, EmailAttachment, NoteHistory } from '../types';
 
 /**
  * Send an email with the roadmap data
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const sendRoadmapController = async (
   req: Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
   res: Response
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-
-  if (req.body.selectedFileIds && req.body.selectedFileIds.length) {
+  if (req.body.selectedFileIds?.length) {
     const attachments: EmailAttachment[] = [];
 
     if (req.currentContext?.bearerToken) {
       // Attempt to get the requested documents from COMS
       // If succesful it is converted to base64 encoding and added to the attachment list
       const objectPromises = req.body.selectedFileIds.map(async (id) => {
-        const { status, headers, data } = await getObject(req.currentContext?.bearerToken as string, id);
+        const { status, headers, data } = await getObject(req.currentContext.bearerToken!, id);
 
         if (status === 200) {
-          const filename = headers['x-amz-meta-name'];
+          const filename = headers['x-amz-meta-name'] as string;
           if (filename) {
             attachments.push({
               content: Buffer.from(data).toString('base64'),
-              contentType: headers['content-type'],
+              contentType: headers['content-type'] as string,
               encoding: 'base64',
               filename: filename
             });
