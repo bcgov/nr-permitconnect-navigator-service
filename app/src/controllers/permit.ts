@@ -64,6 +64,7 @@ export const listPermitsController = async (
 
 /**
  * Sends out an email notification for the given update email params
+ * @param params Email information for template and recipients
  */
 export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => {
   const { permit, initiative, dearName, projectId, toEmails, emailTemplate } = params;
@@ -71,7 +72,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   const permitName = permit.permitType?.name;
   const submittedDate = formatDateOnly(permit.submittedDate);
 
-  const nrmPermitEmail = config.get('frontend.ches.submission.cc') as string;
+  const nrmPermitEmail: string = config.get('frontend.ches.submission.cc');
 
   const emailBody = emailTemplate({
     activityId,
@@ -101,6 +102,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
 
 /**
  * Creates update notes and sends out email notifications for updated permits
+ * @param permits Array of Permits to send notifications for
  */
 export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
@@ -120,7 +122,7 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
         const navigator = await readUser(tx, navigatorId);
         navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
       }
-      const navEmail = config.get('server.pcns.navEmail') as string;
+      const navEmail: string = config.get('server.pcns.navEmail');
 
       permitUpdateEmails.push({
         permit,

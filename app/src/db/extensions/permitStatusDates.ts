@@ -35,19 +35,24 @@ function dateToTimeString(value: Date | null | undefined): string | null {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function normalizePermitWriteData(data: any) {
   for (const field of DATE_FIELDS) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const value = data[field];
     if (typeof value === 'string' && DATE_ONLY_REGEX.test(value)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       data[field] = dateFromDateString(value);
     }
   }
 
   for (const field of TIME_FIELDS) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const value = data[field];
     if (typeof value === 'string' && TIMETZ_REGEX.test(value)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       data[field] = dateFromTimeString(value);
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return data;
 }
 

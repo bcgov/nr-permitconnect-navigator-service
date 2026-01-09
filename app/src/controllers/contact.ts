@@ -33,7 +33,7 @@ export const getContactController = async (
 export const getCurrentUserContactController = async (req: Request<never, never, never, never>, res: Response) => {
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
     return await searchContacts(tx, {
-      userId: [req.currentContext.userId as string]
+      userId: [req.currentContext.userId!]
     });
   });
   res.status(200).json(response[0]);

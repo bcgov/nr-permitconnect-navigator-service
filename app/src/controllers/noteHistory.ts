@@ -30,6 +30,8 @@ import type { BringForward, Note, NoteHistory } from '../types/index.ts';
 
 /**
  * Create a new note history and add the given note to it
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const createNoteHistoryController = async (
   req: Request<never, never, NoteHistory & { note: string }>,
@@ -63,6 +65,8 @@ export const createNoteHistoryController = async (
 
 /**
  * Delete the given note history
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -79,11 +83,11 @@ export const listBringForwardController = async (
   const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
     const history: NoteHistory[] = await listBringForward(
       tx,
-      req.currentContext.initiative as Initiative,
+      req.currentContext.initiative!,
       req.query.bringForwardState
     );
 
-    if (history && history.length) {
+    if (history.length) {
       const [elecProj, housingProj] = await Promise.all([
         searchElectrificationProjects(tx, {
           activityId: history.map((x) => x.activityId)
@@ -97,7 +101,7 @@ export const listBringForwardController = async (
         userId: history
           .map((x) => x.createdBy)
           .filter((x) => !!x)
-          .map((x) => x as string)
+          .map((x) => x!)
       });
 
       const enquiries = (
@@ -121,18 +125,17 @@ export const listBringForwardController = async (
 
       return history.map((h) => ({
         activityId: h.activityId,
-        noteId: h.noteHistoryId as string,
-        electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)
-          ?.electrificationProjectId as string,
-        housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId as string,
-        enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId as string,
+        noteId: h.noteHistoryId,
+        electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
+        housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
+        enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
         title: h.title,
         projectName:
           elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
           housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
           null,
         createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
-        bringForwardDate: h.bringForwardDate?.toISOString() as string,
+        bringForwardDate: h.bringForwardDate?.toISOString(),
         escalateToSupervisor: h.escalateToSupervisor,
         escalateToDirector: h.escalateToDirector
       }));
@@ -145,6 +148,8 @@ export const listBringForwardController = async (
 
 /**
  * Get a list of all note histories for the given activityId
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const listNoteHistoryController = async (req: Request<{ activityId: string }>, res: Response) => {
   const response = await transactionWrapper<NoteHistory[]>(async (tx: PrismaTransactionClient) => {
@@ -163,6 +168,8 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
 /**
  * Updates a note history
  * Adds a new note to an existing history if one was given
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const updateNoteHistoryController = async (
   req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,

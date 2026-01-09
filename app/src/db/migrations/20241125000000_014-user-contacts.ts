@@ -93,7 +93,18 @@ export async function up(knex: Knex): Promise<void> {
 
              CREATE TABLE temp (contact_id uuid, activity_id text, contact_first_name text, contact_last_name text, contact_email text, contact_phone_number text, contact_preference text, contact_applicant_relationship text);`);
 
-        let submissions = await knex
+        interface ActivityWithContact {
+          contact_id?: string;
+          activity_id: string;
+          contact_first_name: string;
+          contact_last_name: string;
+          contact_email: string;
+          contact_phone_number: string;
+          contact_preference: string;
+          contact_applicant_relationship: string;
+        }
+
+        let submissions: ActivityWithContact[] = await knex
           .select(
             's.activity_id',
             's.contact_first_name',
@@ -110,7 +121,7 @@ export async function up(knex: Knex): Promise<void> {
           ...x
         }));
 
-        let enquiries = await knex
+        let enquiries: ActivityWithContact[] = await knex
           .select(
             'e.activity_id',
             'e.contact_first_name',
@@ -127,8 +138,8 @@ export async function up(knex: Knex): Promise<void> {
           ...x
         }));
 
-        if (submissions && submissions.length) await knex('public.temp').insert(submissions);
-        if (enquiries && enquiries.length) await knex('public.temp').insert(enquiries);
+        if (submissions?.length) await knex('public.temp').insert(submissions);
+        if (enquiries?.length) await knex('public.temp').insert(enquiries);
 
         await knex.raw(`INSERT INTO public.contact (contact_id, first_name, last_name, email, phone_number, contact_preference, contact_applicant_relationship)
             SELECT contact_id, contact_first_name, contact_last_name, contact_email, contact_phone_number, contact_preference, contact_applicant_relationship

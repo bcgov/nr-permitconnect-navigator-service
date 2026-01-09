@@ -4,6 +4,7 @@ import { Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import Problem from '../utils/problem.ts';
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,
@@ -17,7 +18,9 @@ export const getGroupsController = async (
 
 export const getPermissionsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload?.sub as string);
+    if (!req.currentContext.tokenPayload?.sub) throw new Problem(500, { detail: 'Unable to read token sub' });
+
+    const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload.sub);
     const permissions = await Promise.all(groups.map((x) => getGroupPermissions(tx, x.groupId))).then((x) => x.flat());
 
     return { groups, permissions };

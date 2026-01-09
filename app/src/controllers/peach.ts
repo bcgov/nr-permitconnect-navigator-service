@@ -5,7 +5,7 @@ import { getPeachRecord } from '../services/peach.ts';
 import { searchPermits, upsertPermit } from '../services/permit.ts';
 import { combineDateTime, compareDates, omit, Problem } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
-import { PeachIntegratedSystem } from '../utils/enums/permit.ts';
+import { PeachIntegratedSystem, PermitStage, PermitState } from '../utils/enums/permit.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -25,6 +25,8 @@ const PEACH_TRACKING_PRIORITY = [
 
 /**
  * Finds the permit tracking with the highest priority, used for fetching PEACH data
+ * @param permitTrackings Array of permit tracking objects
+ * @returns The highest priority tracker
  */
 const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTracking | undefined => {
   let permitTracking: PermitTracking | undefined;
@@ -49,6 +51,8 @@ const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTr
 
 /**
  * Fetches PEACH data for permit tracking
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const getPeachSummaryController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
   const permitTracking = findPriorityPermitTracking(req.body);
@@ -68,6 +72,7 @@ export const getPeachSummaryController = async (req: Request<never, never, Permi
 
 /**
  * Syncs PEACH data for permit tracking to PCNS, returns a list of permits used for sending update notifications
+ * @returns Array of updated permits
  */
 export const syncPeachRecords = async (): Promise<Permit[]> => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
@@ -156,8 +161,8 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
       const submittedDatesEqual = compareDates(peachSubmittedDatetime, pcnsSubmittedDatetime) === 0;
       const decisionDatesEqual = compareDates(peachDecisionDatetime, pcnsDecisionDatetime) === 0;
       const lastChangedDatesEqual = compareDates(peachStatusChangedDatetime, pcnsStatusChangedDatetime) === 0;
-      const stagesEqual = peachSummary.stage === pcnsPermit.stage;
-      const statesEqual = peachSummary.state === pcnsPermit.state;
+      const stagesEqual = peachSummary.stage === (pcnsPermit.stage as PermitStage);
+      const statesEqual = peachSummary.state === (pcnsPermit.state as PermitState);
 
       const hasDiff =
         !stagesEqual || !statesEqual || !submittedDatesEqual || !decisionDatesEqual || !lastChangedDatesEqual;

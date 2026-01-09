@@ -41,7 +41,7 @@ const getTeamMemberEmailTemplateData = async (
     projectName
   };
 
-  const navEmail = config.get('server.pcns.navEmail') as string;
+  const navEmail: string = config.get('server.pcns.navEmail');
 
   return { templateParams, navEmail };
 };
@@ -91,7 +91,8 @@ export const deleteActivityContactController = async (
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
-    if (ac.role === ActivityContactRole.PRIMARY) throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
+    if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
+      throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
     await deleteActivityContact(tx, req.params.activityId, req.params.contactId);
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
@@ -130,7 +131,8 @@ export const updateActivityContactController = async (
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
     const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
 
-    if (ac.role === ActivityContactRole.PRIMARY) throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
+    if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
+      throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
 
     const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 

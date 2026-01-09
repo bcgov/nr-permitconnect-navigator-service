@@ -19,7 +19,6 @@ import {
   searchEnquiries,
   updateEnquiry
 } from '../services/enquiry.ts';
-import { Initiative } from '../utils/enums/application.ts';
 import {
   ActivityContactRole,
   ApplicationStatus,
@@ -42,10 +41,9 @@ const generateEnquiryData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (
-      await createActivity(tx, currentContext.initiative as Initiative, generateCreateStamps(currentContext))
-    )?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    activityId = (await createActivity(tx, currentContext.initiative!, generateCreateStamps(currentContext)))
+      ?.activityId;
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -63,7 +61,7 @@ const generateEnquiryData = async (
   return {
     ...basic,
     enquiryId: data.enquiryId ?? uuidv4(),
-    activityId: activityId as string,
+    activityId: activityId,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
     submittedBy: getCurrentUsername(currentContext),
     intakeStatus: IntakeStatus.SUBMITTED,
@@ -74,7 +72,7 @@ const generateEnquiryData = async (
 
 export const createEnquiryController = async (req: Request<never, never, EnquiryIntake>, res: Response) => {
   // Provide an empty body if POST body is given undefined
-  if (req.body === undefined) req.body = {} as EnquiryIntake;
+  req.body ??= {} as EnquiryIntake;
 
   const result = await transactionWrapper<Enquiry & { contact: Contact }>(async (tx: PrismaTransactionClient) => {
     const enquiry = await generateEnquiryData(tx, req.body, req.currentContext);
@@ -99,7 +97,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
 
     // Create additional activity_contact links if the enquiry is related to a project
     if (data.relatedActivityId) {
-      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
 
       const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
         (x) => x.contactId != currentContact[0].contactId
@@ -160,7 +158,7 @@ export const searchEnquiriesController = async (
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
       },
-      req.currentContext.initiative as Initiative
+      req.currentContext.initiative!
     );
   });
 
