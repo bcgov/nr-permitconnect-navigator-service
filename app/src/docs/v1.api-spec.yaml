@@ -627,14 +627,6 @@ paths:
             description: The Enquiry IDs to filter on
             items:
               $ref: '#/components/parameters/Path-EnquiryId'
-        - in: query
-          name: intakeStatus
-          required: false
-          schema:
-            type: array
-            description: The intake statuses to filter on
-            items:
-              $ref: '#/components/parameters/IntakeStatus'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -1572,14 +1564,6 @@ paths:
             description: The Enquiry IDs to filter on
             items:
               $ref: '#/components/parameters/Path-EnquiryId'
-        - in: query
-          name: intakeStatus
-          required: false
-          schema:
-            type: array
-            description: The intake statuses to filter on
-            items:
-              $ref: '#/components/parameters/IntakeStatus'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -2088,14 +2072,6 @@ paths:
             items:
               $ref: '#/components/parameters/Path-HousingProjectId'
         - in: query
-          name: intakeStatus
-          required: false
-          schema:
-            type: array
-            description: The intake statuses to filter on
-            items:
-              $ref: '#/components/parameters/IntakeStatus'
-        - in: query
           name: submissionType
           required: false
           schema:
@@ -2272,14 +2248,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
 components:
   parameters:
-    IntakeStatus:
-      in: path
-      name: intakeStatus
-      description: The intake status type of a submission
-      required: true
-      schema:
-        type: string
-        example: Assigned
     Path-AccessRequestId:
       in: path
       name: accessRequestId
@@ -2554,10 +2522,6 @@ components:
           description: Date it was submitted
           format: date-time
           example: '2024-04-03T00:57:09.070Z'
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
         applicationStatus:
           type: string
           description: Status of the application
@@ -2799,10 +2763,6 @@ components:
           type: boolean
           description: Updated by aai
           example: false
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
         applicationStatus:
           type: string
           description: Status of the application
@@ -3702,10 +3662,6 @@ components:
           type: string
           description: Who made the housing project
           example: JSMITH
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
         applicationStatus:
           type: string
           description: Status of the application
@@ -3719,7 +3675,6 @@ components:
       type: object
       required:
         - activityId
-        - intakeStatus
         - includeUser
         - housingProjectId
         - submissionType
@@ -3728,10 +3683,6 @@ components:
           type: string
           description: ID of the activity
           example: 2DE67F13
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Assigned
         includeUser:
           type: string
           description: If set it retrieves only this user's housing projects
@@ -3954,10 +3905,6 @@ components:
           description: Notes from AST
           example: AST notes here
           maxLength: 4000
-        intakeStatus:
-          type: string
-          description: Intake status type
-          example: Submitted
         assignedUserId:
           type: string
           description: User ID assigned to the housing project
@@ -3967,11 +3914,6 @@ components:
           type: string
           description: Status of the application
           example: New
-        waitingOn:
-          type: string
-          description: Any dependencies or things waiting on
-          example: Waiting on review
-          maxLength: 255
     Response-BadRequest:
       title: Response Bad Request
       type: object
@@ -4461,9 +4403,6 @@ components:
           type: number
           example: 0
         state_completed:
-          type: number
-          example: 0
-        waiting_on:
           type: number
           example: 0
         queue_1:

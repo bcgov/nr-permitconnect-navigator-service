@@ -9,7 +9,6 @@ export type IProject = {
   activityId: string;
   submittedAt: string;
   assignedUserId?: string;
-  intakeStatus: string;
   applicationStatus: ApplicationStatus;
 
   companyIdRegistered: string;

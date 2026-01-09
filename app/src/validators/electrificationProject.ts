@@ -5,9 +5,8 @@ import { email, uuidv4 } from './common';
 import { contactSchema } from './contact';
 import { validate } from '../middleware/validation';
 import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectType } from '../utils/enums/electrification';
-import { IntakeStatus } from '../utils/enums/projectCommon';
 import { YES_NO_LIST } from '../utils/constants/application';
 
 const electrificationIntake = {
@@ -74,7 +73,6 @@ const schema = {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
-      intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
       projectType: Joi.array().items(...electrificationProjectTypeCodes),
@@ -90,11 +88,7 @@ const schema = {
         projectCategory: Joi.string()
           .valid(...electrificationProjectCategoryCodes)
           .allow(null),
-        assignedUserId: Joi.when('intakeStatus', {
-          is: IntakeStatus.SUBMITTED,
-          then: uuidv4,
-          otherwise: uuidv4.allow(null)
-        }),
+        assignedUserId: uuidv4.allow(null),
         hasEpa: Joi.string()
           .valid(...YES_NO_LIST)
           .allow(null),

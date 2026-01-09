@@ -547,7 +547,6 @@ describe('getHousingProjectStatisticsController', () => {
         supported_indigenous: 0,
         supported_non_profit: 0,
         supported_housing_coop: 0,
-        waiting_on: 0,
         queue_1: 0,
         queue_2: 0,
         queue_3: 0,

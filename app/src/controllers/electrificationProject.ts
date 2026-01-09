@@ -23,13 +23,7 @@ import {
   updateElectrificationProject
 } from '../services/electrificationProject';
 import { Initiative } from '../utils/enums/application';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  DraftCode,
-  IntakeStatus,
-  SubmissionType
-} from '../utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon';
 import { isTruthy } from '../utils/utils';
 
 import type { Request, Response } from 'express';
@@ -71,7 +65,6 @@ const generateElectrificationProjectData = async (
     activityId: activityId,
     submittedAt: new Date(),
     submissionType: SubmissionType.GUIDANCE,
-    intakeStatus: IntakeStatus.SUBMITTED,
     applicationStatus: ApplicationStatus.NEW,
     aaiUpdated: false,
     addedToAts: false,

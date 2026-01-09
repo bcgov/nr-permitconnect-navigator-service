@@ -37,13 +37,6 @@ export enum DraftCode {
   HOUSING_PROJECT = 'HOUSING_PROJECT'
 }
 
-export enum IntakeStatus {
-  SUBMITTED = 'Submitted',
-  ASSIGNED = 'Assigned',
-  COMPLETED = 'Completed',
-  DRAFT = 'Draft'
-}
-
 export enum NoteType {
   GENERAL = 'General',
   BRING_FORWARD = 'Bring forward',
