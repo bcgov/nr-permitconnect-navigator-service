@@ -49,7 +49,6 @@ const testSubmission: HousingProject = {
   hasRelatedEnquiry: false,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Company Inc.',
-  isDevelopedInBc: 'Yes',
   projectName: 'Test Project',
   projectDescription: 'Test Description',
   projectLocationDescription: 'Location Description',

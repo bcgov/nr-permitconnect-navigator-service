@@ -208,7 +208,6 @@ function initializeFormValues(project: HousingProject) {
     project: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      isDevelopedInBc: project.isDevelopedInBc,
       projectName: project.projectName
     },
 
@@ -415,6 +414,7 @@ const onSubmit = async (values: any) => {
         addedToAts: values.addedToAts,
         ltsaCompleted: values.ltsaCompleted,
         bcOnlineCompleted: values.bcOnlineCompleted,
+        companyIdRegistered: values.project?.companyIdRegistered ?? null,
         submittedAt: values.submittedAt,
         consentToFeedback: values.consentToFeedback === BasicResponse.YES,
         naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
@@ -545,14 +545,7 @@ onBeforeMount(async () => {
               </h3>
             </div>
           </template>
-          <div class="grid grid-cols-2 gap-x-6 gap-y-6">
-            <Select
-              name="project.isDevelopedInBc"
-              :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
-              :disabled="!editable"
-              :options="YES_NO_LIST"
-              @on-change="setFieldValue('project.companyIdRegistered', null)"
-            />
+          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
             <InputText
               name="project.projectName"
               :label="t('i.housing.project.projectForm.projectNameLabel')"
@@ -560,7 +553,6 @@ onBeforeMount(async () => {
               @on-input="emitProjectNameChange"
             />
             <AutoComplete
-              v-if="values.project.isDevelopedInBc === BasicResponse.YES"
               name="project.companyNameRegistered"
               :label="t('i.housing.project.projectForm.companyLabel')"
               :bold="true"
@@ -569,6 +561,7 @@ onBeforeMount(async () => {
               :placeholder="t('i.common.projectForm.searchBCRegistered')"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
               :suggestions="orgBookOptions"
+              @on-change="setFieldValue('project.companyIdRegistered', null)"
               @on-complete="onRegisteredNameInput"
               @on-select="
                 (orgBookOption: OrgBookOption) => {
@@ -578,23 +571,6 @@ onBeforeMount(async () => {
               "
             />
             <InputText
-              v-else
-              name="project.companyNameRegistered"
-              :label="t('i.housing.project.projectForm.companyLabel')"
-              :disabled="!editable"
-              @on-change="
-                (e) => {
-                  setFieldValue('project.companyIdRegistered', null);
-                  if (!e.target.value) {
-                    setFieldValue('project.companyNameRegistered', null);
-                    setFieldValue('project.isDevelopedInBc', null);
-                  }
-                }
-              "
-            />
-
-            <InputText
-              v-if="values.project.isDevelopedInBc === BasicResponse.YES"
               name="project.companyIdRegistered"
               :label="t('i.common.projectForm.bcRegistryId')"
               :disabled="true"
