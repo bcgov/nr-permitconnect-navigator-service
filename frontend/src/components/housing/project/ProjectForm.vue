@@ -28,7 +28,15 @@ import {
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, externalApiService, housingProjectService, mapService, userService } from '@/services';
+import {
+  activityContactService,
+  atsService,
+  contactService,
+  externalApiService,
+  housingProjectService,
+  mapService,
+  userService
+} from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -47,7 +55,7 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
@@ -168,19 +176,21 @@ const getAssigneeOptionLabel = (e: User) => {
 };
 
 function initializeFormValues(project: HousingProject) {
-  const firstContact = project?.activity?.activityContact?.[0]?.contact;
+  const primaryContact = project?.activity?.activityContact?.find(
+    (x) => x.role === ActivityContactRole.PRIMARY
+  )?.contact;
 
   return {
     consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {
-      contactId: firstContact?.contactId,
-      firstName: firstContact?.firstName,
-      lastName: firstContact?.lastName,
-      phoneNumber: firstContact?.phoneNumber,
-      email: firstContact?.email,
-      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-      contactPreference: firstContact?.contactPreference,
-      userId: firstContact?.userId
+      contactId: primaryContact?.contactId,
+      firstName: primaryContact?.firstName,
+      lastName: primaryContact?.lastName,
+      phoneNumber: primaryContact?.phoneNumber,
+      email: primaryContact?.email,
+      contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
+      contactPreference: primaryContact?.contactPreference,
+      userId: primaryContact?.userId
     },
     finance: {
       financiallySupportedBc: project.financiallySupportedBc,
@@ -420,21 +430,13 @@ const onSubmit = async (values: any) => {
         naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
         assignedUserId: values.submissionState.assignedUser?.userId ?? undefined
       }),
-      [
-        'contactId',
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactUserId',
-        'assignedUser',
-        'submissionState',
-        'locationAddress',
-        'relatedEnquiries'
-      ]
+      ['contact', 'assignedUser', 'submissionState', 'locationAddress', 'relatedEnquiries']
     );
+
+    // Get the current primary contact from the prop
+    const primaryContact = project?.activity?.activityContact?.find(
+      (x) => x.role === ActivityContactRole.PRIMARY
+    )?.contact;
 
     // Update project
     const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
@@ -448,6 +450,22 @@ const onSubmit = async (values: any) => {
         ...initializeFormValues(result.data)
       }
     });
+
+    // Deal with Nav contact change nonsense
+    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
+    if (primaryContact?.contactId !== values.contact.contactId) {
+      const newContact = (await contactService.updateContact(values.contact)).data;
+      if (newContact.contactId) {
+        const ac = await activityContactService.createActivityContact(
+          result.data.activityId,
+          newContact.contactId,
+          ActivityContactRole.PRIMARY
+        );
+
+        setBasicInfo(newContact);
+        projectStore.addActivityContact(ac.data);
+      }
+    }
 
     toast.success(t('i.common.form.savedMessage'));
   } catch (e: any) {
