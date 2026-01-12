@@ -9,7 +9,7 @@ import { getInitiative } from '../services/initiative.ts';
 import { createUser, readUser } from '../services/user.ts';
 import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
-import { AccessRequestStatus, GroupName, IdentityProvider, Initiative } from '../utils/enums/application.ts';
+import { AccessRequestStatus, GroupName, IdentityProvider } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';

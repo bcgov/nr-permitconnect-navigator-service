@@ -63,7 +63,7 @@ export type IdentityProvider = IdentityProviderBase;
 
 const initiativeBase = Prisma.validator<Prisma.initiativeDefaultArgs>()({});
 export type InitiativeBase = Prisma.initiativeGetPayload<typeof initiativeBase>;
-export type Initiative = InitiativeBase;
+export type Initiative = InitiativeBase & { permitTypeInitiativeXrefBase?: PermitTypeInitiativeXref };
 
 const noteBase = Prisma.validator<Prisma.noteDefaultArgs>()({});
 export type NoteBase = Prisma.noteGetPayload<typeof noteBase>;
@@ -102,6 +102,13 @@ export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSys
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;
 export type PermitType = PermitTypeBase;
+
+const permitTypeInitiativeXrefBase = Prisma.validator<Prisma.permit_type_initiative_xrefDefaultArgs>()({});
+export type PermitTypeInitiativeXrefBase = Prisma.permit_typeGetPayload<typeof permitTypeInitiativeXrefBase>;
+export type PermitTypeInitiativeXref = PermitTypeInitiativeXrefBase & {
+  permitType?: PermitType;
+  initiative?: Initiative;
+};
 
 const sourceSystemCodeBase = Prisma.validator<Prisma.source_system_codeDefaultArgs>()({});
 export type SourceSystemCodeBase = Prisma.source_system_codeGetPayload<typeof sourceSystemCodeBase>;

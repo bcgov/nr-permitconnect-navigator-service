@@ -8,7 +8,7 @@ export async function seed(knex: Knex): Promise<void> {
     })
     .select('initiative_id');
 
-  const developer_group_id = await knex('yars.group')
+  const developer_group_id: { group_id: number }[] = await knex('yars.group')
     .where({ initiative_id: pcns_id, name: GroupName.DEVELOPER })
     .select('group_id');
 
@@ -27,8 +27,7 @@ export async function seed(knex: Knex): Promise<void> {
     identities.map((x) => x.sub)
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const filtered = identities.filter((x) => !exists.some((y: any) => y.sub === x.sub));
+  const filtered = identities.filter((x) => !exists.some((y: { sub: string; group_id: number }) => y.sub === x.sub));
 
   // Inserts missing seed entries
   if (filtered.length > 0) {

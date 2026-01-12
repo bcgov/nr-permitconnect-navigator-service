@@ -72,7 +72,8 @@ describe('getPeachSummaryController', () => {
     expect(summarizeSpy).toHaveBeenCalledWith(TEST_PEACH_RECORD_1);
     expect(res.status).toHaveBeenCalledWith(200);
 
-    const payload = (res.json as jest.Mock).mock.calls[0][0];
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
+    const payload = res.json!.mock.calls[0][0];
     expect(payload).toEqual(TEST_PEACH_SUMMARY);
   });
 

@@ -61,7 +61,7 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
-        const policies = await knex
+        const policies: { policy_id: number; resource_name: string; action_name: Action }[] = await knex
           .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
           .from({ p: 'yars.policy' })
           .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
@@ -70,10 +70,10 @@ export async function up(knex: Knex): Promise<void> {
         const items: { role_id: number; policy_id: number }[] = [];
 
         const addRolePolicies = async (resourceName: string) => {
-          const viewerId = await knex('yars.role')
+          const viewerId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
             .select('role_id');
-          const editorId = await knex('yars.role')
+          const editorId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_EDITOR` })
             .select('role_id');
 
@@ -81,11 +81,11 @@ export async function up(knex: Knex): Promise<void> {
           items.push(
             {
               role_id: viewerId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ)!.policy_id
             },
             {
               role_id: editorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE)!.policy_id
             }
           );
         };
@@ -135,35 +135,44 @@ export async function up(knex: Knex): Promise<void> {
 
       // Update policies
       .then(async () => {
-        const pcns_id = await knex('initiative')
+        const pcns_id: { initiative_id: string }[] = await knex('initiative')
           .where({
             code: Initiative.PCNS
           })
           .select('initiative_id');
 
-        const pcns_navigator_group_id = await knex('yars.group')
+        const pcns_navigator_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const pcns_navigator_read_group_id = await knex('yars.group')
+        const pcns_navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const pcns_supervisor_group_id = await knex('yars.group')
+        const pcns_supervisor_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const pcns_admin_group_id = await knex('yars.group')
+        const pcns_admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const pcns_proponent_group_id = await knex('yars.group')
+        const pcns_proponent_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.PROPONENT })
           .select('group_id');
 
         // Get all necessary data
         // Filterable by group_name
-        const data = await knex
+        interface SqlResponse {
+          group_id: number;
+          role_id: number;
+          initiative_code: string;
+          group_name: GroupName;
+          role_name: string;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const data: SqlResponse[] = await knex
           .raw(
             `SELECT
           "group".group_id,
@@ -183,22 +192,21 @@ export async function up(knex: Knex): Promise<void> {
           resource.name in ('ATS', 'CONTACT', 'REPORTING', 'SSO', 'USER')`
           )
           .then((res) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
             return res.rows;
           });
 
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        const navigator = data.filter((x: any) => x.group_name === GroupName.NAVIGATOR);
-        const navigator_read = data.filter((x: any) => x.group_name === GroupName.NAVIGATOR_READ_ONLY);
-        const supervisor = data.filter((x: any) => x.group_name === GroupName.SUPERVISOR);
-        const admin = data.filter((x: any) => x.group_name === GroupName.ADMIN);
-        const proponent = data.filter((x: any) => x.group_name === GroupName.PROPONENT);
-        /* eslint-enable @typescript-eslint/no-explicit-any */
+        const navigator = data.filter((x) => x.group_name === GroupName.NAVIGATOR);
+        const navigator_read = data.filter((x) => x.group_name === GroupName.NAVIGATOR_READ_ONLY);
+        const supervisor = data.filter((x) => x.group_name === GroupName.SUPERVISOR);
+        const admin = data.filter((x) => x.group_name === GroupName.ADMIN);
+        const proponent = data.filter((x) => x.group_name === GroupName.PROPONENT);
 
         await knex('yars.group_role')
           .where({ group_id: navigator[0].group_id })
           .whereIn(
             'role_id',
-            navigator.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            navigator.map((x) => x.role_id)
           )
           .update({
             group_id: pcns_navigator_group_id[0].group_id
@@ -208,7 +216,7 @@ export async function up(knex: Knex): Promise<void> {
           .where({ group_id: navigator_read[0].group_id })
           .whereIn(
             'role_id',
-            navigator_read.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            navigator_read.map((x) => x.role_id)
           )
           .update({
             group_id: pcns_navigator_read_group_id[0].group_id
@@ -218,7 +226,7 @@ export async function up(knex: Knex): Promise<void> {
           .where({ group_id: supervisor[0].group_id })
           .whereIn(
             'role_id',
-            supervisor.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            supervisor.map((x) => x.role_id)
           )
           .update({
             group_id: pcns_supervisor_group_id[0].group_id
@@ -228,7 +236,7 @@ export async function up(knex: Knex): Promise<void> {
           .where({ group_id: admin[0].group_id })
           .whereIn(
             'role_id',
-            admin.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            admin.map((x) => x.role_id)
           )
           .update({
             group_id: pcns_admin_group_id[0].group_id
@@ -238,7 +246,7 @@ export async function up(knex: Knex): Promise<void> {
           .where({ group_id: proponent[0].group_id })
           .whereIn(
             'role_id',
-            proponent.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            proponent.map((x) => x.role_id)
           )
           .update({
             group_id: pcns_proponent_group_id[0].group_id
@@ -246,41 +254,41 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .then(async () => {
-        const pcns_id = await knex('initiative')
+        const pcns_id: { initiative_id: string }[] = await knex('initiative')
           .where({
             code: Initiative.PCNS
           })
           .select('initiative_id');
 
-        const pcns_supervisor_group_id = await knex('yars.group')
+        const pcns_supervisor_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const pcns_admin_group_id = await knex('yars.group')
+        const pcns_admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: pcns_id[0].initiative_id, name: GroupName.ADMIN })
           .select('group_id');
         const items: { group_id: number; role_id: number }[] = [];
 
         const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Action[]) => {
           if (actionNames.includes(Action.READ)) {
+            const read_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_VIEWER` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_VIEWER` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: read_role_id[0].role_id
             });
           }
 
           if (actionNames.includes(Action.DELETE)) {
+            const update_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_EDITOR` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_EDITOR` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: update_role_id[0].role_id
             });
           }
         };
@@ -302,35 +310,44 @@ export async function down(knex: Knex): Promise<void> {
     Promise.resolve()
       // Revert policies
       .then(async () => {
-        const housing_id = await knex('initiative')
+        const housing_id: { initiative_id: string }[] = await knex('initiative')
           .where({
             code: Initiative.HOUSING
           })
           .select('initiative_id');
 
-        const housing_navigator_group_id = await knex('yars.group')
+        const housing_navigator_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const housing_navigator_read_group_id = await knex('yars.group')
+        const housing_navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const housing_supervisor_group_id = await knex('yars.group')
+        const housing_supervisor_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const housing_admin_group_id = await knex('yars.group')
+        const housing_admin_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const housing_proponent_group_id = await knex('yars.group')
+        const housing_proponent_group_id: { group_id: number }[] = await knex('yars.group')
           .where({ initiative_id: housing_id[0].initiative_id, name: GroupName.PROPONENT })
           .select('group_id');
 
         // Get all necessary data
         // Filterable by group_name
-        const data = await knex
+        interface SqlResponse {
+          group_id: number;
+          role_id: number;
+          initiative_code: string;
+          group_name: GroupName;
+          role_name: string;
+        }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const data: SqlResponse[] = await knex
           .raw(
             `SELECT
           "group".group_id,
@@ -350,22 +367,21 @@ export async function down(knex: Knex): Promise<void> {
           resource.name in ('ATS', 'CONTACT', 'REPORTING', 'SSO', 'USER')`
           )
           .then((res) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
             return res.rows;
           });
 
-        /* eslint-disable @typescript-eslint/no-explicit-any */
-        const navigator = data.filter((x: any) => x.group_name === GroupName.NAVIGATOR);
-        const navigator_read = data.filter((x: any) => x.group_name === GroupName.NAVIGATOR_READ_ONLY);
-        const supervisor = data.filter((x: any) => x.group_name === GroupName.SUPERVISOR);
-        const admin = data.filter((x: any) => x.group_name === GroupName.ADMIN);
-        const proponent = data.filter((x: any) => x.group_name === GroupName.PROPONENT);
-        /* eslint-enable @typescript-eslint/no-explicit-any */
+        const navigator = data.filter((x) => x.group_name === GroupName.NAVIGATOR);
+        const navigator_read = data.filter((x) => x.group_name === GroupName.NAVIGATOR_READ_ONLY);
+        const supervisor = data.filter((x) => x.group_name === GroupName.SUPERVISOR);
+        const admin = data.filter((x) => x.group_name === GroupName.ADMIN);
+        const proponent = data.filter((x) => x.group_name === GroupName.PROPONENT);
 
         await knex('yars.group_role')
           .where({ group_id: navigator[0].group_id })
           .whereIn(
             'role_id',
-            navigator.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            navigator.map((x) => x.role_id)
           )
           .update({
             group_id: housing_navigator_group_id[0].group_id
@@ -375,7 +391,7 @@ export async function down(knex: Knex): Promise<void> {
           .where({ group_id: navigator_read[0].group_id })
           .whereIn(
             'role_id',
-            navigator_read.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            navigator_read.map((x) => x.role_id)
           )
           .update({
             group_id: housing_navigator_read_group_id[0].group_id
@@ -385,7 +401,7 @@ export async function down(knex: Knex): Promise<void> {
           .where({ group_id: supervisor[0].group_id })
           .whereIn(
             'role_id',
-            supervisor.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            supervisor.map((x) => x.role_id)
           )
           .update({
             group_id: housing_supervisor_group_id[0].group_id
@@ -395,7 +411,7 @@ export async function down(knex: Knex): Promise<void> {
           .where({ group_id: admin[0].group_id })
           .whereIn(
             'role_id',
-            admin.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            admin.map((x) => x.role_id)
           )
           .update({
             group_id: housing_admin_group_id[0].group_id
@@ -405,7 +421,7 @@ export async function down(knex: Knex): Promise<void> {
           .where({ group_id: proponent[0].group_id })
           .whereIn(
             'role_id',
-            proponent.map((x: any) => x.role_id) // eslint-disable-line @typescript-eslint/no-explicit-any
+            proponent.map((x) => x.role_id)
           )
           .update({
             group_id: housing_proponent_group_id[0].group_id
@@ -419,7 +435,7 @@ export async function down(knex: Knex): Promise<void> {
             code: Initiative.PCNS
           })
           .select('initiative_id')
-          .first();
+          .first<{ initiative_id: string }>();
 
         if (pcns_id) {
           await knex('yars.group').where({ initiative_id: pcns_id.initiative_id, name: GroupName.ADMIN }).del();
@@ -434,10 +450,10 @@ export async function down(knex: Knex): Promise<void> {
 
       // Remove group to role mappings for YARS
       .then(async () => {
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.YARS}_VIEWER` })
           .select('role_id');
-        const editorRole = await knex('yars.role')
+        const editorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.YARS}_EDITOR` })
           .select('role_id');
         if (viewerRole && viewerRole.length > 0) {
@@ -450,10 +466,10 @@ export async function down(knex: Knex): Promise<void> {
 
       // Remove role to policy mappings for YARS
       .then(async () => {
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.YARS}_VIEWER` })
           .select('role_id');
-        const editorRole = await knex('yars.role')
+        const editorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.YARS}_EDITOR` })
           .select('role_id');
         if (viewerRole && viewerRole.length > 0) {
@@ -476,7 +492,10 @@ export async function down(knex: Knex): Promise<void> {
 
       // Remove the YARS policies
       .then(async () => {
-        const resourceRow = await knex('yars.resource').where({ name: Resource.YARS }).select('resource_id').first();
+        const resourceRow = await knex('yars.resource')
+          .where({ name: Resource.YARS })
+          .select('resource_id')
+          .first<{ resource_id: number }>();
         if (resourceRow) {
           return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
         }

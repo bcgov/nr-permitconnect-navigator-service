@@ -47,6 +47,10 @@ import type {
 
 /**
  * Handles creating a project from intake data
+ * @param tx Prisma transaction client
+ * @param data Electrification project data
+ * @param currentContext context data of current request
+ * @returns Maniplated electrification data
  */
 const generateElectrificationProjectData = async (
   tx: PrismaTransactionClient,
@@ -59,7 +63,7 @@ const generateElectrificationProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
       ?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -96,6 +100,8 @@ const generateElectrificationProjectData = async (
 
 /**
  * Send an email with the confirmation of electrification project
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const emailElectrificationProjectConfirmationController = async (
   req: Request<never, never, Email>,
@@ -117,11 +123,9 @@ export const createElectrificationProjectController = async (
   res: Response
 ) => {
   // Provide an empty body if POST body is given undefined
-  if (req.body === undefined) {
-    req.body = {
-      project: {}
-    } as ElectrificationProjectIntake;
-  }
+  req.body ??= {
+    project: {}
+  } as ElectrificationProjectIntake;
 
   const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
     const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);

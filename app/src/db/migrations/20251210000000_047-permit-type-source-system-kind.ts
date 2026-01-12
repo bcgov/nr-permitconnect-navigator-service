@@ -152,17 +152,17 @@ export async function up(knex: Knex): Promise<void> {
       // Populate permit_type_source_system_kind_xref table
       .then(async () => {
         for (const ptsk of permitTypeSystemsKinds) {
-          const permitTypes = await knex
-            .select('permit_type_id')
+          const permitTypes: { permit_type_id: number }[] = await knex
             .from('permit_type')
-            .whereIn('name', ptsk.permitTypeName);
+            .whereIn('name', ptsk.permitTypeName)
+            .select('permit_type_id');
 
           for (const sk of ptsk.systemsKinds) {
-            const sourceSystemKinds = await knex
-              .select('source_system_kind_id')
+            const sourceSystemKinds: { source_system_kind_id: number }[] = await knex
               .from('source_system_kind')
               .whereIn('description', sk.sourceSystemKind)
-              .andWhere('source_system', sk.sourceSystem);
+              .andWhere('source_system', sk.sourceSystem)
+              .select('source_system_kind_id');
 
             const items = [];
             for (const pt of permitTypes) {

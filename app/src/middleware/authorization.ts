@@ -32,7 +32,7 @@ import type { CurrentAuthorization } from '../types/index.ts';
  * @param  resource a resource name
  * @param action an action name
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const hasAuthorization = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -50,8 +50,11 @@ export const hasAuthorization = (resource: string, action: string) => {
             throw new Error('Invalid user');
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const sub = (req.currentContext?.tokenPayload as any).sub;
+          const sub = req.currentContext?.tokenPayload?.sub;
+
+          if (!sub) {
+            throw new Error('No subject');
+          }
 
           const groups = await getSubjectGroups(tx, sub);
 
@@ -73,13 +76,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             } else {
               policyDetails = await Promise.all(
                 groups.map((x) => {
-                  return getGroupPolicyDetails(
-                    tx,
-                    x.groupId,
-                    resource,
-                    action,
-                    req.currentContext?.initiative as Initiative
-                  );
+                  return getGroupPolicyDetails(tx, x.groupId, resource, action, req.currentContext?.initiative);
                 })
               ).then((x) => x.flat());
             }
@@ -91,7 +88,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             // Inject policy attributes at global level and matching users groups
             const policyAttributes = await Promise.all(
               policyDetails.map((x) => {
-                return getPolicyAttributes(tx, x.policyId as number);
+                return getPolicyAttributes(tx, x.policyId!);
               })
             ).then((x) => x.flat());
 
@@ -118,9 +115,12 @@ export const hasAuthorization = (resource: string, action: string) => {
           throw new Error('No current user');
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    } catch (error) {
+      if (error instanceof Error) {
+        return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+      } else if (typeof error === 'string') {
+        return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+      } else return next(new Problem(403, { instance: req.originalUrl }));
     }
 
     // Continue middleware
@@ -147,7 +147,7 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
  * Ensure that the current user contact is part of the activity contact list
  * @param param A route parameter string, typically a GUID
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -156,14 +156,16 @@ export const hasAccess = (param: string) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
 
-          let data;
+          let data: unknown;
           if (param !== 'activityId') {
             const func = paramMap.get(param);
             if (func) data = await func(tx, id);
           }
 
-          const activityId = data?.activityId ?? id;
-          const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+          // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          const activityId: string = data?.activityId ?? id;
+          const contact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
           const activityContacts = await listActivityContacts(tx, activityId);
 
           if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
@@ -171,9 +173,12 @@ export const hasAccess = (param: string) => {
           }
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    } catch (error) {
+      if (error instanceof Error) {
+        return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+      } else if (typeof error === 'string') {
+        return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+      } else return next(new Problem(403, { instance: req.originalUrl }));
     }
 
     // Continue middleware

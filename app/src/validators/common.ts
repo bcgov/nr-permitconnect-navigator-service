@@ -6,7 +6,7 @@ export const activityId = Joi.string().min(8).max(8).required();
 
 export const dateOnlyString = Joi.string()
   .pattern(new RegExp(Regex.DATE_ONLY))
-  .custom((value, helpers) => {
+  .custom((value: string | number | Date, helpers) => {
     const d = new Date(value);
     const canonical = d.toISOString().slice(0, 10);
     if (canonical !== value) {

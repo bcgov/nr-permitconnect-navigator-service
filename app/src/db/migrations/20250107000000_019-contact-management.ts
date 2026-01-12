@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import type { Knex } from 'knex';
 
 import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';

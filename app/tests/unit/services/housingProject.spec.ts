@@ -65,7 +65,7 @@ describe('getHousingProjectStatistics', () => {
     });
 
     expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([{ ...FAKE_PROJECT, submittedAt: expect.any(String) }]);
+    expect(response).toStrictEqual([{ ...FAKE_PROJECT, submittedAt: expect.any(String) as string }]);
   });
 });
 

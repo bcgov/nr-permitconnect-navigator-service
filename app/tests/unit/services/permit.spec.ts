@@ -45,8 +45,9 @@ describe('getPermit', () => {
 describe('getPermitTypes', () => {
   it('calls initiative.findFirstOrThrow and returns result', async () => {
     prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce({
-      permitTypeInitiativeXref: [{ permitType: 'ABC' }]
-    } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      // @ts-expect-error Jest doesn't play nicely with Prisma includes
+      permitTypeInitiativeXref: [{ permitType: { permitTypeId: 'ABC' } }]
+    });
 
     const response = await permitService.getPermitTypes(prismaTxMock, Initiative.HOUSING);
 
@@ -75,7 +76,7 @@ describe('getPermitTypes', () => {
         }
       }
     });
-    expect(response).toStrictEqual(['ABC']);
+    expect(response).toStrictEqual([{ permitType: { permitTypeId: 'ABC' } }]);
   });
 });
 
@@ -113,10 +114,7 @@ describe('searchPermits', () => {
   it('calls permit.findMany with no filters or includes and returns result', async () => {
     prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
 
-    const response = await permitService.searchPermits(
-      prismaTxMock as any, // eslint-disable-line @typescript-eslint/no-explicit-any
-      {}
-    );
+    const response = await permitService.searchPermits(prismaTxMock, {});
 
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
@@ -142,7 +140,7 @@ describe('searchPermits', () => {
       includePermitTracking: true,
       includePermitType: true,
       onlyPeachIntegratedTrackings: true
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    };
 
     const response = await permitService.searchPermits(prismaTxMock, params);
 
@@ -199,7 +197,7 @@ describe('searchPermits', () => {
 
     const params = {
       includePermitTracking: true
-    } as any; // eslint-disable-line @typescript-eslint/no-explicit-any
+    };
 
     const response = await permitService.searchPermits(prismaTxMock, params);
 

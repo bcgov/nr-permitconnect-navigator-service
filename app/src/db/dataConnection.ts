@@ -7,12 +7,12 @@ import numericTransform from './extensions/numeric.ts';
 import projectIdTransform from './extensions/projectId.ts';
 
 const db = {
-  host: config.get('server.db.host'),
-  user: config.get('server.db.username'),
-  password: config.get('server.db.password'),
-  database: config.get('server.db.database'),
-  port: config.get('server.db.port'),
-  poolMax: config.get('server.db.poolMax')
+  host: config.get<string>('server.db.host'),
+  user: config.get<string>('server.db.username'),
+  password: config.get<string>('server.db.password'),
+  database: config.get<string>('server.db.database'),
+  port: config.get<string>('server.db.port'),
+  poolMax: config.get<string>('server.db.poolMax')
 };
 
 const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;

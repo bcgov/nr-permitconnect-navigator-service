@@ -5,16 +5,17 @@ import { parse } from 'path';
 import { createLogger, format, transports } from 'winston';
 import Transport from 'winston-transport';
 
+import type { Request, Response } from 'express';
 import type { Logger } from 'winston';
 
 /**
  * Class representing a winston transport writing to null
- * @extends Transport
+ * Typically only used in test environments
  */
 export class NullTransport extends Transport {
   /**
    * Constructor
-   * @param {object} opts Winston Transport options
+   * @param opts Winston Transport options
    */
   constructor(opts: object) {
     super(opts);
@@ -22,8 +23,8 @@ export class NullTransport extends Transport {
 
   /**
    * The transport logger
-   * @param {object} _info Object to log
-   * @param {function} callback Callback function
+   * @param _info Object to log
+   * @param callback Callback function
    */
   log(_info: object, callback: () => void) {
     callback();
@@ -61,23 +62,22 @@ if (config.has('server.logFile')) {
 
 /**
  * Returns a Winston Logger or Child Winston Logger
- * @param {string} [filename] Optional module filename path to annotate logs with
- * @returns {object} A child logger with appropriate metadata if `filename` is defined.
+ * @param filename Optional module filename path to annotate logs with
+ * @returns A child logger with appropriate metadata if `filename` is defined.
  * Otherwise returns a standard logger.
  */
-export const getLogger = (filename: string | undefined): Logger => {
+export function getLogger(filename?: string): Logger {
   return filename ? log.child({ component: parse(filename).name }) : log;
-};
+}
 
 /**
  * Returns an express-winston middleware function for http logging
- * @returns {function} An express-winston middleware function
+ * @returns An express-winston middleware function
  */
 export const httpLogger = logger({
   colorize: false,
   // Parses express information to insert into log output
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  dynamicMeta: (req, res: any) => {
+  dynamicMeta: (req: Request, res: Response & { responseTime?: number }) => {
     // const token = jwt.decode((req.get('authorization') || '').slice(7));
     return {
       // azp: token && token.azp || undefined,
