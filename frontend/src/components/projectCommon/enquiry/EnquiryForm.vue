@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, inject, onBeforeMount, ref } from 'vue';
+import { computed, inject, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { boolean, mixed, object, string } from 'yup';
 
@@ -37,15 +37,7 @@ import { emailValidator } from '@/validators/common';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type {
-  ActivityContact,
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
-  Contact,
-  Enquiry,
-  User
-} from '@/types';
+import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, Enquiry, User } from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -75,8 +67,11 @@ const basicInfoManualEntry: Ref<boolean> = ref(false);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const filteredProjectActivityIds: Ref<Array<string>> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const projectActivityIds: Ref<Array<string>> = ref([]);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
+const primaryContact = computed(
+  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
+const projectActivityIds: Ref<Array<string>> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -283,14 +278,9 @@ const onSubmit = async (values: any) => {
     const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
     submitData.assignedUserId = values.user?.userId ?? undefined;
 
-    // Get the current primary contact from the result
-    let primaryContact = enquiry?.activity?.activityContact?.find(
-      (x) => x.role === ActivityContactRole.PRIMARY
-    )?.contact;
-
     // Deal with Nav contact change nonsense
     // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact?.contactId !== values.contact.contactId) {
+    if (primaryContact.value?.contactId !== values.contact.contactId) {
       const newContact = (await contactService.updateContact(values.contact)).data;
       if (newContact.contactId) {
         await activityContactService.createActivityContact(
@@ -307,10 +297,8 @@ const onSubmit = async (values: any) => {
     const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
     enquiryStore.setEnquiry(result.data);
 
-    // TODO: Create one function for creating initial values and reset values
-    primaryContact = result.data?.activity?.activityContact?.find(
-      (x: ActivityContact) => x.role === ActivityContactRole.PRIMARY
-    )?.contact;
+    // Wait a tick for store to propagate
+    await nextTick();
 
     let atsClientId;
     if (submitData?.relatedActivityId) atsClientId = await getRelatedATSClientID(submitData?.relatedActivityId);
@@ -319,14 +307,14 @@ const onSubmit = async (values: any) => {
       values: {
         ...submitData,
         contact: {
-          contactId: primaryContact?.contactId,
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          userId: primaryContact?.userId
+          contactId: primaryContact.value?.contactId,
+          firstName: primaryContact.value?.firstName,
+          lastName: primaryContact.value?.lastName,
+          phoneNumber: primaryContact.value?.phoneNumber,
+          email: primaryContact.value?.email,
+          contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
+          contactPreference: primaryContact.value?.contactPreference,
+          userId: primaryContact.value?.userId
         },
         atsClientId: values.atsClientId || atsClientId,
         atsEnquiryId: values.atsEnquiryId,
@@ -350,10 +338,6 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }
 
-  const primaryContact = enquiry?.activity?.activityContact?.find(
-    (x) => x.role === ActivityContactRole.PRIMARY
-  )?.contact;
-
   let atsClientId;
   if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
 
@@ -368,14 +352,14 @@ onBeforeMount(async () => {
     submittedMethod: enquiry?.submittedMethod,
     enquiryDescription: enquiry?.enquiryDescription,
     contact: {
-      contactId: primaryContact?.contactId,
-      firstName: primaryContact?.firstName,
-      lastName: primaryContact?.lastName,
-      phoneNumber: primaryContact?.phoneNumber,
-      email: primaryContact?.email,
-      contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-      contactPreference: primaryContact?.contactPreference,
-      userId: primaryContact?.userId
+      contactId: primaryContact.value?.contactId,
+      firstName: primaryContact.value?.firstName,
+      lastName: primaryContact.value?.lastName,
+      phoneNumber: primaryContact.value?.phoneNumber,
+      email: primaryContact.value?.email,
+      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
+      contactPreference: primaryContact.value?.contactPreference,
+      userId: primaryContact.value?.userId
     },
 
     addedToAts: enquiry?.addedToAts,
@@ -557,7 +541,7 @@ async function createATSClientEnquiry() {
           :last-name="values.contact.lastName"
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
-          :related-enquiry="!!values.relatedActivityId"
+          :is-related-enquiry="!!values.relatedActivityId"
           @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsClientId', atsClientId)"
           @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('addedToAts', addedToATS)"
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"

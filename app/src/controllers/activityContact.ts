@@ -9,10 +9,10 @@ import {
   listActivityContacts,
   updateActivityContact
 } from '../services/activityContact';
-import { validatePrimaryChange } from '../services/helpers/activityContact';
 import { searchContacts } from '../services/contact';
 import { email } from '../services/email';
 import { searchEnquiries } from '../services/enquiry';
+import { verifyPrimaryChange } from '../services/helpers/activityContact';
 import { getProjectByActivityId } from '../services/project';
 import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
@@ -66,7 +66,7 @@ export const createActivityContactController = async (
 ) => {
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
     // Make any pre adjustments if the PRIMARY role is being given to another user
-    await validatePrimaryChange(
+    await verifyPrimaryChange(
       tx,
       req.currentAuthorization.attributes,
       req.currentContext.userId,
@@ -164,7 +164,7 @@ export const updateActivityContactController = async (
     if (ac.role === ActivityContactRole.PRIMARY) throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
 
     // Make any pre adjustments if the PRIMARY role is being given to another user
-    await validatePrimaryChange(
+    await verifyPrimaryChange(
       tx,
       req.currentAuthorization.attributes,
       req.currentContext.userId,

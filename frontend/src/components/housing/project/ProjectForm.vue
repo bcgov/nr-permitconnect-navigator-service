@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from './ProjectFormSchema';
@@ -105,6 +105,9 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
+const primaryContact = computed(
+  () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
@@ -176,21 +179,17 @@ const getAssigneeOptionLabel = (e: User) => {
 };
 
 function initializeFormValues(project: HousingProject) {
-  const primaryContact = project?.activity?.activityContact?.find(
-    (x) => x.role === ActivityContactRole.PRIMARY
-  )?.contact;
-
   return {
     consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {
-      contactId: primaryContact?.contactId,
-      firstName: primaryContact?.firstName,
-      lastName: primaryContact?.lastName,
-      phoneNumber: primaryContact?.phoneNumber,
-      email: primaryContact?.email,
-      contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-      contactPreference: primaryContact?.contactPreference,
-      userId: primaryContact?.userId
+      contactId: primaryContact.value?.contactId,
+      firstName: primaryContact.value?.firstName,
+      lastName: primaryContact.value?.lastName,
+      phoneNumber: primaryContact.value?.phoneNumber,
+      email: primaryContact.value?.email,
+      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
+      contactPreference: primaryContact.value?.contactPreference,
+      userId: primaryContact.value?.userId
     },
     finance: {
       financiallySupportedBc: project.financiallySupportedBc,
@@ -433,31 +432,13 @@ const onSubmit = async (values: any) => {
       ['contact', 'assignedUser', 'submissionState', 'locationAddress', 'relatedEnquiries']
     );
 
-    // Get the current primary contact from the prop
-    const primaryContact = project?.activity?.activityContact?.find(
-      (x) => x.role === ActivityContactRole.PRIMARY
-    )?.contact;
-
-    // Update project
-    const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
-
-    // Update store with returned data
-    projectStore.setProject(result.data);
-
-    // Reinitialize the form
-    formRef.value?.resetForm({
-      values: {
-        ...initializeFormValues(result.data)
-      }
-    });
-
     // Deal with Nav contact change nonsense
     // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact?.contactId !== values.contact.contactId) {
+    if (primaryContact.value?.contactId !== values.contact.contactId) {
       const newContact = (await contactService.updateContact(values.contact)).data;
       if (newContact.contactId) {
         const ac = await activityContactService.createActivityContact(
-          result.data.activityId,
+          project.activityId,
           newContact.contactId,
           ActivityContactRole.PRIMARY
         );
@@ -466,6 +447,20 @@ const onSubmit = async (values: any) => {
         projectStore.addActivityContact(ac.data);
       }
     }
+
+    // Update project
+    const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
+    projectStore.setProject(result.data);
+
+    // Wait a tick for store to propagate
+    await nextTick();
+
+    // Reinitialize the form
+    formRef.value?.resetForm({
+      values: {
+        ...initializeFormValues(result.data)
+      }
+    });
 
     toast.success(t('i.common.form.savedMessage'));
   } catch (e: any) {

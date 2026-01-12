@@ -32,7 +32,7 @@ const FAKE_MEMBER_ACTIVITY_CONTACT = {
 };
 const FAKE_PRIMARY_ACTIVITY_CONTACT = { ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 };
 
-const validatePrimaryChangeSpy = jest.spyOn(activityContactHelpers, 'validatePrimaryChange');
+const verifyPrimaryChangeSpy = jest.spyOn(activityContactHelpers, 'verifyPrimaryChange');
 
 let app: express.Express;
 
@@ -49,7 +49,7 @@ beforeEach(() => {
   mockedConfig = config as jest.MockedObjectDeep<typeof config>;
   mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
 
-  validatePrimaryChangeSpy.mockResolvedValue();
+  verifyPrimaryChangeSpy.mockResolvedValue();
 });
 
 afterEach(() => {
