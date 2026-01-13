@@ -20,7 +20,7 @@ import { enquiryService } from '@/services';
 import { useAppStore, useAuthZStore, useContactStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Resource } from '@/utils/enums/application';
-import { ApplicationStatus, IntakeStatus } from '@/utils/enums/projectCommon';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
@@ -310,7 +310,7 @@ function updateQueryParams() {
       style="min-width: 200px"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
     <Column

@@ -37,7 +37,6 @@ const testProject: ElectrificationProject = {
   projectId: 'proj123',
   activityId: 'activity123',
   submittedAt: new Date().toISOString(),
-  intakeStatus: 'Pending',
   applicationStatus: ApplicationStatus.IN_PROGRESS,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Test Co',

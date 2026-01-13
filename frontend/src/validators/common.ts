@@ -2,27 +2,15 @@ import { date, mixed, number, string } from 'yup';
 
 import { Regex } from '@/utils/enums/application';
 
-export const assignedToValidator = (when: string, is: any) =>
-  mixed()
-    .when(when, {
-      is: (val: typeof is) => val === is,
-      then: (schema) =>
-        schema
-          .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
-            if (typeof obj === 'object') return true;
-            if (typeof obj === 'string') {
-              return obj === null || obj === undefined || obj.length === 0;
-            }
-          })
-          .nullable(),
-      otherwise: (schema) =>
-        schema
-          .test('expect-user', 'Assigned to must be a selected user', (obj) => {
-            return typeof obj === 'object';
-          })
-          .required()
-    })
-    .label('Assigned to');
+export const assignedToValidator = mixed()
+  .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
+    if (typeof obj === 'object') return true;
+    if (typeof obj === 'string') {
+      return obj === null || obj === undefined || obj.length === 0;
+    }
+  })
+  .nullable()
+  .label('Assigned to');
 
 export const atsClientIdValidator = number().notRequired().min(0).integer().label('ATS Client #');
 

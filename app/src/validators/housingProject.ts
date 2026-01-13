@@ -11,9 +11,8 @@ import { permits } from './permits';
 import { validate } from '../middleware/validation';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { BasicResponse } from '../utils/enums/application';
-import { IntakeStatus } from '../utils/enums/projectCommon';
 
 const schema = {
   createHousingProject: {
@@ -69,7 +68,6 @@ const schema = {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
-      intakeStatus: Joi.array().items(...INTAKE_STATUS_LIST),
       includeUser: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
@@ -161,14 +159,8 @@ const schema = {
       bcOnlineCompleted: Joi.boolean().required(),
       aaiUpdated: Joi.boolean().required(),
       astNotes: Joi.string().allow(null).max(4000),
-      intakeStatus: Joi.string().valid(...INTAKE_STATUS_LIST),
-      assignedUserId: Joi.when('intakeStatus', {
-        is: IntakeStatus.SUBMITTED,
-        then: uuidv4,
-        otherwise: uuidv4.allow(null)
-      }),
-      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      waitingOn: Joi.string().allow(null).max(255)
+      assignedUserId: uuidv4.allow(null),
+      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
     }),
     params: Joi.object({
       housingProjectId: uuidv4.required()

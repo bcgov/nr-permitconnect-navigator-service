@@ -148,7 +148,6 @@ export const getElectrificationProjects = async (tx: PrismaTransactionClient): P
  * @param params.electrificationProjectId Optional array of uuids representing the electrification project ID
  * @param params.projectType Optional array of strings representing the electrification project type
  * @param params.projectCategory Optional array of strings representing the electrification project category
- * @param params.intakeStatus Optional array of strings representing the intake status
  * @param params.includeUser Optional boolean representing whether the linked user should be included
  * @returns A Promise that resolves to an array of electrification projects from search params
  */
@@ -173,9 +172,6 @@ export const searchElectrificationProjects = async (
         },
         {
           projectCategory: { in: params.projectCategory }
-        },
-        {
-          intakeStatus: { in: params.intakeStatus }
         }
       ]
     },

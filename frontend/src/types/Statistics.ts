@@ -15,7 +15,6 @@ export type Statistics = {
   supported_indigenous: number;
   supported_non_profit: number;
   supported_housing_coop: number;
-  waiting_on: number;
   queue_1: number;
   queue_2: number;
   queue_3: number;

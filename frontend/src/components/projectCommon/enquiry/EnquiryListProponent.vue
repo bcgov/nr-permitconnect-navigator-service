@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { useAuthZStore } from '@/store/authzStore';
-import { EnquirySubmittedMethod, IntakeStatus } from '@/utils/enums/projectCommon';
+import { EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
@@ -108,11 +108,6 @@ function getRouteToObject(data: Enquiry) {
         </div>
       </template>
     </Column>
-    <Column
-      field="intakeStatus"
-      :header="t('enquiryListProponent.state')"
-      :sortable="true"
-    />
 
     <Column
       field="submittedAt"
@@ -122,7 +117,7 @@ function getRouteToObject(data: Enquiry) {
       class="!text-right"
     >
       <template #body="{ data }">
-        {{ data.intakeStatus !== IntakeStatus.DRAFT ? formatDate(data?.submittedAt) : undefined }}
+        {{ formatDate(data?.submittedAt) }}
       </template>
     </Column>
   </DataTable>

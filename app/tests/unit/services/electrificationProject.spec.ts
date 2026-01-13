@@ -3,7 +3,6 @@ import { prismaTxMock } from '../../__mocks__/prismaMock';
 import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data';
 import * as electrificationProjectService from '../../../src/services/electrificationProject';
 import { generateDeleteStamps } from '../../../src/db/utils/utils';
-import { IntakeStatus } from '../../../src/utils/enums/projectCommon';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -156,9 +155,6 @@ describe('searchElectrificationProjects', () => {
           },
           {
             projectCategory: { in: undefined }
-          },
-          {
-            intakeStatus: { in: undefined }
           }
         ]
       },
@@ -186,7 +182,6 @@ describe('searchElectrificationProjects', () => {
       electrificationProjectId: ['789'],
       projectType: ['TYPE'],
       projectCategory: ['CAT'],
-      intakeStatus: [IntakeStatus.SUBMITTED],
       includeUser: true
     };
 
@@ -209,9 +204,6 @@ describe('searchElectrificationProjects', () => {
           },
           {
             projectCategory: { in: params.projectCategory }
-          },
-          {
-            intakeStatus: { in: params.intakeStatus }
           }
         ]
       },

@@ -154,7 +154,6 @@ export const getHousingProjects = async (tx: PrismaTransactionClient): Promise<H
  * @param params.createdBy Optional array of uuids representing users who created housing projects
  * @param params.housingProjectId Optional array of uuids representing the housing project ID
  * @param params.submissionType Optional array of strings representing the housing submission type
- * @param params.intakeStatus Optional array of strings representing the intake status
  * @param params.includeUser Optional boolean representing whether the linked user should be included
  * @returns A Promise that resolves to an array of housing projects from search params
  */
@@ -176,9 +175,6 @@ export const searchHousingProjects = async (
         },
         {
           submissionType: { in: params.submissionType }
-        },
-        {
-          intakeStatus: { in: params.intakeStatus }
         }
       ]
     },

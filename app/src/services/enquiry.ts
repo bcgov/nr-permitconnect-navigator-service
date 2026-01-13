@@ -104,7 +104,6 @@ export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string)
  * @param params.activityId Optional array of uuids representing the activity ID
  * @param params.createdBy Optional array of uuids representing users who created enquiries
  * @param params.enquiryId Optional array of uuids representing the enquiry ID
- * @param params.intakeStatus Optional array of strings representing the intake status
  * @param params.includeUser Optional boolean representing whether the linked user should be included
  * @param initiative Initiative to search in
  * @returns A Promise that resolves to an array of enquiries from search params
@@ -132,9 +131,6 @@ export const searchEnquiries = async (
         },
         {
           enquiryId: { in: params.enquiryId }
-        },
-        {
-          intakeStatus: { in: params.intakeStatus }
         }
       ]
     },

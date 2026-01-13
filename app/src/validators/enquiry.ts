@@ -6,7 +6,7 @@ import { uuidv4 } from './common';
 import { contacts, contactSchema } from './contact';
 import { validate } from '../middleware/validation';
 import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/projectCommon';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST } from '../utils/constants/projectCommon';
 
 const schema = {
   createEnquiry: {
@@ -27,7 +27,6 @@ const schema = {
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       enquiryId: Joi.array().items(Joi.string()),
-      intakeStatus: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean()
     })
   },
@@ -40,14 +39,10 @@ const schema = {
       submittedBy: Joi.string().max(255).required(),
       relatedActivityId: Joi.string().max(255).allow(null),
       enquiryDescription: Joi.string().min(0).allow(null),
-      intakeStatus: Joi.string()
-        .valid(...Object.values(INTAKE_STATUS_LIST))
-        .allow(null),
       assignedUserId: uuidv4.allow(null),
       enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       submittedMethod: Joi.string().valid(...ENQUIRY_SUBMITTED_METHOD),
       ...atsValidator.atsEnquirySubmissionFields,
-      waitingOn: Joi.string().allow(null).max(255),
       contacts: contacts,
       createdAt: Joi.date().allow(null),
       createdBy: Joi.string().allow(null),
