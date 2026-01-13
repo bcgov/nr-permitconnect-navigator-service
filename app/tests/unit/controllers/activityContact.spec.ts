@@ -11,6 +11,7 @@ import {
   updateActivityContactController
 } from '../../../src/controllers/activityContact';
 import * as activityContactService from '../../../src/services/activityContact';
+import * as activityContactHelpers from '../../../src/services/helpers/activityContact';
 import * as contactService from '../../../src/services/contact';
 import * as emailService from '../../../src/services/email';
 import * as projectService from '../../../src/services/project';
@@ -31,15 +32,14 @@ const FAKE_MEMBER_ACTIVITY_CONTACT = {
 };
 const FAKE_PRIMARY_ACTIVITY_CONTACT = { ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 };
 
-const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-const emailSpy = jest.spyOn(emailService, 'email');
-const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+const verifyPrimaryChangeSpy = jest.spyOn(activityContactHelpers, 'verifyPrimaryChange');
 
 let app: express.Express;
 
 beforeEach(() => {
   app = express();
   app.use(express.json());
+  app.request.currentAuthorization = { attributes: [], groups: [] };
   app.request.currentContext = TEST_CURRENT_CONTEXT;
   app.get('/activity/:activityId/contact', listActivityContactController);
   app.delete('/activity/:activityId/contact/:contactId', deleteActivityContactController);
@@ -49,10 +49,7 @@ beforeEach(() => {
   mockedConfig = config as jest.MockedObjectDeep<typeof config>;
   mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
 
-  searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-  getProjectSpy.mockResolvedValueOnce({
-    ...TEST_HOUSING_PROJECT_1
-  });
+  verifyPrimaryChangeSpy.mockResolvedValue();
 });
 
 afterEach(() => {
@@ -74,8 +71,17 @@ describe('GET /activity/:activityId/contact', () => {
 });
 
 describe('DELETE /activity/:activityId/contact/:contactId', () => {
+  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
   const deleteActivityContactSpy = jest.spyOn(activityContactService, 'deleteActivityContact');
   const getActivityContactSpy = jest.spyOn(activityContactService, 'getActivityContact');
+  const emailSpy = jest.spyOn(emailService, 'email');
+
+  beforeEach(() => {
+    getProjectByActivityIdSpy.mockResolvedValue({
+      ...TEST_HOUSING_PROJECT_1
+    });
+  });
 
   it('should call services and respond with 204', async () => {
     deleteActivityContactSpy.mockResolvedValue();
@@ -107,7 +113,7 @@ describe('DELETE /activity/:activityId/contact/:contactId', () => {
       .expect(204);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -131,7 +137,17 @@ describe('DELETE /activity/:activityId/contact/:contactId', () => {
 });
 
 describe('POST /activity/:activityId/contact/:contactId', () => {
+  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
   const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
+  const emailSpy = jest.spyOn(emailService, 'email');
+
+  beforeEach(() => {
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    getProjectByActivityIdSpy.mockResolvedValue({
+      ...TEST_HOUSING_PROJECT_1
+    });
+  });
 
   it('should call services and respond with 201 and result', async () => {
     createActivityContactSpy.mockResolvedValue(FAKE_MEMBER_ACTIVITY_CONTACT);
@@ -160,7 +176,7 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
       .expect(201);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -173,7 +189,7 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
       .expect(201);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
@@ -190,8 +206,18 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
 });
 
 describe('PUT /activity/:activityId/contact/:contactId', () => {
+  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
   const updateActivityContactSpy = jest.spyOn(activityContactService, 'updateActivityContact');
   const getActivityContactSpy = jest.spyOn(activityContactService, 'getActivityContact');
+  const emailSpy = jest.spyOn(emailService, 'email');
+
+  beforeEach(() => {
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    getProjectByActivityIdSpy.mockResolvedValue({
+      ...TEST_HOUSING_PROJECT_1
+    });
+  });
 
   it('should call services and respond with 200', async () => {
     updateActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN });
@@ -228,7 +254,7 @@ describe('PUT /activity/:activityId/contact/:contactId', () => {
       .expect(200);
 
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectSpy).toHaveBeenCalledTimes(1);
+    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 

@@ -11,7 +11,10 @@ import {
 } from '../services/activityContact';
 import { searchContacts } from '../services/contact';
 import { email } from '../services/email';
+import { searchEnquiries } from '../services/enquiry';
+import { verifyPrimaryChange } from '../services/helpers/activityContact';
 import { getProjectByActivityId } from '../services/project';
+import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates';
 
@@ -21,6 +24,7 @@ import type { ActivityContact, Contact } from '../types';
 
 const getTeamMemberEmailTemplateData = async (
   tx: PrismaTransactionClient,
+  initiative: Initiative,
   currentUserId: string | undefined,
   activityId: string,
   contact: Contact
@@ -32,18 +36,28 @@ const getTeamMemberEmailTemplateData = async (
     });
   }
 
-  const project = await getProjectByActivityId(tx, activityId);
-  const projectName = project.projectName ?? '';
+  try {
+    const project = await getProjectByActivityId(tx, activityId);
+    const projectName = project.projectName ?? '';
 
-  const templateParams = {
-    dearName: `${contact.firstName} ${contact.lastName}`,
-    adminName: adminContact?.length ? `${adminContact[0].firstName} ${adminContact[0].lastName}` : undefined,
-    projectName
-  };
+    const templateParams = {
+      dearName: `${contact.firstName} ${contact.lastName}`,
+      adminName: adminContact?.length ? `${adminContact[0].firstName} ${adminContact[0].lastName}` : undefined,
+      projectName
+    };
 
-  const navEmail = config.get('server.pcns.navEmail') as string;
+    const navEmail = config.get('server.pcns.navEmail') as string;
 
-  return { templateParams, navEmail };
+    return { templateParams, navEmail };
+  } catch (e) {
+    // getProjectByActivityId could 404 indicating it might be an enquiry, in which case we just do nothing
+    const enquiry = await searchEnquiries(tx, { activityId: [activityId] }, initiative);
+    if (enquiry[0]) {
+      return { templateParams: undefined, navEmail: undefined };
+    } else {
+      throw e;
+    }
+  }
 };
 
 export const createActivityContactController = async (
@@ -51,32 +65,44 @@ export const createActivityContactController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
+    // Make any pre adjustments if the PRIMARY role is being given to another user
+    await verifyPrimaryChange(
+      tx,
+      req.currentAuthorization.attributes,
+      req.currentContext.userId,
+      req.params.activityId,
+      req.body.role
+    );
+
     const newContact = await createActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
+      req.currentContext.initiative!,
       req.currentContext.userId,
       req.params.activityId,
       newContact.contact!
     );
 
-    let template, subject;
-    if (req.body.role === ActivityContactRole.MEMBER) {
-      template = teamMemberAddedTemplate(templateParams);
-      subject = `You've been added to the project ${templateParams.projectName} project in the Navigator Service`;
-    } else if (req.body.role === ActivityContactRole.ADMIN) {
-      template = teamAdminAddedTemplate(templateParams);
-      subject = `You are now the Admin of ${templateParams.projectName} project in the Navigator Service`;
-    }
+    if (templateParams && navEmail) {
+      let template, subject;
+      if (req.body.role === ActivityContactRole.MEMBER) {
+        template = teamMemberAddedTemplate(templateParams);
+        subject = `You've been added to the project ${templateParams.projectName} project in the Navigator Service`;
+      } else if (req.body.role === ActivityContactRole.ADMIN) {
+        template = teamAdminAddedTemplate(templateParams);
+        subject = `You are now the Admin of ${templateParams.projectName} project in the Navigator Service`;
+      }
 
-    if (template && subject && newContact.contact?.email) {
-      await email({
-        to: [newContact.contact.email],
-        from: navEmail,
-        subject: subject,
-        bodyType: 'html',
-        body: template
-      });
+      if (template && subject && newContact.contact?.email) {
+        await email({
+          to: [newContact.contact.email],
+          from: navEmail,
+          subject: subject,
+          bodyType: 'html',
+          body: template
+        });
+      }
     }
 
     return newContact;
@@ -90,25 +116,30 @@ export const deleteActivityContactController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    // Disallow removing the only PRIMARY user
     const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
     if (ac.role === ActivityContactRole.PRIMARY) throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
+
     await deleteActivityContact(tx, req.params.activityId, req.params.contactId);
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
+      req.currentContext.initiative!,
       req.currentContext.userId,
       req.params.activityId,
       ac.contact!
     );
 
-    if (ac.contact?.email) {
-      await email({
-        to: [ac.contact.email],
-        from: navEmail,
-        subject: `You no longer have access to ${templateParams.projectName} project in the Navigator Service`,
-        bodyType: 'html',
-        body: teamMemberRevokedTemplate(templateParams)
-      });
+    if (templateParams && navEmail) {
+      if (ac.contact?.email) {
+        await email({
+          to: [ac.contact.email],
+          from: navEmail,
+          subject: `You no longer have access to ${templateParams.projectName} project in the Navigator Service`,
+          bodyType: 'html',
+          body: teamMemberRevokedTemplate(templateParams)
+        });
+      }
     }
   });
 
@@ -128,33 +159,45 @@ export const updateActivityContactController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
+    // Disallow removing the only PRIMARY user
     const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
-
     if (ac.role === ActivityContactRole.PRIMARY) throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
+
+    // Make any pre adjustments if the PRIMARY role is being given to another user
+    await verifyPrimaryChange(
+      tx,
+      req.currentAuthorization.attributes,
+      req.currentContext.userId,
+      req.params.activityId,
+      req.body.role
+    );
 
     const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
+      req.currentContext.initiative!,
       req.currentContext.userId,
       req.params.activityId,
       updated.contact!
     );
 
-    let template, subject;
-    if (req.body.role === ActivityContactRole.ADMIN) {
-      template = teamAdminAddedTemplate(templateParams);
-      subject = `You are now the Admin of ${templateParams.projectName} project in the Navigator Service`;
-    }
+    if (templateParams && navEmail) {
+      let template, subject;
+      if (req.body.role === ActivityContactRole.ADMIN) {
+        template = teamAdminAddedTemplate(templateParams);
+        subject = `You are now the Admin of ${templateParams.projectName} project in the Navigator Service`;
+      }
 
-    if (template && subject && updated.contact?.email) {
-      await email({
-        to: [updated.contact.email],
-        from: navEmail,
-        subject: subject,
-        bodyType: 'html',
-        body: template
-      });
+      if (template && subject && updated.contact?.email) {
+        await email({
+          to: [updated.contact.email],
+          from: navEmail,
+          subject: subject,
+          bodyType: 'html',
+          body: template
+        });
+      }
     }
 
     return updated;

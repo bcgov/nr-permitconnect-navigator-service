@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from './ProjectFormSchema';
@@ -18,7 +18,14 @@ import {
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
+import {
+  activityContactService,
+  atsService,
+  contactService,
+  electrificationProjectService,
+  externalApiService,
+  userService
+} from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import {
@@ -36,7 +43,7 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
@@ -82,6 +89,9 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
+const primaryContact = computed(
+  () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
@@ -120,18 +130,16 @@ const onAssigneeInput = async (e: IInputEvent) => {
 };
 
 function initilizeFormValues(project: ElectrificationProject) {
-  const firstContact = project?.activity?.activityContact?.[0]?.contact;
-
   return {
     contact: {
-      contactId: firstContact?.contactId,
-      firstName: firstContact?.firstName,
-      lastName: firstContact?.lastName,
-      phoneNumber: firstContact?.phoneNumber,
-      email: firstContact?.email,
-      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-      contactPreference: firstContact?.contactPreference,
-      userId: firstContact?.userId
+      contactId: primaryContact.value?.contactId,
+      firstName: primaryContact.value?.firstName,
+      lastName: primaryContact.value?.lastName,
+      phoneNumber: primaryContact.value?.phoneNumber,
+      email: primaryContact.value?.email,
+      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
+      contactPreference: primaryContact.value?.contactPreference,
+      userId: primaryContact.value?.userId
     },
     project: {
       companyIdRegistered: project.companyIdRegistered,
@@ -337,25 +345,31 @@ const onSubmit = async (values: any) => {
           addedToAts: values.addedToAts
         }
       }),
-      [
-        'contactId',
-        'contactFirstName',
-        'contactLastName',
-        'contactPhoneNumber',
-        'contactEmail',
-        'contactApplicantRelationship',
-        'contactPreference',
-        'contactUserId',
-        'assignedUser',
-        'submissionState'
-      ]
+      ['contact', 'assignedUser', 'submissionState']
     );
+
+    // Deal with Nav contact change nonsense
+    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
+    if (primaryContact.value?.contactId !== values.contact.contactId) {
+      const newContact = (await contactService.updateContact(values.contact)).data;
+      if (newContact.contactId) {
+        const ac = await activityContactService.createActivityContact(
+          project.activityId,
+          newContact.contactId,
+          ActivityContactRole.PRIMARY
+        );
+
+        setBasicInfo(newContact);
+        projectStore.addActivityContact(ac.data);
+      }
+    }
 
     // Update project
     const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
-
-    // Update store with returned data
     projectStore.setProject(result.data);
+
+    // Wait a tick for store to propagate
+    await nextTick();
 
     // Reinitialize the form
     formRef.value?.resetForm({

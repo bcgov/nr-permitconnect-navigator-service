@@ -7,6 +7,7 @@ import ProjectTeamTable from './ProjectTeamTable.vue';
 import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
 import ProjectTeamManageModal from './ProjectTeamManageModal.vue';
 import { activityContactService } from '@/services';
+import { useProjectStore } from '@/store';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -17,11 +18,10 @@ const { activityId } = defineProps<{
   activityId: string;
 }>();
 
-const activityContacts = defineModel<ActivityContact[]>('activityContacts');
-
 // Composables
 const confirm = useConfirm();
 const { t } = useI18n();
+const projectStore = useProjectStore();
 const toast = useToast();
 
 // State
@@ -34,8 +34,8 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
   try {
     const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
 
-    // Explicitly update ref to force prop updates
-    activityContacts.value = activityContacts.value?.concat([response]);
+    // Update store
+    projectStore.addActivityContact(response);
 
     if (role === ActivityContactRole.ADMIN)
       toast.success(
@@ -64,8 +64,8 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
   try {
     const response = (await activityContactService.updateActivityContact(activityId, contact.contactId, role)).data;
 
-    // Explicitly update ref to force prop updates
-    activityContacts.value = activityContacts.value?.map((x) => (x.contactId === response.contactId ? response : x));
+    // Update store
+    projectStore.updateActivityContact(response);
 
     // Close modal on success
     manageUserModalVisible.value = false;
@@ -83,9 +83,8 @@ async function onRevokeUser(contact: ActivityContact) {
   try {
     await activityContactService.deleteActivityContact(activityId, contact.contactId);
 
-    if (activityContacts.value) {
-      activityContacts.value = activityContacts.value.filter((x) => x.contactId !== contact.contactId);
-    }
+    // Update store
+    projectStore.removeActivityContact(contact);
 
     toast.success(
       t('e.common.projectTeamTab.memberRevoked', {
@@ -132,15 +131,15 @@ function onRevokeUserClick(contact: ActivityContact) {
       </div>
     </div>
   </div>
-  <div v-if="activityContacts">
+  <div v-if="projectStore.getActivityContacts">
     <ProjectTeamTable
-      :activity-contacts="activityContacts"
+      :activity-contacts="projectStore.getActivityContacts"
       @project-team-table:manage-user="onManageUserClick"
       @project-team-table:revoke-user="onRevokeUserClick"
     />
     <ProjectTeamAddModal
       v-model:visible="createUserModalVisible"
-      :activity-contacts="activityContacts"
+      :activity-contacts="projectStore.getActivityContacts"
       @project-team-add-modal:add-user="onAddUser"
     />
     <ProjectTeamManageModal

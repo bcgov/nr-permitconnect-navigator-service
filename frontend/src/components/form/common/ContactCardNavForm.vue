@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import BasicInfo from '@/components/common/icons/BasicInfo.vue';
@@ -33,11 +33,11 @@ const { t } = useI18n();
 // Show the hint if any of the following conditions are met:
 // 1. A contact is selected but it does not have a userId
 // 2. The initial form values have a contactId but no userId
-function showManualContactHint() {
+const showManualContactHint = computed(() => {
   if (selectedContact.value) return !selectedContact.value.userId;
   else if (formValues.contact.contactId) return !formValues.contact.userId;
   return false;
-}
+});
 </script>
 
 <template>
@@ -63,7 +63,7 @@ function showManualContactHint() {
       </div>
     </div>
     <div
-      v-if="showManualContactHint()"
+      v-if="showManualContactHint"
       class="mb-2"
     >
       <Message
