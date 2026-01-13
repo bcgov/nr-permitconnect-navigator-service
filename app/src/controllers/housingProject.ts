@@ -28,12 +28,7 @@ import { upsertPermitTracking } from '../services/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
 import { NumResidentialUnits } from '../utils/enums/housing.ts';
 import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  DraftCode,
-  SubmissionType
-} from '../utils/enums/projectCommon.ts';
+import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
 import { getCurrentUsername, isTruthy, omit } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';

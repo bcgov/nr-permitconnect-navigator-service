@@ -23,12 +23,7 @@ import {
   updateElectrificationProject
 } from '../services/electrificationProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  DraftCode,
-  SubmissionType
-} from '../utils/enums/projectCommon.ts';
+import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
 import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';

@@ -6,7 +6,7 @@ import { uuidv4 } from './common.ts';
 import { contacts, contactSchema } from './contact.ts';
 import { validate } from '../middleware/validation.ts';
 import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/projectCommon.ts';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST } from '../utils/constants/projectCommon.ts';
+import { APPLICATION_STATUS_LIST } from '../utils/constants/projectCommon.ts';
 
 const schema = {
   createEnquiry: {

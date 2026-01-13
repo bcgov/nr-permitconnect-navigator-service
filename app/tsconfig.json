@@ -4,7 +4,7 @@
     "erasableSyntaxOnly": false, // TODO: Consider enabling this later and making necessary changes
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": true,
+    "noEmit": false,
     "outDir": "./sbin",
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,

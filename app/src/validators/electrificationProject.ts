@@ -5,7 +5,7 @@ import { email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { validate } from '../middleware/validation.ts';
 import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes.ts';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { ProjectType } from '../utils/enums/electrification.ts';
 import { YES_NO_LIST } from '../utils/constants/application.ts';
 

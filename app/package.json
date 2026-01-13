@@ -54,7 +54,7 @@
     "reinstall": "npm run purge",
     "seed:make": "npm run knex seed:make",
     "seed:dev": "npm run knex seed:run --specific=dev_groups.ts",
-    "seed:housing": "knex seed:run --specific=housing_projects.ts",
+    "seed:housing": "npm run knex seed:run --specific=housing_projects.ts",
     "seed": "npm run knex seed:run",
     "serve": "tsx watch --include \"./config/*\" --include \"./dist/*\" ./server --clear-screen=false",
     "start": "tsx ./server",

@@ -6,7 +6,7 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**']
+    ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**', 'sbin/**']
   },
   {
     files: ['**/*.{js,ts}'],

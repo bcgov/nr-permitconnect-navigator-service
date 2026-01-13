@@ -11,7 +11,7 @@ import { permits } from './permits.ts';
 import { validate } from '../middleware/validation.ts';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing.ts';
-import { APPLICATION_STATUS_LIST, INTAKE_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { BasicResponse } from '../utils/enums/application.ts';
 
 const schema = {

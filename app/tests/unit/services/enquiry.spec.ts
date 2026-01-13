@@ -2,7 +2,6 @@ import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data/index.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
-import { IntakeStatus } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 beforeEach(() => {
