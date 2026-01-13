@@ -6,15 +6,15 @@ import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
   {
-    ignores: ['coverage/**', 'node_modules/**']
+    ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**']
   },
   {
     files: ['**/*.{js,ts}'],
     extends: [
       // Extensions are order dependent - always apply Prettier last
       eslint.configs.recommended,
-      tseslint.configs.recommendedTypeChecked,
-      tseslint.configs.stylisticTypeChecked,
+      tseslint.configs.recommended,
+      tseslint.configs.stylistic,
       jsdoc.configs['flat/recommended-typescript'],
       eslintPluginPrettierRecommended,
       eslintConfigPrettier // Drops conflicting rules

@@ -14,13 +14,13 @@ import {
   deleteActivityContactController,
   listActivityContactController,
   updateActivityContactController
-} from '../../../src/controllers/activityContact';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as activityContactHelpers from '../../../src/services/helpers/activityContact';
-import * as contactService from '../../../src/services/contact';
-import * as emailService from '../../../src/services/email';
-import * as projectService from '../../../src/services/project';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
+} from '../../../src/controllers/activityContact.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as activityContactHelpers from '../../../src/services/helpers/activityContact.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as projectService from '../../../src/services/project.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 jest.mock('config');
 let mockedConfig = config as jest.MockedObjectDeep<typeof config>;

@@ -12,6 +12,7 @@ export const validate = (schema: object) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const validationErrors = Object.entries(schema)
       .map(([prop, def]) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const result = def.validate((req as any)[prop], { abortEarly: false })?.error;
         return result ? [prop, result?.details] : undefined;
       })
@@ -22,6 +23,7 @@ export const validate = (schema: object) => {
       new Problem(
         422,
         {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           detail: validationErrors.flatMap((groups) => groups[1]?.map((error: any) => error?.message)).join('; ')
         },
         { errors: Object.fromEntries(validationErrors) }

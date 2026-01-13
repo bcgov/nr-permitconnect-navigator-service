@@ -27,7 +27,6 @@ describe('common validators', () => {
 
   describe('dateOnlyString', () => {
     it.each(['2000-01-01', '1999-12-31', '2024-02-29'])('accepts valid past dates: %s', (value) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const { error, value: out } = dateOnlyString.validate(value);
       expect(error).toBeUndefined();
       expect(out).toBe(value);

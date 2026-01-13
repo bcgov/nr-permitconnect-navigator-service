@@ -10,16 +10,11 @@ const excludeOperations: readonly string[] = ['create', 'createMany', 'createMan
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterColumn(operation: string, args: any) {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   if (excludeOperations.includes(operation)) return args;
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   if (!args.where) args = { ...args, where: {} };
-
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
   args.where = { ...args.where, deletedAt: null };
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-return
   return args;
 }
 
@@ -32,43 +27,36 @@ const filterDeletedTransform = Prisma.defineExtension({
   query: {
     activity: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     enquiry: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     electrification_project: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     housing_project: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     note_history: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     permit: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     },
     permit_note: {
       $allOperations({ operation, args, query }) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
         return query(filterColumn(operation, args));
       }
     }

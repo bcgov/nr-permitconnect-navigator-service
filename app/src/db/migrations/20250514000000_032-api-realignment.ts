@@ -171,7 +171,6 @@ export async function up(knex: Knex): Promise<void> {
           role_name: string;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const data: SqlResponse[] = await knex
           .raw(
             `SELECT
@@ -192,7 +191,6 @@ export async function up(knex: Knex): Promise<void> {
           resource.name in ('ATS', 'CONTACT', 'REPORTING', 'SSO', 'USER')`
           )
           .then((res) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
             return res.rows;
           });
 
@@ -346,7 +344,6 @@ export async function down(knex: Knex): Promise<void> {
           role_name: string;
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         const data: SqlResponse[] = await knex
           .raw(
             `SELECT
@@ -367,7 +364,6 @@ export async function down(knex: Knex): Promise<void> {
           resource.name in ('ATS', 'CONTACT', 'REPORTING', 'SSO', 'USER')`
           )
           .then((res) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
             return res.rows;
           });
 

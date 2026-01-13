@@ -266,7 +266,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       userAccessRequest.accessRequest = undefined;
       userAccessRequest.user.status = AccessRequestStatus.APPROVED;
       userAccessRequest.user.userId = response.userId;
-      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = Group[]();
+      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = [];
       userAccessRequest.user.groups.push(group);
       usersAndAccessRequests.value.push(userAccessRequest);
     }

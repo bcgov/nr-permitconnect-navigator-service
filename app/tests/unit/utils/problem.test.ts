@@ -90,15 +90,11 @@ describe('Problem', () => {
       const problem = new Problem(401, { title: 'Unauthorized' });
       problem.send(req, res);
 
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.writeHead).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.writeHead).toHaveBeenCalledWith(401, {
         'Content-Type': 'application/problem+json'
       });
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.end).toHaveBeenCalledTimes(1);
-      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.end).toHaveBeenCalledWith(
         JSON.stringify(
           {

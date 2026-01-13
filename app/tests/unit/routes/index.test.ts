@@ -18,7 +18,9 @@ describe('GET /', () => {
     expect(response.status).toBe(200);
     expect(response.body).toEqual(
       expect.objectContaining({
-        endpoints: ['/api', '/docs', '/live', '/ready']
+        endpoints: ['/live', '/ready', '/v1'],
+        gitRev: expect.anything(),
+        versions: [1]
       })
     );
   });

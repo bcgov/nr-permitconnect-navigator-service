@@ -21,7 +21,10 @@ interface OpenAPISpec {
   };
 }
 
-/** Gets the OpenAPI specification */
+/**
+ * Gets the OpenAPI specification
+ * @returns The OpenAPI spec
+ */
 function getSpec(): OpenAPISpec | undefined {
   const rawSpec = readFileSync(join(__dirname, '../../docs/v1.api-spec.yaml'), 'utf8');
   const spec = yaml.load(rawSpec) as OpenAPISpec;

@@ -13,15 +13,15 @@ let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
 jest.mock('axios');
 let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
 
-type Message = {
+interface Message {
   msgId: string;
   to: string[];
-};
+}
 
-type EmailData = {
+interface EmailData {
   messages: Message[];
   txId: string;
-};
+}
 
 const postFakeEmail: Email = {
   to: ['to@test.com'],
@@ -110,7 +110,7 @@ describe('logEmail', () => {
 
   it('should call createMany with the right http status code', async () => {
     const recipients: string[] = ['test1@test.com'];
-    const statusCode: number = 451;
+    const statusCode = 451;
 
     prismaMock.email_log.createMany.mockResolvedValueOnce({ count: recipients.length });
     await emailService.logEmail(chesResponse, recipients, statusCode);

@@ -8,15 +8,15 @@ import {
   getActivityContact,
   listActivityContacts,
   updateActivityContact
-} from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { email } from '../services/email';
-import { searchEnquiries } from '../services/enquiry';
-import { verifyPrimaryChange } from '../services/helpers/activityContact';
-import { getProjectByActivityId } from '../services/project';
-import { Initiative } from '../utils/enums/application';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
-import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates';
+} from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { email } from '../services/email.ts';
+import { searchEnquiries } from '../services/enquiry.ts';
+import { verifyPrimaryChange } from '../services/helpers/activityContact.ts';
+import { getProjectByActivityId } from '../services/project.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
+import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -46,7 +46,7 @@ const getTeamMemberEmailTemplateData = async (
       projectName
     };
 
-  const navEmail: string = config.get('server.pcns.navEmail');
+    const navEmail: string = config.get('server.pcns.navEmail');
 
     return { templateParams, navEmail };
   } catch (e) {

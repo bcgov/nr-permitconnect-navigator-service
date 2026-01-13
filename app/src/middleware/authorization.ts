@@ -163,7 +163,6 @@ export const hasAccess = (param: string) => {
           }
 
           // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           const activityId: string = data?.activityId ?? id;
           const contact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
           const activityContacts = await listActivityContacts(tx, activityId);

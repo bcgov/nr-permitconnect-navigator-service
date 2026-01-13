@@ -13,7 +13,7 @@ import type { PrismaTransactionClient } from '../db/dataConnection.ts';
  * @param _res Express response object
  * @param next The next callback function
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {

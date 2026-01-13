@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Prisma } from '@prisma/client';
 
 const accessRequestBase = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
@@ -84,7 +85,7 @@ type PermitDateTimeKeys =
   | 'statusLastChangedTime';
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
-export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & { [K in PermitDateTimeKeys]: string | null };
+export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & Record<PermitDateTimeKeys, string | null>;
 export type Permit = PermitBase & {
   permitNote?: PermitNote[];
   permitTracking?: PermitTracking[];

@@ -1,6 +1,3 @@
-/* eslint-disable */
-/* Too confusing */
-
 /**
  * Create CONTACT_UPDATER role (UPDATE only, no DELETE)
  * Map role to UPDATE policy on CONTACT
@@ -114,4 +111,3 @@ export async function down(knex: Knex): Promise<void> {
       )
   );
 }
-/* eslint-enable */

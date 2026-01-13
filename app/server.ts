@@ -63,7 +63,6 @@ function normalizePort(val: string): string | number | boolean {
  * @param error.code Error code
  */
 function onError(error: { syscall?: string; code: string }): void {
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
   if (error.syscall !== 'listen') throw error;
 
   // Handle specific listen errors with friendly messages
@@ -78,7 +77,7 @@ function onError(error: { syscall?: string; code: string }): void {
       shutdown('SIGABRT');
       break;
     default:
-      throw error; // eslint-disable-line @typescript-eslint/only-throw-error
+      throw error;
   }
 }
 

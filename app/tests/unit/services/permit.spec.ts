@@ -76,7 +76,7 @@ describe('getPermitTypes', () => {
         }
       }
     });
-    expect(response).toStrictEqual([{ permitType: { permitTypeId: 'ABC' } }]);
+    expect(response).toStrictEqual([{ permitTypeId: 'ABC' }]);
   });
 });
 

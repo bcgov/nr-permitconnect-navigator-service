@@ -18,7 +18,7 @@ import type { UserSearchParameters } from '../types/stuff.ts';
 /**
  * An equivalent User model object without timestamp information
  */
-type JwtUser = {
+interface JwtUser {
   active: boolean;
   bceidBusinessName: string | null;
   email: string | null;
@@ -27,7 +27,7 @@ type JwtUser = {
   idp: string | null;
   lastName: string | null;
   sub: string;
-};
+}
 
 /**
  * Transforms JWT payload contents into a User Model object

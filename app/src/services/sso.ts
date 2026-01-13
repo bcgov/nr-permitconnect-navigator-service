@@ -27,7 +27,6 @@ async function getToken() {
 
 /**
  * Returns an Axios instance with Authorization header
- * @param options Axios request config options
  * @returns An axios instance
  */
 function ssoAxios(): AxiosInstance {

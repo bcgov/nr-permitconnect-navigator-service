@@ -1,17 +1,12 @@
 import config from 'config';
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { validate, version } from 'uuid';
 
 import { getLogger } from '../utils/log.ts';
 
-import type {
-  ChefsFormConfig,
-  ChefsFormConfigData,
-  CurrentContext,
-  IdpAttributes,
-  DateTimeStrings
-} from '../types/index.ts';
+import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
 
 const log = getLogger(module.filename);
 
@@ -80,16 +75,6 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
 }
 
 /**
- * Search for a CHEFS form Api Key
- * @param formId The CHEFS form ID
- * @returns The CHEFS form Api Key if it exists
- */
-export function getChefsApiKey(formId: string): string | undefined {
-  const cfg: ChefsFormConfig = config.get('server.chefs.forms');
-  return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
-}
-
-/**
  * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
  * @param value A date only string
  * @returns A string representation of `value`
@@ -113,36 +98,65 @@ export function formatDateOnly(value: string | null | undefined): string {
 }
 
 /**
- * Gets the current git revision hash
- * @see {@link https://stackoverflow.com/a/34518749}
- * @returns The git revision hash, or empty string
+ * Gets the current Git commit hash, or undefined if not found.
+ * @see https://stackoverflow.com/a/34518749
+ * @returns The git revision hash, or undefined
  */
-export function getGitRevision(): string {
-  try {
-    const gitDir = (() => {
-      let dir = '.git',
-        i = 0;
-      while (!existsSync(join(__dirname, dir)) && i < 5) {
-        dir = '../' + dir;
-        i++;
-      }
-      return dir;
-    })();
+export function getGitRevision(): string | undefined {
+  const findGitDir = (base: string): string | undefined => {
+    let gitPath = join(base, '.git');
+    if (existsSync(gitPath)) return gitPath;
 
-    const head = readFileSync(join(__dirname, `${gitDir}/HEAD`), 'utf8')
-      .toString()
-      .trim();
-
-    if (head.includes(':')) {
-      return head;
-    } else {
-      return readFileSync(join(__dirname, `${gitDir}/${head.substring(5)}`), 'utf8')
-        .toString()
-        .trim();
+    for (let i = 1; i <= 5; i++) {
+      gitPath = join(base, '../'.repeat(i), '.git');
+      if (existsSync(gitPath)) return gitPath;
     }
-  } catch (err) {
-    log.warn(err);
-    return '';
+
+    return undefined;
+  };
+
+  const resolveGitDir = (gitPath: string): string => {
+    if (!statSync(gitPath).isFile()) return gitPath;
+
+    const content = readFileSync(gitPath, 'utf8').trim();
+    const match = /^gitdir: (.+)$/.exec(content);
+    return match ? join(cwd(), match[1]) : gitPath;
+  };
+
+  const readRef = (gitDir: string, ref: string): string | undefined => {
+    const refPath = join(gitDir, ref);
+    return existsSync(refPath) ? readFileSync(refPath, 'utf8').trim() : undefined;
+  };
+
+  const readPackedRef = (gitDir: string, ref: string): string | undefined => {
+    const packedPath = join(gitDir, 'packed-refs');
+    if (!existsSync(packedPath)) return undefined;
+
+    const refName = ref.trim();
+    const line = readFileSync(packedPath, 'utf8')
+      .split('\n')
+      .find((l) => l.endsWith(refName));
+
+    return line ? line.split(' ')[0] : undefined;
+  };
+
+  try {
+    if (process.env.GIT_COMMIT) return process.env.GIT_COMMIT;
+
+    const gitPath = findGitDir(cwd());
+    if (!gitPath) return undefined;
+
+    const gitDir = resolveGitDir(gitPath);
+    const head = readFileSync(join(gitDir, 'HEAD'), 'utf8').trim();
+
+    if (!head.startsWith('ref:')) return head;
+
+    const ref = head.slice(5).trim();
+
+    return readRef(gitDir, ref) ?? readPackedRef(gitDir, ref) ?? undefined;
+  } catch (error) {
+    if (error instanceof Error) log.warn(error.message, { function: 'getGitRevision' });
+    return undefined;
   }
 }
 

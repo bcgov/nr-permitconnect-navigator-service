@@ -260,7 +260,6 @@ describe('sendPermitUpdateEmail', () => {
     await sendPermitUpdateEmail(job);
 
     expect(templateMock).toHaveBeenCalledTimes(1);
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const ctxArg = templateMock.mock.calls[0][0];
     expect(ctxArg).toMatchObject({
       activityId: permit.activityId,

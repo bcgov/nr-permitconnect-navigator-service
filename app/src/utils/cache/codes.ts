@@ -20,6 +20,7 @@ const log = getLogger(module.filename);
 /**
  * Pull the currently‑active codes from the DB and refresh
  * the in‑memory arrays.
+ * @returns true if succesful, false otherwise
  */
 export async function refreshCodeCaches(): Promise<boolean> {
   try {

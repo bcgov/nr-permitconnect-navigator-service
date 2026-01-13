@@ -7,15 +7,15 @@ import prisma from '../db/dataConnection.ts';
 import type { AxiosInstance } from 'axios';
 import type { Email } from '../types/index.ts';
 
-type Message = {
+interface Message {
   msgId: string;
   to: string[];
-};
+}
 
-type EmailData = {
+interface EmailData {
   messages: Message[];
   txId: string;
-};
+}
 
 /**
  * Gets Auth token using CHES client credentials
