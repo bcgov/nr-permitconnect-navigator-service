@@ -2,6 +2,7 @@
 import { useField, ErrorMessage } from 'vee-validate';
 
 import { DatePicker } from '@/lib/primevue';
+
 import type { InputNumberBlurEvent } from 'primevue/inputnumber';
 
 // Props
@@ -31,6 +32,7 @@ const { errorMessage, handleBlur, value } = useField<Date>(name);
 <template>
   <div>
     <label
+      v-if="label"
       :id="`${name}-label`"
       :class="{ 'font-bold': bold }"
       :for="name"
@@ -47,6 +49,7 @@ const { errorMessage, handleBlur, value } = useField<Date>(name);
       :disabled="disabled"
       :show-time="showTime"
       hour-format="24"
+      fluid
       show-icon
       icon-display="input"
       date-format="yy/mm/dd"
