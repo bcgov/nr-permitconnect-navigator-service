@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import EnquiryListProponent from '@/components/projectCommon/enquiry/EnquiryListProponent.vue';
+import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import { enquiryService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 

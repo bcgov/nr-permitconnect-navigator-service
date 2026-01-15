@@ -4,28 +4,15 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import EnquiryListNavigator from '@/components/projectCommon/enquiry/EnquiryListNavigator.vue';
-import { enquiryService } from '@/services';
+import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
+import { userService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
+import type { Enquiry } from '@/types';
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
-vi.mock('vue-router', () => ({
-  useRoute: vi.fn(() => ({
-    query: {}
-  })),
-  useRouter: vi.fn(() => ({
-    push: vi.fn()
-  }))
-}));
+const useUserService = vi.spyOn(userService, 'searchUsers');
 
-const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
-deleteEnquirySpy.mockResolvedValue({ data: {} } as AxiosResponse);
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
@@ -36,7 +23,7 @@ const exampleContact = {
 };
 
 // Example Enquiry object
-const testEnquiry = {
+const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: 'General Inquiry',
@@ -54,11 +41,11 @@ const testEnquiry = {
   atsEnquiryId: '654321'
 };
 
-const testEnquiries = [testEnquiry];
-const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => ({
+useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+
+const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
   props: {
-    enquiries: testEnquiriesProp,
-    loading: loading
+    enquiry: testEnquiryProp
   },
   global: {
     plugins: [
@@ -78,9 +65,13 @@ const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => 
   }
 });
 
-describe('EnquiryListNavigator.vue', () => {
+describe('EnquiryCard.vue', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it('renders the component with the provided props', () => {
-    const wrapper = mount(EnquiryListNavigator, wrapperSettings());
+    const wrapper = mount(EnquiryCard, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

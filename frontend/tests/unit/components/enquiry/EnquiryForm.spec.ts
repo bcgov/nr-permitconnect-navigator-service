@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { nextTick, ref } from 'vue';
 import { mount } from '@vue/test-utils';
 
-import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
+import EnquiryForm from '@/components/enquiry/EnquiryForm.vue';
 import { electrificationProjectService, enquiryService, housingProjectService, userService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';

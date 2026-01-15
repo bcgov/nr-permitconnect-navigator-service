@@ -6,8 +6,8 @@ import Tooltip from 'primevue/tooltip';
 import { nextTick } from 'vue';
 import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
 
-import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
-import { createProjectIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
+import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
+import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
 import { contactService, documentService, permitService, housingProjectService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
@@ -149,9 +149,9 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-describe('SubmissionIntakeForm', () => {
+describe('ProjectIntakeForm', () => {
   it('renders component', async () => {
-    const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
+    const wrapper = mount(ProjectIntakeForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 
@@ -161,7 +161,7 @@ describe('SubmissionIntakeForm', () => {
 
       getDraftSpy.mockResolvedValue({ draftId: '123' } as any);
 
-      const wrapper = shallowMount(SubmissionIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
+      const wrapper = shallowMount(ProjectIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
 
       await nextTick();
       await flushPromises();
@@ -180,7 +180,7 @@ describe('SubmissionIntakeForm', () => {
       listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as any);
       listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as any);
 
-      const wrapper = shallowMount(SubmissionIntakeForm, {
+      const wrapper = shallowMount(ProjectIntakeForm, {
         ...wrapperSettings(),
         props: { housingProjectId: '456' }
       });
@@ -194,7 +194,7 @@ describe('SubmissionIntakeForm', () => {
   });
 
   it('checks submit btn disabled conditions', async () => {
-    const wrapper = mount(SubmissionIntakeForm, wrapperSettings());
+    const wrapper = mount(ProjectIntakeForm, wrapperSettings());
     await nextTick();
     await flushPromises();
     const submitButton = wrapper.find('[type="submit"]');

@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
+import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { GroupName } from '@/utils/enums/application';
 
@@ -149,13 +149,13 @@ const wrapperSettings = (testSubmissionsProp = testSubmissions) => ({
   }
 });
 
-describe('SubmissionListNavigator.vue', () => {
+describe('ProjectListNavigator.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(SubmissionListNavigator, wrapperSettings());
+    const wrapper = mount(ProjectListNavigator, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

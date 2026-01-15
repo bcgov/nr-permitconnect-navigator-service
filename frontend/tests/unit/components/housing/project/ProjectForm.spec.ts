@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { nextTick } from 'vue';
 
-import ProjectForm from '@/components/housing/project/ProjectForm.vue';
+import ProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import { externalApiService, mapService, userService } from '@/services';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { GroupName } from '@/utils/enums/application';
