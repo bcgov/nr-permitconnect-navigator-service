@@ -2,8 +2,8 @@
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import SubmissionListNavigatorElectrification from '@/components/electrification/submission/SubmissionListNavigatorElectrification.vue'; // eslint-disable-line max-len
-import SubmissionListNavigatorHousing from '@/components/housing/submission/SubmissionListNavigatorHousing.vue';
+import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue'; // eslint-disable-line max-len
+import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {
   Button,
@@ -251,12 +251,12 @@ onBeforeMount(() => {
       </div>
     </template>
 
-    <SubmissionListNavigatorHousing
+    <ProjectListNavigatorHousing
       v-if="useAppStore().getInitiative === Initiative.HOUSING"
       :on-delete-callback="onDelete"
       :selection="selection"
     />
-    <SubmissionListNavigatorElectrification
+    <ProjectListNavigatorElectrification
       v-if="useAppStore().getInitiative === Initiative.ELECTRIFICATION"
       :on-delete-callback="onDelete"
       :selection="selection"

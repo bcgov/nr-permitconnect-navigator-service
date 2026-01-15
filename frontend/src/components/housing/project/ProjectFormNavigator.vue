@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { createProjectFormSchema } from './ProjectFormSchema';
+import { createProjectFormSchema } from '../../../validators/housing/projectFormNavigatorSchema';
 import {
   AddLocation,
   AdditionalInfo,
