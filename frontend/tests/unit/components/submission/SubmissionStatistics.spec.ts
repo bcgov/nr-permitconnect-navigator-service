@@ -1,4 +1,4 @@
-import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
+import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';

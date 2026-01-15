@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
+import SubmissionAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
 import { userService } from '@/services';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 

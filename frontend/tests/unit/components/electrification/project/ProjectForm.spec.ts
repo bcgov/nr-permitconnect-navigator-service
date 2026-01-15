@@ -5,7 +5,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 
-import ProjectForm from '@/components/electrification/project/ProjectForm.vue';
+import ProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
 import { externalApiService, userService } from '@/services';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 

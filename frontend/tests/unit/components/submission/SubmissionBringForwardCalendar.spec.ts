@@ -1,7 +1,7 @@
 import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
-import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
+import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
