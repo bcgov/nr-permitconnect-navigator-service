@@ -1,9 +1,9 @@
-import { generateUniqueActivityId } from '../db/utils/utils';
-import { Initiative } from '../utils/enums/application';
+import { generateUniqueActivityId } from '../db/utils/utils.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Activity } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Activity } from '../types/index.ts';
 
 /**
  * Create an activity for the given initiative with a unique identifier

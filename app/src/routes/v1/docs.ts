@@ -1,10 +1,12 @@
-import { Router, Request, Response } from 'express';
+import { Router } from 'express';
 import { readFileSync } from 'fs';
 import helmet from 'helmet';
 import yaml from 'js-yaml';
 import { join } from 'path';
 
-import docs from '../../docs/docs';
+import docs from '../../docs/docs.ts';
+
+import type { Request, Response } from 'express';
 
 const router = Router();
 
@@ -19,7 +21,10 @@ interface OpenAPISpec {
   };
 }
 
-/** Gets the OpenAPI specification */
+/**
+ * Gets the OpenAPI specification
+ * @returns The OpenAPI spec
+ */
 function getSpec(): OpenAPISpec | undefined {
   const rawSpec = readFileSync(join(__dirname, '../../docs/v1.api-spec.yaml'), 'utf8');
   const spec = yaml.load(rawSpec) as OpenAPISpec;

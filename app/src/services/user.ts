@@ -1,15 +1,15 @@
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-import { searchContacts, upsertContacts } from './contact';
-import { SYSTEM_ID } from '../utils/constants/application';
-import { IdentityProvider as enumIDP } from '../utils/enums/application';
-import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
-import { Problem } from '../utils';
+import { searchContacts, upsertContacts } from './contact.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { IdentityProvider as enumIDP } from '../utils/enums/application.ts';
+import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
+import { Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, IdentityProvider, User } from '../types/models';
-import type { UserSearchParameters } from '../types/stuff';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, IdentityProvider, User } from '../types/models.ts';
+import type { UserSearchParameters } from '../types/stuff.ts';
 
 /**
  * The User DB Service
@@ -18,7 +18,7 @@ import type { UserSearchParameters } from '../types/stuff';
 /**
  * An equivalent User model object without timestamp information
  */
-type JwtUser = {
+interface JwtUser {
   active: boolean;
   bceidBusinessName: string | null;
   email: string | null;
@@ -27,7 +27,7 @@ type JwtUser = {
   idp: string | null;
   lastName: string | null;
   sub: string;
-};
+}
 
 /**
  * Transforms JWT payload contents into a User Model object
@@ -129,7 +129,7 @@ export const getCurrentUserId = async (
     }
   });
 
-  return user && user.userId ? user.userId : defaultValue;
+  return user?.userId ?? defaultValue;
 };
 
 /**
@@ -166,8 +166,8 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
 
   // Create initial contact entry
   if (response) {
-    const oldContact: Array<Contact> = await searchContacts(tx, {
-      userId: [response.userId as string]
+    const oldContact: Contact[] = await searchContacts(tx, {
+      userId: [response.userId]
     });
     if (!oldContact.length) {
       // BCeID crams the entire name into firstName
@@ -187,7 +187,7 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
 
       const newContact: Contact = {
         contactId: uuidv4(),
-        userId: response.userId as string,
+        userId: response.userId,
         firstName: firstNameOverride ?? newUser.firstName,
         lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options
         email: newUser.email,
@@ -239,6 +239,8 @@ export const readUser = async (tx: PrismaTransactionClient, userId: string): Pro
 
 /**
  * Search and filter for specific users
+ * @param tx Prisma transaction client
+ * @param params Optional filtering parameters
  * @param params.userId Optional array of uuids representing the user subject
  * @param params.idp Optional array of identity providers
  * @param params.sub Optional sub string to match on

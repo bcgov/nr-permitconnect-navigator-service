@@ -1,14 +1,15 @@
-import * as comsService from '../../../src/services/coms';
-import * as emailService from '../../../src/services/email';
-import * as noteHistoryService from '../../../src/services/noteHistory';
-import * as noteService from '../../../src/services/note';
-import { sendRoadmapController } from '../../../src/controllers/roadmap';
+import * as comsService from '../../../src/services/coms.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import * as noteService from '../../../src/services/note.ts';
+import { sendRoadmapController } from '../../../src/controllers/roadmap.ts';
+import { TEST_CURRENT_CONTEXT, TEST_EMAIL_RESPONSE, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+
 import type { Request, Response } from 'express';
-import { TEST_CURRENT_CONTEXT, TEST_EMAIL_RESPONSE, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data';
-import { Email, Note, NoteHistory } from '../../../src/types';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
+import type { Email, Note, NoteHistory } from '../../../src/types';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -119,16 +120,16 @@ describe('send', () => {
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...createdHistory,
-      noteHistoryId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.any(Date),
+      noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: createdNote.noteHistoryId,
       note: createdNote.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
@@ -347,16 +348,16 @@ describe('send', () => {
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...createdHistory,
-      noteHistoryId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.any(Date),
+      noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: createdNote.noteHistoryId,
       note: createdNote.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()

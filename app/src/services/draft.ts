@@ -1,8 +1,8 @@
-import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { DraftCode } from '../utils/enums/projectCommon';
+import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
+import { DraftCode } from '../utils/enums/projectCommon.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Draft, DraftBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Draft, DraftBase } from '../types/index.ts';
 
 /**
  * Create a draft

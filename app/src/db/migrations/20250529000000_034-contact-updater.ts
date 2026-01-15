@@ -5,7 +5,7 @@
  */
 
 import type { Knex } from 'knex';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 const CONTACT_EDITOR = 'CONTACT_EDITOR';
 const CONTACT_UPDATER = 'CONTACT_UPDATER';
@@ -26,14 +26,16 @@ export async function up(knex: Knex): Promise<void> {
 
       // Get IDs for the initiative, groups, roles, and policies
       .then(async ([{ role_id }]) => {
-        const updaterRoleId = role_id;
+        const updaterRoleId: number = role_id as number;
 
-        const { initiative_id } = await knex('initiative').where({ code: Initiative.PCNS }).first();
+        const { initiative_id } = await knex('initiative')
+          .where({ code: Initiative.PCNS })
+          .first<{ initiative_id: string }>();
 
-        const groupIds: number[] = await knex('yars.group')
+        const groupIds = await knex('yars.group')
           .where({ initiative_id })
           .whereIn('name', [GroupName.PROPONENT, GroupName.NAVIGATOR_READ_ONLY])
-          .pluck('group_id');
+          .pluck<number[]>('group_id');
 
         const [{ role_id: editorRoleId }] = await knex('yars.role').where({ name: CONTACT_EDITOR });
 

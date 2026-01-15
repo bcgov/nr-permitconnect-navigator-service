@@ -1,7 +1,7 @@
-import { Initiative as EInitiative } from '../utils/enums/application';
+import { Initiative as EInitiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Initiative } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Initiative } from '../types/index.ts';
 
 /**
  * Fetches an initiative for the given initiative code

@@ -5,7 +5,7 @@ import {
   teamAdminAddedTemplate,
   teamMemberAddedTemplate,
   teamMemberRevokedTemplate
-} from '../../../src/utils/templates';
+} from '../../../src/utils/templates.ts';
 
 jest.mock('config', () => ({
   get: (key: string) => {

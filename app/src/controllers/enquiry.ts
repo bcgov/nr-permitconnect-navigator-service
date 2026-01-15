@@ -1,15 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
-} from '../db/utils/utils';
-import { createActivity, deleteActivity } from '../services/activity';
-import { createActivityContact, listActivityContacts } from '../services/activityContact';
-import { searchContacts, upsertContacts } from '../services/contact';
+} from '../db/utils/utils.ts';
+import { createActivity, deleteActivity } from '../services/activity.ts';
+import { createActivityContact, listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts, upsertContacts } from '../services/contact.ts';
 import {
   createEnquiry,
   deleteEnquiry,
@@ -18,19 +18,18 @@ import {
   getRelatedEnquiries,
   searchEnquiries,
   updateEnquiry
-} from '../services/enquiry';
-import { Initiative } from '../utils/enums/application';
+} from '../services/enquiry.ts';
 import {
   ActivityContactRole,
   ApplicationStatus,
   EnquirySubmittedMethod,
   SubmissionType
-} from '../utils/enums/projectCommon';
-import { getCurrentUsername, isTruthy } from '../utils/utils';
+} from '../utils/enums/projectCommon.ts';
+import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,
@@ -41,10 +40,9 @@ const generateEnquiryData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (
-      await createActivity(tx, currentContext.initiative as Initiative, generateCreateStamps(currentContext))
-    )?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    activityId = (await createActivity(tx, currentContext.initiative!, generateCreateStamps(currentContext)))
+      ?.activityId;
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -62,7 +60,7 @@ const generateEnquiryData = async (
   return {
     ...basic,
     enquiryId: data.enquiryId ?? uuidv4(),
-    activityId: activityId as string,
+    activityId: activityId,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
     submittedBy: getCurrentUsername(currentContext),
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
@@ -72,7 +70,7 @@ const generateEnquiryData = async (
 
 export const createEnquiryController = async (req: Request<never, never, EnquiryIntake>, res: Response) => {
   // Provide an empty body if POST body is given undefined
-  if (req.body === undefined) req.body = {} as EnquiryIntake;
+  req.body ??= {} as EnquiryIntake;
 
   const result = await transactionWrapper<Enquiry & { contact: Contact }>(async (tx: PrismaTransactionClient) => {
     const enquiry = await generateEnquiryData(tx, req.body, req.currentContext);
@@ -96,7 +94,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
 
     // Create additional activity_contact links if the enquiry is related to a project
     if (data.relatedActivityId) {
-      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
 
       const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
         (x) => x.contactId != currentContact[0].contactId
@@ -157,7 +155,7 @@ export const searchEnquiriesController = async (
         ...req.query,
         includeUser: isTruthy(req.query.includeUser)
       },
-      req.currentContext.initiative as Initiative
+      req.currentContext.initiative!
     );
   });
 

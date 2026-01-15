@@ -4,16 +4,16 @@ import {
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED,
   TEST_PEACH_RECORD_ISSUED
-} from '../data';
+} from '../data/index.ts';
 import {
   compareProcessEvents,
   getRecordEvents,
   parsePeachRecords,
   summarizePeachRecord
-} from '../../../src/parsers/peachParser';
-import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit';
+} from '../../../src/parsers/peachParser.ts';
+import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
 
-import type { ProcessEvent, Record as PeachRecord } from '../../../src/types';
+import type { ProcessEvent, Record as PeachRecord } from '../../../src/types/index.ts';
 
 jest.mock('config');
 jest.mock('../../../src/utils/log', () => ({

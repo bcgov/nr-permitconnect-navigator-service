@@ -41,7 +41,8 @@ try {
         console.log(`${TITLE} is present and up to date`);
       }
   }
-} catch (err) {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+} catch (error) {
   console.log(`An error occured while managing ${TITLE}`);
   process.exit(1);
 }
@@ -51,8 +52,7 @@ try {
 //
 
 /**
- * @function buildComponents
- * @description Rebuild `nr-permitting-navigator-service-frontend` library
+ * Rebuild `nr-permitting-navigator-service-frontend` library
  */
 function buildComponents() {
   if (!existsSync(`${FRONTEND_DIR}/node_modules`)) {
@@ -65,8 +65,7 @@ function buildComponents() {
 }
 
 /**
- * @function cleanComponents
- * @description Clean `nr-permitting-navigator-service-frontend` library directory
+ * Clean `nr-permitting-navigator-service-frontend` library directory
  */
 function cleanComponents() {
   console.log(`Cleaning ${TITLE}...`);
@@ -83,8 +82,7 @@ function copyDocs() {
 }
 
 /**
- * @function deployComponents
- * @description Redeploy `nr-permitting-navigator-service-frontend` library
+ * Redeploy `nr-permitting-navigator-service-frontend` library
  */
 function deployComponents() {
   console.log(`Redeploying ${TITLE}...`);
@@ -98,14 +96,12 @@ function deployComponents() {
 //
 
 /**
- * @function runSync
- * @description Execute a single shell command where `cmd` is a string
- * @param {string} cmd Shell command to run
- * @param {string} [cwd] Working directory of the command to run
+ * Execute a single shell command where `cmd` is a string
+ * @param cmd Shell command to run
+ * @param cwd Working directory of the command to run
  */
 export function runSync(cmd: string, cwd: string | undefined) {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { spawnSync } = require('child_process');
+  const { spawnSync } = require('child_process'); // eslint-disable-line @typescript-eslint/no-require-imports
   const parts = cmd.split(/\s+/g);
   const opts = {
     cwd: cwd || undefined,
@@ -123,10 +119,9 @@ export function runSync(cmd: string, cwd: string | undefined) {
 }
 
 /**
- * @function copyFileSync
- * @description Copies `source` file to `target` file
- * @param {string} source Source file location
- * @param {string} target Target file location
+ * Copies `source` file to `target` file
+ * @param source Source file location
+ * @param  target Target file location
  */
 export function copyFileSync(source: string, target: string) {
   let targetFile = target;
@@ -142,10 +137,9 @@ export function copyFileSync(source: string, target: string) {
 }
 
 /**
- * @function copyDirRecursiveSync
- * @description Recursively copies `source` directory contents to `target` directory
- * @param {string} source Source directory location
- * @param {string} target Target directory location
+ * Recursively copies `source` directory contents to `target` directory
+ * @param source Source directory location
+ * @param  target Target directory location
  */
 export function copyDirRecursiveSync(source: string, target: string) {
   let files = [];

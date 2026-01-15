@@ -1,32 +1,32 @@
 import {
-  createNoteHistoryController,
-  deleteNoteHistoryController,
-  listBringForwardController,
-  listNoteHistoryController,
-  updateNoteHistoryController
-} from '../../../src/controllers/noteHistory';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as housingProjectService from '../../../src/services/housingProject';
-import * as noteService from '../../../src/services/note';
-import * as noteHistoryService from '../../../src/services/noteHistory';
-import * as userService from '../../../src/services/user';
-import { Initiative } from '../../../src/utils/enums/application';
-import { BringForwardType } from '../../../src/utils/enums/projectCommon';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
-
-import type { Request, Response } from 'express';
-import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types';
-import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_IDIR_USER_1,
   TEST_NOTE_1,
   TEST_NOTE_HISTORY_1,
   TEST_NOTE_HISTORY_2
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import {
+  createNoteHistoryController,
+  deleteNoteHistoryController,
+  listBringForwardController,
+  listNoteHistoryController,
+  updateNoteHistoryController
+} from '../../../src/controllers/noteHistory.ts';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import * as noteService from '../../../src/services/note.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import * as userService from '../../../src/services/user.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+
+import type { Request, Response } from 'express';
+import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 const CURRENT_AUTHORIZATION = {
-  attributes: [] as Array<string>
+  attributes: [] as string[]
 };
 
 TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
@@ -75,16 +75,16 @@ describe('createNoteHistoryController', () => {
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
     expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_NOTE_HISTORY_1,
-      noteHistoryId: expect.stringMatching(uuidv4Pattern),
-      createdAt: expect.any(Date),
+      noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
@@ -109,7 +109,7 @@ describe('deleteNoteHistoryController', () => {
 
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: req.currentContext.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -244,7 +244,7 @@ describe('updateNoteHistoryController', () => {
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...UPDATED_HISTORY,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: req.currentContext.userId
     });
     expect(getNoteHistorySpy).toHaveBeenCalledTimes(1);
@@ -272,10 +272,10 @@ describe('updateNoteHistoryController', () => {
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern),
+      noteId: expect.stringMatching(uuidv4Pattern) as string,
       noteHistoryId: req.params.noteHistoryId,
       note: req.body.note,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: req.currentContext.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()

@@ -1,13 +1,14 @@
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma, { PrismaTransactionClient } from '../../db/dataConnection';
-import { getActivity } from '../../services/activity';
-import { SYSTEM_ID } from '../../utils/constants/application';
-import { getLogger } from '../../utils/log';
-import { uuidToActivityId } from '../../utils/utils';
+import prisma from '../../db/dataConnection.ts';
+import { getActivity } from '../../services/activity.ts';
+import { SYSTEM_ID } from '../../utils/constants/application.ts';
+import { getLogger } from '../../utils/log.ts';
+import { uuidToActivityId } from '../../utils/utils.ts';
 
-import type { CurrentContext } from '../../types';
+import type { PrismaTransactionClient } from '../../db/dataConnection.ts';
+import type { CurrentContext } from '../../types/index.ts';
 
 const log = getLogger(module.filename);
 
@@ -15,7 +16,7 @@ const log = getLogger(module.filename);
  * Checks the health of the database by executing a simple query.
  * @returns A promise that resolves to `true` if the database is healthy, or
  * `false` if the health check fails.
- * @throws Will log an error and return `false` if the database is not healthy.
+ * Will log an error and return `false` if the database is not healthy.
  */
 export async function checkDatabaseHealth(): Promise<boolean> {
   try {
@@ -32,9 +33,9 @@ export async function checkDatabaseHealth(): Promise<boolean> {
  * Checks if the database schema matches the expected structure.
  * @returns A promise that resolves to `true` if the  database schema matches
  * the expected structure, or `false` otherwise.
- * @throws Will log an error and return `false` if the database introspection fails.
+ * Will log an error and return `false` if the database introspection fails.
  */
-export async function checkDatabaseSchema(): Promise<boolean> {
+export function checkDatabaseSchema(): boolean {
   // TODO: Should this be in a different location?
   const expected = Object.freeze({
     schemas: ['public', 'yars'],
@@ -65,7 +66,7 @@ export async function checkDatabaseSchema(): Promise<boolean> {
   });
 
   const schemas = new Set(Prisma.dmmf.datamodel.models.map((x) => x.schema));
-  const tables = new Set(Prisma.dmmf.datamodel.models.map((x) => x.dbName || x.name));
+  const tables = new Set(Prisma.dmmf.datamodel.models.map((x) => x.dbName ?? x.name));
   const matches = {
     schemas: expected.schemas.every((t) => schemas.has(t)),
     tables: expected.tables.every((t) => tables.has(t))
@@ -101,7 +102,6 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
 
 /**
  * Generates null DB update stamps
- * @param currentContext The current context of the Express request
  * @returns An object with null update stamps
  */
 export function generateNullUpdateStamps() {
@@ -137,6 +137,7 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient): Pro
   do {
     id = uuidToActivityId(uuidv4());
     // No op any errors, 404 is potentially expected here
+    // eslint-disable-next-line @typescript-eslint/no-empty-function
     queryResult = await getActivity(tx, id).catch(() => {});
   } while (queryResult);
 

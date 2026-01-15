@@ -1,9 +1,9 @@
 import config from 'config';
-import { existsSync, readFileSync } from 'fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { validate, version } from 'uuid';
 
-import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums/application';
-import * as utils from '../../../src/utils/utils';
+import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums/application.ts';
+import * as utils from '../../../src/utils/utils.ts';
 
 import type { JwtPayload } from 'jsonwebtoken';
 
@@ -12,9 +12,10 @@ jest.mock('config', () => ({
   get: jest.fn()
 }));
 
-jest.mock('fs', () => ({
+jest.mock('node:fs', () => ({
   existsSync: jest.fn(),
-  readFileSync: jest.fn()
+  readFileSync: jest.fn(),
+  statSync: jest.fn()
 }));
 
 jest.mock('../../../src/utils/log', () => ({
@@ -25,17 +26,6 @@ jest.mock('uuid', () => ({
   validate: jest.fn(),
   version: jest.fn()
 }));
-
-const CHES_CONFIG = {
-  form1: {
-    id: '550e8400-e29b-41d4-a716-446655440000',
-    apiKey: '550e8400-e29b-41d4-a716-446655440001'
-  },
-  form2: {
-    id: '9f3c8b27-3d1a-4e65-8f6a-5a3d2c74b8cb',
-    apiKey: '9f3c8b27-3d1a-4e65-8f6a-5a3d2c74b8cd'
-  }
-};
 
 const TOKEN_PAYLOAD: JwtPayload = {
   sub: '12345678-90ab-cdef-1234-567890abcdef',
@@ -79,6 +69,7 @@ describe('utils', () => {
     jest.clearAllMocks();
     (existsSync as jest.Mock).mockReset();
     (readFileSync as jest.Mock).mockReset();
+    (statSync as jest.Mock).mockReset();
     (config.get as jest.Mock).mockReset();
     (config.has as jest.Mock).mockReset();
   });
@@ -196,35 +187,116 @@ describe('utils', () => {
     });
   });
 
-  describe('getChefsApiKey', () => {
-    it('returns apiKey that matches form id', () => {
-      (config.get as jest.Mock).mockReturnValue(CHES_CONFIG);
-      expect(utils.getChefsApiKey('550e8400-e29b-41d4-a716-446655440000')).toBe('550e8400-e29b-41d4-a716-446655440001');
-      expect(utils.getChefsApiKey('550e8400-e29b-41d4-a716-446655440002')).toBeUndefined();
-    });
-  });
-
   describe('getGitRevision', () => {
-    it('returns direct HEAD hash when HEAD is a hash', () => {
-      (existsSync as jest.Mock).mockReturnValueOnce(true);
-      (readFileSync as jest.Mock).mockReturnValueOnce('abcdef1234567890\n'); // HEAD
+    const mockStat = (isFile: boolean) => ({
+      isFile: () => isFile
+    });
+
+    it('returns the GIT_COMMIT environment variable if set', () => {
+      process.env.GIT_COMMIT = 'envhash123';
+      expect(utils.getGitRevision()).toBe('envhash123');
+      delete process.env.GIT_COMMIT;
+    });
+
+    it('returns the HEAD hash if HEAD is detached', () => {
+      (existsSync as jest.Mock).mockImplementation((path: string) => {
+        // .git and HEAD exist
+        return path.endsWith('.git') || path.endsWith('HEAD');
+      });
+      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+        if (path.endsWith('HEAD')) return 'abcdef1234567890\n';
+        return '';
+      });
+
       expect(utils.getGitRevision()).toBe('abcdef1234567890');
     });
 
-    it('resolves ref: and returns resolved hash', () => {
-      (existsSync as jest.Mock).mockReturnValueOnce(true);
-      (readFileSync as jest.Mock)
-        .mockReturnValueOnce('ref: refs/heads/main\n') // HEAD
-        .mockReturnValueOnce('deadbeefcafebabe\n'); // resolved ref file
-      expect(utils.getGitRevision()).toBe('deadbeefcafebabe');
+    it('returns the commit hash from ref file if HEAD points to a ref', () => {
+      (existsSync as jest.Mock).mockImplementation((path: string) => {
+        // .git, HEAD, and ref exist
+        return (
+          path.endsWith('.git') ||
+          path.endsWith('HEAD') ||
+          path.endsWith('refs/heads/main') ||
+          path.endsWith('refs\\heads\\main')
+        );
+      });
+      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+        if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
+        if (path.endsWith('refs/heads/main') || path.endsWith('refs\\heads\\main')) return '1234567890abcdef\n';
+        return '';
+      });
+
+      expect(utils.getGitRevision()).toBe('1234567890abcdef');
     });
 
-    it('returns empty string and logs on error', () => {
-      (existsSync as jest.Mock).mockReturnValueOnce(true);
-      (readFileSync as jest.Mock).mockImplementation(() => {
-        throw new Error('boom');
+    it('returns the commit hash from packed-refs if ref file does not exist', () => {
+      (existsSync as jest.Mock).mockImplementation((path: string) => {
+        // .git, HEAD, packed-refs exist, but not the ref file
+        return path.endsWith('.git') || path.endsWith('HEAD') || path.endsWith('packed-refs');
       });
-      expect(utils.getGitRevision()).toBe('');
+      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+        if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
+        if (path.endsWith('packed-refs')) return 'fedcba9876543210 refs/heads/main\n';
+        return '';
+      });
+
+      expect(utils.getGitRevision()).toBe('fedcba9876543210');
+    });
+
+    it('returns undefined if ref file does not exist', () => {
+      (existsSync as jest.Mock).mockImplementation((path: string) => {
+        // .git, HEAD, packed-refs exist, but not the ref file
+        return path.endsWith('.git') || path.endsWith('HEAD') || path.endsWith('packed-refs');
+      });
+      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+        if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
+        return '';
+      });
+
+      expect(utils.getGitRevision()).toBeUndefined();
+    });
+
+    it('returns undefined if .git does not exist', () => {
+      (existsSync as jest.Mock).mockReturnValue(false);
+
+      expect(utils.getGitRevision()).toBeUndefined();
+    });
+
+    it('returns undefined and logs warning if an error is thrown', () => {
+      (existsSync as jest.Mock).mockImplementation(() => {
+        throw new Error('fs error');
+      });
+
+      expect(utils.getGitRevision()).toBeUndefined();
+    });
+
+    it('resolves .git as a file (worktree/submodule) and reads gitdir', () => {
+      (existsSync as jest.Mock).mockImplementation((path: string) => {
+        // .git file, HEAD, and ref exist
+        return (
+          path.endsWith('.git') ||
+          path.endsWith('HEAD') ||
+          path.endsWith('refs/heads/feature') ||
+          path.endsWith('refs\\heads\\feature')
+        );
+      });
+      (statSync as jest.Mock).mockImplementation((path: string) => {
+        // .git is a file
+        return mockStat(path.endsWith('.git'));
+      });
+      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+        if (path.endsWith('.git')) return 'gitdir: .git/worktrees/feature\n';
+        if (path.endsWith('HEAD')) return 'ref: refs/heads/feature\n';
+        if (path.endsWith('refs/heads/feature') || path.endsWith('refs\\heads\\feature')) return 'cafebabe12345678\n';
+        return '';
+      });
+
+      expect(utils.getGitRevision()).toBe('cafebabe12345678');
     });
   });
 

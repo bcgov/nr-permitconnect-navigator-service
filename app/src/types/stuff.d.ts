@@ -1,14 +1,16 @@
 import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
+import { ParsedQs } from 'qs';
 
-import { AuthType, GroupName, Initiative } from '../utils/enums/application';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
+import { PermitStage, PermitState } from '../utils/enums/permit.ts';
+import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 
 import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
-import type { IStamps } from '../interfaces/IStamps';
-import type { PermitEmailTemplate } from '../utils/templates';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { EmailTemplate } from '../utils/templates';
 
-type AddressResource = {
+interface AddressResource {
   '@type': string;
   addressLine1: string;
   addressLine2: string | null;
@@ -18,9 +20,9 @@ type AddressResource = {
   postalCode: string | null;
   primaryPhone: string;
   email: string;
-};
+}
 
-export type ATSClientResource = {
+export interface ATSClientResource {
   '@type': string;
   address: AddressResource;
   firstName: string;
@@ -28,9 +30,9 @@ export type ATSClientResource = {
   regionName: string;
   optOutOfBCStatSurveyInd: string;
   createdBy: string;
-};
+}
 
-export type ATSEnquiryResource = {
+export interface ATSEnquiryResource {
   '@type': string;
   clientId: number;
   contactFirstName: string;
@@ -43,105 +45,33 @@ export type ATSEnquiryResource = {
   enquiryMethodCodes: string[];
   enquiryPartnerAgencies: string[];
   enquiryFileNumbers: string[];
-};
+}
 
-export type ATSUserSearchParameters = {
+export interface ATSUserSearchParameters extends ParsedQs {
   atsClientId?: string;
   email?: string;
   firstName: string;
   lastName: string;
   phone?: string;
-};
+}
 
-export type BceidSearchParameters = {
+export interface BceidSearchParameters extends ParsedQs {
   guid: string;
-};
+}
 
-export type BringForward = {
+export interface BringForward {
   activityId: string;
   noteId: string;
-  electrificationProjectId: string;
-  housingProjectId: string;
-  enquiryId: string;
+  electrificationProjectId?: string;
+  housingProjectId?: string;
+  enquiryId?: string;
   title: string;
   projectName: string | null;
-  bringForwardDate: string;
+  bringForwardDate?: string;
   createdByFullName: string | null;
-};
+}
 
-export type ChefsFormConfig = {
-  form1: ChefsFormConfigData;
-  form2: ChefsFormConfigData;
-};
-
-export type ChefsFormConfigData = {
-  id: string;
-  apiKey: string;
-};
-
-export type ChefsSubmissionExport = {
-  form: {
-    id: string;
-    submissionId: string;
-    confirmationId: string;
-    formName: string;
-    version: number;
-    createdAt: string;
-    fullName: string;
-    username: string;
-    email: string;
-    status: string;
-    assignee: string;
-    assigneedEmail: string;
-  };
-
-  submissionId: string;
-  confirmationId: string;
-  contactEmail: string;
-  contactPreference: string;
-  projectName: string;
-  projectDescription: string;
-  contactPhoneNumber: string;
-  contactFirstName: string;
-  contactLastName: string;
-  contactApplicantRelationship: string;
-  financiallySupported: boolean;
-  housingCoopName: string;
-  IndigenousHousingProviderName: string;
-  isBCHousingSupported: string;
-  isCompany: string;
-  isCompanyRegistered: string;
-  isIndigenousHousingProviderSupported: string;
-  isNonProfitSupported: string;
-  isHousingCooperativeSupported: string;
-  nonProfitHousingSocietyName: string;
-  parcelID: string;
-  latitude: number;
-  locality: string;
-  longitude: number;
-  naturalDisasterInd: boolean;
-  otherProjectType: string;
-  companyName: string;
-  companyNameRegistered: string;
-  province: string;
-  queuePriority: string;
-  rentalUnits: string;
-  singleFamilyUnits: string;
-  multiFamilyUnits: string;
-  multiFamilyUnits1: string;
-  isRentalUnit: string;
-  addressType: string;
-  streetAddress: string;
-  previousPermits: string;
-  createdAt: string;
-  createdBy: string;
-
-  // No clue what format the CHEFS permits might be delivered in
-  permitGrid: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-  dataGrid: any; // eslint-disable-line @typescript-eslint/no-explicit-any
-};
-
-export type ContactSearchParameters = {
+export interface ContactSearchParameters {
   contactApplicantRelationship?: string;
   contactPreference?: string;
   contactId?: string[];
@@ -152,22 +82,22 @@ export type ContactSearchParameters = {
   userId?: string[];
   initiative?: Initiative;
   includeActivities?: boolean;
-};
+}
 
-export type CurrentAuthorization = {
-  attributes: Array<string>;
-  groups: Array<Group>;
-};
+export interface CurrentAuthorization {
+  attributes: string[];
+  groups: Group[];
+}
 
-export type CurrentContext = {
+export interface CurrentContext {
   authType?: AuthType;
   bearerToken?: string;
   initiative?: Initiative;
   tokenPayload?: jwt.JwtPayload;
   userId?: string;
-};
+}
 
-export type ElectrificationProjectIntake = {
+export interface ElectrificationProjectIntake {
   contact: Contact;
   draftId?: string;
   project: {
@@ -180,18 +110,18 @@ export type ElectrificationProjectIntake = {
     bcHydroNumber: string | null;
     submissionType?: string;
   };
-};
+}
 
-export type ElectrificationProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  electrificationProjectId?: Array<string>;
-  projectType?: Array<string>;
-  projectCategory?: Array<string>;
+export interface ElectrificationProjectSearchParameters {
+  activityId?: string[];
+  createdBy?: string[];
+  electrificationProjectId?: string[];
+  projectType?: string[];
+  projectCategory?: string[];
   includeUser?: boolean;
-};
+}
 
-export type ElectrificationProjectStatistics = {
+export interface ElectrificationProjectStatistics {
   total_submissions: number;
   total_submissions_between: number;
   total_submissions_monthyear: number;
@@ -209,31 +139,31 @@ export type ElectrificationProjectStatistics = {
   inapplicable: number;
   status_request: number;
   multi_permits_needed: number;
-};
+}
 
-export type Email = {
-  bcc?: Array<string>;
+export interface Email {
+  bcc?: string[];
   bodyType: string;
   body: string;
-  cc?: Array<string>;
+  cc?: string[];
   delayTS?: number;
   encoding?: string;
   from: string;
   priority?: string;
   subject: string;
-  to: Array<string>;
+  to: string[];
   tag?: string;
-  attachments?: Array<EmailAttachment>;
-};
+  attachments?: EmailAttachment[];
+}
 
-export type EmailAttachment = {
+export interface EmailAttachment {
   content: string;
   contentType: string;
   encoding: string;
   filename: string;
-};
+}
 
-export type EnquiryIntake = {
+export interface EnquiryIntake {
   activityId?: string;
   enquiryId?: string;
   submittedAt?: string;
@@ -248,24 +178,24 @@ export type EnquiryIntake = {
   };
 
   contact: Contact;
-};
+}
 
-export type EnquirySearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  enquiryId?: Array<string>;
+export interface EnquirySearchParameters {
+  activityId?: string[];
+  createdBy?: string[];
+  enquiryId?: string[];
   includeUser?: boolean;
-};
+}
 
-export type Group = {
+export interface Group extends Partial<IStamps> {
   groupId: number;
   initiativeCode: string;
   initiativeId: string;
   name: GroupName;
   label?: string;
-} & Partial<IStamps>;
+}
 
-export type HousingProjectIntake = {
+export interface HousingProjectIntake {
   activityId: string | null;
   draftId: string | null;
   submittedAt: string | null;
@@ -319,17 +249,17 @@ export type HousingProjectIntake = {
   appliedPermits: Permit[];
   investigatePermits: Permit[];
   contact: Contact;
-};
+}
 
-export type HousingProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  housingProjectId?: Array<string>;
-  submissionType?: Array<string>;
+export interface HousingProjectSearchParameters {
+  activityId?: string[];
+  createdBy?: string[];
+  housingProjectId?: string[];
+  submissionType?: string[];
   includeUser?: boolean;
-};
+}
 
-export type HousingProjectStatistics = {
+export interface HousingProjectStatistics {
   total_submissions: number;
   total_submissions_between: number;
   total_submissions_monthyear: number;
@@ -354,27 +284,27 @@ export type HousingProjectStatistics = {
   inapplicable: number;
   status_request: number;
   multi_permits_needed: number;
-};
+}
 
-export type IdirSearchParameters = {
+export interface IdirSearchParameters extends ParsedQs {
   firstName: string;
   lastName: string;
   email: string;
-};
+}
 
-export type IdpAttributes = {
+export interface IdpAttributes {
   identityKey: string;
   idp: string;
   name: string;
   username: string;
-};
+}
 
-export type ListPermitsOptions = {
+export interface ListPermitsOptions extends Partial<IStamps> {
   activityId?: string;
   includeNotes?: boolean;
-} & Partial<IStamps>;
+}
 
-export type PeachSummary = {
+export interface PeachSummary {
   stage: PermitStage;
   state: PermitState;
   submittedDate: string | null;
@@ -383,9 +313,9 @@ export type PeachSummary = {
   decisionTime: string | null;
   statusLastChanged: string;
   statusLastChangedTime: string | null;
-};
+}
 
-export type PermitSearchParams = {
+export interface PermitSearchParams {
   permitId?: string[];
   activityId?: string[];
   permitTypeId?: number[];
@@ -396,40 +326,40 @@ export type PermitSearchParams = {
   includePermitTracking?: boolean;
   includePermitType?: boolean;
   onlyPeachIntegratedTrackings?: boolean;
-};
+}
 
-export type PermitUpdateEmailParams = {
+export interface PermitUpdateEmailParams {
   permit: Permit;
   initiative: Initiative;
   dearName: string;
   projectId: string;
   toEmails: string[];
-  emailTemplate: PermitEmailTemplate;
-};
+  emailTemplate: EmailTemplate;
+}
 
 export type Project = HousingProject | ElectrificationProject;
 
-type SplitDatetimeBase<T> = {
+interface SplitDatetimeBase<T> {
   date: T;
   time: string | null;
-};
+}
 
 export type DateTimeStrings = SplitDatetimeBase<string>;
 
 export type NullableDateTimeStrings = SplitDatetimeBase<string | null>;
 
-export type StatisticsFilters = {
+export interface StatisticsFilters extends ParsedQs {
   dateFrom: string;
   dateTo: string;
   monthYear: string;
   userId: string;
-};
+}
 
-export type UserAccessRequest = {
+export interface UserAccessRequest extends User {
   accessRequest?: AccessRequest;
-} & User;
+}
 
-export type UserSearchParameters = {
+export interface UserSearchParameters {
   userId?: string[];
   idp?: string[];
   group?: GroupName[];
@@ -441,4 +371,4 @@ export type UserSearchParameters = {
   active?: boolean;
   includeUserGroups?: boolean;
   initiative?: Initiative[];
-};
+}

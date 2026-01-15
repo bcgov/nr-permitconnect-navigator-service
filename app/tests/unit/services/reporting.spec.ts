@@ -1,6 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import * as reportingService from '../../../src/services/reporting';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as reportingService from '../../../src/services/reporting.ts';
 
 describe('getElectrificationProjectPermitData', () => {
   it('calls $queryRaw and returns result', async () => {

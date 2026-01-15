@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 
-import { state } from '../../../state';
-import router from '../../../src/routes';
+import { state } from '../../../state.ts';
+import router from '../../../src/routes/index.ts';
 
 const app = express();
 app.use(router);
@@ -13,19 +13,26 @@ jest.mock('config', () => ({
 }));
 
 describe('GET /', () => {
-  it('should return the root information', async () => {
+  it('should return the root endpoints', async () => {
     const response = await request(app).get('/');
     expect(response.status).toBe(200);
-    expect(response.body).toEqual({
-      app: {
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        endpoints: ['/live', '/ready', '/v1'],
         gitRev: expect.anything(),
-        name: expect.anything(),
-        nodeVersion: expect.anything(),
-        version: expect.anything()
-      },
-      endpoints: ['/live', '/ready', '/v1'],
-      versions: [1]
-    });
+        versions: [1]
+      })
+    );
+  });
+
+  it('should return the git revision', async () => {
+    const response = await request(app).get('/');
+    expect(response.status).toBe(200);
+    expect(response.body).toEqual(
+      expect.objectContaining({
+        gitRev: state.gitRev
+      })
+    );
   });
 });
 

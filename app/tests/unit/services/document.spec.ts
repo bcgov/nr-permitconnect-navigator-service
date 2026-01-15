@@ -1,11 +1,9 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as documentService from '../../../src/services/document.ts';
+import { generateCreateStamps } from '../../../src/db/utils/utils.ts';
 
-import * as documentService from '../../../src/services/document';
-
-import { generateCreateStamps } from '../../../src/db/utils/utils';
-import { TEST_CURRENT_CONTEXT } from '../data';
-
-import type { Document } from '../../../src/types';
+import type { Document } from '../../../src/types/index.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -33,7 +31,7 @@ describe('createDocument', () => {
         filename: 'FILE.txt',
         mimeType: 'MIME',
         filesize: 12345,
-        createdAt: expect.any(Date),
+        createdAt: expect.any(Date) as Date,
         createdBy: TEST_CURRENT_CONTEXT.userId
       }
     });

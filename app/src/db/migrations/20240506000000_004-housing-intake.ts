@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 import type { Knex } from 'knex';
-import stamps from '../stamps';
+import stamps from '../stamps.ts';
 
 export async function up(knex: Knex): Promise<void> {
   return (

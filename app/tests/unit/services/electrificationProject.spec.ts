@@ -1,8 +1,7 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data';
-import * as electrificationProjectService from '../../../src/services/electrificationProject';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -54,7 +53,7 @@ describe('deleteElectrificationProject', () => {
     expect(prismaTxMock.electrification_project.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { electrificationProjectId: '1' }
     });
   });

@@ -14,19 +14,19 @@ import {
   submitHousingProjectDraftController,
   updateHousingProjectController,
   upsertHousingProjectDraftController
-} from '../../../src/controllers/housingProject';
-import * as activityService from '../../../src/services/activity';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as contactService from '../../../src/services/contact';
-import * as draftService from '../../../src/services/draft';
-import * as emailService from '../../../src/services/email';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as housingProjectService from '../../../src/services/housingProject';
-import * as permitService from '../../../src/services/permit';
-import * as permitTrackingService from '../../../src/services/permitTracking';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon';
-import { Initiative } from '../../../src/utils/enums/application';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+} from '../../../src/controllers/housingProject.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as draftService from '../../../src/services/draft.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import * as permitTrackingService from '../../../src/services/permitTracking.ts';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type {
@@ -38,7 +38,7 @@ import type {
   HousingProjectSearchParameters,
   HousingProjectStatistics,
   StatisticsFilters
-} from '../../../src/types';
+} from '../../../src/types/index.ts';
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
@@ -239,7 +239,7 @@ describe('createHousingProjectController', () => {
     } as ActivityContact);
     createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
     upsertPermitTrackingSpy.mockResolvedValue([]);
-    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName as string);
+    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName!);
 
     await createHousingProjectController(
       req as unknown as Request<never, never, HousingProjectIntake>,
@@ -248,7 +248,7 @@ describe('createHousingProjectController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -265,17 +265,17 @@ describe('createHousingProjectController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_CREATE,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
   });
@@ -322,9 +322,9 @@ describe('createHousingProjectController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -339,9 +339,9 @@ describe('createHousingProjectController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -357,9 +357,9 @@ describe('createHousingProjectController', () => {
       issuedPermitId: null,
       submittedDate: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -391,12 +391,12 @@ describe('deleteHousingProjectController', () => {
     expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
     expect(deleteHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -676,7 +676,7 @@ describe('submitHousingProjectDraftController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
@@ -693,9 +693,9 @@ describe('submitHousingProjectDraftController', () => {
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern),
-      submittedAt: expect.any(Date),
-      createdAt: expect.any(Date),
+      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      submittedAt: expect.any(Date) as Date,
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(201);
@@ -767,9 +767,9 @@ describe('submitHousingProjectDraftController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -784,9 +784,9 @@ describe('submitHousingProjectDraftController', () => {
       statusLastVerified: null,
       issuedPermitId: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -802,9 +802,9 @@ describe('submitHousingProjectDraftController', () => {
       issuedPermitId: null,
       submittedDate: null,
       decisionDate: null,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId,
       deletedAt: null,
       deletedBy: null
@@ -852,11 +852,11 @@ describe('updateHousingProjectDraftController', () => {
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledTimes(1);
     expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern),
+      draftId: expect.stringMatching(uuidv4Pattern) as string,
       activityId: 'ACTI1234',
       draftCode: DraftCode.HOUSING_PROJECT,
       data: req.body.data,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: null,
       updatedBy: null,
@@ -903,7 +903,7 @@ describe('updateHousingProjectDraftController', () => {
     expect(updateDraftSpy).toHaveBeenCalledTimes(1);
     expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
@@ -935,7 +935,7 @@ describe('updateHousingProjectController', () => {
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...UPDATED_PROJECT,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

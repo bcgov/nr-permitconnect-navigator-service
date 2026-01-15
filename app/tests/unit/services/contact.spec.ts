@@ -1,11 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ContactPreference, ProjectRelationship } from '../../../src/utils/enums/projectCommon.ts';
 
-import { TEST_CURRENT_CONTEXT } from '../data';
-import * as contactService from '../../../src/services/contact';
-import { Initiative } from '../../../src/utils/enums/application';
-import { ContactPreference, ProjectRelationship } from '../../../src/utils/enums/projectCommon';
-
-import type { Contact } from '../../../src/types';
+import type { Contact } from '../../../src/types/index.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -70,7 +69,7 @@ describe('insertContacts', () => {
     expect(prismaTxMock.contact.create).toHaveBeenCalledWith({
       data: {
         contactId: '1',
-        createdAt: expect.any(Date),
+        createdAt: expect.any(Date) as Date,
         createdBy: TEST_CURRENT_CONTEXT.userId
       }
     });

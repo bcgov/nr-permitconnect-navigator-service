@@ -1,13 +1,13 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateUpdateStamps } from '../db/utils/utils';
-import { deleteContact, getContact, matchContacts, searchContacts, upsertContacts } from '../services/contact';
-import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { generateUpdateStamps } from '../db/utils/utils.ts';
+import { deleteContact, getContact, matchContacts, searchContacts, upsertContacts } from '../services/contact.ts';
+import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Contact, ContactSearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Contact, ContactSearchParameters } from '../types/index.ts';
 
 export const deleteContactController = async (req: Request<{ contactId: string }>, res: Response) => {
   const contactId = req.params.contactId;
@@ -33,7 +33,7 @@ export const getContactController = async (
 export const getCurrentUserContactController = async (req: Request<never, never, never, never>, res: Response) => {
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
     return await searchContacts(tx, {
-      userId: [req.currentContext.userId as string]
+      userId: [req.currentContext.userId!]
     });
   });
   res.status(200).json(response[0]);

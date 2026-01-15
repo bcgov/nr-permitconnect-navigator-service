@@ -1,11 +1,11 @@
-import { generateCreateStamps } from '../db/utils/utils';
-import { createDocument, deleteDocument, listDocuments } from '../services/document';
-import { readUser } from '../services/user';
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { generateCreateStamps } from '../db/utils/utils.ts';
+import { createDocument, deleteDocument, listDocuments } from '../services/document.ts';
+import { readUser } from '../services/user.ts';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Document } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Document } from '../types/index.ts';
 
 export const createDocumentController = async (
   req: Request<

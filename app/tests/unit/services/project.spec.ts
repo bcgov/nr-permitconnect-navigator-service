@@ -1,8 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_HOUSING_PROJECT_1, TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as projectService from '../../../src/services/project.ts';
+import { Problem } from '../../../src/utils/index.ts';
 
-import { TEST_HOUSING_PROJECT_1, TEST_ELECTRIFICATION_PROJECT_1 } from '../data';
-import * as projectService from '../../../src/services/project';
-import { Problem } from '../../../src/utils';
+const FAKE_HOUSING_PROJECT = { ...TEST_HOUSING_PROJECT_1, projectId: '' };
+const FAKE_ELECTRIFICATION_PROJECT = { ...TEST_ELECTRIFICATION_PROJECT_1, projectId: '' };
 
 describe('getProjectByActivityId', () => {
   const ACTIVITY_ID = 'ACTI1234';
@@ -25,9 +27,7 @@ describe('getProjectByActivityId', () => {
   });
 
   it('returns a housing project when only housing_result is found', async () => {
-    prismaTxMock.housing_project.findFirst.mockResolvedValueOnce(
-      TEST_HOUSING_PROJECT_1 as any // eslint-disable-line @typescript-eslint/no-explicit-any
-    );
+    prismaTxMock.housing_project.findFirst.mockResolvedValueOnce(FAKE_HOUSING_PROJECT);
     prismaTxMock.electrification_project.findFirst.mockResolvedValueOnce(null);
 
     const result = await projectService.getProjectByActivityId(prismaTxMock, ACTIVITY_ID);
@@ -44,14 +44,12 @@ describe('getProjectByActivityId', () => {
       include: expectedInclude
     });
 
-    expect(result).toStrictEqual(TEST_HOUSING_PROJECT_1);
+    expect(result).toStrictEqual(FAKE_HOUSING_PROJECT);
   });
 
   it('returns an electrification project when only electrification_result is found', async () => {
     prismaTxMock.housing_project.findFirst.mockResolvedValueOnce(null);
-    prismaTxMock.electrification_project.findFirst.mockResolvedValueOnce(
-      TEST_ELECTRIFICATION_PROJECT_1 as any // eslint-disable-line @typescript-eslint/no-explicit-any
-    );
+    prismaTxMock.electrification_project.findFirst.mockResolvedValueOnce(FAKE_ELECTRIFICATION_PROJECT);
 
     const result = await projectService.getProjectByActivityId(prismaTxMock, ACTIVITY_ID);
 
@@ -67,16 +65,12 @@ describe('getProjectByActivityId', () => {
       include: expectedInclude
     });
 
-    expect(result).toStrictEqual(TEST_ELECTRIFICATION_PROJECT_1);
+    expect(result).toStrictEqual(FAKE_ELECTRIFICATION_PROJECT);
   });
 
   it('throws Problem(409) when both housing and electrification projects are found', async () => {
-    prismaTxMock.housing_project.findFirst.mockResolvedValueOnce(
-      TEST_HOUSING_PROJECT_1 as any // eslint-disable-line @typescript-eslint/no-explicit-any
-    );
-    prismaTxMock.electrification_project.findFirst.mockResolvedValueOnce(
-      TEST_ELECTRIFICATION_PROJECT_1 as any // eslint-disable-line @typescript-eslint/no-explicit-any
-    );
+    prismaTxMock.housing_project.findFirst.mockResolvedValueOnce(FAKE_HOUSING_PROJECT);
+    prismaTxMock.electrification_project.findFirst.mockResolvedValueOnce(FAKE_ELECTRIFICATION_PROJECT);
 
     await expect(projectService.getProjectByActivityId(prismaTxMock, ACTIVITY_ID)).rejects.toBeInstanceOf(Problem);
   });

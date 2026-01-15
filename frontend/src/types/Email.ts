@@ -1,13 +1,13 @@
 export type Email = {
-  bcc?: Array<string>;
+  bcc?: string[];
   bodyType: string;
   body: string;
-  cc?: Array<string>;
+  cc?: string[];
   delayTS?: number;
   encoding?: string;
   from: string;
   priority?: string;
   subject: string;
-  to: Array<string>;
+  to: string[];
   tag?: string;
 };

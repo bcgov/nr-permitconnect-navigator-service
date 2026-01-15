@@ -4,7 +4,8 @@ import { Prisma } from '@prisma/client';
 const excludeOperations: readonly string[] = ['create', 'createMany', 'createManyAndReturn'];
 
 /*
- * args is some crazy dynamic type
+ * Many eslint-disable lines as working with the prisma dynamic typing is basically impossible so its
+ * significantly to work with `any` types
  */
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

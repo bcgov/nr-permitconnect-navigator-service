@@ -6,19 +6,19 @@ import {
   TEST_PERMIT_2,
   TEST_PERMIT_3,
   TEST_PERMIT_4
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach';
-import * as parser from '../../../src/parsers/peachParser';
-import * as permitService from '../../../src/services/permit';
-import * as peachService from '../../../src/services/peach';
-import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit';
-import * as txWrapper from '../../../src/db/utils/transactionWrapper';
-import * as stamps from '../../../src/db/utils/utils';
-import { splitDateTime, Problem } from '../../../src/utils';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach.ts';
+import * as parser from '../../../src/parsers/peachParser.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import * as peachService from '../../../src/services/peach.ts';
+import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
+import * as stamps from '../../../src/db/utils/utils.ts';
+import { splitDateTime, Problem } from '../../../src/utils/index.ts';
 
 import type { Request, Response } from 'express';
-import type { PermitTracking } from '../../../src/types';
+import type { PermitTracking } from '../../../src/types/index.ts';
 
 jest.mock('config');
 
@@ -72,7 +72,7 @@ describe('getPeachSummaryController', () => {
     expect(summarizeSpy).toHaveBeenCalledWith(TEST_PEACH_RECORD_1);
     expect(res.status).toHaveBeenCalledWith(200);
 
-    const payload = (res.json as jest.Mock).mock.calls[0][0];
+    const payload = res.json!.mock.calls[0][0];
     expect(payload).toEqual(TEST_PEACH_SUMMARY);
   });
 
@@ -225,8 +225,8 @@ describe('syncPeachRecords', () => {
     const sameDate = TEST_PERMIT_2.submittedDate!;
     parseSpy.mockReturnValueOnce({
       [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
-        state: TEST_PERMIT_2.state,
-        stage: TEST_PERMIT_2.stage,
+        state: TEST_PERMIT_2.state as PermitState,
+        stage: TEST_PERMIT_2.stage as PermitStage,
         submittedDate: sameDate,
         submittedTime: null,
         decisionDate: null,
@@ -410,8 +410,8 @@ describe('syncPeachRecords', () => {
 
     parseSpy.mockReturnValueOnce({
       [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
-        state: permitWithVerifiedLater.state,
-        stage: permitWithVerifiedLater.stage,
+        state: permitWithVerifiedLater.state as PermitState,
+        stage: permitWithVerifiedLater.stage as PermitStage,
         submittedDate: permitWithVerifiedLater.submittedDate!,
         submittedTime: null,
         decisionDate: null,

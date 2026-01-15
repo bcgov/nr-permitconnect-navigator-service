@@ -1,14 +1,14 @@
-import { transactionWrapper } from '../../db/utils/transactionWrapper';
-import { listAllCodeTables } from '../../services/code';
-import { getLogger } from '../../utils/log';
+import { transactionWrapper } from '../../db/utils/transactionWrapper.ts';
+import { listAllCodeTables } from '../../services/code.ts';
+import { getLogger } from '../../utils/log.ts';
 
-import type { PrismaTransactionClient } from '../../db/dataConnection';
+import type { PrismaTransactionClient } from '../../db/dataConnection.ts';
 import type {
   ElectrificationProjectCategoryCode,
   ElectrificationProjectTypeCode,
   EscalationTypeCode,
   SourceSystemCode
-} from '../../types';
+} from '../../types/index.ts';
 
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
@@ -20,6 +20,7 @@ const log = getLogger(module.filename);
 /**
  * Pull the currently‑active codes from the DB and refresh
  * the in‑memory arrays.
+ * @returns true if succesful, false otherwise
  */
 export async function refreshCodeCaches(): Promise<boolean> {
   try {

@@ -1,8 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as accessRequestService from '../../../src/services/accessRequest.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
-import * as accessRequestService from '../../../src/services/accessRequest';
-import { AccessRequest } from '../../../src/types';
-import { Initiative } from '../../../src/utils/enums/application';
+import type { AccessRequest } from '../../../src/types/index.ts';
 
 const ACCESS_REQUEST = {
   userId: '123',

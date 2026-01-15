@@ -1,9 +1,10 @@
-import { mockDeep, DeepMockProxy, mockReset } from 'jest-mock-extended';
+import { mockDeep, mockReset } from 'jest-mock-extended';
 
-import prisma from '../../src/db/dataConnection';
-import { transactionWrapper } from '../../src/db/utils/transactionWrapper';
+import prisma from '../../src/db/dataConnection.ts';
+import { transactionWrapper } from '../../src/db/utils/transactionWrapper.ts';
 
-import type { ExtendedClient, PrismaTransactionClient } from '../../src/db/dataConnection';
+import type { DeepMockProxy } from 'jest-mock-extended';
+import type { ExtendedClient, PrismaTransactionClient } from '../../src/db/dataConnection.ts';
 
 jest.mock('../../src/db/dataConnection', () => ({
   __esModule: true,

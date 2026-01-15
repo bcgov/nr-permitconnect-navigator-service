@@ -1,14 +1,14 @@
-import { BringForwardType } from '../utils/enums/projectCommon';
-import { Initiative } from '../utils/enums/application';
+import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { NoteHistory, NoteHistoryBase } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { NoteHistory, NoteHistoryBase } from '../types/index.ts';
 
 /**
  * Create a note history
  * @param tx Prisma transaction client
- * @param data - The note history object to create
+ * @param data The note history object to create
  * @returns A Promise that resolves to the created resource
  */
 export const createNoteHistory = async (tx: PrismaTransactionClient, data: NoteHistoryBase): Promise<NoteHistory> => {
@@ -22,7 +22,8 @@ export const createNoteHistory = async (tx: PrismaTransactionClient, data: NoteH
 /**
  * Soft deletes a note history by marking is as deleted
  * @param tx Prisma transaction client
- * @param noteHistoryId - The ID of the note history to delete
+ * @param noteHistoryId The ID of the note history to delete
+ * @param deleteStamp Deleted timestamp information
  */
 export const deleteNoteHistory = async (
   tx: PrismaTransactionClient,
@@ -43,7 +44,7 @@ export const deleteNoteHistory = async (
 /**
  * Get a note history
  * @param tx Prisma transaction client
- * @param noteHistoryId - The ID of the note history to retrieve
+ * @param noteHistoryId The ID of the note history to retrieve
  * @returns A Promise that resolves to the created resource
  */
 export const getNoteHistory = async (tx: PrismaTransactionClient, noteHistoryId: string): Promise<NoteHistory> => {
@@ -61,8 +62,8 @@ export const getNoteHistory = async (tx: PrismaTransactionClient, noteHistoryId:
 /**
  * Retrieve a list of bring forward type note histories by the given state
  * @param tx Prisma transaction client
- * @param initiative - The initiative for which the note history belongs to
- * @param state - The state to search for
+ * @param initiative The initiative for which the note history belongs to
+ * @param state The state to search for
  * @returns A Promise that resolves to the note histories for the given parameters
  */
 export const listBringForward = async (
@@ -93,7 +94,7 @@ export const listBringForward = async (
 /**
  * Get all note histories for the given activity
  * @param tx Prisma transaction client
- * @param activityId - The ID of the activity the note histories belong to
+ * @param activityId The ID of the activity the note histories belong to
  * @returns A Promise that resolves to the permit types for the given initiative
  */
 export const listNoteHistory = async (tx: PrismaTransactionClient, activityId: string): Promise<NoteHistory[]> => {
@@ -115,7 +116,7 @@ export const listNoteHistory = async (tx: PrismaTransactionClient, activityId: s
 /**
  * Update a note history
  * @param tx Prisma transaction client
- * @param data - The note history to update
+ * @param data The note history to update
  * @returns A Promise that resolves to the updated resource
  */
 export const updateNoteHistory = async (tx: PrismaTransactionClient, data: NoteHistoryBase): Promise<NoteHistory> => {

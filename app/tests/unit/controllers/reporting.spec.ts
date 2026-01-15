@@ -1,10 +1,10 @@
-import { TEST_CURRENT_CONTEXT } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   getElectrificationProjectPermitDataController,
   getHousingProjectPermitDataController
-} from '../../../src/controllers/reporting';
-import * as reportingService from '../../../src/services/reporting';
+} from '../../../src/controllers/reporting.ts';
+import * as reportingService from '../../../src/services/reporting.ts';
 
 import type { Request, Response } from 'express';
 

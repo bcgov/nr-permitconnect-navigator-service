@@ -1,14 +1,14 @@
 import { Prisma } from '@prisma/client';
 
-import prisma from '../dataConnection';
+import prisma from '../dataConnection.ts';
 
-import type { PrismaTransactionClient } from '../dataConnection';
+import type { PrismaTransactionClient } from '../dataConnection.ts';
 
-type TxOpts = {
+interface TxOpts {
   isolationLevel?: Prisma.TransactionIsolationLevel;
   maxWait?: number;
   timeout?: number;
-};
+}
 
 /**
  * Run a transaction with the specified options

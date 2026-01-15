@@ -1,2 +1,2 @@
-export { default as Problem } from './problem';
-export * from './utils';
+export { default as Problem } from './problem.ts';
+export * from './utils.ts';

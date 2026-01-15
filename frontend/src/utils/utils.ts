@@ -57,7 +57,7 @@ export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
  * @param {string} value The string to parse
  * @returns {string[]} An array of string values
  */
-export function delimitEmails(value: string): Array<string> {
+export function delimitEmails(value: string): string[] {
   return value
     .split(/[\s;,]+/g)
     .map((s) => s.trim())
@@ -230,9 +230,9 @@ export function isTruthy(value: unknown) {
  * @param  {...string} items The strings to join on
  * @returns {string} A path string with the specified delimiter
  */
-export function joinPath(...items: Array<string>): string {
+export function joinPath(...items: string[]): string {
   if (items && items.length) {
-    const parts: Array<string> = [];
+    const parts: string[] = [];
     items.forEach((p) => {
       if (p)
         p.split(DELIMITER).forEach((x) => {
@@ -267,7 +267,7 @@ export function omit<Data extends object, Keys extends keyof Data>(data: Data, k
  * @param {string} delimiter The optional string delimiter
  * @returns {string[]} An array of string values, or `value` if it is not a string
  */
-export function parseCSV(value: string, delimiter: string = ','): Array<string> {
+export function parseCSV(value: string, delimiter: string = ','): string[] {
   return value.split(`${delimiter}`).map((s) => s.trim());
 }
 

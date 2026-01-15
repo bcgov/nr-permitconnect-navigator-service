@@ -1,8 +1,8 @@
 export type ElectrificationProjectSearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
   includeUser?: boolean;
-  electrificationProjectId?: Array<string>;
-  projectType?: Array<string>;
-  projectCategory?: Array<string>;
+  electrificationProjectId?: string[];
+  projectType?: string[];
+  projectCategory?: string[];
 };

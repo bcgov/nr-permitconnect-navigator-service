@@ -1,6 +1,6 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Document } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Document } from '../types/index.ts';
 
 /**
  * Creates a link between an activity and a previously existing object in COMS
@@ -10,6 +10,7 @@ import type { Document } from '../types';
  * @param filename Original filename of the document
  * @param mimeType Type of document
  * @param filesize Size of document
+ * @param createStamp CreatedAt timestamp
  * @returns A Promise that resolves to the created resource
  */
 export const createDocument = async (

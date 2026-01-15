@@ -12,7 +12,7 @@ export default {
    * Send an email with the roadmap data
    * @returns {Promise} An axios response
    */
-  send(activityId: string, selectedFileIds: Array<string>, emailData: Email) {
+  send(activityId: string, selectedFileIds: string[], emailData: Email) {
     if (emailData.to && !Array.isArray(emailData.to)) {
       emailData.to = delimitEmails(emailData.to);
     }

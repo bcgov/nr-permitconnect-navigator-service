@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { BceidSearchParameters, IdirSearchParameters } from '../types';
+import type { BceidSearchParameters, IdirSearchParameters } from '../types/index.ts';
 
 /**
  * Gets Auth token using SSO credentials
@@ -27,7 +27,6 @@ async function getToken() {
 
 /**
  * Returns an Axios instance with Authorization header
- * @param options Axios request config options
  * @returns An axios instance
  */
 function ssoAxios(): AxiosInstance {

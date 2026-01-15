@@ -2,20 +2,20 @@ import axios from 'axios';
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma from '../db/dataConnection';
+import prisma from '../db/dataConnection.ts';
 
 import type { AxiosInstance } from 'axios';
-import type { Email } from '../types';
+import type { Email } from '../types/index.ts';
 
-type Message = {
+interface Message {
   msgId: string;
-  to: Array<string>;
-};
+  to: string[];
+}
 
-type EmailData = {
-  messages: Array<Message>;
+interface EmailData {
+  messages: Message[];
   txId: string;
-};
+}
 
 /**
  * Gets Auth token using CHES client credentials
@@ -60,7 +60,7 @@ function chesAxios(): AxiosInstance {
 
 /**
  * Sends an email with CHES service
- * @param emailData
+ * @param emailData The email information
  * @returns A Promise that resolves to the response from the external api
  */
 export const email = async (emailData: Email) => {

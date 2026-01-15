@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import * as ssoService from '../../../src/services/sso';
+import * as ssoService from '../../../src/services/sso.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

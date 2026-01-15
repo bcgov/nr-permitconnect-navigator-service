@@ -6,24 +6,24 @@ import {
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
-} from '../../../src/controllers/enquiry';
-import * as activityService from '../../../src/services/activity';
-import * as activityContactService from '../../../src/services/activityContact';
-import * as enquiryService from '../../../src/services/enquiry';
-import * as contactService from '../../../src/services/contact';
-import { Initiative } from '../../../src/utils/enums/application';
+} from '../../../src/controllers/enquiry.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types';
+import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types/index.ts';
 import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
   TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -80,7 +80,7 @@ describe('createEnquiryController', () => {
 
     expect(createActivitySpy).toHaveBeenCalledTimes(1);
     expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(searchContactsSpy).toHaveBeenCalledTimes(2);
@@ -95,7 +95,7 @@ describe('createEnquiryController', () => {
       ActivityContactRole.PRIMARY
     );
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date), updatedBy: TEST_CURRENT_CONTEXT.userId }
+      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date) as Date, updatedBy: TEST_CURRENT_CONTEXT.userId }
     ]);
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
@@ -123,12 +123,12 @@ describe('deleteEnquiryController', () => {
     expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
     expect(deleteEnquirySpy).toHaveBeenCalledTimes(1);
     expect(deleteEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
     expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_1.activityId, {
-      deletedAt: expect.any(Date),
+      deletedAt: expect.any(Date) as Date,
       deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
@@ -240,7 +240,7 @@ describe('updateEnquiryController', () => {
 
     expect(updateEnquirySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ENQUIRY_1,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
