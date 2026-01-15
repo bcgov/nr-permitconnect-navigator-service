@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { array, object, string } from 'yup';
@@ -16,6 +16,7 @@ import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
+import { isAxiosError } from 'axios';
 
 // Props
 const { activityId, editable = true } = defineProps<{
@@ -35,7 +36,7 @@ const projectStore = useProjectStore();
 const fileSelectModalVisible: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any> = ref();
-const selectedFiles: Ref<Array<Document>> = ref([]);
+const selectedFiles: Ref<Document[]> = ref([]);
 
 // Form schema
 const emailValidator = (min: number, message: string) => {
@@ -66,7 +67,7 @@ const formSchema = object({
 const confirm = useConfirm();
 const toast = useToast();
 
-const confirmSubmit = (data: any) => {
+const confirmSubmit = (data: GenericObject) => {
   confirm.require({
     message: 'Please confirm that you want to send this Permit Roadmap. This cannot be undone.',
     header: 'Confirm sending this Permit Roadmap',
@@ -84,32 +85,36 @@ const confirmSubmit = (data: any) => {
         ).data;
         projectStore.addNoteHistory(response);
         toast.success('Roadmap sent');
-      } catch (e: any) {
-        toast.error('Failed to send roadmap', e?.response?.statusText);
+      } catch (e) {
+        if (isAxiosError(e)) toast.error('Failed to send roadmap', e?.response?.statusText);
+        else toast.error('Failed to send roadmap', String(e));
       }
     }
   });
 };
 
-function getPermitTypeNamesByStatus(status: string) {
-  return getPermits.value.filter((p) => p.stage === status).map((p) => p.permitType.name);
+function getPermitTypeNamesByStatus(status: string): string[] {
+  return getPermits.value
+    .filter((p) => p.stage === status)
+    .map((p) => p.permitType?.name)
+    .filter(Boolean) as string[];
 }
 
 function getPermitTypeNamesByNeeded(needed: string) {
-  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType.name);
+  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType?.name);
 }
 
 function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
 
-function onFileSelect(data: Array<Document>) {
+function onFileSelect(data: Document[]) {
   selectedFiles.value = data;
 }
 
 watchEffect(async () => {
   // Dumb, but need to do something with the ref for it to be watched properly
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const permits = getPermits.value.concat();
   const project = getProject.value;
 

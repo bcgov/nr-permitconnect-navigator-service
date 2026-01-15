@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -33,7 +34,7 @@ const toast = useToast();
 const assignedUsers: Ref<Record<string, string>> = ref({});
 const contact: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const projectsEnquiries: Ref<Array<ElectrificationProject | HousingProject | Enquiry>> = ref([]);
+const projectsEnquiries: Ref<(ElectrificationProject | HousingProject | Enquiry)[]> = ref([]);
 const updateContactModalVisible: Ref<boolean> = ref(false);
 
 const fullName = computed(() => {
@@ -69,8 +70,9 @@ function onDelete() {
              ${t('contactsProponentsList.deleteContactSuccessMessage')}`
           );
         }
-      } catch (e: any) {
-        toast.error(t('contactsProponentsList.deleteContactFailed'), e.message);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error)
+          toast.error(t('contactsProponentsList.deleteContactFailed'), String(e.message));
       }
       router.push({
         name: contactInitiativeRoute
@@ -91,7 +93,7 @@ onBeforeMount(async () => {
         projectService?.value.searchProjects({ activityId: activityIds }),
         enquiryService.searchEnquiries({ activityId: activityIds })
       ])
-    ).map((r: any) => r?.data);
+    ).map((r) => r?.data);
 
     projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
   }

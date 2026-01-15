@@ -1,6 +1,6 @@
 import type { GroupName, Initiative } from '@/utils/enums/application';
 
-export type UserSearchParameters = {
+export interface UserSearchParameters {
   userId?: string[];
   idp?: string[];
   sub?: string;
@@ -12,4 +12,4 @@ export type UserSearchParameters = {
   group?: GroupName[];
   includeUserGroups?: boolean;
   initiative?: Initiative[];
-};
+}

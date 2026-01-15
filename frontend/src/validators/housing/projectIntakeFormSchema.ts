@@ -11,7 +11,7 @@ import type { OrgBookOption } from '@/types';
 // Form validation schema
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 
-export function createProjectIntakeSchema(orgBookOptions: Array<OrgBookOption>) {
+export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
   return object({
     [IntakeFormCategory.CONTACTS]: object(contactValidator),
     [IntakeFormCategory.BASIC]: object({

@@ -1,11 +1,11 @@
-export type RelLink = {
+export interface RelLink {
   '@type': string;
   rel: string;
   href: string;
   method: string;
-};
+}
 
-export type ATSAddressResource = {
+export interface ATSAddressResource {
   '@type': string;
   links: RelLink[];
   addressId: number;
@@ -23,9 +23,9 @@ export type ATSAddressResource = {
   createdDateTime: number | null;
   updatedBy: string | null;
   updatedDateTime: number | null;
-};
+}
 
-export type ATSClientResource = {
+export interface ATSClientResource {
   '@type': string | undefined;
   links: RelLink[] | undefined;
   clientId: number | undefined;
@@ -43,4 +43,4 @@ export type ATSClientResource = {
   updatedDateTime: number | undefined;
   regionName: string | undefined;
   optOutOfBCStatSurveyInd: string | undefined;
-};
+}

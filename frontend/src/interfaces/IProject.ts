@@ -4,7 +4,7 @@ import type { Contact } from '../types/Contact';
 import type { User } from '../types/User';
 import type { ApplicationStatus } from '@/utils/enums/projectCommon';
 
-export type IProject = {
+export interface IProject extends IStamps {
   projectId: string;
   activityId: string;
   submittedAt: string;
@@ -27,6 +27,6 @@ export type IProject = {
 
   // Joined
   activity?: Activity;
-  contacts: Array<Contact>;
+  contacts: Contact[];
   user?: User;
-} & Partial<IStamps>;
+}

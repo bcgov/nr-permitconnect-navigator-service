@@ -9,7 +9,7 @@ import type { OrgBookOption } from '@/types';
 export function createProjectIntakeSchema(
   codeList: Record<CodeName, string[]>,
   enums: Record<CodeName, Record<string, string>>,
-  orgBookOptions: Array<OrgBookOption>
+  orgBookOptions: OrgBookOption[]
 ) {
   return object({
     [IntakeFormCategory.CONTACTS]: object(contactValidator),

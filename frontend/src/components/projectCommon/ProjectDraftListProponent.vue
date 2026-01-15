@@ -13,7 +13,7 @@ import type { ElectrificationProject, HousingProject } from '@/types';
 // Props
 const { loading, drafts } = defineProps<{
   loading: boolean;
-  drafts: Array<any> | undefined;
+  drafts: any[] | undefined;
 }>();
 
 // Injections

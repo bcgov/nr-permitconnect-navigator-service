@@ -34,12 +34,12 @@ const route = useRoute();
 const router = useRouter();
 
 // State
-const authorizations: Ref<Array<Permit>> = ref([]);
-const drafts: Ref<Array<any>> = ref([]);
-const enquiries: Ref<Array<Enquiry>> = ref([]);
+const authorizations: Ref<Permit[]> = ref([]);
+const drafts: Ref<any[]> = ref([]);
+const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
 const loading: Ref<boolean> = ref(true);
-const projects: Ref<Array<HousingProject>> = ref([]);
+const projects: Ref<HousingProject[]> = ref([]);
 
 // Providers
 provide(draftableProjectServiceKey, ref(housingProjectService));

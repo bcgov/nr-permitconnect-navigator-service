@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -25,13 +26,13 @@ import type { Contact, Pagination } from '@/types';
 
 // Props
 const { contacts, loading } = defineProps<{
-  contacts: Array<Contact> | undefined;
+  contacts: Contact[] | undefined;
   loading: boolean;
 }>();
 
 // Emits
 const emit = defineEmits<{
-  (e: 'contact-deleted', contact: Contact): void;
+  contactDeleted: [contact: Contact];
 }>();
 
 // Injections
@@ -55,7 +56,7 @@ const pagination: Ref<Pagination> = ref({
   field: 'lastName',
   page: 0
 });
-const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
+const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<Contact | undefined> = ref(undefined);
 const updateContactModalVisible: Ref<boolean> = ref(false);
 
@@ -80,9 +81,10 @@ function onDelete(contact: Contact) {
           t('contactsProponentsList.deleteContactSuccess'),
           `${contact.firstName} ${contact.lastName} ${t('contactsProponentsList.deleteContactSuccessMessage')}`
         );
-        emit('contact-deleted', contact);
-      } catch (e: any) {
-        toast.error(t('contactsProponentsList.deleteContactFailed'), e.message);
+        emit('contactDeleted', contact);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error)
+          toast.error(t('contactsProponentsList.deleteContactFailed'), e.message);
       }
     }
   });

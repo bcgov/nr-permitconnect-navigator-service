@@ -27,13 +27,18 @@ import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Enquiry, Pagination } from '@/types';
+import { isAxiosError } from 'axios';
+import instance from '@/i18n';
 
 // Types
-type FilterOption = { label: string; statuses: string[] };
+interface FilterOption {
+  label: string;
+  statuses: string[];
+}
 
 // Props
 const { enquiries } = defineProps<{
-  enquiries: Array<Enquiry> | undefined;
+  enquiries: Enquiry[] | undefined;
 }>();
 
 // Injections
@@ -114,8 +119,8 @@ function handleCreateNewActivity() {
             params: { enquiryId: response.enquiryId }
           });
         }
-      } catch (e: any) {
-        toast.error(t('enquiryListNavigator.failedSubmission'), e.message);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryListNavigator.failedSubmission'), e.message);
       }
     },
     acceptLabel: t('enquiryListNavigator.confirm'),
@@ -140,7 +145,7 @@ function onDelete(enquiryId: string, activityId: string) {
           selection.value = undefined;
           toast.success('Enquiry deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete enquiry', e.message));
+        .catch((e) => toast.error('Failed to delete enquiry', e.message));
     }
   });
 }

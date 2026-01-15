@@ -13,15 +13,15 @@ import type { BringForward } from '@/types';
 
 // Props
 const { bringForward = [], myAssignedTo = new Set<string>() } = defineProps<{
-  bringForward?: Array<BringForward>;
-  myAssignedTo: Set<string>;
+  bringForward?: BringForward[];
+  myAssignedTo?: Set<string>;
 }>();
 
 // Store
 const { getProfile } = storeToRefs(useAuthNStore());
 
 // State
-const bringForwards: Ref<Array<BringForward>> = ref(bringForward);
+const bringForwards: Ref<BringForward[]> = ref(bringForward);
 const filterToUser: Ref<boolean> = ref(false);
 
 // Actions

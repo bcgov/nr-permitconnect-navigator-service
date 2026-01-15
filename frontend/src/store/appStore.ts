@@ -4,14 +4,14 @@ import { computed, readonly, ref } from 'vue';
 
 import type { Ref } from 'vue';
 
-export type AppStoreState = {
+export interface AppStoreState {
   initiative: Ref<Initiative>;
   loadingCalls: Ref<number>;
   loadingInterval: Ref<ReturnType<typeof setTimeout> | undefined>;
   loadingMode: Ref<'determinate' | 'indeterminate'>;
   loadingValue: Ref<number>;
   zone: Ref<Zone>;
-};
+}
 
 export const useAppStore = defineStore('app', () => {
   // State

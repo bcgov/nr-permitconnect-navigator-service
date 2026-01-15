@@ -32,7 +32,11 @@ import type { ElectrificationProject, Enquiry, HousingProject, Permit } from '@/
 import { Initiative, RouteName } from '@/utils/enums/application';
 
 // Props
-const { enquiryId, project, permit } = defineProps<{
+const {
+  enquiryId = undefined,
+  project = undefined,
+  permit = undefined
+} = defineProps<{
   enquiryId?: string;
   project?: ElectrificationProject | HousingProject;
   permit?: Permit;
@@ -78,7 +82,7 @@ const formSchema = object({
 });
 
 // Actions
-function confirmSubmit(data: any) {
+function confirmSubmit(data: GenericObject) {
   confirm.require({
     message: 'Are you sure you wish to submit this form?',
     header: 'Please confirm submission',
@@ -91,7 +95,7 @@ function confirmSubmit(data: any) {
 
 async function emailConfirmation(activityId: string, enquiryId: string) {
   const configCC = getConfig.value.ches?.submission?.cc;
-  let permitDescription: string = '';
+  let permitDescription = '';
   let enquiryDescription: string = formRef.value?.values.basic.enquiryDescription || '';
   let firstTwoSentences: string;
 
@@ -184,19 +188,19 @@ async function loadEnquiry() {
         enquiryDescription: response?.enquiryDescription
       }
     };
-  } catch (e: any) {
+  } catch (e) {
     if (getInitiative.value === Initiative.HOUSING) router.replace({ name: enquiryRouteName });
     else router.replace({ name: RouteName.EXT_ELECTRIFICATION });
-    toast.error('Failed to load enquiry', e);
+    toast.error('Failed to load enquiry', String(e));
   }
 }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]!) : []));
   document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
 }
 
-async function onSubmit(values: any) {
+async function onSubmit(values: GenericObject) {
   editable.value = false;
 
   try {
@@ -217,7 +221,7 @@ async function onSubmit(values: any) {
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values, contact }, [
+    const dataOmitted = omit({ ...values, contact } as GenericObject, [
       'contactId',
       'contactFirstName',
       'contactLastName',
@@ -229,7 +233,7 @@ async function onSubmit(values: any) {
 
     if (permit) {
       let permitDescription =
-        t('enquiryIntakeForm.re') + ': ' + permit.permitType.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
+        t('enquiryIntakeForm.re') + ': ' + permit.permitType?.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
       const trackingId =
         permit.permitTracking?.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
       const authState = t('enquiryIntakeForm.authStatus') + ': ' + permit.state;
@@ -248,8 +252,8 @@ async function onSubmit(values: any) {
     emailConfirmation(response.data.activityId, response.data.enquiryId);
 
     router.push(getEnquiryConfirmationRoute(response.data));
-  } catch (e: any) {
-    toast.error('Failed to save intake', e);
+  } catch (e) {
+    toast.error('Failed to save intake', String(e));
   } finally {
     editable.value = true;
   }
@@ -314,7 +318,7 @@ onBeforeMount(async () => {
             <span class="section-header">
               {{ t('enquiryIntakeForm.about') }}
               <span class="text-primary">
-                {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType.name }}|
+                {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType?.name }}|
                 {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
                 {{ permit?.state ?? 'No authorization status.' }}
               </span>

@@ -4,8 +4,8 @@ import { formatDateTime } from '@/utils/formatters';
 import type { PermitNote } from '@/types';
 
 // Props
-const { authorizationNotes } = defineProps<{
-  authorizationNotes?: Array<PermitNote>;
+const { authorizationNotes = undefined } = defineProps<{
+  authorizationNotes?: PermitNote[];
 }>();
 </script>
 

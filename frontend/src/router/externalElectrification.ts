@@ -5,7 +5,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: 'electrification',
     meta: { access: [NavigationPermission.EXT_ELECTRIFICATION], breadcrumb: 'Electrification', requiresAuth: true },

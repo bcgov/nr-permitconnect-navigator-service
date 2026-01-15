@@ -12,6 +12,7 @@ import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
+import { isAxiosError } from 'axios';
 
 // Props
 const { activityId } = defineProps<{
@@ -54,9 +55,11 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
 
     // Close modal on success
     createUserModalVisible.value = false;
-  } catch (error: any) {
-    if (error.response?.data?.type === 'P2002') toast.error(t('e.common.projectTeamTab.userAlreadyExists'));
-    else toast.error(t('e.common.projectTeamTab.failedToAdd'), error.response?.data?.message ?? error.message);
+  } catch (error) {
+    if (isAxiosError(error)) {
+      if (error.response?.data?.type === 'P2002') toast.error(t('e.common.projectTeamTab.userAlreadyExists'));
+      else toast.error(t('e.common.projectTeamTab.failedToAdd'), error.response?.data?.message ?? error.message);
+    } else if (error instanceof Error) toast.error(t('e.common.projectTeamTab.failedToAdd'), String(error.message));
   }
 }
 
@@ -69,8 +72,10 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
 
     // Close modal on success
     manageUserModalVisible.value = false;
-  } catch (error: any) {
-    toast.error(t('e.common.projectTeamTab.failedToUpdate'), error.response?.data?.message ?? error.message);
+  } catch (error) {
+    if (isAxiosError(error))
+      toast.error(t('e.common.projectTeamTab.failedToUpdate'), error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error(t('e.common.projectTeamTab.failedToUpdate'), error.message);
   }
 }
 
@@ -92,8 +97,10 @@ async function onRevokeUser(contact: ActivityContact) {
         last: contact.contact?.lastName
       })
     );
-  } catch (error: any) {
-    toast.error(t('e.common.projectTeamTab.failedToRevoke'), error.response?.data?.message ?? error.message);
+  } catch (error) {
+    if (isAxiosError(error))
+      toast.error(t('e.common.projectTeamTab.failedToRevoke'), error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error(t('e.common.projectTeamTab.failedToRevoke'), error.message);
   }
 }
 

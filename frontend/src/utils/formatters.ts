@@ -9,7 +9,6 @@ function _dateFnsFormat(value: string | undefined | null, formatter: string) {
       return format(parseJSON(value), formatter);
     }
   } catch (error) {
-    // eslint-disable-next-line no-console
     console.error(`_dateFnsFormat: Error parsing ${value} to ${error}`);
   }
   return formatted;

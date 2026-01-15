@@ -17,11 +17,11 @@ export default {
   async createObject(
     object: any,
     headers: {
-      metadata?: Array<{ key: string; value: string }>;
+      metadata?: { key: string; value: string }[];
     },
     params: {
       bucketId?: string;
-      tagset?: Array<{ key: string; value: string }>;
+      tagset?: { key: string; value: string }[];
     },
     axiosOptions?: AxiosRequestConfig
   ) {

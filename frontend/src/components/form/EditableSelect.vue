@@ -22,7 +22,7 @@ const {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  options: Array<unknown>;
+  options: unknown[];
   getOptionLabel: Function;
   bold?: boolean;
 }>();
@@ -54,7 +54,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
       :options="options"
-      :option-label="(option: Array<unknown>) => getOptionLabel(option)"
+      :option-label="(option: unknown[]) => getOptionLabel(option)"
       @blur="handleBlur"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: SelectChangeEvent) => emit('onChange', e)"

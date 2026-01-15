@@ -189,7 +189,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm = wrapper.vm;
 
     expect(vm.initialFormValues).toEqual({
       state: PermitState.NONE,

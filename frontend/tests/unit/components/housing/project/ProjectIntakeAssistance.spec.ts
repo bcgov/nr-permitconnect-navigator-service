@@ -17,7 +17,7 @@ const testFormErrors: Record<string, string | undefined> = {
   [`${IntakeFormCategory.CONTACTS}.email`]: 'Invalid email address'
 };
 
-const testFormValues: { [key: string]: string } = {
+const testFormValues: Record<string, string> = {
   [`${IntakeFormCategory.CONTACTS}`]: 'John Doe',
   [`${IntakeFormCategory.CONTACTS}.email`]: 'john.doe@example.com'
 };

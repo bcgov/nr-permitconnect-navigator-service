@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { array, boolean, number, object, string } from 'yup';
+import { array, boolean, number, object, string, type InferType } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
@@ -30,10 +31,12 @@ import {
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitTracking, SourceSystemKind, User } from '@/types';
+import type { Permit, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
+import type { IStamps } from '@/interfaces';
+import type { PermitArgs } from '@/types/Permit';
 
 // Props
-const { authorization, editable } = defineProps<{
+const { authorization = undefined, editable } = defineProps<{
   authorization?: Permit;
   editable?: boolean;
 }>();
@@ -51,34 +54,7 @@ const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
 
-// Store
-const { codeDisplay } = codeStore;
-const { isPeachEnabled } = storeToRefs(featureStore);
-const { getConfig } = storeToRefs(configStore);
-const { getProject } = storeToRefs(projectStore);
-
-// State
-const disableFormNavigationGuard: Ref<boolean> = ref(false);
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const isValidPeachPermit: Ref<boolean> = ref(false);
-const noPeachDataModalVisible = defineModel<boolean>('visible');
-const sourceSystemKinds: Ref<Array<SourceSystemKind>> = ref([]);
-const updatedBy: Ref<User | undefined> = ref(undefined);
-
-const isPeachIntegratedAuthType = computed(() =>
-  checkIfPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem)
-);
-const isPeachIntegratedTrackingId = computed(() =>
-  checkIfPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
-);
-const isPeachIntegrated = computed(() => isPeachIntegratedAuthType.value && isPeachIntegratedTrackingId.value);
-
-// Providers
-const projectRouteName = inject(projectRouteNameKey);
-const projectService = inject(projectServiceKey);
-
-// Actions
+// Types
 const formSchema = object({
   permitNote: string()
     .when('stage', {
@@ -102,10 +78,12 @@ const formSchema = object({
       );
     }),
   stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
+  issuedPermitId: string(),
+  permitId: string(),
   permitTracking: array().of(
     object({
-      sourceSystemKindId: number().required().label(t('authorization.authorizationForm.trackingIdType')),
-      trackingId: string().max(255).required().label(t('authorization.authorizationForm.trackingId')),
+      sourceSystemKindId: number().label(t('authorization.authorizationForm.trackingIdType')),
+      trackingId: string().max(255).label(t('authorization.authorizationForm.trackingId')),
       shownToProponent: boolean()
         .oneOf([true, false])
         .default(false)
@@ -133,7 +111,37 @@ const formSchema = object({
   statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
 });
 
-const snapshotPermitStatus = (p: any) => ({
+type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & IStamps;
+
+// Store
+const { codeDisplay } = codeStore;
+const { isPeachEnabled } = storeToRefs(featureStore);
+const { getConfig } = storeToRefs(configStore);
+const { getProject } = storeToRefs(projectStore);
+
+// State
+const disableFormNavigationGuard: Ref<boolean> = ref(false);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<Partial<FormSchemaType> | undefined> = ref(undefined);
+const isValidPeachPermit: Ref<boolean> = ref(false);
+const noPeachDataModalVisible = defineModel<boolean>('visible');
+const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
+const updatedBy: Ref<User | undefined> = ref(undefined);
+
+const isPeachIntegratedAuthType = computed(() =>
+  checkIfPeachIntegratedAuthType(formRef.value?.values?.authorizationType?.sourceSystem)
+);
+const isPeachIntegratedTrackingId = computed(() =>
+  checkIfPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
+);
+const isPeachIntegrated = computed(() => isPeachIntegratedAuthType.value && isPeachIntegratedTrackingId.value);
+
+// Providers
+const projectRouteName = inject(projectRouteNameKey);
+const projectService = inject(projectServiceKey);
+
+// Actions
+const snapshotPermitStatus = (p: Partial<Permit>) => ({
   state: p.state,
   stage: p.stage,
   decisionDate: p.decisionDate,
@@ -174,7 +182,7 @@ async function emailNotification(data: Permit, permitNote: string) {
       getProject.value?.contacts?.[0]?.firstName ||
       getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
     '{{ activityId }}': getProject.value?.activityId,
-    '{{ permitName }}': data.permitType.name,
+    '{{ permitName }}': data.permitType?.name,
     '{{ submittedDate }}': data.submittedDate ? formatDateOnly(data.submittedDate) : formatDate(data.createdAt),
     '{{ projectId }}': getProject.value?.projectId,
     '{{ permitId }}': data.permitId
@@ -199,7 +207,7 @@ async function emailNotification(data: Permit, permitNote: string) {
     from: configCC,
     to: [applicantEmail],
     cc: configCC,
-    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType.name}`,
+    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType?.name}`,
     bodyType: 'html',
     body: body
   };
@@ -212,7 +220,8 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
   try {
     const data: PermitTracking[] = permitTrackings.map((pt) => {
       const found =
-        sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) || ({} as any);
+        sourceSystemKinds.value.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) ||
+        ({} as SourceSystemKind);
       return {
         ...pt,
         sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
@@ -220,13 +229,18 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
     });
     const peachSummary = await peachService.getPeachSummary(data);
     return peachSummary.data;
-  } catch (e: any) {
-    const systemRecordNotFound =
-      e.response.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
-    if (e.status === 404 && systemRecordNotFound) {
-      noPeachDataModalVisible.value = isPeachEnabled.value; // Change to `true1 once toggle removed
+  } catch (e) {
+    if (isAxiosError(e)) {
+      const systemRecordNotFound =
+        e.response?.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
+
+      if (e.status === 404 && systemRecordNotFound) {
+        noPeachDataModalVisible.value = isPeachEnabled.value; // Change to `true` once toggle removed
+      } else {
+        toast.error(e.message);
+      }
     } else {
-      toast.error(e.message);
+      toast.error(String(e));
     }
   }
 }
@@ -278,7 +292,7 @@ function initializeFormValues() {
       authorizationType: authorization.permitType,
       decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
       submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
-      permitTracking: authorization.permitTracking.map((pt) => {
+      permitTracking: authorization.permitTracking?.map((pt) => {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { sourceSystemKind, ...tracking } = pt;
         return tracking;
@@ -288,7 +302,7 @@ function initializeFormValues() {
       statusLastVerified: combineDateTime(authorization.statusLastVerified, authorization.statusLastVerifiedTime),
       stage: authorization.stage,
       state: authorization.state,
-      needed: authorization.needed,
+      needed: authorization.needed as PermitNeeded,
       permitId: authorization?.permitId,
       createdAt: authorization.createdAt,
       createdBy: authorization.createdBy,
@@ -326,29 +340,31 @@ function onDelete() {
             initialTab: AUTHORIZATION_TAB
           }
         });
-      } catch (e: any) {
-        toast.error(t('authorization.authorizationForm.authDeletionError'), e.message);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error)
+          toast.error(t('authorization.authorizationForm.authDeletionError'), e.message);
+        else toast.error(t('authorization.authorizationForm.authDeletionError'), String(e));
       }
     }
   });
 }
 
-function onInvalidSubmit(e: any) {
-  scrollToFirstError(e.errors);
+function onInvalidSubmit({ errors }: GenericObject) {
+  scrollToFirstError(errors);
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(data: GenericObject) {
   disableFormNavigationGuard.value = true;
   const decision = splitDateTime(data.decisionDate);
   const submitted = splitDateTime(data.submittedDate);
   const statusLastChanged = splitDateTime(data.statusLastChanged);
   const statusLastVerified = splitDateTime(data.statusLastVerified);
 
-  const { authorizationType, permitNote, ...rest } = data;
-  const permitData: Permit = {
+  const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
+  const permitData: PermitArgs = {
     ...rest,
-    activityId: getProject.value?.activityId,
-    permitTypeId: authorizationType?.permitTypeId,
+    activityId: getProject.value!.activityId,
+    permitTypeId: authorizationType.permitTypeId,
     submittedDate: submitted.date,
     submittedTime: submitted.time,
     decisionDate: decision.date,
@@ -365,7 +381,7 @@ async function onSubmit(data: any) {
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
       checkIfPeachIntegratedTrackingId(data.permitTracking)
     ) {
-      const response = await getPeachSummary(permitData?.permitTracking);
+      const response = await getPeachSummary(permitData?.permitTracking ?? []);
       if (response) {
         isValidPeachPermit.value = true;
         permitData.decisionDate = response.decisionDate;
@@ -416,8 +432,8 @@ async function onSubmit(data: any) {
         initialTab: '2'
       }
     });
-  } catch (e: any) {
-    toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
+  } catch (e) {
+    if (e instanceof Error) toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
   }
 }
 
@@ -448,7 +464,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       name="permitId"
     />
     <h3 class="mt-4">
-      {{ authorization ? authorization.permitType.name : t('authorization.authorizationForm.addAuthorization') }}
+      {{ authorization?.permitType?.name ?? t('authorization.authorizationForm.addAuthorization') }}
     </h3>
     <AuthorizationCardIntake
       :editable="editable"
@@ -519,11 +535,11 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
         <span class="font-bold mr-2">
           {{ t('authorization.authorizationForm.agency') }}
         </span>
-        {{ authorization?.permitType.agency }}
+        {{ authorization?.permitType?.agency }}
       </div>
       <div class="flex justify-center">
         <span class="font-bold mr-2">{{ t('authorization.authorizationForm.businessDomain') }}</span>
-        {{ authorization?.permitType.businessDomain }}
+        {{ authorization?.permitType?.businessDomain }}
       </div>
       <div class="flex justify-center">
         <span class="font-bold mr-2">{{ t('authorization.authorizationForm.updatedBy') }}</span>

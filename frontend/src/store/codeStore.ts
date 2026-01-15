@@ -22,9 +22,9 @@ const initialCodeMap = codeNames.reduce<CodeMap>((acc, name) => {
   return acc;
 }, {} as CodeMap);
 
-export type CodeStoreState = {
+export interface CodeStoreState {
   codes: Ref<CodeMap>;
-};
+}
 
 export const useCodeStore = defineStore('code', () => {
   // State

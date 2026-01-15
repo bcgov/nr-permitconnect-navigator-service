@@ -10,8 +10,8 @@ import type { Document } from '@/types';
 
 // Props
 const { documents, selectedDocuments = [] } = defineProps<{
-  documents: Array<Document>;
-  selectedDocuments?: Array<Document>;
+  documents: Document[];
+  selectedDocuments?: Document[];
 }>();
 
 // Emits
@@ -22,7 +22,7 @@ const { t } = useI18n();
 
 // State
 const visible = defineModel<boolean>('visible');
-const selectedFiles: Ref<Array<Document>> = ref(selectedDocuments);
+const selectedFiles: Ref<Document[]> = ref(selectedDocuments);
 
 // Actions
 function onDocumentClicked(data: { document: Document; selected: boolean }) {

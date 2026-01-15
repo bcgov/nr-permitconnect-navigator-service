@@ -27,11 +27,11 @@ const route = useRoute();
 const router = useRouter();
 
 // State
-const authorizations: Ref<Array<Permit>> = ref([]);
-const drafts: Ref<Array<any>> = ref([]);
+const authorizations: Ref<Permit[]> = ref([]);
+const drafts: Ref<any[]> = ref([]);
 const first: Ref<number> = ref(0);
 const loading: Ref<boolean> = ref(true);
-const projects: Ref<Array<ElectrificationProject>> = ref([]);
+const projects: Ref<ElectrificationProject[]> = ref([]);
 
 // Providers
 provide(projectRouteNameKey, ref(RouteName.EXT_ELECTRIFICATION_INTAKE));

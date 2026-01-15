@@ -99,7 +99,7 @@ const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
 const locationRef: Ref<InstanceType<typeof LocationCard> | null> = ref(null);
-const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
+const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const parcelAccordionIndex: Ref<number | undefined> = ref(undefined);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
@@ -157,8 +157,8 @@ async function emailConfirmation(actId: string, projectId: string, forProjectSub
       body: body
     };
     await housingProjectService.emailConfirmation(emailData);
-  } catch (e: any) {
-    toast.error('Failed to send confirmation email. ', e);
+  } catch (e) {
+    toast.error('Failed to send confirmation email.', String(e));
   }
 }
 
@@ -199,8 +199,8 @@ async function onAssistanceRequest(values: GenericObject) {
     } else {
       toast.error('Failed to submit enquiry');
     }
-  } catch (e: any) {
-    toast.error('Failed to save enquiry', e);
+  } catch (e) {
+    toast.error('Failed to save enquiry', String(e));
   } finally {
     editable.value = true;
   }
@@ -263,16 +263,16 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: { [key: string]: string }) => ({
+      .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
   }
 }
 
-async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
+async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = true) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
@@ -285,12 +285,12 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
     });
 
     if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
-  } catch (e: any) {
-    toast.error('Failed to save draft', e);
+  } catch (e) {
+    toast.error('Failed to save draft', String(e));
   }
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(data: GenericObject) {
   // If there is a change to contact fields,
   // please update onAssistanceRequest() as well.
   editable.value = false;
@@ -318,7 +318,7 @@ async function onSubmit(data: any) {
     // Show the trackingNumber of all appliedPermits to the proponent
     dataOmitted.appliedPermits?.forEach((x: Permit) => {
       if (x.permitTracking) x.permitTracking = x.permitTracking.filter((pt) => pt.trackingId);
-      if (x.permitTracking[0]) x.permitTracking[0].shownToProponent = true;
+      if (x.permitTracking?.[0]) x.permitTracking[0].shownToProponent = true;
     });
 
     // Remove empty investigate permit objects
@@ -348,8 +348,8 @@ async function onSubmit(data: any) {
     } else {
       throw new Error('Failed to retrieve correct draft data');
     }
-  } catch (e: any) {
-    toast.error('Failed to save intake', e);
+  } catch (e) {
+    toast.error('Failed to save intake', String(e));
     editable.value = true;
   }
 }
@@ -360,8 +360,8 @@ onBeforeMount(async () => {
     projectStore.setDocuments([]);
 
     let response,
-      permits: Array<Permit> = [],
-      documents: Array<Document> = [];
+      permits: Permit[] = [],
+      documents: Document[] = [];
 
     if (draftId) {
       response = (await housingProjectService.getDraft(draftId)).data;
@@ -480,8 +480,8 @@ onBeforeMount(async () => {
     }
 
     locationRef.value?.onLatLongInput();
-  } catch (e: any) {
-    toast.error('Failed to load intake', e);
+  } catch (e) {
+    toast.error('Failed to load intake', String(e));
     router.replace({ name: RouteName.EXT_HOUSING });
   }
 });

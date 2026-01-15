@@ -27,7 +27,7 @@ const {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  suggestions: Array<unknown>;
+  suggestions: unknown[];
   getOptionLabel?: Function;
   bold?: boolean;
   forceSelection?: boolean;

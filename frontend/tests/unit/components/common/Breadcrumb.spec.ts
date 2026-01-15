@@ -333,7 +333,7 @@ describe('Breadcrumb.vue', () => {
     const currentSpans = wrapper.findAll('span.breadcrumb-current');
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(currentSpans[0]!.text()).toBe(testPermit.permitType.name);
+    expect(currentSpans[0]!.text()).toBe(testPermit.permitType?.name);
   });
 
   test('renders dynamic "authorization" breadcrumb as link with truncation (not last item)', async () => {
@@ -354,7 +354,7 @@ describe('Breadcrumb.vue', () => {
     const currentSpans = wrapper.findAll('span.breadcrumb-current');
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBe(1);
-    expect(links[0]!.text()).toBe(testPermit.permitType.name.substring(0, 10) + '...');
+    expect(links[0]!.text()).toBe(testPermit.permitType?.name.substring(0, 10) + '...');
   });
 
   test('renders default dynamic breadcrumb with non defined dynamicBreadcrumb type', () => {
