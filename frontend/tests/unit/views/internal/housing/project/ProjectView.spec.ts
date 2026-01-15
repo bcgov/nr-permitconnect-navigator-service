@@ -55,7 +55,7 @@ listRelatedEnquiriesSpy.mockResolvedValue({
   data: [{ enquiryId: 'enquiry123', activityId: 'activity456' }]
 } as AxiosResponse);
 
-const testHousingProjectId = 'submission123';
+const testHousingProjectId = 'project123';
 
 const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
   props: {

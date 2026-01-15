@@ -55,7 +55,7 @@ describe('ATSUserCreateModal.vue', () => {
     vi.clearAllMocks();
   });
 
-  it('renders the component with the provided props, a submission', () => {
+  it('renders the component with the provided props, a project', () => {
     const wrapper = mount(ATSUserCreateModal, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });

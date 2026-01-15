@@ -17,13 +17,13 @@ vi.mock('vue-i18n', () => ({
 
 const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
 
-getProjectSpy.mockResolvedValue({ data: { activityId: '123', submissionId: '456' } } as AxiosResponse);
+getProjectSpy.mockResolvedValue({ data: { activityId: '123', projectId: '456' } } as AxiosResponse);
 
-const testSubmissionId = 'submission123';
+const testProjectId = 'project123';
 
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId) => ({
+const wrapperSettings = (testProjectIdProp = testProjectId) => ({
   props: {
-    projectId: testSubmissionIdProp
+    projectId: testProjectIdProp
   },
   global: {
     plugins: [
