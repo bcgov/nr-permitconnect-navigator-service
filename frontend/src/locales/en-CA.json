@@ -433,7 +433,7 @@
           "submissionTypeLabel": "Submission type",
           "updatesHeader": "Updates"
         },
-        "projectFormSchema": {
+        "projectFormNavigatorSchema": {
           "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
           "addedToAts": "Authorized Tracking System (ATS) updated",
           "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
@@ -670,6 +670,7 @@
     "deleteContactFailed": "Failed to delete contact",
     "deleteContactHeader": "Delete contact?",
     "deleteContactMessage": "Please confirm that you want to delete the contact of ",
+    "deleteContactNotLoaded": "Contact not loaded into Contact Details page",
     "deleteContactSuccess": "Contact deleted",
     "deleteContactSuccessMessage": "has been deleted.",
     "email": "Email",
@@ -895,17 +896,7 @@
     "register": "Need an account?",
     "setupBCServicesCard": "Set up a BC Services Card account."
   },
-  "relatedEnquiryListProponent": {
-    "createdByFailed": "Failed to load created by users",
-    "enquiryId": "Enquiry ID",
-    "listEmpty": "Your project related enquiries will be displayed here.",
-    "of": "of",
-    "state": "State",
-    "submittedBy": "Submitted by",
-    "submittedDate": "Submitted date",
-    "tableAlt": "A table containing a list of enquiries"
-  },
-  "submissionDraftListProponent": {
+  "projectDraftListProponent": {
     "action": "Action",
     "ariaDeleteDraft": "Delete draft",
     "cancel": "Cancel",
@@ -919,6 +910,16 @@
     "listEmpty": "Your project submission drafts will be displayed here",
     "of": "of",
     "tableAlt": "A table containing a list of draft submissions"
+  },
+  "relatedEnquiryListProponent": {
+    "createdByFailed": "Failed to load created by users",
+    "enquiryId": "Enquiry ID",
+    "listEmpty": "Your project related enquiries will be displayed here.",
+    "of": "of",
+    "state": "State",
+    "submittedBy": "Submitted by",
+    "submittedDate": "Submitted date",
+    "tableAlt": "A table containing a list of enquiries"
   },
   "updateContactModal": {
     "cancel": "Cancel",

@@ -121,7 +121,7 @@ watch(visible, () => {
         <template #body="{ data }">
           <Button
             class="p-button-lg p-button-text p-button-danger p-0"
-            :aria-label="t('i.ats.common.deleteUser')"
+            :aria-label="t('i.ats.atsUserDetailsModal.deleteUser')"
             :disabled="disabled || isRelatedEnquiry"
             @click="users = users.filter((atsUser) => atsUser.clientId !== data.clientId)"
           >

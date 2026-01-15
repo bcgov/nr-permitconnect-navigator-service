@@ -322,7 +322,7 @@ watchEffect(() => {
           </AccordionPanel>
         </Accordion>
         <ProjectListNavigator
-          :submissions="projects"
+          :projects="projects"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>

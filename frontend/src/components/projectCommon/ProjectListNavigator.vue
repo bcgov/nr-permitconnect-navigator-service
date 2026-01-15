@@ -30,8 +30,8 @@ import type { ElectrificationProject, HousingProject, Pagination } from '@/types
 type FilterOption = { label: string; statuses: string[] };
 
 // Props
-const { submissions } = defineProps<{
-  submissions: (ElectrificationProject | HousingProject)[] | undefined;
+const { projects } = defineProps<{
+  projects: (ElectrificationProject | HousingProject)[] | undefined;
 }>();
 
 // Injections
@@ -73,11 +73,11 @@ const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 /**
- * Filter submissions based on status
+ * Filter projects based on status
  * Inject a joined location field for housing for proper sorting and searching
  */
-const filteredSubmissions = computed(() => {
-  return submissions
+const filteredProjects = computed(() => {
+  return projects
     ?.filter((element) => {
       return selectedFilter.value.statuses.includes(element.applicationStatus);
     })
@@ -166,8 +166,8 @@ function updateQueryParams() {
 
 onBeforeMount(() => {
   const lastRowsPerPage = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
-  if (submissions && lastRowsPerPage && submissions.length > lastRowsPerPage) {
-    rowsPerPageOptions.value.push(submissions.length);
+  if (projects && lastRowsPerPage && projects.length > lastRowsPerPage) {
+    rowsPerPageOptions.value.push(projects.length);
   }
 });
 </script>
@@ -176,7 +176,7 @@ onBeforeMount(() => {
   <DataTable
     v-model:filters="filters"
     v-model:selection="selection"
-    :value="filteredSubmissions"
+    :value="filteredProjects"
     data-key="projectId"
     removable-sort
     scrollable
