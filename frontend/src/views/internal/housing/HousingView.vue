@@ -3,7 +3,7 @@ import { onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ViewHeader from '@/components/common/ViewHeader.vue';
-import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
+import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.vue';
 import { enquiryService, housingProjectService, noteHistoryService, permitService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
