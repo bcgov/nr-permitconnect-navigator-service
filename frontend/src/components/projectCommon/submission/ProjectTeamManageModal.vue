@@ -9,7 +9,7 @@ import type { Ref } from 'vue';
 import type { ActivityContact } from '@/types';
 
 // Props
-const { activityContact } = defineProps<{
+const { activityContact = undefined } = defineProps<{
   activityContact?: ActivityContact;
 }>();
 

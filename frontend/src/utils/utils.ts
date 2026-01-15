@@ -86,7 +86,7 @@ export function differential(source: any, comparer: any): any {
 export function objectToOptions<E extends Record<string, string | number>>(
   enm: E
 ): { value: keyof E; label: string | number }[] {
-  return (Object.keys(enm) as Array<keyof E>).map((key) => ({
+  return (Object.keys(enm) as (keyof E)[]).map((key) => ({
     value: key,
     label: enm[key]
   })) as { value: keyof E; label: string | number }[];
@@ -267,7 +267,7 @@ export function omit<Data extends object, Keys extends keyof Data>(data: Data, k
  * @param {string} delimiter The optional string delimiter
  * @returns {string[]} An array of string values, or `value` if it is not a string
  */
-export function parseCSV(value: string, delimiter: string = ','): string[] {
+export function parseCSV(value: string, delimiter = ','): string[] {
   return value.split(`${delimiter}`).map((s) => s.trim());
 }
 
@@ -275,21 +275,17 @@ export function parseCSV(value: string, delimiter: string = ','): string[] {
  * @function partition
  * Partitions an array into two array sets depending on conditional
  * @see {@link https://stackoverflow.com/a/71247432}
- * @param {Array<T>} arr The array to partition
+ * @param {T[]} arr The array to partition
  * @param {Function} predicate The predicate function
  * @returns
  */
-export function partition<T>(
-  arr: Array<T>,
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  predicate: (v: T, i: number, ar: Array<T>) => boolean
-): [Array<T>, Array<T>] {
+export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => boolean): [T[], T[]] {
   return arr.reduce(
     (acc, item, index, array) => {
       acc[+!predicate(item, index, array)]!.push(item);
       return acc;
     },
-    [[], []] as [Array<T>, Array<T>]
+    [[], []] as [T[], T[]]
   );
 }
 
@@ -298,7 +294,7 @@ export function partition<T>(
  * Scrolls to the first invalid field in a form
  * @param {object} errors An object with keys as field names and values as error messages
  */
-export function scrollToFirstError(errors: { [key: string]: string }) {
+export function scrollToFirstError(errors: Record<string, string>) {
   let first: Element | null = null;
 
   for (const error of Object.keys(errors)) {

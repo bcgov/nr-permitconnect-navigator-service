@@ -13,7 +13,12 @@ import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types';
 
 // Props
-const { firstName, lastName, phoneNumber, emailId } = defineProps<{
+const {
+  firstName = undefined,
+  lastName = undefined,
+  phoneNumber = undefined,
+  emailId = undefined
+} = defineProps<{
   firstName?: string;
   lastName?: string;
   phoneNumber?: string;
@@ -36,7 +41,7 @@ const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
 const hasSearched: Ref<boolean> = ref(false);
 const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
-const users: Ref<Array<ATSClientResource>> = ref([]);
+const users: Ref<ATSClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 const fName: Ref<string> = ref('');
 const lName: Ref<string> = ref('');

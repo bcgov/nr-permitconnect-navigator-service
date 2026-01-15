@@ -26,7 +26,7 @@ export default {
       const newDocument = new File([document], newDocumentName, { type: document.type });
 
       // The tagset is used to filter the objects in the bucket
-      const tagset: Array<{ key: string; value: string }> = [{ key: PROJECT_ID, value: activityId }];
+      const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
 
       // Create COMS object
       comsResponse = await comsService.createObject(

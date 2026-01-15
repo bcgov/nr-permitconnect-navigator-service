@@ -30,6 +30,7 @@ import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AccessRequest, Group, User, UserAccessRequest } from '@/types';
+import { isAxiosError } from 'axios';
 
 // Constants
 const PENDING_STATUSES = {
@@ -62,7 +63,7 @@ const selectedUserAccessRequest: Ref<UserAccessRequest | undefined> = ref(undefi
 const userProcessModalVisible: Ref<boolean> = ref(false); // Approve/Deny modal visible
 const userProcessModalAction: Ref<string> = ref(''); // Approve/Deny modal action
 const userProcessRequestType: Ref<string> = ref(''); // Access or Revocation request
-const usersAndAccessRequests: Ref<Array<UserAccessRequest>> = ref([]); // Main table data
+const usersAndAccessRequests: Ref<UserAccessRequest[]> = ref([]); // Main table data
 
 const getAccessRequests = computed(() =>
   usersAndAccessRequests.value.filter((uaar) => uaar.accessRequest?.status === AccessRequestStatus.PENDING)
@@ -139,8 +140,8 @@ async function onProcessUserAccessRequest() {
         approvedAccess || approvedRevocation ? 'approved' : 'denied'
       }`
     );
-  } catch (error: any) {
-    toast.error(error);
+  } catch (error) {
+    toast.error(String(error));
   }
 }
 
@@ -230,8 +231,10 @@ async function onUserGroupChange(group: Group) {
         toast.success(`${t('i.user.userManagementView.updateSuccess')}`);
       }
     }
-  } catch (error: any) {
-    toast.error(`${t('i.user.userManagementView.updateError')}, ${error.response.data.message}`);
+  } catch (error) {
+    if (isAxiosError(error))
+      toast.error(`${t('i.user.userManagementView.updateError')}, ${error.response?.data.message}`);
+    else if (error instanceof Error) toast.error(`${t('i.user.userManagementView.updateError')}, ${error.message}`);
   } finally {
     manageUserModalVisible.value = false;
   }
@@ -272,8 +275,10 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
     }
 
     toast.success(`${t('i.user.userManagementView.requestSuccess')}`);
-  } catch (error: any) {
-    toast.error(`${t('i.user.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
+  } catch (error) {
+    if (isAxiosError(error))
+      toast.error(`${t('i.user.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error(`${t('i.user.userManagementView.requestError')}`, error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;
@@ -292,7 +297,7 @@ onBeforeMount(async () => {
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
     if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
 
-    const users: Array<User> = (
+    const users: User[] = (
       await userService.searchUsers({
         active: true,
         idp: [idpCfg.idp],
@@ -301,7 +306,7 @@ onBeforeMount(async () => {
         initiative: [useAppStore().getInitiative]
       })
     ).data;
-    const accessRequests: Array<AccessRequest> = (await accessRequestService.getAccessRequests()).data;
+    const accessRequests: AccessRequest[] = (await accessRequestService.getAccessRequests()).data;
     const currentAccessRequests = new Map();
 
     // Create map of all pending requests
@@ -326,7 +331,7 @@ onBeforeMount(async () => {
       .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
     // Get requesting users and add their access requests
-    const newRequestingUsers: Array<User> = (
+    const newRequestingUsers: User[] = (
       await userService.searchUsers({
         userId: Array.from(currentAccessRequests.keys())
       })
@@ -336,8 +341,9 @@ onBeforeMount(async () => {
       const accessRequest = currentAccessRequests.get(user.userId);
       usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
     });
-  } catch (error: any) {
-    toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+  } catch (error) {
+    if (isAxiosError(error)) toast.error('Failed to request access', error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error('Failed to request access', error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;

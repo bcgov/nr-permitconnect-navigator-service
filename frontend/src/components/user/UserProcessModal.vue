@@ -20,10 +20,8 @@ const headers: Record<string, string> = {
 const messages: Record<string, string> = {
   'Approve-access': 'This user will now be an authorized user.',
   'Approve-revocation': 'This user will now lose all access to the system.',
-  // eslint-disable-next-line max-len
-  'Deny-access': "This user's approval request will be denied, and access will not be granted", // eslint-disable-line quotes
-  // eslint-disable-next-line max-len
-  'Deny-revocation': "This user's revocation request will be denied, and they will remain authorized" // eslint-disable-line quotes
+  'Deny-access': "This user's approval request will be denied, and access will not be granted",
+  'Deny-revocation': "This user's revocation request will be denied, and they will remain authorized"
 };
 
 const labels: Record<string, string> = {

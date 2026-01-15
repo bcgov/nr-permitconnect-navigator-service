@@ -26,7 +26,7 @@ const { t } = useI18n();
       <div class="mt-5">
         <b>{{ t('authorization.authorizationInfoProponent.agency') }}:</b>
         <span class="ml-1">
-          {{ permit?.permitType.agency }}
+          {{ permit?.permitType?.agency }}
         </span>
       </div>
     </div>

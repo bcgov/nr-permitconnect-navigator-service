@@ -18,7 +18,11 @@ import {
 import type { Ref } from 'vue';
 
 // Props
-const { enquiryId, projectId, permitId } = defineProps<{
+const {
+  enquiryId = undefined,
+  projectId = undefined,
+  permitId = undefined
+} = defineProps<{
   enquiryId?: string;
   projectId?: string;
   permitId?: string;

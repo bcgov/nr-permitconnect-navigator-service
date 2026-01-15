@@ -13,7 +13,7 @@ import type { ElectrificationProject, HousingProject } from '@/types';
 // Props
 const { loading, drafts } = defineProps<{
   loading: boolean;
-  drafts: Array<any> | undefined;
+  drafts: any[] | undefined;
 }>();
 
 // Injections
@@ -47,7 +47,7 @@ function onDelete(draftId: string) {
           emit('submissionDraft:delete', draftId);
           toast.success(t('submissionDraftListProponent.deleteSuccess'));
         })
-        .catch((e: any) => toast.error(t('submissionDraftListProponent.deleteFailed'), e.message));
+        .catch((e) => toast.error(t('submissionDraftListProponent.deleteFailed'), e.message));
     }
   });
 }

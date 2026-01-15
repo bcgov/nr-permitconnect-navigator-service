@@ -17,14 +17,14 @@ import type {
 // Types
 export type ProjectType = ElectrificationProject | HousingProject | undefined;
 
-export type ProjectStoreState = {
+export interface ProjectStoreState {
   activityContacts: Ref<ActivityContact[]>;
   documents: Ref<Document[]>;
   relatedEnquiries: Ref<Enquiry[]>;
   noteHistory: Ref<NoteHistory[]>;
   permits: Ref<Permit[]>;
   project: Ref<ProjectType>;
-};
+}
 
 export const useProjectStore = defineStore('project', () => {
   // State
@@ -107,9 +107,10 @@ export const useProjectStore = defineStore('project', () => {
       return state.noteHistory.value
         .filter((noteHistory) => noteHistory.shownToProponent)
         .sort((a, b) => {
-          const aCreatedAt = a.note[0]?.createdAt!;
-          const bCreatedAt = b.note[0]?.createdAt!;
-          return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
+          const aCreatedAt = a.note[0]?.createdAt;
+          const bCreatedAt = b.note[0]?.createdAt;
+          if (aCreatedAt && bCreatedAt) return new Date(bCreatedAt).getTime() - new Date(aCreatedAt).getTime();
+          return -1;
         });
     }),
     getPermits: computed(() => state.permits.value),
@@ -119,11 +120,14 @@ export const useProjectStore = defineStore('project', () => {
 
   // Actions
   function permitBusinessSortFcn(a: Permit, b: Permit) {
-    return a.permitType.businessDomain > b.permitType.businessDomain ? 1 : -1;
+    if (a.permitType?.businessDomain && b.permitType?.businessDomain)
+      return a.permitType?.businessDomain > b.permitType?.businessDomain ? 1 : -1;
+    else return -1;
   }
 
   function permitNameSortFcn(a: Permit, b: Permit) {
-    return a.permitType.name > b.permitType.name ? 1 : -1;
+    if (a.permitType?.name && b.permitType?.name) return a.permitType?.name > b.permitType?.name ? 1 : -1;
+    else return -1;
   }
 
   function addActivityContact(data: ActivityContact) {
@@ -143,7 +147,7 @@ export const useProjectStore = defineStore('project', () => {
     if (idx >= 0) state.activityContacts.value[idx] = data;
   }
 
-  function setActivityContacts(data: Array<ActivityContact>) {
+  function setActivityContacts(data: ActivityContact[]) {
     state.activityContacts.value = data;
   }
 
@@ -155,11 +159,11 @@ export const useProjectStore = defineStore('project', () => {
     state.documents.value = state.documents.value.filter((x) => x.documentId !== data.documentId);
   }
 
-  function setDocuments(data: Array<Document>) {
+  function setDocuments(data: Document[]) {
     state.documents.value = data;
   }
 
-  function addNoteHistory(data: NoteHistory, prepend: boolean = false) {
+  function addNoteHistory(data: NoteHistory, prepend = false) {
     if (prepend) state.noteHistory.value.unshift(data);
     else state.noteHistory.value.push(data);
   }
@@ -185,7 +189,7 @@ export const useProjectStore = defineStore('project', () => {
     state.permits.value = state.permits.value.filter((x) => x.permitId !== data.permitId);
   }
 
-  function setPermits(data: Array<Permit>) {
+  function setPermits(data: Permit[]) {
     state.permits.value = data;
   }
 
@@ -197,7 +201,7 @@ export const useProjectStore = defineStore('project', () => {
     state.relatedEnquiries.value = state.relatedEnquiries.value.filter((x) => x.enquiryId !== data.enquiryId);
   }
 
-  function setRelatedEnquiries(data: Array<Enquiry>) {
+  function setRelatedEnquiries(data: Enquiry[]) {
     state.relatedEnquiries.value = data;
   }
 

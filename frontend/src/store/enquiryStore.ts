@@ -4,10 +4,10 @@ import { computed, readonly, ref } from 'vue';
 import type { Ref } from 'vue';
 import type { Enquiry, NoteHistory } from '@/types';
 
-export type EnquiryStoreState = {
+export interface EnquiryStoreState {
   noteHistory: Ref<NoteHistory[]>;
   enquiry: Ref<Enquiry | undefined>;
-};
+}
 
 export const useEnquiryStore = defineStore('enquiry', () => {
   // State
@@ -28,7 +28,7 @@ export const useEnquiryStore = defineStore('enquiry', () => {
 
   // Actions
   /* Notes */
-  function addNoteHistory(data: NoteHistory, prepend: boolean = false) {
+  function addNoteHistory(data: NoteHistory, prepend = false) {
     if (prepend) state.noteHistory.value.unshift(data);
     else state.noteHistory.value.push(data);
   }

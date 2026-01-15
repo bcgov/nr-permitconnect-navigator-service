@@ -9,7 +9,7 @@ import type { Group, UserAccessRequest } from '@/types';
 
 // Props
 const { usersAndAccessRequests, requestTable = false } = defineProps<{
-  usersAndAccessRequests: Array<UserAccessRequest>;
+  usersAndAccessRequests: UserAccessRequest[];
   requestTable?: boolean;
 }>();
 

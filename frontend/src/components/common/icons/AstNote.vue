@@ -1,6 +1,4 @@
-<script setup lang="ts">
-/* eslint-disable max-len */
-</script>
+<script setup lang="ts"></script>
 <template>
   <svg
     width="23"

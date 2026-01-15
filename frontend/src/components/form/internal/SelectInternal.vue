@@ -22,7 +22,7 @@ const {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  options: Array<any> | undefined;
+  options: any[] | undefined;
   optionLabel?: string | ((data: any) => string);
   optionValue?: string;
   bold?: boolean;

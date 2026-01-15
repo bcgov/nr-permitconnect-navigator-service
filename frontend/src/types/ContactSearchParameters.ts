@@ -1,6 +1,6 @@
 import type { Initiative } from '@/utils/enums/application';
 
-export type ContactSearchParameters = {
+export interface ContactSearchParameters {
   contactApplicantRelationship?: string;
   contactPreference?: string;
   contactId?: string[];
@@ -12,4 +12,4 @@ export type ContactSearchParameters = {
   userId?: string[];
   initiative?: Initiative;
   includeActivities?: boolean;
-};
+}

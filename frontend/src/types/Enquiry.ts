@@ -18,7 +18,7 @@ export type Enquiry = {
   relatedActivityId?: string;
   enquiryDescription?: string;
   enquiryStatus: ApplicationStatus;
-  contacts: Array<Contact>;
+  contacts: Contact[];
   submittedMethod: EnquirySubmittedMethod;
 
   // Joined

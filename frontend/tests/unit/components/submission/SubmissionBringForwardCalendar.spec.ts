@@ -22,7 +22,7 @@ vi.mock('vue-router', () => ({
 
 const currentDate = new Date().toISOString();
 
-const bringForward: Array<BringForward> = [
+const bringForward: BringForward[] = [
   {
     noteId: '327eda7d-3d4c-42e9-aa94-3de04cd23d55',
     housingProjectId: '123',
@@ -36,7 +36,7 @@ const bringForward: Array<BringForward> = [
   }
 ];
 
-const myAssignedTo: Set<string> = new Set([]);
+const myAssignedTo = new Set<string>([]);
 
 const wrapperSettings = () => ({
   props: {

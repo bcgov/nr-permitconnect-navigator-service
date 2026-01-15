@@ -15,18 +15,18 @@ import type { IInputEvent } from '@/interfaces';
 import type { Statistics, User } from '@/types';
 
 // Types
-type StatisticFilters = {
+interface StatisticFilters {
   dateFrom?: Date;
   dateTo?: Date;
   monthYear?: Date;
   userId?: string;
-};
+}
 
 // Injections
 const projectService = inject(projectServiceKey);
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<Statistics | undefined>('statistics');
 const statisticFilters: Ref<StatisticFilters> = ref({});
 

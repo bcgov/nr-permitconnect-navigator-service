@@ -18,11 +18,11 @@ import type { IInputEvent } from '@/interfaces';
 import type { GeocoderEntry } from '@/types';
 
 // Types
-type PinUpdateEvent = {
+interface PinUpdateEvent {
   longitude: number;
   latitude: number;
   address: string;
-};
+}
 
 // Props
 const { editable = true } = defineProps<{
@@ -42,7 +42,7 @@ const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
 
 // State
-const addressGeocoderOptions: Ref<Array<any>> = ref([]);
+const addressGeocoderOptions: Ref<any[]> = ref([]);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -78,7 +78,7 @@ function handleProjectLocationClick() {
 async function onAddressSearchInput(e: IInputEvent) {
   const input = e.target.value;
   addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as Array<GeocoderEntry>) ?? [];
+    ((await externalApiService.searchAddressCoder(input))?.data?.features as GeocoderEntry[]) ?? [];
 }
 
 async function onAddressSelect(e: SelectChangeEvent) {

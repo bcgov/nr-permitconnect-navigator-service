@@ -15,7 +15,7 @@ import type { ElectrificationProject, Enquiry, HousingProject, Pagination } from
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
   assignedUsers: Record<string, string>;
-  contactsHistory: Array<ElectrificationProject | HousingProject | Enquiry>;
+  contactsHistory: (ElectrificationProject | HousingProject | Enquiry)[];
   loading: boolean;
 }>();
 
@@ -31,7 +31,7 @@ const pagination: Ref<Pagination> = ref({
   field: 'submittedAt',
   page: 0
 });
-const rowsPerPageOptions: Ref<Array<number>> = ref([10, 20, 50]);
+const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<ElectrificationProject | HousingProject | Enquiry | undefined> = ref(undefined);
 
 // Actions

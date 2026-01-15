@@ -87,7 +87,7 @@ function convertRemToPixels(rem: number) {
   return pixels || 64;
 }
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     component: () => import('@/views/GenericView.vue'),
@@ -187,7 +187,7 @@ export default function getRouter() {
     if (to.query?.r) {
       router.replace({
         path: to.query.r ? to.query.r.toString() : to.path,
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars, no-unused-vars
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
         query: (({ r, ...q }) => q)(to.query),
         hash: to.hash
       });

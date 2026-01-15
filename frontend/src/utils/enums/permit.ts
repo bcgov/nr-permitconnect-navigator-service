@@ -26,7 +26,6 @@ export enum PermitState {
 }
 
 export enum PermitStateDescriptions {
-  /* eslint-disable max-len */
   INITIAL_REVIEW = 'Your application has been received and is being reviewed for completeness.',
   PENDING_CLIENT = 'The application is currently pending the applicant’s action in response to the reviewing authority’s request.',
   IN_PROGRESS = 'The application is currently active.',
@@ -37,5 +36,4 @@ export enum PermitStateDescriptions {
   REJECTED = 'Your application has been rejected by the reviewing authority.',
   WITHDRAWN = 'The application has been withdrawn by the applicant.',
   NONE = ''
-  /*eslint-enable max-len */
 }

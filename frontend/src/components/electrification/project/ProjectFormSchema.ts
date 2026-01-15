@@ -1,4 +1,4 @@
-import { boolean, number, object, string } from 'yup';
+import { boolean, number, object, string, type InferType } from 'yup';
 
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';

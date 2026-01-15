@@ -37,7 +37,7 @@ const confirmDelete = () => {
             projectStore.removeDocument(document);
             toast.success('Document deleted');
           })
-          .catch((e: any) => toast.error('Failed to deleted document', e.message));
+          .catch((e) => toast.error('Failed to deleted document', e.message));
       }
     });
   }

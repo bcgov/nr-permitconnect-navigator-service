@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -23,6 +23,7 @@ import { scrollToFirstError } from '@/utils/utils';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { NoteHistory, User } from '@/types';
+import { isAxiosError } from 'axios';
 
 // Props
 const { editable, noteHistory = undefined } = defineProps<{
@@ -119,7 +120,7 @@ function initializeFormValues() {
 }
 // }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
@@ -139,15 +140,15 @@ function onDelete() {
             toast.success(t('note.noteForm.noteDeleted'));
             navigateToOrigin();
           })
-          .catch((e: any) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
+          .catch((e) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
       }
     });
   }
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(data: GenericObject) {
   try {
-    const body = { ...data };
+    const body = { ...data } as NoteHistory;
 
     // Force some data based on the type of note
     if (body.type === NoteType.BRING_FORWARD) {
@@ -162,16 +163,19 @@ async function onSubmit(data: any) {
       body.shownToProponent = shownToProponent.value;
     }
 
+    const activityId = getProject.value?.activityId || getEnquiry.value?.activityId;
+    if (!activityId) throw new Error('No activity ID');
+
     if (!noteHistory) {
       await noteHistoryService.createNoteHistory({
         ...body,
-        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
+        activityId,
         note: data.note
       });
     } else {
       await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
         ...body,
-        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
+        activityId: getProject.value!.activityId,
         note: data.note
       });
       if (
@@ -184,8 +188,8 @@ async function onSubmit(data: any) {
     }
     toast.success(t('note.noteForm.noteSaved'));
     navigateToOrigin();
-  } catch (e: any) {
-    toast.error(t('note.noteForm.noteSaveFailed'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('note.noteForm.noteSaveFailed'), e.message);
   }
 }
 

@@ -74,7 +74,7 @@ onBeforeMount(async () => {
   <div class="permit-status-view">
     <div class="flex justify-between mb-5 mt-10">
       <div>
-        <h1 class="mt-0 mb-0">{{ getPermit?.permitType.name }}</h1>
+        <h1 class="mt-0 mb-0">{{ getPermit?.permitType?.name }}</h1>
       </div>
       <Button
         v-if="canNavigate(NavigationPermission.EXT_ELECTRIFICATION)"

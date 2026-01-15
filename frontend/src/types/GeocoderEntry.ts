@@ -1,4 +1,4 @@
-export type GeocoderEntry = {
+export interface GeocoderEntry {
   geometry: { coordinates: number[]; [key: string]: any };
-  properties: { [key: string]: string };
-};
+  properties: Record<string, string>;
+}

@@ -5,9 +5,9 @@ import { ConfigService } from '@/services';
 
 import type { Ref } from 'vue';
 
-export type ConfigStoreState = {
+export interface ConfigStoreState {
   config: Ref<any | null>;
-};
+}
 
 export const useConfigStore = defineStore('config', () => {
   const configService = new ConfigService();

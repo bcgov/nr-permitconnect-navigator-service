@@ -13,7 +13,7 @@ import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 
-const { projectId, permitId } = defineProps<{
+const { projectId, permitId = undefined } = defineProps<{
   projectId: string;
   permitId?: string;
 }>();

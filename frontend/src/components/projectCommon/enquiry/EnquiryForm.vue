@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { computed, inject, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { boolean, mixed, object, string } from 'yup';
@@ -38,6 +38,7 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, Enquiry, User } from '@/types';
+import { isAxiosError } from 'axios';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -62,7 +63,7 @@ const emit = defineEmits(['enquiryForm:saved']);
 const enquiryStore = useEnquiryStore();
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const basicInfoManualEntry: Ref<boolean> = ref(false);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const filteredProjectActivityIds: Ref<string[]> = ref([]);
@@ -71,7 +72,7 @@ const initialFormValues: Ref<any | undefined> = ref(undefined);
 const primaryContact = computed(
   () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
 );
-const projectActivityIds: Ref<Array<string>> = ref([]);
+const projectActivityIds: Ref<string[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Form validation schema
@@ -164,7 +165,7 @@ function onCancel() {
   }, 6000);
 }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   const errors = Object.keys(e.errors);
 
   if (errors.includes('contact.firstName')) {
@@ -201,7 +202,7 @@ function onReOpen() {
     rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
-      onSubmit(formRef.value?.values);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
 }
@@ -239,7 +240,7 @@ function setBasicInfo(contact?: Contact) {
   basicInfoManualEntry.value = false;
 }
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: GenericObject) => {
   try {
     // Create ATS data as necessary
     if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
@@ -328,8 +329,8 @@ const onSubmit = async (values: any) => {
     emit('enquiryForm:saved');
 
     toast.success(t('i.common.form.savedMessage'));
-  } catch (e: any) {
-    toast.error(t('enquiryForm.failedMessage'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryForm.failedMessage'), e.message);
   }
 };
 

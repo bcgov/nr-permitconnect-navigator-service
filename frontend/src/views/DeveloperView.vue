@@ -12,7 +12,10 @@ import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import type { Ref } from 'vue';
 
 // Types
-type GroupList = { id: string; text: string };
+interface GroupList {
+  id: string;
+  text: string;
+}
 
 // Composables
 const { t } = useI18n();

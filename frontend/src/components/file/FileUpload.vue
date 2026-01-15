@@ -21,8 +21,8 @@ const { getConfig } = storeToRefs(useConfigStore());
 const projectStore = useProjectStore();
 
 // State
-const fileInput: Ref<any> = ref(null);
-const uploading: Ref<Boolean> = ref(false);
+const fileInput: Ref<HTMLInputElement | null> = ref(null);
+const uploading: Ref<boolean> = ref(false);
 
 // Actions
 const toast = useToast();
@@ -33,7 +33,7 @@ const onFileUploadClick = () => {
     return;
   }
 
-  fileInput.value.click();
+  fileInput.value?.click();
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
@@ -45,7 +45,7 @@ const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
   onUpload(Array.isArray(event.files) ? event.files : [event.files]);
 };
 
-const onUpload = async (files: Array<File>) => {
+const onUpload = async (files: File[]) => {
   await Promise.allSettled(
     files.map(async (file: File) => {
       const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
@@ -61,8 +61,8 @@ const onUpload = async (files: Array<File>) => {
           projectStore.addDocument(response);
           toast.success('Document uploaded');
         }
-      } catch (e: any) {
-        toast.error('Failed to upload document', e);
+      } catch (e) {
+        toast.error('Failed to upload document', String(e));
       } finally {
         uploading.value = false;
       }

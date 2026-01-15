@@ -45,10 +45,10 @@ const TAB_INDEX = {
 };
 
 // Props
-const bringForward = defineModel<Array<BringForward>>('bringForward', { required: true });
-const enquiries = defineModel<Array<Enquiry>>('enquiries', { required: true });
-const permits = defineModel<Array<Permit>>('permits', { required: true });
-const projects = defineModel<Array<ElectrificationProject | HousingProject>>('projects', { required: true });
+const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
+const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
+const permits = defineModel<Permit[]>('permits', { required: true });
+const projects = defineModel<(ElectrificationProject | HousingProject)[]>('projects', { required: true });
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections

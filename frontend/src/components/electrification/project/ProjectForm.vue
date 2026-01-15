@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { isAxiosError } from 'axios';
+import { Form, type GenericObject } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -68,7 +69,7 @@ const { editable = true, project } = defineProps<{
 
 // Emits
 const emit = defineEmits<{
-  (e: 'input-project-name', newName: string): void;
+  inputProjectName: [newName: string];
 }>();
 
 // Constants
@@ -84,7 +85,7 @@ const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<any | undefined> = ref(undefined);
@@ -100,7 +101,7 @@ const projectFormSchema = computed(() => {
 });
 
 function emitProjectNameChange(e: Event) {
-  emit('input-project-name', (e.target as HTMLInputElement).value);
+  emit('inputProjectName', (e.target as HTMLInputElement).value);
 }
 
 const getAssigneeOptionLabel = (e: User) => {
@@ -251,7 +252,7 @@ function onCancel() {
   }, 6000);
 }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   const errors = Object.keys(e.errors);
 
   if (errors.includes('contact.firstName')) {
@@ -264,9 +265,9 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: { [key: string]: string }) => ({
+      .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
@@ -282,7 +283,7 @@ function onReOpen() {
     rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      onSubmit(formRef.value?.values);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
 }
@@ -299,7 +300,7 @@ function setBasicInfo(contact?: Contact) {
   formRef.value?.setFieldValue('contact.userId', contact?.userId);
 }
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: GenericObject) => {
   try {
     if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
       const response = await createATSClientEnquiry();
@@ -378,8 +379,8 @@ const onSubmit = async (values: any) => {
     });
 
     toast.success(t('i.common.form.savedMessage'));
-  } catch (e: any) {
-    toast.error(t('i.common.projectForm.failedMessage'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
 

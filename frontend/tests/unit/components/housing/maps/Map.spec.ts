@@ -1,6 +1,6 @@
 import { createTestingPinia } from '@pinia/testing';
 // Needed to be imported before mocking
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { nextTick } from 'vue';
@@ -14,13 +14,13 @@ import ToastService from 'primevue/toastservice';
 import type { AxiosResponse } from 'axios';
 import type { GeoJSON } from 'geojson';
 
-type Props = {
+interface Props {
   disabled?: boolean;
   geoJsonData?: GeoJSON;
   latitude?: number;
   longitude?: number;
   pinOrDraw?: boolean;
-};
+}
 
 const disableInteractionMock = vi.fn();
 const eachLayerMock = vi.fn();

@@ -23,7 +23,7 @@ const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
-const breadcrumbItems: ComputedRef<Array<MenuItem>> = computed(() => {
+const breadcrumbItems: ComputedRef<MenuItem[]> = computed(() => {
   if (route.meta.hideBreadcrumb) return [];
   const matchedCrumbs = route.matched.filter((m) => m.meta?.breadcrumb !== undefined || m.meta?.dynamicBreadcrumb);
 
@@ -69,11 +69,7 @@ function generateBreadcrumbLabel(routeRecord: RouteLocationMatched): string {
       }
       case 'authorization': {
         const authorization = getPermit;
-        if (authorization.value) {
-          return authorization.value.permitType.name;
-        } else {
-          return 'Add authorization';
-        }
+        return authorization.value?.permitType?.name ?? 'Add authorization';
       }
       case 'note': {
         // Try to determine where to get the note history from

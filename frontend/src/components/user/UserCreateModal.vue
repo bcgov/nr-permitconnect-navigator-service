@@ -14,7 +14,7 @@ import type { Ref } from 'vue';
 import type { Group, User } from '@/types';
 
 // Constants
-const USER_SEARCH_PARAMS: { [key: string]: string } = {
+const USER_SEARCH_PARAMS: Record<string, string> = {
   firstName: 'First name',
   lastName: 'Last name',
   email: 'Email'
@@ -41,7 +41,7 @@ const users: Ref<User[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 const searchMutex = new Mutex();
-let timeoutId: NodeJS.Timeout;
+let timeoutId: ReturnType<typeof setTimeout>;
 
 // Actions
 async function searchIdirUsers() {
@@ -71,9 +71,9 @@ async function searchIdirUsers() {
               sub: username,
               fullName: attributes?.display_name?.[0] as string
             }))
-            .filter((user: any) => !!user.email);
-        } catch (error: any) {
-          toast.error(t('userCreateModal.searchError'), error);
+            .filter((user: User) => !!user.email);
+        } catch (error) {
+          toast.error(t('userCreateModal.searchError'), String(error));
         } finally {
           loading.value = false;
         }

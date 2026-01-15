@@ -21,7 +21,7 @@ import type { Ref } from 'vue';
 // Props
 const {
   enquiryId,
-  projectId,
+  projectId = undefined,
   initialTab = '0'
 } = defineProps<{
   enquiryId: string;

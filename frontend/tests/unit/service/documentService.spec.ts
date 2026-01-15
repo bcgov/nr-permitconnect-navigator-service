@@ -154,7 +154,7 @@ describe('documentService', () => {
           });
 
           await expect(
-            async () => await documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
           ).rejects.toThrow();
         });
 
@@ -166,8 +166,8 @@ describe('documentService', () => {
 
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
-          expect(
-            async () => await documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+          await expect(
+            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
           ).rejects.toThrow();
         });
       });

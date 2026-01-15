@@ -14,15 +14,15 @@ import type { Ref } from 'vue';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 
 // Types
-type NavItem = {
+interface NavItem {
   label: string;
   route?: string;
   func?: Function;
   public?: boolean;
-  access?: NavigationPermission | Array<NavigationPermission>;
-  items?: Array<NavItem>;
+  access?: NavigationPermission | NavigationPermission[];
+  items?: NavItem[];
   mailTo?: string;
-};
+}
 
 // Composables
 const router = useRouter();
@@ -32,7 +32,7 @@ const appStore = useAppStore();
 const authzStore = useAuthZStore();
 
 // State
-const items: Ref<Array<NavItem>> = ref([]);
+const items: Ref<NavItem[]> = ref([]);
 
 // Actions
 async function createIntake(service: IDraftableProjectService, route: RouteName) {
