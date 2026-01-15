@@ -13,16 +13,16 @@ const usePermitService = vi.spyOn(permitService, 'getPermitTypes');
 
 usePermitService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 
-const testSubmissionId = 'enquiry123';
+const testProjectId = 'enquiry123';
 const testActivityId = 'activity123';
 
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: {} })
 }));
 
-const wrapperSettings = (testSubmissionIdProp = testSubmissionId, testActivityIdProp = testActivityId) => ({
+const wrapperSettings = (testProjectIdProp = testProjectId, testActivityIdProp = testActivityId) => ({
   props: {
-    electrificationProjectId: testSubmissionIdProp,
+    electrificationProjectId: testProjectIdProp,
     activityId: testActivityIdProp
   },
   global: {

@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
+import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
 import { userService } from '@/services';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
@@ -47,13 +47,13 @@ const wrapperSettings = (testFormErrorsProp = testFormErrors, testFormValuesProp
   }
 });
 
-describe('SubmissionAssistance.vue', () => {
+describe('ProjectIntakeAssistance.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = shallowMount(SubmissionAssistance, wrapperSettings());
+    const wrapper = shallowMount(ProjectIntakeAssistance, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

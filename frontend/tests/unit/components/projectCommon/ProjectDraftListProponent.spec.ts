@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
+import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { userService } from '@/services';
 
 import type { AxiosResponse } from 'axios';
@@ -46,13 +46,13 @@ const wrapperSettings = (testDraftsProp = testDrafts) => ({
   }
 });
 
-describe('SubmissionDraftListProponent.vue', () => {
+describe('ProjectDraftListProponent.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(SubmissionDraftListProponent, wrapperSettings());
+    const wrapper = mount(ProjectDraftListProponent, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

@@ -6,7 +6,7 @@ import Tooltip from 'primevue/tooltip';
 import { nextTick } from 'vue';
 import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
 
-import EnquiryIntakeForm from '@/components/projectCommon/enquiry/EnquiryIntakeForm.vue';
+import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
 import { contactService, enquiryService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';

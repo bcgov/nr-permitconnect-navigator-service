@@ -1,4 +1,4 @@
-import SubmissionsNavigator from '@/components/housing/submission/SubmissionsNavigator.vue';
+import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
