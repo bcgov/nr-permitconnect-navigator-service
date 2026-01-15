@@ -89,11 +89,11 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-// Example Submission object
-const testSubmission: HousingProject = {
+// Example Project object
+const testProject: HousingProject = {
   activityId: 'activity456',
-  housingProjectId: 'submission789',
-  projectId: 'submission789',
+  housingProjectId: 'project789',
+  projectId: 'project789',
   queuePriority: 1,
   submissionType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
@@ -144,9 +144,9 @@ const testSubmission: HousingProject = {
   updatedAt: currentDate
 };
 
-const wrapperSettings = (testSubmissionProp = testSubmission, editableProp = true) => ({
+const wrapperSettings = (testProjectProp = testProject, editableProp = true) => ({
   props: {
-    project: testSubmissionProp,
+    project: testProjectProp,
     editable: editableProp
   },
   global: {
@@ -219,13 +219,13 @@ describe('ProjectForm.vue', () => {
   });
 
   it('searches for users onMount', async () => {
-    const mountSubmission = { ...testSubmission, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(ProjectForm, wrapperSettings(mountSubmission));
+    const mountProject = { ...testProject, assignedUserId: 'testAssignedUseId' };
+    const wrapper = mount(ProjectForm, wrapperSettings(mountProject));
     await nextTick();
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchUsersSpy).toHaveBeenCalledWith({ userId: [mountSubmission.assignedUserId] });
+    expect(searchUsersSpy).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
   });
 
   it('gets PIDs onMount', async () => {
@@ -234,7 +234,7 @@ describe('ProjectForm.vue', () => {
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(getPIDsSpy).toHaveBeenCalledTimes(1);
-    expect(getPIDsSpy).toHaveBeenCalledWith(testSubmission.housingProjectId);
+    expect(getPIDsSpy).toHaveBeenCalledWith(testProject.housingProjectId);
   });
 
   it('disables all fields when editable is false', async () => {
@@ -269,19 +269,19 @@ describe('ProjectForm.vue', () => {
   });
 
   it('geojson download btn not visible when no geojson', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJson: undefined };
+    const modifiedProject = { ...testProject, geoJson: undefined };
 
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
     await nextTick();
     await nextTick();
 
     expect(wrapper.find('#download-geojson').exists()).toBe(false);
   });
 
-  it('geojson download btn visible when geojson is in submission', async () => {
-    const modifiedSubmission = { ...testSubmission, geoJson: {} };
+  it('geojson download btn visible when geojson is in project', async () => {
+    const modifiedProject = { ...testProject, geoJson: {} };
 
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
     await nextTick();
     await nextTick();
 
@@ -290,11 +290,11 @@ describe('ProjectForm.vue', () => {
     expect(downloadBtn.isVisible()).toBe(true);
   });
 
-  it('geojson download btn visible when geojson is in submission', async () => {
+  it('geojson download btn visible when geojson is in project', async () => {
     const testGeoJson = { feature: 'POINT', data: 'test' };
-    const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
+    const modifiedProject = { ...testProject, geoJson: testGeoJson };
 
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission, false));
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
     await nextTick();
     await nextTick();
 
@@ -312,8 +312,8 @@ describe('onRegisteredNameInput', () => {
   });
 
   it('should not call searchOrgBook when query length is less than 2', async () => {
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -340,8 +340,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -371,8 +371,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -407,8 +407,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -432,8 +432,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -462,8 +462,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 
@@ -489,8 +489,8 @@ describe('onRegisteredNameInput', () => {
 
     searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
 
-    const modifiedSubmission = { ...testSubmission, isDevelopedInBc: 'Yes' };
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedSubmission));
+    const modifiedProject = { ...testProject, isDevelopedInBc: 'Yes' };
+    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject));
     await nextTick();
     await nextTick();
 

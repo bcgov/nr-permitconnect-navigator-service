@@ -123,7 +123,7 @@ describe('templates.ts', () => {
       expect(roadmapTemplate(replaceConfig)).toEqual(expectedOutput);
     });
 
-    it('omit all permit sections if the submission does not have any associated permits', () => {
+    it('omit all permit sections if the project does not have any associated permits', () => {
       testCases.permitStateNew = [];
       testCases.permitPossiblyNeeded = [];
       testCases.permitStateApplied = [];

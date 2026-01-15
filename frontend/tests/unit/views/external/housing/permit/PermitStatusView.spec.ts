@@ -28,7 +28,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const testPermitId = 'permit123';
-const testHousingProjectId = 'submission123';
+const testHousingProjectId = 'project123';
 
 const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
