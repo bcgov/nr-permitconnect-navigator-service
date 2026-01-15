@@ -25,7 +25,7 @@ const { t } = useI18n();
           role="heading"
           aria-level="2"
         >
-          {{ t('submissionIntakeForm.naturalDisasterCard') }}
+          {{ t('projectIntakeForm.naturalDisasterCard') }}
         </span>
       </div>
       <Divider type="solid" />

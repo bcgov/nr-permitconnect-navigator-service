@@ -3,7 +3,7 @@ import { Form } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { createProjectFormSchema } from '../../../validators/housing/projectFormNavigatorSchema';
+import { createProjectFormNavigatorSchema } from '../../../validators/housing/projectFormNavigatorSchema';
 import {
   AddLocation,
   AdditionalInfo,
@@ -468,7 +468,7 @@ const onSubmit = async (values: any) => {
   }
 };
 
-const projectFormSchema = createProjectFormSchema();
+const projectFormNavigatorSchema = createProjectFormNavigatorSchema();
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
@@ -520,7 +520,7 @@ onBeforeMount(async () => {
     v-slot="{ setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="projectFormSchema"
+    :validation-schema="projectFormNavigatorSchema"
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
