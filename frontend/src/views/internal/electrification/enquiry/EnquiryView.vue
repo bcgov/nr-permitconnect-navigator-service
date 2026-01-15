@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import EnquiryForm from '@/components/projectCommon/enquiry/EnquiryForm.vue';
+import EnquiryForm from '@/components/enquiry/EnquiryForm.vue';
 import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { electrificationProjectService, enquiryService, noteHistoryService, userService } from '@/services';
 import { useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';

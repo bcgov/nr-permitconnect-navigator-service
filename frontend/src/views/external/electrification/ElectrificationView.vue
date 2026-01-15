@@ -5,7 +5,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
-import SubmissionDraftListProponent from '@/components/projectCommon/submission/SubmissionDraftListProponent.vue';
+import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
 import { electrificationProjectService, permitService } from '@/services';
 import { useContactStore } from '@/store';
@@ -297,7 +297,7 @@ onBeforeMount(async () => {
     </div>
 
     <div class="w-full">
-      <SubmissionDraftListProponent
+      <ProjectDraftListProponent
         :loading="loading"
         :drafts="drafts"
         @submission-draft:delete="onElectrificationProjectDraftDelete"
