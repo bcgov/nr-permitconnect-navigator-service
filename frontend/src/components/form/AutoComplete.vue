@@ -4,7 +4,7 @@ import { onBeforeMount } from 'vue';
 
 import { AutoComplete } from '@/lib/primevue';
 
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 
 // Props
 
@@ -37,7 +37,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['onComplete', 'onSelect']);
+const emit = defineEmits(['onChange', 'onComplete', 'onSelect']);
 const { errorMessage, handleBlur, value, resetField } = useField<string>(name);
 
 onBeforeMount(() => {
@@ -72,6 +72,7 @@ onBeforeMount(() => {
       :placeholder="placeholder"
       :suggestions="suggestions"
       @blur="handleBlur"
+      @change="(e: AutoCompleteChangeEvent) => emit('onChange', e)"
       @complete="(e: AutoCompleteCompleteEvent) => emit('onComplete', e)"
       @option-select="(e) => emit('onSelect', e.value)"
     />

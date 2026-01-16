@@ -582,7 +582,6 @@ model housing_project {
   hasRentalUnits                  String?   @map("has_rental_units")
   projectDescription              String?   @map("project_description")
   projectApplicantType            String?   @map("project_applicant_type")
-  isDevelopedInBc                 String?   @map("is_developed_in_bc")
   multiFamilyUnits                String?   @map("multi_family_units")
   otherUnits                      String?   @map("other_units")
   otherUnitsDescription           String?   @map("other_units_description")
