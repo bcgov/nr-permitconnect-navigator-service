@@ -27,9 +27,7 @@ onBeforeRouteLeave(async (to) => {
   autoSaveRef?.stopAutoSave();
 
   // Skip navigation guard if already accepted
-  if (isAccepted.value) {
-    return true;
-  }
+  if (isAccepted.value) return true;
 
   if (isDirty.value && !isOpen.value) {
     isOpen.value = true;

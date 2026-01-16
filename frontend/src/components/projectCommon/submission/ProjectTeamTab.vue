@@ -123,7 +123,7 @@ function onRevokeUserClick(contact: ActivityContact) {
     <div class="basis-1/6">
       <div class="flex justify-end">
         <Button
-          :label="t('e.common.projectTeamTab.addUserBtn')"
+          :label="t('e.common.projectTeamTab.addMemberBtn')"
           icon="pi pi-plus"
           outlined
           @click="createUserModalVisible = true"
