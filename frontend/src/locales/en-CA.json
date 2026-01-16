@@ -71,7 +71,7 @@
         "save": "Save"
       },
       "projectTeamTab": {
-        "addUserBtn": "Add user",
+        "addMemberBtn": "Add team member",
         "adminAdded": "{first} {last} has been added as a Project Admin.",
         "adminUpdated": "{first} {last} is now a Project Admin.",
         "failedToAdd": "Failed to add user",
