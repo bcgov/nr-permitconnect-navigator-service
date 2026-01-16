@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
-
 import SubmissionListNavigatorElectrification from '@/components/electrification/submission/SubmissionListNavigatorElectrification.vue';
 import SubmissionListNavigatorHousing from '@/components/housing/submission/SubmissionListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';

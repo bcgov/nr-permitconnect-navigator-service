@@ -9,7 +9,7 @@ const DEFAULT_DELAY = 10000;
 
 // Props
 const { callback, delay = DEFAULT_DELAY } = defineProps<{
-  callback: (...args: any[]) => any;
+  callback: <T>(...args: T[]) => void;
   delay?: number;
 }>();
 

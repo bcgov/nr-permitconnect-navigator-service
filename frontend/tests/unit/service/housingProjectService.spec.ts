@@ -1,8 +1,11 @@
+import { createPinia, setActivePinia } from 'pinia';
 import { housingProjectService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+
+import type { StoreGeneric } from 'pinia';
+import type { AxiosInstance } from 'axios';
 
 // Constants
 const PATH = 'project';
@@ -59,7 +62,7 @@ vi.mocked(appAxios).mockReturnValue({
   patch: patchSpy,
   post: postSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

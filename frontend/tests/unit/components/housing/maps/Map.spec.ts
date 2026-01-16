@@ -32,7 +32,7 @@ const setMaxBoundsMock = vi.fn();
 vi.mock('leaflet', async (importOriginal) => {
   const mod = await importOriginal(); // type is inferred
   return {
-    //@ts-ignore - insufficient type definitions
+    // @ts-expect-error - insufficient type definitions
     ...mod,
     // replace some exports
     map: vi.fn().mockImplementation(() => ({
@@ -170,7 +170,7 @@ describe('Map.vue', () => {
     const wrapper = mount(Map, wrapperSettings(newProps));
     await nextTick();
 
-    //@ts-ignore - wrapper.vm functions not exposed for typing
+    // @ts-expect-error - wrapper.vm functions not exposed for typing
     wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
     await nextTick();
 
@@ -197,7 +197,7 @@ describe('Map.vue', () => {
     const wrapper = mount(Map, wrapperSettings(newProps));
     await nextTick();
 
-    //@ts-ignore - wrapper.vm functions not exposed for typing
+    // @ts-expect-error - wrapper.vm functions not exposed for typing
     wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
     await nextTick();
 

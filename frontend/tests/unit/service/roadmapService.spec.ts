@@ -5,6 +5,8 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
+import type { AxiosInstance } from 'axios';
+
 // Consants
 const PATH = 'roadmap';
 
@@ -36,7 +38,7 @@ vi.mock('vue-router', () => ({
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

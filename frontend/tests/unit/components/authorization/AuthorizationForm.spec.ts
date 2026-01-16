@@ -15,6 +15,7 @@ import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { AxiosResponse } from 'axios';
+import type { Permit, PermitNote, PermitType, SourceSystemKind } from '@/types';
 
 const createPermitNoteSpy = vi.spyOn(permitNoteService, 'createPermitNote');
 const deletePermitSpy = vi.spyOn(permitService, 'deletePermit');
@@ -181,7 +182,7 @@ describe('AuthorizationForm', () => {
 
     expect(getSourceSystemKindsService).toHaveBeenCalledTimes(1);
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(vm.sourceSystemKinds).toHaveLength(testSourceSystemKinds.length);
   });
 
@@ -189,7 +190,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     expect(vm.initialFormValues).toEqual({
       state: PermitState.NONE,
@@ -233,13 +234,13 @@ describe('AuthorizationForm', () => {
       ...baseSettings,
       props: {
         ...baseSettings.props,
-        authorization: auth as any
+        authorization: auth as Permit
       }
     });
 
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     expect(vm.initialFormValues.authorizationType).toEqual(auth.permitType);
     expect(vm.initialFormValues.stage).toBe(auth.stage);
@@ -259,7 +260,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     vm.sourceSystemKinds = [
       {
@@ -285,7 +286,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     vm.sourceSystemKinds = [
       {
@@ -327,7 +328,7 @@ describe('AuthorizationForm', () => {
   it('submits a non-PEACH permit, creates note, and triggers email notification', async () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const projectService = vm.projectService.value;
     const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
@@ -368,7 +369,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const submitPayload = {
       authorizationType: {
@@ -396,14 +397,14 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
 
-    (vm.t as any).mockReturnValue(template);
+    vm.t.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
-    (vm as any).formRef = {
+    vm.formRef = {
       values: {
         permitNote: `Some user text\n\n${template}\n\nMore text`
       },
@@ -419,14 +420,14 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
 
-    (vm.t as any).mockReturnValue(template);
+    vm.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
-    (vm as any).formRef = {
+    vm.formRef = {
       values: {
         permitNote: ''
       },
@@ -442,14 +443,14 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
 
-    (vm.t as any).mockReturnValue(template);
+    vm.t.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
-    (vm as any).formRef = {
+    vm.formRef = {
       values: {
         permitNote: 'Existing note'
       },
@@ -468,27 +469,27 @@ describe('AuthorizationForm', () => {
       props: {
         ...baseSettings.props,
         authorization: {
-          permitNote: 'previous note',
+          permitNote: [{ note: 'previous note' } as PermitNote],
           permitTracking: [
             {
               sourceSystemKindId: 10,
               trackingId: 'ABC-123',
               shownToProponent: true,
-              sourceSystemKind: { sourceSystemKindId: 10 }
+              sourceSystemKind: { sourceSystemKindId: 10 } as SourceSystemKind
             }
           ]
-        } as any
+        } as unknown as Permit
       }
     });
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
-    (vm.t as any).mockReturnValue(template);
+    vm.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
-    (vm as any).formRef = {
+    vm.formRef = {
       values: { permitNote: '' },
       setFieldValue
     };
@@ -504,7 +505,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     vm.sourceSystemKinds = [
       {
@@ -551,7 +552,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     getPeachSummarySpy.mockRejectedValueOnce({
       status: 404,
@@ -581,12 +582,12 @@ describe('AuthorizationForm', () => {
   it('uses peachPermitNoteNotificationTemplate when note is only the Peach template and permit is valid', async () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     vm.isValidPeachPermit = true;
 
     const template = 'PEACH TEMPLATE ONLY';
-    (vm.t as any).mockReturnValue(template);
+    vm.mockReturnValue(template);
 
     const projectService = vm.projectService.value;
     const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
@@ -596,7 +597,7 @@ describe('AuthorizationForm', () => {
       submittedDate: '2025-01-01',
       createdAt: '2025-01-01T00:00:00.000Z',
       permitId: 'permit-123'
-    } as any;
+    } as Permit;
 
     await vm.emailNotification(permit, template);
 
@@ -607,7 +608,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     upsertPermitSpy.mockRejectedValueOnce(new Error('boom'));
 
@@ -628,6 +629,8 @@ describe('AuthorizationForm', () => {
     };
 
     await vm.onSubmit(submitPayload);
+
+    expect(upsertPermitSpy).toThrowError();
   });
 
   it('onDelete calls deletePermit and navigates on accept', async () => {
@@ -638,20 +641,22 @@ describe('AuthorizationForm', () => {
       props: {
         ...baseSettings.props,
         authorization: {
+          activityId: 'act-123',
           permitId: 'permit-123',
-          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' },
+          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' } as PermitType,
+          permitTypeId: 123,
           permitTracking: [],
           createdAt: '2025-01-01',
           createdBy: 'creator',
           stage: PermitStage.PRE_SUBMISSION,
           state: PermitState.NONE,
           needed: PermitNeeded.NO
-        } as any
+        }
       }
     });
 
     await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const requireSpy = vi.spyOn(vm.confirmDialog, 'require');
 
@@ -680,9 +685,10 @@ describe('AuthorizationForm', () => {
       props: {
         ...baseSettings.props,
         authorization: {
+          activityId: 'act-123',
           permitId: 'permit-123',
-          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' },
-          permitTracking: [],
+          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' } as PermitType,
+          permitTypeId: 123,
           createdAt: '2025-01-01',
           createdBy: 'creator',
           updatedAt: '2025-01-02',
@@ -690,12 +696,12 @@ describe('AuthorizationForm', () => {
           stage: PermitStage.PRE_SUBMISSION,
           state: PermitState.NONE,
           needed: PermitNeeded.NO
-        } as any
+        }
       }
     });
 
     await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     const requireSpy = vi.spyOn(vm.confirmDialog, 'require');
     deletePermitSpy.mockRejectedValueOnce(new Error('boom'));
@@ -716,7 +722,7 @@ describe('AuthorizationForm', () => {
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
-    const vm: any = wrapper.vm;
+    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
     expect(() => vm.onInvalidSubmit({ errors: { field: 'some error' } })).not.toThrow();
   });

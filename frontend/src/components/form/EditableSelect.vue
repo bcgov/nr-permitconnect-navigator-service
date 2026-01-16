@@ -23,7 +23,8 @@ const {
   placeholder?: string;
   disabled?: boolean;
   options: unknown[];
-  getOptionLabel: Function;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getOptionLabel?: string | ((data: any) => string) | undefined; // Matches Prisma type
   bold?: boolean;
 }>();
 
@@ -54,7 +55,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :class="{ 'p-invalid': errorMessage }"
       :disabled="disabled"
       :options="options"
-      :option-label="(option: unknown[]) => getOptionLabel(option)"
+      :option-label="getOptionLabel"
       @blur="handleBlur"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: SelectChangeEvent) => emit('onChange', e)"
