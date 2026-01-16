@@ -13,14 +13,9 @@ const axiosConfig = {
     Pragma: 'no-cache'
   }
 };
-const getSpy = vi.fn();
-const putSpy = vi.fn();
 
 vi.mock('axios');
-vi.mocked(axios).mockReturnValue({
-  get: getSpy,
-  put: putSpy
-} as any);
+vi.mocked(axios, true);
 
 beforeEach(() => {
   sessionStorage.setItem(
@@ -65,12 +60,12 @@ describe('Config Store', () => {
       expect(storageType.getItem(StorageKey.CONFIG)).toBe(`${testData2}`);
     });
 
-    it('fails the init get request', () => {
+    it('fails the init get request', async () => {
       vi.mocked(axios.get).mockImplementation(() => Promise.reject('errTest'));
 
-      ConfigService.init().catch(() => {
-        expect(storageType.getItem(StorageKey.CONFIG)).toBeNull();
-      });
+      await ConfigService.init().catch(() => {});
+
+      expect(storageType.getItem(StorageKey.CONFIG)).toBeNull();
     });
 
     it('gets information from getConfig()', async () => {

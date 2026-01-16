@@ -7,6 +7,7 @@ import { Initiative } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note, NoteHistory } from '@/types';
+import type { AxiosInstance } from 'axios';
 
 // Constants
 const PATH = 'note';
@@ -58,7 +59,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   post: postSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

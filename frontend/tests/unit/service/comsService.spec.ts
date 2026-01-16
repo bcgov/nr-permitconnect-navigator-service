@@ -1,6 +1,8 @@
 import { comsService } from '@/services';
 import { comsAxios } from '@/services/interceptors';
 
+import type { AxiosInstance } from 'axios';
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -24,12 +26,12 @@ vi.mocked(comsAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();
-  createObjectURLSpy.mockImplementation(() => vi.fn() as any);
-  revokeObjectURLSpy.mockImplementation(() => vi.fn() as any);
+  createObjectURLSpy.mockImplementation(vi.fn());
+  revokeObjectURLSpy.mockImplementation(vi.fn());
 });
 
 describe('comsService test', () => {

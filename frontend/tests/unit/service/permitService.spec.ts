@@ -6,6 +6,7 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { PermitStage, PermitState } from '@/utils/enums/permit';
 
+import type { AxiosInstance } from 'axios';
 import type { Permit, PermitType } from '@/types';
 
 // Constants
@@ -60,7 +61,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   put: putSpy,
   delete: deleteSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Spies
 const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');

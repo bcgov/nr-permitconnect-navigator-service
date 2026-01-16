@@ -1,6 +1,8 @@
 import { reportingService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
+import type { AxiosInstance } from 'axios';
+
 // Constants
 const PATH = 'reporting';
 
@@ -16,7 +18,7 @@ vi.mock('vue-router', () => ({
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

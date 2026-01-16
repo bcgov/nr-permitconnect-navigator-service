@@ -61,7 +61,7 @@ function clearGeoJson() {
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
-  return e?.properties?.fullAddress;
+  return e?.properties?.fullAddress ?? '';
 };
 
 function handleProjectLocationClick() {

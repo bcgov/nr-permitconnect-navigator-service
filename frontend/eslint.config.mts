@@ -21,6 +21,7 @@ export default defineConfig([
   },
   tseslint.configs.recommended,
   tseslint.configs.stylistic,
+  pluginVue.configs['flat/recommended'],
   {
     files: ['**/*.vue'],
     languageOptions: {
@@ -48,7 +49,6 @@ export default defineConfig([
       'vue/singleline-html-element-content-newline': 'off'
     }
   },
-  pluginVue.configs['flat/recommended'],
   {
     files: ['**/*.{test,spec}.{js,ts,vue}'],
     plugins: {
@@ -66,7 +66,7 @@ export default defineConfig([
       indent: ['error', 2, { SwitchCase: 1 }],
       'linebreak-style': ['error', 'unix'],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
-      'max-len': ['warn', { code: 120, comments: 120, ignoreUrls: true }],
+      'max-len': ['warn', { code: 120, comments: 120, ignorePattern: '^(import\\s.+|\\} from)', ignoreUrls: true }],
       'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-empty-function': ['error', { allow: ['arrowFunctions'] }],

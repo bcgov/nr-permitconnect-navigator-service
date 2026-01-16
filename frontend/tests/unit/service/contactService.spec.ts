@@ -1,6 +1,7 @@
 import { contactService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
+import type { AxiosInstance } from 'axios';
 import type { Contact, ContactSearchParameters } from '@/types';
 
 vi.mock('vue-router', () => ({
@@ -47,7 +48,7 @@ vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   patch: patchSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();

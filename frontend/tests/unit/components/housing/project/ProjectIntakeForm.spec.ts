@@ -171,7 +171,7 @@ describe('ProjectIntakeForm', () => {
     });
 
     // No clue why this one is exploding the tests
-    it.skip('sets editable to false when housing project ID given', async () => {
+    it.todo('sets editable to false when housing project ID given', async () => {
       const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');

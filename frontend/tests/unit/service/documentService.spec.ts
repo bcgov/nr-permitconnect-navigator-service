@@ -5,7 +5,7 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 
 // Constants
 const PATH = 'document';
@@ -50,7 +50,7 @@ vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
   post: postSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Spies
 const createObjectSpy = vi.spyOn(comsService, 'createObject');

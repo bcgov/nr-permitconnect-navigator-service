@@ -352,7 +352,7 @@ function onReOpen() {
 }
 
 const getAddressSearchLabel = (e: GeocoderEntry) => {
-  return e?.properties?.fullAddress;
+  return e?.properties?.fullAddress ?? '';
 };
 
 async function onAddressSearchInput(e: IInputEvent) {

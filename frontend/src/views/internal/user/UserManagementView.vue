@@ -121,10 +121,12 @@ async function onProcessUserAccessRequest() {
 
       // Change status back to approved
       if (usersAndAccessRequests.value[idx] && (approvedAccess || deniedRevocation)) {
-        usersAndAccessRequests.value[idx].accessRequest &&
-          (usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
+        if (usersAndAccessRequests.value[idx].accessRequest) {
+          usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
             ? AccessRequestStatus.APPROVED
-            : AccessRequestStatus.REJECTED);
+            : AccessRequestStatus.REJECTED;
+        }
+
         usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
       }
 

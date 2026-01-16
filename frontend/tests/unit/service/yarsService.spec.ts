@@ -2,6 +2,8 @@ import { appAxios } from '@/services/interceptors';
 import yarsService from '@/services/yarsService';
 import { Initiative } from '@/utils/enums/application';
 
+import type { AxiosInstance } from 'axios';
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -21,7 +23,7 @@ vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   delete: deleteSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();

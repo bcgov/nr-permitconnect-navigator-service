@@ -5,6 +5,8 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
+import type { AxiosInstance } from 'axios';
+
 // Constants
 const PATH = 'permit/note';
 
@@ -37,7 +39,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   post: postSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

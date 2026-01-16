@@ -1,6 +1,8 @@
 import ssoService from '@/services/ssoService';
 import { appAxios } from '@/services/interceptors';
 
+import type { AxiosInstance } from 'axios';
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -17,7 +19,7 @@ const getSpy = vi.fn();
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();

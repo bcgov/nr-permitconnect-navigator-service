@@ -1,7 +1,7 @@
 import { userService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
-import type { AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import type { UserSearchParameters } from '@/types/UserSearchParameters';
 
 vi.mock('vue-router', () => ({
@@ -15,7 +15,7 @@ const getSpy = vi.fn();
 vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();
