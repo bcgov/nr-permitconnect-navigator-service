@@ -1,9 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data';
-import * as enquiryService from '../../../src/services/enquiry';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
-import { Initiative } from '../../../src/utils/enums/application';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data/index.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -43,7 +42,7 @@ describe('deleteEnquiry', () => {
     expect(prismaTxMock.enquiry.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { enquiryId: '1' }
     });
   });

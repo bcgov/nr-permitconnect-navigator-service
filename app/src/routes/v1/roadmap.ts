@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { sendRoadmapController } from '../../controllers/roadmap';
-import { hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { roadmapValidator } from '../../validators';
+import { sendRoadmapController } from '../../controllers/roadmap.ts';
+import { hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { roadmapValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

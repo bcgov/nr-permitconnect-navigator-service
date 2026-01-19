@@ -1,8 +1,8 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_PERMIT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as permitTrackingService from '../../../src/services/permitTracking.ts';
 
-import { TEST_PERMIT_1 } from '../data';
-import * as permitTrackingService from '../../../src/services/permitTracking';
-import { PermitTracking } from '../../../src/types';
+import type { PermitTracking } from '../../../src/types/index.ts';
 
 describe('deleteManyPermitTracking', () => {
   it('calls permit_tracking.deleteMany', async () => {

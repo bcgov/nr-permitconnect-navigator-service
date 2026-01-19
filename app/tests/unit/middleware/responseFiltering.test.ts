@@ -1,10 +1,11 @@
-import express, { Request, Response } from 'express';
+import express from 'express';
 import request from 'supertest';
 
-import { filterActivityResponseByScope } from '../../../src/middleware/responseFiltering';
-import * as contactService from '../../../src/services/contact';
+import { TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { filterActivityResponseByScope } from '../../../src/middleware/responseFiltering.ts';
+import * as contactService from '../../../src/services/contact.ts';
 
-import { TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data';
+import type { Request, Response } from 'express';
 
 function buildApp() {
   const app = express();

@@ -1,21 +1,27 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils';
-import { email } from '../services/email';
-import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit';
-import { createPermitNote } from '../services/permitNote';
-import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking';
-import { getProjectByActivityId } from '../services/project';
-import { readUser } from '../services/user';
-import { Initiative } from '../utils/enums/application';
-import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../utils/templates';
-import { formatDateOnly, isTruthy } from '../utils/utils';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
+import { email } from '../services/email.ts';
+import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit.ts';
+import { createPermitNote } from '../services/permitNote.ts';
+import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
+import { getProjectByActivityId } from '../services/project.ts';
+import { readUser } from '../services/user.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../utils/templates.ts';
+import { formatDateOnly, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { ListPermitsOptions, Permit, PermitTracking, PermitType, PermitUpdateEmailParams } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type {
+  ListPermitsOptions,
+  Permit,
+  PermitTracking,
+  PermitType,
+  PermitUpdateEmailParams
+} from '../types/index.ts';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -58,6 +64,7 @@ export const listPermitsController = async (
 
 /**
  * Sends out an email notification for the given update email params
+ * @param params Email information for template and recipients
  */
 export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => {
   const { permit, initiative, dearName, projectId, toEmails, emailTemplate } = params;
@@ -65,7 +72,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   const permitName = permit.permitType?.name;
   const submittedDate = formatDateOnly(permit.submittedDate);
 
-  const nrmPermitEmail = config.get('frontend.ches.submission.cc') as string;
+  const nrmPermitEmail: string = config.get('frontend.ches.submission.cc');
 
   const emailBody = emailTemplate({
     activityId,
@@ -95,6 +102,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
 
 /**
  * Creates update notes and sends out email notifications for updated permits
+ * @param permits Array of Permits to send notifications for
  */
 export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
@@ -114,7 +122,7 @@ export const sendPermitUpdateNotifications = async (permits: Permit[]) => {
         const navigator = await readUser(tx, navigatorId);
         navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
       }
-      const navEmail = config.get('server.pcns.navEmail') as string;
+      const navEmail: string = config.get('server.pcns.navEmail');
 
       permitUpdateEmails.push({
         permit,

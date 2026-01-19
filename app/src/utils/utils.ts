@@ -1,12 +1,12 @@
 import config from 'config';
-import { existsSync, readFileSync } from 'fs';
-import { join } from 'path';
+import { existsSync, readFileSync, statSync } from 'node:fs';
+import { join } from 'node:path';
+import { cwd } from 'node:process';
 import { validate, version } from 'uuid';
 
-import { getLogger } from '../utils/log';
+import { getLogger } from '../utils/log.ts';
 
-import type { JwtPayload } from 'jsonwebtoken';
-import type { ChefsFormConfig, ChefsFormConfigData, CurrentContext, IdpAttributes, DateTimeStrings } from '../types';
+import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
 
 const log = getLogger(module.filename);
 
@@ -25,7 +25,7 @@ export function addDashesToUuid(str: string): string {
 
 /**
  * Converts a CamelCase string to title case that can handle camel case
- * @param str The string to convert
+ * @param input The string to convert
  * @returns A string in title case
  */
 export function camelCaseToTitleCase(input: string | null): string | null {
@@ -75,18 +75,9 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
 }
 
 /**
- * Search for a CHEFS form Api Key
- * @returns The CHEFS form Api Key if it exists
- */
-export function getChefsApiKey(formId: string): string | undefined {
-  const cfg = config.get('server.chefs.forms') as ChefsFormConfig;
-  return Object.values<ChefsFormConfigData>(cfg).find((o: ChefsFormConfigData) => o.id === formId)?.apiKey;
-}
-
-/**
  * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
  * @param value A date only string
- * @returns {String} A string representation of `value`
+ * @returns A string representation of `value`
  */
 export function formatDateOnly(value: string | null | undefined): string {
   if (!value) return '';
@@ -107,47 +98,75 @@ export function formatDateOnly(value: string | null | undefined): string {
 }
 
 /**
- * Gets the current git revision hash
- * @see {@link https://stackoverflow.com/a/34518749}
- * @returns The git revision hash, or empty string
+ * Gets the current Git commit hash, or undefined if not found.
+ * @see https://stackoverflow.com/a/34518749
+ * @returns The git revision hash, or undefined
  */
-export function getGitRevision(): string {
-  try {
-    const gitDir = (() => {
-      let dir = '.git',
-        i = 0;
-      while (!existsSync(join(__dirname, dir)) && i < 5) {
-        dir = '../' + dir;
-        i++;
-      }
-      return dir;
-    })();
+export function getGitRevision(): string | undefined {
+  const findGitDir = (base: string): string | undefined => {
+    let gitPath = join(base, '.git');
+    if (existsSync(gitPath)) return gitPath;
 
-    const head = readFileSync(join(__dirname, `${gitDir}/HEAD`), 'utf8')
-      .toString()
-      .trim();
-
-    if (head.indexOf(':') === -1) {
-      return head;
-    } else {
-      return readFileSync(join(__dirname, `${gitDir}/${head.substring(5)}`), 'utf8')
-        .toString()
-        .trim();
+    for (let i = 1; i <= 5; i++) {
+      gitPath = join(base, '../'.repeat(i), '.git');
+      if (existsSync(gitPath)) return gitPath;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    log.warn(err.message, { function: 'getGitRevision' });
-    return '';
+
+    return undefined;
+  };
+
+  const resolveGitDir = (gitPath: string): string => {
+    if (!statSync(gitPath).isFile()) return gitPath;
+
+    const content = readFileSync(gitPath, 'utf8').trim();
+    const match = /^gitdir: (.+)$/.exec(content);
+    return match ? join(cwd(), match[1]) : gitPath;
+  };
+
+  const readRef = (gitDir: string, ref: string): string | undefined => {
+    const refPath = join(gitDir, ref);
+    return existsSync(refPath) ? readFileSync(refPath, 'utf8').trim() : undefined;
+  };
+
+  const readPackedRef = (gitDir: string, ref: string): string | undefined => {
+    const packedPath = join(gitDir, 'packed-refs');
+    if (!existsSync(packedPath)) return undefined;
+
+    const refName = ref.trim();
+    const line = readFileSync(packedPath, 'utf8')
+      .split('\n')
+      .find((l) => l.endsWith(refName));
+
+    return line ? line.split(' ')[0] : undefined;
+  };
+
+  try {
+    if (process.env.GIT_COMMIT) return process.env.GIT_COMMIT;
+
+    const gitPath = findGitDir(cwd());
+    if (!gitPath) return undefined;
+
+    const gitDir = resolveGitDir(gitPath);
+    const head = readFileSync(join(gitDir, 'HEAD'), 'utf8').trim();
+
+    if (!head.startsWith('ref:')) return head;
+
+    const ref = head.slice(5).trim();
+
+    return readRef(gitDir, ref) ?? readPackedRef(gitDir, ref) ?? undefined;
+  } catch (error) {
+    if (error instanceof Error) log.warn(error.message, { function: 'getGitRevision' });
+    return undefined;
   }
 }
 
 /**
  * Attempts to acquire a specific current token sub. Yields `defaultValue` otherwise
  * @param currentContext The express request currentContext object
- * @param [defaultValue=''] An optional default return value
+ * @param defaultValue An optional default return value
  * @returns The requested current token sub if applicable, or `defaultValue`
  */
-export function getCurrentSubject(currentContext: CurrentContext | undefined, defaultValue: string = ''): string {
+export function getCurrentSubject(currentContext: CurrentContext | undefined, defaultValue = ''): string {
   return currentContext?.tokenPayload?.sub ?? defaultValue;
 }
 
@@ -159,11 +178,11 @@ export function getCurrentSubject(currentContext: CurrentContext | undefined, de
 export function getCurrentUsername(currentContext: CurrentContext | undefined): string | undefined {
   if (currentContext?.tokenPayload) {
     const idpList = readIdpList();
-    const payload = currentContext.tokenPayload as JwtPayload;
+    const payload = currentContext.tokenPayload;
 
     const usernameKey = idpList.find((x) => x.idp === payload.identity_provider)?.username;
 
-    if (usernameKey && usernameKey in payload) return payload[usernameKey];
+    if (usernameKey && usernameKey in payload) return payload[usernameKey] as string;
   }
 
   return undefined;
@@ -198,11 +217,10 @@ export function mixedQueryToArray(param: string | string[] | undefined): string[
 }
 
 /**
- * @function omit
  * Omits the given set of keys from the given object
- * @param {object} data The object to copy and manipulate
- * @param {string[]} keys Array of keys to remove
- * @returns {object} A new object with the given keys removed
+ * @param data The object to copy and manipulate
+ * @param keys Array of keys to remove
+ * @returns A new object with the given keys removed
  */
 export function omit<Data extends object, Keys extends keyof Data>(data: Data, keys: Keys[]): Omit<Data, Keys> {
   const result = { ...data };
@@ -228,13 +246,9 @@ export function parseCSV(value: string): string[] {
  * @see {@link https://stackoverflow.com/a/71247432}
  * @param arr The array to partition
  * @param predicate The predicate function
- * @returns
+ * @returns The partitioned arrays
  */
-export function partition<T>(
-  arr: T[],
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  predicate: (v: T, i: number, ar: T[]) => boolean
-): [T[], T[]] {
+export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => boolean): [T[], T[]] {
   return arr.reduce(
     (acc, item, index, array) => {
       acc[+!predicate(item, index, array)].push(item);
@@ -261,18 +275,18 @@ export function parseIdentityKeyClaims(): string[] {
  * Acquires the list of feature flags to be used
  * @returns A promise resolving to an object of key values
  */
-export function readFeatureList(): { [key: string]: unknown } {
+export function readFeatureList(): Record<string, boolean> {
   const configDir = '../../config';
-  const env = config.get('server.env');
+  const env: string = config.get('server.env');
   const defaultFile = `features-${env}.json`;
   const overrideFile = 'features-local.json';
 
-  let features;
+  let features: Record<string, boolean> = {};
 
   if (existsSync(join(__dirname, configDir, overrideFile))) {
-    features = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8'));
+    features = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8')) as Record<string, boolean>;
   } else if (existsSync(join(__dirname, configDir, defaultFile))) {
-    features = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8'));
+    features = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8')) as Record<string, boolean>;
   }
 
   return features;
@@ -287,12 +301,12 @@ export function readIdpList(): IdpAttributes[] {
   const defaultFile = 'idplist-default.json';
   const overrideFile = 'idplist-local.json';
 
-  let idpList = [];
+  let idpList: IdpAttributes[] = [];
 
   if (existsSync(join(__dirname, configDir, overrideFile))) {
-    idpList = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8'));
+    idpList = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8')) as IdpAttributes[];
   } else if (existsSync(join(__dirname, configDir, defaultFile))) {
-    idpList = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8'));
+    idpList = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8')) as IdpAttributes[];
   }
 
   return idpList;
@@ -304,7 +318,7 @@ export function readIdpList(): IdpAttributes[] {
  * @param fields An array of field strings to sanitize on
  * @returns An arbitrary object with specified secret fields marked as redacted
  */
-export function redactSecrets(data: { [key: string]: unknown }, fields: string[]): unknown {
+export function redactSecrets(data: Record<string, unknown>, fields: string[]): unknown {
   if (fields && Array.isArray(fields) && fields.length) {
     fields.forEach((field) => {
       if (data[field]) data[field] = 'REDACTED';

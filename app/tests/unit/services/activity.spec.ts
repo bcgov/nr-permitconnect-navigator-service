@@ -1,10 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 
-import { generateCreateStamps, generateDeleteStamps } from '../../../src/db/utils/utils';
-import * as activityService from '../../../src/services/activity';
-import { Initiative as InitiativeE } from '../../../src/utils/enums/application';
+import { generateCreateStamps, generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import * as activityService from '../../../src/services/activity.ts';
+import { Initiative as InitiativeE } from '../../../src/utils/enums/application.ts';
 
-import type { Activity, Initiative } from '../../../src/types';
+import type { Activity, Initiative } from '../../../src/types/index.ts';
 
 const ACTIVITY = {
   activityId: 'ABCD1234'

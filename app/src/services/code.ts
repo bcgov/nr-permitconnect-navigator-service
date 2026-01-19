@@ -1,10 +1,10 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type {
   ElectrificationProjectCategoryCode,
   ElectrificationProjectTypeCode,
   EscalationTypeCode,
   SourceSystemCode
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * List all code tables

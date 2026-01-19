@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application';
+import stamps from '../stamps.ts';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
 
@@ -386,9 +386,11 @@ export async function up(knex: Knex): Promise<void> {
           .where({
             code: Initiative.HOUSING
           })
-          .first();
+          .first<{ initiative_id: string }>();
 
-        const housing_permit_ids = await knex.select('permit_type_id').from('permit_type');
+        const housing_permit_ids: { permit_type_id: string }[] = await knex
+          .select('permit_type_id')
+          .from('permit_type');
 
         const items = housing_permit_ids.map((x) => ({
           permit_type_id: x.permit_type_id,
@@ -411,18 +413,18 @@ export async function up(knex: Knex): Promise<void> {
           .where({
             code: Initiative.ELECTRIFICATION
           })
-          .first();
+          .first<{ initiative_id: string }>();
 
         // All permits except these 4
-        const electrification_permit_ids = await knex
-          .select('permit_type_id')
+        const electrification_permit_ids: { permit_type_id: string }[] = await knex
           .from('permit_type')
           .whereNotIn('name', [
             'Sponsored Crown Grant',
             'Residential Lands Tenure',
             'Nominal Rent Tenure',
             'Site Remediation Authorization'
-          ]);
+          ])
+          .select('permit_type_id');
 
         const items = electrification_permit_ids.map((x) => ({
           permit_type_id: x.permit_type_id,
@@ -492,7 +494,7 @@ export async function up(knex: Knex): Promise<void> {
 
       // Add roles
       .then(() => {
-        const items: Array<{ name: string; description: string }> = [];
+        const items: { name: string; description: string }[] = [];
         for (const resource of resources) {
           items.push(
             {
@@ -514,22 +516,22 @@ export async function up(knex: Knex): Promise<void> {
 
       // Add role to policy mappings
       .then(async () => {
-        const policies = await knex
+        const policies: { policy_id: number; resource_name: string; action_name: Action }[] = await knex
           .select('p.policy_id', 'r.name as resource_name', 'a.name as action_name')
           .from({ p: 'yars.policy' })
           .innerJoin({ r: 'yars.resource' }, 'p.resource_id', '=', 'r.resource_id')
           .innerJoin({ a: 'yars.action' }, 'p.action_id', '=', 'a.action_id');
 
-        const items: Array<{ role_id: number; policy_id: number }> = [];
+        const items: { role_id: number; policy_id: number }[] = [];
 
         const addRolePolicies = async (resourceName: string) => {
-          const creatorId = await knex('yars.role')
+          const creatorId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_CREATOR` })
             .select('role_id');
-          const viewerId = await knex('yars.role')
+          const viewerId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_VIEWER` })
             .select('role_id');
-          const editorId = await knex('yars.role')
+          const editorId: { role_id: number }[] = await knex('yars.role')
             .where({ name: `${resourceName.toUpperCase()}_EDITOR` })
             .select('role_id');
 
@@ -537,20 +539,20 @@ export async function up(knex: Knex): Promise<void> {
           items.push(
             {
               role_id: creatorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.CREATE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.CREATE)!.policy_id
             },
             {
               role_id: viewerId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.READ)!.policy_id
             },
             {
               role_id: editorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.UPDATE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.UPDATE)!.policy_id
             },
 
             {
               role_id: editorId[0].role_id,
-              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE).policy_id
+              policy_id: resourcePolicies.find((x) => x.action_name == Action.DELETE)!.policy_id
             }
           );
         };
@@ -562,65 +564,65 @@ export async function up(knex: Knex): Promise<void> {
 
       // Add group to role mappings for ELECTRIFICATION_PROJECT
       .then(async () => {
-        const electrification_id = await knex('initiative')
+        const electrification_initiative_id: { initiative_id: string }[] = await knex('initiative')
           .where({
             code: Initiative.ELECTRIFICATION
           })
           .select('initiative_id');
 
-        const elec_navigator_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.NAVIGATOR })
+        const elec_navigator_group_id: { group_id: number }[] = await knex('yars.group')
+          .where({ initiative_id: electrification_initiative_id[0].initiative_id, name: GroupName.NAVIGATOR })
           .select('group_id');
 
-        const elec_navigator_read_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
+        const elec_navigator_read_group_id: { group_id: number }[] = await knex('yars.group')
+          .where({ initiative_id: electrification_initiative_id[0].initiative_id, name: GroupName.NAVIGATOR_READ_ONLY })
           .select('group_id');
 
-        const elec_supervisor_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.SUPERVISOR })
+        const elec_supervisor_group_id: { group_id: number }[] = await knex('yars.group')
+          .where({ initiative_id: electrification_initiative_id[0].initiative_id, name: GroupName.SUPERVISOR })
           .select('group_id');
 
-        const elec_admin_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.ADMIN })
+        const elec_admin_group_id: { group_id: number }[] = await knex('yars.group')
+          .where({ initiative_id: electrification_initiative_id[0].initiative_id, name: GroupName.ADMIN })
           .select('group_id');
 
-        const elec_proponent_group_id = await knex('yars.group')
-          .where({ initiative_id: electrification_id[0].initiative_id, name: GroupName.PROPONENT })
+        const elec_proponent_group_id: { group_id: number }[] = await knex('yars.group')
+          .where({ initiative_id: electrification_initiative_id[0].initiative_id, name: GroupName.PROPONENT })
           .select('group_id');
 
-        const items: Array<{ group_id: number; role_id: number }> = [];
+        const items: { group_id: number; role_id: number }[] = [];
 
-        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Array<Action>) => {
+        const addResourceRoles = async (group_id: number, resourceName: Resource, actionNames: Action[]) => {
           if (actionNames.includes(Action.CREATE)) {
+            const creator_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_CREATOR` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_CREATOR` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: creator_role_id[0].role_id
             });
           }
 
           if (actionNames.includes(Action.READ)) {
+            const read_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_VIEWER` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_VIEWER` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: read_role_id[0].role_id
             });
           }
 
           if (actionNames.includes(Action.UPDATE) || actionNames.includes(Action.DELETE)) {
+            const update_role_id: { role_id: number }[] = await knex('yars.role')
+              .where({ name: `${resourceName}_EDITOR` })
+              .select('role_id');
+
             items.push({
               group_id: group_id,
-              role_id: (
-                await knex('yars.role')
-                  .where({ name: `${resourceName}_EDITOR` })
-                  .select('role_id')
-              )[0].role_id
+              role_id: update_role_id[0].role_id
             });
           }
         };
@@ -678,25 +680,32 @@ export async function up(knex: Knex): Promise<void> {
          * Attach scope attributes to all non CREATE ELECTRIFICATION_PROJECT policies
          */
 
-        const action_create_id = await knex('yars.action').where({ name: Action.CREATE }).select('action_id');
+        const action_create_id: { action_id: number }[] = await knex('yars.action')
+          .where({ name: Action.CREATE })
+          .select('action_id');
 
-        const electrification_resource_id = await knex('yars.resource')
+        const electrification_resource_id: { resource_id: number }[] = await knex('yars.resource')
           .where({ name: Resource.ELECTRIFICATION_PROJECT })
           .select('resource_id');
 
-        const scopeAllId = await knex('yars.attribute').where({ name: 'scope:all' }).select('attribute_id');
-        const scopeSelfId = await knex('yars.attribute').where({ name: 'scope:self' }).select('attribute_id');
+        const scope_all_attribute_id: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:all' })
+          .select('attribute_id');
 
-        const policies = await knex('yars.policy')
+        const scope_self_attribute_id: { attribute_id: number }[] = await knex('yars.attribute')
+          .where({ name: 'scope:self' })
+          .select('attribute_id');
+
+        const policies: { policy_id: number }[] = await knex('yars.policy')
           .where({ resource_id: electrification_resource_id[0].resource_id })
           .whereNot({ action_id: action_create_id[0].action_id })
           .select('policy_id');
 
-        const items: Array<{ policy_id: number; attribute_id: number }> = [];
+        const items: { policy_id: number; attribute_id: number }[] = [];
 
         for (const policy of policies) {
-          items.push({ policy_id: policy.policy_id, attribute_id: scopeAllId[0].attribute_id });
-          items.push({ policy_id: policy.policy_id, attribute_id: scopeSelfId[0].attribute_id });
+          items.push({ policy_id: policy.policy_id, attribute_id: scope_all_attribute_id[0].attribute_id });
+          items.push({ policy_id: policy.policy_id, attribute_id: scope_self_attribute_id[0].attribute_id });
         }
 
         return knex('yars.policy_attribute').insert(items);
@@ -1012,13 +1021,13 @@ export async function down(knex: Knex): Promise<void> {
       // Remove YARS
       // Remove group to role mappings for ELECTRIFICATION_PROJECT
       .then(async () => {
-        const creatorRole = await knex('yars.role')
+        const creatorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_CREATOR` })
           .select('role_id');
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_VIEWER` })
           .select('role_id');
-        const editorRole = await knex('yars.role')
+        const editorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_EDITOR` })
           .select('role_id');
         if (creatorRole && creatorRole.length > 0) {
@@ -1034,13 +1043,13 @@ export async function down(knex: Knex): Promise<void> {
 
       // Remove role to policy mappings for ELECTRIFICATION_PROJECT
       .then(async () => {
-        const creatorRole = await knex('yars.role')
+        const creatorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_CREATOR` })
           .select('role_id');
-        const viewerRole = await knex('yars.role')
+        const viewerRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_VIEWER` })
           .select('role_id');
-        const editorRole = await knex('yars.role')
+        const editorRole: { role_id: number }[] = await knex('yars.role')
           .where({ name: `${Resource.ELECTRIFICATION_PROJECT}_EDITOR` })
           .select('role_id');
         if (creatorRole && creatorRole.length > 0) {
@@ -1072,7 +1081,7 @@ export async function down(knex: Knex): Promise<void> {
         const resourceRow = await knex('yars.resource')
           .where({ name: Resource.ELECTRIFICATION_PROJECT })
           .select('resource_id')
-          .first();
+          .first<{ resource_id: number }>();
         if (resourceRow) {
           return knex('yars.policy').where({ resource_id: resourceRow.resource_id }).del();
         }
@@ -1085,7 +1094,7 @@ export async function down(knex: Knex): Promise<void> {
             code: Initiative.ELECTRIFICATION
           })
           .select('initiative_id')
-          .first();
+          .first<{ initiative_id: string }>();
 
         if (electrificationRow) {
           return knex('yars.group').where({ initiative_id: electrificationRow.initiative_id }).del();

@@ -1,5 +1,4 @@
-/* eslint-disable max-len */
-import stamps from '../stamps';
+import stamps from '../stamps.ts';
 
 import type { Knex } from 'knex';
 

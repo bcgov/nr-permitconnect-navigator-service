@@ -1,5 +1,5 @@
-import { Problem } from '../utils';
-import { AuthType } from '../utils/enums/application';
+import { Problem } from '../utils/index.ts';
+import { AuthType } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 
@@ -8,8 +8,7 @@ import type { NextFunction, Request, Response } from 'express';
  * @param req Express request object
  * @param _res Express response object
  * @param next The next callback function
- * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const requireSomeAuth = (req: Request, _res: Response, next: NextFunction) => {
   const authType: string | undefined = req.currentContext ? req.currentContext.authType : undefined;

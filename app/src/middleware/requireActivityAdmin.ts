@@ -1,11 +1,11 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { Problem } from '../utils';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { Problem } from '../utils/index.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity
@@ -14,7 +14,7 @@ import type { PrismaTransactionClient } from '../db/dataConnection';
  * @param res Express response object
  * @param next The next callback function
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const requireActivityAdmin = async (
   req: Request<{ activityId: string; contactId: string }>,
@@ -39,9 +39,12 @@ export const requireActivityAdmin = async (
         throw new Error();
       }
     });
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+  } catch (error) {
+    if (error instanceof Error) {
+      return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+    } else if (typeof error === 'string') {
+      return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+    } else return next(new Problem(403, { instance: req.originalUrl }));
   }
 
   // Continue middleware

@@ -1,14 +1,14 @@
 import config from 'config';
 import jwt from 'jsonwebtoken';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { login } from '../services/user';
-import { Problem } from '../utils';
-import { AuthType, Initiative } from '../utils/enums/application';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { login } from '../services/user.ts';
+import { Problem } from '../utils/index.ts';
+import { AuthType, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentContext } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { CurrentContext } from '../types/index.ts';
 
 // TODO: Implement a 401 for unrecognized users.
 
@@ -22,11 +22,9 @@ export const _spkiWrapper = (spki: string) => `-----BEGIN PUBLIC KEY-----\n${spk
 /**
  * Injects a currentContext object to the request if there exists valid authentication artifacts.
  * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
- * @param req Express request object
- * @param  res Express response object
- * @param next The next callback function
- * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @param initiative The initiative associated with the request
+ * @returns A middleware function
+ * @throws {Problem} The error encountered upon failure
  */
 export const currentContext = (initiative: Initiative) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -59,7 +57,7 @@ export const currentContext = (initiative: Initiative) => {
             currentContext.bearerToken = bearerToken;
             currentContext.tokenPayload = isValid as jwt.JwtPayload;
             const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-              return await login(tx, currentContext.tokenPayload as jwt.JwtPayload);
+              return await login(tx, currentContext.tokenPayload!);
             });
 
             if (user && user.userId) currentContext.userId = user.userId;
@@ -67,9 +65,12 @@ export const currentContext = (initiative: Initiative) => {
           } else {
             throw new Error('Invalid authorization token');
           }
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+        } catch (error) {
+          if (error instanceof Error) {
+            return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+          } else if (typeof error === 'string') {
+            return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+          } else return next(new Problem(403, { instance: req.originalUrl }));
         }
       }
     }

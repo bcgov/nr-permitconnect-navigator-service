@@ -1,18 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
   generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
-} from '../db/utils/utils';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity';
-import { createActivityContact } from '../services/activityContact';
-import { searchContacts, upsertContacts } from '../services/contact';
-import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft';
-import { email } from '../services/email';
+} from '../db/utils/utils.ts';
+import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivityContact } from '../services/activityContact.ts';
+import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
+import { email } from '../services/email.ts';
 import {
   createElectrificationProject,
   deleteElectrificationProject,
@@ -21,13 +21,13 @@ import {
   getElectrificationProjectStatistics,
   searchElectrificationProjects,
   updateElectrificationProject
-} from '../services/electrificationProject';
-import { Initiative } from '../utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon';
-import { isTruthy } from '../utils/utils';
+} from '../services/electrificationProject.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
+import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type {
   Contact,
   CurrentContext,
@@ -38,10 +38,14 @@ import type {
   ElectrificationProjectStatistics,
   Email,
   StatisticsFilters
-} from '../types';
+} from '../types/index.ts';
 
 /**
  * Handles creating a project from intake data
+ * @param tx Prisma transaction client
+ * @param data Electrification project data
+ * @param currentContext context data of current request
+ * @returns Maniplated electrification data
  */
 const generateElectrificationProjectData = async (
   tx: PrismaTransactionClient,
@@ -54,7 +58,7 @@ const generateElectrificationProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
       ?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -91,6 +95,8 @@ const generateElectrificationProjectData = async (
 
 /**
  * Send an email with the confirmation of electrification project
+ * @param req Express Request object
+ * @param res Express Response object
  */
 export const emailElectrificationProjectConfirmationController = async (
   req: Request<never, never, Email>,
@@ -112,11 +118,9 @@ export const createElectrificationProjectController = async (
   res: Response
 ) => {
   // Provide an empty body if POST body is given undefined
-  if (req.body === undefined) {
-    req.body = {
-      project: {}
-    } as ElectrificationProjectIntake;
-  }
+  req.body ??= {
+    project: {}
+  } as ElectrificationProjectIntake;
 
   const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
     const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
@@ -266,7 +270,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
       });
 
       // Update the contact and link to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
       if (contacts[0])
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
 
@@ -278,7 +282,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
 };
 
 export const updateElectrificationProjectController = async (
-  req: Request<never, never, { project: ElectrificationProject; contacts: Array<Contact> }>,
+  req: Request<never, never, { project: ElectrificationProject; contacts: Contact[] }>,
   res: Response
 ) => {
   const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {

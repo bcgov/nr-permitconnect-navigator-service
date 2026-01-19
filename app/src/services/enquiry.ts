@@ -1,8 +1,8 @@
-import { Initiative } from '../utils/enums/application';
+import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { IStamps } from '../interfaces/IStamps';
-import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
+import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types/index.ts';
 
 /**
  * Creates a new enquiry
@@ -101,6 +101,7 @@ export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string)
 /**
  * Search and filter for specific enquiries
  * @param tx Prisma transaction client
+ * @param params Optional filtering parameters
  * @param params.activityId Optional array of uuids representing the activity ID
  * @param params.createdBy Optional array of uuids representing users who created enquiries
  * @param params.enquiryId Optional array of uuids representing the enquiry ID

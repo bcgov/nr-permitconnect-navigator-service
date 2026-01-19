@@ -1,6 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import * as codeService from '../../../src/services/code';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as codeService from '../../../src/services/code.ts';
 
 describe('listAllCodeTables', () => {
   it('calls required findMany and returns result', async () => {

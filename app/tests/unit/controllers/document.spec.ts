@@ -1,12 +1,12 @@
-import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   createDocumentController,
   deleteDocumentController,
   listDocumentsController
-} from '../../../src/controllers/document';
-import * as documentService from '../../../src/services/document';
-import * as userService from '../../../src/services/user';
+} from '../../../src/controllers/document.ts';
+import * as documentService from '../../../src/services/document.ts';
+import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
 
@@ -65,7 +65,7 @@ describe('createDocumentController', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.filesize,
-      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT_1);
@@ -105,7 +105,7 @@ describe('createDocumentController', () => {
       req.body.filename,
       req.body.mimeType,
       req.body.filesize,
-      { createdAt: expect.any(Date), createdBy: TEST_CURRENT_CONTEXT.userId }
+      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
     );
     expect(readUserSpy).toHaveBeenCalledTimes(1);
     expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);

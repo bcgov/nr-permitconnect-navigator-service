@@ -1,7 +1,7 @@
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import { Problem } from '../utils/index.ts';
 
-import type { Project } from '../types';
-import { Problem } from '../utils';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Project } from '../types/index.ts';
 
 /**
  * Gets a specific project from the PCNS database by given ActivityId

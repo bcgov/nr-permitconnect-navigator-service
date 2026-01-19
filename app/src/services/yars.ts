@@ -1,10 +1,10 @@
 /* TODO: Create group policy details type and set explicit return types */
 
-import { createBucket } from './coms';
-import { Initiative, GroupName, Action } from '../utils/enums/application';
+import { createBucket } from './coms.ts';
+import { Initiative, GroupName, Action } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Group } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { Group } from '../types/index.ts';
 
 /**
  * Assigns an identity to the given group
@@ -34,7 +34,7 @@ export const assignGroup = async (
     }
   });
 
-  const comsPermsMap = new Map<GroupName, Array<Action>>([
+  const comsPermsMap = new Map<GroupName, Action[]>([
     [GroupName.PROPONENT, [Action.CREATE]],
     [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
     [GroupName.NAVIGATOR_READ_ONLY, [Action.READ]],
@@ -77,7 +77,7 @@ export const getSubjectGroups = async (tx: PrismaTransactionClient, sub: string)
     groupId: x.groupId,
     name: x.group.name as GroupName,
     label: x.group.label
-  })) as Array<Group>;
+  })) as Group[];
 };
 
 /**

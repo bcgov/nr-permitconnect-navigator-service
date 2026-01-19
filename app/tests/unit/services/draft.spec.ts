@@ -1,13 +1,11 @@
-import { JsonValue } from '@prisma/client/runtime/library';
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { generateCreateStamps } from '../../../src/db/utils/utils.ts';
+import * as draftService from '../../../src/services/draft.ts';
+import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT } from '../data';
-import { generateCreateStamps } from '../../../src/db/utils/utils';
-import * as draftService from '../../../src/services/draft';
-import { DraftCode } from '../../../src/utils/enums/projectCommon';
-
-import type { Draft } from '../../../src/types';
+import type { JsonValue } from '@prisma/client/runtime/library';
+import type { Draft } from '../../../src/types/index.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();

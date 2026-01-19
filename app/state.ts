@@ -1,4 +1,4 @@
-import { getGitRevision, readFeatureList } from './src/utils/utils';
+import { getGitRevision, readFeatureList } from './src/utils/utils.ts';
 
 export const state = {
   features: readFeatureList(),

@@ -1,8 +1,7 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_ACTIVITY_CONTACT_1 } from '../data';
-import * as activityContactService from '../../../src/services/activityContact';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_ACTIVITY_CONTACT_1 } from '../data/index.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 describe('createActivityContact', () => {
   it('calls activity_contact.create and returns result', async () => {

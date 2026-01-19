@@ -1,6 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 
-import { sanitize } from './utils';
+import { sanitize } from './utils.ts';
 
 /**
  * Express middleware to sanitize incoming request bodies

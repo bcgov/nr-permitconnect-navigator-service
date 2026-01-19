@@ -1,5 +1,5 @@
-import { compareDates, splitDateTime } from '../utils';
-import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit';
+import { compareDates, splitDateTime } from '../utils/index.ts';
+import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit.ts';
 
 import type {
   CodingEvent,
@@ -9,10 +9,11 @@ import type {
   PeachSummary,
   ProcessEvent,
   DateTimeStrings
-} from '../types';
+} from '../types/index.ts';
 
 /**
- * Inferred process ordering from @see {@link https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process}
+ * Inferred process ordering from
+ * @see {@link https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process}
  */
 const APPLICATION_PROCESS_ORDERING: string[] = [
   'APPLICATION',
@@ -174,8 +175,8 @@ export function compareProcessEvents(a: ProcessEvent, b: ProcessEvent, desc = fa
  */
 export const getRecordEvents = (
   record: PeachRecord,
-  n: number = 0,
-  m: number = 0
+  n = 0,
+  m = 0
 ): { processEvent: ProcessEvent; onHoldEvent: CodingEvent } => {
   const processEvents = [...record.process_event_set].sort((a, b) => compareProcessEvents(a, b, true));
   // TODO: Once onHold is implemented a tie breaker compartive function will be needed

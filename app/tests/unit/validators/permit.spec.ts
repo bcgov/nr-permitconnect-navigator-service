@@ -1,5 +1,5 @@
-import { PermitStage, PermitState } from '../../../src/utils/enums/permit';
-import { upsertPermitBodySchema } from '../../../src/validators/permit';
+import { PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { upsertPermitBodySchema } from '../../../src/validators/permit.ts';
 
 const permit = () => ({
   permitId: null,

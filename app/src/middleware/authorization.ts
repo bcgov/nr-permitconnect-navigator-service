@@ -1,28 +1,28 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { getDocument } from '../services/document';
-import { getDraft } from '../services/draft';
-import { getElectrificationProject } from '../services/electrificationProject';
-import { getEnquiry } from '../services/enquiry';
-import { getHousingProject } from '../services/housingProject';
-import { getNoteHistory } from '../services/noteHistory';
-import { getPermit } from '../services/permit';
-import { getCurrentUserId } from '../services/user';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { listActivityContacts } from '../services/activityContact.ts';
+import { searchContacts } from '../services/contact.ts';
+import { getDocument } from '../services/document.ts';
+import { getDraft } from '../services/draft.ts';
+import { getElectrificationProject } from '../services/electrificationProject.ts';
+import { getEnquiry } from '../services/enquiry.ts';
+import { getHousingProject } from '../services/housingProject.ts';
+import { getNoteHistory } from '../services/noteHistory.ts';
+import { getPermit } from '../services/permit.ts';
+import { getCurrentUserId } from '../services/user.ts';
 import {
   getGroupPolicyDetails,
   getPCNSGroupPolicyDetails,
   getPolicyAttributes,
   getSubjectGroups
-} from '../services/yars';
-import { SYSTEM_ID } from '../utils/constants/application';
-import { Initiative, GroupName } from '../utils/enums/application';
-import { Problem } from '../utils';
-import { getCurrentSubject } from '../utils/utils';
+} from '../services/yars.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { Problem } from '../utils/index.ts';
+import { getCurrentSubject } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { CurrentAuthorization } from '../types';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { CurrentAuthorization } from '../types/index.ts';
 
 /**
  * Obtains the groups for the current users identity
@@ -32,7 +32,7 @@ import type { CurrentAuthorization } from '../types';
  * @param  resource a resource name
  * @param action an action name
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const hasAuthorization = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -50,8 +50,11 @@ export const hasAuthorization = (resource: string, action: string) => {
             throw new Error('Invalid user');
           }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          const sub = (req.currentContext?.tokenPayload as any).sub;
+          const sub = req.currentContext?.tokenPayload?.sub;
+
+          if (!sub) {
+            throw new Error('No subject');
+          }
 
           const groups = await getSubjectGroups(tx, sub);
 
@@ -73,13 +76,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             } else {
               policyDetails = await Promise.all(
                 groups.map((x) => {
-                  return getGroupPolicyDetails(
-                    tx,
-                    x.groupId,
-                    resource,
-                    action,
-                    req.currentContext?.initiative as Initiative
-                  );
+                  return getGroupPolicyDetails(tx, x.groupId, resource, action, req.currentContext?.initiative);
                 })
               ).then((x) => x.flat());
             }
@@ -91,11 +88,11 @@ export const hasAuthorization = (resource: string, action: string) => {
             // Inject policy attributes at global level and matching users groups
             const policyAttributes = await Promise.all(
               policyDetails.map((x) => {
-                return getPolicyAttributes(tx, x.policyId as number);
+                return getPolicyAttributes(tx, x.policyId!);
               })
             ).then((x) => x.flat());
 
-            const matchingAttributes: Array<string> = [];
+            const matchingAttributes: string[] = [];
             for (const attribute of policyAttributes) {
               if (attribute.groupId.length === 0) {
                 matchingAttributes.push(attribute.attributeName);
@@ -118,9 +115,12 @@ export const hasAuthorization = (resource: string, action: string) => {
           throw new Error('No current user');
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    } catch (error) {
+      if (error instanceof Error) {
+        return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+      } else if (typeof error === 'string') {
+        return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+      } else return next(new Problem(403, { instance: req.originalUrl }));
     }
 
     // Continue middleware
@@ -147,7 +147,7 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
  * Ensure that the current user contact is part of the activity contact list
  * @param param A route parameter string, typically a GUID
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -156,14 +156,15 @@ export const hasAccess = (param: string) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
 
-          let data;
+          let data: unknown;
           if (param !== 'activityId') {
             const func = paramMap.get(param);
             if (func) data = await func(tx, id);
           }
 
-          const activityId = data?.activityId ?? id;
-          const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+          // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
+          const activityId: string = data?.activityId ?? id;
+          const contact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
           const activityContacts = await listActivityContacts(tx, activityId);
 
           if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
@@ -171,9 +172,12 @@ export const hasAccess = (param: string) => {
           }
         }
       });
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (err: any) {
-      return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+    } catch (error) {
+      if (error instanceof Error) {
+        return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+      } else if (typeof error === 'string') {
+        return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+      } else return next(new Problem(403, { instance: req.originalUrl }));
     }
 
     // Continue middleware

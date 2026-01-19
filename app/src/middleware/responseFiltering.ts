@@ -1,9 +1,9 @@
-import prisma from '../db/dataConnection';
-import { searchContacts } from '../services/contact';
-import { Problem } from '../utils';
+import prisma from '../db/dataConnection.ts';
+import { searchContacts } from '../services/contact.ts';
+import { Problem } from '../utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Activity } from '../types';
+import type { Activity } from '../types/index.ts';
 
 /**
  * Filters the response json based on the scope of the current authorization
@@ -13,7 +13,7 @@ import type { Activity } from '../types';
  * @param res Express response object
  * @param next The next callback function
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const filterActivityResponseByScope = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -42,8 +42,11 @@ export const filterActivityResponseByScope = async (req: Request, res: Response,
     };
 
     next();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (err: any) {
-    return next(new Problem(403, { detail: err.message, instance: req.originalUrl }));
+  } catch (error) {
+    if (error instanceof Error) {
+      return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
+    } else if (typeof error === 'string') {
+      return next(new Problem(403, { detail: error, instance: req.originalUrl }));
+    } else return next(new Problem(403, { instance: req.originalUrl }));
   }
 };

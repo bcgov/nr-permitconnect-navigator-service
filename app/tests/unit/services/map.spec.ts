@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import * as mapService from '../../../src/services/map';
+import * as mapService from '../../../src/services/map.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');

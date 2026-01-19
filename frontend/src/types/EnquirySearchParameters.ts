@@ -1,6 +1,6 @@
 export type EnquirySearchParameters = {
-  activityId?: Array<string>;
-  createdBy?: Array<string>;
-  enquiryId?: Array<string>;
+  activityId?: string[];
+  createdBy?: string[];
+  enquiryId?: string[];
   includeUser?: boolean;
 };

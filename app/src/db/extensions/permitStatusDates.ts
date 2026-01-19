@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import { Regex } from '../../utils/enums/application';
+import { Regex } from '../../utils/enums/application.ts';
 
 const DATE_ONLY_REGEX = new RegExp(Regex.DATE_ONLY);
 const DATE_FIELDS = ['submittedDate', 'decisionDate', 'statusLastVerified', 'statusLastChanged'];

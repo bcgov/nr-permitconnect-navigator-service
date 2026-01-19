@@ -1,10 +1,10 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper';
-import { assignGroup, getGroups, getSubjectGroups } from '../services/yars';
-import { Problem } from '../utils';
-import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application';
+import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { assignGroup, getGroups, getSubjectGroups } from '../services/yars.ts';
+import { Problem } from '../utils/index.ts';
+import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 
 /**
  * Attempt to assign proponent groups to users with external IDPs
@@ -13,7 +13,7 @@ import type { PrismaTransactionClient } from '../db/dataConnection';
  * @param _res Express response object
  * @param next The next callback function
  * @returns Express middleware function
- * @throws The error encountered upon failure
+ * @throws {Problem} The error encountered upon failure
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {

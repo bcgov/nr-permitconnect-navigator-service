@@ -1,6 +1,6 @@
-import { BasicResponse } from '../../../src/utils/enums/application';
-import { NumResidentialUnits } from '../../../src/utils/enums/housing';
-import { housing } from '../../../src/validators/housing';
+import { BasicResponse } from '../../../src/utils/enums/application.ts';
+import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
+import { housing } from '../../../src/validators/housing.ts';
 
 describe('housingSchema', () => {
   it('should validate the housing schema with valid data', () => {

@@ -1,14 +1,14 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils';
-import * as contactService from '../../../src/services/contact';
-import * as userService from '../../../src/services/user';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { SYSTEM_ID } from '../../../src/utils/constants/application';
-import { IdentityProvider } from '../../../src/utils/enums/application';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import * as userService from '../../../src/services/user.ts';
+import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
+import { IdentityProvider } from '../../../src/utils/enums/application.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
-import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types';
+import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types/index.ts';
 
 const idirIdentityProvider: IDPType = {
   idp: IdentityProvider.IDIR,
@@ -63,7 +63,7 @@ const bceidToken = {
   name: bceidUser.fullName,
   family_name: bceidUser.lastName,
   email: bceidUser.email,
-  identity_provider: bceidUser.idp
+  identity_provider: bceidUser.idp!
 };
 
 const idirToken = {
@@ -72,7 +72,7 @@ const idirToken = {
   name: idirUser.fullName,
   family_name: idirUser.lastName,
   email: idirUser.email,
-  identity_provider: idirUser.idp
+  identity_provider: idirUser.idp!
 };
 
 afterEach(() => {
@@ -130,7 +130,7 @@ describe('createUser', () => {
     expect(response).toEqual(
       expect.objectContaining({
         ...idirUser,
-        userId: expect.stringMatching(uuidv4Pattern)
+        userId: expect.stringMatching(uuidv4Pattern) as string
       })
     );
   });
@@ -244,16 +244,16 @@ describe('login', () => {
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
       {
-        contactId: expect.stringMatching(uuidv4Pattern),
-        userId: bceidUser.userId as string,
+        contactId: expect.stringMatching(uuidv4Pattern) as string,
+        userId: bceidUser.userId,
         firstName: 'BCeID',
         lastName: 'User',
         email: bceidUser.email,
         phoneNumber: null,
         contactApplicantRelationship: null,
         contactPreference: null,
-        createdAt: expect.any(Date),
-        createdBy: expect.stringMatching(uuidv4Pattern),
+        createdAt: expect.any(Date) as Date,
+        createdBy: expect.stringMatching(uuidv4Pattern) as string,
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       }
@@ -278,16 +278,16 @@ describe('login', () => {
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
     expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
       {
-        contactId: expect.stringMatching(uuidv4Pattern),
-        userId: bceidUser.userId as string,
+        contactId: expect.stringMatching(uuidv4Pattern) as string,
+        userId: bceidUser.userId,
         firstName: 'Blank',
         lastName: ' ',
         email: bceidUser.email,
         phoneNumber: null,
         contactApplicantRelationship: null,
         contactPreference: null,
-        createdAt: expect.any(Date),
-        createdBy: expect.stringMatching(uuidv4Pattern),
+        createdAt: expect.any(Date) as Date,
+        createdBy: expect.stringMatching(uuidv4Pattern) as string,
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       }
@@ -324,14 +324,14 @@ describe('readIdp', () => {
 describe('readUser', () => {
   it('calls user.findUnique', async () => {
     prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    await userService.readUser(prismaTxMock, idirUser.userId as string);
+    await userService.readUser(prismaTxMock, idirUser.userId);
 
     expect(prismaTxMock.user.findUnique).toHaveBeenCalledTimes(1);
   });
 
   it('converts prisma model to application model', async () => {
     prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    const response = await userService.readUser(prismaTxMock, idirUser.userId as string);
+    const response = await userService.readUser(prismaTxMock, idirUser.userId);
 
     expect(response).toStrictEqual(idirUser);
   });
@@ -347,14 +347,14 @@ describe('readUser', () => {
 describe('searchUsers', () => {
   it('calls user.findMany', async () => {
     prismaTxMock.user.findMany.mockResolvedValueOnce([idirUser]);
-    await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId as string] });
+    await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId] });
 
     expect(prismaTxMock.user.findMany).toHaveBeenCalledTimes(1);
   });
 
   it('converts prisma model to application model', async () => {
     prismaTxMock.user.findMany.mockResolvedValueOnce([idirUser]);
-    const response = await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId as string] });
+    const response = await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId] });
 
     expect(response).toStrictEqual([idirUser]);
   });
@@ -374,7 +374,7 @@ describe('updateUser', () => {
 
     readUserSpy.mockResolvedValueOnce(idirUser);
 
-    const response = await userService.updateUser(prismaTxMock, idirUser.userId as string, idirUser);
+    const response = await userService.updateUser(prismaTxMock, idirUser.userId, idirUser);
 
     expect(prismaTxMock.user.update).toHaveBeenCalledTimes(0);
     expect(response).toEqual(idirUser);
@@ -389,7 +389,7 @@ describe('updateUser', () => {
     readIdpSpy.mockResolvedValueOnce(null);
 
     const changedUser = { ...idirUser, firstName: 'Changed' };
-    await userService.updateUser(prismaTxMock, changedUser.userId as string, changedUser);
+    await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
 
     expect(readIdpSpy).toHaveBeenCalledTimes(1);
     expect(createIdpSpy).toHaveBeenCalledTimes(1);
@@ -404,7 +404,7 @@ describe('updateUser', () => {
     prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
 
     const changedUser = { ...idirUser, firstName: 'Changed' };
-    const response = await userService.updateUser(prismaTxMock, changedUser.userId as string, changedUser);
+    const response = await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
 
     expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
     expect(response).toEqual(
@@ -424,6 +424,6 @@ describe('updateUser', () => {
 
     const changedUser = { ...idirUser, firstName: 'Changed' };
 
-    await userService.updateUser(prismaTxMock, changedUser.userId as string, changedUser);
+    await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
   });
 });

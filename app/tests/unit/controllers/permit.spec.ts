@@ -16,8 +16,8 @@ import {
   TEST_PERMIT_TYPE_LIST,
   TEST_EMAIL_RESPONSE,
   TEST_PERMIT_NOTE_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   deletePermitController,
   getPermitController,
@@ -26,21 +26,21 @@ import {
   upsertPermitController,
   sendPermitUpdateNotifications,
   sendPermitUpdateEmail
-} from '../../../src/controllers/permit';
-import * as permitController from '../../../src/controllers/permit';
-import * as permitService from '../../../src/services/permit';
-import * as projectService from '../../../src/services/project';
-import * as userService from '../../../src/services/user';
-import * as permitNoteService from '../../../src/services/permitNote';
-import * as emailService from '../../../src/services/email';
-import * as txWrapper from '../../../src/db/utils/transactionWrapper';
-import { Initiative } from '../../../src/utils/enums/application';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
-import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit';
-import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../../../src/utils/templates';
+} from '../../../src/controllers/permit.ts';
+import * as permitController from '../../../src/controllers/permit.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import * as projectService from '../../../src/services/project.ts';
+import * as userService from '../../../src/services/user.ts';
+import * as permitNoteService from '../../../src/services/permitNote.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
 
 import type { Request, Response } from 'express';
-import type { ListPermitsOptions, Permit, PermitUpdateEmailParams } from '../../../src/types';
+import type { ListPermitsOptions, Permit, PermitUpdateEmailParams } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -218,12 +218,12 @@ describe('upsertPermitController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...req.body,
-      permitId: expect.stringMatching(uuidv4Pattern),
+      permitId: expect.stringMatching(uuidv4Pattern) as string,
       permitNote: undefined,
       permitTracking: undefined,
-      createdAt: expect.any(Date),
+      createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date),
+      updatedAt: expect.any(Date) as Date,
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);

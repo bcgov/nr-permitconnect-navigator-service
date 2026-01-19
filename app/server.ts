@@ -4,11 +4,11 @@
 import config from 'config';
 import { createServer } from 'node:http';
 
-import app from './app';
-import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils';
-import { refreshCodeCaches } from './src/utils/cache/codes';
-import getLogger from './src/utils/log';
-import { state } from './state';
+import app from './app.ts';
+import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils.ts';
+import { refreshCodeCaches } from './src/utils/cache/codes.ts';
+import getLogger from './src/utils/log.ts';
+import { state } from './state.ts';
 
 const log = getLogger(module.filename);
 const port = normalizePort(config.get('server.port') ?? '3000');
@@ -63,7 +63,6 @@ function normalizePort(val: string): string | number | boolean {
  * @param error.code Error code
  */
 function onError(error: { syscall?: string; code: string }): void {
-  // eslint-disable-next-line @typescript-eslint/only-throw-error
   if (error.syscall !== 'listen') throw error;
 
   // Handle specific listen errors with friendly messages
@@ -78,7 +77,7 @@ function onError(error: { syscall?: string; code: string }): void {
       shutdown('SIGABRT');
       break;
     default:
-      throw error; // eslint-disable-line @typescript-eslint/only-throw-error
+      throw error;
   }
 }
 

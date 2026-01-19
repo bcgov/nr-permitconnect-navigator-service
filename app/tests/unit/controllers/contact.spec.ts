@@ -1,16 +1,16 @@
-import { TEST_CURRENT_CONTEXT, TEST_CONTACT_1, TEST_CONTACT_WITH_ACTIVITY_1 } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import * as contactService from '../../../src/services/contact';
+import { TEST_CURRENT_CONTEXT, TEST_CONTACT_1, TEST_CONTACT_WITH_ACTIVITY_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   deleteContactController,
   getContactController,
   searchContactsController,
   upsertContactController
-} from '../../../src/controllers/contact';
-import { Contact, ContactSearchParameters } from '../../../src/types';
-import { uuidv4Pattern } from '../../../src/utils/regexp';
+} from '../../../src/controllers/contact.ts';
+import * as contactService from '../../../src/services/contact.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
+import type { Contact, ContactSearchParameters } from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -209,8 +209,8 @@ describe('updateContactController', () => {
       expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
         {
           ...req.body,
-          contactId: expect.stringMatching(uuidv4Pattern),
-          updatedAt: expect.any(Date),
+          contactId: expect.stringMatching(uuidv4Pattern) as string,
+          updatedAt: expect.any(Date) as Date,
           updatedBy: TEST_CURRENT_CONTEXT.userId
         }
       ]);
@@ -243,7 +243,7 @@ describe('updateContactController', () => {
         {
           ...req.body,
           contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
-          updatedAt: expect.any(Date),
+          updatedAt: expect.any(Date) as Date,
           updatedBy: TEST_CURRENT_CONTEXT.userId
         }
       ]);

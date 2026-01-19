@@ -1,8 +1,7 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-
-import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data';
-import * as housingProjectService from '../../../src/services/housingProject';
-import { generateDeleteStamps } from '../../../src/db/utils/utils';
+import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -47,7 +46,7 @@ describe('deleteHousingProject', () => {
     expect(prismaTxMock.housing_project.delete).not.toHaveBeenCalled();
     expect(prismaTxMock.housing_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.housing_project.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: { housingProjectId: '1' }
     });
   });
@@ -65,7 +64,7 @@ describe('getHousingProjectStatistics', () => {
     });
 
     expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([{ ...FAKE_PROJECT, submittedAt: expect.any(String) }]);
+    expect(response).toStrictEqual([{ ...FAKE_PROJECT, submittedAt: expect.any(String) as string }]);
   });
 });
 

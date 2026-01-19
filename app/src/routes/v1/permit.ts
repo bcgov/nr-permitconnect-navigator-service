@@ -1,18 +1,18 @@
 import express from 'express';
 
-import permitNote from './permitNote';
+import permitNote from './permitNote.ts';
 import {
   deletePermitController,
   getPermitController,
   getPermitTypesController,
   listPermitsController,
   upsertPermitController
-} from '../../controllers/permit';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup';
-import { Action, Resource } from '../../utils/enums/application';
-import { permitValidator } from '../../validators';
+} from '../../controllers/permit.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
+import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
+import { Action, Resource } from '../../utils/enums/application.ts';
+import { permitValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);

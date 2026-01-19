@@ -1,5 +1,5 @@
 import { Knex } from 'knex';
-import { GroupName, Initiative } from '../../utils/enums/application';
+import { GroupName, Initiative } from '../../utils/enums/application.ts';
 
 export async function seed(knex: Knex): Promise<void> {
   const pcns_id = knex('initiative')
@@ -14,15 +14,15 @@ export async function seed(knex: Knex): Promise<void> {
     })
     .select('initiative_id');
 
-  const admin_group_id = await knex('yars.group')
+  const admin_group_id: { group_id: number }[] = await knex('yars.group')
     .where({ initiative_id: housing_id, name: GroupName.ADMIN })
     .select('group_id');
 
-  const developer_group_id = await knex('yars.group')
+  const developer_group_id: { group_id: number }[] = await knex('yars.group')
     .where({ initiative_id: pcns_id, name: GroupName.DEVELOPER })
     .select('group_id');
 
-  const navigator_group_id = await knex('yars.group')
+  const navigator_group_id: { group_id: number }[] = await knex('yars.group')
     .where({ initiative_id: housing_id, name: GroupName.NAVIGATOR })
     .select('group_id');
 
@@ -50,8 +50,7 @@ export async function seed(knex: Knex): Promise<void> {
     identities.map((x) => x.sub)
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const filtered = identities.filter((x) => !exists.some((y: any) => y.sub === x.sub));
+  const filtered = identities.filter((x) => !exists.some((y: { sub: string; group_id: number }) => y.sub === x.sub));
 
   // Inserts missing seed entries
   if (filtered.length > 0) {

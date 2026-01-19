@@ -96,7 +96,7 @@ onBeforeMount(async () => {
     projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
   }
   // Map users ids to full names for history data table
-  let userIds: Array<string> = [];
+  let userIds: string[] = [];
   projectsEnquiries.value.forEach((pe) => {
     if (pe.assignedUserId) userIds.push(pe.assignedUserId);
   });
