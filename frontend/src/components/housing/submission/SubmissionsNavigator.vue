@@ -356,7 +356,7 @@ watchEffect(() => {
 }
 
 .withinWeek {
-  background-color: $app-pill-lightyellow;
+  background-color: var(--p-gold-200);
 }
 
 .withinMonth {

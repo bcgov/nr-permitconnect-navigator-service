@@ -8,7 +8,7 @@ const {
   bgColor,
   borderColor,
   icon,
-  contentColor = '$app-pill-text'
+  contentColor = 'var(--p-greyscale-900)'
 } = defineProps<{
   enlarge?: boolean;
   stage?: string;

@@ -106,7 +106,7 @@ function login(kind: IdentityProviderKind) {
 
 <style lang="scss" scoped>
 .account-setup {
-  outline: solid 0.063rem $app-grey;
+  outline: solid 0.063rem var(--p-greyscale-200);
   border-radius: 0.5rem;
 }
 

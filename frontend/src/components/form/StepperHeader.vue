@@ -80,6 +80,6 @@ const {
 
 .outer-border-error {
   border-radius: 50% !important;
-  box-shadow: 0 0 0 3px $app-error !important;
+  box-shadow: 0 0 0 3px var(--p-red-400) !important;
 }
 </style>

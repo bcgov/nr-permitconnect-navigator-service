@@ -188,10 +188,10 @@ function getStatusClass(data: UserAccessRequest) {
 }
 
 .pending-approval-status {
-  color: $app-primary;
+  color: var(--p-bcblue-950);
 }
 
 .pending-revoke-status {
-  color: $app-error;
+  color: var(--p-red-400);
 }
 </style>

@@ -55,6 +55,6 @@ function logout() {
 
 <style lang="scss" scoped>
 button {
-  color: $app-primary !important;
+  color: var(--p-bcblue-950) !important;
 }
 </style>
