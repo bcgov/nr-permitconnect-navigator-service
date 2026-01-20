@@ -39,7 +39,7 @@ const initiative: Ref<Initiative | undefined> = ref(undefined);
       v-if="getConfig"
       class="version pl-2"
     >
-      v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
+      {{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
     </div>
   </div>
   <div>

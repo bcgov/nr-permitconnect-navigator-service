@@ -11,6 +11,7 @@ import { GroupName } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 
 import type { AxiosResponse } from 'axios';
+import type { GeoJSON } from 'geojson';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
 
@@ -280,21 +281,21 @@ describe('ProjectForm.vue', () => {
     expect(wrapper.find('#download-geojson').exists()).toBe(false);
   });
 
-  it('geojson download btn visible when geojson is in project', async () => {
-    const modifiedProject = { ...testProject, geoJson: {} };
-
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
-    await nextTick();
-    await nextTick();
-
-    const downloadBtn = wrapper.find('#download-geojson');
-    expect(downloadBtn.exists()).toBe(true);
-    expect(downloadBtn.isVisible()).toBe(true);
-  });
-
-  it('geojson download btn visible when geojson is in project', async () => {
-    const testGeoJson = { feature: 'POINT', data: 'test' };
-    const modifiedProject = { ...testProject, geoJson: testGeoJson };
+  it('checks geojson download btn visible when geojson is in submission', async () => {
+    const testGeoJson: GeoJSON = {
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          geometry: {
+            type: 'Point',
+            coordinates: [0, 0]
+          },
+          properties: {}
+        }
+      ]
+    };
+    const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
 
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
     await nextTick();
@@ -385,7 +386,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     // Access internal state through wrapper
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(2);
     expect(orgBookOptions[0]).toEqual({
       registeredName: 'Test Company Ltd',
@@ -419,7 +420,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 
@@ -443,7 +444,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 
@@ -472,7 +473,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 

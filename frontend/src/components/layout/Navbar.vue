@@ -12,12 +12,13 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { CallbackFn } from '@/types';
 
 // Types
 interface NavItem {
   label: string;
   route?: string;
-  func?: Function;
+  func?: CallbackFn;
   public?: boolean;
   access?: NavigationPermission | NavigationPermission[];
   items?: NavItem[];
@@ -59,56 +60,6 @@ async function createIntake(service: IDraftableProjectService, route: RouteName)
     }
   });
 }
-
-// async function createElectrificationIntake() {
-//   const contact = useContactStore().getContact;
-//   const response = await electrificationProjectService.updateDraft({
-//     data: {
-//       contacts: {
-//         contactId: contact?.contactId,
-//         userId: contact?.userId,
-//         contactFirstName: contact?.firstName,
-//         contactLastName: contact?.lastName,
-//         contactEmail: contact?.email,
-//         contactPhoneNumber: contact?.phoneNumber,
-//         contactApplicantRelationship: contact?.contactApplicantRelationship,
-//         contactPreference: contact?.contactPreference
-//       }
-//     }
-//   });
-
-//   router.push({
-//     name: RouteName.EXT_ELECTRIFICATION_INTAKE,
-//     params: {
-//       draftId: response.data.draftId
-//     }
-//   });
-// }
-
-// async function createHousingIntake() {
-//   const contact = useContactStore().getContact;
-//   const response = await housingProjectService.updateDraft({
-//     data: {
-//       contacts: {
-//         contactId: contact?.contactId,
-//         userId: contact?.userId,
-//         contactFirstName: contact?.firstName,
-//         contactLastName: contact?.lastName,
-//         contactEmail: contact?.email,
-//         contactPhoneNumber: contact?.phoneNumber,
-//         contactApplicantRelationship: contact?.contactApplicantRelationship,
-//         contactPreference: contact?.contactPreference
-//       }
-//     }
-//   });
-
-//   router.push({
-//     name: RouteName.EXT_HOUSING_INTAKE,
-//     params: {
-//       draftId: response.data.draftId
-//     }
-//   });
-// }
 
 watchEffect(() => {
   if (appStore.getInitiative === Initiative.ELECTRIFICATION) {

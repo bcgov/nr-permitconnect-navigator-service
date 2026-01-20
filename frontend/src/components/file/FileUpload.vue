@@ -51,8 +51,10 @@ const onUpload = async (files: File[]) => {
       const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
       try {
         uploading.value = true;
+        if (!getConfig.value?.coms.bucketId) throw new Error('No bucket ID');
+
         const response = (
-          await documentService.createDocument(sanitizedFile, activityId, getConfig.value.coms.bucketId)
+          await documentService.createDocument(sanitizedFile, activityId, getConfig.value?.coms.bucketId)
         )?.data;
 
         if (response) {

@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
 import { ref, watchEffect } from 'vue';
@@ -12,11 +13,10 @@ import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { roadmapTemplate } from '@/utils/templates';
-import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
+import { delimitEmails, isDefined, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
-import { isAxiosError } from 'axios';
 
 // Props
 const { activityId, editable = true } = defineProps<{
@@ -97,7 +97,7 @@ function getPermitTypeNamesByStatus(status: string): string[] {
   return getPermits.value
     .filter((p) => p.stage === status)
     .map((p) => p.permitType?.name)
-    .filter(Boolean) as string[];
+    .filter(isDefined);
 }
 
 function getPermitTypeNamesByNeeded(needed: string) {
@@ -119,7 +119,7 @@ watchEffect(async () => {
   const project = getProject.value;
 
   // Get navigator details
-  const configBCC = getConfig.value.ches?.roadmap?.bcc;
+  const configBCC = getConfig.value?.ches?.roadmap?.bcc;
   let bcc = configBCC;
   let navigator = {
     email: configBCC ?? '',

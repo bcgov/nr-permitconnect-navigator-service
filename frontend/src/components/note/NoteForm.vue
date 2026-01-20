@@ -237,7 +237,9 @@ async function emailNotification() {
 
   if (supervisorsEmails.length === 0) return;
 
-  const configCC = getConfig.value.ches?.submission?.cc;
+  const configCC = getConfig.value?.ches?.submission?.cc;
+  if (!configCC) throw new Error('No "from" email');
+
   let body: string;
   if (resource?.value === Resource.ENQUIRY) {
     body = bringForwardEnquiryNotificationTemplate({

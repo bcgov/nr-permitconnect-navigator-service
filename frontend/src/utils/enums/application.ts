@@ -177,8 +177,8 @@ export enum ToastTimeout {
   ERROR = 5000,
   INFO = 3000,
   STICKY = 0,
-  SUCCESS = 3000,
-  WARNING = 5000
+  SUCCESS = 3000, // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
+  WARNING = 5000 // eslint-disable-line @typescript-eslint/no-duplicate-enum-values
 }
 
 export enum UserSearchParams {

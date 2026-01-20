@@ -13,9 +13,10 @@ import { externalApiService } from '@/services';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/housing';
 import { ProjectLocation } from '@/utils/enums/housing';
 
+import type { GeoJSON } from 'geojson';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { GeocoderEntry } from '@/types';
+import type { GeocoderFeature } from '@/types';
 
 // Types
 interface PinUpdateEvent {
@@ -42,7 +43,7 @@ const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
 
 // State
-const addressGeocoderOptions: Ref<any[]> = ref([]);
+const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
 const mapRef: Ref<InstanceType<typeof Map> | null> = ref(null);
@@ -60,8 +61,8 @@ function clearGeoJson() {
   setGeoJson(null);
 }
 
-const getAddressSearchLabel = (e: GeocoderEntry) => {
-  return e?.properties?.fullAddress ?? '';
+const getAddressSearchLabel = (e: GeocoderFeature) => {
+  return e.properties.fullAddress ?? '';
 };
 
 function handleProjectLocationClick() {
@@ -77,14 +78,13 @@ function handleProjectLocationClick() {
 
 async function onAddressSearchInput(e: IInputEvent) {
   const input = e.target.value;
-  addressGeocoderOptions.value =
-    ((await externalApiService.searchAddressCoder(input))?.data?.features as GeocoderEntry[]) ?? [];
+  addressGeocoderFeatures.value = (await externalApiService.searchAddressCoder(input))?.data?.features ?? [];
 }
 
 async function onAddressSelect(e: SelectChangeEvent) {
   if (e.originalEvent instanceof InputEvent) return;
 
-  if (e.value as GeocoderEntry) {
+  if (e.value as GeocoderFeature) {
     const properties = e.value?.properties;
     const geometry = e.value?.geometry;
 
@@ -112,7 +112,7 @@ async function onLatLongInput() {
   }
 }
 
-function onPolygonUpdate(data: any) {
+function onPolygonUpdate(data: { geoJson: GeoJSON }) {
   clearAddress();
   setGeoJson(data.geoJson);
 }
@@ -178,7 +178,7 @@ defineExpose({ resizeMap, onLatLongInput });
                   class="col-span-12"
                   name="addressSearch"
                   :get-option-label="getAddressSearchLabel"
-                  :options="addressGeocoderOptions"
+                  :options="addressGeocoderFeatures"
                   :placeholder="t('locationCard.addressSearchPlaceholder')"
                   :bold="false"
                   :disabled="!editable"

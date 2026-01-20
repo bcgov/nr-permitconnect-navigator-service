@@ -94,7 +94,9 @@ function confirmSubmit(data: GenericObject) {
 }
 
 async function emailConfirmation(activityId: string, enquiryId: string) {
-  const configCC = getConfig.value.ches?.submission?.cc;
+  const configCC = getConfig.value?.ches?.submission?.cc;
+  if (!configCC) throw new Error('No "from" email');
+
   let permitDescription = '';
   let enquiryDescription: string = formRef.value?.values.basic.enquiryDescription || '';
   let firstTwoSentences: string;
@@ -126,7 +128,7 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
   let emailData = {
     from: configCC,
     to: [applicantEmail],
-    cc: configCC,
+    cc: [configCC],
     subject: 'Confirmation of Enquiry Submission',
     bodyType: 'html',
     body: body

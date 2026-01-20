@@ -1,10 +1,11 @@
+import type { GeoJSON } from 'geojson';
 import type { IProject } from '../interfaces/IProject';
 
 export type HousingProject = {
   housingProjectId: string;
   relatedEnquiries: string;
   consentToFeedback?: boolean;
-  geoJson?: any;
+  geoJson?: GeoJSON;
   projectLocationDescription: string;
   singleFamilyUnits: string;
   multiFamilyUnits: string;

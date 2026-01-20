@@ -7,7 +7,7 @@ import { isTruthy } from '@/utils/utils';
 export const useFeatureStore = defineStore('feature', () => {
   // Getters
   const getters = {
-    isPeachEnabled: computed(() => isTruthy(useConfigStore().getConfig.features.peach))
+    isPeachEnabled: computed(() => isTruthy(useConfigStore().getConfig?.features.peach))
   };
 
   return {

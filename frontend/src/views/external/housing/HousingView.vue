@@ -23,7 +23,7 @@ import {
 } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject, Permit } from '@/types';
+import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
 
 // Constants
 const PAGE_ROWS = 5;
@@ -35,7 +35,7 @@ const router = useRouter();
 
 // State
 const authorizations: Ref<Permit[]> = ref([]);
-const drafts: Ref<any[]> = ref([]);
+const drafts: Ref<Draft[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
 const loading: Ref<boolean> = ref(true);

@@ -126,12 +126,14 @@ function confirmSubmit(data: GenericObject) {
 
 async function emailConfirmation(actId: string, projectId: string, forProjectSubmission: boolean) {
   try {
-    const configCC = getConfig.value.ches?.submission?.cc;
+    const configCC = getConfig.value?.ches?.submission?.cc;
     const applicantName = formRef.value?.values.contacts.contactFirstName;
     const applicantEmail = formRef.value?.values.contacts.contactEmail;
     const initiative = toTitleCase(useAppStore().getInitiative);
     const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
     let body: string;
+
+    if (!configCC) throw new Error('No "from" email');
 
     if (forProjectSubmission) {
       body = confirmationTemplateHousingSubmission({
@@ -151,7 +153,7 @@ async function emailConfirmation(actId: string, projectId: string, forProjectSub
     const emailData = {
       from: configCC,
       to: [applicantEmail],
-      cc: configCC,
+      cc: [configCC],
       subject: subject,
       bodyType: 'html',
       body: body
@@ -245,6 +247,8 @@ async function onBeforeRouteLeaveCallback() {
   }
 }
 
+// vee-validate doesn't export the necessary function types and we can't create it ourselves easily
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
 function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: Function, setFieldValue: Function) {
   if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
     if (fieldsLength === 0) {

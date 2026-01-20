@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import Divider from '@/components/common/Divider.vue';
 
+import type { CallbackFn } from '@/types/index.ts';
+
 // Props
 const {
   index,
@@ -13,7 +15,7 @@ const {
 } = defineProps<{
   index: number;
   activeStep: number;
-  clickCallback?: Function;
+  clickCallback?: CallbackFn;
   title: string;
   icon: string;
   errors?: boolean;

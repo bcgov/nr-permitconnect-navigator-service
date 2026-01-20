@@ -18,7 +18,6 @@ import {
 
 import type { GeoJSON } from 'geojson';
 import type { Ref } from 'vue';
-import instance from '@/i18n';
 
 // Props
 const {
@@ -181,7 +180,7 @@ function resizeMap() {
   }
 }
 
-function setAddressMarker(coords: any) {
+function setAddressMarker(coords: L.LatLngExpression) {
   if (marker) map.removeLayer(marker);
   // Custom(-ish) markers courtesy of https://github.com/pointhi/leaflet-color-markers
   const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);

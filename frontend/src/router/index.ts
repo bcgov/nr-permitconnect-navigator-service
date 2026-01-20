@@ -19,7 +19,7 @@ import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName, StorageKey, Zone } from '@/utils/enums/application';
 import { isEmptyObject } from '@/utils/utils';
 
-import type { RouteLocationNormalizedGeneric, RouteRecordRaw } from 'vue-router';
+import type { LocationQuery, RouteLocationNormalizedGeneric, RouteParamsGeneric, RouteRecordRaw } from 'vue-router';
 import type { Contact } from '@/types';
 
 /**
@@ -62,7 +62,7 @@ export async function bootstrap() {
  * @param route The route object
  * @returns A Vue props object
  */
-export function createProps(route: { query: any; params: any }): object {
+export function createProps(route: { query: LocationQuery; params: RouteParamsGeneric }): object {
   return { ...route.query, ...route.params };
 }
 

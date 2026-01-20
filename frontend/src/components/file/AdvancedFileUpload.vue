@@ -60,8 +60,10 @@ const onUpload = async (files: File[]) => {
       const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
       return new Promise((resolve, reject) => {
         if (activityId) {
+          if (!getConfig.value?.coms.bucketId) throw new Error('No bucket ID');
+
           documentService
-            .createDocument(sanitizedFile, activityId, getConfig.value.coms.bucketId)
+            .createDocument(sanitizedFile, activityId, getConfig.value?.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 response.data.filename = decodeURI(response.data.filename);

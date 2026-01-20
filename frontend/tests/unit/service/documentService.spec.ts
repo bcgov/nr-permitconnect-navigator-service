@@ -159,7 +159,7 @@ describe('documentService', () => {
         });
 
         // Useless test until above can be fixed
-        it.skip('does not delete COMS object on comsService error', async () => {
+        it.todo('does not delete COMS object on comsService error', async () => {
           createObjectSpy.mockImplementation(() => {
             throw new Error();
           });

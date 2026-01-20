@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
@@ -25,7 +26,6 @@ import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
-import { isAxiosError } from 'axios';
 
 // Types
 interface FilterOption {

@@ -168,7 +168,7 @@ export const useAuthZStore = defineStore('authz', () => {
   };
 
   // Actions
-  function setPermissions(data: any) {
+  function setPermissions(data: { groups: Group[]; permissions: Permission[] }) {
     state.groups.value = data.groups;
     state.permissions.value = data.permissions;
   }

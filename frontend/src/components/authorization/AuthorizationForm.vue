@@ -187,7 +187,8 @@ async function emailNotification(data: Permit, permitNote: string) {
     '{{ projectId }}': getProject.value?.projectId,
     '{{ permitId }}': data.permitId
   };
-  const configCC = getConfig.value.ches?.submission?.cc;
+  const configCC = getConfig.value?.ches?.submission?.cc;
+  if (!configCC) throw new Error('No "from" email');
 
   const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
   const isOnlyTemplate = permitNote.trim() === peachUpdateNotePlaceholder;
@@ -206,7 +207,7 @@ async function emailNotification(data: Permit, permitNote: string) {
   let emailData = {
     from: configCC,
     to: [applicantEmail],
-    cc: configCC,
+    cc: [configCC],
     subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType?.name}`,
     bodyType: 'html',
     body: body
