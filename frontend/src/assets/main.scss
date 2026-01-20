@@ -112,11 +112,11 @@ label {
 }
 
 .app-error-background {
-  background-color: $app-error !important;
+  background-color: var(--p-red-1000) !important;
 }
 
 .app-error-border {
-  border-color: $app-error !important;
+  border-color: var(--p-red-1000)!important;
 }
 
 .app-error-color {
@@ -265,6 +265,6 @@ label {
 
 /* common */
 .disclaimer-block {
-  outline: solid 0.063rem $app-grey;
+  outline: solid 0.063rem var(--p-greyscale-200);
   border-radius: 0.5rem;
 }
