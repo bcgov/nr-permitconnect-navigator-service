@@ -1,5 +1,6 @@
 import { contactService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosInstance } from 'axios';
 import type { Contact, ContactSearchParameters } from '@/types';
@@ -18,8 +19,8 @@ const sampleContact: Contact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',

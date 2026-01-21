@@ -4,8 +4,10 @@ import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 import type { Enquiry, HousingProject } from '@/types';
+import { BasicResponse } from '@/utils/enums/application';
+import { NumResidentialUnits } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -25,12 +27,11 @@ const testEnquiry: Enquiry = {
   assignedUserId: 'user123',
   atsClientId: null,
   atsEnquiryId: '654321',
-  submissionType: 'General Inquiry',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   enquiryStatus: ApplicationStatus.NEW,
-  contacts: [],
   createdAt: undefined,
   createdBy: undefined,
   updatedAt: undefined,
@@ -42,7 +43,7 @@ const testSubmission: HousingProject = {
   housingProjectId: 'submission123',
   projectId: 'submission123',
   queuePriority: 1,
-  submissionType: 'TypeA',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-02-01T12:00:00Z',
   relatedEnquiries: 'none',
   hasRelatedEnquiry: false,
@@ -51,19 +52,19 @@ const testSubmission: HousingProject = {
   projectName: 'Test Project',
   projectDescription: 'Test Description',
   projectLocationDescription: 'Location Description',
-  singleFamilyUnits: '1',
-  multiFamilyUnits: '0',
+  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+  multiFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
   multiPermitsNeeded: 'No',
   otherUnitsDescription: 'None',
-  otherUnits: '0',
-  hasRentalUnits: 'No',
-  rentalUnits: '0',
-  financiallySupportedBc: 'No',
-  financiallySupportedIndigenous: 'No',
+  otherUnits: NumResidentialUnits.UNSURE,
+  hasRentalUnits: BasicResponse.NO,
+  rentalUnits: NumResidentialUnits.UNSURE,
+  financiallySupportedBc: BasicResponse.NO,
+  financiallySupportedIndigenous: BasicResponse.NO,
   indigenousDescription: '',
-  financiallySupportedNonProfit: 'No',
+  financiallySupportedNonProfit: BasicResponse.NO,
   nonProfitDescription: '',
-  financiallySupportedHousingCoop: 'No',
+  financiallySupportedHousingCoop: BasicResponse.NO,
   housingCoopDescription: '',
   streetAddress: '123 Test St',
   locality: 'Test City',

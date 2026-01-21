@@ -223,7 +223,7 @@ async function onSubmit(values: GenericObject) {
     };
 
     // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values, contact } as GenericObject, [
+    const dataOmitted = omit({ ...values }, [
       'contactId',
       'contactFirstName',
       'contactLastName',
@@ -245,7 +245,7 @@ async function onSubmit(values: GenericObject) {
     }
 
     // Create enquiry
-    const response = await enquiryService.createEnquiry(dataOmitted);
+    const response = await enquiryService.createEnquiry({ ...dataOmitted, contact: contact });
 
     // Save contact data to store
     contactStore.setContact(response.data.contact);

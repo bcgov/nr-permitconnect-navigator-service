@@ -2,6 +2,8 @@ import axios from 'axios';
 
 import { StorageKey } from '@/utils/enums/application';
 
+import type { Config } from '@/types';
+
 const storageType = window.sessionStorage;
 
 /**
@@ -55,9 +57,9 @@ export default class ConfigService {
   /**
    * @function getConfig
    * Fetches and returns the config object if available
-   * @returns {any | undefined} The config object if available
+   * @returns The config object if available
    */
-  public getConfig(): any | undefined {
+  public getConfig(): Config | undefined {
     try {
       let cfgString = storageType.getItem(StorageKey.CONFIG);
       if (cfgString === null) {

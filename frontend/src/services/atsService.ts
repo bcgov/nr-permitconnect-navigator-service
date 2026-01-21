@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
 
-import type { ATSClientResource, ATSEnquiryResource } from '@/types';
+import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '@/types';
 
 export default {
   /**
@@ -9,7 +9,7 @@ export default {
    * @returns {Promise} An axios response
    */
 
-  searchATSUsers(params?: any) {
+  searchATSUsers(params?: ATSUserSearchParameters) {
     return appAxios().get('ats/clients', { params: params });
   },
 

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
 
@@ -224,7 +224,7 @@ export const useProjectStore = defineStore('project', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

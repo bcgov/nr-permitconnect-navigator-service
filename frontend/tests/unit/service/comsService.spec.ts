@@ -39,7 +39,7 @@ describe('comsService test', () => {
     const testObject = {
       name: 'testName',
       type: 'text/html'
-    };
+    } as File;
     const testParams = {
       bucketId: 'testBucketId'
     };

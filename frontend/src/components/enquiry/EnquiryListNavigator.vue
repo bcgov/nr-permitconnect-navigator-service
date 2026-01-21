@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -27,8 +28,6 @@ import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Enquiry, Pagination } from '@/types';
-import { isAxiosError } from 'axios';
-import instance from '@/i18n';
 
 // Types
 interface FilterOption {
@@ -100,16 +99,17 @@ function handleCreateNewActivity() {
     accept: async () => {
       try {
         const userContact = useContactStore().getContact;
+        if (!userContact) throw new Error('No contact');
         const response = (
           await enquiryService.createEnquiry({
             contact: {
-              contactId: userContact?.contactId,
-              firstName: userContact?.firstName,
-              lastName: userContact?.lastName,
-              phoneNumber: userContact?.phoneNumber,
-              email: userContact?.email,
-              contactApplicantRelationship: userContact?.contactApplicantRelationship,
-              contactPreference: userContact?.contactPreference
+              contactId: userContact.contactId,
+              firstName: userContact.firstName,
+              lastName: userContact.lastName,
+              phoneNumber: userContact.phoneNumber,
+              email: userContact.email,
+              contactApplicantRelationship: userContact.contactApplicantRelationship,
+              contactPreference: userContact.contactPreference
             }
           })
         ).data;

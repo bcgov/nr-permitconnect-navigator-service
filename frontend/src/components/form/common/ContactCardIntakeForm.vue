@@ -7,10 +7,14 @@ import { InputMask, InputText, Select } from '@/components/form';
 import { Card } from '@/lib/primevue';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
+import type { FormSchemaType as ElectrificationFormSchemaType } from '@/components/electrification/project/ProjectIntakeSchema';
+import type { FormSchemaType as HousingFormSchemaType } from '@/components/housing/submission/SubmissionIntakeSchema';
+import type { DeepPartial } from '@/types';
+
 // Props
 const { editable = true, initialFormValues } = defineProps<{
   editable?: boolean;
-  initialFormValues: any;
+  initialFormValues: DeepPartial<ElectrificationFormSchemaType> | DeepPartial<HousingFormSchemaType>;
 }>();
 
 // Composables

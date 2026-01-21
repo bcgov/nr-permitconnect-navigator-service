@@ -44,12 +44,12 @@ export default {
         mimeType: comsResponse.data.mimeType,
         filesize: comsResponse.data.length
       });
-    } catch (e: any) {
+    } catch (e) {
       // In event of any error try to Delete COMS object if it was created
       if (comsResponse) {
         comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
       }
-      throw new Error(e);
+      throw e;
     }
   },
 
@@ -65,6 +65,7 @@ export default {
           versionId: versionId
         }
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // TODO: If one fails and other doesn't then??
     }

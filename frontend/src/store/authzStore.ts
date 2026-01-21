@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import useAppStore from './appStore';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
@@ -183,7 +183,7 @@ export const useAuthZStore = defineStore('authz', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

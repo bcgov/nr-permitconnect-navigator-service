@@ -1,5 +1,7 @@
 import type { GeoJSON } from 'geojson';
 import type { IProject } from '../interfaces/IProject';
+import type { BasicResponse } from '@/utils/enums/application';
+import type { NumResidentialUnits } from '@/utils/enums/housing';
 
 export type HousingProject = {
   housingProjectId: string;
@@ -7,18 +9,18 @@ export type HousingProject = {
   consentToFeedback?: boolean;
   geoJson?: GeoJSON;
   projectLocationDescription: string;
-  singleFamilyUnits: string;
-  multiFamilyUnits: string;
+  singleFamilyUnits: NumResidentialUnits;
+  multiFamilyUnits: NumResidentialUnits;
   otherUnitsDescription: string;
-  otherUnits: string;
-  hasRentalUnits: string;
+  otherUnits: NumResidentialUnits;
+  hasRentalUnits: BasicResponse;
   rentalUnits: string;
-  financiallySupportedBc: string;
-  financiallySupportedIndigenous: string;
+  financiallySupportedBc: BasicResponse;
+  financiallySupportedIndigenous: BasicResponse;
   indigenousDescription: string;
-  financiallySupportedNonProfit: string;
+  financiallySupportedNonProfit: BasicResponse;
   nonProfitDescription: string;
-  financiallySupportedHousingCoop: string;
+  financiallySupportedHousingCoop: BasicResponse;
   housingCoopDescription: string;
   locality: string;
   province: string;

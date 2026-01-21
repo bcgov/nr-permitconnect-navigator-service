@@ -48,10 +48,10 @@ export interface ATSEnquiryResource {
 }
 
 export interface ATSUserSearchParameters extends ParsedQs {
-  atsClientId?: string;
+  clientId?: string | number | null;
   email?: string;
-  firstName: string;
-  lastName: string;
+  firstName?: string;
+  lastName?: string;
   phone?: string;
 }
 

@@ -9,12 +9,14 @@ import { Message } from '@/lib/primevue';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
 import type { Ref } from 'vue';
-import type { Contact } from '@/types';
+import type { Contact, DeepPartial } from '@/types';
+import type { FormSchemaType as ElectrificationFormSchemaType } from '../../electrification/project/ProjectFormSchema';
+import type { FormSchemaType as HousingFormSchemaType } from '../../housing/project/ProjectFormSchema';
 
 // Props
 const { editable = true, formValues } = defineProps<{
   editable?: boolean;
-  formValues: any;
+  formValues: DeepPartial<ElectrificationFormSchemaType> | DeepPartial<HousingFormSchemaType>;
 }>();
 
 // State
@@ -35,7 +37,7 @@ const { t } = useI18n();
 // 2. The initial form values have a contactId but no userId
 const showManualContactHint = computed(() => {
   if (selectedContact.value) return !selectedContact.value.userId;
-  else if (formValues.contact.contactId) return !formValues.contact.userId;
+  else if (formValues.contact?.contactId) return !formValues.contact.userId;
   return false;
 });
 </script>
@@ -95,7 +97,7 @@ const showManualContactHint = computed(() => {
       "
     />
     <div
-      v-if="formValues?.contact.contactId || basicInfoManualEntry || selectedContact?.contactId"
+      v-if="formValues?.contact?.contactId || basicInfoManualEntry || selectedContact?.contactId"
       class="grid grid-cols-3 gap-x-6 gap-y-6"
     >
       <InputText

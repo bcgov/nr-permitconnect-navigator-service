@@ -6,6 +6,8 @@ import PrimeVue from 'primevue/config';
 import LoginButton from '@/components/layout/LoginButton.vue';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 
+import type { RouteLocationNormalizedLoaded, Router } from 'vue-router';
+
 // Mock router calls
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(),
@@ -69,14 +71,17 @@ describe.todo('LoginButton.vue', () => {
     });
 
     it('navigates to login on click', async () => {
-      (useRoute as any).mockImplementation(() => ({
-        params: { name: RouteName.OIDC_LOGIN }
-      }));
+      vi.mocked(useRoute).mockImplementation(
+        () =>
+          ({
+            params: { name: RouteName.OIDC_LOGIN }
+          }) as Partial<RouteLocationNormalizedLoaded> as RouteLocationNormalizedLoaded
+      );
 
       const push = vi.fn();
-      (useRouter as any).mockImplementation(() => ({
+      vi.mocked(useRouter).mockReturnValue({
         push
-      }));
+      } as Partial<Router> as Router);
 
       const wrapper = shallowMount(LoginButton, {
         global: {
@@ -119,14 +124,17 @@ describe.todo('LoginButton.vue', () => {
     });
 
     it('navigates to logout on click', async () => {
-      (useRoute as any).mockImplementation(() => ({
-        params: { name: RouteName.OIDC_LOGOUT }
-      }));
+      vi.mocked(useRoute).mockImplementation(
+        () =>
+          ({
+            params: { name: RouteName.OIDC_LOGOUT }
+          }) as Partial<RouteLocationNormalizedLoaded> as RouteLocationNormalizedLoaded
+      );
 
       const push = vi.fn();
-      (useRouter as any).mockImplementation(() => ({
+      vi.mocked(useRouter).mockReturnValue({
         push
-      }));
+      } as Partial<Router> as Router);
 
       const wrapper = shallowMount(LoginButton, {
         global: {

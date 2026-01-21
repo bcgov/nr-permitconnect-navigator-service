@@ -10,8 +10,12 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const testObj = {
+const testIdirObj = {
   firstName: 'John'
+};
+
+const testBceidObj = {
+  guid: '1234'
 };
 
 const getSpy = vi.fn();
@@ -28,19 +32,19 @@ beforeEach(() => {
 describe('ssoService', () => {
   describe('searchIdirUsers', () => {
     it('calls with given data', () => {
-      ssoService.searchIdirUsers(testObj);
+      ssoService.searchIdirUsers(testIdirObj);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('sso/idir/users', { params: testObj });
+      expect(getSpy).toHaveBeenCalledWith('sso/idir/users', { params: testIdirObj });
     });
   });
 
   describe('searchBasicBceidUsers', () => {
     it('calls with given data', () => {
-      ssoService.searchBasicBceidUsers(testObj);
+      ssoService.searchBasicBceidUsers(testBceidObj);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('sso/basic-bceid/users', { params: testObj });
+      expect(getSpy).toHaveBeenCalledWith('sso/basic-bceid/users', { params: testBceidObj });
     });
   });
 });

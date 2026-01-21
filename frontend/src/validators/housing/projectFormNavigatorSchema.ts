@@ -1,4 +1,4 @@
-import { boolean, number, object, string } from 'yup';
+import { boolean, date, number, object, string, type InferType } from 'yup';
 import { useI18n } from 'vue-i18n';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
@@ -19,7 +19,9 @@ export function createProjectFormNavigatorSchema() {
     bcOnlineCompleted: boolean().required().label(t('i.housing.project.projectFormNavigatorSchema.bcOnlineCompleted')),
     astNotes: string().notRequired().max(4000).label(t('i.housing.project.projectFormNavigatorSchema.astNotes')),
     atsClientId: atsClientIdValidator,
+    atsEnquiryId: string().notRequired(),
     contact: object({
+      contactId: string(),
       email: emailValidator(t('i.housing.project.projectFormNavigatorSchema.validContact'))
         .required()
         .label(t('i.housing.project.projectFormNavigatorSchema.contactEmail')),
@@ -97,6 +99,7 @@ export function createProjectFormNavigatorSchema() {
         .notRequired()
         .max(255)
         .label(t('i.housing.project.projectFormNavigatorSchema.locationProvince')),
+      locationAddress: string(),
       locationPids: string()
         .notRequired()
         .max(255)
@@ -112,11 +115,13 @@ export function createProjectFormNavigatorSchema() {
         .required()
         .label(t('i.housing.project.projectFormNavigatorSchema.locationNaturalDisaster'))
     }),
+    locationPidsAuto: string(),
     projectLocationDescription: string()
       .notRequired()
       .max(4000)
       .label(t('i.housing.project.projectFormNavigatorSchema.projectLocationDescription')),
     project: object({
+      companyIdRegistered: string(),
       companyNameRegistered: string()
         .notRequired()
         .max(255)
@@ -127,6 +132,7 @@ export function createProjectFormNavigatorSchema() {
       .notRequired()
       .label(t('i.housing.project.projectFormNavigatorSchema.projectDescription')),
     relatedEnquiries: string().notRequired().label(t('i.housing.project.projectFormNavigatorSchema.relatedEnquiries')),
+    submittedAt: date(),
     submissionState: object({
       applicationStatus: string()
         .oneOf(APPLICATION_STATUS_LIST)
@@ -181,3 +187,5 @@ export function createProjectFormNavigatorSchema() {
     })
   });
 }
+
+export type FormSchemaType = InferType<ReturnType<typeof createProjectFormSchema>>;

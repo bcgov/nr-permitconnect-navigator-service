@@ -7,7 +7,7 @@ import { mount } from '@vue/test-utils';
 
 import EnquiryForm from '@/components/enquiry/EnquiryForm.vue';
 import { electrificationProjectService, enquiryService, housingProjectService, userService } from '@/services';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 
 import type { AxiosResponse } from 'axios';
@@ -28,22 +28,14 @@ const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService,
 
 const currentDate = new Date().toISOString();
 
-const exampleContact = {
-  contactId: 'contact123',
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '123-456-7890'
-};
-
 // Example Enquiry object
 const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
-  submissionType: 'General Inquiry',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   enquiryStatus: ApplicationStatus.NEW,
-  contacts: [exampleContact],
   atsClientId: null,
   atsEnquiryId: null,
   addedToAts: false,

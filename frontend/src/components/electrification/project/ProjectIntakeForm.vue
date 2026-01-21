@@ -20,7 +20,8 @@ import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Document, OrgBookOption } from '@/types';
+import type { FormSchemaType } from '@/components/electrification/project/ProjectIntakeSchema';
+import type { DeepPartial, Document, OrgBookOption } from '@/types';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{
@@ -49,7 +50,7 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings

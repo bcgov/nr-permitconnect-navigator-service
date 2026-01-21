@@ -9,7 +9,7 @@ import vitest from '@vitest/eslint-plugin';
 
 export default defineConfig([
   {
-    ignores: ['coverage', 'dist', 'node_modules']
+    ignores: ['coverage', 'dist', 'node_modules', '*.config.js']
   },
   {
     files: ['**/*.{js,mjs,cjs,ts,mts,cts,vue}'],
@@ -55,7 +55,8 @@ export default defineConfig([
       vitest
     },
     rules: {
-      ...vitest.configs.recommended.rules
+      ...vitest.configs.recommended.rules,
+      'vitest/no-focused-tests': ['warn']
     }
   },
   eslintConfigPrettier,

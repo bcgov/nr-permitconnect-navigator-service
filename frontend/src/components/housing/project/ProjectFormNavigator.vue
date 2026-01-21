@@ -64,12 +64,15 @@ import type { GeoJSON } from 'geojson';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
+
 import type { IInputEvent } from '@/interfaces';
+import type { FormSchemaType } from './ProjectFormSchema';
 import type {
   ATSAddressResource,
   ATSClientResource,
   ATSEnquiryResource,
   Contact,
+  DeepPartial,
   GeocoderFeature,
   HousingProject,
   OrgBookOption,
@@ -104,7 +107,7 @@ const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const geoJson: Ref<GeoJSON | null> = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const primaryContact = computed(
@@ -180,7 +183,7 @@ const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName}`;
 };
 
-function initializeFormValues(project: HousingProject) {
+function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaType> {
   return {
     consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {

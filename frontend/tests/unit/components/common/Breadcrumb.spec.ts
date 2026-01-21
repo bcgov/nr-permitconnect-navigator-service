@@ -7,13 +7,14 @@ import Breadcrumb from '@/components/common/Breadcrumb.vue';
 import { useEnquiryStore } from '@/store/enquiryStore';
 import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
+import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { NumResidentialUnits } from '@/utils/enums/housing';
 import { PermitStage, PermitState } from '@/utils/enums/permit';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 
 import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
-import { RouteName } from '@/utils/enums/application';
 
-let mockRoute: any = {};
+let mockRoute = {};
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
@@ -26,12 +27,11 @@ const exampleContact = {
 const testEnquiry: Enquiry = {
   enquiryId: '789',
   activityId: '789',
-  submissionType: 'General Inquiry',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   enquiryStatus: ApplicationStatus.NEW,
   submittedMethod: EnquirySubmittedMethod.PCNS,
-  contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
@@ -46,7 +46,7 @@ const testProject: HousingProject = {
   housingProjectId: '456',
   projectId: '456',
   queuePriority: 1,
-  submissionType: 'Type A',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
@@ -56,19 +56,19 @@ const testProject: HousingProject = {
   projectName: 'Super Long Project Name',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
-  singleFamilyUnits: '10',
-  multiFamilyUnits: '20',
+  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+  multiFamilyUnits: NumResidentialUnits.UNSURE,
   multiPermitsNeeded: 'Yes',
   otherUnitsDescription: 'Other units description.',
-  otherUnits: '5',
-  hasRentalUnits: 'Yes',
+  otherUnits: NumResidentialUnits.UNSURE,
+  hasRentalUnits: BasicResponse.YES,
   rentalUnits: '15',
-  financiallySupportedBc: 'Yes',
-  financiallySupportedIndigenous: 'Yes',
+  financiallySupportedBc: BasicResponse.YES,
+  financiallySupportedIndigenous: BasicResponse.YES,
   indigenousDescription: 'Indigenous support description.',
-  financiallySupportedNonProfit: 'Yes',
+  financiallySupportedNonProfit: BasicResponse.YES,
   nonProfitDescription: 'Non-profit support description.',
-  financiallySupportedHousingCoop: 'Yes',
+  financiallySupportedHousingCoop: BasicResponse.YES,
   housingCoopDescription: 'Housing coop support description.',
   streetAddress: '123 Main St',
   locality: 'Anytown',
@@ -391,7 +391,7 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const toObj = (wrapper.vm as any).breadcrumbItems[0].to;
+    const toObj = (wrapper.vm as any).breadcrumbItems[0].to; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(toObj.name).toBe('childRouteName');
   });
 
@@ -410,7 +410,7 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const toObj = (wrapper.vm as any).breadcrumbItems[0].to;
+    const toObj = (wrapper.vm as any).breadcrumbItems[0].to; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(toObj.name).toBe(RouteName.HOME);
   });
 
@@ -421,6 +421,6 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    expect((wrapper.vm as any).breadcrumbItems).toEqual([]);
+    expect((wrapper.vm as any).breadcrumbItems).toEqual([]); // eslint-disable-line @typescript-eslint/no-explicit-any
   });
 });

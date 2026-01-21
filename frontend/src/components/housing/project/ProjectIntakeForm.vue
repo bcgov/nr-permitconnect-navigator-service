@@ -59,7 +59,8 @@ import { getHTMLElement, omit, setEmptyStringsToNull, toTitleCase } from '@/util
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Document, HousingProjectIntake, OrgBookOption, Permit, PermitType } from '@/types';
+import type { FormSchemaType } from '@/components/housing/submission/SubmissionIntakeSchema';
+import type { DeepPartial, Document, HousingProjectIntake, OrgBookOption, Permit, PermitType } from '@/types';
 
 // Types
 type HousingProjectForm = {
@@ -96,7 +97,7 @@ const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const geomarkAccordionIndex: Ref<number | undefined> = ref(undefined);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
 const locationRef: Ref<InstanceType<typeof LocationCard> | null> = ref(null);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
@@ -171,17 +172,15 @@ async function onAssistanceRequest(values: GenericObject) {
         enquiryDescription: t('projectIntakeForm.assistanceMessage'),
         submissionType: SubmissionType.ASSISTANCE
       },
-      contacts: [
-        setEmptyStringsToNull({
-          contactId: values.contacts.contactId,
-          firstName: values.contacts.contactFirstName,
-          lastName: values.contacts.contactLastName,
-          phoneNumber: values.contacts.contactPhoneNumber,
-          email: values.contacts.contactEmail,
-          contactApplicantRelationship: values.contacts.contactApplicantRelationship,
-          contactPreference: values.contacts.contactPreference
-        })
-      ]
+      contact: setEmptyStringsToNull({
+        contactId: values.contacts.contactId,
+        firstName: values.contacts.contactFirstName,
+        lastName: values.contacts.contactLastName,
+        phoneNumber: values.contacts.contactPhoneNumber,
+        email: values.contacts.contactEmail,
+        contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+        contactPreference: values.contacts.contactPreference
+      })
     };
 
     const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;

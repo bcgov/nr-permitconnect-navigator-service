@@ -15,7 +15,7 @@ export default {
    * @returns {Promise} An axios response
    */
   async createObject(
-    object: any,
+    object: File,
     headers: {
       metadata?: { key: string; value: string }[];
     },

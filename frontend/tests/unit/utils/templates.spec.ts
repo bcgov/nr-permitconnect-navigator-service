@@ -50,7 +50,7 @@ Regards,
 ${inputs.navigatorName}`;
 }
 
-let replaceConfig: any = {}; // the part actually fed into the function we're testing
+let replaceConfig: Record<string, string | string[] | undefined> = {};
 const sampleInputs = {
   contactName: 'Contact Name',
   projectName: 'My Permit Project',
@@ -61,7 +61,8 @@ const sampleInputs = {
   permitStateCompleted: ['Site Alteration Permit'],
   navigatorName: 'Permit Navigator'
 };
-let testCases: any = {}; // test-specific temp object to hold the values being tested
+
+let testCases: typeof sampleInputs = {} as typeof sampleInputs;
 
 beforeEach(() => {
   testCases = Object.assign(testCases, sampleInputs);

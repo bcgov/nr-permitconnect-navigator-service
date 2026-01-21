@@ -58,7 +58,7 @@ export default {
    * @function updateContact
    * @returns {Promise} An axios response
    */
-  updateContact(data?: any): Promise<AxiosResponse<Contact>> {
+  updateContact(data?: Contact): Promise<AxiosResponse<Contact>> {
     return appAxios().put(`${PATH}`, data);
   }
 };

@@ -20,6 +20,19 @@ const USER_SEARCH_PARAMS: Record<string, string> = {
   email: 'Email'
 };
 
+// Interfaces
+interface IdirResult {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  attributes: {
+    display_name: string[];
+    idir_user_guid: string[];
+    idir_username: string[];
+  };
+}
+
 // Composables
 const { t } = useI18n();
 const toast = useToast();
@@ -66,10 +79,10 @@ async function searchIdirUsers() {
           // Map the response data to the required format
           // Spread the rest of the properties and filter out users without email
           users.value = response.data
-            .map(({ attributes, username, ...rest }: any) => ({
+            .map(({ attributes, username, ...rest }: IdirResult) => ({
               ...rest,
               sub: username,
-              fullName: attributes?.display_name?.[0] as string
+              fullName: attributes?.display_name?.[0]
             }))
             .filter((user: User) => !!user.email);
         } catch (error) {

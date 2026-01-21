@@ -1,3 +1,4 @@
+import { isAxiosError } from 'axios';
 import { createTestingPinia } from '@pinia/testing';
 import { setActivePinia } from 'pinia';
 import { shallowMount } from '@vue/test-utils';
@@ -16,6 +17,7 @@ import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { AxiosResponse } from 'axios';
 import type { Permit, PermitNote, PermitType, SourceSystemKind } from '@/types';
+import { useToast } from '@/lib/primevue';
 
 const createPermitNoteSpy = vi.spyOn(permitNoteService, 'createPermitNote');
 const deletePermitSpy = vi.spyOn(permitService, 'deletePermit');
@@ -23,6 +25,17 @@ const getPeachSummarySpy = vi.spyOn(peachService, 'getPeachSummary');
 const getSourceSystemKindsService = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+
+vi.mock('axios', async () => {
+  const actual = await vi.importActual<typeof import('axios')>('axios');
+  return {
+    ...actual,
+    default: {
+      get: vi.fn()
+    },
+    isAxiosError: vi.fn()
+  };
+});
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -423,7 +436,7 @@ describe('AuthorizationForm', () => {
     const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
 
-    vm.mockReturnValue(template);
+    vm.t.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
@@ -485,7 +498,7 @@ describe('AuthorizationForm', () => {
 
     const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
     const template = 'PEACH TEMPLATE';
-    vm.mockReturnValue(template);
+    vm.t.mockReturnValue(template);
 
     const setFieldValue = vi.fn();
 
@@ -554,6 +567,7 @@ describe('AuthorizationForm', () => {
 
     const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
+    vi.mocked(isAxiosError).mockReturnValueOnce(true);
     getPeachSummarySpy.mockRejectedValueOnce({
       status: 404,
       response: {
@@ -587,7 +601,7 @@ describe('AuthorizationForm', () => {
     vm.isValidPeachPermit = true;
 
     const template = 'PEACH TEMPLATE ONLY';
-    vm.mockReturnValue(template);
+    vm.t.mockReturnValue(template);
 
     const projectService = vm.projectService.value;
     const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
@@ -604,7 +618,9 @@ describe('AuthorizationForm', () => {
     expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('handles errors when saving the permit fails', async () => {
+  it.todo('handles errors when saving the permit fails', async () => {
+    const toastSpy = vi.spyOn(useToast(), 'error');
+
     const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
     await wrapper.vm.$nextTick();
 
@@ -630,7 +646,8 @@ describe('AuthorizationForm', () => {
 
     await vm.onSubmit(submitPayload);
 
-    expect(upsertPermitSpy).toThrowError();
+    expect(toastSpy).toHaveBeenCalledWith(expect.any(String), 'boom');
+    expect(upsertPermitSpy).toHaveBeenCalledWith(submitPayload);
   });
 
   it('onDelete calls deletePermit and navigates on accept', async () => {

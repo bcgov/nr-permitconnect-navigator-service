@@ -1,6 +1,6 @@
 import { Initiative, Zone } from '@/utils/enums/application';
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import type { Ref } from 'vue';
 
@@ -76,7 +76,7 @@ export const useAppStore = defineStore('app', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

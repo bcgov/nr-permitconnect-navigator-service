@@ -4,7 +4,7 @@ import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
-import { array, boolean, mixed, number, object, string } from 'yup';
+import { array, boolean, mixed, number, object, string, type InferType } from 'yup';
 
 import type { OrgBookOption } from '@/types';
 
@@ -13,7 +13,9 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 
 export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
   return object({
-    [IntakeFormCategory.CONTACTS]: object(contactValidator),
+    activityId: string(),
+    housingProjectId: string(),
+    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string() }),
     [IntakeFormCategory.BASIC]: object({
       consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
       projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
@@ -158,7 +160,8 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       }),
       ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
       geomarkUrl: string().max(255).label('Geomark web service url'),
-      geoJson: mixed().nullable().label('geoJson')
+      geoJson: mixed().nullable().label('geoJson'),
+      projectLocationDescription: string()
     }),
     [IntakeFormCategory.PERMITS]: object({
       hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits')
@@ -183,3 +186,5 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
     )
   });
 }
+
+export type FormSchemaType = InferType<ReturnType<typeof createProjectIntakeSchema>>;

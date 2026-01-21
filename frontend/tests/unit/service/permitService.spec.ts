@@ -133,10 +133,10 @@ describe('permitService', () => {
 
       it('calls put permit with wrong object type', async () => {
         upsertPermitSpy.mockRejectedValue(new Error('Invalid permit object'));
-        const modifiedPermit = {} as any;
+        const modifiedPermit: { permitTypeId?: string } = { permitTypeId: '123' };
         delete modifiedPermit.permitTypeId;
 
-        await expect(permitService.upsertPermit(modifiedPermit)).rejects.toThrow();
+        await expect(permitService.upsertPermit(modifiedPermit as unknown as Permit)).rejects.toThrow();
         expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
       });
 

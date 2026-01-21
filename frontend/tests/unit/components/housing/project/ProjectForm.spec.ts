@@ -6,8 +6,9 @@ import { nextTick } from 'vue';
 
 import ProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import { externalApiService, mapService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { GroupName } from '@/utils/enums/application';
+import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
+import { BasicResponse, GroupName } from '@/utils/enums/application';
+import { NumResidentialUnits } from '@/utils/enums/housing';
 import { mount } from '@vue/test-utils';
 
 import type { AxiosResponse } from 'axios';
@@ -96,7 +97,7 @@ const testProject: HousingProject = {
   housingProjectId: 'project789',
   projectId: 'project789',
   queuePriority: 1,
-  submissionType: 'Type A',
+  submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
@@ -106,19 +107,19 @@ const testProject: HousingProject = {
   projectName: 'Project Alpha',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
-  singleFamilyUnits: '10',
-  multiFamilyUnits: '20',
+  singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+  multiFamilyUnits: NumResidentialUnits.UNSURE,
   multiPermitsNeeded: 'Yes',
   otherUnitsDescription: 'Other units description.',
-  otherUnits: '5',
-  hasRentalUnits: 'Yes',
+  otherUnits: NumResidentialUnits.UNSURE,
+  hasRentalUnits: BasicResponse.YES,
   rentalUnits: '15',
-  financiallySupportedBc: 'Yes',
-  financiallySupportedIndigenous: 'Yes',
+  financiallySupportedBc: BasicResponse.YES,
+  financiallySupportedIndigenous: BasicResponse.YES,
   indigenousDescription: 'Indigenous support description.',
-  financiallySupportedNonProfit: 'Yes',
+  financiallySupportedNonProfit: BasicResponse.YES,
   nonProfitDescription: 'Non-profit support description.',
-  financiallySupportedHousingCoop: 'Yes',
+  financiallySupportedHousingCoop: BasicResponse.YES,
   housingCoopDescription: 'Housing coop support description.',
   streetAddress: '123 Main St',
   locality: 'Anytown',

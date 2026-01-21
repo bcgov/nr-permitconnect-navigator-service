@@ -3,6 +3,7 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 
 import UpdateContactModal from '@/components/contact/UpdateContactModal.vue';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn() })
@@ -15,8 +16,8 @@ const testContact = {
   lastName: 'Doe',
   phoneNumber: '(250) 555-0000',
   email: 'jane.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT
 };
 
 const wrapperSettings = () => ({

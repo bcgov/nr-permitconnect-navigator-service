@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object, string, mixed } from 'yup';
+import { object, string, mixed, type InferType, boolean } from 'yup';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
@@ -23,7 +24,6 @@ import { scrollToFirstError } from '@/utils/utils';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { NoteHistory, User } from '@/types';
-import { isAxiosError } from 'axios';
 
 // Props
 const { editable, noteHistory = undefined } = defineProps<{
@@ -52,19 +52,9 @@ const router = useRouter();
 const toast = useToast();
 const { options } = useCodeStore();
 
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
-const { getProject } = storeToRefs(projectStore);
-const { getEnquiry } = storeToRefs(enquiryStore);
-
-// State
-const createdByFullNames: Ref<Record<string, string>> = ref({});
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const shownToProponent: Ref<boolean> = ref(false);
-
-// Actions
+// Form Schema
 const formSchema = object({
+  activityId: string(),
   bringForwardDate: mixed()
     .nullable()
     .when('type', {
@@ -80,6 +70,7 @@ const formSchema = object({
       otherwise: () => mixed().nullable()
     })
     .label('Bring forward state'),
+  noteHistoryId: string(),
   note: string()
     .when('noteHistoryId', {
       is: (noteHistoryId: string) => noteHistoryId === undefined,
@@ -89,6 +80,8 @@ const formSchema = object({
     .label('Note'),
   type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
   title: string().required().max(255, t('note.noteForm.titleLong')).label('Title'),
+  escalateToDirector: boolean(),
+  escalateToSupervisor: boolean(),
   escalationType: mixed()
     .when(['escalateToSupervisor', 'escalateToDirector'], {
       is: (escalateToSupervisor: boolean, escalateToDirector: boolean) => escalateToSupervisor || escalateToDirector,
@@ -98,15 +91,29 @@ const formSchema = object({
     .label('Escalation type')
 });
 
+export type FormSchemaType = InferType<typeof formSchema>;
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
+const { getProject } = storeToRefs(projectStore);
+const { getEnquiry } = storeToRefs(enquiryStore);
+
+// State
+const createdByFullNames: Ref<Record<string, string>> = ref({});
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<Partial<FormSchemaType> | undefined> = ref(undefined);
+const shownToProponent: Ref<boolean> = ref(false);
+
+// Actions
 function initializeFormValues() {
   if (noteHistory) {
     initialFormValues.value = {
       activityId: noteHistory.activityId,
       bringForwardDate: noteHistory?.bringForwardDate ? new Date(noteHistory.bringForwardDate) : null,
-      bringForwardState: noteHistory?.bringForwardState ?? null,
+      bringForwardState: noteHistory?.bringForwardState ?? undefined,
       escalateToSupervisor: noteHistory?.escalateToSupervisor,
       escalateToDirector: noteHistory?.escalateToDirector,
-      escalationType: noteHistory?.escalationType,
+      escalationType: noteHistory?.escalationType ?? undefined,
       noteHistoryId: noteHistory.noteHistoryId,
       type: noteHistory.type,
       title: noteHistory.title

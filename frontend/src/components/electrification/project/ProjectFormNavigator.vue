@@ -44,22 +44,26 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { Ref } from 'vue';
+
 import type { IInputEvent } from '@/interfaces';
+import type { FormSchemaType } from './ProjectFormSchema';
 import type {
   ATSAddressResource,
   ATSClientResource,
   ATSEnquiryResource,
   Contact,
+  DeepPartial,
   ElectrificationProject,
   OrgBookOption,
   User
 } from '@/types';
+import type { Maybe } from 'yup';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -88,7 +92,7 @@ const { codeList, enums, options } = useCodeStore();
 const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const primaryContact = computed(
   () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
@@ -130,7 +134,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-function initilizeFormValues(project: ElectrificationProject) {
+function initilizeFormValues(project: ElectrificationProject): DeepPartial<FormSchemaType> {
   return {
     contact: {
       contactId: primaryContact.value?.contactId,
@@ -148,10 +152,10 @@ function initilizeFormValues(project: ElectrificationProject) {
       projectName: project.projectName,
       bcHydroNumber: project.bcHydroNumber,
       projectType: project.projectType,
-      hasEpa: project.hasEpa,
-      megawatts: project.megawatts,
+      hasEpa: project.hasEpa as BasicResponse | null | undefined,
+      megawatts: project.megawatts as Maybe<number | undefined>,
       projectCategory: project.projectCategory,
-      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded
+      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded as BasicResponse | null | undefined
     },
 
     // Additional Info
@@ -166,7 +170,7 @@ function initilizeFormValues(project: ElectrificationProject) {
     // Submission state
     submissionState: {
       queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
+      submissionType: project.submissionType as SubmissionType | undefined,
       assignedUser: assigneeOptions.value[0] ?? null,
       applicationStatus: project.applicationStatus
     },

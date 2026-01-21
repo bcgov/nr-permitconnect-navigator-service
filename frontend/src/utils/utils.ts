@@ -334,9 +334,12 @@ export function setDispositionHeader(filename: string) {
 /**
  * @function setEmptyStringsToNull
  * Converts empty string values to null values, recursively
- * @param  {object} data The object to change
- * @returns {object} The object with the remapped values
+ * @param data The object to change
+ * @returns The object with the remapped values
  */
+// Too much gets broken by trying to make this type safe
+// Honestly we need to find a way to remove this function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setEmptyStringsToNull(data: any): any {
   if (data === '' || data === null) return null;
 
