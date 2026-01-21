@@ -425,7 +425,7 @@ onBeforeMount(async () => {
             :options="options.ElectrificationProjectType"
             @on-change="
               (e: string) => {
-                if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('bcHydroNumber', null);
+                if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('project.bcHydroNumber', null);
               }
             "
           />

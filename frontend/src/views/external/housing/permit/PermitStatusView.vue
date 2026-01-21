@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { computed, onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, onBeforeUnmount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AuthorizationInfoProponent from '@/components/authorization/AuthorizationInfoProponent.vue';
@@ -67,6 +67,10 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.permitStatusView.unableToLoad'));
   }
+});
+
+onBeforeUnmount(() => {
+  permitStore.reset();
 });
 </script>
 

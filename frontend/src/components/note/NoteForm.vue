@@ -182,7 +182,7 @@ async function onSubmit(data: GenericObject) {
     } else {
       await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
         ...body,
-        activityId: getProject.value!.activityId,
+        activityId,
         note: data.note
       });
       if (

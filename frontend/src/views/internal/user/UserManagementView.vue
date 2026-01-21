@@ -214,7 +214,9 @@ async function onUserGroupChange(group: Group) {
         'createdAt',
         'createdBy',
         'updatedAt',
-        'updatedBy'
+        'updatedBy',
+        'deletedAt',
+        'deletedBy'
       ]);
       const response = await accessRequestService.createUserAccessRequest({
         user: omittedUser,

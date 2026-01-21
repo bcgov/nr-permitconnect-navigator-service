@@ -215,6 +215,7 @@ export const useProjectStore = defineStore('project', () => {
   }
 
   function reset() {
+    state.activityContacts.value = [];
     state.documents.value = [];
     state.relatedEnquiries.value = [];
     state.noteHistory.value = [];

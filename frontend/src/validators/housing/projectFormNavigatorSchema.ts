@@ -121,7 +121,7 @@ export function createProjectFormNavigatorSchema() {
       .max(4000)
       .label(t('i.housing.project.projectFormNavigatorSchema.projectLocationDescription')),
     project: object({
-      companyIdRegistered: string(),
+      companyIdRegistered: string().nullable(),
       companyNameRegistered: string()
         .notRequired()
         .max(255)
