@@ -15,6 +15,7 @@ const { autoSaveRef = null, callback = () => {} } = defineProps<{
 }>();
 
 // State
+const isAccepted: Ref<boolean> = ref(false);
 const isDirty = useIsFormDirty();
 const isOpen: Ref<boolean> = ref(false);
 
@@ -24,6 +25,9 @@ const router = useRouter();
 
 onBeforeRouteLeave(async (to) => {
   autoSaveRef?.stopAutoSave();
+
+  // Skip navigation guard if already accepted
+  if (isAccepted.value) return true;
 
   if (isDirty.value && !isOpen.value) {
     isOpen.value = true;
@@ -35,6 +39,7 @@ onBeforeRouteLeave(async (to) => {
       rejectLabel: 'Cancel',
       rejectProps: { outlined: true },
       accept: async () => {
+        isAccepted.value = true;
         await callback();
         router.replace(to);
       },
