@@ -1,12 +1,10 @@
-import { BasicResponse } from '../../../src/utils/enums/application.ts';
-import { ProjectApplicant } from '../../../src/utils/enums/housing.ts';
-import { basicIntake, basicEnquiry } from '../../../src/validators/basic.ts';
+import { ProjectApplicant } from '../../../src/utils/enums/housing';
+import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
 
 describe('basicIntakeSchema', () => {
-  it('should validate when projectApplicantType and isDevelopedInBc are valid', () => {
+  it('should validate when projectApplicantType is valid', () => {
     const data = {
       projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBc: BasicResponse.YES,
       registeredName: 'My Company'
     };
 
@@ -17,38 +15,7 @@ describe('basicIntakeSchema', () => {
   it('should throw an error when projectApplicantType is invalid', () => {
     const data = {
       projectApplicantType: 'invalid',
-      isDevelopedInBc: BasicResponse.YES,
       registeredName: 'My Company'
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeDefined();
-  });
-
-  it('should throw an error when isDevelopedInBc is invalid', () => {
-    const data = {
-      projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBc: 'invalid'
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeDefined();
-  });
-
-  it('should throw an error when isDevelopedInBc is BUSINESS but registeredName is not provided', () => {
-    const data = {
-      projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBc: BasicResponse.YES
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeDefined();
-  });
-
-  it('should throw an error when isDevelopedInBc is BUSINESS and registeredName is not provided', () => {
-    const data = {
-      projectApplicantType: ProjectApplicant.BUSINESS,
-      isDevelopedInBc: BasicResponse.NO
     };
 
     const result = basicIntake.validate(data);

@@ -83,7 +83,6 @@ const testSubmission: HousingProject = {
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
-  isDevelopedInBc: 'Yes',
   projectName: 'Project Alpha',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',

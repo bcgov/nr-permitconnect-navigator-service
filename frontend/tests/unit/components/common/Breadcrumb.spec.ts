@@ -53,7 +53,6 @@ const testProject: HousingProject = {
   companyNameRegistered: 'Example Company',
   companyIdRegistered: 'FM0281610',
   consentToFeedback: true,
-  isDevelopedInBc: 'Yes',
   projectName: 'Super Long Project Name',
   projectDescription: 'This is a test project description.',
   projectLocationDescription: 'Test location description.',
