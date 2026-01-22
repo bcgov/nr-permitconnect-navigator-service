@@ -116,7 +116,7 @@ const confirmSubmit = () => {
 }
 
 :deep(.assistance-tab:focus-visible) {
-  outline: 0.25rem solid $app-hover;
+  outline: 0.25rem solid var(--p-bcblue-700);
   outline-offset: 0.125rem;
 }
 

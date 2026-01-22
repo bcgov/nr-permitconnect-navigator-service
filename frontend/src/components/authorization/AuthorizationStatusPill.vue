@@ -163,38 +163,38 @@ const statePillDisplayText = {
 }
 
 .green {
-  background-color: $app-pill-lightgreen;
-  border-color: $app-pill-green;
-  color: $app-pill-green;
+  background-color: var(--p-green-75);
+  border-color: var(--p-green-500);
+  color: var(--p-green-500);
 }
 
 .grey {
-  background-color: $app-pill-grey;
-  border-color: $app-pill-lightgrey;
+  background-color: var(--p-greyscale-100);
+  border-color: var(--p-greyscale-900);
 }
 
 .outlined-green {
-  background-color: $app-pill-green;
-  border-color: $app-pill-green;
+  background-color: var(--p-green-500);
+  border-color: var(--p-green-500);
   border-style: solid;
   border-radius: 50%;
-  color: $app-pill-lightgreen;
+  color: var(--p-green-75);
 }
 
 .red {
-  background-color: $app-pill-lightred;
-  border-color: $app-pill-red;
-  color: $app-pill-red;
+  background-color: var(--p-red-50);
+  border-color: var(--p-red-400);
+  color: var(--p-red-400);
 }
 
 .yellow {
-  background-color: $app-pill-lightyellow;
-  border-color: $app-pill-yellow;
-  color: $app-pill-yellow;
+  background-color: var(--p-gold-200);
+  border-color: var(--p-gold-900);
+  color: var(--p-gold-900);
 }
 
 .text-color {
   font-weight: normal;
-  color: $app-pill-text;
+  color: var(--p-greyscale-900);
 }
 </style>

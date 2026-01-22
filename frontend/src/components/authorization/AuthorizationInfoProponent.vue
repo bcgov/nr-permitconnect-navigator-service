@@ -69,6 +69,6 @@ const { t } = useI18n();
 </template>
 <style scoped lang="scss">
 .border-color {
-  border-color: $app-proj-white-one;
+  border-color: var(--p-greyscale-100);
 }
 </style>

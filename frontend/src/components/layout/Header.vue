@@ -38,7 +38,7 @@ const { t } = useI18n();
 <style lang="scss" scoped>
 #header-branding {
   background-color: white;
-  color: $app-primary;
+  color: var(--p-bcblue-950);
   white-space: nowrap;
   // TODO: Reference a surface colour once PrimeVue 4 changes come in
   border-bottom: 1px solid #d8d8d8;

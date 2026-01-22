@@ -49,7 +49,7 @@ const { t } = useI18n();
   border-color: var(--p-greyscale-100);
   border-style: solid;
   border-width: 0.063rem;
-  box-shadow: 0.25rem 0.25rem 0.25rem 0rem $app-proj-black;
+  box-shadow: 0.25rem 0.25rem 0.25rem 0rem var(--p-greyscale-50);
   &--hover:hover {
     background-color: var(--p-bcblue-50);
   }
