@@ -11,11 +11,11 @@ import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFor
 import { contactService, documentService, permitService, housingProjectService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
+import { ProjectApplicant } from '@/utils/enums/housing';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
-
 import type { Contact } from '@/types';
-import { ProjectApplicant } from '@/utils/enums/housing';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -94,8 +94,8 @@ const sampleContact: Contact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
@@ -159,26 +159,26 @@ describe('ProjectIntakeForm', () => {
     it('keeps editable true in draft mode', async () => {
       const getDraftSpy = vi.spyOn(housingProjectService, 'getDraft');
 
-      getDraftSpy.mockResolvedValue({ draftId: '123' } as any);
+      getDraftSpy.mockResolvedValue({ data: { draftId: '123' } } as AxiosResponse);
 
       const wrapper = shallowMount(ProjectIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
 
       await nextTick();
       await flushPromises();
 
-      const editable = (wrapper.vm as any)?.editable;
+      const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
       expect(editable).toBeTruthy();
     });
 
     // No clue why this one is exploding the tests
-    it.skip('sets editable to false when housing project ID given', async () => {
+    it.todo('sets editable to false when housing project ID given', async () => {
       const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
       const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
       const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 
-      getProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as any);
-      listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as any);
-      listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as any);
+      getProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as AxiosResponse);
+      listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as AxiosResponse);
+      listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as AxiosResponse);
 
       const wrapper = shallowMount(ProjectIntakeForm, {
         ...wrapperSettings(),
@@ -188,7 +188,7 @@ describe('ProjectIntakeForm', () => {
       await nextTick();
       await flushPromises();
 
-      const editable = (wrapper.vm as any)?.editable;
+      const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
       expect(editable).toBeFalsy();
     });
   });

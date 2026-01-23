@@ -4,7 +4,7 @@ import { Initiative } from '@/utils/enums/application';
 import { delimitEmails } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { Email, Draft, HousingProjectSearchParameters } from '@/types';
+import type { Email, Draft, HousingProject, HousingProjectSearchParameters, StatisticFilters } from '@/types';
 
 const PATH = 'project';
 
@@ -13,7 +13,7 @@ const service: IDraftableProjectService = {
    * @function createProject
    * @returns {Promise} An axios response
    */
-  createProject(data?: any) {
+  createProject(data?: Partial<HousingProject>) {
     return appAxios().post(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, data);
   },
 
@@ -84,7 +84,7 @@ const service: IDraftableProjectService = {
    * @function getStatistics
    * @returns {Promise} An axios response
    */
-  getStatistics(filters?: any) {
+  getStatistics(filters?: StatisticFilters) {
     return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/statistics`, {
       params: { ...filters }
     });
@@ -110,7 +110,7 @@ const service: IDraftableProjectService = {
    * @function submitDraft
    * @returns {Promise} An axios response
    */
-  submitDraft(data?: any) {
+  submitDraft(data?: Partial<HousingProject>) {
     return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/submit`, data);
   },
 
@@ -126,7 +126,7 @@ const service: IDraftableProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: any) {
+  updateProject(projectId: string, data: HousingProject) {
     return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };

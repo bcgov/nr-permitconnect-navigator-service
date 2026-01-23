@@ -5,7 +5,7 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosResponse } from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 
 // Constants
 const PATH = 'document';
@@ -50,7 +50,7 @@ vi.mocked(appAxios).mockReturnValue({
   delete: deleteSpy,
   get: getSpy,
   post: postSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Spies
 const createObjectSpy = vi.spyOn(comsService, 'createObject');
@@ -154,20 +154,20 @@ describe('documentService', () => {
           });
 
           await expect(
-            async () => await documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
           ).rejects.toThrow();
         });
 
         // Useless test until above can be fixed
-        it.skip('does not delete COMS object on comsService error', async () => {
+        it.todo('does not delete COMS object on comsService error', async () => {
           createObjectSpy.mockImplementation(() => {
             throw new Error();
           });
 
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
-          expect(
-            async () => await documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+          await expect(
+            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
           ).rejects.toThrow();
         });
       });

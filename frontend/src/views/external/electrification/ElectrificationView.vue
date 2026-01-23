@@ -16,7 +16,7 @@ import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { ElectrificationProject, Permit } from '@/types';
+import type { Draft, ElectrificationProject, Permit } from '@/types';
 
 // Constants
 const PAGE_ROWS = 5;
@@ -27,11 +27,11 @@ const route = useRoute();
 const router = useRouter();
 
 // State
-const authorizations: Ref<Array<Permit>> = ref([]);
-const drafts: Ref<Array<any>> = ref([]);
+const authorizations: Ref<Permit[]> = ref([]);
+const drafts: Ref<Draft[]> = ref([]);
 const first: Ref<number> = ref(0);
 const loading: Ref<boolean> = ref(true);
-const projects: Ref<Array<ElectrificationProject>> = ref([]);
+const projects: Ref<ElectrificationProject[]> = ref([]);
 
 // Providers
 provide(projectRouteNameKey, ref(RouteName.EXT_ELECTRIFICATION_INTAKE));

@@ -2,7 +2,7 @@ const PCNS_URL = window.location.origin;
 const BC_EMAIL_BANNER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/446ee8ee-e302-4cb8-b44d-24a1f583edba';
 const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e62f-41f5-81fd-6eff6cb66d52';
 
-export const roadmapTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+export const roadmapTemplate = (replaceConfig: Record<string, string | string[] | undefined>) => {
   const baseTemplate =
     'Dear {{ contactName }},\n\n' +
     'Here is your Permit Roadmap for {{ projectName }}: {{ activityId }}.\n\n' +
@@ -37,7 +37,7 @@ const templateConfig = {
     '{{ permitStateCompleted }}\n\n'
 };
 
-const replacePlaceholders = (baseText: string, replacementConfig: { [key: string]: string | string[] | undefined }) => {
+const replacePlaceholders = (baseText: string, replacementConfig: Record<string, string | string[] | undefined>) => {
   if (!baseText || !Object.keys(replacementConfig)) return baseText;
 
   let newText = baseText;
@@ -47,7 +47,7 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
       // Workaround: str.replaceAll() isn't available in ES2020
       newText = newText.replace(new RegExp(key, 'g'), value);
     } else if (Array.isArray(value)) {
-      let listString: string = '';
+      let listString = '';
 
       value.forEach((element, index) => {
         if (index) {
@@ -63,9 +63,9 @@ const replacePlaceholders = (baseText: string, replacementConfig: { [key: string
   return newText;
 };
 
-export const confirmationTemplateElectrificationSubmission = (replaceConfig: {
-  [key: string]: string | string[] | undefined;
-}) => {
+export const confirmationTemplateElectrificationSubmission = (
+  replaceConfig: Record<string, string | string[] | undefined>
+) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -91,9 +91,7 @@ export const confirmationTemplateElectrificationSubmission = (replaceConfig: {
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const confirmationTemplateHousingSubmission = (replaceConfig: {
-  [key: string]: string | string[] | undefined;
-}) => {
+export const confirmationTemplateHousingSubmission = (replaceConfig: Record<string, string | string[] | undefined>) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -119,7 +117,7 @@ export const confirmationTemplateHousingSubmission = (replaceConfig: {
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+export const confirmationTemplateEnquiry = (replaceConfig: Record<string, string | string[] | undefined>) => {
   const ENQUIRY_URL = replaceConfig['{{ projectId }}']
     ? '/e/{{ initiative }}/project/{{ projectId }}/enquiry/{{ enquiryId }}'
     : '/e/{{ initiative }}/enquiry/{{ enquiryId }}';
@@ -151,9 +149,7 @@ export const confirmationTemplateEnquiry = (replaceConfig: { [key: string]: stri
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const peachPermitNoteNotificationTemplate = (replaceConfig: {
-  [key: string]: string | string[] | undefined;
-}) => {
+export const peachPermitNoteNotificationTemplate = (replaceConfig: Record<string, string | string[] | undefined>) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -181,7 +177,7 @@ export const peachPermitNoteNotificationTemplate = (replaceConfig: {
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: string | string[] | undefined }) => {
+export const permitNoteNotificationTemplate = (replaceConfig: Record<string, string | string[] | undefined>) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -207,9 +203,9 @@ export const permitNoteNotificationTemplate = (replaceConfig: { [key: string]: s
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const bringForwardProjectNotificationTemplate = (replaceConfig: {
-  [key: string]: string | string[] | undefined;
-}) => {
+export const bringForwardProjectNotificationTemplate = (
+  replaceConfig: Record<string, string | string[] | undefined>
+) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +
@@ -233,9 +229,9 @@ export const bringForwardProjectNotificationTemplate = (replaceConfig: {
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
-export const bringForwardEnquiryNotificationTemplate = (replaceConfig: {
-  [key: string]: string | string[] | undefined;
-}) => {
+export const bringForwardEnquiryNotificationTemplate = (
+  replaceConfig: Record<string, string | string[] | undefined>
+) => {
   const baseTemplate =
     '<div style="width: 880px">' +
     '<img src="' +

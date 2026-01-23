@@ -2,6 +2,8 @@
 import { nextTick } from 'vue';
 import { Button } from '@/lib/primevue';
 
+import type { CallbackFn } from '@/types';
+
 // Props
 const {
   nextCallback = () => {},
@@ -9,9 +11,9 @@ const {
   prevCallback = () => {},
   prevDisabled = false
 } = defineProps<{
-  nextCallback?: Function;
+  nextCallback?: CallbackFn;
   nextDisabled?: boolean;
-  prevCallback?: Function;
+  prevCallback?: CallbackFn;
   prevDisabled?: boolean;
 }>();
 

@@ -11,7 +11,7 @@ import type { ElectrificationProject, HousingProject } from '@/types';
 
 // Props
 const { onDeleteCallback } = defineProps<{
-  onDeleteCallback: Function;
+  onDeleteCallback: (projectId: string, activityId: string) => void;
 }>();
 
 const selection = defineModel<ElectrificationProject | HousingProject | undefined>('selection');

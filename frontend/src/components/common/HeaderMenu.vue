@@ -39,7 +39,7 @@ const menu: Ref<MenuType | undefined> = ref(undefined);
 // Actions
 const router = useRouter();
 
-const toggle = (event: any) => {
+const toggle = (event: Event) => {
   menu.value?.toggle(event);
 };
 </script>

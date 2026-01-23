@@ -2,6 +2,7 @@ import { geocoderAxios, orgBookAxios } from './interceptors';
 import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
 import type { AxiosResponse } from 'axios';
+import type { GeocoderAddressResponse } from '@/types';
 
 export default {
   /**
@@ -14,7 +15,7 @@ export default {
     return orgBookAxios().get('/search/autocomplete', { params: { q: nameSearch, ...ORG_BOOK_QUERY_PARAMS } });
   },
 
-  searchAddressCoder(addressSearch: string): Promise<AxiosResponse> {
+  searchAddressCoder(addressSearch: string): Promise<AxiosResponse<GeocoderAddressResponse>> {
     return geocoderAxios().get('/addresses.json', {
       params: {
         addressString: addressSearch,

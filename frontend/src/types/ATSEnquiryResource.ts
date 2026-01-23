@@ -1,4 +1,4 @@
-export type ATSEnquiryResource = {
+export interface ATSEnquiryResource {
   '@type': string;
   clientId: number;
   contactFirstName: string;
@@ -11,4 +11,4 @@ export type ATSEnquiryResource = {
   enquiryMethodCodes: string[];
   enquiryPartnerAgencies: string[];
   enquiryFileNumbers: string[];
-};
+}

@@ -64,8 +64,8 @@ async function searchProponents() {
             lastName: searchTag.value
           })
         ).data;
-      } catch (error: any) {
-        toast.error(t('userCreateModal.searchError'), error);
+      } catch (error) {
+        toast.error(t('userCreateModal.searchError'), String(error));
       } finally {
         loading.value = false;
       }

@@ -7,6 +7,7 @@ import { shallowMount } from '@vue/test-utils';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { contactService, housingProjectService, enquiryService, userService } from '@/services';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosRequestHeaders } from 'axios';
 
@@ -30,8 +31,8 @@ const testContact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.OWNER,
   activityContact: []
 };
 

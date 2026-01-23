@@ -7,6 +7,7 @@ import { Initiative } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note, NoteHistory } from '@/types';
+import type { AxiosInstance } from 'axios';
 
 // Constants
 const PATH = 'note';
@@ -58,7 +59,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   post: postSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {
@@ -80,7 +81,9 @@ describe('noteHistoryService', () => {
 
       describe('createNoteHistory', () => {
         it('calls with given data', () => {
-          noteHistoryService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as any);
+          noteHistoryService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as NoteHistory & {
+            note: string;
+          });
 
           expect(postSpy).toHaveBeenCalledTimes(1);
           expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
@@ -143,7 +146,7 @@ describe('noteHistoryService', () => {
         it('calls with given data', () => {
           noteHistoryService.updateNoteHistory(
             TEST_NOTE_HISTORY.noteHistoryId as string,
-            { ...TEST_NOTE_HISTORY, note: 'text' } as any
+            { ...TEST_NOTE_HISTORY, note: 'text' } as NoteHistory & { note: string }
           );
 
           expect(putSpy).toHaveBeenCalledTimes(1);

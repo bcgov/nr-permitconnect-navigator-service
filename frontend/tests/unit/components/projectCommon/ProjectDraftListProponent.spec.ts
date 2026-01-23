@@ -8,6 +8,7 @@ import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftLi
 import { userService } from '@/services';
 
 import type { AxiosResponse } from 'axios';
+import type { Draft } from '@/types';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -18,8 +19,8 @@ vi.mock('vue-i18n', () => ({
 
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
-const testDraft = { foo: 'bar' };
-const testDrafts = [testDraft];
+const testDraft = { draftId: 'bar' };
+const testDrafts = [testDraft] as Draft[];
 
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 

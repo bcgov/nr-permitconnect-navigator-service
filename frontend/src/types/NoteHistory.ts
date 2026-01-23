@@ -1,5 +1,6 @@
 import type { IStamps } from '@/interfaces';
 import type { Note } from './Note';
+import type { NoteType } from '@/utils/enums/projectCommon';
 
 export type NoteHistory = {
   noteHistoryId?: string; // Primary Key
@@ -12,5 +13,5 @@ export type NoteHistory = {
   note: Note[];
   shownToProponent: boolean;
   title: string;
-  type: string;
+  type: NoteType;
 } & Partial<IStamps>;

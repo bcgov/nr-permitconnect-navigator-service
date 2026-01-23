@@ -8,7 +8,7 @@ describe('utils.ts', () => {
     });
 
     it('returns null when date is empty string (falsy guard)', () => {
-      const result = combineDateTime('', '07:00:00Z' as any);
+      const result = combineDateTime('', '07:00:00Z');
       expect(result).toBeNull();
     });
 

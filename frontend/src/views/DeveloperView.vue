@@ -12,7 +12,10 @@ import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import type { Ref } from 'vue';
 
 // Types
-type GroupList = { id: string; text: string };
+interface GroupList {
+  id: string;
+  text: string;
+}
 
 // Composables
 const { t } = useI18n();
@@ -36,7 +39,7 @@ const initiative: Ref<Initiative | undefined> = ref(undefined);
       v-if="getConfig"
       class="version pl-2"
     >
-      v{{ getConfig.version }}{{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
+      {{ getConfig.gitRev ? '-' + getConfig.gitRev.substring(0, 8) : '' }}
     </div>
   </div>
   <div>

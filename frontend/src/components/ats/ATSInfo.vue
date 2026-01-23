@@ -6,22 +6,22 @@ import ATSUserCreateModal from '@/components/ats/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
 import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
-import { Button, useConfirm, useToast } from '@/lib/primevue';
-import { atsService } from '@/services';
-import { ATSCreateTypes } from '@/utils/enums/application';
+import { Button, useConfirm, useToast } from '@/lib/primevue/index.ts';
+import { atsService } from '@/services/index.ts';
+import { ATSCreateTypes } from '@/utils/enums/application.ts';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource } from '@/types';
+import type { ATSClientResource } from '@/types/index.ts';
 
 // Props
 const {
-  atsClientId,
-  atsEnquiryId,
+  atsClientId = undefined,
+  atsEnquiryId = undefined,
   editable = true,
-  email,
-  firstName,
-  lastName,
-  phoneNumber,
+  email = undefined,
+  firstName = undefined,
+  lastName = undefined,
+  phoneNumber = undefined,
   isRelatedEnquiry = false
 } = defineProps<{
   atsClientId?: string | number;
@@ -48,7 +48,7 @@ const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(false);
-const users: Ref<Array<ATSClientResource>> = ref([]);
+const users: Ref<ATSClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -228,6 +228,7 @@ watch(visible, () => {
     "
   />
 </template>
+
 <style scoped lang="scss">
 .ats-button {
   background-color: white;

@@ -5,6 +5,7 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
+import type { AxiosInstance } from 'axios';
 import type { StoreGeneric } from 'pinia';
 
 // Constants
@@ -44,7 +45,7 @@ vi.mock('@/services/interceptors');
 vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   post: postSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {

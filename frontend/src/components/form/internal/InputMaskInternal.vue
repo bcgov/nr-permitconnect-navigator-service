@@ -5,7 +5,14 @@ import { useField } from 'vee-validate';
 import { InputMask } from '@/lib/primevue';
 
 // Props
-const { label, name, mask, placeholder, disabled, bold } = defineProps<{
+const {
+  label,
+  name,
+  mask,
+  placeholder = '',
+  disabled,
+  bold
+} = defineProps<{
   label: string;
   name: string;
   mask: string;

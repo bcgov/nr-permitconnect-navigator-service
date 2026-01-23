@@ -22,7 +22,7 @@ const { contact } = defineProps<{
 }>();
 
 // Types
-type ContactForm = {
+interface ContactForm {
   contactId: string;
   firstName?: string;
   lastName?: string;
@@ -30,11 +30,11 @@ type ContactForm = {
   phoneNumber?: string;
   contactApplicantRelationship?: string;
   contactPreference?: string;
-};
+}
 
 // Emits
 const emit = defineEmits<{
-  (e: 'update-contact', contact: Contact): void;
+  updateContact: [contact: Contact];
 }>();
 
 // Composables
@@ -77,11 +77,11 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
           ...formRef.value?.values
         }
       });
-      emit('update-contact', result.data);
+      emit('updateContact', result.data);
       router.back();
     } else toast.error(t('contactForm.failedToSaveTheForm'));
-  } catch (e: any) {
-    toast.error(t('contactForm.failedToSaveTheForm'), e);
+  } catch (e) {
+    toast.error(t('contactForm.failedToSaveTheForm'), String(e));
   }
 };
 </script>

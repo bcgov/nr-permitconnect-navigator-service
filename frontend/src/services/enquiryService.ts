@@ -1,7 +1,8 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { EnquirySearchParameters } from '@/types';
+import type { Enquiry, EnquirySearchParameters } from '@/types';
+import type { EnquiryArgs } from '@/types/Enquiry';
 
 const PATH = 'enquiry';
 
@@ -10,7 +11,7 @@ export default {
    * @function createEnquiry
    * @returns {Promise} An axios response
    */
-  createEnquiry(data?: any) {
+  createEnquiry(data: EnquiryArgs) {
     return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
@@ -60,7 +61,7 @@ export default {
    * @function updateEnquiry
    * @returns {Promise} An axios response
    */
-  updateEnquiry(enquiryId: string, data?: any) {
+  updateEnquiry(enquiryId: string, data?: Enquiry) {
     return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`, data);
   }
 };

@@ -1,7 +1,7 @@
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
 
-export type HousingProjectIntake = {
+export interface HousingProjectIntake {
   basic?: {
     consentToFeedback?: boolean;
     projectApplicantType?: string;
@@ -44,9 +44,9 @@ export type HousingProjectIntake = {
     hasAppliedProvincialPermits?: string;
   };
 
-  appliedPermits?: Array<Permit>;
+  appliedPermits?: Permit[];
 
-  investigatePermits?: Array<Permit>;
+  investigatePermits?: Permit[];
 
-  contacts: Array<Contact>;
-};
+  contacts: Contact[];
+}

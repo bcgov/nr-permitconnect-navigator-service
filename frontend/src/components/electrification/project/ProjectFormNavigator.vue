@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { isAxiosError } from 'axios';
+import { Form, type GenericObject } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -43,22 +44,25 @@ import {
   Initiative,
   Regex
 } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { Ref } from 'vue';
+import type { Maybe } from 'yup';
 import type { IInputEvent } from '@/interfaces';
 import type {
   ATSAddressResource,
   ATSClientResource,
   ATSEnquiryResource,
   Contact,
+  DeepPartial,
   ElectrificationProject,
   OrgBookOption,
   User
 } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -68,7 +72,7 @@ const { editable = true, project } = defineProps<{
 
 // Emits
 const emit = defineEmits<{
-  (e: 'input-project-name', newName: string): void;
+  inputProjectName: [newName: string];
 }>();
 
 // Constants
@@ -84,10 +88,10 @@ const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const primaryContact = computed(
   () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
@@ -100,7 +104,7 @@ const projectFormSchema = computed(() => {
 });
 
 function emitProjectNameChange(e: Event) {
-  emit('input-project-name', (e.target as HTMLInputElement).value);
+  emit('inputProjectName', (e.target as HTMLInputElement).value);
 }
 
 const getAssigneeOptionLabel = (e: User) => {
@@ -129,7 +133,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-function initilizeFormValues(project: ElectrificationProject) {
+function initilizeFormValues(project: ElectrificationProject): DeepPartial<FormSchemaType> {
   return {
     contact: {
       contactId: primaryContact.value?.contactId,
@@ -147,10 +151,10 @@ function initilizeFormValues(project: ElectrificationProject) {
       projectName: project.projectName,
       bcHydroNumber: project.bcHydroNumber,
       projectType: project.projectType,
-      hasEpa: project.hasEpa,
-      megawatts: project.megawatts,
+      hasEpa: project.hasEpa as BasicResponse | null | undefined,
+      megawatts: project.megawatts as Maybe<number | undefined>,
       projectCategory: project.projectCategory,
-      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded
+      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded as BasicResponse | null | undefined
     },
 
     // Additional Info
@@ -165,7 +169,7 @@ function initilizeFormValues(project: ElectrificationProject) {
     // Submission state
     submissionState: {
       queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
+      submissionType: project.submissionType as SubmissionType | undefined,
       assignedUser: assigneeOptions.value[0] ?? null,
       applicationStatus: project.applicationStatus
     },
@@ -251,7 +255,7 @@ function onCancel() {
   }, 6000);
 }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   const errors = Object.keys(e.errors);
 
   if (errors.includes('contact.firstName')) {
@@ -264,9 +268,9 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: { [key: string]: string }) => ({
+      .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
@@ -282,7 +286,7 @@ function onReOpen() {
     rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      onSubmit(formRef.value?.values);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
 }
@@ -299,7 +303,7 @@ function setBasicInfo(contact?: Contact) {
   formRef.value?.setFieldValue('contact.userId', contact?.userId);
 }
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: GenericObject) => {
   try {
     if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
       const response = await createATSClientEnquiry();
@@ -378,8 +382,8 @@ const onSubmit = async (values: any) => {
     });
 
     toast.success(t('i.common.form.savedMessage'));
-  } catch (e: any) {
-    toast.error(t('i.common.projectForm.failedMessage'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
 

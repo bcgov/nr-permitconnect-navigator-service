@@ -18,8 +18,11 @@ const paramsSerializer = {
  * @returns {AxiosInstance} An axios instance
  */
 export function appAxios(options: AxiosRequestConfig = {}): AxiosInstance {
+  const cfg = new ConfigService().getConfig();
+  if (!cfg) throw new Error('Unable to obtain config');
+
   const instance = axios.create({
-    baseURL: window.location.origin + `/${new ConfigService().getConfig().apiPath}`,
+    baseURL: window.location.origin + `/${cfg.apiPath}`,
     timeout: 10000,
     ...options
   });
@@ -48,8 +51,11 @@ export function appAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
+  const cfg = new ConfigService().getConfig();
+  if (!cfg) throw new Error('Unable to obtain config');
+
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().coms.apiPath,
+    baseURL: cfg.coms.apiPath,
     timeout: 10000,
     ...options
   });
@@ -78,8 +84,11 @@ export function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
+  const cfg = new ConfigService().getConfig();
+  if (!cfg) throw new Error('Unable to obtain config');
+
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().geocoder.apiPath,
+    baseURL: cfg.geocoder.apiPath,
     timeout: 10000,
     paramsSerializer,
     ...options
@@ -104,8 +113,11 @@ export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function orgBookAxios(options: AxiosRequestConfig = {}): AxiosInstance {
+  const cfg = new ConfigService().getConfig();
+  if (!cfg) throw new Error('Unable to obtain config');
+
   const instance = axios.create({
-    baseURL: new ConfigService().getConfig().orgbook.apiPath,
+    baseURL: cfg.orgbook.apiPath,
     timeout: 10000,
     paramsSerializer,
     ...options

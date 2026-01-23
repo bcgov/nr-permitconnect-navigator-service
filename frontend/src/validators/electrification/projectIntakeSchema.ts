@@ -1,4 +1,4 @@
-import { object, string } from 'yup';
+import { object, string, type InferType } from 'yup';
 
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
@@ -9,11 +9,14 @@ import type { OrgBookOption } from '@/types';
 export function createProjectIntakeSchema(
   codeList: Record<CodeName, string[]>,
   enums: Record<CodeName, Record<string, string>>,
-  orgBookOptions: Array<OrgBookOption>
+  orgBookOptions: OrgBookOption[]
 ) {
   return object({
-    [IntakeFormCategory.CONTACTS]: object(contactValidator),
+    draftId: string(),
+    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string() }),
     project: object({
+      activityId: string(),
+      electrificationProjectId: string(),
       companyNameRegistered: string()
         .required()
         .max(255)
@@ -33,3 +36,5 @@ export function createProjectIntakeSchema(
     })
   });
 }
+
+export type FormSchemaType = InferType<ReturnType<typeof createProjectIntakeSchema>>;

@@ -26,7 +26,7 @@ export default {
       const newDocument = new File([document], newDocumentName, { type: document.type });
 
       // The tagset is used to filter the objects in the bucket
-      const tagset: Array<{ key: string; value: string }> = [{ key: PROJECT_ID, value: activityId }];
+      const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
 
       // Create COMS object
       comsResponse = await comsService.createObject(
@@ -44,12 +44,12 @@ export default {
         mimeType: comsResponse.data.mimeType,
         filesize: comsResponse.data.length
       });
-    } catch (e: any) {
+    } catch (e) {
       // In event of any error try to Delete COMS object if it was created
       if (comsResponse) {
         comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
       }
-      throw new Error(e);
+      throw e;
     }
   },
 
@@ -65,6 +65,7 @@ export default {
           versionId: versionId
         }
       });
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (e) {
       // TODO: If one fails and other doesn't then??
     }

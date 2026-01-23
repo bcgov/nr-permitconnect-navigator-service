@@ -99,7 +99,9 @@ export function formatDateTime(value: string | undefined | null) {
 export function formatJwtUsername(value: string | undefined | null) {
   if (!value) return undefined;
 
-  const idps = useConfigStore().getConfig.idpList;
+  const idps = useConfigStore().getConfig?.idpList;
+  if (!idps) return undefined;
+
   value = value.toUpperCase();
 
   let substr = value.length;

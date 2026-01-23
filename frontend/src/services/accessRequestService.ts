@@ -26,7 +26,7 @@ export default {
    * @function createUserAccessRequest
    * @returns {Promise} An axios response
    */
-  createUserAccessRequest(data: any) {
+  createUserAccessRequest(data: unknown) {
     return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
   },
 
@@ -34,7 +34,7 @@ export default {
    * @function processUserAccessRequest
    * @returns {Promise} An axios response
    */
-  processUserAccessRequest(accessRequestId: string, data: any) {
+  processUserAccessRequest(accessRequestId: string, data: unknown) {
     return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${accessRequestId}`, data);
   },
 

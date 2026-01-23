@@ -11,7 +11,13 @@ import { Initiative } from '@/utils/enums/application';
 import type { Ref } from 'vue';
 
 // Props
-const { address, firstName, lastName, phone, email } = defineProps<{
+const {
+  address = undefined,
+  firstName = undefined,
+  lastName = undefined,
+  phone = undefined,
+  email = undefined
+} = defineProps<{
   firstName?: string;
   lastName?: string;
   address?: string;

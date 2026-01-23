@@ -8,10 +8,14 @@ import { useAuthZStore } from '@/store';
 import { GROUP_NAME_LIST } from '@/utils/constants/application';
 import { GroupName, Initiative } from '@/utils/enums/application';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 
 // Types
-type GroupList = { id: string; text: string };
+interface GroupList {
+  id: string;
+  text: string;
+}
 
 // Store
 const authzStore = useAuthZStore();
@@ -30,12 +34,12 @@ function clear() {
   initiative.value = undefined;
 }
 
-function setGroup(e: any) {
+function setGroup(e: SelectChangeEvent) {
   authzStore.setGroupOverride(e.value);
   group.value = e.value;
 }
 
-function setInitiative(e: any) {
+function setInitiative(e: SelectChangeEvent) {
   authzStore.setInitiativeOverride(e.value);
   initiative.value = e.value;
 }

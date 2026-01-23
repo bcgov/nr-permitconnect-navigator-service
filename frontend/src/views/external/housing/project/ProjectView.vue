@@ -28,9 +28,10 @@ import { UUID_V4_PATTERN } from '@/utils/constants/application';
 import { RouteName } from '@/utils/enums/application';
 import { ActivityContactRole, SubmissionType } from '@/utils/enums/projectCommon';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
+import { isDefined } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Contact } from '@/types';
+import type { Contact, Enquiry, HousingProject } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -88,7 +89,8 @@ const createdByName: Ref<string> = computed(() => {
 });
 
 onBeforeMount(async () => {
-  let enquiriesValue, projectValue: any;
+  let enquiriesValue: Enquiry[] | undefined = undefined;
+  let projectValue: HousingProject;
 
   try {
     projectValue = (await housingProjectService.getProject(projectId)).data;
@@ -96,6 +98,7 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.EXT_HOUSING });
+    return;
   }
 
   try {
@@ -115,13 +118,13 @@ onBeforeMount(async () => {
   }
 
   projectStore.setProject(projectValue);
-  projectStore.setRelatedEnquiries(enquiriesValue);
+  projectStore.setRelatedEnquiries(enquiriesValue ?? []);
 
   // Fetch contacts for createdBy and assignedUserId
-  // Push only thruthy values into the array
-  const userIds = [projectValue?.assignedUserId, projectValue?.createdBy]
-    .filter(Boolean)
-    .filter((x) => !UUID_V4_PATTERN.test(x));
+  // Push only defined values into the array
+  const userIds = [projectValue.assignedUserId, projectValue.createdBy]
+    .filter(isDefined)
+    .filter((x) => !UUID_V4_PATTERN.test(x!));
   const contacts = (await contactService.searchContacts({ userId: userIds })).data;
   assignee.value = contacts.find(
     (contact: Contact) => contact.userId && contact.userId === projectValue?.assignedUserId

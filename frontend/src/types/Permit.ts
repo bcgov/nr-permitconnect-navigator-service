@@ -4,14 +4,13 @@ import type { PermitTracking } from './PermitTracking';
 import type { PermitType } from './PermitType';
 import type { PermitStage, PermitState } from '@/utils/enums/permit';
 
-export type Permit = {
-  permitId: string; // Primary Key
+interface PermitBase extends IStamps {
   activityId: string;
-  issuedPermitId?: string;
+  issuedPermitId?: string | null;
   needed: string;
-  permitNote: Array<PermitNote>;
-  permitTracking: Array<PermitTracking>;
-  permitType: PermitType;
+  permitNote?: PermitNote[];
+  permitTracking?: PermitTracking[];
+  permitType?: PermitType;
   permitTypeId: number;
   stage: PermitStage;
   state: PermitState;
@@ -23,4 +22,12 @@ export type Permit = {
   statusLastVerifiedTime?: string | null;
   decisionDate?: string | null;
   decisionTime?: string | null;
-} & Partial<IStamps>;
+}
+
+export interface Permit extends PermitBase {
+  permitId: string;
+}
+
+export interface PermitArgs extends PermitBase {
+  permitId?: string;
+}

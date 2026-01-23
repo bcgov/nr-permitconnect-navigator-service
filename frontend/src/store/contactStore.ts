@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import type { Ref } from 'vue';
 import type { Contact } from '@/types';
 
-export type ContactStoreState = {
+export interface ContactStoreState {
   contact: Ref<Contact | undefined>;
-};
+}
 
 export const useContactStore = defineStore('contact', () => {
   // State
@@ -26,7 +26,7 @@ export const useContactStore = defineStore('contact', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

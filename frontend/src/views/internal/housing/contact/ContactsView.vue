@@ -17,7 +17,7 @@ import type { Contact } from '@/types';
 const { t } = useI18n();
 
 // State
-const contacts: Ref<Array<Contact>> = ref([]);
+const contacts: Ref<Contact[]> = ref([]);
 const loading: Ref<boolean> = ref(true);
 
 // Providers

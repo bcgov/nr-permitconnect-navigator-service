@@ -10,7 +10,7 @@ import type { Ref } from 'vue';
 
 // Props
 const { formValues } = defineProps<{
-  formValues: { [key: string]: string };
+  formValues: Record<string, string>;
 }>();
 // Emits
 const emit = defineEmits(['onSubmitAssistance']);
@@ -22,7 +22,7 @@ const showTab: Ref<boolean> = ref(true);
 const confirm = useConfirm();
 const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = (values: { [key: string]: string }): boolean => {
+const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
   // Check applicant section is filled
   let applicant = values?.[IntakeFormCategory.CONTACTS];
   return contactSchema.isValidSync(applicant);

@@ -21,7 +21,7 @@ import type { HousingProject, User } from '@/types';
 // Props
 const {
   enquiryId,
-  projectId,
+  projectId = undefined,
   initialTab = '0'
 } = defineProps<{
   enquiryId: string;

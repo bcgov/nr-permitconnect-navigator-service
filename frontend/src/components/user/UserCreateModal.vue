@@ -14,11 +14,24 @@ import type { Ref } from 'vue';
 import type { Group, User } from '@/types';
 
 // Constants
-const USER_SEARCH_PARAMS: { [key: string]: string } = {
+const USER_SEARCH_PARAMS: Record<string, string> = {
   firstName: 'First name',
   lastName: 'Last name',
   email: 'Email'
 };
+
+// Interfaces
+interface IdirResult {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  attributes: {
+    display_name: string[];
+    idir_user_guid: string[];
+    idir_username: string[];
+  };
+}
 
 // Composables
 const { t } = useI18n();
@@ -41,7 +54,7 @@ const users: Ref<User[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 const searchMutex = new Mutex();
-let timeoutId: NodeJS.Timeout;
+let timeoutId: ReturnType<typeof setTimeout>;
 
 // Actions
 async function searchIdirUsers() {
@@ -66,14 +79,14 @@ async function searchIdirUsers() {
           // Map the response data to the required format
           // Spread the rest of the properties and filter out users without email
           users.value = response.data
-            .map(({ attributes, username, ...rest }: any) => ({
+            .map(({ attributes, username, ...rest }: IdirResult) => ({
               ...rest,
               sub: username,
-              fullName: attributes?.display_name?.[0] as string
+              fullName: attributes?.display_name?.[0]
             }))
-            .filter((user: any) => !!user.email);
-        } catch (error: any) {
-          toast.error(t('userCreateModal.searchError'), error);
+            .filter((user: User) => !!user.email);
+        } catch (error) {
+          toast.error(t('userCreateModal.searchError'), String(error));
         } finally {
           loading.value = false;
         }

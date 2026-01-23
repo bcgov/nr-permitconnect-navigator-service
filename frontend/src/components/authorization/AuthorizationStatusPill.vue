@@ -6,9 +6,9 @@ import { PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
 
 // Props
 const {
-  state,
+  state = undefined,
   enlarge = false,
-  displayText
+  displayText = undefined
 } = defineProps<{
   state?: string;
   enlarge?: boolean;

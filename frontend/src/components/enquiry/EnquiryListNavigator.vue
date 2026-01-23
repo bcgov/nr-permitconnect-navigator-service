@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -29,11 +30,14 @@ import type { Ref } from 'vue';
 import type { Enquiry, Pagination } from '@/types';
 
 // Types
-type FilterOption = { label: string; statuses: string[] };
+interface FilterOption {
+  label: string;
+  statuses: string[];
+}
 
 // Props
 const { enquiries } = defineProps<{
-  enquiries: Array<Enquiry> | undefined;
+  enquiries: Enquiry[] | undefined;
 }>();
 
 // Injections
@@ -95,16 +99,17 @@ function handleCreateNewActivity() {
     accept: async () => {
       try {
         const userContact = useContactStore().getContact;
+        if (!userContact) throw new Error('No contact');
         const response = (
           await enquiryService.createEnquiry({
             contact: {
-              contactId: userContact?.contactId,
-              firstName: userContact?.firstName,
-              lastName: userContact?.lastName,
-              phoneNumber: userContact?.phoneNumber,
-              email: userContact?.email,
-              contactApplicantRelationship: userContact?.contactApplicantRelationship,
-              contactPreference: userContact?.contactPreference
+              contactId: userContact.contactId,
+              firstName: userContact.firstName,
+              lastName: userContact.lastName,
+              phoneNumber: userContact.phoneNumber,
+              email: userContact.email,
+              contactApplicantRelationship: userContact.contactApplicantRelationship,
+              contactPreference: userContact.contactPreference
             }
           })
         ).data;
@@ -114,8 +119,8 @@ function handleCreateNewActivity() {
             params: { enquiryId: response.enquiryId }
           });
         }
-      } catch (e: any) {
-        toast.error(t('enquiryListNavigator.failedSubmission'), e.message);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryListNavigator.failedSubmission'), e.message);
       }
     },
     acceptLabel: t('enquiryListNavigator.confirm'),
@@ -140,7 +145,7 @@ function onDelete(enquiryId: string, activityId: string) {
           selection.value = undefined;
           toast.success('Enquiry deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete enquiry', e.message));
+        .catch((e) => toast.error('Failed to delete enquiry', e.message));
     }
   });
 }

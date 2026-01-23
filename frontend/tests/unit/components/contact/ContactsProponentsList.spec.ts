@@ -7,6 +7,7 @@ import { mount } from '@vue/test-utils';
 
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { contactService } from '@/services';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { contactInitiativeRouteNameKey } from '@/utils/keys';
 
 import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
@@ -18,8 +19,8 @@ const CONTACT_DATA = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
   createdAt: undefined,
   createdBy: undefined,
   updatedBy: undefined,

@@ -1,5 +1,6 @@
 // tests/unit/components/roadmap/Roadmap.spec.ts
 
+import { reactive, ref } from 'vue';
 import { nextTick, defineComponent } from 'vue';
 import { mount } from '@vue/test-utils';
 import { createTestingPinia } from '@pinia/testing';
@@ -18,17 +19,16 @@ vi.mock('vue-i18n', () => ({
 }));
 
 vi.mock('@/store', () => {
-  const vue = require('vue');
   return {
     useConfigStore: () =>
-      vue.reactive({
-        getConfig: vue.ref({ ches: { roadmap: { bcc: 'bcc@example.com' } } })
+      reactive({
+        getConfig: ref({ ches: { roadmap: { bcc: 'bcc@example.com' } } })
       }),
     useProjectStore: () =>
-      vue.reactive({
-        getPermits: vue.ref([]),
-        getDocuments: vue.ref([]),
-        getProject: vue.ref({
+      reactive({
+        getPermits: ref([]),
+        getDocuments: ref([]),
+        getProject: ref({
           activityId: 'act1',
           projectName: 'Test Project',
           assignedUserId: undefined,
@@ -36,8 +36,8 @@ vi.mock('@/store', () => {
         })
       }),
     useAppStore: () =>
-      vue.reactive({
-        getInitiative: vue.ref(Initiative.HOUSING)
+      reactive({
+        getInitiative: ref(Initiative.HOUSING)
       })
   };
 });

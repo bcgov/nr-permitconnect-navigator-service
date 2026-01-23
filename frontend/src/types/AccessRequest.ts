@@ -9,4 +9,5 @@ export type AccessRequest = {
   groupLabel?: string;
   status: AccessRequestStatus;
   userId?: string;
+  update?: boolean;
 } & IStamps;

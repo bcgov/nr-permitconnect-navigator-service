@@ -7,11 +7,12 @@ import { ref } from 'vue';
 import { FormAutosave } from '@/components/form';
 
 import type { Ref } from 'vue';
+import type { CallbackFn } from '@/types';
 
 // Props
 const { autoSaveRef = null, callback = () => {} } = defineProps<{
   autoSaveRef?: InstanceType<typeof FormAutosave> | null;
-  callback?: (...args: any[]) => any;
+  callback?: CallbackFn;
 }>();
 
 // State

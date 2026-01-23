@@ -39,8 +39,8 @@ const sampleContact: Contact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
@@ -160,7 +160,7 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const formRef = (wrapper.vm as any)?.formRef;
+      const formRef = (wrapper.vm as any)?.formRef; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       const modifiedFormValues = {
         ...basicValidFormValues()
@@ -178,7 +178,7 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const formRef = (wrapper.vm as any)?.formRef;
+      const formRef = (wrapper.vm as any)?.formRef; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       const modifiedFormValues = {
         ...basicValidFormValues()
@@ -196,7 +196,7 @@ describe('EnquiryIntakeForm', () => {
   it('sets editable to false when enquiry ID given', async () => {
     const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
 
-    getEnquirySpy.mockResolvedValue({ data: { activityId: '123', enquiryId: '456' } } as any);
+    getEnquirySpy.mockResolvedValue({ data: { activityId: '123', enquiryId: '456' } } as AxiosResponse);
 
     const wrapper = shallowMount(EnquiryIntakeForm, {
       ...wrapperSettings(),
@@ -206,7 +206,7 @@ describe('EnquiryIntakeForm', () => {
     await nextTick();
     await flushPromises();
 
-    const editable = (wrapper.vm as any)?.editable;
+    const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(editable).toBeFalsy();
   });
 });

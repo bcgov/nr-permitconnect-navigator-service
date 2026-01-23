@@ -7,7 +7,7 @@ import ToastService from 'primevue/toastservice';
 
 import ProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
 import { externalApiService, userService } from '@/services';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
@@ -42,7 +42,7 @@ const testProject: ElectrificationProject = {
   companyNameRegistered: 'Test Co',
   hasRelatedEnquiry: false,
   queuePriority: 1,
-  submissionType: 'Type A',
+  submissionType: SubmissionType.ASSISTANCE,
   projectName: 'Test Project',
   projectDescription: 'Description',
   multiPermitsNeeded: 'No',
@@ -165,7 +165,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     // Access internal state through wrapper
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(2);
     expect(orgBookOptions[0]).toEqual({
       registeredName: 'Test Company Ltd',
@@ -199,7 +199,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 
@@ -223,7 +223,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 
@@ -252,7 +252,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions;
+    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(orgBookOptions).toHaveLength(0);
   });
 

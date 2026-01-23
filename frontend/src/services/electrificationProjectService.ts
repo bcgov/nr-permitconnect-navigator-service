@@ -3,7 +3,13 @@ import { Initiative } from '@/utils/enums/application';
 import { delimitEmails } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { Email, ElectrificationProjectSearchParameters, Draft } from '@/types';
+import type {
+  Email,
+  ElectrificationProjectSearchParameters,
+  Draft,
+  ElectrificationProject,
+  StatisticFilters
+} from '@/types';
 
 const PATH = 'project';
 
@@ -12,7 +18,7 @@ const service: IDraftableProjectService = {
    * @function createProject
    * @returns {Promise} An axios response
    */
-  createProject(data?: any) {
+  createProject(data?: Partial<ElectrificationProject>) {
     return appAxios().post(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, data);
   },
 
@@ -83,7 +89,7 @@ const service: IDraftableProjectService = {
    * @function getStatistics
    * @returns {Promise} An axios response
    */
-  getStatistics(filters?: any) {
+  getStatistics(filters?: StatisticFilters) {
     return appAxios().get(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/statistics`, {
       params: { ...filters }
     });
@@ -109,7 +115,7 @@ const service: IDraftableProjectService = {
    * @function submitDraft
    * @returns {Promise} An axios response
    */
-  submitDraft(data?: any) {
+  submitDraft(data?: Partial<ElectrificationProject>) {
     return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, data);
   },
 
@@ -125,7 +131,7 @@ const service: IDraftableProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: any) {
+  updateProject(projectId: string, data: ElectrificationProject) {
     return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };

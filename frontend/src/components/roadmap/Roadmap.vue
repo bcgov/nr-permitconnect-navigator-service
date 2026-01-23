@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { array, object, string } from 'yup';
+import { array, object, string, type InferType } from 'yup';
 
 import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
@@ -12,7 +13,7 @@ import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { roadmapTemplate } from '@/utils/templates';
-import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
+import { delimitEmails, isDefined, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
@@ -25,17 +26,6 @@ const { activityId, editable = true } = defineProps<{
 
 // Composables
 const { t } = useI18n();
-
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
-const projectStore = useProjectStore();
-
-// State
-const fileSelectModalVisible: Ref<boolean> = ref(false);
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any> = ref();
-const selectedFiles: Ref<Array<Document>> = ref([]);
 
 // Form schema
 const emailValidator = (min: number, message: string) => {
@@ -55,18 +45,33 @@ const emailValidator = (min: number, message: string) => {
 };
 
 const formSchema = object({
+  from: string(),
   to: emailValidator(1, 'To is required'),
   cc: emailValidator(0, 'CC is not required'),
   bcc: emailValidator(1, 'BCC is required'),
   subject: string().required(),
-  body: string().required()
+  body: string().required(),
+  bodyType: string()
 });
+
+export type FormSchemaType = InferType<typeof formSchema>;
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
+const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
+const projectStore = useProjectStore();
+
+// State
+const fileSelectModalVisible: Ref<boolean> = ref(false);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<Partial<FormSchemaType> | undefined> = ref(undefined);
+const selectedFiles: Ref<Document[]> = ref([]);
 
 // Actions
 const confirm = useConfirm();
 const toast = useToast();
 
-const confirmSubmit = (data: any) => {
+const confirmSubmit = (data: GenericObject) => {
   confirm.require({
     message: 'Please confirm that you want to send this Permit Roadmap. This cannot be undone.',
     header: 'Confirm sending this Permit Roadmap',
@@ -84,37 +89,41 @@ const confirmSubmit = (data: any) => {
         ).data;
         projectStore.addNoteHistory(response);
         toast.success('Roadmap sent');
-      } catch (e: any) {
-        toast.error('Failed to send roadmap', e?.response?.statusText);
+      } catch (e) {
+        if (isAxiosError(e)) toast.error('Failed to send roadmap', e?.response?.statusText);
+        else toast.error('Failed to send roadmap', String(e));
       }
     }
   });
 };
 
-function getPermitTypeNamesByStatus(status: string) {
-  return getPermits.value.filter((p) => p.stage === status).map((p) => p.permitType.name);
+function getPermitTypeNamesByStatus(status: string): string[] {
+  return getPermits.value
+    .filter((p) => p.stage === status)
+    .map((p) => p.permitType?.name)
+    .filter(isDefined);
 }
 
 function getPermitTypeNamesByNeeded(needed: string) {
-  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType.name);
+  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType?.name);
 }
 
 function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
 
-function onFileSelect(data: Array<Document>) {
+function onFileSelect(data: Document[]) {
   selectedFiles.value = data;
 }
 
 watchEffect(async () => {
   // Dumb, but need to do something with the ref for it to be watched properly
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const permits = getPermits.value.concat();
   const project = getProject.value;
 
   // Get navigator details
-  const configBCC = getConfig.value.ches?.roadmap?.bcc;
+  const configBCC = getConfig.value?.ches?.roadmap?.bcc;
   let bcc = configBCC;
   let navigator = {
     email: configBCC ?? '',
@@ -160,9 +169,9 @@ watchEffect(async () => {
   // Initial form values
   initialFormValues.value = {
     from: navigator.email,
-    to: contact?.email,
+    to: [contact?.email],
     cc: undefined,
-    bcc: bcc,
+    bcc: [bcc],
     subject: `Here is your ${initiative} project's Permit Roadmap`,
     bodyType: 'text',
     body: body

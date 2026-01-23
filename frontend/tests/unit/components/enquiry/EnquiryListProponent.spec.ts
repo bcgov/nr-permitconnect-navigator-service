@@ -6,9 +6,10 @@ import { mount } from '@vue/test-utils';
 
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import { enquiryService } from '@/services';
-import { ApplicationStatus, EnquirySubmittedMethod } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
+import type { Enquiry } from '@/types';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -30,23 +31,15 @@ const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
 deleteEnquirySpy.mockResolvedValue({ data: {} } as AxiosResponse);
 const currentDate = new Date().toISOString();
 
-const exampleContact = {
-  contactId: 'contact123',
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '123-456-7890'
-};
-
 // Example Enquiry object
-const testEnquiry = {
+const testEnquiry: Enquiry = {
   enquiryId: 'enquiry123',
   activityId: 'activity456',
-  submissionType: 'General Inquiry',
+  submissionType: SubmissionType.GUIDANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   enquiryStatus: ApplicationStatus.NEW,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
-  contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

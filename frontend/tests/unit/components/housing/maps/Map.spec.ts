@@ -1,6 +1,6 @@
 import { createTestingPinia } from '@pinia/testing';
 // Needed to be imported before mocking
-// eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { nextTick } from 'vue';
@@ -14,13 +14,13 @@ import ToastService from 'primevue/toastservice';
 import type { AxiosResponse } from 'axios';
 import type { GeoJSON } from 'geojson';
 
-type Props = {
+interface Props {
   disabled?: boolean;
   geoJsonData?: GeoJSON;
   latitude?: number;
   longitude?: number;
   pinOrDraw?: boolean;
-};
+}
 
 const disableInteractionMock = vi.fn();
 const eachLayerMock = vi.fn();
@@ -32,7 +32,7 @@ const setMaxBoundsMock = vi.fn();
 vi.mock('leaflet', async (importOriginal) => {
   const mod = await importOriginal(); // type is inferred
   return {
-    //@ts-ignore - insufficient type definitions
+    // @ts-expect-error - insufficient type definitions
     ...mod,
     // replace some exports
     map: vi.fn().mockImplementation(() => ({
@@ -170,7 +170,7 @@ describe('Map.vue', () => {
     const wrapper = mount(Map, wrapperSettings(newProps));
     await nextTick();
 
-    //@ts-ignore - wrapper.vm functions not exposed for typing
+    // @ts-expect-error - wrapper.vm functions not exposed for typing
     wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
     await nextTick();
 
@@ -197,7 +197,7 @@ describe('Map.vue', () => {
     const wrapper = mount(Map, wrapperSettings(newProps));
     await nextTick();
 
-    //@ts-ignore - wrapper.vm functions not exposed for typing
+    // @ts-expect-error - wrapper.vm functions not exposed for typing
     wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
     await nextTick();
 

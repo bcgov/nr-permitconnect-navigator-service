@@ -6,6 +6,7 @@ import ToastService from 'primevue/toastservice';
 
 import ContactForm from '@/components/contact/ContactForm.vue';
 import { contactService } from '@/services';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { Contact } from '@/types';
 import type { AxiosResponse } from 'axios';
@@ -23,8 +24,8 @@ const testContact: Contact = {
   lastName: 'Doe',
   phoneNumber: '(250) 555-0000',
   email: 'jane.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant',
+  contactPreference: ContactPreference.EMAIL,
+  contactApplicantRelationship: ProjectRelationship.OWNER,
   activityContact: []
 };
 

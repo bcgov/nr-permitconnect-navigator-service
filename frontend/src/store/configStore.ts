@@ -1,13 +1,14 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { ConfigService } from '@/services';
 
 import type { Ref } from 'vue';
+import type { Config } from '@/types';
 
-export type ConfigStoreState = {
-  config: Ref<any | null>;
-};
+export interface ConfigStoreState {
+  config: Ref<Config | null>;
+}
 
 export const useConfigStore = defineStore('config', () => {
   const configService = new ConfigService();
@@ -26,12 +27,12 @@ export const useConfigStore = defineStore('config', () => {
   async function init(): Promise<void> {
     await ConfigService.init();
 
-    state.config.value = configService.getConfig();
+    state.config.value = configService.getConfig() ?? null;
   }
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,
