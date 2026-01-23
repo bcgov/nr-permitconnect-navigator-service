@@ -6,7 +6,7 @@ import type { PermitStage, PermitState } from '@/utils/enums/permit';
 
 interface PermitBase extends IStamps {
   activityId: string;
-  issuedPermitId?: string;
+  issuedPermitId?: string | null;
   needed: string;
   permitNote?: PermitNote[];
   permitTracking?: PermitTracking[];

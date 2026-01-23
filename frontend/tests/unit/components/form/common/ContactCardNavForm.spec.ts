@@ -4,9 +4,9 @@ import PrimeVue from 'primevue/config';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { FormSchemaType as ElectrificationFormSchemaType } from '@/components/electrification/project/ProjectFormSchema';
-import type { FormSchemaType as HousingFormSchemaType } from '@/components/housing/project/ProjectFormSchema';
 import type { DeepPartial } from '@/types';
+import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
+import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 vi.mock('vue-i18n', () => ({ useI18n: () => ({ t: vi.fn() }) }));
 

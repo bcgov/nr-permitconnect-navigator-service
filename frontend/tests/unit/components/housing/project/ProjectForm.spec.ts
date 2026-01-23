@@ -282,7 +282,7 @@ describe('ProjectForm.vue', () => {
     expect(wrapper.find('#download-geojson').exists()).toBe(false);
   });
 
-  it('checks geojson download btn visible when geojson is in submission', async () => {
+  it('checks geojson download btn visible when geojson is in project', async () => {
     const testGeoJson: GeoJSON = {
       type: 'FeatureCollection',
       features: [
@@ -296,7 +296,7 @@ describe('ProjectForm.vue', () => {
         }
       ]
     };
-    const modifiedSubmission = { ...testSubmission, geoJson: testGeoJson };
+    const modifiedProject = { ...testProject, geoJson: testGeoJson };
 
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
     await nextTick();

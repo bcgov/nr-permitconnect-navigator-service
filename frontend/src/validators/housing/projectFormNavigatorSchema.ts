@@ -35,7 +35,8 @@ export function createProjectFormNavigatorSchema() {
       contactPreference: string()
         .required()
         .oneOf(CONTACT_PREFERENCE_LIST)
-        .label(t('i.housing.project.projectFormNavigatorSchema.contactPreference'))
+        .label(t('i.housing.project.projectFormNavigatorSchema.contactPreference')),
+      userId: string()
     }),
     consentToFeedback: string()
       .notRequired()
@@ -188,4 +189,4 @@ export function createProjectFormNavigatorSchema() {
   });
 }
 
-export type FormSchemaType = InferType<ReturnType<typeof createProjectFormSchema>>;
+export type FormSchemaType = InferType<ReturnType<typeof createProjectFormNavigatorSchema>>;

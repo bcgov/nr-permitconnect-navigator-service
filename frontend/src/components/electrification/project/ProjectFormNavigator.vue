@@ -50,9 +50,8 @@ import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitle
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { Ref } from 'vue';
-
+import type { Maybe } from 'yup';
 import type { IInputEvent } from '@/interfaces';
-import type { FormSchemaType } from './ProjectFormSchema';
 import type {
   ATSAddressResource,
   ATSClientResource,
@@ -63,7 +62,7 @@ import type {
   OrgBookOption,
   User
 } from '@/types';
-import type { Maybe } from 'yup';
+import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Props
 const { editable = true, project } = defineProps<{

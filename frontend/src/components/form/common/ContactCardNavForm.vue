@@ -10,8 +10,8 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/cons
 
 import type { Ref } from 'vue';
 import type { Contact, DeepPartial } from '@/types';
-import type { FormSchemaType as ElectrificationFormSchemaType } from '../../electrification/project/ProjectFormSchema';
-import type { FormSchemaType as HousingFormSchemaType } from '../../housing/project/ProjectFormSchema';
+import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
+import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 // Props
 const { editable = true, formValues } = defineProps<{

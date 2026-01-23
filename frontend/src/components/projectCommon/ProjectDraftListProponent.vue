@@ -47,7 +47,7 @@ function onDelete(draftId: string) {
           emit('submissionDraft:delete', draftId);
           toast.success(t('projectDraftListProponent.deleteSuccess'));
         })
-        .catch((e: any) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
+        .catch((e) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
     }
   });
 }

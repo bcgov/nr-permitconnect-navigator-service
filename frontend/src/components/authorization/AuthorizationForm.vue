@@ -78,7 +78,7 @@ const formSchema = object({
       );
     }),
   stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
-  issuedPermitId: string(),
+  issuedPermitId: string().nullable(),
   permitId: string(),
   permitTracking: array().of(
     object({

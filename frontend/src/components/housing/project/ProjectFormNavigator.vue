@@ -66,7 +66,6 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 
 import type { IInputEvent } from '@/interfaces';
-import type { FormSchemaType } from './ProjectFormSchema';
 import type {
   ATSAddressResource,
   ATSClientResource,
@@ -78,6 +77,7 @@ import type {
   OrgBookOption,
   User
 } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 // Props
 const { editable = true, project } = defineProps<{

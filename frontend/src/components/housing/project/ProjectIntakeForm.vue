@@ -59,8 +59,8 @@ import { getHTMLElement, omit, setEmptyStringsToNull, toTitleCase } from '@/util
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { FormSchemaType } from '@/components/housing/submission/SubmissionIntakeSchema';
 import type { DeepPartial, Document, HousingProjectIntake, OrgBookOption, Permit, PermitType } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Types
 type HousingProjectForm = {

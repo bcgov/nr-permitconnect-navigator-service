@@ -3,7 +3,7 @@ import { isAxiosError } from 'axios';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue'; // eslint-disable-line max-len
+import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue';
 import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {

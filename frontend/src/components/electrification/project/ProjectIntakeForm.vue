@@ -20,8 +20,8 @@ import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { FormSchemaType } from '@/components/electrification/project/ProjectIntakeSchema';
 import type { DeepPartial, Document, OrgBookOption } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeSchema';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{
