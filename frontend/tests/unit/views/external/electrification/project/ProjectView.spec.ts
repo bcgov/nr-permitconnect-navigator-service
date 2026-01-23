@@ -50,7 +50,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const testElectrificationProjectId = 'submission123';
+const testElectrificationProjectId = 'project123';
 const exampleContact = {
   contactId: 'contact123',
   name: 'John Doe',

@@ -433,7 +433,7 @@
           "submissionTypeLabel": "Submission type",
           "updatesHeader": "Updates"
         },
-        "projectFormSchema": {
+        "projectFormNavigatorSchema": {
           "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
           "addedToAts": "Authorized Tracking System (ATS) updated",
           "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
@@ -670,6 +670,7 @@
     "deleteContactFailed": "Failed to delete contact",
     "deleteContactHeader": "Delete contact?",
     "deleteContactMessage": "Please confirm that you want to delete the contact of ",
+    "deleteContactNotLoaded": "Contact not loaded into Contact Details page",
     "deleteContactSuccess": "Contact deleted",
     "deleteContactSuccessMessage": "has been deleted.",
     "email": "Email",
@@ -857,47 +858,7 @@
     "addTitle": "Add permit",
     "editTitle": "Edit permit"
   },
-  "oidcLoginView": {
-    "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",
-    "BCServicesCardRequirement": "If you do not have a BC Services Card, you must live in Canada and provide 2 pieces of government-issued ID.",
-    "BusinessBCeIDRequirement": "Use when representing a legal entity. You must have documentation to prove the business or organization's identity.",
-    "getBasicBCeID": "Get a Basic BCeID.",
-    "getBusinessBCeID": "Get a Business BCeID.",
-    "internalGovUsers": "Internal Government Users",
-    "login": "Login",
-    "loginBasicBCeID": "Login with Basic BCeID",
-    "loginBCServicesCard": "Login with BC Services Card",
-    "loginBusinessBCeID": "Login with Business BCeID",
-    "loginIDIR": "Login with IDIR",
-    "register": "Need an account?",
-    "setupBCServicesCard": "Set up a BC Services Card account."
-  },
-  "relatedEnquiryListProponent": {
-    "createdByFailed": "Failed to load created by users",
-    "enquiryId": "Enquiry ID",
-    "listEmpty": "Your project related enquiries will be displayed here.",
-    "of": "of",
-    "state": "State",
-    "submittedBy": "Submitted by",
-    "submittedDate": "Submitted date",
-    "tableAlt": "A table containing a list of enquiries"
-  },
-  "submissionDraftListProponent": {
-    "action": "Action",
-    "ariaDeleteDraft": "Delete draft",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "deleteHeader": "Delete draft?",
-    "deleteMsg": "Please confirm that you want to delete this draft",
-    "deleteFailed": "Failed to delete draft",
-    "deleteSuccess": "Draft deleted",
-    "draftId": "Draft ID",
-    "lastEdited": "Last edited",
-    "listEmpty": "Your project submission drafts will be displayed here",
-    "of": "of",
-    "tableAlt": "A table containing a list of draft submissions"
-  },
-  "submissionIntakeForm": {
+  "projectIntakeForm": {
     "assistanceMessage": "Assistance requested",
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
     "additionalLocationCard": "Provide additional location details (optional)",
@@ -919,6 +880,46 @@
     "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+  },
+  "oidcLoginView": {
+    "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",
+    "BCServicesCardRequirement": "If you do not have a BC Services Card, you must live in Canada and provide 2 pieces of government-issued ID.",
+    "BusinessBCeIDRequirement": "Use when representing a legal entity. You must have documentation to prove the business or organization's identity.",
+    "getBasicBCeID": "Get a Basic BCeID.",
+    "getBusinessBCeID": "Get a Business BCeID.",
+    "internalGovUsers": "Internal Government Users",
+    "login": "Login",
+    "loginBasicBCeID": "Login with Basic BCeID",
+    "loginBCServicesCard": "Login with BC Services Card",
+    "loginBusinessBCeID": "Login with Business BCeID",
+    "loginIDIR": "Login with IDIR",
+    "register": "Need an account?",
+    "setupBCServicesCard": "Set up a BC Services Card account."
+  },
+  "projectDraftListProponent": {
+    "action": "Action",
+    "ariaDeleteDraft": "Delete draft",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "deleteHeader": "Delete draft?",
+    "deleteMsg": "Please confirm that you want to delete this draft",
+    "deleteFailed": "Failed to delete draft",
+    "deleteSuccess": "Draft deleted",
+    "draftId": "Draft ID",
+    "lastEdited": "Last edited",
+    "listEmpty": "Your project submission drafts will be displayed here",
+    "of": "of",
+    "tableAlt": "A table containing a list of draft submissions"
+  },
+  "relatedEnquiryListProponent": {
+    "createdByFailed": "Failed to load created by users",
+    "enquiryId": "Enquiry ID",
+    "listEmpty": "Your project related enquiries will be displayed here.",
+    "of": "of",
+    "state": "State",
+    "submittedBy": "Submitted by",
+    "submittedDate": "Submitted date",
+    "tableAlt": "A table containing a list of enquiries"
   },
   "updateContactModal": {
     "cancel": "Cancel",

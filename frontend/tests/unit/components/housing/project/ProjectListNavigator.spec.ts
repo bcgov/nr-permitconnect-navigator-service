@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
+import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { GroupName } from '@/utils/enums/application';
 
@@ -70,11 +70,11 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-// Example Submission object
-const testSubmission: HousingProject = {
+// Example Project object
+const testProject: HousingProject = {
   activityId: 'activity456',
-  housingProjectId: 'submission789',
-  projectId: 'submission789',
+  housingProjectId: 'project789',
+  projectId: 'project789',
   queuePriority: 1,
   submissionType: 'Type A',
   submittedAt: '2023-01-01T12:00:00Z',
@@ -124,11 +124,11 @@ const testSubmission: HousingProject = {
   updatedAt: currentDate
 };
 
-const testSubmissions = [testSubmission];
+const testProjects = [testProject];
 
-const wrapperSettings = (testSubmissionsProp = testSubmissions) => ({
+const wrapperSettings = (testProjectsProp = testProjects) => ({
   props: {
-    submissions: testSubmissionsProp,
+    projects: testProjectsProp,
     loading: false
   },
   global: {
@@ -149,13 +149,13 @@ const wrapperSettings = (testSubmissionsProp = testSubmissions) => ({
   }
 });
 
-describe('SubmissionListNavigator.vue', () => {
+describe('ProjectListNavigator.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(SubmissionListNavigator, wrapperSettings());
+    const wrapper = mount(ProjectListNavigator, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

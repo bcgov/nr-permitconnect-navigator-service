@@ -10,10 +10,10 @@ import AuthorizationCardLite from '@/components/authorization/AuthorizationCardL
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
-import ProjectForm from '@/components/housing/project/ProjectForm.vue';
+import ProjectFormNavigator from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import EnquiryCard from '@/components/projectCommon/enquiry/EnquiryCard.vue';
-import ProjectTeamTable from '@/components/projectCommon/submission/ProjectTeamTable.vue';
+import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
+import ProjectTeamTable from '@/components/projectCommon/ProjectTeamTable.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
   Button,
@@ -300,7 +300,7 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
-          <ProjectForm
+          <ProjectFormNavigator
             :editable="!isCompleted && useAuthZStore().can(Initiative.HOUSING, Resource.HOUSING_PROJECT, Action.UPDATE)"
             :project="getProject as HousingProject"
             @input-project-name="updateLiveName"

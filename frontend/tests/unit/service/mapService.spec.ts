@@ -8,7 +8,7 @@ import { Initiative } from '@/utils/enums/application';
 // Constants
 const PATH = 'map';
 
-const TEST_SUBMISSION_ID = 'submission123';
+const TEST_PROJECT_ID = 'project123';
 
 // Mocks
 const getSpy = vi.fn();
@@ -42,10 +42,10 @@ describe('mapService', () => {
 
   describe('getPIDs', () => {
     it('calls with given data', () => {
-      mapService.getPIDs(TEST_SUBMISSION_ID);
+      mapService.getPIDs(TEST_PROJECT_ID);
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/pids/${TEST_SUBMISSION_ID}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/pids/${TEST_PROJECT_ID}`);
     });
   });
 });

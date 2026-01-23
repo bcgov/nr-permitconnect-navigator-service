@@ -5,10 +5,10 @@ import { inject, onBeforeMount, ref, watch, watchEffect } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Escalation } from '@/components/common/icons';
-import SubmissionBringForwardCalendar from '@/components/housing/submission/SubmissionBringForwardCalendar.vue';
-import SubmissionListNavigator from '@/components/housing/submission/SubmissionListNavigator.vue';
-import SubmissionStatistics from '@/components/housing/submission/SubmissionStatistics.vue';
-import EnquiryListNavigator from '@/components/projectCommon/enquiry/EnquiryListNavigator.vue';
+import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
+import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
+import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
+import EnquiryListNavigator from '@/components/enquiry/EnquiryListNavigator.vue';
 import {
   Accordion,
   AccordionContent,
@@ -321,8 +321,8 @@ watchEffect(() => {
             </AccordionContent>
           </AccordionPanel>
         </Accordion>
-        <SubmissionListNavigator
-          :submissions="projects"
+        <ProjectListNavigator
+          :projects="projects"
           @submission:delete="onSubmissionDelete"
         />
       </TabPanel>

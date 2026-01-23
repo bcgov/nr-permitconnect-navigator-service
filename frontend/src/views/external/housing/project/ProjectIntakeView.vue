@@ -2,7 +2,7 @@
 import { onBeforeMount, ref } from 'vue';
 import { useRoute } from 'vue-router';
 
-import SubmissionIntakeForm from '@/components/housing/submission/SubmissionIntakeForm.vue';
+import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
 import { permitService } from '@/services';
 import { usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
@@ -29,7 +29,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <SubmissionIntakeForm
+  <ProjectIntakeForm
     v-if="!loading"
     :key="route.fullPath"
     :housing-project-id="projectId"

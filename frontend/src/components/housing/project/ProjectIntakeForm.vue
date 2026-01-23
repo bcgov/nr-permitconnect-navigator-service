@@ -27,8 +27,8 @@ import {
   LocationCard,
   CollectionDisclaimer
 } from '@/components/form/common';
-import SubmissionAssistance from '@/components/housing/submission/SubmissionAssistance.vue';
-import { createProjectIntakeSchema } from '@/components/housing/submission/SubmissionIntakeSchema';
+import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
+import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
 import {
   Accordion,
   AccordionContent,
@@ -79,7 +79,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
-const VALIDATION_BANNER_TEXT = t('submissionIntakeForm.validationBanner');
+const VALIDATION_BANNER_TEXT = t('projectIntakeForm.validationBanner');
 
 // Store
 const contactStore = useContactStore();
@@ -144,7 +144,7 @@ async function emailConfirmation(actId: string, projectId: string, forProjectSub
       body = confirmationTemplateEnquiry({
         '{{ contactName }}': applicantName,
         '{{ activityId }}': actId,
-        '{{ enquiryDescription }}': t('submissionIntakeForm.assistanceMessage'),
+        '{{ enquiryDescription }}': t('projectIntakeForm.assistanceMessage'),
         '{{ enquiryId }}': projectId
       });
     }
@@ -166,7 +166,7 @@ async function onAssistanceRequest(values: GenericObject) {
   try {
     const enquiryData = {
       basic: {
-        enquiryDescription: t('submissionIntakeForm.assistanceMessage'),
+        enquiryDescription: t('projectIntakeForm.assistanceMessage'),
         submissionType: SubmissionType.ASSISTANCE
       },
       contacts: [
@@ -524,7 +524,7 @@ watchEffect(() => {
         :callback="() => onSaveDraft(values, true)"
       />
 
-      <SubmissionAssistance
+      <ProjectIntakeAssistance
         v-if="editable && values?.contacts"
         :form-values="values"
         @on-submit-assistance="onAssistanceRequest(values)"
@@ -630,7 +630,7 @@ watchEffect(() => {
                   role="heading"
                   aria-level="2"
                 >
-                  {{ t('submissionIntakeForm.projectApplicantTypeCard') }}
+                  {{ t('projectIntakeForm.projectApplicantTypeCard') }}
                 </span>
                 <Divider type="solid" />
               </template>
@@ -659,7 +659,7 @@ watchEffect(() => {
                         class="pl-2"
                         right
                         icon="fa-solid fa-circle-question"
-                        :text="t('submissionIntakeForm.isRegisteredTooltip')"
+                        :text="t('projectIntakeForm.isRegisteredTooltip')"
                       />
                     </div>
                     <RadioList
@@ -747,7 +747,7 @@ watchEffect(() => {
                   role="heading"
                   aria-level="2"
                 >
-                  {{ t('submissionIntakeForm.projectNameCard') }}
+                  {{ t('projectIntakeForm.projectNameCard') }}
                 </span>
                 <Divider type="solid" />
               </template>
@@ -772,7 +772,7 @@ watchEffect(() => {
                   role="heading"
                   aria-level="2"
                 >
-                  {{ t('submissionIntakeForm.singleFamilySelectedCard') }}
+                  {{ t('projectIntakeForm.singleFamilySelectedCard') }}
                 </span>
                 <Divider type="solid" />
               </template>
@@ -809,7 +809,7 @@ watchEffect(() => {
                         class="pl-2"
                         right
                         icon="fa-solid fa-circle-question"
-                        :text="t('submissionIntakeForm.multiFamilyTooltip')"
+                        :text="t('projectIntakeForm.multiFamilyTooltip')"
                       />
                     </div>
                   </div>
@@ -862,12 +862,12 @@ watchEffect(() => {
                     role="heading"
                     aria-level="2"
                   >
-                    {{ t('submissionIntakeForm.hasRentalUnitsCard') }}
+                    {{ t('projectIntakeForm.hasRentalUnitsCard') }}
                   </span>
                   <Tooltip
                     right
                     icon="fa-solid fa-circle-question"
-                    :text="t('submissionIntakeForm.rentalUnitsTooltip')"
+                    :text="t('projectIntakeForm.rentalUnitsTooltip')"
                   />
                 </div>
                 <Divider type="solid" />
@@ -901,7 +901,7 @@ watchEffect(() => {
                       role="heading"
                       aria-level="2"
                     >
-                      {{ t('submissionIntakeForm.financiallySupportedCard') }}
+                      {{ t('projectIntakeForm.financiallySupportedCard') }}
                     </span>
                   </div>
                   <Button
@@ -938,7 +938,7 @@ watchEffect(() => {
                         class="pl-2 mb-2"
                         right
                         icon="fa-solid fa-circle-question"
-                        :text="t('submissionIntakeForm.bcHousingTooltip')"
+                        :text="t('projectIntakeForm.bcHousingTooltip')"
                       />
                     </div>
 
@@ -1031,7 +1031,7 @@ watchEffect(() => {
                   role="heading"
                   aria-level="2"
                 >
-                  {{ t('submissionIntakeForm.projectDescriptionCard') }}
+                  {{ t('projectIntakeForm.projectDescriptionCard') }}
                 </span>
                 <Divider type="solid" />
               </template>
@@ -1043,7 +1043,7 @@ watchEffect(() => {
                       class="pl-2 mb-2"
                       right
                       icon="fa-solid fa-circle-question"
-                      :text="t('submissionIntakeForm.additionalInfoTooltip')"
+                      :text="t('projectIntakeForm.additionalInfoTooltip')"
                     />
                   </div>
                 </div>
@@ -1118,7 +1118,7 @@ watchEffect(() => {
                       role="heading"
                       aria-level="2"
                     >
-                      {{ t('submissionIntakeForm.additionalLocationCard') }}
+                      {{ t('projectIntakeForm.additionalLocationCard') }}
                     </span>
                   </div>
                 </div>
@@ -1207,7 +1207,7 @@ watchEffect(() => {
                       role="heading"
                       aria-level="2"
                     >
-                      {{ t('submissionIntakeForm.projectLocationDescriptionCard') }}
+                      {{ t('projectIntakeForm.projectLocationDescriptionCard') }}
                     </span>
                   </div>
                 </div>
@@ -1259,13 +1259,13 @@ watchEffect(() => {
                     role="heading"
                     aria-level="2"
                   >
-                    {{ t('submissionIntakeForm.provincialPermitsCard') }}
+                    {{ t('projectIntakeForm.provincialPermitsCard') }}
                   </span>
                   <Tooltip
                     class="mb-2"
                     right
                     icon="fa-solid fa-circle-question"
-                    :text="t('submissionIntakeForm.appliedPermitsTooltip')"
+                    :text="t('projectIntakeForm.appliedPermitsTooltip')"
                   />
                 </div>
                 <Divider type="solid" />
@@ -1291,7 +1291,7 @@ watchEffect(() => {
                   >
                     <div class="mb-2">
                       <span class="app-primary-color">
-                        {{ t('submissionIntakeForm.appliedPermitsShareNotification') }}
+                        {{ t('projectIntakeForm.appliedPermitsShareNotification') }}
                       </span>
                     </div>
                     <Card class="no-shadow">
@@ -1399,12 +1399,12 @@ watchEffect(() => {
                     role="heading"
                     aria-level="2"
                   >
-                    {{ t('submissionIntakeForm.investigatePermitsCard') }}
+                    {{ t('projectIntakeForm.investigatePermitsCard') }}
                   </span>
                   <Tooltip
                     right
                     icon="fa-solid fa-circle-question"
-                    :text="t('submissionIntakeForm.potentialPermitsTooltip')"
+                    :text="t('projectIntakeForm.potentialPermitsTooltip')"
                   />
                 </div>
                 <Divider type="solid" />

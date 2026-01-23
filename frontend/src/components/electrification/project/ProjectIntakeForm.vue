@@ -9,7 +9,7 @@ import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
 import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
-import { createProjectIntakeSchema } from '@/components/electrification/project/ProjectIntakeSchema';
+import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useAppStore, useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
