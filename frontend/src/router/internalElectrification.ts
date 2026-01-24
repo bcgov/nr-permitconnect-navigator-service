@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.INT_ELECTRIFICATION,
-            component: () => import('@/views/internal/electrification/ElectrificationView.vue'),
+            component: () => import('@/views/internal/InitiativeView.vue'),
             beforeEnter: accessHandler
           },
           {
