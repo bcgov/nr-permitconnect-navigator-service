@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -30,7 +31,6 @@ import { findIdpConfig, omit } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { AccessRequest, Group, User, UserAccessRequest } from '@/types';
-import { isAxiosError } from 'axios';
 
 // Constants
 const PENDING_STATUSES = {

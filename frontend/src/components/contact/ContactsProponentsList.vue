@@ -18,7 +18,7 @@ import {
   useConfirm
 } from '@/lib/primevue';
 import { contactService } from '@/services';
-import { contactInitiativeRouteNameKey } from '@/utils/keys';
+import { initiativeContactRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -36,7 +36,7 @@ const emit = defineEmits<{
 }>();
 
 // Injections
-const contactInitiativeRoute = inject(contactInitiativeRouteNameKey);
+const contactInitiativeRoute = inject(initiativeContactRouteNameKey);
 
 // Composables
 const { t } = useI18n();

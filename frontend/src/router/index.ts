@@ -17,7 +17,6 @@ import {
 } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName, StorageKey, Zone } from '@/utils/enums/application';
-import { isEmptyObject } from '@/utils/utils';
 
 import type { LocationQuery, RouteLocationNormalizedGeneric, RouteParamsGeneric, RouteRecordRaw } from 'vue-router';
 import type { Contact } from '@/types';
@@ -176,12 +175,10 @@ export default function getRouter() {
   router.beforeEach(async (to) => {
     appStore.beginDeterminateLoading();
 
-    // If no router params reset stores
-    if (isEmptyObject(to.params)) {
-      useEnquiryStore().reset();
-      usePermitStore().reset();
-      useProjectStore().reset();
-    }
+    // If no router params reset specific stores
+    if (!('enquiryId' in to.params)) useEnquiryStore().reset();
+    if (!('permitId' in to.params)) usePermitStore().reset();
+    if (!('projectId' in to.params)) useProjectStore().reset();
 
     // Backend Redirection Handler
     if (to.query?.r) {

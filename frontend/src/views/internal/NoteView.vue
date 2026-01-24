@@ -1,19 +1,20 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, provide, ref } from 'vue';
+import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import NoteForm from '@/components/note/NoteForm.vue';
-import { useToast } from '@/lib/primevue';
 import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { useAppStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { enquiryServiceKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
+import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 
+// Props
 const {
   enquiryId = undefined,
   projectId = undefined,
@@ -24,13 +25,45 @@ const {
   noteHistoryId?: string;
 }>();
 
+// Interfaces
+interface InitiativeState {
+  provideRouteName: RouteName;
+  provideProjectService: IDraftableProjectService;
+  provideResource: Resource;
+}
+
+// Constants
+const ELECTRIFICATION_VIEW_ENQUIRY_STATE: InitiativeState = {
+  provideRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
+  provideProjectService: electrificationProjectService,
+  provideResource: Resource.ENQUIRY
+};
+
+const ELECTRIFICATION_VIEW_PROJECT_STATE: InitiativeState = {
+  provideRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
+  provideProjectService: electrificationProjectService,
+  provideResource: Resource.ELECTRIFICATION_PROJECT
+};
+
+const HOUSING_VIEW_PROJECT_ENQUIRY_STATE: InitiativeState = {
+  provideRouteName: RouteName.INT_HOUSING_ENQUIRY,
+  provideProjectService: housingProjectService,
+  provideResource: Resource.ENQUIRY
+};
+
+const HOUSING_VIEW_PROJECT_PROJECT_STATE: InitiativeState = {
+  provideRouteName: RouteName.INT_HOUSING_PROJECT,
+  provideProjectService: housingProjectService,
+  provideResource: Resource.HOUSING_PROJECT
+};
+
 // State
 const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
+const viewState: Ref<InitiativeState> = ref(HOUSING_VIEW_PROJECT_PROJECT_STATE);
 
 // Composables
 const { t } = useI18n();
-const toast = useToast();
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
 
@@ -38,44 +71,30 @@ const projectStore = useProjectStore();
 const { getEnquiry } = storeToRefs(enquiryStore);
 const { getProject } = storeToRefs(projectStore);
 
-const provideResource: Ref<Resource> = ref(Resource.HOUSING_PROJECT);
-const provideProjectRouteNameKey: Ref<RouteName> = ref(RouteName.INT_HOUSING_PROJECT);
-const provideProjectServiceKey: Ref<IDraftableProjectService> = ref(housingProjectService);
-
+// Providers
+const provideRouteName = computed(() => viewState.value.provideRouteName);
+const provideProjectService = computed(() => viewState.value.provideProjectService);
+const provideResource = computed(() => viewState.value.provideResource);
 provide(resourceKey, provideResource);
-provide(projectRouteNameKey, provideProjectRouteNameKey);
-provide(projectServiceKey, provideProjectServiceKey);
+provide(projectRouteNameKey, provideRouteName);
+provide(projectServiceKey, provideProjectService);
 provide(enquiryServiceKey, enquiryService);
 
 onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        provideProjectServiceKey.value = electrificationProjectService;
-        if (projectId) {
-          provideResource.value = Resource.ELECTRIFICATION_PROJECT;
-          provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_PROJECT;
-        }
-        if (enquiryId) {
-          provideResource.value = Resource.ENQUIRY;
-          provideProjectRouteNameKey.value = RouteName.INT_ELECTRIFICATION_ENQUIRY;
-        }
+        viewState.value = projectId ? ELECTRIFICATION_VIEW_PROJECT_STATE : ELECTRIFICATION_VIEW_ENQUIRY_STATE;
         break;
       case Initiative.HOUSING:
-        provideProjectServiceKey.value = housingProjectService;
-        if (projectId) {
-          provideResource.value = Resource.HOUSING_PROJECT;
-          provideProjectRouteNameKey.value = RouteName.INT_HOUSING_PROJECT;
-        }
-        if (enquiryId) {
-          provideResource.value = Resource.ENQUIRY;
-          provideProjectRouteNameKey.value = RouteName.INT_HOUSING_ENQUIRY;
-        }
+        viewState.value = projectId ? HOUSING_VIEW_PROJECT_PROJECT_STATE : HOUSING_VIEW_PROJECT_ENQUIRY_STATE;
         break;
+      default:
+        throw new Error(t('i.common.view.initiativeStateError'));
     }
 
-    if (!getProject.value && provideProjectServiceKey.value && projectId) {
-      const project = (await provideProjectServiceKey.value.getProject(projectId)).data;
+    if (!getProject.value && viewState.value.provideProjectService && projectId) {
+      const project = (await viewState.value.provideProjectService.getProject(projectId)).data;
       projectStore.setProject(project);
     }
     if (!getEnquiry.value && enquiryId) {
@@ -93,8 +112,8 @@ onBeforeMount(async () => {
     }
 
     loading.value = false;
-  } catch {
-    toast.error(t('note.noteView.noteLoadError'));
+  } catch (e) {
+    generalErrorHandler(e, t('note.noteView.noteLoadError'));
   }
 });
 </script>

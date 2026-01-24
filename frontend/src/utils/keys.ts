@@ -7,8 +7,8 @@ import type { NavigationPermission } from '@/store/authzStore';
 import type { Resource, RouteName } from '@/utils/enums/application';
 
 // Constants
-export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<string>;
-export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<string>;
+export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<Ref<string>>;
+export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<Ref<string>>;
 
 // Permissions
 export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermission>;
@@ -17,11 +17,16 @@ export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermis
 export const resourceKey = Symbol() as InjectionKey<Ref<Resource>>;
 
 // RouteNames
-export const contactInitiativeRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
+export const enquiryNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
 export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
-export const enquiryRouteNameKey = Symbol() as InjectionKey<RouteName>;
+export const enquiryRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const initiativeContactRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectAddAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectProponentNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 
 // Services

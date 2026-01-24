@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.INT_HOUSING,
-            component: () => import('@/views/internal/housing/HousingView.vue'),
+            component: () => import('@/views/internal/InitiativeView.vue'),
             beforeEnter: accessHandler
           },
           {
@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: '',
                 name: RouteName.INT_HOUSING_ENQUIRY,
-                component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+                component: () => import('@/views/internal/EnquiryView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
-                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    component: () => import('@/views/internal/NoteView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -57,7 +57,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: '',
                 name: RouteName.INT_HOUSING_PROJECT,
-                component: () => import('@/views/internal/housing/project/ProjectView.vue'),
+                component: () => import('@/views/internal/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
@@ -68,7 +68,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':enquiryId',
                     name: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
-                    component: () => import('@/views/internal/housing/enquiry/EnquiryView.vue'),
+                    component: () => import('@/views/internal/EnquiryView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { dynamicBreadcrumb: 'enquiry' }
@@ -83,14 +83,14 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: '',
                     name: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
-                    component: () => import('@/views/internal/housing/authorization/AuthorizationView.vue'),
+                    component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
                   {
                     path: ':permitId',
                     name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
-                    component: () => import('@/views/internal/housing/authorization/AuthorizationView.vue'),
+                    component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -104,7 +104,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_HOUSING_PROJECT_NOTE,
-                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    component: () => import('@/views/internal/NoteView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -145,13 +145,13 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.INT_HOUSING_CONTACT,
-            component: () => import('@/views/internal/housing/contact/ContactsView.vue'),
+            component: () => import('@/views/internal/ContactsView.vue'),
             beforeEnter: accessHandler
           },
           {
             path: ':contactId',
             name: RouteName.INT_HOUSING_CONTACT_PAGE,
-            component: () => import('@/views/internal/housing/contact/ContactPageView.vue'),
+            component: () => import('@/views/internal/ContactPageView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: { breadcrumb: 'Contact Details' }
@@ -161,7 +161,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'user',
         name: RouteName.INT_HOUSING_USER_MANAGEMENT,
-        component: () => import('@/views/internal/user/UserManagementView.vue'),
+        component: () => import('@/views/internal/UserManagementView.vue'),
         beforeEnter: accessHandler,
         meta: {
           access: [NavigationPermission.INT_USER_MANAGEMENT],
