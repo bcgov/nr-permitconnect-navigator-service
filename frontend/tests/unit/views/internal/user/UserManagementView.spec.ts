@@ -4,7 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import UserManagementView from '@/views/internal/user/UserManagementView.vue';
+import UserManagementView from '@/views/internal/UserManagementView.vue';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({

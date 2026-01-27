@@ -44,7 +44,7 @@ const loading: Ref<boolean> = ref(true);
 provide(enquiryConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION);
 provide(enquiryPermitConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION);
 provide(enquiryProjectConfirmRouteNameKey, RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION);
-provide(enquiryRouteNameKey, RouteName.EXT_ELECTRIFICATION);
+provide(enquiryRouteNameKey, ref(RouteName.EXT_ELECTRIFICATION));
 provide(projectServiceKey, ref(electrificationProjectService));
 
 // Actions

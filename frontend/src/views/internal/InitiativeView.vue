@@ -20,11 +20,11 @@ import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKe
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
 
 // Interfaces
-interface ViewState {
+interface InitiativeState {
   headerText: string;
   navigationPermission: NavigationPermission;
   provideEnquiryRouteName: RouteName;
@@ -38,7 +38,7 @@ const { t } = useI18n();
 const authzStore = useAuthZStore();
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: ViewState = {
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   headerText: t('i.electrification.electrificationView.header'),
   navigationPermission: NavigationPermission.INT_ELECTRIFICATION,
   provideEnquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
@@ -47,7 +47,7 @@ const ELECTRIFICATION_VIEW_STATE: ViewState = {
   provideResource: Resource.ELECTRIFICATION_PROJECT
 };
 
-const HOUSING_VIEW_STATE: ViewState = {
+const HOUSING_VIEW_STATE: InitiativeState = {
   headerText: t('i.housing.housingView.header'),
   navigationPermission: NavigationPermission.INT_HOUSING,
   provideEnquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
@@ -59,17 +59,17 @@ const HOUSING_VIEW_STATE: ViewState = {
 // State
 const bringForward: Ref<BringForward[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
 const loading: Ref<boolean> = ref(true);
 const permits: Ref<Permit[]> = ref([]);
 const projects: Ref<HousingProject[]> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
-const viewState: Ref<ViewState> = ref(HOUSING_VIEW_STATE);
 
 // Providers
-const provideEnquiryRouteName = computed(() => viewState.value.provideEnquiryRouteName);
-const provideProjectRouteName = computed(() => viewState.value.provideProjectRouteName);
-const provideProjectService = computed(() => viewState.value.provideProjectService);
-const provideResource = computed(() => viewState.value.provideResource);
+const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
+const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
+const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+const provideResource = computed(() => initiativeState.value.provideResource);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
@@ -80,23 +80,23 @@ onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        viewState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
         break;
       case Initiative.HOUSING:
-        viewState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error('Unable to determine view state');
+        throw new Error(t('i.common.view.initiativeStateError'));
     }
 
     [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = (
       await Promise.all([
         enquiryService.searchEnquiries(),
         permitService.listPermits(),
-        viewState.value.provideProjectService.searchProjects({
+        initiativeState.value.provideProjectService.searchProjects({
           includeUser: true
         }),
-        viewState.value.provideProjectService.getStatistics(),
+        initiativeState.value.provideProjectService.getStatistics(),
         noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)
       ])
     ).map((r) => r.data);
@@ -112,9 +112,9 @@ onBeforeMount(async () => {
     <Spinner />
   </div>
   <div v-else>
-    <ViewHeader :header="viewState.headerText" />
+    <ViewHeader :header="initiativeState.headerText" />
     <SubmissionsNavigator
-      v-if="authzStore.canNavigate(viewState?.navigationPermission)"
+      v-if="authzStore.canNavigate(initiativeState?.navigationPermission)"
       v-model:bring-forward="bringForward"
       v-model:enquiries="enquiries"
       v-model:permits="permits"

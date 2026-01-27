@@ -43,7 +43,7 @@ const projects: Ref<HousingProject[]> = ref([]);
 
 // Providers
 provide(draftableProjectServiceKey, ref(housingProjectService));
-provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_ENQUIRY);
+provide(enquiryRouteNameKey, ref(RouteName.EXT_HOUSING_ENQUIRY));
 provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
 provide(projectRouteNameKey, ref(RouteName.EXT_HOUSING_INTAKE));
 

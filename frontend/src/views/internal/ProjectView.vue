@@ -7,10 +7,11 @@ import { useRouter } from 'vue-router';
 
 import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
-import ProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
+import { default as ElectrificationProjectForm } from '@/components/electrification/project/ProjectFormNavigator.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
+import { default as HousingProjectForm } from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
 import ProjectTeamTable from '@/components/projectCommon/ProjectTeamTable.vue';
@@ -31,21 +32,28 @@ import {
 import {
   activityContactService,
   documentService,
-  enquiryService,
   electrificationProjectService,
+  enquiryService,
+  housingProjectService,
   noteHistoryService,
   permitService,
   userService
 } from '@/services';
-import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
-import { projectServiceKey } from '@/utils/keys';
-import { getFilenameAndExtension } from '@/utils/utils';
+import {
+  projectAuthorizationRouteNameKey,
+  projectNoteRouteNameKey,
+  projectProponentNameKey,
+  projectServiceKey
+} from '@/utils/keys';
+import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, ElectrificationProject, User } from '@/types';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { Document, ElectrificationProject, Enquiry, HousingProject, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -53,7 +61,32 @@ const { initialTab = '0', projectId } = defineProps<{
   projectId: string;
 }>();
 
+// Interfaces
+interface InitiativeState {
+  projectAddAuthorizationRouteName: RouteName;
+  projectAuthorizationRouteName: RouteName;
+  projectNoteRouteName: RouteName;
+  projectProponentName: RouteName;
+  provideProjectService: IDraftableProjectService;
+}
+
 // Constants
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+  projectAddAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
+  projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
+  projectNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+  projectProponentName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
+  provideProjectService: electrificationProjectService
+};
+
+const HOUSING_VIEW_STATE: InitiativeState = {
+  projectAddAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
+  projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+  projectNoteRouteName: RouteName.INT_HOUSING_PROJECT_NOTE,
+  projectProponentName: RouteName.INT_HOUSING_PROJECT_PROPONENT,
+  provideProjectService: housingProjectService
+};
+
 const SORT_ORDER = {
   ASCENDING: 1,
   DESCENDING: -1
@@ -71,6 +104,7 @@ const { t } = useI18n();
 const router = useRouter();
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
 const { getPermitTypes } = storeToRefs(permitStore);
@@ -82,8 +116,8 @@ const {
   getAuthsOnGoing,
   getAuthsUnderInvestigation,
   getDocuments,
-  getNoteHistory,
   getProject,
+  getNoteHistory,
   getPermits,
   getRelatedEnquiries
 } = storeToRefs(projectStore);
@@ -91,6 +125,7 @@ const {
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
 const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
@@ -100,7 +135,14 @@ const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Providers
-provide(projectServiceKey, ref(electrificationProjectService));
+const provideProjectAuthorizationRouteName = computed(() => initiativeState.value.projectAuthorizationRouteName);
+const provideProjectNoteRouteName = computed(() => initiativeState.value.projectNoteRouteName);
+const provideProjectProponentRouteName = computed(() => initiativeState.value.projectProponentName);
+const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+provide(projectAuthorizationRouteNameKey, provideProjectAuthorizationRouteName);
+provide(projectNoteRouteNameKey, provideProjectNoteRouteName);
+provide(projectProponentNameKey, provideProjectProponentRouteName);
+provide(projectServiceKey, provideProjectService);
 
 // Actions
 const filteredDocuments = computed(() => {
@@ -142,13 +184,9 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 
-function updateLiveName(name: string) {
-  liveName.value = name;
-}
-
 function toAuthorization(authId: string) {
   router.push({
-    name: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
+    name: initiativeState.value.projectAuthorizationRouteName,
     params: {
       permitId: authId,
       projectId: projectId
@@ -158,7 +196,7 @@ function toAuthorization(authId: string) {
 
 function toEditNote(noteHistoryId: string) {
   router.push({
-    name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+    name: initiativeState.value.projectNoteRouteName,
     params: {
       noteHistoryId: noteHistoryId,
       projectId: projectId
@@ -166,58 +204,78 @@ function toEditNote(noteHistoryId: string) {
   });
 }
 
+function updateLiveName(name: string) {
+  liveName.value = name;
+}
+
 onBeforeMount(async () => {
-  const project = (await electrificationProjectService.getProject(projectId)).data;
-  activityId.value = project.activityId;
-  const [documents, notes, permits, relatedEnquiries, contacts] = (
-    await Promise.all([
-      documentService.listDocuments(project.activityId),
-      noteHistoryService.listNoteHistories(project.activityId),
-      permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
-      enquiryService.listRelatedEnquiries(project.activityId),
-      activityContactService.listActivityContacts(project.activityId)
-    ])
-  ).map((r) => r.data);
+  try {
+    switch (getInitiative.value) {
+      case Initiative.ELECTRIFICATION:
+        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        break;
+      case Initiative.HOUSING:
+        initiativeState.value = HOUSING_VIEW_STATE;
+        break;
+      default:
+        throw new Error(t('i.common.view.initiativeStateError'));
+    }
 
-  documents.forEach((d: Document) => {
-    d.extension = getFilenameAndExtension(d.filename).extension;
-    d.filename = decodeURI(d.filename);
-  });
+    const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
+    activityId.value = project.activityId;
+    const [documents, notes, permits, relatedEnquiries, contacts] = (
+      await Promise.all([
+        documentService.listDocuments(project.activityId),
+        noteHistoryService.listNoteHistories(project.activityId),
+        permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
+        enquiryService.listRelatedEnquiries(project.activityId),
+        activityContactService.listActivityContacts(project.activityId)
+      ])
+    ).map((r) => r.data);
 
-  projectStore.setProject(project);
-  projectStore.setActivityContacts(contacts);
-  projectStore.setDocuments(documents);
-  projectStore.setNoteHistory(notes);
-  projectStore.setPermits(permits);
-  projectStore.setRelatedEnquiries(relatedEnquiries);
+    project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');
+    documents.forEach((d: Document) => {
+      d.extension = getFilenameAndExtension(d.filename).extension;
+      d.filename = decodeURI(d.filename);
+    });
 
-  liveName.value = project.projectName;
+    projectStore.setProject(project);
+    projectStore.setActivityContacts(contacts);
+    projectStore.setDocuments(documents);
+    projectStore.setNoteHistory(notes);
+    projectStore.setPermits(permits);
+    projectStore.setRelatedEnquiries(relatedEnquiries);
 
-  if (getPermitTypes.value.length === 0) {
-    const permitTypes = (await permitService.getPermitTypes(Initiative.ELECTRIFICATION)).data;
-    permitStore.setPermitTypes(permitTypes);
-  }
+    liveName.value = project.projectName;
 
-  // Batch lookup the users who have created notes
-  const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
-    noteHistoryId: x.noteHistoryId,
-    createdBy: x.createdBy
-  }));
+    if (getPermitTypes.value.length === 0) {
+      const permitTypes = (await permitService.getPermitTypes(getInitiative.value)).data;
+      permitStore.setPermitTypes(permitTypes);
+    }
 
-  if (noteHistoryCreatedByUsers.length) {
-    const noteHistoryUsers = (
-      await userService.searchUsers({
-        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
-      })
-    ).data;
-
-    noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
-      noteHistoryId: x.noteHistoryId as string,
-      createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
+    // Batch lookup the users who have created notes
+    const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
+      noteHistoryId: x.noteHistoryId,
+      createdBy: x.createdBy
     }));
-  }
 
-  loading.value = false;
+    if (noteHistoryCreatedByUsers.length) {
+      const noteHistoryUsers = (
+        await userService.searchUsers({
+          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+        })
+      ).data;
+
+      noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
+        noteHistoryId: x.noteHistoryId as string,
+        createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
+      }));
+    }
+
+    loading.value = false;
+  } catch (e) {
+    generalErrorHandler(e);
+  }
 });
 </script>
 
@@ -244,7 +302,7 @@ onBeforeMount(async () => {
       outlined
       @click="
         router.push({
-          name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
+          name: initiativeState.projectProponentName,
           params: {
             projectId: projectId
           }
@@ -299,10 +357,16 @@ onBeforeMount(async () => {
     <TabPanels>
       <TabPanel :value="0">
         <span v-if="!loading && getProject">
-          <ProjectForm
+          <HousingProjectForm
+            v-if="getInitiative === Initiative.HOUSING"
+            :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.HOUSING_PROJECT, Action.UPDATE)"
+            :project="getProject as HousingProject"
+            @input-project-name="updateLiveName"
+          />
+          <ElectrificationProjectForm
+            v-if="getInitiative === Initiative.ELECTRIFICATION"
             :editable="
-              !isCompleted &&
-              useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
+              !isCompleted && useAuthZStore().can(getInitiative, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
             "
             :project="getProject as ElectrificationProject"
             @input-project-name="updateLiveName"
@@ -314,9 +378,7 @@ onBeforeMount(async () => {
           <FileUpload
             v-if="activityId"
             :activity-id="activityId"
-            :disabled="
-              isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.CREATE)
-            "
+            :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.CREATE)"
           />
         </div>
         <div class="flex flex-row justify-between pb-4">
@@ -441,7 +503,7 @@ onBeforeMount(async () => {
                 href="#"
                 @click="
                   () => {
-                    if (useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.READ))
+                    if (useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.READ))
                       documentService.downloadDocument(data.documentId, data.filename);
                   }
                 "
@@ -487,9 +549,7 @@ onBeforeMount(async () => {
             <template #body="{ data }">
               <div class="flex justify-center">
                 <DeleteDocument
-                  :disabled="
-                    isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.DOCUMENT, Action.DELETE)
-                  "
+                  :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.DELETE)"
                   :document="data"
                 />
               </div>
@@ -503,11 +563,11 @@ onBeforeMount(async () => {
             <p class="font-bold">{{ t('i.common.projectView.applicableAuthorizations') }} ({{ getPermits.length }})</p>
           </div>
           <Button
-            aria-label="Add permit"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.PERMIT, Action.CREATE)"
+            aria-label="Add authorization"
+            :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.PERMIT, Action.CREATE)"
             @click="
               router.push({
-                name: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
+                name: initiativeState.projectAddAuthorizationRouteName,
                 params: {
                   projectId: projectId
                 }
@@ -563,6 +623,7 @@ onBeforeMount(async () => {
           <h4 class="mb-6">{{ t('i.common.projectView.needed') }}</h4>
           <div
             v-for="(permit, index) in getAuthsNeeded"
+            :id="permit.permitId"
             :key="permit.permitId"
             :index="index"
             class="my-2"
@@ -622,10 +683,10 @@ onBeforeMount(async () => {
           </div>
           <Button
             aria-label="Add note"
-            :disabled="isCompleted || !useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.NOTE, Action.CREATE)"
+            :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
             @click="
               router.push({
-                name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+                name: initiativeState.projectNoteRouteName,
                 params: {
                   projectId: projectId
                 }
@@ -664,7 +725,7 @@ onBeforeMount(async () => {
         <Roadmap
           v-if="!loading && activityId"
           :activity-id="activityId"
-          :editable="!isCompleted && useAuthZStore().can(Initiative.ELECTRIFICATION, Resource.ROADMAP, Action.CREATE)"
+          :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.ROADMAP, Action.CREATE)"
         />
       </TabPanel>
       <TabPanel :value="5">

@@ -26,32 +26,32 @@ const {
 }>();
 
 // Interfaces
-interface ViewState {
+interface InitiativeState {
   provideRouteName: RouteName;
   provideProjectService: IDraftableProjectService;
   provideResource: Resource;
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_ENQUIRY_STATE: ViewState = {
+const ELECTRIFICATION_VIEW_ENQUIRY_STATE: InitiativeState = {
   provideRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
   provideProjectService: electrificationProjectService,
   provideResource: Resource.ENQUIRY
 };
 
-const ELECTRIFICATION_VIEW_PROJECT_STATE: ViewState = {
+const ELECTRIFICATION_VIEW_PROJECT_STATE: InitiativeState = {
   provideRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   provideProjectService: electrificationProjectService,
   provideResource: Resource.ELECTRIFICATION_PROJECT
 };
 
-const HOUSING_VIEW_PROJECT_ENQUIRY_STATE: ViewState = {
+const HOUSING_VIEW_PROJECT_ENQUIRY_STATE: InitiativeState = {
   provideRouteName: RouteName.INT_HOUSING_ENQUIRY,
   provideProjectService: housingProjectService,
   provideResource: Resource.ENQUIRY
 };
 
-const HOUSING_VIEW_PROJECT_PROJECT_STATE: ViewState = {
+const HOUSING_VIEW_PROJECT_PROJECT_STATE: InitiativeState = {
   provideRouteName: RouteName.INT_HOUSING_PROJECT,
   provideProjectService: housingProjectService,
   provideResource: Resource.HOUSING_PROJECT
@@ -60,7 +60,7 @@ const HOUSING_VIEW_PROJECT_PROJECT_STATE: ViewState = {
 // State
 const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const viewState: Ref<ViewState> = ref(HOUSING_VIEW_PROJECT_PROJECT_STATE);
+const viewState: Ref<InitiativeState> = ref(HOUSING_VIEW_PROJECT_PROJECT_STATE);
 
 // Composables
 const { t } = useI18n();
@@ -90,7 +90,7 @@ onBeforeMount(async () => {
         viewState.value = projectId ? HOUSING_VIEW_PROJECT_PROJECT_STATE : HOUSING_VIEW_PROJECT_ENQUIRY_STATE;
         break;
       default:
-        throw new Error('Unable to determine view state');
+        throw new Error(t('i.common.view.initiativeStateError'));
     }
 
     if (!getProject.value && viewState.value.provideProjectService && projectId) {

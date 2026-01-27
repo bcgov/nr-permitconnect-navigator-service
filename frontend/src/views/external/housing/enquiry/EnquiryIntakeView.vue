@@ -44,7 +44,7 @@ const loading: Ref<boolean> = ref(true);
 provide(enquiryConfirmRouteNameKey, RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION);
 provide(enquiryPermitConfirmRouteNameKey, RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION);
 provide(enquiryProjectConfirmRouteNameKey, RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION);
-provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_ENQUIRY_INTAKE);
+provide(enquiryRouteNameKey, ref(RouteName.EXT_HOUSING_ENQUIRY_INTAKE));
 provide(projectServiceKey, ref(housingProjectService));
 
 // Actions

@@ -3,7 +3,7 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import NoteView from '@/views/internal/note/NoteView.vue';
+import NoteView from '@/views/internal/NoteView.vue';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({

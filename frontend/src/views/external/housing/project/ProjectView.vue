@@ -67,7 +67,7 @@ const loading: Ref<boolean> = ref(true);
 const noteHistoryVisible: Ref<boolean> = ref(false);
 
 // Providers
-provide(enquiryRouteNameKey, RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY);
+provide(enquiryRouteNameKey, ref(RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY));
 provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
 
 // Actions

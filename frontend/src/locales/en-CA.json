@@ -294,6 +294,9 @@
         "bcRegistryId": "BC Registry ID",
         "searchBCRegistered": "Type to search the B.C registered name",
         "searchContacts": "Search Contacts"
+      },
+      "view": {
+        "initiativeStateError": "Unable to determine initiative state"
       }
     },
     "contact": {
