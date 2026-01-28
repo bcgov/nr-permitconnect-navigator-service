@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import { enquiryService, noteHistoryService } from '@/services';
-import EnquiryView from '@/views/internal/housing/enquiry/EnquiryView.vue';
+import EnquiryView from '@/views/internal/EnquiryView.vue';
 
 import type { AxiosResponse } from 'axios';
 

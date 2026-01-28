@@ -3,7 +3,6 @@ import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ViewHeader from '@/components/common/ViewHeader.vue';
-import { Spinner } from '@/components/layout';
 import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.vue';
 import {
   enquiryService,
@@ -108,10 +107,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div v-if="loading">
-    <Spinner />
-  </div>
-  <div v-else>
+  <div v-if="!loading">
     <ViewHeader :header="initiativeState.headerText" />
     <SubmissionsNavigator
       v-if="authzStore.canNavigate(initiativeState?.navigationPermission)"

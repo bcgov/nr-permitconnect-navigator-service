@@ -3,7 +3,7 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import AuthorizationView from '@/views/internal/housing/authorization/AuthorizationView.vue';
+import AuthorizationView from '@/views/internal/AuthorizationView.vue';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
