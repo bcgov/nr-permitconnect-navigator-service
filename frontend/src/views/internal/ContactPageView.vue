@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, onBeforeMount, provide, ref, type Ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { electrificationProjectService, housingProjectService } from '@/services';
@@ -31,6 +32,9 @@ const HOUSING_VIEW_STATE: InitiativeState = {
   provideInitiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE,
   provideProjectService: housingProjectService
 };
+
+// Composables
+const { t } = useI18n();
 
 // State
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);

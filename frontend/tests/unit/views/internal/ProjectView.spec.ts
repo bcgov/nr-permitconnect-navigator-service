@@ -8,11 +8,11 @@ import {
   activityContactService,
   documentService,
   enquiryService,
-  electrificationProjectService,
   noteHistoryService,
-  permitService
+  permitService,
+  housingProjectService
 } from '@/services';
-import ProjectView from '@/views/internal/electrification/project/ProjectView.vue';
+import ProjectView from '@/views/internal/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -31,42 +31,46 @@ vi.mock('vue-router', () => ({
   }))
 }));
 
-const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
+const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
 const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
 const listNotesSpy = vi.spyOn(noteHistoryService, 'listNoteHistories');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
-const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
 
-getProjectSpy.mockResolvedValue({
-  data: {
-    electrificationProjectId: 'proj1',
-    activityId: 'act1',
-    projectName: 'Test Project',
-    applicationStatus: null
-  }
-} as AxiosResponse);
+getProjectSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 listActivityContactsSpy.mockResolvedValue({
   data: []
 } as AxiosResponse);
-listDocumentsSpy.mockResolvedValue({ data: [{ filename: 'foo', activityId: 'activity456' }] } as AxiosResponse);
+listDocumentsSpy.mockResolvedValue({
+  data: [{ filename: 'foo', activityId: 'activity456' }]
+} as AxiosResponse);
 listNotesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 listPermitsSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
+getPermitTypesSpy.mockResolvedValue({
+  data: { enquiryId: 'enquiry123', activityId: 'activity456' }
+} as AxiosResponse);
 listRelatedEnquiriesSpy.mockResolvedValue({
   data: [{ enquiryId: 'enquiry123', activityId: 'activity456' }]
 } as AxiosResponse);
-getPermitTypesSpy.mockResolvedValue({ data: { enquiryId: 'enquiry123', activityId: 'activity456' } } as AxiosResponse);
 
-const testProjectId = 'proj1';
-const wrapperSettings = (initialTabProp = '0', projectIdProp = testProjectId) => ({
+const testHousingProjectId = 'project123';
+
+const wrapperSettings = (testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
-    initialTab: initialTabProp,
-    projectId: projectIdProp
+    projectId: testHousingProjectIdProp
   },
   global: {
     plugins: [
-      () => createTestingPinia({ initialState: { auth: { user: {} } } }),
+      () =>
+        createTestingPinia({
+          initialState: {
+            auth: {
+              user: {}
+            }
+          }
+        }),
       PrimeVue,
       ConfirmationService,
       ToastService
@@ -75,14 +79,13 @@ const wrapperSettings = (initialTabProp = '0', projectIdProp = testProjectId) =>
   }
 });
 
-describe('ProjectView.vue (Electrification)', () => {
+describe('ProjectView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
-  it('renders the component with the provided props', async () => {
+  it('renders the component with the provided props', () => {
     const wrapper = shallowMount(ProjectView, wrapperSettings());
-    await wrapper.vm.$nextTick();
-    expect(wrapper.exists()).toBe(true);
+    expect(wrapper).toBeTruthy();
   });
 });

@@ -3,7 +3,8 @@ import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import AuthorizationView from '@/views/internal/electrification/authorization/AuthorizationView.vue';
+import ContactPageView from '@/views/internal/ContactPageView.vue';
+import { Initiative } from '@/utils/enums/application';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -18,37 +19,34 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-afterEach(() => {
-  sessionStorage.clear();
-});
-
-const wrapperSettings = () => ({
+const wrapperSettings = (contactId: string) => ({
+  props: {
+    contactId
+  },
   global: {
     plugins: [
       () =>
         createTestingPinia({
           initialState: {
-            auth: {
-              user: {}
+            app: {
+              initiative: Initiative.HOUSING
             }
           }
         }),
       PrimeVue,
       ToastService
-    ],
-    stubs: ['font-awesome-icon', 'router-link']
+    ]
   }
 });
 
 // Tests
-describe('AuthorizationView.vue', () => {
-  it('renders', () => {
-    const wrapper = shallowMount(AuthorizationView, wrapperSettings());
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
+describe('ContactPageView.vue', () => {
+  it('renders', () => {
+    const wrapper = shallowMount(ContactPageView, wrapperSettings('123'));
     expect(wrapper).toBeTruthy();
   });
 });
