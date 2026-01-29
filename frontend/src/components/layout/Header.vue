@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import HeaderMenu from '../common/HeaderMenu.vue';
+import HeaderMenu from '@/components/common/HeaderMenu.vue';
 
 // Actions
 const { t } = useI18n();

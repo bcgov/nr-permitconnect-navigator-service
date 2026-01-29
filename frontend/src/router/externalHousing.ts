@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: RouteName.EXT_HOUSING,
-        component: () => import('../views/external/housing/HousingView.vue'),
+        component: () => import('@/views/external/InitiativeView.vue'),
         beforeEnter: accessHandler
       },
       {
