@@ -29,9 +29,11 @@ app.use(express.json({ limit: config.get('server.bodyLimit') }));
 app.use(express.urlencoded({ extended: true }));
 app.use(requestSanitizer);
 app.set('query parser', 'extended');
-
 app.use((_req, res, next) => {
   res.locals.cspNonce = randomBytes(32).toString('hex');
+  next();
+});
+app.use(
   helmet({
     contentSecurityPolicy: {
       directives: {
@@ -47,9 +49,8 @@ app.use((_req, res, next) => {
         'script-src': ["'self'", (_req, res: any) => `'nonce-${res.locals.cspNonce}'`] // eslint-disable-line
       }
     }
-  });
-  next();
-});
+  })
+);
 
 // Skip if running tests
 if (process.env.NODE_ENV !== 'test') {
