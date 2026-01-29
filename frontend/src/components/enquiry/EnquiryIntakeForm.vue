@@ -140,21 +140,21 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
 function getEnquiryConfirmationRoute(enquiry: Enquiry) {
   if (isOnlyProjectRelated.value) {
     return {
-      name: enquiryProjectConfirmRouteName,
+      name: enquiryProjectConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else if (isPermitRelated.value) {
     return {
-      name: enquiryPermitConfirmRouteName,
+      name: enquiryPermitConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else {
     return {
-      name: enquiryConfirmRouteName,
+      name: enquiryConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }

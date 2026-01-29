@@ -119,7 +119,7 @@ const routes: RouteRecordRaw[] = [
                     path: '',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
                     // TODO: Consider creating reuse component from view so we can create a separate internal view
-                    component: () => import('@/views/external/electrification/project/ProjectView.vue'),
+                    component: () => import('@/views/external/ProjectView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
@@ -127,7 +127,7 @@ const routes: RouteRecordRaw[] = [
                     path: ':permitId',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT,
                     // TODO: Consider creating reuse component from view so we can create a separate internal view
-                    component: () => import('@/views/external/electrification/permit/PermitStatusView.vue'),
+                    component: () => import('@/views/external/PermitStatusView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { dynamicBreadcrumb: 'authorization' }

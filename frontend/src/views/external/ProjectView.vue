@@ -17,21 +17,23 @@ import { Button, Tab, TabList, TabPanel, TabPanels, Tabs, useToast } from '@/lib
 import {
   activityContactService,
   contactService,
+  electrificationProjectService,
   enquiryService,
   housingProjectService,
   noteHistoryService,
   permitService
 } from '@/services';
-import { useAuthZStore, useContactStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, useContactStore, useProjectStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { UUID_V4_PATTERN } from '@/utils/constants/application';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 import { ActivityContactRole, SubmissionType } from '@/utils/enums/projectCommon';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
-import { isDefined } from '@/utils/utils';
+import { generalErrorHandler, isDefined } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Contact, Enquiry, HousingProject } from '@/types';
+import type { Contact, ElectrificationProject, Enquiry, HousingProject } from '@/types';
+import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -39,12 +41,51 @@ const { initialTab = '0', projectId } = defineProps<{
   projectId: string;
 }>();
 
+// Interfaces
+interface InitiativeState {
+  enquiryProjectRouteName: RouteName;
+  initiativeRouteName: RouteName;
+  internalNavigationPermission: NavigationPermission;
+  internalProjectProponentAuthorizationRouteName: RouteName;
+  projectAuthorizationRouteName: RouteName;
+  projectIntakeRouteName: RouteName;
+  projectService: IProjectService;
+  provideEnquiryRouteName?: RouteName;
+  provideNavigationPermission: NavigationPermission;
+}
+
+// Constants
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+  enquiryProjectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY,
+  initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
+  internalNavigationPermission: NavigationPermission.INT_ELECTRIFICATION,
+  internalProjectProponentAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT,
+  projectAuthorizationRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
+  projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_INTAKE,
+  projectService: electrificationProjectService,
+  provideNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
+  provideEnquiryRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY
+};
+
+const HOUSING_VIEW_STATE: InitiativeState = {
+  enquiryProjectRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY,
+  initiativeRouteName: RouteName.EXT_HOUSING,
+  internalNavigationPermission: NavigationPermission.INT_HOUSING,
+  internalProjectProponentAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
+  projectAuthorizationRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT,
+  projectIntakeRouteName: RouteName.EXT_HOUSING_PROJECT_INTAKE,
+  projectService: housingProjectService,
+  provideNavigationPermission: NavigationPermission.EXT_HOUSING,
+  provideEnquiryRouteName: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY
+};
+
 // Composables
 const { t } = useI18n();
 const router = useRouter();
 const toast = useToast();
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const authZStore = useAuthZStore();
 const projectStore = useProjectStore();
 const { canNavigate } = storeToRefs(authZStore);
@@ -62,18 +103,21 @@ const {
 const activeTab: Ref<number> = ref(Number(initialTab));
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
 const isAdmin: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryVisible: Ref<boolean> = ref(false);
 
 // Providers
-provide(enquiryRouteNameKey, ref(RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY));
-provide(navigationPermissionKey, NavigationPermission.EXT_HOUSING);
+const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
+const provideNavigationPermission = computed(() => initiativeState.value.provideNavigationPermission);
+provide(enquiryRouteNameKey, provideEnquiryRouteName);
+provide(navigationPermissionKey, provideNavigationPermission);
 
 // Actions
 function navigateToSubmissionIntakeView() {
   router.push({
-    name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
+    name: initiativeState.value.projectIntakeRouteName,
     params: { projectId }
   });
 }
@@ -89,57 +133,74 @@ const createdByName: Ref<string> = computed(() => {
 });
 
 onBeforeMount(async () => {
-  let enquiriesValue: Enquiry[] | undefined = undefined;
-  let projectValue: HousingProject;
-
   try {
-    projectValue = (await housingProjectService.getProject(projectId)).data;
-    if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
-  } catch {
-    toast.error(t('e.common.projectView.toastProjectLoadFailed'));
-    router.replace({ name: RouteName.EXT_HOUSING });
-    return;
+    switch (getInitiative.value) {
+      case Initiative.ELECTRIFICATION:
+        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        break;
+      case Initiative.HOUSING:
+        initiativeState.value = HOUSING_VIEW_STATE;
+        break;
+      default:
+        throw new Error(t('i.common.view.initiativeStateError'));
+    }
+
+    let enquiriesValue: Enquiry[] | undefined = undefined;
+    let projectValue: HousingProject | ElectrificationProject;
+
+    try {
+      projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
+      if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
+    } catch {
+      toast.error(t('e.common.projectView.toastProjectLoadFailed'));
+      router.replace({ name: initiativeState.value.initiativeRouteName });
+      return;
+    }
+
+    try {
+      const activityId = projectValue.activityId;
+      const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
+      projectStore.setPermits(permitsValue);
+    } catch {
+      throw new Error(t('e.common.projectView.toastPermitLoadFailed'));
+    }
+
+    try {
+      const activityId = projectValue.activityId;
+      const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+      projectStore.setNoteHistory(noteHistory);
+    } catch {
+      throw new Error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
+    }
+
+    projectStore.setProject(projectValue);
+    projectStore.setRelatedEnquiries(enquiriesValue ?? []);
+
+    // Fetch contacts for createdBy and assignedUserId
+    // Push only defined values into the array
+    const userIds = [projectValue.assignedUserId, projectValue.createdBy]
+      .filter(isDefined)
+      .filter((x) => !UUID_V4_PATTERN.test(x!));
+    const contacts = (await contactService.searchContacts({ userId: userIds })).data;
+    assignee.value = contacts.find(
+      (contact: Contact) => contact.userId && contact.userId === projectValue?.assignedUserId
+    );
+    createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
+
+    const activityContacts = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+    projectStore.setActivityContacts(activityContacts);
+
+    // Determine if the current user has admin priviledges
+    const userActivityRole = activityContacts.find(
+      (x) => x.contactId === useContactStore().getContact?.contactId
+    )?.role;
+    if (userActivityRole)
+      isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
+
+    loading.value = false;
+  } catch (e) {
+    generalErrorHandler(e);
   }
-
-  try {
-    const activityId = projectValue.activityId;
-    const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
-    projectStore.setPermits(permitsValue);
-  } catch {
-    toast.error(t('e.common.projectView.toastPermitLoadFailed'));
-  }
-
-  try {
-    const activityId = projectValue.activityId;
-    const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
-    projectStore.setNoteHistory(noteHistory);
-  } catch {
-    toast.error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
-  }
-
-  projectStore.setProject(projectValue);
-  projectStore.setRelatedEnquiries(enquiriesValue ?? []);
-
-  // Fetch contacts for createdBy and assignedUserId
-  // Push only defined values into the array
-  const userIds = [projectValue.assignedUserId, projectValue.createdBy]
-    .filter(isDefined)
-    .filter((x) => !UUID_V4_PATTERN.test(x!));
-  const contacts = (await contactService.searchContacts({ userId: userIds })).data;
-  assignee.value = contacts.find(
-    (contact: Contact) => contact.userId && contact.userId === projectValue?.assignedUserId
-  );
-  createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
-
-  const activityContacts = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
-  projectStore.setActivityContacts(activityContacts);
-
-  // Determine if the current user has admin priviledges
-  const userActivityRole = activityContacts.find((x) => x.contactId === useContactStore().getContact?.contactId)?.role;
-  if (userActivityRole)
-    isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
-
-  loading.value = false;
 });
 </script>
 
@@ -156,14 +217,12 @@ onBeforeMount(async () => {
           </h1>
         </div>
         <Button
-          v-if="
-            canNavigate(NavigationPermission.EXT_HOUSING) && getProject?.submissionType !== SubmissionType.INAPPLICABLE
-          "
+          v-if="canNavigate(provideNavigationPermission) && getProject?.submissionType !== SubmissionType.INAPPLICABLE"
           class="p-button-sm header-btn mt-3"
           :label="t('e.common.projectView.askMyNavigator')"
           @click="
             router.push({
-              name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY
+              name: initiativeState.enquiryProjectRouteName
             })
           "
         >
@@ -239,16 +298,16 @@ onBeforeMount(async () => {
               :id="permit.permitId"
               :key="permit.permitId"
               :to="{
-                name: canNavigate(NavigationPermission.INT_HOUSING)
-                  ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
-                  : RouteName.EXT_HOUSING_PROJECT_PERMIT,
+                name: canNavigate(initiativeState.internalNavigationPermission)
+                  ? initiativeState.internalProjectProponentAuthorizationRouteName
+                  : initiativeState.projectAuthorizationRouteName,
                 params: { permitId: permit.permitId }
               }"
               @keydown.space.prevent="
                 router.push({
-                  name: canNavigate(NavigationPermission.INT_HOUSING)
-                    ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
-                    : RouteName.EXT_HOUSING_PROJECT_PERMIT,
+                  name: canNavigate(initiativeState.internalNavigationPermission)
+                    ? initiativeState.internalProjectProponentAuthorizationRouteName
+                    : initiativeState.projectAuthorizationRouteName,
                   params: { permitId: permit.permitId }
                 })
               "
@@ -270,16 +329,16 @@ onBeforeMount(async () => {
               :id="permit.permitId"
               :key="permit.permitId"
               :to="{
-                name: canNavigate(NavigationPermission.INT_HOUSING)
-                  ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
-                  : RouteName.EXT_HOUSING_PROJECT_PERMIT,
+                name: canNavigate(initiativeState.internalNavigationPermission)
+                  ? initiativeState.internalProjectProponentAuthorizationRouteName
+                  : initiativeState.projectAuthorizationRouteName,
                 params: { permitId: permit.permitId }
               }"
               @keydown.space.prevent="
                 router.push({
-                  name: canNavigate(NavigationPermission.INT_HOUSING)
-                    ? RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT
-                    : RouteName.EXT_HOUSING_PROJECT_PERMIT,
+                  name: canNavigate(initiativeState.internalNavigationPermission)
+                    ? initiativeState.internalProjectProponentAuthorizationRouteName
+                    : initiativeState.projectAuthorizationRouteName,
                   params: { permitId: permit.permitId }
                 })
               "

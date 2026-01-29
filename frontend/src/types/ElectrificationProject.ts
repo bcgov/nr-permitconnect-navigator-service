@@ -1,4 +1,4 @@
-import type { IProject } from '../interfaces/IProject';
+import type { IProject } from '@/interfaces/IProject';
 
 export type ElectrificationProject = {
   electrificationProjectId: string; // Primary key

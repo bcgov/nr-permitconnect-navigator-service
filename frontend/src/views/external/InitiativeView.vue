@@ -5,42 +5,95 @@ import { useRoute, useRouter } from 'vue-router';
 
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
+import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { electrificationProjectService, permitService } from '@/services';
-import { useContactStore } from '@/store';
-import { RouteName } from '@/utils/enums/application';
+import { electrificationProjectService, enquiryService, housingProjectService, permitService } from '@/services';
+import { useAppStore, useContactStore } from '@/store';
+import { NavigationPermission } from '@/store/authzStore';
+import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitState } from '@/utils/enums/permit';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
+import {
+  draftableProjectServiceKey,
+  enquiryRouteNameKey,
+  navigationPermissionKey,
+  projectIntakeRouteNameKey
+} from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Draft, ElectrificationProject, Permit } from '@/types';
+import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import { generalErrorHandler } from '@/utils/utils';
+import { storeToRefs } from 'pinia';
 
-// Constants
-const PAGE_ROWS = 5;
+// Interfaces
+interface InitiativeState {
+  headerText: string;
+  initiativeRouteName: RouteName;
+  provideDraftableProjectService: IDraftableProjectService;
+  provideEnquiryRouteName?: RouteName;
+  provideNavigationPermission: NavigationPermission;
+  projectRouteName: RouteName;
+  provideProjectIntakeRouteName: RouteName;
+  enquiryIntakeRouteName?: RouteName;
+}
 
 // Composables
 const { t } = useI18n();
 const route = useRoute();
 const router = useRouter();
 
+// Constants
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+  headerText: t('e.electrification.electrificationView.electrification'),
+  initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
+  provideDraftableProjectService: electrificationProjectService,
+  provideNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
+  projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
+  provideProjectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE
+};
+
+const HOUSING_VIEW_STATE: InitiativeState = {
+  headerText: t('e.housing.housingView.housing'),
+  initiativeRouteName: RouteName.EXT_HOUSING,
+  provideNavigationPermission: NavigationPermission.EXT_HOUSING,
+  provideDraftableProjectService: housingProjectService,
+  provideEnquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
+  projectRouteName: RouteName.EXT_HOUSING_PROJECT,
+  provideProjectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
+  enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE
+};
+
+const PAGE_ROWS = 5;
+
+// Store
+const { getInitiative } = storeToRefs(useAppStore());
+
 // State
 const authorizations: Ref<Permit[]> = ref([]);
 const drafts: Ref<Draft[]> = ref([]);
+const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
 const loading: Ref<boolean> = ref(true);
-const projects: Ref<ElectrificationProject[]> = ref([]);
+const projects: Ref<HousingProject[]> = ref([]);
 
 // Providers
-provide(projectRouteNameKey, ref(RouteName.EXT_ELECTRIFICATION_INTAKE));
-provide(draftableProjectServiceKey, ref(electrificationProjectService));
+const provideDraftableProjectService = computed(() => initiativeState.value.provideDraftableProjectService);
+const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
+const provideNavigationPermission = computed(() => initiativeState.value.provideNavigationPermission);
+const provideProjectIntakeRouteName = computed(() => initiativeState.value.provideProjectIntakeRouteName);
+provide(draftableProjectServiceKey, provideDraftableProjectService);
+provide(enquiryRouteNameKey, provideEnquiryRouteName);
+provide(navigationPermissionKey, provideNavigationPermission);
+provide(projectIntakeRouteNameKey, provideProjectIntakeRouteName);
 
 // Actions
 async function createIntake() {
   const contact = useContactStore().getContact;
-  const response = await electrificationProjectService.updateDraft({
+  const response = await provideDraftableProjectService.value.updateDraft({
     data: {
       contacts: {
         contactId: contact?.contactId,
@@ -56,7 +109,7 @@ async function createIntake() {
   });
 
   router.push({
-    name: RouteName.EXT_ELECTRIFICATION_INTAKE,
+    name: provideProjectIntakeRouteName.value,
     params: {
       draftId: response.data.draftId
     }
@@ -92,11 +145,11 @@ const hasPendingAuth = computed(() => (activityId: string) => {
   );
 });
 
-function onElectrificationProjectDraftDelete(draftId: string) {
+function onHousingProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
 
-function sortByLastUpdated(a: ElectrificationProject, b: ElectrificationProject) {
+function sortByLastUpdated(a: HousingProject, b: HousingProject) {
   if (a.updatedAt && b.updatedAt) {
     return a.updatedAt > b.updatedAt ? -1 : 1;
   } else {
@@ -120,59 +173,90 @@ watch(
 );
 
 onBeforeMount(async () => {
-  [authorizations.value, projects.value, drafts.value] = (
-    await Promise.all([
-      permitService.listPermits(),
-      electrificationProjectService.searchProjects(),
-      electrificationProjectService.getDrafts()
-    ])
-  ).map((r) => r.data);
+  try {
+    switch (getInitiative.value) {
+      case Initiative.ELECTRIFICATION:
+        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        break;
+      case Initiative.HOUSING:
+        initiativeState.value = HOUSING_VIEW_STATE;
+        break;
+      default:
+        throw new Error(t('i.common.view.initiativeStateError'));
+    }
 
-  // Sort by last updated, push non-updated projects to bottom
-  projects.value.sort(sortByLastUpdated);
+    [authorizations.value, enquiries.value, projects.value, drafts.value] = (
+      await Promise.all([
+        permitService.listPermits(),
+        enquiryService.getEnquiries(),
+        provideDraftableProjectService.value.searchProjects(),
+        provideDraftableProjectService.value.getDrafts()
+      ])
+    ).map((r) => r.data);
 
-  drafts.value = drafts.value.map((x, index) => ({ ...x, index: index + 1 }));
+    // Sort by last updated, push non-updated projects to bottom
+    projects.value.sort(sortByLastUpdated);
 
-  loading.value = false;
+    drafts.value = drafts.value.map((x, index) => ({ ...x, index: index + 1 }));
+
+    // Filter enquiries to only include enquiries with no relatedActivityId
+    enquiries.value = enquiries.value.filter((enquiry) => !enquiry.relatedActivityId);
+
+    loading.value = false;
+  } catch (e) {
+    generalErrorHandler(e);
+  }
 });
 </script>
 
 <template>
   <div class="flex flex-col items-center justify-start h-full">
     <div class="flex flex-row items-center w-full justify-between shadow px-4">
-      <h1>{{ t('e.electrification.electrificationView.electrification') }}</h1>
+      <h1>{{ initiativeState.headerText }}</h1>
       <img
         class="mr-4"
-        src="@/assets/images/elec_banner.png"
+        src="@/assets/images/housing_2.png"
         width="120"
-        alt="Electrification image"
+        alt="Housing image"
       />
     </div>
 
     <div class="flex flex-row items-center w-full mt-4 mb-9">
-      <div class="font-bold mr-2">{{ t('e.electrification.electrificationView.onThisPage') }}</div>
+      <div class="font-bold mr-2">{{ t('e.housing.housingView.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
       <div>
         <router-link
           :to="{
-            name: RouteName.EXT_ELECTRIFICATION,
+            name: initiativeState.initiativeRouteName,
             hash: '#projects'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.EXT_ELECTRIFICATION, hash: '#projects' })"
+          @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#projects' })"
         >
-        {{ t('e.electrification.electrificationView.myProjects') }}</router-link>
+        {{ t('e.housing.housingView.myProjects') }}</router-link>
         |
         <router-link
           :to="{
-            name: RouteName.EXT_ELECTRIFICATION,
+            name: initiativeState.initiativeRouteName,
             hash: '#drafts'
           }"
           class="no-underline"
-          @keydown.space.prevent="router.push({ name: RouteName.EXT_ELECTRIFICATION, hash: '#drafts' })"
+          @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#drafts' })"
         >
-        {{ t('e.electrification.electrificationView.drafts') }}</router-link>
+        {{ t('e.housing.housingView.drafts') }}</router-link>
+        <span v-if="getInitiative === Initiative.HOUSING">
+          |
+          <router-link
+            :to="{
+              name: initiativeState.initiativeRouteName,
+              hash: '#enquiries'
+            }"
+            class="no-underline"
+            @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#enquiries' })"
+          >
+          {{ t('e.housing.housingView.generalEnquiries') }}</router-link>
+        </span>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
     </div>
@@ -186,16 +270,16 @@ onBeforeMount(async () => {
           id="projects"
           tabindex="-1"
         >
-          {{ t('e.electrification.electrificationView.myProjects') }}
+          {{ t('e.housing.housingView.myProjects') }}
         </h2>
         <Tooltip
           class="pl-2 text-xl"
           right
-          :text="t('e.electrification.electrificationView.projectsTooltip')"
+          :text="t('e.housing.housingView.projectsTooltip')"
         />
       </div>
       <Button @click="createIntake">
-        {{ t('e.electrification.electrificationView.submitNewProject') }}
+        {{ t('e.housing.housingView.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
           icon="fa-solid fa-arrow-right"
@@ -208,7 +292,7 @@ onBeforeMount(async () => {
         v-if="!projects.length"
         class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
       >
-        <p class="font-bold">{{ t('e.electrification.electrificationView.projectsEmpty') }}</p>
+        <p class="font-bold">{{ t('e.housing.housingView.projectsEmpty') }}</p>
       </div>
       <div
         v-for="(project, index) in displayedProjectsInOrder"
@@ -225,8 +309,8 @@ onBeforeMount(async () => {
           v-if="hasPendingAuth(project.activityId)"
           class="no-underline"
           :to="{
-            name: RouteName.EXT_ELECTRIFICATION_PROJECT,
-            params: { projectId: project.electrificationProjectId }
+            name: initiativeState.projectRouteName,
+            params: { projectId: project.projectId }
           }"
         >
           <h5 class="font-bold mb-4">{{ project.projectName }}</h5>
@@ -237,8 +321,8 @@ onBeforeMount(async () => {
               v-if="!hasPendingAuth(project.activityId)"
               class="no-underline"
               :to="{
-                name: RouteName.EXT_ELECTRIFICATION_PROJECT,
-                params: { projectId: project.electrificationProjectId }
+                name: initiativeState.projectRouteName,
+                params: { projectId: project.projectId }
               }"
             >
               <h5 class="font-bold mb-0">{{ project.projectName }}</h5>
@@ -247,7 +331,7 @@ onBeforeMount(async () => {
               v-if="hasPendingAuth(project.activityId)"
               class="my-1"
               :state="PermitState.PENDING_CLIENT"
-              :display-text="t('e.electrification.electrificationView.pendingAuths')"
+              :display-text="t('e.housing.housingView.pendingAuths')"
             />
           </div>
           <div class="col-span-3 flex items-center">
@@ -260,11 +344,11 @@ onBeforeMount(async () => {
             </p>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('e.electrification.electrificationView.confirmationId') }}: {{ project.activityId }}</p>
+            <p>{{ t('e.housing.housingView.confirmationId') }}: {{ project.activityId }}</p>
           </div>
           <div class="col-span-3 flex items-center">
             <p>
-              {{ t('e.electrification.electrificationView.lastUpdated') }}:
+              {{ t('e.housing.housingView.lastUpdated') }}:
               {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}
             </p>
           </div>
@@ -276,9 +360,7 @@ onBeforeMount(async () => {
           :rows="PAGE_ROWS"
           :total-records="projects.length"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          :current-page-report-template="`
-            ({currentPage} ${t('e.electrification.electrificationView.of')} {totalPages})
-          `"
+          :current-page-report-template="`({currentPage} ${t('e.housing.housingView.of')} {totalPages})`"
         />
       </div>
     </div>
@@ -292,7 +374,7 @@ onBeforeMount(async () => {
         class="flex font-bold"
         tabindex="-1"
       >
-        {{ t('e.electrification.electrificationView.drafts') }}
+        {{ t('e.housing.housingView.drafts') }}
       </h2>
     </div>
 
@@ -300,8 +382,48 @@ onBeforeMount(async () => {
       <ProjectDraftListProponent
         :loading="loading"
         :drafts="drafts"
-        @submission-draft:delete="onElectrificationProjectDraftDelete"
+        @submission-draft:delete="onHousingProjectDraftDelete"
       />
+    </div>
+
+    <!--
+      Enquiries
+    -->
+    <div
+      v-if="getInitiative === Initiative.HOUSING"
+      class="w-full"
+    >
+      <div class="flex flex-row items-center w-full justify-between">
+        <div class="flex items-center flex-row">
+          <h2
+            id="enquiries"
+            class="font-bold"
+            tabindex="-1"
+          >
+            {{ t('e.housing.housingView.generalEnquiries') }}
+          </h2>
+          <Tooltip
+            class="pl-2 text-xl"
+            right
+            :text="t('e.housing.housingView.enquiriesTooltip')"
+          />
+        </div>
+
+        <Button @click="router.push({ name: initiativeState.enquiryIntakeRouteName })">
+          {{ t('e.housing.housingView.submitNewEnquiry') }}
+          <font-awesome-icon
+            class="ml-2"
+            icon="fa-solid fa-arrow-right"
+          />
+        </Button>
+      </div>
+
+      <div class="w-full">
+        <EnquiryListProponent
+          :loading="loading"
+          :enquiries="enquiries"
+        />
+      </div>
     </div>
   </div>
 </template>

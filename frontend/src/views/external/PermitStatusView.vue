@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useI18n } from 'vue-i18n';
-import { computed, onBeforeMount, onBeforeUnmount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 import AuthorizationInfoProponent from '@/components/authorization/AuthorizationInfoProponent.vue';
@@ -9,15 +9,16 @@ import AuthorizationStatusDescriptionModal from '@/components/authorization/Auth
 import AuthorizationTrackerCard from '@/components/authorization/AuthorizationTrackerCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { AskMyNavigator } from '@/components/common/icons';
-import { Button, useToast } from '@/lib/primevue';
-import { useProjectStore, usePermitStore } from '@/store';
+import { Button } from '@/lib/primevue';
+import { contactService, electrificationProjectService, housingProjectService, permitService } from '@/services';
+import { useProjectStore, usePermitStore, useAppStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
-import { RouteName } from '@/utils/enums/application';
+import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitState } from '@/utils/enums/permit';
-
-import { contactService, housingProjectService, permitService } from '@/services';
+import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
+import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Props
 const { permitId, projectId } = defineProps<{
@@ -25,21 +26,42 @@ const { permitId, projectId } = defineProps<{
   projectId: string;
 }>();
 
+// Interfaces
+interface InitiativeState {
+  enquiryPermitRouteName: RouteName;
+  initiativeNavigationPermission: NavigationPermission;
+  projectService: IProjectService;
+}
+
+// Constants
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+  enquiryPermitRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY,
+  initiativeNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
+  projectService: electrificationProjectService
+};
+
+const HOUSING_VIEW_STATE: InitiativeState = {
+  enquiryPermitRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
+  initiativeNavigationPermission: NavigationPermission.EXT_HOUSING,
+  projectService: housingProjectService
+};
+
 // Composables
 const { t } = useI18n();
 const router = useRouter();
-const toast = useToast();
 
 // Store
 const authZStore = useAuthZStore();
 const permitStore = usePermitStore();
 const projectStore = useProjectStore();
+const { getInitiative } = storeToRefs(useAppStore());
 const { canNavigate } = storeToRefs(authZStore);
 const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
 const descriptionModalVisible: Ref<boolean> = ref(false);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
 const updatedBy: Ref<string | undefined> = ref(undefined);
 
 // Actions
@@ -52,25 +74,36 @@ const hideTimelineFromScreenReader = computed(() => {
 
 onBeforeMount(async () => {
   try {
-    const permitData = (await permitService.getPermit(permitId)).data;
-    permitStore.setPermit(permitData);
-
-    if (!getProject.value) {
-      const submission = (await housingProjectService.getProject(projectId)).data;
-      projectStore.setProject(submission);
+    switch (getInitiative.value) {
+      case Initiative.ELECTRIFICATION:
+        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        break;
+      case Initiative.HOUSING:
+        initiativeState.value = HOUSING_VIEW_STATE;
+        break;
+      default:
+        throw new Error(t('i.common.view.initiativeStateError'));
     }
 
-    if (getPermit.value?.updatedBy) {
-      const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
-      if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+    try {
+      const permitData = (await permitService.getPermit(permitId)).data;
+      permitStore.setPermit(permitData);
+
+      if (!getProject.value) {
+        const submission = (await initiativeState.value.projectService.getProject(projectId)).data;
+        projectStore.setProject(submission);
+      }
+
+      if (getPermit.value?.updatedBy) {
+        const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
+        if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
+      }
+    } catch {
+      throw new Error(t('e.common.permitStatusView.unableToLoad'));
     }
-  } catch {
-    toast.error(t('e.common.permitStatusView.unableToLoad'));
+  } catch (e) {
+    generalErrorHandler(e);
   }
-});
-
-onBeforeUnmount(() => {
-  permitStore.reset();
 });
 </script>
 
@@ -82,12 +115,12 @@ onBeforeUnmount(() => {
           <h1 class="mt-0 mb-0">{{ getPermit?.permitType?.name }}</h1>
         </div>
         <Button
-          v-if="canNavigate(NavigationPermission.EXT_HOUSING)"
+          v-if="canNavigate(initiativeState.initiativeNavigationPermission)"
           class="p-button-sm max-h-8 mt-3"
           :label="t('e.common.permitStatusView.askNav')"
           @click="
             router.push({
-              name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
+              name: initiativeState.enquiryPermitRouteName,
               params: { permitId, projectId }
             })
           "

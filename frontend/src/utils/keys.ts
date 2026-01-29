@@ -11,20 +11,22 @@ export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<Ref<string>
 export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<Ref<string>>;
 
 // Permissions
-export const navigationPermissionKey = Symbol() as InjectionKey<NavigationPermission>;
+export const navigationPermissionKey = Symbol() as InjectionKey<Ref<NavigationPermission>>;
 
 // Resources
 export const resourceKey = Symbol() as InjectionKey<Ref<Resource>>;
 
 // RouteNames
-export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
+export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
 export const enquiryNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
-export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<RouteName>;
-export const enquiryRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const enquiryRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
+export const initiativeRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const initiativeContactRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectAddAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectIntakeRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectProponentNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
