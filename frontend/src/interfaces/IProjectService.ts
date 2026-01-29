@@ -2,23 +2,23 @@ import type { Draft, ElectrificationProjectSearchParameters, Email, HousingProje
 import type { AxiosResponse } from 'axios';
 
 export interface IProjectService {
-  createProject(data?: any): Promise<AxiosResponse<any, any>>;
-  deleteProject(projectId: string): Promise<AxiosResponse<any, any>>;
-  emailConfirmation(emailData: Email): Promise<AxiosResponse<any, any>>;
-  getActivityIds(): Promise<AxiosResponse<any, any>>;
-  getProjects(): Promise<AxiosResponse<any, any>>;
-  getStatistics(filters?: any): Promise<AxiosResponse<any, any>>;
-  getProject(projectId: string): Promise<AxiosResponse<any, any>>;
+  createProject(data?: unknown): Promise<AxiosResponse>;
+  deleteProject(projectId: string): Promise<AxiosResponse>;
+  emailConfirmation(emailData: Email): Promise<AxiosResponse>;
+  getActivityIds(): Promise<AxiosResponse>;
+  getProjects(): Promise<AxiosResponse>;
+  getStatistics(filters?: unknown): Promise<AxiosResponse>;
+  getProject(projectId: string): Promise<AxiosResponse>;
   searchProjects(
     filters?: ElectrificationProjectSearchParameters | HousingProjectSearchParameters
-  ): Promise<AxiosResponse<any, any>>;
-  submitDraft(data?: any): Promise<AxiosResponse<any, any>>;
-  updateProject(projectId: string, data: any): Promise<AxiosResponse<any, any>>;
+  ): Promise<AxiosResponse>;
+  submitDraft(data?: unknown): Promise<AxiosResponse>;
+  updateProject(projectId: string, data: unknown): Promise<AxiosResponse>;
 }
 
 export interface IDraftableProjectService extends IProjectService {
-  deleteDraft(draftId: string): Promise<AxiosResponse<any, any>>;
-  getDraft(draftId: string): Promise<AxiosResponse<any, any>>;
-  getDrafts(): Promise<AxiosResponse<any, any>>;
-  updateDraft(data?: Partial<Draft>): Promise<AxiosResponse<any, any>>;
+  deleteDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse>;
+  getDrafts(): Promise<AxiosResponse>;
+  updateDraft(data?: Partial<Draft>): Promise<AxiosResponse>;
 }

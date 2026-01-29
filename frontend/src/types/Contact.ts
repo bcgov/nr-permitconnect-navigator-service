@@ -1,5 +1,6 @@
 import type { IStamps } from '@/interfaces';
 import type { ActivityContact } from '@/types';
+import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 export type Contact = {
   bceidBusinessName?: string;
@@ -9,7 +10,7 @@ export type Contact = {
   lastName?: string;
   phoneNumber?: string;
   email?: string;
-  contactPreference?: string;
-  contactApplicantRelationship?: string;
+  contactPreference?: ContactPreference;
+  contactApplicantRelationship?: ProjectRelationship;
   activityContact?: ActivityContact[];
 } & Partial<IStamps>;

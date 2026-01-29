@@ -5,7 +5,7 @@ import { NavigationPermission } from '@/store/authzStore';
 
 import type { RouteRecordRaw } from 'vue-router';
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/contact',
     meta: { hideBreadcrumb: true },

@@ -2,6 +2,8 @@ import { externalApiService } from '@/services';
 import { geocoderAxios, orgBookAxios } from '@/services/interceptors';
 import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
+import type { AxiosInstance } from 'axios';
+
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),
@@ -16,10 +18,10 @@ const testAddressString = '2975 Imaginary Ave';
 vi.mock('@/services/interceptors');
 vi.mocked(geocoderAxios).mockReturnValue({
   get: getSpy
-} as any);
+} as unknown as AxiosInstance);
 vi.mocked(orgBookAxios).mockReturnValue({
   get: getSpy
-} as any);
+} as unknown as AxiosInstance);
 
 beforeEach(() => {
   vi.clearAllMocks();

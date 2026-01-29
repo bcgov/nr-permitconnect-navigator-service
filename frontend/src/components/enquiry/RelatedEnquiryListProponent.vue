@@ -15,10 +15,14 @@ import type { Ref } from 'vue';
 import type { Contact, Enquiry } from '@/types';
 
 // Props
-const { loading, enquiries, projectId } = defineProps<{
+const {
+  loading,
+  enquiries,
+  projectId = undefined
+} = defineProps<{
   loading: boolean;
-  enquiries: Array<Enquiry> | undefined;
-  projectId?: string | undefined;
+  enquiries: Enquiry[] | undefined;
+  projectId?: string;
 }>();
 
 // Injections

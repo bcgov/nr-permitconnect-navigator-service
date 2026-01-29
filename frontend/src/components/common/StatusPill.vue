@@ -4,10 +4,10 @@ import { computed } from 'vue';
 // Props
 const {
   enlarge = false,
-  stage,
-  bgColor,
-  borderColor,
-  icon,
+  stage = undefined,
+  bgColor = undefined,
+  borderColor = undefined,
+  icon = undefined,
   contentColor = 'var(--p-greyscale-900)'
 } = defineProps<{
   enlarge?: boolean;

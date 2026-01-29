@@ -25,7 +25,7 @@ afterEach(() => {
 
 const testName = 'foo';
 
-const wrapperSettings = (overrides: Record<string, any> = {}) => ({
+const wrapperSettings = (overrides: Record<string, string> = {}) => ({
   props: {
     name: testName,
     ...overrides

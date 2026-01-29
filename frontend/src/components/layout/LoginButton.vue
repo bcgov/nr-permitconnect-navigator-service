@@ -20,7 +20,7 @@ function isLoginEnabled() {
     !getIsAuthenticated &&
     router.currentRoute.value.name &&
     ![RouteName.HOME, RouteName.OIDC_LOGIN, RouteName.OIDC_CALLBACK, RouteName.OIDC_LOGOUT].includes(
-      router.currentRoute.value.name as any
+      router.currentRoute.value.name as RouteName
     )
   );
 }

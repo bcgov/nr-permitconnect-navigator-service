@@ -5,6 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import { contactService } from '@/services';
+import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import ContactProfileView from '@/views/contact/ContactView.vue';
 
 import type { Contact } from '@/types';
@@ -28,8 +29,8 @@ const testContact: Contact = {
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
   email: 'john.doe@example.com',
-  contactPreference: 'email',
-  contactApplicantRelationship: 'applicant'
+  contactPreference: ContactPreference.EITHER,
+  contactApplicantRelationship: ProjectRelationship.CONSULTANT
 };
 
 const useContactService = vi.spyOn(contactService, 'searchContacts');

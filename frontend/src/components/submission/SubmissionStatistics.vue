@@ -12,21 +12,13 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { Statistics, User } from '@/types';
-
-// Types
-type StatisticFilters = {
-  dateFrom?: Date;
-  dateTo?: Date;
-  monthYear?: Date;
-  userId?: string;
-};
+import type { StatisticFilters, Statistics, User } from '@/types';
 
 // Injections
 const projectService = inject(projectServiceKey);
 
 // State
-const assigneeOptions: Ref<Array<User>> = ref([]);
+const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<Statistics | undefined>('statistics');
 const statisticFilters: Ref<StatisticFilters> = ref({});
 

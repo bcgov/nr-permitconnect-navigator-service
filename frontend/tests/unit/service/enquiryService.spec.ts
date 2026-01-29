@@ -5,31 +5,63 @@ import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
+import type { AxiosInstance } from 'axios';
+import type { Enquiry } from '@/types';
+import {
+  ApplicationStatus,
+  ContactPreference,
+  EnquirySubmittedMethod,
+  ProjectRelationship,
+  SubmissionType
+} from '@/utils/enums/projectCommon';
+import type { EnquiryArgs } from '@/types/Enquiry';
+
 // Constants
 const PATH = 'enquiry';
 
 const TEST_ACTIVITY_ID = '25357C4A';
 
-const testEnquiry = {
-  enquiryId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
-  activityId: '45A0A36A',
-  assignedUserId: 'aaaaaaaa-cccc-cccc-cccc-bbbbbbbbbbbb',
-  submittedAt: '2024-06-12T07:00:00.000Z',
-  submittedBy: 'WILSWONG',
-  relatedActivityId: 'D95F1DE6',
-  enquiryDescription: 'D95F1DE6 Test enquiry info',
-  updatedAt: '2024-06-13T00:00:00.000Z',
-  submissionType: 'General enquiry',
-  contacts: [
-    {
-      firstName: 'enquiryDraft1',
-      lastName: 'enquiryDraft1',
-      phoneNumber: '(123) 456-7890',
-      email: 'test@test.weg',
-      contactPreference: 'Phone call',
-      contactApplicantRelationship: 'Property owner'
-    }
-  ]
+const currentDate = new Date().toISOString();
+
+const testCreateEnquiry: EnquiryArgs = {
+  submissionType: SubmissionType.GUIDANCE,
+  submittedAt: '2023-01-01T12:00:00Z',
+  submittedBy: 'user123',
+  enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
+  createdBy: 'testCreatedBy',
+  createdAt: currentDate,
+  updatedBy: 'testUpdatedAt',
+  updatedAt: currentDate,
+  addedToAts: false,
+  atsClientId: 123456,
+  atsEnquiryId: '654321',
+  contact: {
+    contactId: '123',
+    firstName: 'enquiryDraft1',
+    lastName: 'enquiryDraft1',
+    phoneNumber: '(123) 456-7890',
+    email: 'test@test.weg',
+    contactPreference: ContactPreference.EITHER,
+    contactApplicantRelationship: ProjectRelationship.OWNER
+  }
+};
+
+const testEnquiry: Enquiry = {
+  enquiryId: 'enquiry123',
+  activityId: 'activity456',
+  submissionType: SubmissionType.GUIDANCE,
+  submittedAt: '2023-01-01T12:00:00Z',
+  submittedBy: 'user123',
+  enquiryStatus: ApplicationStatus.NEW,
+  submittedMethod: EnquirySubmittedMethod.EMAIL,
+  createdBy: 'testCreatedBy',
+  createdAt: currentDate,
+  updatedBy: 'testUpdatedAt',
+  updatedAt: currentDate,
+  addedToAts: false,
+  atsClientId: 123456,
+  atsEnquiryId: '654321'
 };
 
 // Mocks
@@ -53,7 +85,7 @@ vi.mocked(appAxios).mockReturnValue({
   patch: patchSpy,
   post: postSpy,
   put: putSpy
-} as any);
+} as unknown as AxiosInstance);
 
 // Tests
 beforeEach(() => {
@@ -102,10 +134,10 @@ describe('enquiryService', () => {
       });
 
       it('calls createEnquiry with correct data', () => {
-        enquiryService.createEnquiry(testEnquiry);
+        enquiryService.createEnquiry(testCreateEnquiry);
 
         expect(postSpy).toHaveBeenCalledTimes(1);
-        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testEnquiry);
+        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testCreateEnquiry);
       });
 
       it('calls searchEnquiries with correct data', () => {

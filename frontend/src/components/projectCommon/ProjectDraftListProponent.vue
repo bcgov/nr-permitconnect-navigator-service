@@ -8,12 +8,12 @@ import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { Draft, ElectrificationProject, HousingProject } from '@/types';
 
 // Props
 const { loading, drafts } = defineProps<{
   loading: boolean;
-  drafts: Array<any> | undefined;
+  drafts: Draft[] | undefined;
 }>();
 
 // Injections
@@ -47,7 +47,7 @@ function onDelete(draftId: string) {
           emit('submissionDraft:delete', draftId);
           toast.success(t('projectDraftListProponent.deleteSuccess'));
         })
-        .catch((e: any) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
+        .catch((e) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
     }
   });
 }

@@ -1,13 +1,13 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import type { Ref } from 'vue';
 import type { Permit, PermitType } from '@/types';
 
-export type PermitStoreState = {
+export interface PermitStoreState {
   permit: Ref<Permit | undefined>;
-  permitTypes: Ref<Array<PermitType>>;
-};
+  permitTypes: Ref<PermitType[]>;
+}
 
 export const usePermitStore = defineStore('permit', () => {
   // State
@@ -27,7 +27,7 @@ export const usePermitStore = defineStore('permit', () => {
     state.permit.value = data;
   }
 
-  function setPermitTypes(data: Array<PermitType>) {
+  function setPermitTypes(data: PermitType[]) {
     state.permitTypes.value = data;
   }
 
@@ -38,7 +38,7 @@ export const usePermitStore = defineStore('permit', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

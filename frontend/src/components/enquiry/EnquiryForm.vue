@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Form } from 'vee-validate';
+import { isAxiosError } from 'axios';
+import { Form, type GenericObject } from 'vee-validate';
 import { computed, inject, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { boolean, mixed, object, string } from 'yup';
+import { boolean, date, mixed, object, string, type InferType } from 'yup';
 
 import { CancelButton, EditableSelect, FormNavigationGuard, Select, TextArea } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
@@ -37,7 +38,15 @@ import { emailValidator } from '@/validators/common';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
-import type { ATSAddressResource, ATSClientResource, ATSEnquiryResource, Contact, Enquiry, User } from '@/types';
+import type {
+  ATSAddressResource,
+  ATSClientResource,
+  ATSEnquiryResource,
+  Contact,
+  DeepPartial,
+  Enquiry,
+  User
+} from '@/types';
 
 // Interfaces
 interface EnquiryForm extends Enquiry {
@@ -58,42 +67,51 @@ const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
 
-// Store
-const enquiryStore = useEnquiryStore();
-
-// State
-const assigneeOptions: Ref<Array<User>> = ref([]);
-const basicInfoManualEntry: Ref<boolean> = ref(false);
-const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
-const filteredProjectActivityIds: Ref<string[]> = ref([]);
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const primaryContact = computed(
-  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
-const projectActivityIds: Ref<Array<string>> = ref([]);
-const showCancelMessage: Ref<boolean> = ref(false);
-
 // Form validation schema
 const intakeSchema = object({
+  activityId: string(),
+  enquiryId: string(),
+  submittedBy: string(),
+  submittedAt: date(),
   submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
   submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
   contact: object({
+    contactId: string(),
     email: emailValidator('Contact email must be valid').required().label('Contact email'),
     firstName: string().required().max(255).label('Contact first name'),
     lastName: string().max(255).label('Contact last name').nullable(),
     phoneNumber: string().required().label('Contact phone number'),
     contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method')
+    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
+    userId: string()
   }),
   enquiryDescription: string().required().label('Enquiry detail'),
   user: mixed().nullable().label('Assigned to'),
   enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientId: atsClientIdValidator
+  atsClientId: atsClientIdValidator,
+  atsEnquiryId: string().notRequired()
 });
+
+export type FormSchemaType = InferType<typeof intakeSchema>;
+
+// Store
+const enquiryStore = useEnquiryStore();
+
+// State
+const assigneeOptions: Ref<User[]> = ref([]);
+const basicInfoManualEntry: Ref<boolean> = ref(false);
+const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
+const filteredProjectActivityIds: Ref<string[]> = ref([]);
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
+const primaryContact = computed(
+  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
+const projectActivityIds: Ref<string[]> = ref([]);
+const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
 const { t } = useI18n();
@@ -164,7 +182,7 @@ function onCancel() {
   }, 6000);
 }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   const errors = Object.keys(e.errors);
 
   if (errors.includes('contact.firstName')) {
@@ -201,7 +219,7 @@ function onReOpen() {
     rejectProps: { outlined: true },
     accept: () => {
       formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
-      onSubmit(formRef.value?.values);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
 }
@@ -239,7 +257,7 @@ function setBasicInfo(contact?: Contact) {
   basicInfoManualEntry.value = false;
 }
 
-const onSubmit = async (values: any) => {
+const onSubmit = async (values: GenericObject) => {
   try {
     // Create ATS data as necessary
     if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
@@ -328,8 +346,8 @@ const onSubmit = async (values: any) => {
     emit('enquiryForm:saved');
 
     toast.success(t('i.common.form.savedMessage'));
-  } catch (e: any) {
-    toast.error(t('enquiryForm.failedMessage'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryForm.failedMessage'), e.message);
   }
 };
 

@@ -27,8 +27,9 @@ const {
   name: string;
   placeholder?: string;
   disabled?: boolean;
-  suggestions: Array<unknown>;
-  getOptionLabel?: Function;
+  suggestions: unknown[];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  getOptionLabel?: string | ((data: any) => string) | undefined; // Matches Prisma type
   bold?: boolean;
   forceSelection?: boolean;
   loading?: boolean;
@@ -68,7 +69,7 @@ onBeforeMount(() => {
       input-class="w-full"
       :loading="loading"
       :name="name"
-      :option-label="(option: any) => getOptionLabel(option)"
+      :option-label="getOptionLabel"
       :placeholder="placeholder"
       :suggestions="suggestions"
       @blur="handleBlur"

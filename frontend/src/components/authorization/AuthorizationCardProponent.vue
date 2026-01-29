@@ -21,7 +21,7 @@ const { t } = useI18n();
   <Card class="permit-card--hover mb-4">
     <template #content>
       <div class="flex justify-between">
-        <h5 class="m-0 app-primary-color cursor-pointer hover:underline">{{ permit.permitType.name }}</h5>
+        <h5 class="m-0 app-primary-color cursor-pointer hover:underline">{{ permit.permitType?.name }}</h5>
         <Button
           class="p-button-outlined size-fit"
           :label="t('authorization.authorizationCardProponent.more')"
@@ -45,17 +45,13 @@ const { t } = useI18n();
           <div class="label-field">{{ t('authorization.authorizationCardProponent.latestUpdates') }}</div>
           <div>
             <span
-              v-if="permit.permitNote[0]"
+              v-if="permit.permitNote?.[0]"
               class="mr-1 font-bold"
             >
               {{ formatDateTime(permit.permitNote[0].createdAt) }},
             </span>
             <span class="permit-data">
-              {{
-                permit?.permitNote[0]
-                  ? permit?.permitNote[0].note
-                  : t('authorization.authorizationCardProponent.noUpdates')
-              }}
+              {{ permit?.permitNote?.[0]?.note ?? t('authorization.authorizationCardProponent.noUpdates') }}
             </span>
           </div>
         </div>
@@ -68,7 +64,7 @@ const { t } = useI18n();
         <div class="col-span-3">
           <div class="label-field">{{ t('authorization.authorizationCardProponent.agency') }}</div>
           <div class="permit-data">
-            {{ permit?.permitType.agency }}
+            {{ permit?.permitType?.agency }}
           </div>
         </div>
       </div>

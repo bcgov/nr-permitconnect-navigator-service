@@ -11,7 +11,7 @@ export default {
    * Returns a specific contact details
    * @returns {Promise<AxiosResponse>} An axios response or empty object
    */
-  getContact(contactId: string, includeActivities: boolean = false): Promise<AxiosResponse<Contact>> {
+  getContact(contactId: string, includeActivities = false): Promise<AxiosResponse<Contact>> {
     return appAxios().get(`${PATH}/${contactId}`, { params: { includeActivities } });
   },
 
@@ -58,7 +58,7 @@ export default {
    * @function updateContact
    * @returns {Promise} An axios response
    */
-  updateContact(data?: any): Promise<AxiosResponse<Contact>> {
+  updateContact(data?: Contact): Promise<AxiosResponse<Contact>> {
     return appAxios().put(`${PATH}`, data);
   }
 };

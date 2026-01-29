@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import useAppStore from './appStore';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
@@ -33,15 +33,15 @@ export enum NavigationPermission {
   INT_USER_MANAGEMENT = 'int_user_management'
 }
 
-type NavigationAuthorizationMapT = {
+interface NavigationAuthorizationMapT {
   initiative: Initiative;
   group: GroupName;
-  permissions: Array<NavigationPermission>;
-};
+  permissions: NavigationPermission[];
+}
 
 const GlobalNavigations = [NavigationPermission.GLO_USER];
 
-const NavigationAuthorizationMap: Array<NavigationAuthorizationMapT> = [
+const NavigationAuthorizationMap: NavigationAuthorizationMapT[] = [
   // Electrification
   {
     initiative: Initiative.ELECTRIFICATION,
@@ -116,12 +116,12 @@ const NavigationAuthorizationMap: Array<NavigationAuthorizationMapT> = [
 // Add global permissions to all
 NavigationAuthorizationMap.forEach((auth) => auth.permissions.push(...GlobalNavigations));
 
-export type AuthZStoreState = {
+export interface AuthZStoreState {
   groups: Ref<Group[]>;
-  permissions: Ref<Array<Permission>>;
+  permissions: Ref<Permission[]>;
   groupOverride: Ref<GroupName | undefined>;
   initiativeOverride: Ref<Initiative | undefined>;
-};
+}
 
 export const useAuthZStore = defineStore('authz', () => {
   // State
@@ -145,35 +145,30 @@ export const useAuthZStore = defineStore('authz', () => {
               (group ? x.group === group : true)
           ) || getters.isInGroup.value([GroupName.DEVELOPER])
     ),
-    canNavigate: computed(
-      () =>
-        (navPerm: NavigationPermission | Array<NavigationPermission>, allowGroupOverride: boolean = true) => {
-          const currentInitiative = useAppStore().getInitiative;
-          const bypassInitiative = currentInitiative === Initiative.PCNS;
+    canNavigate: computed(() => (navPerm: NavigationPermission | NavigationPermission[], allowGroupOverride = true) => {
+      const currentInitiative = useAppStore().getInitiative;
+      const bypassInitiative = currentInitiative === Initiative.PCNS;
 
-          const groups =
-            allowGroupOverride && state.groupOverride.value && state.initiativeOverride.value
-              ? [{ initiativeCode: state.initiativeOverride.value, name: state.groupOverride.value } as Group]
-              : state.groups.value;
-          const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
-          const perms = NavigationAuthorizationMap.filter((p) =>
-            groups?.some((g) => g.initiativeCode === p.initiative && g.name === p.group)
-          )
-            .filter((p) => bypassInitiative || p.initiative === currentInitiative)
-            .flatMap((p) => p.permissions);
-          return groups?.some((g) => g.name === GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
-        }
-    ),
+      const groups =
+        allowGroupOverride && state.groupOverride.value && state.initiativeOverride.value
+          ? [{ initiativeCode: state.initiativeOverride.value, name: state.groupOverride.value } as Group]
+          : state.groups.value;
+      const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
+      const perms = NavigationAuthorizationMap.filter((p) =>
+        groups?.some((g) => g.initiativeCode === p.initiative && g.name === p.group)
+      )
+        .filter((p) => bypassInitiative || p.initiative === currentInitiative)
+        .flatMap((p) => p.permissions);
+      return groups?.some((g) => g.name === GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
+    }),
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
     getInitiativeOverride: computed(() => state.initiativeOverride.value),
-    isInGroup: computed(
-      () => (group: Array<GroupName>) => state.groups.value.some((x) => group.some((g) => g === x.name))
-    )
+    isInGroup: computed(() => (group: GroupName[]) => state.groups.value.some((x) => group.some((g) => g === x.name)))
   };
 
   // Actions
-  function setPermissions(data: any) {
+  function setPermissions(data: { groups: Group[]; permissions: Permission[] }) {
     state.groups.value = data.groups;
     state.permissions.value = data.permissions;
   }
@@ -188,7 +183,7 @@ export const useAuthZStore = defineStore('authz', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

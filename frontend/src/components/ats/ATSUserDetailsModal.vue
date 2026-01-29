@@ -28,7 +28,7 @@ const { t } = useI18n();
 
 // State
 const loading: Ref<boolean> = ref(false);
-const users: Ref<Array<ATSClientResource>> = ref([]);
+const users: Ref<ATSClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions

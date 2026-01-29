@@ -1,8 +1,9 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue'; // eslint-disable-line max-len
+import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue';
 import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {
@@ -27,7 +28,10 @@ import type { Ref } from 'vue';
 import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
 
 // Types
-type FilterOption = { label: string; statuses: string[] };
+interface FilterOption {
+  label: string;
+  statuses: string[];
+}
 
 // Props
 const { projects } = defineProps<{
@@ -115,8 +119,8 @@ function handleCreateNewActivity() {
             params: { projectId: response.projectId }
           });
         }
-      } catch (e: any) {
-        toast.error('Failed to create new submission', e.message);
+      } catch (e) {
+        if (isAxiosError(e) || e instanceof Error) toast.error('Failed to create new submission', e.message);
       }
     },
     acceptLabel: 'Confirm',
@@ -146,7 +150,7 @@ function onDelete(projectId: string, activityId: string) {
           selection.value = undefined;
           toast.success('Project deleted');
         })
-        .catch((e: any) => toast.error('Failed to delete project', e.message));
+        .catch((e) => toast.error('Failed to delete project', e.message));
     }
   });
 }

@@ -20,7 +20,7 @@ const emit = defineEmits(['contactSearch:pick', 'contactSearch:manualEntry']);
 const { t } = useI18n();
 
 // State
-const contacts: Ref<Array<Contact>> = ref([]);
+const contacts: Ref<Contact[]> = ref([]);
 const hasSearched: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');

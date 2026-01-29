@@ -1,12 +1,12 @@
 import { defineStore } from 'pinia';
-import { computed, readonly, ref } from 'vue';
+import { computed, ref } from 'vue';
 
 import { AuthService } from '@/services';
 
 import type { IdTokenClaims, User } from 'oidc-client-ts';
 import type { Ref } from 'vue';
 
-export type AuthNStoreState = {
+export interface AuthNStoreState {
   accessToken: Ref<string | undefined>;
   expiresAt: Ref<number | undefined>;
   identityId: Ref<string | undefined>;
@@ -17,7 +17,7 @@ export type AuthNStoreState = {
   roleOverride: Ref<string | undefined>;
   scope: Ref<string | undefined>;
   user: Ref<User | null>;
-};
+}
 
 export const useAuthNStore = defineStore('authn', () => {
   const authService = new AuthService();
@@ -100,7 +100,7 @@ export const useAuthNStore = defineStore('authn', () => {
 
   return {
     // State
-    state: readonly(state),
+    ...state,
 
     // Getters
     ...getters,

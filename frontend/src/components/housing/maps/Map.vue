@@ -81,17 +81,17 @@ async function initMap() {
         const geo = e.layer as L.GeoJSON;
 
         if (oldLayer.value) {
-          //@ts-ignore - insufficient type definitions
+          // @ts-expect-error - insufficient type definitions
           map.removeLayer(toRaw(oldLayer.value));
           oldLayer.value = undefined;
         }
         oldLayer.value = e.layer;
 
-        //@ts-ignore - insufficient type definitions
+        // @ts-expect-error - insufficient type definitions
         if (geo.toGeoJSON().geometry.type === POINT) {
-          //@ts-ignore - insufficient type definitions
+          // @ts-expect-error - insufficient type definitions
           let latitude = geo.toGeoJSON().geometry.coordinates[1];
-          //@ts-ignore - insufficient type definitions
+          // @ts-expect-error - insufficient type definitions
           let longitude = geo.toGeoJSON().geometry.coordinates[0];
 
           getNearestOccupant(longitude, latitude);
@@ -102,8 +102,8 @@ async function initMap() {
         }
         // Zoom in
         zoomToGeometry(geo);
-      } catch (e: any) {
-        toast.error('Error', e.message);
+      } catch (e) {
+        if (e instanceof Error) toast.error('Error', e.message);
       }
     });
     // On erase
@@ -180,7 +180,7 @@ function resizeMap() {
   }
 }
 
-function setAddressMarker(coords: any) {
+function setAddressMarker(coords: L.LatLngExpression) {
   if (marker) map.removeLayer(marker);
   // Custom(-ish) markers courtesy of https://github.com/pointhi/leaflet-color-markers
   const redIcon = new L.Icon(MAP_ICON_OPTIONS_RED);
@@ -193,7 +193,7 @@ function zoomToGeometry(geo: L.GeoJSON) {
   if (!geo) return;
   // Zoom in
   if (geo.getBounds) map.fitBounds(geo.getBounds());
-  //@ts-ignore - insufficient type definitions
+  // @ts-expect-error - insufficient type definitions
   else map.flyTo(geo.getLatLng(), 17);
 }
 

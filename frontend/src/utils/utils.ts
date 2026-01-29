@@ -1,5 +1,3 @@
-import { toRaw, isRef, isReactive, isProxy } from 'vue';
-
 import { useConfigStore } from '@/store';
 import { DELIMITER } from '@/utils/constants/application';
 import { FileCategory, IdentityProviderKind } from '@/utils/enums/application';
@@ -26,32 +24,6 @@ export function combineDateTime(date?: string | null, time?: string | null): Dat
 }
 
 /**
- * @function deepToRaw
- * Recursively converts a Vue-created proxy object to a raw JSON object
- * @param {T} sourceObj Source object
- * @returns {T} Raw object from the given proxy sourceObj
- */
-export function deepToRaw<T extends Record<string, any>>(sourceObj: T): T {
-  const objectIterator = (input: any): any => {
-    if (Array.isArray(input)) {
-      return input.map((item) => objectIterator(item));
-    }
-    if (isRef(input) || isReactive(input) || isProxy(input)) {
-      return objectIterator(toRaw(input));
-    }
-    if (input && typeof input === 'object') {
-      return Object.keys(input).reduce((acc, key) => {
-        acc[key as keyof typeof acc] = objectIterator(input[key]);
-        return acc;
-      }, {} as T);
-    }
-    return input;
-  };
-
-  return objectIterator(sourceObj);
-}
-
-/**
  * @function delimitEmails
  * Converts a space, semi-colon, or comma-separated value string into an array of string values
  * @param {string} value The string to parse
@@ -67,12 +39,14 @@ export function delimitEmails(value: string): string[] {
 /**
  * @function differential
  * Create a key/value differential from source against comparer
- * @param {object} source Source object
- * @param {object} comparer The object to be compared against
- * @returns {object} Object containing the non-matching key/value pairs in the source object
+ * @param source Source object
+ * @param comparer The object to be compared against
+ * @returns Object containing the non-matching key/value pairs in the source object
  */
-export function differential(source: any, comparer: any): any {
-  return Object.fromEntries(Object.entries(source).filter(([key, value]) => comparer[key] !== value));
+export function differential<T extends Record<PropertyKey, unknown>>(source: T, comparer: Partial<T>): Partial<T> {
+  return Object.fromEntries(
+    (Object.entries(source) as [keyof T, T[keyof T]][]).filter(([key, value]) => comparer[key] !== value)
+  ) as Partial<T>;
 }
 
 /**
@@ -86,7 +60,7 @@ export function differential(source: any, comparer: any): any {
 export function objectToOptions<E extends Record<string, string | number>>(
   enm: E
 ): { value: keyof E; label: string | number }[] {
-  return (Object.keys(enm) as Array<keyof E>).map((key) => ({
+  return (Object.keys(enm) as (keyof E)[]).map((key) => ({
     value: key,
     label: enm[key]
   })) as { value: keyof E; label: string | number }[];
@@ -192,6 +166,21 @@ export function isDebugMode(): boolean {
 }
 
 /**
+ * Checks whether a value is neither `null` nor `undefined`.
+ *
+ * This function acts as a type guard, allowing TypeScript to
+ * narrow the type of the value to `T` when it returns `true`.
+ *
+ * @template T
+ * @param value - The value to test, which may be `null` or `undefined`
+ * @returns `true` if the value is defined; otherwise `false`
+ *
+ */
+export function isDefined<T>(value: T | null | undefined): value is T {
+  return value !== null && value !== undefined;
+}
+
+/**
  * Checks whether the given object is empty, no properties
  *
  * @param {object} obj - The object to check.
@@ -200,14 +189,25 @@ export function isDebugMode(): boolean {
 export function isEmptyObject(obj: object): boolean {
   return Object.keys(obj).length === 0;
 }
+
 /**
  * @function isPlainObject
  * Checks if the given value is a plain object and not another type or other built in object type
  * @param {unknown} value The value to check
  * @returns {boolean} True if the value is a plain object, false otherwise
  */
-export function isPlainObject(value: unknown): boolean {
-  return typeof value === 'object' && value !== null && Object.getPrototypeOf(value) === Object.prototype;
+export function isPlainObject(value: unknown): value is Record<string, unknown> {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+
+  if (Object.prototype.toString.call(value) !== '[object Object]') {
+    return false;
+  }
+
+  const proto = Object.getPrototypeOf(value);
+
+  return proto === Object.prototype || proto === null;
 }
 
 /**
@@ -267,7 +267,7 @@ export function omit<Data extends object, Keys extends keyof Data>(data: Data, k
  * @param {string} delimiter The optional string delimiter
  * @returns {string[]} An array of string values, or `value` if it is not a string
  */
-export function parseCSV(value: string, delimiter: string = ','): string[] {
+export function parseCSV(value: string, delimiter = ','): string[] {
   return value.split(`${delimiter}`).map((s) => s.trim());
 }
 
@@ -275,21 +275,17 @@ export function parseCSV(value: string, delimiter: string = ','): string[] {
  * @function partition
  * Partitions an array into two array sets depending on conditional
  * @see {@link https://stackoverflow.com/a/71247432}
- * @param {Array<T>} arr The array to partition
+ * @param {T[]} arr The array to partition
  * @param {Function} predicate The predicate function
  * @returns
  */
-export function partition<T>(
-  arr: Array<T>,
-  // eslint-disable-next-line no-unused-vars, @typescript-eslint/no-unused-vars
-  predicate: (v: T, i: number, ar: Array<T>) => boolean
-): [Array<T>, Array<T>] {
+export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => boolean): [T[], T[]] {
   return arr.reduce(
     (acc, item, index, array) => {
       acc[+!predicate(item, index, array)]!.push(item);
       return acc;
     },
-    [[], []] as [Array<T>, Array<T>]
+    [[], []] as [T[], T[]]
   );
 }
 
@@ -298,7 +294,7 @@ export function partition<T>(
  * Scrolls to the first invalid field in a form
  * @param {object} errors An object with keys as field names and values as error messages
  */
-export function scrollToFirstError(errors: { [key: string]: string }) {
+export function scrollToFirstError(errors: Record<string, string>) {
   let first: Element | null = null;
 
   for (const error of Object.keys(errors)) {
@@ -338,9 +334,12 @@ export function setDispositionHeader(filename: string) {
 /**
  * @function setEmptyStringsToNull
  * Converts empty string values to null values, recursively
- * @param  {object} data The object to change
- * @returns {object} The object with the remapped values
+ * @param data The object to change
+ * @returns The object with the remapped values
  */
+// Too much gets broken by trying to make this type safe
+// Honestly we need to find a way to remove this function
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setEmptyStringsToNull(data: any): any {
   if (data === '' || data === null) return null;
 

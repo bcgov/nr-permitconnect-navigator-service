@@ -1,4 +1,4 @@
-export type Statistics = {
+export interface Statistics {
   total_submissions: number;
   total_submissions_between: number;
   total_submissions_monthyear: number;
@@ -23,4 +23,4 @@ export type Statistics = {
   guidance: number;
   inapplicable: number;
   status_request: number;
-};
+}

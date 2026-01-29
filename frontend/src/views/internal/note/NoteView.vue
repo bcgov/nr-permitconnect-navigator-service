@@ -14,7 +14,11 @@ import { enquiryServiceKey, projectRouteNameKey, projectServiceKey, resourceKey 
 import type { Ref } from 'vue';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 
-const { enquiryId, projectId, noteHistoryId } = defineProps<{
+const {
+  enquiryId = undefined,
+  projectId = undefined,
+  noteHistoryId = undefined
+} = defineProps<{
   enquiryId?: string;
   projectId?: string;
   noteHistoryId?: string;

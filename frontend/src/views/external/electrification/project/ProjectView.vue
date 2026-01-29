@@ -30,7 +30,8 @@ import { ActivityContactRole, SubmissionType } from '@/utils/enums/projectCommon
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Contact } from '@/types';
+import type { Contact, ElectrificationProject, Enquiry } from '@/types';
+import { isDefined } from '@/utils/utils';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -88,7 +89,8 @@ const createdByName: Ref<string> = computed(() => {
 });
 
 onBeforeMount(async () => {
-  let enquiriesValue, projectValue: any;
+  let enquiriesValue: Enquiry[] | undefined = undefined;
+  let projectValue: ElectrificationProject;
 
   try {
     projectValue = (await electrificationProjectService.getProject(projectId)).data;
@@ -97,6 +99,7 @@ onBeforeMount(async () => {
   } catch {
     toast.error(t('e.common.projectView.toastProjectLoadFailed'));
     router.replace({ name: RouteName.EXT_ELECTRIFICATION });
+    return;
   }
 
   try {
@@ -116,12 +119,12 @@ onBeforeMount(async () => {
   }
 
   projectStore.setProject(projectValue);
-  projectStore.setRelatedEnquiries(enquiriesValue);
+  projectStore.setRelatedEnquiries(enquiriesValue ?? []);
 
   // Fetch contacts for createdBy and assignedUserId
-  // Push only thruthy values into the array
+  // Push only defined values into the array
   const userIds = [projectValue?.assignedUserId, projectValue?.createdBy]
-    .filter(Boolean)
+    .filter(isDefined)
     .filter((x) => !UUID_V4_PATTERN.test(x));
   const contacts = (await contactService.searchContacts({ userId: userIds })).data;
   assignee.value = contacts.find(

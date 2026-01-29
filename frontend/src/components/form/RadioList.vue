@@ -20,7 +20,7 @@ const {
   helpText?: string;
   name: string;
   disabled?: boolean;
-  options: Array<RadioOptionObject | string> | undefined;
+  options: (RadioOptionObject | string)[] | undefined;
 }>();
 
 // Emits

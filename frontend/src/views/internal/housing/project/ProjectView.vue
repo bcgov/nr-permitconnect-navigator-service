@@ -138,7 +138,7 @@ const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-function sortComparator(sortValue: number | undefined, a: any, b: any) {
+function sortComparator(sortValue: number | undefined, a: string | number, b: string | number) {
   return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
 }
 

@@ -1,10 +1,11 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, type GenericObject } from 'vee-validate';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object, string, mixed } from 'yup';
+import { object, string, mixed, type InferType, boolean } from 'yup';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
@@ -51,19 +52,9 @@ const router = useRouter();
 const toast = useToast();
 const { options } = useCodeStore();
 
-// Store
-const { getConfig } = storeToRefs(useConfigStore());
-const { getProject } = storeToRefs(projectStore);
-const { getEnquiry } = storeToRefs(enquiryStore);
-
-// State
-const createdByFullNames: Ref<Record<string, string>> = ref({});
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const shownToProponent: Ref<boolean> = ref(false);
-
-// Actions
+// Form Schema
 const formSchema = object({
+  activityId: string(),
   bringForwardDate: mixed()
     .nullable()
     .when('type', {
@@ -79,6 +70,7 @@ const formSchema = object({
       otherwise: () => mixed().nullable()
     })
     .label('Bring forward state'),
+  noteHistoryId: string(),
   note: string()
     .when('noteHistoryId', {
       is: (noteHistoryId: string) => noteHistoryId === undefined,
@@ -88,6 +80,8 @@ const formSchema = object({
     .label('Note'),
   type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
   title: string().required().max(255, t('note.noteForm.titleLong')).label('Title'),
+  escalateToDirector: boolean(),
+  escalateToSupervisor: boolean(),
   escalationType: mixed()
     .when(['escalateToSupervisor', 'escalateToDirector'], {
       is: (escalateToSupervisor: boolean, escalateToDirector: boolean) => escalateToSupervisor || escalateToDirector,
@@ -97,15 +91,29 @@ const formSchema = object({
     .label('Escalation type')
 });
 
+export type FormSchemaType = InferType<typeof formSchema>;
+
+// Store
+const { getConfig } = storeToRefs(useConfigStore());
+const { getProject } = storeToRefs(projectStore);
+const { getEnquiry } = storeToRefs(enquiryStore);
+
+// State
+const createdByFullNames: Ref<Record<string, string>> = ref({});
+const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
+const initialFormValues: Ref<Partial<FormSchemaType> | undefined> = ref(undefined);
+const shownToProponent: Ref<boolean> = ref(false);
+
+// Actions
 function initializeFormValues() {
   if (noteHistory) {
     initialFormValues.value = {
       activityId: noteHistory.activityId,
       bringForwardDate: noteHistory?.bringForwardDate ? new Date(noteHistory.bringForwardDate) : null,
-      bringForwardState: noteHistory?.bringForwardState ?? null,
+      bringForwardState: noteHistory?.bringForwardState ?? undefined,
       escalateToSupervisor: noteHistory?.escalateToSupervisor,
       escalateToDirector: noteHistory?.escalateToDirector,
-      escalationType: noteHistory?.escalationType,
+      escalationType: noteHistory?.escalationType ?? undefined,
       noteHistoryId: noteHistory.noteHistoryId,
       type: noteHistory.type,
       title: noteHistory.title
@@ -119,7 +127,7 @@ function initializeFormValues() {
 }
 // }
 
-function onInvalidSubmit(e: any) {
+function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
@@ -139,15 +147,15 @@ function onDelete() {
             toast.success(t('note.noteForm.noteDeleted'));
             navigateToOrigin();
           })
-          .catch((e: any) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
+          .catch((e) => toast.error(t('note.noteForm.noteDeleteFailed'), e.message));
       }
     });
   }
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(data: GenericObject) {
   try {
-    const body = { ...data };
+    const body = { ...data } as NoteHistory;
 
     // Force some data based on the type of note
     if (body.type === NoteType.BRING_FORWARD) {
@@ -162,16 +170,19 @@ async function onSubmit(data: any) {
       body.shownToProponent = shownToProponent.value;
     }
 
+    const activityId = getProject.value?.activityId || getEnquiry.value?.activityId;
+    if (!activityId) throw new Error('No activity ID');
+
     if (!noteHistory) {
       await noteHistoryService.createNoteHistory({
         ...body,
-        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
+        activityId,
         note: data.note
       });
     } else {
       await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
         ...body,
-        activityId: getProject.value?.activityId || getEnquiry.value?.activityId,
+        activityId,
         note: data.note
       });
       if (
@@ -184,8 +195,8 @@ async function onSubmit(data: any) {
     }
     toast.success(t('note.noteForm.noteSaved'));
     navigateToOrigin();
-  } catch (e: any) {
-    toast.error(t('note.noteForm.noteSaveFailed'), e.message);
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('note.noteForm.noteSaveFailed'), e.message);
   }
 }
 
@@ -233,7 +244,9 @@ async function emailNotification() {
 
   if (supervisorsEmails.length === 0) return;
 
-  const configCC = getConfig.value.ches?.submission?.cc;
+  const configCC = getConfig.value?.ches?.submission?.cc;
+  if (!configCC) throw new Error('No "from" email');
+
   let body: string;
   if (resource?.value === Resource.ENQUIRY) {
     body = bringForwardEnquiryNotificationTemplate({

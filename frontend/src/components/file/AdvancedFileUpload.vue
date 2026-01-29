@@ -28,8 +28,8 @@ const { getConfig } = storeToRefs(useConfigStore());
 const projectStore = useProjectStore();
 
 // State
-const fileInput: Ref<any> = ref(null);
-const uploading: Ref<Boolean> = ref(false);
+const fileInput: Ref<HTMLInputElement | null> = ref(null);
+const uploading: Ref<boolean> = ref(false);
 
 // Actions
 const toast = useToast();
@@ -40,7 +40,7 @@ const onFileUploadClick = () => {
     return;
   }
 
-  fileInput.value.click();
+  fileInput.value?.click();
 };
 
 const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
@@ -52,7 +52,7 @@ const onFileUploadDragAndDrop = (event: FileUploadUploaderEvent) => {
   onUpload(Array.isArray(event.files) ? event.files : [event.files]);
 };
 
-const onUpload = async (files: Array<File>) => {
+const onUpload = async (files: File[]) => {
   uploading.value = true;
 
   await Promise.allSettled(
@@ -60,8 +60,10 @@ const onUpload = async (files: Array<File>) => {
       const sanitizedFile = new File([file], encodeURI(file.name), { type: file.type });
       return new Promise((resolve, reject) => {
         if (activityId) {
+          if (!getConfig.value?.coms.bucketId) throw new Error('No bucket ID');
+
           documentService
-            .createDocument(sanitizedFile, activityId, getConfig.value.coms.bucketId)
+            .createDocument(sanitizedFile, activityId, getConfig.value?.coms.bucketId)
             .then((response) => {
               if (response?.data) {
                 response.data.filename = decodeURI(response.data.filename);
@@ -70,7 +72,7 @@ const onUpload = async (files: Array<File>) => {
               }
               return resolve(response);
             })
-            .catch((e: any) => {
+            .catch((e) => {
               toast.error('Failed to upload document', e);
               return reject(e);
             });

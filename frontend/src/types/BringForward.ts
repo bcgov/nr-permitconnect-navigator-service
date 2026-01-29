@@ -1,4 +1,4 @@
-export type BringForward = {
+export interface BringForward {
   activityId: string;
   enquiryId?: string;
   noteId: string;
@@ -10,4 +10,4 @@ export type BringForward = {
   projectName?: string;
   bringForwardDate: string;
   createdByFullName?: string;
-};
+}

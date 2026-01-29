@@ -21,11 +21,11 @@ const { t } = useI18n();
 const authzStore = useAuthZStore();
 
 // State
-const bringForward: Ref<Array<BringForward>> = ref([]);
-const enquiries: Ref<Array<Enquiry>> = ref([]);
+const bringForward: Ref<BringForward[]> = ref([]);
+const enquiries: Ref<Enquiry[]> = ref([]);
 const loading: Ref<boolean> = ref(true);
-const permits: Ref<Array<Permit>> = ref([]);
-const projects: Ref<Array<ElectrificationProject>> = ref([]);
+const permits: Ref<Permit[]> = ref([]);
+const projects: Ref<ElectrificationProject[]> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers

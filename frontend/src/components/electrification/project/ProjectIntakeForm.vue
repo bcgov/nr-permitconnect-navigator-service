@@ -20,7 +20,8 @@ import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Document, OrgBookOption } from '@/types';
+import type { DeepPartial, Document, OrgBookOption } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeSchema';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{
@@ -49,8 +50,8 @@ const assignedActivityId: Ref<string | undefined> = ref(undefined);
 const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const editable: Ref<boolean> = ref(true);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<any | undefined> = ref(undefined);
-const orgBookOptions: Ref<Array<OrgBookOption>> = ref([]);
+const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
+const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationErrors = computed(() => {
   // Parse errors from vee-validate into a string[] of category headings
   if (!formRef?.value?.errors) return [];
@@ -74,12 +75,14 @@ function confirmSubmit(data: GenericObject) {
 
 async function emailConfirmation(actId: string, projectId: string, forProjectSubmission: boolean) {
   try {
-    const configCC = getConfig.value.ches?.submission?.cc;
+    const configCC = getConfig.value?.ches?.submission?.cc;
     const applicantName = formRef.value?.values.contacts.contactFirstName;
     const applicantEmail = formRef.value?.values.contacts.contactEmail;
     const initiative = toTitleCase(useAppStore().getInitiative);
     const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
     let body: string;
+
+    if (!configCC) throw new Error('No "from" email');
 
     if (forProjectSubmission) {
       body = confirmationTemplateElectrificationSubmission({
@@ -99,14 +102,14 @@ async function emailConfirmation(actId: string, projectId: string, forProjectSub
     const emailData = {
       from: configCC,
       to: [applicantEmail],
-      cc: configCC,
+      cc: [configCC],
       subject: subject,
       bodyType: 'html',
       body: body
     };
     await electrificationProjectService.emailConfirmation(emailData);
-  } catch (e: any) {
-    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), e);
+  } catch (e) {
+    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), String(e));
   }
 }
 
@@ -131,16 +134,16 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
-      .filter((obo: { [key: string]: string }) => obo.type === 'name')
+      .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: { [key: string]: string }) => ({
+      .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
   }
 }
 
-async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, showToast: boolean = true) {
+async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = true) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
@@ -156,12 +159,12 @@ async function onSaveDraft(data: GenericObject, isAutoSave: boolean = false, sho
           ? t('e.electrification.projectIntakeForm.draftAutoSaved')
           : t('e.electrification.projectIntakeForm.draftSaved')
       );
-  } catch (e: any) {
-    toast.error(t('e.electrification.projectIntakeForm.failedSaveDraft'), e);
+  } catch (e) {
+    toast.error(t('e.electrification.projectIntakeForm.failedSaveDraft'), String(e));
   }
 }
 
-async function onSubmit(data: any) {
+async function onSubmit(data: GenericObject) {
   // If there is a change to contact fields,
   // please update onAssistanceRequest() as well.
   editable.value = false;
@@ -203,8 +206,8 @@ async function onSubmit(data: any) {
     } else {
       throw new Error(t('e.electrification.projectIntakeForm.failedRetrieveDraft'));
     }
-  } catch (e: any) {
-    toast.error(t('e.electrification.projectIntakeForm.failedSaveIntake'), e);
+  } catch (e) {
+    toast.error(t('e.electrification.projectIntakeForm.failedSaveIntake'), String(e));
     editable.value = true;
   }
 }
@@ -215,7 +218,7 @@ onBeforeMount(async () => {
     projectStore.setDocuments([]);
 
     let response,
-      documents: Array<Document> = [];
+      documents: Document[] = [];
 
     if (draftId) {
       response = (await electrificationProjectService.getDraft(draftId)).data;
@@ -285,7 +288,7 @@ onBeforeMount(async () => {
         }
       };
     }
-  } catch (e) {
+  } catch {
     router.replace({ name: RouteName.EXT_ELECTRIFICATION });
   }
 });
@@ -422,7 +425,7 @@ onBeforeMount(async () => {
             :options="options.ElectrificationProjectType"
             @on-change="
               (e: string) => {
-                if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('bcHydroNumber', null);
+                if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('project.bcHydroNumber', null);
               }
             "
           />

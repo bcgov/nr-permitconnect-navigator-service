@@ -28,7 +28,7 @@ vi.mock('vue-i18n', () => ({
 
 const currentDate = new Date().toISOString();
 
-const testDocument: Array<Document> = [
+const testDocument: Document[] = [
   {
     createdBy: 'testCreatedBy',
     createdAt: currentDate,

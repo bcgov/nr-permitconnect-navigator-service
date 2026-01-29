@@ -5,7 +5,7 @@ import { Zone } from '@/utils/enums/application';
 
 import type { RouteRecordRaw } from 'vue-router';
 
-const routes: Array<RouteRecordRaw> = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/e',
     beforeEnter: [() => useAppStore().setZone(Zone.EXTERNAL)],

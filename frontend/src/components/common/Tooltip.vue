@@ -5,7 +5,7 @@ const {
   left,
   icon = 'fa-solid fa-circle-info',
   right = true,
-  text,
+  text = undefined,
   top
 } = defineProps<{
   bottom?: boolean;

@@ -36,7 +36,7 @@ describe('Navbar.vue', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  describe.skip('isAuthenticated', () => {
+  describe.todo('isAuthenticated', () => {
     it('shows correct navbar when true', () => {
       const wrapper = mount(Navbar, {
         global: {

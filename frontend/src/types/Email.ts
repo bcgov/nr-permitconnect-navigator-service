@@ -1,4 +1,4 @@
-export type Email = {
+export interface Email {
   bcc?: string[];
   bodyType: string;
   body: string;
@@ -10,4 +10,4 @@ export type Email = {
   subject: string;
   to: string[];
   tag?: string;
-};
+}
