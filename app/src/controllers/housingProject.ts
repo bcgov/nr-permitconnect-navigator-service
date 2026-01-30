@@ -31,7 +31,7 @@ import { NumResidentialUnits } from '../utils/enums/housing.ts';
 import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
 import { confirmationTemplateHousingSubmission } from '../utils/templates';
-import { getCurrentUsername, isTruthy, omit } from '../utils/utils.ts';
+import { getCurrentUsername, isTruthy, omit, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -433,7 +433,7 @@ async function emailProjectConfirmation(contact: Contact, housingProject: Housin
 
   const body = confirmationTemplateHousingSubmission({
     contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
-    initiative: Initiative.HOUSING,
+    initiative: toTitleCase(Initiative.HOUSING),
     activityId: housingProject.activityId,
     projectId: housingProject.housingProjectId
   });

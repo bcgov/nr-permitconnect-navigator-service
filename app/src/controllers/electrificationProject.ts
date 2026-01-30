@@ -26,7 +26,7 @@ import {
 import { Initiative } from '../utils/enums/application.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
 import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
-import { isTruthy } from '../utils/utils.ts';
+import { isTruthy, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -253,7 +253,7 @@ async function emailProjectConfirmation(contact: Contact, electrificationProject
 
   const body = confirmationTemplateElectrificationSubmission({
     contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
-    initiative: Initiative.ELECTRIFICATION,
+    initiative: toTitleCase(Initiative.ELECTRIFICATION),
     activityId: electrificationProject.activityId,
     projectId: electrificationProject.electrificationProjectId
   });
