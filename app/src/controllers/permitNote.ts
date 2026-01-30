@@ -15,7 +15,7 @@ import { Initiative } from '../utils/enums/application.ts';
 import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '../utils/templates';
-import { formatDateOnly, omit, readFeatureList } from '../utils/utils.ts';
+import { formatDateOnly, omit, readFeatureList, splitDateTime } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -73,7 +73,8 @@ async function emailPermitNoteConfirmation(tx: PrismaTransactionClient, permitNo
       const isFirstNote = !permit?.permitNote?.length;
       const sourceSystemKinds = await getSourceSystemKinds(tx);
       const permitTracking: PermitTracking[] = permit.permitTracking.map((pt) => {
-        const found = sourceSystemKinds.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) || ({} as any);
+        const found =
+          sourceSystemKinds.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) || ({} as SourceSystemKind);
         return {
           ...pt,
           sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
@@ -96,7 +97,9 @@ async function emailPermitNoteConfirmation(tx: PrismaTransactionClient, permitNo
       contactName: primaryContact?.firstName,
       activityId: project?.activityId,
       permitName: permit.permitType?.name,
-      submittedDate: permit.submittedDate ? formatDateOnly(permit.submittedDate) : formatDateOnly(permit.createdAt!),
+      submittedDate: permit.submittedDate
+        ? formatDateOnly(permit.submittedDate)
+        : formatDateOnly(splitDateTime(permit.createdAt!).date),
       projectId: projectId,
       permitId: permit.permitId
     };
@@ -105,10 +108,11 @@ async function emailPermitNoteConfirmation(tx: PrismaTransactionClient, permitNo
     } else {
       body = permitNoteNotificationTemplate(emailTemplateData);
     }
+    if (!primaryContact?.email) return;
 
     const emailData = {
       from: configCC,
-      to: [primaryContact?.email!],
+      to: [primaryContact?.email],
       cc: [configCC],
       subject: `Updates for project ${project?.activityId}, ${permit.permitType?.name}`,
       bodyType: 'html',

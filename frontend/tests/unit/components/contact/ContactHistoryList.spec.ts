@@ -84,6 +84,7 @@ const testSubmission: HousingProject = {
   assignedUserId: 'user123',
   applicationStatus: ApplicationStatus.NEW,
   contacts: [],
+  roadmapNote: 'Roadmap note',
   createdAt: undefined,
   createdBy: undefined,
   updatedAt: undefined,
