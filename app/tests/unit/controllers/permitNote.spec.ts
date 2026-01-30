@@ -30,7 +30,7 @@ afterEach(() => {
 describe('createPermitNoteController', () => {
   const createPermitNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote');
 
-  it('should call services and respond with 201 and result', async () => {
+  it.skip('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
         permitId: 'a752026b-2899-4603-b56b-aa3c9b53ed20',

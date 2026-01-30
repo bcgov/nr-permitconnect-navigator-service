@@ -3,14 +3,22 @@ import { v4 as uuidv4 } from 'uuid';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject } from '../services/coms';
+import { searchElectrificationProjects } from '../services/electrificationProject.ts';
 import { email } from '../services/email';
+import { searchHousingProjects } from '../services/housingProject';
 import { createNote } from '../services/note';
 import { createNoteHistory } from '../services/noteHistory';
+import { listPermits } from '../services/permit';
 import { Problem } from '../utils';
+import { PCNS_FULL_NAME } from '../utils/constants/application.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon';
+import { roadmapTemplate } from '../utils/templates';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Email, EmailAttachment, NoteHistory } from '../types';
+import type { Email, EmailAttachment, ElectrificationProject, HousingProject, NoteHistory, Permit } from '../types';
 
 /**
  * Send an email with the roadmap data
@@ -97,3 +105,60 @@ export const sendRoadmapController = async (
   });
   res.status(201).json(response);
 };
+
+/**
+ * Returns roadmap note content
+ * @param req Express Request object
+ * @param res Express Response object
+ */
+export const getRoadmapNoteController = async (
+  req: Request<never, never, never, { activityId: string }>,
+  res: Response
+) => {
+  const response = await transactionWrapper<string>(async (tx: PrismaTransactionClient) => {
+    let project: HousingProject | ElectrificationProject | undefined;
+    if (req.currentContext?.initiative === Initiative.HOUSING) {
+      project = (await searchHousingProjects(tx, { activityId: [req.query.activityId] }))[0];
+    } else if (req.currentContext?.initiative === Initiative.ELECTRIFICATION) {
+      project = (await searchElectrificationProjects(tx, { activityId: [req.query.activityId] }))[0];
+    }
+
+    const permits = await listPermits(tx, { activityId: req.query.activityId });
+    const primaryContact = project?.activity?.activityContact?.find(
+      (ac) => ac.role === ActivityContactRole.PRIMARY
+    )?.contact;
+
+    const permitStateApplied = getPermitTypeNamesByStatus(permits, PermitStage.APPLICATION_SUBMISSION);
+    const permitStateCompleted = getPermitTypeNamesByStatus(permits, PermitStage.POST_DECISION);
+    const permitPossiblyNeeded = getPermitTypeNamesByStatus(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+      getPermitTypeNamesByNeeded(permits, PermitNeeded.UNDER_INVESTIGATION).includes(value)
+    );
+    const permitStateNew = getPermitTypeNamesByStatus(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+      getPermitTypeNamesByNeeded(permits, PermitNeeded.YES).includes(value)
+    );
+
+    const rodmapNote = roadmapTemplate({
+      contactName:
+        primaryContact?.firstName && primaryContact?.lastName
+          ? `${primaryContact?.firstName} ${primaryContact?.lastName}`
+          : '',
+      projectName: project?.projectName,
+      activityId: project?.activityId,
+      permitStateNew: permitStateNew,
+      permitPossiblyNeeded: permitPossiblyNeeded,
+      permitStateApplied: permitStateApplied,
+      permitStateCompleted: permitStateCompleted,
+      navigatorName: PCNS_FULL_NAME
+    });
+    return rodmapNote;
+  });
+  res.status(201).json(response);
+};
+
+function getPermitTypeNamesByStatus(permits: Permit[], status: string) {
+  return permits.filter((p) => p.stage === status).map((p) => p.permitType?.name);
+}
+
+function getPermitTypeNamesByNeeded(permits: Permit[], needed: string) {
+  return permits.filter((p) => p.needed === needed).map((p) => p.permitType?.name);
+}

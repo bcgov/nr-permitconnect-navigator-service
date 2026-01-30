@@ -35,6 +35,7 @@ import {
   electrificationProjectService,
   noteHistoryService,
   permitService,
+  roadmapService,
   userService
 } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
@@ -168,6 +169,8 @@ function toEditNote(noteHistoryId: string) {
 
 onBeforeMount(async () => {
   const project = (await electrificationProjectService.getProject(projectId)).data;
+  const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
+  project.roadmapNote = roadMapNote;
   activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries, contacts] = (
     await Promise.all([

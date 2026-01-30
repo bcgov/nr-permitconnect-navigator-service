@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -10,6 +11,8 @@ import {
 import { createActivity, deleteActivity } from '../services/activity.ts';
 import { createActivityContact, listActivityContacts } from '../services/activityContact.ts';
 import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { searchElectrificationProjects } from '../services/electrificationProject.ts';
+import { email } from '../services/email.ts';
 import {
   createEnquiry,
   deleteEnquiry,
@@ -19,12 +22,15 @@ import {
   searchEnquiries,
   updateEnquiry
 } from '../services/enquiry.ts';
+import { searchHousingProjects } from '../services/housingProject';
+import { Initiative } from '../utils/enums/application.ts';
 import {
   ActivityContactRole,
   ApplicationStatus,
   EnquirySubmittedMethod,
   SubmissionType
 } from '../utils/enums/projectCommon.ts';
+import { confirmationTemplateEnquiry } from '../utils/templates';
 import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
@@ -107,11 +113,80 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       );
     }
 
+    await emailEnquiryConfirmation(
+      tx,
+      contactResponse[0],
+      data,
+      req.currentContext.initiative!,
+      req.body.basic?.relatedActivityId
+    );
+
     return { ...data, contact: contactResponse[0] };
   });
 
   res.status(201).json(result);
 };
+
+async function emailEnquiryConfirmation(
+  tx: PrismaTransactionClient,
+  contact: Contact,
+  enquiry: Enquiry,
+  initiative: string,
+  relatedActivityId?: string
+) {
+  const configCC = config.get('server.ches.submission.cc') as string;
+
+  let permitDescription = '';
+  let enquiryDescription: string = enquiry.enquiryDescription || '';
+  let firstTwoSentences: string;
+
+  // If has permit description convert \n to <br>
+  if (enquiryDescription.includes('Tracking ID:')) {
+    const descriptionSplit = enquiryDescription.split('\n\n');
+    permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
+    enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
+  }
+
+  // Get the first two sentences of the enquiry description
+  // If there are more than two sentences in enquiryDescription, add '..' to the end
+  firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
+  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
+  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
+
+  if (permitDescription) firstTwoSentences = permitDescription + firstTwoSentences;
+
+  let projectId: string | undefined;
+
+  if (relatedActivityId) {
+    if (initiative === Initiative.HOUSING) {
+      projectId = (await searchHousingProjects(tx, { activityId: [relatedActivityId] }))[0]?.housingProjectId;
+    }
+    if (initiative === Initiative.ELECTRIFICATION) {
+      projectId = (await searchElectrificationProjects(tx, { activityId: [relatedActivityId] }))[0]
+        ?.electrificationProjectId;
+    }
+  }
+
+  const body = confirmationTemplateEnquiry({
+    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    activityId: enquiry.activityId,
+    enquiryDescription: firstTwoSentences.trim(),
+    enquiryId: enquiry.enquiryId,
+    projectId: projectId ?? undefined,
+    initiative: initiative.toLowerCase()
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [contact.email!],
+    cc: [configCC],
+    subject: 'Confirmation of Enquiry Submission',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {

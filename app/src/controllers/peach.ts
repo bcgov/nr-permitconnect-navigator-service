@@ -28,7 +28,7 @@ const PEACH_TRACKING_PRIORITY = [
  * @param permitTrackings Array of permit tracking objects
  * @returns The highest priority tracker
  */
-const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTracking | undefined => {
+export const findPriorityPermitTracking = (permitTrackings: PermitTracking[]): PermitTracking | undefined => {
   let permitTracking: PermitTracking | undefined;
   let priorityIndex = PEACH_TRACKING_PRIORITY.length;
 

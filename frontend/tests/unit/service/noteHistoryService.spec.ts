@@ -3,7 +3,7 @@ import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
 import { noteHistoryService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
+import { Initiative, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note, NoteHistory } from '@/types';
@@ -146,13 +146,16 @@ describe('noteHistoryService', () => {
         it('calls with given data', () => {
           noteHistoryService.updateNoteHistory(
             TEST_NOTE_HISTORY.noteHistoryId as string,
-            { ...TEST_NOTE_HISTORY, note: 'text' } as NoteHistory & { note: string }
+            { ...TEST_NOTE_HISTORY, note: 'text', resource: Resource.ELECTRIFICATION_PROJECT } as NoteHistory & {
+              note: string;
+              resource: string;
+            }
           );
 
           expect(putSpy).toHaveBeenCalledTimes(1);
           expect(putSpy).toHaveBeenCalledWith(
             `${initiative.toLowerCase()}/${PATH}/${TEST_NOTE_HISTORY.noteHistoryId}`,
-            { ...TEST_NOTE_HISTORY, note: 'text' }
+            { ...TEST_NOTE_HISTORY, note: 'text', resource: Resource.ELECTRIFICATION_PROJECT }
           );
         });
       });

@@ -44,7 +44,7 @@ export default {
    * @function updateNoteHistory
    * @returns {Promise} An axios response
    */
-  async updateNoteHistory(noteHistoryId: string, data: NoteHistory & { note: string }) {
+  async updateNoteHistory(noteHistoryId: string, data: NoteHistory & { note: string; resource: string }) {
     return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`, data);
   }
 };
