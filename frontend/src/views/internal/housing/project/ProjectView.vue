@@ -35,6 +35,7 @@ import {
   housingProjectService,
   noteHistoryService,
   permitService,
+  roadmapService,
   userService
 } from '@/services';
 import { useAuthZStore, usePermitStore, useProjectStore } from '@/store';
@@ -168,6 +169,8 @@ function updateLiveName(name: string) {
 
 onBeforeMount(async () => {
   const project = (await housingProjectService.getProject(projectId)).data;
+  const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
+  project.roadmapNote = roadMapNote;
   activityId.value = project.activityId;
   const [documents, notes, permits, relatedEnquiries, contacts] = (
     await Promise.all([

@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -24,6 +25,7 @@ import {
 } from '../services/electrificationProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
+import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
 import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
@@ -236,12 +238,37 @@ export const submitElectrificationProjectDraftController = async (
         { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
       ]);
 
+      await emailProjectConfirmation(contactResponse[0], data);
+
       return { ...data, contact: contactResponse[0] };
     }
   );
 
   res.status(201).json({ ...result, contact: result.contact });
 };
+
+async function emailProjectConfirmation(contact: Contact, electrificationProject: ElectrificationProject) {
+  const configCC = config.get('server.ches.submission.cc') as string;
+  const subject = 'Confirmation of Project Submission';
+
+  const body = confirmationTemplateElectrificationSubmission({
+    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    initiative: Initiative.ELECTRIFICATION,
+    activityId: electrificationProject.activityId,
+    projectId: electrificationProject.electrificationProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [contact.email!],
+    cc: [configCC],
+    subject: subject,
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 export const upsertElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;

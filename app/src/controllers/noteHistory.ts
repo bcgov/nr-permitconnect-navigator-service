@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -9,6 +10,7 @@ import {
   generateUpdateStamps
 } from '../db/utils/utils.ts';
 import { searchElectrificationProjects } from '../services/electrificationProject.ts';
+import { email } from '../services/email.ts';
 import { searchEnquiries } from '../services/enquiry.ts';
 import { searchHousingProjects } from '../services/housingProject.ts';
 import { createNote } from '../services/note.ts';
@@ -21,12 +23,14 @@ import {
   updateNoteHistory
 } from '../services/noteHistory.ts';
 import { searchUsers } from '../services/user.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { getUsersWithGroups } from './user.ts';
+import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
+import { BringForwardType, NoteType } from '../utils/enums/projectCommon.ts';
+import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type { BringForward, Note, NoteHistory } from '../types/index.ts';
+import type { BringForward, ElectrificationProject, HousingProject, Note, NoteHistory, User } from '../types/index.ts';
 
 /**
  * Create a new note history and add the given note to it
@@ -172,13 +176,13 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
  * @param res Express Response object
  */
 export const updateNoteHistoryController = async (
-  req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+  req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: string }>,
   res: Response
 ) => {
   const response = await transactionWrapper<NoteHistory>(async (tx: PrismaTransactionClient) => {
-    const { note, ...history } = req.body;
+    const { note, resource, ...history } = req.body;
 
-    await updateNoteHistory(tx, {
+    const noteHistoryResponse = await updateNoteHistory(tx, {
       ...history,
       noteHistoryId: req.params.noteHistoryId,
       ...generateUpdateStamps(req.currentContext)
@@ -195,8 +199,64 @@ export const updateNoteHistoryController = async (
       });
     }
 
+    const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
+    if (isNavigator) await emailProjectConfirmation(tx, noteHistoryResponse, req.currentContext.initiative!, resource);
+
     return await getNoteHistory(tx, req.params.noteHistoryId);
   });
 
   res.status(200).json(response);
 };
+
+async function emailProjectConfirmation(
+  tx: PrismaTransactionClient,
+  noteHistory: NoteHistory,
+  initiative: Initiative,
+  resource: string
+) {
+  if (noteHistory.type !== NoteType.BRING_FORWARD || !noteHistory.escalateToSupervisor) {
+    return;
+  }
+
+  const allUsers = await searchUsers(tx, { active: true });
+
+  const supervisors = await getUsersWithGroups(tx, allUsers, {
+    group: [GroupName.SUPERVISOR],
+    initiative: [initiative]
+  });
+
+  const supervisorsEmails = supervisors.flatMap((user: User) => (user.email ? [user.email] : []));
+
+  if (supervisorsEmails.length === 0) return;
+
+  let body: string;
+  if (resource === Resource.ENQUIRY) {
+    body = bringForwardEnquiryNotificationTemplate({
+      activityId: noteHistory.activityId
+    });
+  } else {
+    let project: HousingProject | ElectrificationProject | undefined;
+    if (initiative === Initiative.HOUSING)
+      project = (await searchHousingProjects(tx, { activityId: [noteHistory.activityId] }))[0];
+    else if (initiative === Initiative.ELECTRIFICATION)
+      project = (await searchElectrificationProjects(tx, { activityId: [noteHistory.activityId] }))[0];
+
+    if (!project) return;
+    body = bringForwardProjectNotificationTemplate({
+      projectName: project.projectName,
+      activityId: noteHistory.activityId
+    });
+  }
+
+  const configCC = config.get('server.ches.submission.cc') as string;
+
+  const emailData = {
+    from: configCC,
+    to: supervisorsEmails,
+    subject: 'New escalation in PCNS',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
