@@ -126,8 +126,11 @@ export function createProjectFormNavigatorSchema() {
       companyNameRegistered: string()
         .notRequired()
         .max(255)
-        .label(t('i.housing.project.projectFormSchema.projectCompanyNameRegistered')),
-      projectName: string().required().max(255).label(t('i.housing.project.projectFormSchema.projectProjectName'))
+        .label(t('i.housing.project.projectFormNavigatorSchema.projectCompanyNameRegistered')),
+      projectName: string()
+        .required()
+        .max(255)
+        .label(t('i.housing.project.projectFormNavigatorSchema.projectProjectName'))
     }),
     projectDescription: string()
       .notRequired()

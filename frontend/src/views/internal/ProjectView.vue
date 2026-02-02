@@ -218,7 +218,7 @@ onBeforeMount(async () => {
         initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error(t('i.common.view.initiativeStateError'));
+        throw new Error(t('views.i.view.initiativeStateError'));
     }
 
     const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
@@ -310,47 +310,47 @@ onBeforeMount(async () => {
       "
     >
       <font-awesome-icon icon="fa-solid fa-eye" />
-      {{ t('i.common.projectView.seePropViewButtonLabel') }}
+      {{ t('views.i.projectView.seePropViewButtonLabel') }}
     </Button>
   </div>
 
   <Tabs :value="activeTab">
     <TabList>
-      <Tab :value="0">{{ t('i.common.projectView.tabInformation') }}</Tab>
+      <Tab :value="0">{{ t('views.i.projectView.tabInformation') }}</Tab>
       <Tab
         :value="1"
         class="no-underline"
       >
-        <span class="underline">{{ t('i.common.projectView.tabFiles') }}</span>
+        <span class="underline">{{ t('views.i.projectView.tabFiles') }}</span>
         ({{ getDocuments.length }})
       </Tab>
       <Tab
         :value="2"
         class="no-underline"
       >
-        <span class="underline">{{ t('i.common.projectView.tabAuthorizations') }}</span>
+        <span class="underline">{{ t('views.i.projectView.tabAuthorizations') }}</span>
         ({{ getPermits.length }})
       </Tab>
       <Tab
         :value="3"
         class="no-underline"
       >
-        <span class="underline">{{ t('i.common.projectView.tabNotes') }}</span>
+        <span class="underline">{{ t('views.i.projectView.tabNotes') }}</span>
         ({{ getNoteHistory.length }})
       </Tab>
-      <Tab :value="4">{{ t('i.common.projectView.tabRoadmap') }}</Tab>
+      <Tab :value="4">{{ t('views.i.projectView.tabRoadmap') }}</Tab>
       <Tab
         :value="5"
         class="no-underline"
       >
-        <span class="underline">{{ t('i.common.projectView.tabRelatedEnquiries') }}</span>
+        <span class="underline">{{ t('views.i.projectView.tabRelatedEnquiries') }}</span>
         ({{ getRelatedEnquiries.length }})
       </Tab>
       <Tab
         :value="6"
         class="no-underline"
       >
-        <span class="underline">{{ t('i.common.projectView.tabProjectTeam') }}</span>
+        <span class="underline">{{ t('views.i.projectView.tabProjectTeam') }}</span>
         ({{ getActivityContacts.length }})
       </Tab>
     </TabList>
@@ -560,7 +560,7 @@ onBeforeMount(async () => {
       <TabPanel :value="2">
         <div class="flex items-center pb-5">
           <div class="grow">
-            <p class="font-bold">{{ t('i.common.projectView.applicableAuthorizations') }} ({{ getPermits.length }})</p>
+            <p class="font-bold">{{ t('views.i.projectView.applicableAuthorizations') }} ({{ getPermits.length }})</p>
           </div>
           <Button
             aria-label="Add authorization"
@@ -578,7 +578,7 @@ onBeforeMount(async () => {
               class="pr-2"
               icon="fa-solid fa-plus"
             />
-            {{ t('i.common.projectView.addAuthorization') }}
+            {{ t('views.i.projectView.addAuthorization') }}
           </Button>
         </div>
         <!-- On going Authorizations -->
@@ -600,7 +600,7 @@ onBeforeMount(async () => {
           v-if="getAuthsUnderInvestigation.length > 0"
           class="mb-8 mt-16"
         >
-          <h4 class="mb-6">{{ t('i.common.projectView.underInvestigation') }}</h4>
+          <h4 class="mb-6">{{ t('views.i.projectView.underInvestigation') }}</h4>
           <div
             v-for="(permit, index) in getAuthsUnderInvestigation"
             :id="permit.permitId"
@@ -620,7 +620,7 @@ onBeforeMount(async () => {
           v-if="getAuthsNeeded.length > 0"
           class="mb-8 mt-16"
         >
-          <h4 class="mb-6">{{ t('i.common.projectView.needed') }}</h4>
+          <h4 class="mb-6">{{ t('views.i.projectView.needed') }}</h4>
           <div
             v-for="(permit, index) in getAuthsNeeded"
             :id="permit.permitId"
@@ -640,7 +640,7 @@ onBeforeMount(async () => {
           v-if="getAuthsCompleted.length > 0"
           class="mb-8 mt-16"
         >
-          <h4 class="mb-6">{{ t('i.common.projectView.completed') }}</h4>
+          <h4 class="mb-6">{{ t('views.i.projectView.completed') }}</h4>
           <div
             v-for="(permit, index) in getAuthsCompleted"
             :id="permit.permitId"
@@ -660,7 +660,7 @@ onBeforeMount(async () => {
           v-if="getAuthsNotNeeded.length > 0"
           class="mb-8 mt-16"
         >
-          <h4 class="mb-6">{{ t('i.common.projectView.notNeeded') }}</h4>
+          <h4 class="mb-6">{{ t('views.i.projectView.notNeeded') }}</h4>
           <div
             v-for="(permit, index) in getAuthsNotNeeded"
             :id="permit.permitId"
@@ -732,7 +732,7 @@ onBeforeMount(async () => {
         <div class="flex items-center pb-2">
           <div class="grow">
             <p class="font-bold">
-              {{ t('i.common.projectView.tabRelatedEnquiries') }} ({{ getRelatedEnquiries.length }})
+              {{ t('views.i.projectView.tabRelatedEnquiries') }} ({{ getRelatedEnquiries.length }})
             </p>
           </div>
         </div>

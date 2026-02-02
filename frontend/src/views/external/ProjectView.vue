@@ -125,7 +125,7 @@ function navigateToSubmissionIntakeView() {
 const assigneeName: Ref<string> = computed(() => {
   return assignee.value?.firstName
     ? `${assignee.value.firstName} ${assignee.value?.lastName}`
-    : t('e.common.projectView.toBeAssigned');
+    : t('views.e.projectView.toBeAssigned');
 });
 
 const createdByName: Ref<string> = computed(() => {
@@ -152,7 +152,7 @@ onBeforeMount(async () => {
       projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
       if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
     } catch {
-      toast.error(t('e.common.projectView.toastProjectLoadFailed'));
+      toast.error(t('views.e.projectView.toastProjectLoadFailed'));
       router.replace({ name: initiativeState.value.initiativeRouteName });
       return;
     }
@@ -162,7 +162,7 @@ onBeforeMount(async () => {
       const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
       projectStore.setPermits(permitsValue);
     } catch {
-      throw new Error(t('e.common.projectView.toastPermitLoadFailed'));
+      throw new Error(t('views.e.projectView.toastPermitLoadFailed'));
     }
 
     try {
@@ -170,7 +170,7 @@ onBeforeMount(async () => {
       const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
       projectStore.setNoteHistory(noteHistory);
     } catch {
-      throw new Error(t('e.common.projectView.toastNoteHistoryLoadFailed'));
+      throw new Error(t('views.e.projectView.toastNoteHistoryLoadFailed'));
     }
 
     projectStore.setProject(projectValue);
@@ -219,7 +219,7 @@ onBeforeMount(async () => {
         <Button
           v-if="canNavigate(provideNavigationPermission) && getProject?.submissionType !== SubmissionType.INAPPLICABLE"
           class="p-button-sm header-btn mt-3"
-          :label="t('e.common.projectView.askMyNavigator')"
+          :label="t('views.e.projectView.askMyNavigator')"
           @click="
             router.push({
               name: initiativeState.enquiryProjectRouteName
@@ -227,7 +227,7 @@ onBeforeMount(async () => {
           "
         >
           <AskMyNavigator />
-          {{ t('e.common.projectView.askMyNavigator') }}
+          {{ t('views.e.projectView.askMyNavigator') }}
         </Button>
       </div>
 
@@ -241,14 +241,14 @@ onBeforeMount(async () => {
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-file"
             />
-            {{ t('e.common.projectView.tabAuthorizations') }}
+            {{ t('views.e.projectView.tabAuthorizations') }}
           </Tab>
           <Tab :value="1">
             <font-awesome-icon
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-file-circle-question"
             />
-            {{ t('e.common.projectView.tabRelatedEnquiries') }}
+            {{ t('views.e.projectView.tabRelatedEnquiries') }}
           </Tab>
           <Tab
             v-if="isAdmin"
@@ -258,7 +258,7 @@ onBeforeMount(async () => {
               class="mr-2 ellipsis-icon"
               icon="fa-solid fa-user-group"
             />
-            {{ t('e.common.projectView.tabProjectTeam') }}
+            {{ t('views.e.projectView.tabProjectTeam') }}
           </Tab>
         </TabList>
         <TabPanels>
@@ -275,23 +275,23 @@ onBeforeMount(async () => {
               @note-banner:show-history="noteHistoryVisible = true"
             />
             <div class="disclaimer-block p-8 mt-8">
-              {{ t('e.common.projectView.disclaimer') }}
+              {{ t('views.e.projectView.disclaimer') }}
             </div>
             <div>
-              <h3 class="mb-8 mt-16">{{ t('e.common.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
+              <h3 class="mb-8 mt-16">{{ t('views.e.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
             </div>
             <div
               v-if="!getAuthsNeeded?.length"
               class="empty-block p-8 mb-2"
             >
-              {{ t('e.common.projectView.requiredAuthsEmpty') }}
+              {{ t('views.e.projectView.requiredAuthsEmpty') }}
             </div>
             <RequiredAuths
               v-if="getAuthsNeeded?.length"
               :auths-needed="getAuthsNeeded"
               :auths-not-needed="getAuthsNotNeeded"
             />
-            <h3 class="mt-20 mb-8">{{ t('e.common.projectView.ongoingAuths') }}</h3>
+            <h3 class="mt-20 mb-8">{{ t('views.e.projectView.ongoingAuths') }}</h3>
 
             <router-link
               v-for="permit in getAuthsOnGoing"
@@ -315,14 +315,14 @@ onBeforeMount(async () => {
               <AuthorizationCardProponent :permit="permit" />
             </router-link>
             <div class="empty-block p-8 mb-20">
-              {{ t('e.common.projectView.missingAuth') }}
+              {{ t('views.e.projectView.missingAuth') }}
             </div>
-            <h3 class="mt-20 mb-8">{{ t('e.common.projectView.completedAuths') }}</h3>
+            <h3 class="mt-20 mb-8">{{ t('views.e.projectView.completedAuths') }}</h3>
             <div
               v-if="!getAuthsCompleted?.length"
               class="empty-block p-8 mb-2"
             >
-              {{ t('e.common.projectView.emptyCompletedAuths') }}
+              {{ t('views.e.projectView.emptyCompletedAuths') }}
             </div>
             <router-link
               v-for="permit in getAuthsCompleted"
@@ -349,7 +349,7 @@ onBeforeMount(async () => {
           <TabPanel :value="1">
             <div>
               <div class="disclaimer-block p-8 mt-4 mb-8">
-                {{ t('e.common.projectView.relatedEnquiriesDesc') }}
+                {{ t('views.e.projectView.relatedEnquiriesDesc') }}
               </div>
               <RelatedEnquiryListProponent
                 :loading="loading"

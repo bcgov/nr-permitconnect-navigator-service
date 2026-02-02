@@ -32,12 +32,57 @@
       "logout": "Log out"
     }
   },
-  "e": {
-    "common": {
+  "views": {
+    "e": {
       "enquiryConfirmationView": {
         "confirmationHeader": "Confirmation of Submission",
         "confirmationIdLabel": "Enquiry ID",
-        "confirmationBanner": "Your enquiry has been successfully submitted."
+        "confirmationBanner": "Your enquiry has been successfully submitted.",
+        "electrification": {
+          "backTo": "Back to Electrification",
+          "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+        },
+        "housing": {
+          "backTo": "Back to Housing",
+          "message": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+        }
+      },
+      "initiativeView": {
+        "confirmationId": "Project ID",
+        "drafts": "Drafts",
+        "electrification": {
+          "header": "Electrification",
+          "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+        },
+        "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
+        "generalEnquiries": "General enquiries",
+        "housing": {
+          "header": "Housing",
+          "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+        },
+        "lastUpdated": "Last updated",
+        "myProjects": "My projects",
+        "onThisPage": "On this page",
+        "of": "of",
+        "pendingAuths": "There are authorizations pending your action.",
+        "projectState": "Project state",
+        "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
+        "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
+        "submitNewEnquiry": "Submit a general enquiry",
+        "submitNewProject": "Submit a new project"
+      },
+      "projectConfirmationView": {
+        "header": "Confirmation of Submission",
+        "electrification": {
+          "backTo": "Back to Electrification",
+          "message": "Your submission will be reviewed and you will be contacted by an Electrification Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+        },
+        "housing": {
+          "backTo": "Back to Housing",
+          "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+        },
+        "projectId": "Project ID:",
+        "success": "Your application has been successfully submitted."
       },
       "permitStatusView": {
         "applicationProgress": "Application progress",
@@ -48,6 +93,104 @@
         "unableToLoad": "Unable to load permit or project, please try again later",
         "updateHistory": "Update history"
       },
+      "projectView": {
+        "agency": "Agency",
+        "askMyNavigator": "Ask my Navigator",
+        "completedAuths": "Completed authorizations",
+        "createdBy": "Created by",
+        "crumbAppsPermits": "Applications and Permits",
+        "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
+        "emptyCompletedAuths": "You have no completed or closed authorizations at this time.",
+        "enquiryID": "Enquiry ID",
+        "latestUpdates": "Latest updates",
+        "listEmpty": "Your project related enquiries will be displayed here.",
+        "missingAuth": "Missing an authorization? Please contact your Navigator.",
+        "noUpdates": "No updates at the moment.",
+        "notNeeded": "Not needed",
+        "ongoingAuths": "Ongoing authorizations",
+        "rangeSeparator": "of",
+        "requiredAuths": "Potentially required authorizations",
+        "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no new authorization is needed at this time.",
+        "relatedEnquiries": "Related enquiries",
+        "relatedEnquiriesDesc": "Any project-related enquiries you or a team member have submitted through the Navigator Service website will appear on this page. You can submit an enquiry about this project to your assigned Navigator by clicking the 'Ask my Navigator' button in the top-right corner.",
+        "status": "Status",
+        "statusNotVerified": "This status has not yet been verified by Navigators",
+        "submittedDate": "Submitted date",
+        "tabAuthorizations": "Authorizations",
+        "tabProjectTeam": "Project team",
+        "tabRelatedEnquiries": "Related enquiries",
+        "toastEnquiryFailed": "Failed to submit enquiry",
+        "toastNoteHistoryLoadFailed": "Unable to load notes for this project, please try again later",
+        "toastProjectLoadFailed": "Unable to load project, please try again later",
+        "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
+        "toBeAssigned": "To be assigned",
+        "trackingId": "Tracking ID"
+      }
+    },
+    "i": {
+      "authorizationView": {
+        "projectPermitLoadError": "Unable to load permit or project, please try again later"
+      },
+      "contactsView": {
+        "contactsHeader": "Contacts list",
+        "proponentsTab": "Proponents"
+      },
+      "enquiryView": {
+        "completed": "(Completed)",
+        "header": "Enquiry:",
+        "linkedActivity": "This enquiry is linked to Project",
+        "invalidLinkedActivity": "This activity is linked to an invalid Activity"
+      },
+      "initiativeView": {
+        "electrification": {
+          "header": "Electrification"
+        },
+        "housing": {
+          "header": "Housing"
+        }
+      },
+      "noteView": {
+        "noteLoadError": "Unable to load note or project, please try again later"
+      },
+      "projectView": {
+        "addAuthorization": "Add authorization",
+        "applicableAuthorizations": "Applicable authorizations",
+        "completed": "Completed",
+        "needed": "Needed",
+        "notNeeded": "Not needed",
+        "seePropViewButtonLabel": "See Proponent's View",
+        "tabAuthorizations": "Authorizations",
+        "tabFiles": "Files",
+        "tabInformation": "Information",
+        "tabNotes": "Notes",
+        "tabProjectTeam": "Project team",
+        "tabRelatedEnquiries": "Related enquiries",
+        "tabRoadmap": "Roadmap",
+        "underInvestigation": "Under investigation"
+      },
+      "userManagementView": {
+        "cancel": "Cancel",
+        "confirm": "Confirm",
+        "createUser": "Create new user",
+        "errorIdpCfg": "Failed to obtain IDP config",
+        "header": "User Management",
+        "requestError": "Failed to request access",
+        "requestSuccess": "Access requested",
+        "revokeAdmin1": "The user will now lose all access to the system.",
+        "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
+        "revokeError": "Error revoking user access",
+        "revokeRequested": "Revoke requested",
+        "searchPlaceholder": "Search all",
+        "tab0": "Manage users",
+        "tab1": "User access requests",
+        "updateError": "Error updating user role",
+        "updateSuccess": "User role updated",
+        "userRevoked": "User revoked"
+      }
+    }
+  },
+  "e": {
+    "common": {
       "projectTeamAddModal": {
         "header": "Add user",
         "searchPlaceholder": "Search by First and Last name",
@@ -97,66 +240,9 @@
         "headerRevoke": "Revoke",
         "headerRole": "Role",
         "noUsers": "No users found."
-      },
-      "projectView": {
-        "agency": "Agency",
-        "askMyNavigator": "Ask my Navigator",
-        "completedAuths": "Completed authorizations",
-        "createdBy": "Created by",
-        "crumbAppsPermits": "Applications and Permits",
-        "disclaimer": "Based on the information you provided, the following permits are recommended. Please note, that this information is for guidance purposes only and is intended to help you prepare a complete application. Recommendations may be updated as we review your project or receive further details.",
-        "emptyCompletedAuths": "You have no completed or closed authorizations at this time.",
-        "enquiryID": "Enquiry ID",
-        "latestUpdates": "Latest updates",
-        "listEmpty": "Your project related enquiries will be displayed here.",
-        "missingAuth": "Missing an authorization? Please contact your Navigator.",
-        "noUpdates": "No updates at the moment.",
-        "notNeeded": "Not needed",
-        "ongoingAuths": "Ongoing authorizations",
-        "rangeSeparator": "of",
-        "requiredAuths": "Potentially required authorizations",
-        "requiredAuthsEmpty": "You may see this message while your Navigator is investigating the potentially required authorizations, or if no new authorization is needed at this time.",
-        "relatedEnquiries": "Related enquiries",
-        "relatedEnquiriesDesc": "Any project-related enquiries you or a team member have submitted through the Navigator Service website will appear on this page. You can submit an enquiry about this project to your assigned Navigator by clicking the 'Ask my Navigator' button in the top-right corner.",
-        "status": "Status",
-        "statusNotVerified": "This status has not yet been verified by Navigators",
-        "submittedDate": "Submitted date",
-        "tabAuthorizations": "Authorizations",
-        "tabProjectTeam": "Project team",
-        "tabRelatedEnquiries": "Related enquiries",
-        "toastEnquiryFailed": "Failed to submit enquiry",
-        "toastNoteHistoryLoadFailed": "Unable to load notes for this project, please try again later",
-        "toastProjectLoadFailed": "Unable to load project, please try again later",
-        "toastPermitLoadFailed": "Unable to load permits for this project, please try again later",
-        "toBeAssigned": "To be assigned",
-        "trackingId": "Tracking ID"
       }
     },
     "electrification": {
-      "electrificationView": {
-        "confirmationId": "Project ID",
-        "drafts": "Drafts",
-        "electrification": "Electrification",
-        "lastUpdated": "Last updated",
-        "myProjects": "My projects",
-        "of": "of",
-        "onThisPage": "On this page",
-        "pendingAuths": "There are authorizations pending your action.",
-        "projectState": "Project state",
-        "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
-        "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
-        "submitNewProject": "Submit a new project"
-      },
-      "enquiryConfirmationView": {
-        "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
-      },
-      "projectConfirmationView": {
-        "backToElectrification": "Back to Electrification",
-        "header": "Confirmation of Submission",
-        "message": "Your submission will be reviewed and you will be contacted by an Electrification Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
-        "projectId": "Project ID:",
-        "success": "Your application has been successfully submitted."
-      },
       "projectIntakeForm": {
         "bcHydroNumber": "What is your BC Hydro Call for Power project number? (optional)",
         "cancel": "Cancel",
@@ -184,35 +270,6 @@
         "upload2": "shape files",
         "upload3": ", etc)",
         "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
-      }
-    },
-    "housing": {
-      "enquiryConfirmationView": {
-        "message": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
-      },
-      "housingView": {
-        "confirmationId": "Project ID",
-        "drafts": "Drafts",
-        "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
-        "generalEnquiries": "General enquiries",
-        "housing": "Housing",
-        "lastUpdated": "Last updated",
-        "myProjects": "My projects",
-        "onThisPage": "On this page",
-        "of": "of",
-        "pendingAuths": "There are authorizations pending your action.",
-        "projectState": "Project state",
-        "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
-        "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
-        "submitNewEnquiry": "Submit a general enquiry",
-        "submitNewProject": "Submit a new project"
-      },
-      "projectConfirmationView": {
-        "backToHousing": "Back to Housing",
-        "header": "Confirmation of Submission",
-        "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
-        "projectId": "Project ID:",
-        "success": "Your application has been successfully submitted."
       }
     }
   },
@@ -268,22 +325,6 @@
         "cancelMessage": "Your changes have not been saved.",
         "savedMessage": "Form saved"
       },
-      "projectView": {
-        "addAuthorization": "Add authorization",
-        "applicableAuthorizations": "Applicable authorizations",
-        "completed": "Completed",
-        "needed": "Needed",
-        "notNeeded": "Not needed",
-        "seePropViewButtonLabel": "See Proponent's View",
-        "tabAuthorizations": "Authorizations",
-        "tabFiles": "Files",
-        "tabInformation": "Information",
-        "tabNotes": "Notes",
-        "tabProjectTeam": "Project team",
-        "tabRelatedEnquiries": "Related enquiries",
-        "tabRoadmap": "Roadmap",
-        "underInvestigation": "Under investigation"
-      },
       "projectForm": {
         "failedMessage": "Failed to save project",
         "reopenReject": "Cancel",
@@ -313,21 +354,9 @@
         "contactPhone": "Contact phone",
         "contactEmail": "Contact email",
         "searchContacts": "Search Contacts"
-      },
-      "contactsView": {
-        "contactsHeader": "Contacts list",
-        "proponentsTab": "Proponents"
       }
     },
     "electrification": {
-      "authorization": {
-        "authorizationView": {
-          "projectPermitLoadError": "Unable to load permit or project, please try again later"
-        }
-      },
-      "electrificationView": {
-        "header": "Electrification"
-      },
       "projectForm": {
         "additionalInfoHeader": "Additional information about project",
         "astNotesHeader": "Automated Status Tool (AST) Notes",
@@ -364,14 +393,6 @@
       }
     },
     "housing": {
-      "authorization": {
-        "authorizationView": {
-          "projectPermitLoadError": "Unable to load permit or project, please try again later"
-        }
-      },
-      "housingView": {
-        "header": "Housing"
-      },
       "project": {
         "projectForm": {
           "aaiUpdateLabel": "AAI Update",
@@ -482,30 +503,6 @@
         "roadmap": {
           "attached": "Attached"
         }
-      }
-    },
-    "projectView": {
-      "seePropViewButtonLabel": "See Proponent's View"
-    },
-    "user": {
-      "userManagementView": {
-        "cancel": "Cancel",
-        "confirm": "Confirm",
-        "createUser": "Create new user",
-        "errorIdpCfg": "Failed to obtain IDP config",
-        "header": "User Management",
-        "requestError": "Failed to request access",
-        "requestSuccess": "Access requested",
-        "revokeAdmin1": "The user will now lose all access to the system.",
-        "revokeAdmin2": "The user will be revoked from the system upon the approval of an admin.",
-        "revokeError": "Error revoking user access",
-        "revokeRequested": "Revoke requested",
-        "searchPlaceholder": "Search all",
-        "tab0": "Manage users",
-        "tab1": "User access requests",
-        "updateError": "Error updating user role",
-        "updateSuccess": "User role updated",
-        "userRevoked": "User revoked"
       }
     }
   },
@@ -752,12 +749,6 @@
     "submittedDate": "Submitted date",
     "tableAlt": "A table containing a list of enquiries"
   },
-  "enquiryView": {
-    "completed": "(Completed)",
-    "header": "Enquiry:",
-    "linkedActivity": "This enquiry is linked to Project",
-    "invalidLinkedActivity": "This activity is linked to an invalid Activity"
-  },
   "fileSelectModal": {
     "noFilesAvailable": "No files available."
   },
@@ -832,9 +823,6 @@
       "escalated": "Escalated",
       "lastUpdated": "Last updated",
       "shownToProponent": "Shown to Proponent"
-    },
-    "noteView": {
-      "noteLoadError": "Unable to load note or project, please try again later"
     },
     "shownToProponentModal": {
       "attnReqd": "Attention required"

@@ -19,26 +19,32 @@ const { projectId } = defineProps<{
 
 // Interfaces
 interface InitiativeState {
+  backTo: string;
   initiativeRouteName: RouteName;
   projectService: IProjectService;
   projectRouteName: RouteName;
+  message: string;
 }
-
-// Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
-  initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
-  projectService: electrificationProjectService,
-  projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT
-};
-
-const HOUSING_VIEW_STATE: InitiativeState = {
-  initiativeRouteName: RouteName.EXT_HOUSING,
-  projectService: housingProjectService,
-  projectRouteName: RouteName.EXT_HOUSING_PROJECT
-};
 
 // Composables
 const { t } = useI18n();
+
+// Constants
+const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+  backTo: t('views.e.projectConfirmationView.electrification.backTo'),
+  initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
+  projectService: electrificationProjectService,
+  projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
+  message: t('views.e.projectConfirmationView.electrification.message')
+};
+
+const HOUSING_VIEW_STATE: InitiativeState = {
+  backTo: t('views.e.projectConfirmationView.housing.backTo'),
+  initiativeRouteName: RouteName.EXT_HOUSING,
+  projectService: housingProjectService,
+  projectRouteName: RouteName.EXT_HOUSING_PROJECT,
+  message: t('views.e.projectConfirmationView.housing.message')
+};
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
@@ -70,14 +76,14 @@ onBeforeMount(async () => {
 
 <template>
   <div>
-    <h2>{{ t('e.housing.projectConfirmationView.header') }}</h2>
+    <h2>{{ t('views.e.projectConfirmationView.header') }}</h2>
     <Message
       severity="success"
       :closable="false"
     >
-      {{ t('e.housing.projectConfirmationView.success') }}
+      {{ t('views.e.projectConfirmationView.success') }}
     </Message>
-    <h3 class="inline-block my-7 mr-2">{{ t('e.housing.projectConfirmationView.projectId') }}</h3>
+    <h3 class="inline-block my-7 mr-2">{{ t('views.e.projectConfirmationView.projectId') }}</h3>
     <router-link
       :to="{
         name: initiativeState.projectRouteName,
@@ -87,11 +93,11 @@ onBeforeMount(async () => {
       <span class="text-2xl">{{ activityId }}</span>
     </router-link>
     <div>
-      {{ t('e.housing.projectConfirmationView.message') }}
+      {{ initiativeState.message }}
     </div>
     <div class="mt-6">
       <router-link :to="{ name: initiativeState.initiativeRouteName }">
-        {{ t('e.housing.projectConfirmationView.backToHousing') }}
+        {{ initiativeState.backTo }}
       </router-link>
     </div>
   </div>

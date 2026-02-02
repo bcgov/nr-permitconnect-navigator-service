@@ -36,6 +36,7 @@ interface InitiativeState {
   provideEnquiryRouteName?: RouteName;
   provideNavigationPermission: NavigationPermission;
   projectRouteName: RouteName;
+  projectTooltip: string;
   provideProjectIntakeRouteName: RouteName;
   enquiryIntakeRouteName?: RouteName;
 }
@@ -47,21 +48,23 @@ const router = useRouter();
 
 // Constants
 const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
-  headerText: t('e.electrification.electrificationView.electrification'),
+  headerText: t('views.e.initiativeView.electrification.header'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   provideDraftableProjectService: electrificationProjectService,
   provideNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
+  projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip'),
   provideProjectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE
 };
 
 const HOUSING_VIEW_STATE: InitiativeState = {
-  headerText: t('e.housing.housingView.housing'),
+  headerText: t('views.e.initiativeView.housing.header'),
   initiativeRouteName: RouteName.EXT_HOUSING,
   provideNavigationPermission: NavigationPermission.EXT_HOUSING,
   provideDraftableProjectService: housingProjectService,
   provideEnquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
+  projectTooltip: t('views.e.initiativeView.housing.projectsTooltip'),
   provideProjectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
   enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE
 };
@@ -222,7 +225,7 @@ onBeforeMount(async () => {
     </div>
 
     <div class="flex flex-row items-center w-full mt-4 mb-9">
-      <div class="font-bold mr-2">{{ t('e.housing.housingView.onThisPage') }}</div>
+      <div class="font-bold mr-2">{{ t('views.e.initiativeView.onThisPage') }}</div>
       <!-- eslint-disable vue/multiline-html-element-content-newline -->
       <!-- prettier-ignore -->
       <div>
@@ -234,7 +237,7 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#projects' })"
         >
-        {{ t('e.housing.housingView.myProjects') }}</router-link>
+        {{ t('views.e.initiativeView.myProjects') }}</router-link>
         |
         <router-link
           :to="{
@@ -244,7 +247,7 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#drafts' })"
         >
-        {{ t('e.housing.housingView.drafts') }}</router-link>
+        {{ t('views.e.initiativeView.drafts') }}</router-link>
         <span v-if="getInitiative === Initiative.HOUSING">
           |
           <router-link
@@ -255,7 +258,7 @@ onBeforeMount(async () => {
             class="no-underline"
             @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#enquiries' })"
           >
-          {{ t('e.housing.housingView.generalEnquiries') }}</router-link>
+          {{ t('views.e.initiativeView.generalEnquiries') }}</router-link>
         </span>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
@@ -270,16 +273,16 @@ onBeforeMount(async () => {
           id="projects"
           tabindex="-1"
         >
-          {{ t('e.housing.housingView.myProjects') }}
+          {{ t('views.e.initiativeView.myProjects') }}
         </h2>
         <Tooltip
           class="pl-2 text-xl"
           right
-          :text="t('e.housing.housingView.projectsTooltip')"
+          :text="initiativeState.projectTooltip"
         />
       </div>
       <Button @click="createIntake">
-        {{ t('e.housing.housingView.submitNewProject') }}
+        {{ t('views.e.initiativeView.submitNewProject') }}
         <font-awesome-icon
           class="ml-2"
           icon="fa-solid fa-arrow-right"
@@ -292,7 +295,7 @@ onBeforeMount(async () => {
         v-if="!projects.length"
         class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
       >
-        <p class="font-bold">{{ t('e.housing.housingView.projectsEmpty') }}</p>
+        <p class="font-bold">{{ t('views.e.initiativeView.projectsEmpty') }}</p>
       </div>
       <div
         v-for="(project, index) in displayedProjectsInOrder"
@@ -331,7 +334,7 @@ onBeforeMount(async () => {
               v-if="hasPendingAuth(project.activityId)"
               class="my-1"
               :state="PermitState.PENDING_CLIENT"
-              :display-text="t('e.housing.housingView.pendingAuths')"
+              :display-text="t('views.e.initiativeView.pendingAuths')"
             />
           </div>
           <div class="col-span-3 flex items-center">
@@ -344,11 +347,11 @@ onBeforeMount(async () => {
             </p>
           </div>
           <div class="col-span-3 flex items-center">
-            <p>{{ t('e.housing.housingView.confirmationId') }}: {{ project.activityId }}</p>
+            <p>{{ t('views.e.initiativeView.confirmationId') }}: {{ project.activityId }}</p>
           </div>
           <div class="col-span-3 flex items-center">
             <p>
-              {{ t('e.housing.housingView.lastUpdated') }}:
+              {{ t('views.e.initiativeView.lastUpdated') }}:
               {{ project.updatedAt ? formatDate(project.updatedAt) : 'N/A' }}
             </p>
           </div>
@@ -360,7 +363,7 @@ onBeforeMount(async () => {
           :rows="PAGE_ROWS"
           :total-records="projects.length"
           template="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink"
-          :current-page-report-template="`({currentPage} ${t('e.housing.housingView.of')} {totalPages})`"
+          :current-page-report-template="`({currentPage} ${t('views.e.initiativeView.of')} {totalPages})`"
         />
       </div>
     </div>
@@ -374,7 +377,7 @@ onBeforeMount(async () => {
         class="flex font-bold"
         tabindex="-1"
       >
-        {{ t('e.housing.housingView.drafts') }}
+        {{ t('views.e.initiativeView.drafts') }}
       </h2>
     </div>
 
@@ -400,17 +403,17 @@ onBeforeMount(async () => {
             class="font-bold"
             tabindex="-1"
           >
-            {{ t('e.housing.housingView.generalEnquiries') }}
+            {{ t('views.e.initiativeView.generalEnquiries') }}
           </h2>
           <Tooltip
             class="pl-2 text-xl"
             right
-            :text="t('e.housing.housingView.enquiriesTooltip')"
+            :text="t('views.e.initiativeView.enquiriesTooltip')"
           />
         </div>
 
         <Button @click="router.push({ name: initiativeState.enquiryIntakeRouteName })">
-          {{ t('e.housing.housingView.submitNewEnquiry') }}
+          {{ t('views.e.initiativeView.submitNewEnquiry') }}
           <font-awesome-icon
             class="ml-2"
             icon="fa-solid fa-arrow-right"

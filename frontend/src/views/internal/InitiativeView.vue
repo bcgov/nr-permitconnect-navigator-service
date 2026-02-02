@@ -38,7 +38,7 @@ const authzStore = useAuthZStore();
 
 // Constants
 const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
-  headerText: t('i.electrification.electrificationView.header'),
+  headerText: t('views.i.initiativeView.electrification.header'),
   navigationPermission: NavigationPermission.INT_ELECTRIFICATION,
   provideEnquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
   provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
@@ -47,7 +47,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
 };
 
 const HOUSING_VIEW_STATE: InitiativeState = {
-  headerText: t('i.housing.housingView.header'),
+  headerText: t('views.i.initiativeView.housing.header'),
   navigationPermission: NavigationPermission.INT_HOUSING,
   provideEnquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
   provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,

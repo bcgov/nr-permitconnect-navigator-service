@@ -99,7 +99,7 @@ onBeforeMount(async () => {
         if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
       }
     } catch {
-      throw new Error(t('e.common.permitStatusView.unableToLoad'));
+      throw new Error(t('views.e.permitStatusView.unableToLoad'));
     }
   } catch (e) {
     generalErrorHandler(e);
@@ -117,7 +117,7 @@ onBeforeMount(async () => {
         <Button
           v-if="canNavigate(initiativeState.initiativeNavigationPermission)"
           class="p-button-sm max-h-8 mt-3"
-          :label="t('e.common.permitStatusView.askNav')"
+          :label="t('views.e.permitStatusView.askNav')"
           @click="
             router.push({
               name: initiativeState.enquiryPermitRouteName,
@@ -126,7 +126,7 @@ onBeforeMount(async () => {
           "
         >
           <AskMyNavigator />
-          {{ t('e.common.permitStatusView.askNav') }}
+          {{ t('views.e.permitStatusView.askNav') }}
         </Button>
       </div>
 
@@ -138,13 +138,13 @@ onBeforeMount(async () => {
         class="mt-14 mb-8"
         :aria-hidden="hideTimelineFromScreenReader"
       >
-        {{ t('e.common.permitStatusView.applicationProgress') }}
+        {{ t('views.e.permitStatusView.applicationProgress') }}
       </h3>
       <AuthorizationTrackerCard
         v-if="getPermit"
         :permit="getPermit"
       />
-      <h4 class="mb-8 mt-14">{{ t('e.common.permitStatusView.updateHistory') }}</h4>
+      <h4 class="mb-8 mt-14">{{ t('views.e.permitStatusView.updateHistory') }}</h4>
       <AuthorizationUpdateHistory
         v-if="getPermit?.permitNote && getPermit.permitNote.length > 0"
         :authorization-notes="getPermit.permitNote"

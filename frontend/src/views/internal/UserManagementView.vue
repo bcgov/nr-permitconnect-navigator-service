@@ -150,17 +150,17 @@ async function onProcessUserAccessRequest() {
 function onRevoke(userAccessRequest: UserAccessRequest) {
   const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
 
-  const message = admin ? t('i.user.userManagementView.revokeAdmin1') : t('i.user.userManagementView.revokeAdmin2');
+  const message = admin ? t('views.i.userManagementView.revokeAdmin1') : t('views.i.userManagementView.revokeAdmin2');
   const successMessage = admin
-    ? t('i.user.userManagementView.userRevoked')
-    : t('i.user.userManagementView.revokeRequested');
+    ? t('views.i.userManagementView.userRevoked')
+    : t('views.i.userManagementView.revokeRequested');
 
   confirm.require({
     message: message,
     header: 'Revoke user',
-    acceptLabel: t('i.user.userManagementView.confirm'),
+    acceptLabel: t('views.i.userManagementView.confirm'),
     acceptClass: 'p-button-danger',
-    rejectLabel: t('i.user.userManagementView.cancel'),
+    rejectLabel: t('views.i.userManagementView.cancel'),
     rejectProps: { outlined: true },
     accept: async () => {
       try {
@@ -197,7 +197,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           toast.success(successMessage);
         }
       } catch (error) {
-        toast.error(`${t('i.user.userManagementView.revokeError')}: ${error}`);
+        toast.error(`${t('views.i.userManagementView.revokeError')}: ${error}`);
       }
     }
   });
@@ -232,13 +232,13 @@ async function onUserGroupChange(group: Group) {
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === user.userId);
         usersAndAccessRequests.value[idx]!.user.groups = [group];
 
-        toast.success(`${t('i.user.userManagementView.updateSuccess')}`);
+        toast.success(`${t('views.i.userManagementView.updateSuccess')}`);
       }
     }
   } catch (error) {
     if (isAxiosError(error))
-      toast.error(`${t('i.user.userManagementView.updateError')}, ${error.response?.data.message}`);
-    else if (error instanceof Error) toast.error(`${t('i.user.userManagementView.updateError')}, ${error.message}`);
+      toast.error(`${t('views.i.userManagementView.updateError')}, ${error.response?.data.message}`);
+    else if (error instanceof Error) toast.error(`${t('views.i.userManagementView.updateError')}, ${error.message}`);
   } finally {
     manageUserModalVisible.value = false;
   }
@@ -249,7 +249,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
     loading.value = true;
 
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
+    if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
     user.idp = idpCfg.idp;
 
@@ -278,11 +278,11 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       usersAndAccessRequests.value.push(userAccessRequest);
     }
 
-    toast.success(`${t('i.user.userManagementView.requestSuccess')}`);
+    toast.success(`${t('views.i.userManagementView.requestSuccess')}`);
   } catch (error) {
     if (isAxiosError(error))
-      toast.error(`${t('i.user.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
-    else if (error instanceof Error) toast.error(`${t('i.user.userManagementView.requestError')}`, error.message);
+      toast.error(`${t('views.i.userManagementView.requestError')}`, error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error(`${t('views.i.userManagementView.requestError')}`, error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;
@@ -299,7 +299,7 @@ onBeforeMount(async () => {
 
   try {
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-    if (!idpCfg) throw new Error(`${t('i.user.userManagementView.errorIdpCfg')}`);
+    if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
     const users: User[] = (
       await userService.searchUsers({
@@ -359,7 +359,7 @@ onBeforeMount(async () => {
   <div>
     <ProgressLoader v-if="loading" />
 
-    <ViewHeader :header="t('i.user.userManagementView.header')" />
+    <ViewHeader :header="t('views.i.userManagementView.header')" />
 
     <UserCreateModal
       v-if="createUserModalVisible"
@@ -383,14 +383,14 @@ onBeforeMount(async () => {
       :value="activeTab"
     >
       <TabList>
-        <Tab :value="0">{{ t('i.user.userManagementView.tab0') }}</Tab>
-        <Tab :value="1">{{ t('i.user.userManagementView.tab1') }}</Tab>
+        <Tab :value="0">{{ t('views.i.userManagementView.tab0') }}</Tab>
+        <Tab :value="1">{{ t('views.i.userManagementView.tab1') }}</Tab>
       </TabList>
       <TabPanels>
         <TabPanel :value="0">
           <div class="flex justify-between">
             <Button
-              :label="t('i.user.userManagementView.createUser')"
+              :label="t('views.i.userManagementView.createUser')"
               type="submit"
               icon="pi pi-plus"
               @click="createUserModalVisible = true"
@@ -399,7 +399,7 @@ onBeforeMount(async () => {
               <InputIcon class="pi pi-search" />
               <InputText
                 v-model="filters['global'].value"
-                :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+                :placeholder="t('views.i.userManagementView.searchPlaceholder')"
                 class="search-input"
               />
             </IconField>
@@ -423,7 +423,7 @@ onBeforeMount(async () => {
               <InputIcon class="pi pi-search" />
               <InputText
                 v-model="filters['global'].value"
-                :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+                :placeholder="t('views.i.userManagementView.searchPlaceholder')"
                 class="search-input"
               />
             </IconField>
@@ -446,7 +446,7 @@ onBeforeMount(async () => {
     <div v-else>
       <div class="flex justify-between">
         <Button
-          :label="t('i.user.userManagementView.createUser')"
+          :label="t('views.i.userManagementView.createUser')"
           type="submit"
           icon="pi pi-plus"
           @click="createUserModalVisible = true"
@@ -455,7 +455,7 @@ onBeforeMount(async () => {
           <InputIcon class="pi pi-search" />
           <InputText
             v-model="filters['global'].value"
-            :placeholder="t('i.user.userManagementView.searchPlaceholder')"
+            :placeholder="t('views.i.userManagementView.searchPlaceholder')"
             class="search-input"
           />
         </IconField>

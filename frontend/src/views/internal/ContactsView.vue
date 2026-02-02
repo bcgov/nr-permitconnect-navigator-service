@@ -79,13 +79,13 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <ViewHeader :header="t('i.contact.contactsView.contactsHeader')" />
+  <ViewHeader :header="t('views.i.contactsView.contactsHeader')" />
   <Tabs
     v-if="!loading"
     :value="0"
   >
     <TabList>
-      <Tab :value="0">{{ t('i.contact.contactsView.proponentsTab') }}</Tab>
+      <Tab :value="0">{{ t('views.i.contactsView.proponentsTab') }}</Tab>
     </TabList>
     <TabPanels>
       <TabPanel :value="0">

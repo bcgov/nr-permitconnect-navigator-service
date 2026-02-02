@@ -185,7 +185,7 @@ onBeforeMount(async () => {
 
 <template>
   <h1>
-    {{ t('enquiryView.header') }}
+    {{ t('views.i.enquiryView.header') }}
     <span
       v-if="getEnquiry?.activityId"
       class="mr-1"
@@ -196,7 +196,7 @@ onBeforeMount(async () => {
       v-if="isCompleted"
       class="ml-0"
     >
-      {{ t('enquiryView.completed') }}
+      {{ t('views.i.enquiryView.completed') }}
     </span>
   </h1>
   <Tabs :value="activeTab">
@@ -212,7 +212,7 @@ onBeforeMount(async () => {
           class="text-center"
           :closable="false"
         >
-          {{ t('enquiryView.linkedActivity') }}
+          {{ t('views.i.enquiryView.linkedActivity') }}
           <router-link
             :to="{
               name: initiativeState.provideProjectRouteName,
@@ -229,7 +229,7 @@ onBeforeMount(async () => {
           class="text-center"
           :closable="false"
         >
-          {{ t('enquiryView.invalidLinkedActivity') }}
+          {{ t('views.i.enquiryView.invalidLinkedActivity') }}
         </Message>
         <span v-if="!loading && getEnquiry">
           <EnquiryForm

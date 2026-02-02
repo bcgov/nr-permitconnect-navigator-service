@@ -113,7 +113,7 @@ onBeforeMount(async () => {
 
     loading.value = false;
   } catch (e) {
-    generalErrorHandler(e, t('note.noteView.noteLoadError'));
+    generalErrorHandler(e, t('views.i.noteView.noteLoadError'));
   }
 });
 </script>

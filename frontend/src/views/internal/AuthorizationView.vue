@@ -82,7 +82,7 @@ onBeforeMount(async () => {
     }
     loading.value = false;
   } catch (e) {
-    generalErrorHandler(e, t('i.housing.authorization.authorizationView.projectPermitLoadError'));
+    generalErrorHandler(e, t('views.i.authorizationView.projectPermitLoadError'));
   }
 });
 </script>

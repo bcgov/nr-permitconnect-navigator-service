@@ -12,7 +12,9 @@ import type { Ref } from 'vue';
 
 // Interfaces
 interface InitiativeState {
+  backTo: string;
   initiativeRouteName: RouteName;
+  message: string;
 }
 
 // Composables
@@ -20,11 +22,15 @@ const { t } = useI18n();
 
 // Constants
 const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
-  initiativeRouteName: RouteName.EXT_HOUSING
+  backTo: t('views.e.enquiryConfirmationView.electrification.backTo'),
+  initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
+  message: t('views.e.enquiryConfirmationView.electrification.message')
 };
 
 const HOUSING_VIEW_STATE: InitiativeState = {
-  initiativeRouteName: RouteName.EXT_HOUSING
+  backTo: t('views.e.enquiryConfirmationView.housing.backTo'),
+  initiativeRouteName: RouteName.EXT_HOUSING,
+  message: t('views.e.enquiryConfirmationView.housing.message')
 };
 
 // Store
@@ -54,20 +60,20 @@ onBeforeMount(async () => {
 <template>
   <div>
     <h2 class="mb-9">
-      {{ t('e.common.enquiryConfirmationView.confirmationHeader') }}
+      {{ t('views.e.enquiryConfirmationView.confirmationHeader') }}
     </h2>
     <Message
       severity="success"
       :closable="false"
     >
-      {{ t('e.common.enquiryConfirmationView.confirmationBanner') }}
+      {{ t('views.e.enquiryConfirmationView.confirmationBanner') }}
     </Message>
     <div class="mt-9">
-      {{ t('e.housing.enquiryConfirmationView.message') }}
+      {{ initiativeState.message }}
     </div>
     <div class="mt-7">
       <router-link :to="{ name: initiativeState.initiativeRouteName }">
-        {{ t('e.housing.projectConfirmationView.backToHousing') }}
+        {{ initiativeState.backTo }}
       </router-link>
     </div>
   </div>
