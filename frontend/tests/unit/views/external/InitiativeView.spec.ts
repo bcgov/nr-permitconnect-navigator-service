@@ -1,11 +1,13 @@
 import PrimeVue from 'primevue/config';
+import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { shallowMount } from '@vue/test-utils';
 
-import { electrificationProjectService, permitService } from '@/services';
-import ElectrificationView from '@/views/external/electrification/ElectrificationView.vue';
+import { enquiryService, housingProjectService, permitService } from '@/services';
+import InitiativeView from '@/views/external/InitiativeView.vue';
 
 import type { AxiosResponse } from 'axios';
+import { createTestingPinia } from '@pinia/testing';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -18,7 +20,7 @@ vi.mock('vue-router', () => ({
   useRoute: () => ({
     query: {},
     params: {},
-    name: 'electrification-route'
+    name: 'housing-route'
   }),
   useRouter: () => ({
     push: vi.fn()
@@ -33,12 +35,14 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const getDraftsSpy = vi.spyOn(electrificationProjectService, 'getDrafts');
-const searchProjectsSpy = vi.spyOn(electrificationProjectService, 'searchProjects');
+const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
+const getDraftsSpy = vi.spyOn(housingProjectService, 'getDrafts');
+const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
 
-getDraftsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 searchProjectsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getEnquiriesSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+getDraftsSpy.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 listPermitsSpy.mockResolvedValue({
   data: [
     { permitId: 'somePermitId', activityId: 'someActivityid', permitTypeId: 1, permitType: { name: 'Test Permit' } }
@@ -47,7 +51,18 @@ listPermitsSpy.mockResolvedValue({
 
 const wrapperSettings = () => ({
   global: {
-    plugins: [() => PrimeVue],
+    plugins: [
+      () =>
+        createTestingPinia({
+          initialState: {
+            auth: {
+              user: {}
+            }
+          }
+        }),
+      PrimeVue,
+      ToastService
+    ],
     stubs: ['font-awesome-icon', 'router-link'],
     directives: {
       Tooltip: Tooltip
@@ -55,9 +70,9 @@ const wrapperSettings = () => ({
   }
 });
 
-describe('ElectrificationView.vue', () => {
+describe('InitiativeView.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(ElectrificationView, wrapperSettings());
+    const wrapper = shallowMount(InitiativeView, wrapperSettings());
 
     expect(wrapper).toBeTruthy();
   });

@@ -64,7 +64,7 @@ onBeforeMount(async () => {
         initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error(t('i.common.view.initiativeStateError'));
+        throw new Error(t('views.initiativeStateError'));
     }
 
     activityId.value = (await initiativeState.value.projectService.getProject(projectId)).data.activityId;

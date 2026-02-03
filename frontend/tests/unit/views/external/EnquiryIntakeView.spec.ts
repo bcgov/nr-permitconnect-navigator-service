@@ -2,10 +2,10 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { mount } from '@vue/test-utils';
+import { shallowMount } from '@vue/test-utils';
 
 import { userService } from '@/services';
-import EnquiryConfirmationView from '@/views/external/housing/enquiry/EnquiryConfirmationView.vue';
+import EnquiryIntakeView from '@/views/external/EnquiryIntakeView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -16,17 +16,21 @@ useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosR
 const testEnquiryId = 'enquiry123';
 const testActivityId = 'activity123';
 
+// Mock dependencies
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: vi.fn()
   })
 }));
 
+vi.mock('vue-router', () => ({
+  useRoute: () => ({ query: {} })
+}));
+
 const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp = testActivityId) => ({
   props: {
     enquiryId: testEnquiryIdProp,
-    activityId: testActivityIdProp,
-    showEnquiryLink: ''
+    activityId: testActivityIdProp
   },
   global: {
     plugins: [
@@ -46,13 +50,13 @@ const wrapperSettings = (testEnquiryIdProp = testEnquiryId, testActivityIdProp =
   }
 });
 
-describe('EnquiryConfirmationView.vue', () => {
+describe('EnquiryIntakeView.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = mount(EnquiryConfirmationView, wrapperSettings());
+    const wrapper = shallowMount(EnquiryIntakeView, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });
 });

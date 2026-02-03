@@ -16,7 +16,7 @@ import {
 import { useAuthZStore } from '@/store';
 import { GroupName, Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/internal/InitiativeView.vue';
-import { mockAxiosResponse } from '../../../helpers';
+import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { Group } from '@/types';
 
@@ -32,16 +32,16 @@ vi.mock('primevue/usetoast', () => ({
   })
 }));
 
+vi.mock('@/lib/primevue/useToast', () => ({
+  useToast: () => ({
+    error: toastErrorMock
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: {} }),
   useRouter: () => ({
     replace: vi.fn()
-  })
-}));
-
-vi.mock('@/lib/primevue/useToast', () => ({
-  useToast: () => ({
-    error: toastErrorMock
   })
 }));
 
@@ -97,16 +97,12 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
       PrimeVue
     ],
     stubs: {
-      // Force PrimeVue stubs to render children
-      Tabs: { template: '<div><slot /></div>' },
-      TabList: { template: '<div><slot /></div>' },
-      Tab: { template: '<div><slot /></div>' },
-      TabPanels: { template: '<div><slot /></div>' },
-      TabPanel: { template: '<div><slot /></div>' }
+      ...PRIMEVUE_STUBS
     }
   }
 });
 
+// Tests
 beforeEach(() => {
   vi.mocked(enquiryService.searchEnquiries).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
@@ -121,7 +117,6 @@ afterEach(() => {
   vi.clearAllMocks();
 });
 
-// Tests
 describe('InitiativeView.vue', () => {
   it('does not render while loading', async () => {
     const wrapper = shallowMount(InitiativeView, wrapperSettings());
@@ -133,7 +128,7 @@ describe('InitiativeView.vue', () => {
     shallowMount(InitiativeView, wrapperSettings(Initiative.PCNS));
     await flushPromises();
 
-    expect(toastErrorMock).toHaveBeenCalledWith('Unable to determine initiative state', undefined, undefined);
+    expect(toastErrorMock).toHaveBeenCalledWith(t('views.initiativeStateError'), undefined, undefined);
   });
 
   it('catches API errors and calls toast', async () => {
@@ -146,8 +141,8 @@ describe('InitiativeView.vue', () => {
   });
 
   it.each([
-    { initiative: Initiative.ELECTRIFICATION, text: 'Electrification' },
-    { initiative: Initiative.HOUSING, text: 'Housing' }
+    { initiative: Initiative.ELECTRIFICATION, text: t('views.i.initiativeView.electrification.header') },
+    { initiative: Initiative.HOUSING, text: t('views.i.initiativeView.housing.header') }
   ])('sets the correct header for $initiative when loaded', async (value) => {
     const wrapper = shallowMount(InitiativeView, wrapperSettings(value.initiative));
     await flushPromises();

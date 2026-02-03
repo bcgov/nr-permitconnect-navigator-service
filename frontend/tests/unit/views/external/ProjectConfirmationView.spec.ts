@@ -4,8 +4,8 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
-import { electrificationProjectService } from '@/services';
-import ProjectConfirmationView from '@/views/external/electrification/project/ProjectConfirmationView.vue';
+import { housingProjectService } from '@/services';
+import ProjectConfirmationView from '@/views/external/ProjectConfirmationView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -15,7 +15,7 @@ vi.mock('vue-i18n', () => ({
   })
 }));
 
-const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
+const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
 
 getProjectSpy.mockResolvedValue({ data: { activityId: '123', projectId: '456' } } as AxiosResponse);
 

@@ -137,7 +137,7 @@ onBeforeMount(async () => {
         initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error(t('i.common.view.initiativeStateError'));
+        throw new Error(t('views.initiativeStateError'));
     }
 
     if (enquiryId) {
@@ -158,15 +158,17 @@ onBeforeMount(async () => {
     }
 
     // Batch lookup the users who have created notes
-    const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
-      noteHistoryId: x.noteHistoryId,
-      createdBy: x.createdBy
-    }));
+    const noteHistoryCreatedByUsers = getNoteHistory.value
+      .map((x) => ({
+        noteHistoryId: x.noteHistoryId,
+        createdBy: x.createdBy
+      }))
+      .filter((x) => x.noteHistoryId && x.createdBy);
 
     if (noteHistoryCreatedByUsers.length) {
       const noteHistoryUsers = (
         await userService.searchUsers({
-          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy!)
         })
       ).data;
 

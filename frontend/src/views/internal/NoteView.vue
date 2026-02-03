@@ -82,6 +82,8 @@ provide(enquiryServiceKey, enquiryService);
 
 onBeforeMount(async () => {
   try {
+    if (projectId && enquiryId) throw new Error(t('views.i.noteView.tooManyProps'));
+
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         viewState.value = projectId ? ELECTRIFICATION_VIEW_PROJECT_STATE : ELECTRIFICATION_VIEW_ENQUIRY_STATE;
@@ -90,7 +92,7 @@ onBeforeMount(async () => {
         viewState.value = projectId ? HOUSING_VIEW_PROJECT_PROJECT_STATE : HOUSING_VIEW_PROJECT_ENQUIRY_STATE;
         break;
       default:
-        throw new Error(t('i.common.view.initiativeStateError'));
+        throw new Error(t('views.initiativeStateError'));
     }
 
     if (!getProject.value && viewState.value.provideProjectService && projectId) {

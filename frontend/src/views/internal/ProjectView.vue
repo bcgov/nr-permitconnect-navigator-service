@@ -218,7 +218,7 @@ onBeforeMount(async () => {
         initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error(t('views.i.view.initiativeStateError'));
+        throw new Error(t('views.initiativeStateError'));
     }
 
     const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
@@ -254,15 +254,17 @@ onBeforeMount(async () => {
     }
 
     // Batch lookup the users who have created notes
-    const noteHistoryCreatedByUsers = getNoteHistory.value.map((x) => ({
-      noteHistoryId: x.noteHistoryId,
-      createdBy: x.createdBy
-    }));
+    const noteHistoryCreatedByUsers = getNoteHistory.value
+      .map((x) => ({
+        noteHistoryId: x.noteHistoryId,
+        createdBy: x.createdBy
+      }))
+      .filter((x) => x.noteHistoryId && x.createdBy);
 
     if (noteHistoryCreatedByUsers.length) {
       const noteHistoryUsers = (
         await userService.searchUsers({
-          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy).filter((x) => x !== undefined)
+          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy!)
         })
       ).data;
 
@@ -563,6 +565,7 @@ onBeforeMount(async () => {
             <p class="font-bold">{{ t('views.i.projectView.applicableAuthorizations') }} ({{ getPermits.length }})</p>
           </div>
           <Button
+            data-test-id="add-authorization-button"
             aria-label="Add authorization"
             :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.PERMIT, Action.CREATE)"
             @click="
@@ -747,7 +750,7 @@ onBeforeMount(async () => {
       </TabPanel>
       <TabPanel :value="6">
         <ProjectTeamTable
-          v-if="projectStore.getProject"
+          v-if="getProject"
           :activity-contacts="projectStore.getActivityContacts"
         />
       </TabPanel>

@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
 import { permitService } from '@/services';
-import ProjectIntakeView from '@/views/external/electrification/project/ProjectIntakeView.vue';
+import ProjectIntakeView from '@/views/external/ProjectIntakeView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -22,7 +22,7 @@ vi.mock('vue-router', () => ({
 
 const wrapperSettings = (testProjectIdProp = testProjectId, testActivityIdProp = testActivityId) => ({
   props: {
-    electrificationProjectId: testProjectIdProp,
+    housingProjectId: testProjectIdProp,
     activityId: testActivityIdProp
   },
   global: {

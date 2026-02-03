@@ -4,15 +4,15 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { shallowMount } from '@vue/test-utils';
 
-import { contactService, permitService, electrificationProjectService } from '@/services';
+import { contactService, permitService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
-import PermitStatusView from '@/views/external/electrification/permit/PermitStatusView.vue';
+import PermitStatusView from '@/views/external/PermitStatusView.vue';
 
 import type { AxiosResponse } from 'axios';
 
 const getPermitSpy = vi.spyOn(permitService, 'getPermit');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-const searchProjectsSpy = vi.spyOn(electrificationProjectService, 'searchProjects');
+const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -28,15 +28,12 @@ vi.mock('vue-router', () => ({
 }));
 
 const testPermitId = 'permit123';
-const testElectrificationProjectId = 'project123';
+const testHousingProjectId = 'project123';
 
-const wrapperSettings = (
-  testPermitIdProp = testPermitId,
-  testElectrificationProjectIdProp = testElectrificationProjectId
-) => ({
+const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdProp = testHousingProjectId) => ({
   props: {
     permitId: testPermitIdProp,
-    projectId: testElectrificationProjectIdProp
+    projectId: testHousingProjectIdProp
   },
   global: {
     plugins: [

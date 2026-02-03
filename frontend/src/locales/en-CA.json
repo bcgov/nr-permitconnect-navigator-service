@@ -33,6 +33,7 @@
     }
   },
   "views": {
+    "initiativeStateError": "Unable to determine initiative state",
     "e": {
       "enquiryConfirmationView": {
         "confirmationHeader": "Confirmation of Submission",
@@ -150,7 +151,8 @@
         }
       },
       "noteView": {
-        "noteLoadError": "Unable to load note or project, please try again later"
+        "noteLoadError": "Unable to load note or project, please try again later",
+        "tooManyProps": "Only supply enquiryId OR projectId. Not both."
       },
       "projectView": {
         "addAuthorization": "Add authorization",
@@ -335,9 +337,6 @@
         "bcRegistryId": "BC Registry ID",
         "searchBCRegistered": "Type to search the B.C registered name",
         "searchContacts": "Search Contacts"
-      },
-      "view": {
-        "initiativeStateError": "Unable to determine initiative state"
       }
     },
     "contact": {

@@ -55,7 +55,7 @@ onBeforeMount(async () => {
         initiativeState.value = HOUSING_VIEW_STATE;
         break;
       default:
-        throw new Error(t('i.common.view.initiativeStateError'));
+        throw new Error(t('views.initiativeStateError'));
     }
   } catch (e) {
     generalErrorHandler(e);

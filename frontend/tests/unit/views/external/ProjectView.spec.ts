@@ -10,9 +10,9 @@ import {
   contactService,
   enquiryService,
   permitService,
-  electrificationProjectService
+  housingProjectService
 } from '@/services';
-import ProjectView from '@/views/external/electrification/project/ProjectView.vue';
+import ProjectView from '@/views/external/ProjectView.vue';
 
 import type { AxiosResponse } from 'axios';
 
@@ -50,7 +50,7 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-const testElectrificationProjectId = 'project123';
+const testHousingProjectId = 'project123';
 const exampleContact = {
   contactId: 'contact123',
   name: 'John Doe',
@@ -58,7 +58,7 @@ const exampleContact = {
   phone: '123-456-7890'
 };
 
-const wrapperSettings = (projectId = testElectrificationProjectId) => ({
+const wrapperSettings = (projectId = testHousingProjectId) => ({
   props: {
     projectId: projectId
   },
@@ -90,9 +90,9 @@ describe('ProjectView.vue', () => {
     const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiries');
     const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
     const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-    const getProjectSpy = vi.spyOn(electrificationProjectService, 'getProject');
+    const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
     const searchContactSpy = vi.spyOn(contactService, 'searchContacts');
-    const searchProjectsSpy = vi.spyOn(electrificationProjectService, 'searchProjects');
+    const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
     listActivityContactsSpy.mockResolvedValue({
       data: []

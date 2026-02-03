@@ -7,9 +7,9 @@ import { default as i18n } from '@/i18n';
 import ViewHeader from '@/components/common/ViewHeader.vue';
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { contactService } from '@/services';
-import ContactsView from '@/views/internal/ContactsView.vue';
 import { Initiative, RouteName } from '@/utils/enums/application';
-import { mockAxiosResponse } from '../../../helpers';
+import ContactsView from '@/views/internal/ContactsView.vue';
+import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { ActivityContact } from '@/types';
 
@@ -25,16 +25,16 @@ vi.mock('primevue/usetoast', () => ({
   })
 }));
 
+vi.mock('@/lib/primevue/useToast', () => ({
+  useToast: () => ({
+    error: toastErrorMock
+  })
+}));
+
 vi.mock('vue-router', () => ({
   useRoute: () => ({ query: {} }),
   useRouter: () => ({
     replace: vi.fn()
-  })
-}));
-
-vi.mock('@/lib/primevue/useToast', () => ({
-  useToast: () => ({
-    error: toastErrorMock
   })
 }));
 
@@ -59,12 +59,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
       PrimeVue
     ],
     stubs: {
-      // Force PrimeVue stubs to render children
-      Tabs: { template: '<div><slot /></div>' },
-      TabList: { template: '<div><slot /></div>' },
-      Tab: { template: '<div><slot /></div>' },
-      TabPanels: { template: '<div><slot /></div>' },
-      TabPanel: { template: '<div><slot /></div>' }
+      ...PRIMEVUE_STUBS
     }
   }
 });
@@ -78,7 +73,7 @@ describe('ContactsView.vue', () => {
   it('sets the correct header', () => {
     const wrapper = shallowMount(ContactsView, wrapperSettings());
     const childComponent = wrapper.findComponent(ViewHeader);
-    expect(childComponent.props('header')).toBe('Contacts list');
+    expect(childComponent.props('header')).toBe(t('views.i.contactsView.contactsHeader'));
   });
 
   it('does not render tabs while loading', async () => {
@@ -100,7 +95,7 @@ describe('ContactsView.vue', () => {
     shallowMount(ContactsView, wrapperSettings(Initiative.PCNS));
     await flushPromises();
 
-    expect(toastErrorMock).toHaveBeenCalledWith('Unable to determine initiative state', undefined, undefined);
+    expect(toastErrorMock).toHaveBeenCalledWith(t('views.initiativeStateError'), undefined, undefined);
   });
 
   it('catches API errors and calls toast', async () => {
