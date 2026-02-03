@@ -177,15 +177,21 @@ export const getRecordEvents = (
   record: PeachRecord,
   n = 0,
   m = 0
-): { processEvent: ProcessEvent; onHoldEvent: CodingEvent } => {
-  const processEvents = [...record.process_event_set].sort((a, b) => compareProcessEvents(a, b, true));
+): { processEvent?: ProcessEvent; onHoldEvent?: CodingEvent } => {
+  const processEvents = record.process_event_set
+    ? [...record.process_event_set].sort((a, b) => compareProcessEvents(a, b, true))
+    : [];
   // TODO: Once onHold is implemented a tie breaker compartive function will be needed
-  const onHoldEvents = [...record.on_hold_event_set].sort((a, b) =>
-    compareDates(piesEventToDate(a.event), piesEventToDate(b.event), true)
-  );
+  /*  eslint-disable indent */
+  const onHoldEvents = record.on_hold_event_set
+    ? [...record.on_hold_event_set].sort((a, b) =>
+        compareDates(piesEventToDate(a.event), piesEventToDate(b.event), true)
+      )
+    : [];
+  /* eslint-enable indent */
 
-  const processEvent = processEvents.length > n ? processEvents[n] : processEvents[0];
-  const onHoldEvent = onHoldEvents.length > m ? onHoldEvents[m] : onHoldEvents[0];
+  const processEvent = processEvents && processEvents.length > n ? processEvents[n] : undefined;
+  const onHoldEvent = onHoldEvents && onHoldEvents.length > m ? onHoldEvents[m] : undefined;
 
   return { processEvent, onHoldEvent };
 };
@@ -207,10 +213,12 @@ const generateStatus = (
   const phase = PermitPhase.APPLICATION;
 
   let statusKey = processEvent.process.code;
-
   if (statusKey in PeachTerminatedStage) {
-    const { processEvent } = getRecordEvents(record, 1);
-    const prevStageCode = processEvent.process.code_set[1] as string;
+    const { processEvent: prevProcessEvent } = getRecordEvents(record, 1);
+    if (!prevProcessEvent) {
+      return { phase, stage: undefined, state: undefined };
+    }
+    const prevStageCode = prevProcessEvent.process.code_set[1];
     statusKey = `${prevStageCode}:${statusKey}`;
   }
 
@@ -265,9 +273,11 @@ export function piesEventToDateParts(piesEvent: PiesEvent): DateTimeStrings {
  * @returns A split date representing the submitted date and time, or both null if not found
  */
 const findSubmittedDate = (record: PeachRecord): NullableDateTimeStrings => {
-  for (const pe of record.process_event_set) {
-    if (pe.process.code === PEACH_SUBMITTED_STATE) {
-      return piesEventToDateParts(pe.event);
+  if (record.process_event_set) {
+    for (const pe of record.process_event_set) {
+      if (pe.process.code === PEACH_SUBMITTED_STATE) {
+        return piesEventToDateParts(pe.event);
+      }
     }
   }
   return {
@@ -282,9 +292,11 @@ const findSubmittedDate = (record: PeachRecord): NullableDateTimeStrings => {
  * @returns A split date representing the decision date and time, or both null if not found
  */
 const findDecisionDate = (record: PeachRecord): NullableDateTimeStrings => {
-  for (const pe of record.process_event_set) {
-    if (PEACH_DECISION_STATES.has(pe.process.code)) {
-      return piesEventToDateParts(pe.event);
+  if (record.process_event_set) {
+    for (const pe of record.process_event_set) {
+      if (PEACH_DECISION_STATES.has(pe.process.code)) {
+        return piesEventToDateParts(pe.event);
+      }
     }
   }
   return {
@@ -312,6 +324,8 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   // } else {
   //   // set set permit values based on process
   // }
+
+  if (!processEvent) return null;
 
   const { stage, state } = generateStatus(processEvent, record);
 
