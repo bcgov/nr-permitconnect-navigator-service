@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.28](https://img.shields.io/badge/Version-0.0.28-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.0](https://img.shields.io/badge/AppVersion-0.9.0-informational?style=flat-square)
+![Version: 0.0.29](https://img.shields.io/badge/Version-0.0.29-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.9.0](https://img.shields.io/badge/AppVersion-0.9.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -59,6 +59,8 @@ Kubernetes: `>= 1.13.0`
 | oidcSecretOverride.password | string | `nil` |  |
 | oidcSecretOverride.username | string | `nil` |  |
 | patroni.enabled | bool | `false` |  |
+| peachSecretOverride.password | string | `nil` |  |
+| peachSecretOverride.username | string | `nil` |  |
 | peachSync.activeDeadlineSeconds | int | `1800` |  |
 | peachSync.backoffLimit | int | `1` |  |
 | peachSync.concurrencyPolicy | string | `"Forbid"` |  |

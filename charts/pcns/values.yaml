@@ -184,6 +184,12 @@ config:
     SERVER_ATS_TOKENURL: ~
 
 # Modify the following variables if you need to acquire secret values from a custom-named resource
+atsSecretOverride:
+  username: ~
+  password: ~
+chesSecretOverride:
+  username: ~
+  password: ~
 dbSecretOverride:
   username: ~
   password: ~
@@ -193,19 +199,16 @@ form1SecretOverride:
 form2SecretOverride:
   username: ~
   password: ~
-chesSecretOverride:
-  username: ~
-  password: ~
 objectStorageSecretOverride:
   username: ~
   password: ~
 oidcSecretOverride:
   username: ~
   password: ~
-ssoSecretOverride:
+peachSecretOverride:
   username: ~
   password: ~
-atsSecretOverride:
+ssoSecretOverride:
   username: ~
   password: ~
 
