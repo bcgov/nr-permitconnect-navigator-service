@@ -4,18 +4,7 @@ import { computed, ref } from 'vue';
 import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
 
 import type { Ref } from 'vue';
-import type {
-  ActivityContact,
-  Document,
-  ElectrificationProject,
-  Enquiry,
-  HousingProject,
-  NoteHistory,
-  Permit
-} from '@/types';
-
-// Types
-export type ProjectType = ElectrificationProject | HousingProject | undefined;
+import type { ActivityContact, Document, Enquiry, NoteHistory, Permit, Project } from '@/types';
 
 export interface ProjectStoreState {
   activityContacts: Ref<ActivityContact[]>;
@@ -23,7 +12,7 @@ export interface ProjectStoreState {
   relatedEnquiries: Ref<Enquiry[]>;
   noteHistory: Ref<NoteHistory[]>;
   permits: Ref<Permit[]>;
-  project: Ref<ProjectType>;
+  project: Ref<Project | undefined>;
 }
 
 export const useProjectStore = defineStore('project', () => {
@@ -210,7 +199,7 @@ export const useProjectStore = defineStore('project', () => {
     if (idx >= 0) state.permits.value[idx] = data;
   }
 
-  function setProject(data: ProjectType) {
+  function setProject(data: Project | undefined) {
     state.project.value = data;
   }
 

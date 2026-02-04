@@ -8,7 +8,7 @@ import { formatDate } from '@/utils/formatters';
 import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Draft, ElectrificationProject, HousingProject } from '@/types';
+import type { Draft, Project } from '@/types';
 
 // Props
 const { loading, drafts } = defineProps<{
@@ -24,7 +24,7 @@ const projectService = inject(draftableProjectServiceKey);
 const emit = defineEmits(['submissionDraft:delete']);
 
 // State
-const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
+const selection: Ref<Project | undefined> = ref(undefined);
 
 // Actions
 const confirm = useConfirm();

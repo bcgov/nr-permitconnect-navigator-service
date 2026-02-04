@@ -28,7 +28,7 @@ import { contactValidator } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { ElectrificationProject, Enquiry, HousingProject, Permit } from '@/types';
+import type { Enquiry, Permit, Project } from '@/types';
 import { Initiative, RouteName } from '@/utils/enums/application';
 
 // Props
@@ -38,7 +38,7 @@ const {
   permit = undefined
 } = defineProps<{
   enquiryId?: string;
-  project?: ElectrificationProject | HousingProject;
+  project?: Project;
   permit?: Permit;
 }>();
 
