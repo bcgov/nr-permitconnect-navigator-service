@@ -57,10 +57,10 @@ describe('peachRecordParser', () => {
 
       const { processEvent } = getRecordEvents(record);
 
-      expect(processEvent.process.code).toBe('REJECTED');
+      expect(processEvent?.process.code).toBe('REJECTED');
     });
 
-    it('falls back to the first process event when n is out of range', () => {
+    it('returns undefined when n is out of range', () => {
       const record: PeachRecord = {
         ...TEST_PEACH_RECORD_1,
         process_event_set: [
@@ -78,8 +78,7 @@ describe('peachRecordParser', () => {
 
       const { processEvent } = getRecordEvents(record, 5);
 
-      expect(processEvent.event.start_datetime).toBe('2024-09-01T00:00:00.000Z');
-      expect(processEvent.process.code).toBe('SUBMITTED');
+      expect(processEvent).toBe(undefined);
     });
   });
 

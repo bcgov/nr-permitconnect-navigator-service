@@ -7,6 +7,27 @@ import type { AxiosInstance, AxiosRequestConfig } from 'axios';
 import type { Record as PeachRecord } from '../types/pies.d.ts';
 
 /**
+ * Gets Auth token using PEACH client credentials
+ * @returns A valid access token
+ */
+async function getToken() {
+  const response = await axios({
+    method: 'POST',
+    url: config.get('server.peach.tokenUrl'),
+    data: {
+      grant_type: 'client_credentials',
+      client_id: config.get('server.peach.clientId'),
+      client_secret: config.get('server.peach.clientSecret')
+    },
+    headers: {
+      'Content-type': 'application/x-www-form-urlencoded'
+    },
+    withCredentials: true
+  });
+  return response.data.access_token;
+}
+
+/**
  * Returns an Axios instance for the PEACH API
  * @param options Axios request config options
  * @returns An axios instance
@@ -19,6 +40,13 @@ function peachAxios(options: AxiosRequestConfig = {}): AxiosInstance {
     ...options
   });
 
+  // Add bearer token
+  instance.interceptors.request.use(async (config) => {
+    const token = await getToken();
+    const auth = token ? `Bearer ${token}` : '';
+    config.headers['Authorization'] = auth;
+    return config;
+  });
   return instance;
 }
 

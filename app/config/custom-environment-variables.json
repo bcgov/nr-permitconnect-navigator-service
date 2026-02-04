@@ -89,7 +89,10 @@
       "navEmail": "SERVER_PCNS_NAVEMAIL"
     },
     "peach": {
-      "apiPath": "SERVER_PEACH_APIPATH"
+      "apiPath": "SERVER_PEACH_APIPATH",
+      "clientId": "SERVER_PEACH_CLIENTID",
+      "clientSecret": "SERVER_PEACH_CLIENTSECRET",
+      "tokenUrl": "SERVER_PEACH_TOKENURL"
     },
     "port": "SERVER_PORT",
     "sso": {

@@ -32,6 +32,7 @@ config:
     SERVER_PCNS_APPURL: https://pcns-prod-master.apps.silver.devops.gov.bc.ca
     SERVER_PCNS_NAVEMAIL: Navigator.Service@gov.bc.ca
     SERVER_PEACH_APIPATH: "https://nr-peach-prod-main-api.azurewebsites.net/api/v1"
+    SERVER_PEACH_TOKENURL: https://loginproxy.gov.bc.ca/auth/realms/permittingexchange/protocol/openid-connect/token
     SERVER_PORT: "8080"
     SERVER_SSO_APIPATH: https://api.loginproxy.gov.bc.ca/api/v1
     SERVER_SSO_TOKENURL: https://loginproxy.gov.bc.ca/auth/realms/standard/protocol/openid-connect/token
