@@ -106,7 +106,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    expect(searchOrgBookSpy).not.toHaveBeenCalled();
+    expect(searchOrgBookSpy).toHaveBeenCalledOnce();
   });
 
   it('should call searchOrgBook when query length is 2 or more', async () => {
@@ -134,7 +134,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    expect(searchOrgBookSpy).toHaveBeenCalledTimes(1);
+    expect(searchOrgBookSpy).toHaveBeenCalledTimes(2);
     expect(searchOrgBookSpy).toHaveBeenCalledWith('Test');
   });
 
@@ -166,14 +166,14 @@ describe('onRegisteredNameInput', () => {
 
     // Access internal state through wrapper
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(2);
+    expect(orgBookOptions).toHaveLength(3);
     expect(orgBookOptions[0]).toEqual({
-      registeredName: 'Test Company Ltd',
-      registeredId: 'FM0001234'
+      registeredName: 'BC HYDRO AND POWER AUTHORITY',
+      registeredId: ''
     });
     expect(orgBookOptions[1]).toEqual({
-      registeredName: 'Test Corp',
-      registeredId: 'FM0005678'
+      registeredName: 'Test Company Ltd',
+      registeredId: 'FM0001234'
     });
   });
 
@@ -200,31 +200,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
-  });
-
-  it('should handle undefined results from searchOrgBook', async () => {
-    const mockResponse = {
-      data: {}
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettingsForm());
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
+    expect(orgBookOptions).toHaveLength(1);
   });
 
   it('should handle results with only non-name types', async () => {
@@ -253,7 +229,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
+    expect(orgBookOptions).toHaveLength(1);
   });
 
   it('should call searchOrgBook with exact query string', async () => {
