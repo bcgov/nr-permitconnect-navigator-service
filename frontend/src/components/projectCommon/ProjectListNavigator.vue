@@ -20,7 +20,7 @@ import {
 import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Initiative } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
@@ -77,7 +77,7 @@ const selection: Ref<Project | undefined> = ref(undefined);
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 /**
- * Filter projects based on status
+ * Filter projects based on status and reduce contacts to primary contact only
  * Inject a joined location field for housing for proper sorting and searching
  */
 const filteredProjects = computed(() => {
@@ -86,12 +86,27 @@ const filteredProjects = computed(() => {
       return selectedFilter.value.statuses.includes(element.applicationStatus);
     })
     .map((x) => {
+      const primaryContact = x.activity?.activityContact?.find(
+        (contact) => contact.role === ActivityContactRole.PRIMARY
+      );
+
       if ('housingProjectId' in x) {
         return {
           ...x,
-          location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', ')
+          location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),
+          activity: {
+            ...x.activity,
+            activityContact: primaryContact ? [primaryContact] : []
+          }
         };
-      } else return x;
+      } else
+        return {
+          ...x,
+          activity: {
+            ...x.activity,
+            activityContact: primaryContact ? [primaryContact] : []
+          }
+        };
     });
 });
 
