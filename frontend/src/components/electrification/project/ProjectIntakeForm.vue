@@ -13,6 +13,7 @@ import { createProjectIntakeSchema } from '@/validators/electrification/projectI
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useAppStore, useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
+import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
 import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
@@ -140,6 +141,12 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
+    orgBookOptions.value.push({
+      registeredName: BC_HYDRO_POWER_AUTHORITY,
+      registeredId: ''
+    });
+    // sort options alphabetically
+    orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
   }
 }
 

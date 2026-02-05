@@ -37,7 +37,7 @@ export function createProjectFormSchema(
     project: object({
       companyIdRegistered: string().nullable(),
       bcEnvironmentAssessNeeded: string().notRequired().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
-      bcHydroNumber: string().required().max(255).label('BC Hydro Call for Power project number'),
+      bcHydroNumber: string().notRequired().max(255).label('BC Hydro Call for Power project number'),
       companyNameRegistered: string()
         .required()
         .max(255)
