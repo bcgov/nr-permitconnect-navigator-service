@@ -35,6 +35,7 @@ export const PRIMEVUE_STUBS = {
           </button>
         `
   },
+  Message: { template: '<div><slot /></div>' },
   Tabs: { template: '<div><slot /></div>' },
   TabList: { template: '<div><slot /></div>' },
   Tab: { template: '<div><slot /></div>' },

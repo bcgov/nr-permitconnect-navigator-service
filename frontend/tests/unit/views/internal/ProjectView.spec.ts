@@ -1,8 +1,6 @@
 import { nextTick } from 'vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 
 import { default as i18n } from '@/i18n';
@@ -114,9 +112,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
         stubActions: false
       }),
       i18n,
-      PrimeVue,
-      ConfirmationService,
-      ToastService
+      PrimeVue
     ],
     stubs: {
       'font-awesome-icon': true,

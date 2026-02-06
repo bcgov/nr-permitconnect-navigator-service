@@ -1,22 +1,28 @@
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import { shallowMount } from '@vue/test-utils';
+import { flushPromises, shallowMount } from '@vue/test-utils';
 
-import { contactService, permitService, housingProjectService } from '@/services';
-import { StorageKey } from '@/utils/enums/application';
+import { default as i18n } from '@/i18n';
+import { contactService, permitService, housingProjectService, electrificationProjectService } from '@/services';
+import { Initiative } from '@/utils/enums/application';
 import PermitStatusView from '@/views/external/PermitStatusView.vue';
+import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { AxiosResponse } from 'axios';
+// Mock functions we need to test
+const toastErrorMock = vi.fn();
 
-const getPermitSpy = vi.spyOn(permitService, 'getPermit');
-const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-const searchProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
+// Mock dependencies
+vi.mock('primevue/usetoast', () => ({
+  useToast: () => ({
+    add: vi.fn(),
+    remove: vi.fn(),
+    removeAll: vi.fn()
+  })
+}));
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
+vi.mock('@/lib/primevue/useToast', () => ({
+  useToast: () => ({
+    error: toastErrorMock
   })
 }));
 
@@ -27,57 +33,82 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const testPermitId = 'permit123';
-const testHousingProjectId = 'project123';
+vi.mock('@/services/contactService', () => ({
+  default: {
+    searchContacts: vi.fn()
+  }
+}));
 
-const wrapperSettings = (testPermitIdProp = testPermitId, testHousingProjectIdProp = testHousingProjectId) => ({
+vi.mock('@/services/permitService', () => ({
+  default: {
+    getPermit: vi.fn()
+  }
+}));
+
+vi.mock('@/services/electrificationProjectService', () => ({
+  default: {
+    searchProjects: vi.fn()
+  }
+}));
+
+vi.mock('@/services/housingProjectService', () => ({
+  default: {
+    searchProjects: vi.fn()
+  }
+}));
+
+// Default component mounting wrapper settings
+const wrapperSettings = (initiative = Initiative.HOUSING) => ({
   props: {
-    permitId: testPermitIdProp,
-    projectId: testHousingProjectIdProp
+    permitId: '123',
+    projectId: '123'
   },
   global: {
     plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
+      createTestingPinia({
+        initialState: {
+          app: {
+            initiative
           }
-        }),
-      PrimeVue,
-      ConfirmationService,
-      ToastService
+        }
+      }),
+      i18n,
+      PrimeVue
     ],
-    stubs: ['font-awesome-icon', 'router-link', 'AuthorizationStatusPill']
+    stubs: {
+      'font-awesome-icon': true,
+      'router-link': true,
+      ...PRIMEVUE_STUBS
+    }
   }
 });
 
+// Tests
 beforeEach(() => {
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
-    })
-  );
-
-  vi.clearAllMocks();
-
-  searchContactsSpy.mockResolvedValue({ data: ['notTested'] } as AxiosResponse);
-  getPermitSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-  searchProjectsSpy.mockResolvedValue({ data: [{ fullName: 'notTested' }] } as AxiosResponse);
+  vi.mocked(contactService.searchContacts).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(housingProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
 });
 
 afterEach(() => {
-  sessionStorage.clear();
+  vi.clearAllMocks();
 });
 
 describe('PermitStatusView', () => {
-  it('renders component', () => {
-    const wrapper = shallowMount(PermitStatusView, wrapperSettings());
-    expect(wrapper).toBeTruthy();
+  it('throws error if unknown initiative', async () => {
+    shallowMount(PermitStatusView, wrapperSettings(Initiative.PCNS));
+    await flushPromises();
+
+    expect(toastErrorMock).toHaveBeenCalledWith(t('views.initiativeStateError'), undefined, undefined);
+  });
+
+  it('catches API errors and calls toast', async () => {
+    vi.mocked(permitService.getPermit).mockRejectedValueOnce(new Error('BOOM'));
+
+    shallowMount(PermitStatusView, wrapperSettings());
+    await flushPromises();
+
+    expect(toastErrorMock).toHaveBeenCalledWith(t('views.e.permitStatusView.unableToLoad'), undefined, undefined);
   });
 });
