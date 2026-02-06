@@ -1,0 +1,40 @@
+# Refer for explanation to following link: https://lefthook.dev/configuration/
+assert_lefthook_installed: true
+colors: false
+
+# Validate commit messages
+commit-msg:
+  commands:
+    commitlint:
+      root: app/
+      run: npm run commit:lint
+
+pre-commit:
+  parallel: true
+  jobs:
+    - name: Format app Source and Tests
+      root: app/
+      glob: '*.{js,json,md,ts,yaml}'
+      run: npm run format
+
+    - name: Format frontend Source and Tests
+      root: frontend/
+      glob: '*.{js,json,md,ts,yaml}'
+      run: npm run format
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: Typecheck app Source and Tests
+      root: app/
+      glob: '*.{js,json,md,ts,yaml}'
+      run: npm run typecheck
+
+    - name: Typecheck frontend Source and Tests
+      root: frontend/
+      glob: '*.{js,json,md,ts,yaml,vue}'
+      run: npm run typecheck
+
+    - name: Validate Branch Naming
+      root: app/
+      run: node ../prepush.helper.ts
