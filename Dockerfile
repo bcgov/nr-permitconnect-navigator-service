@@ -18,7 +18,7 @@ COPY app ${APP_ROOT}
 RUN chown -R 1001:0 ${APP_ROOT}
 USER 1001
 WORKDIR ${APP_ROOT}
-RUN npm ci && npm run build
+RUN npm ci --ignore-scripts --omit-dev && npm run build
 
 #
 # Build the frontend
@@ -37,7 +37,7 @@ COPY frontend ${APP_ROOT}
 RUN chown -R 1001:0 ${APP_ROOT}
 USER 1001
 WORKDIR ${APP_ROOT}
-RUN npm ci && npm run build
+RUN npm ci --ignore-scripts --omit-dev && npm run build
 
 #
 # Create the final container image
@@ -65,7 +65,7 @@ WORKDIR ${APP_ROOT}
 # Install Application
 RUN chown -R 1001:0 ${APP_ROOT}
 USER 1001
-RUN npm ci --omit=dev && npm run prisma:generate
+RUN npm ci --ignore-scripts --omit=dev && npm run prisma:generate
 
 EXPOSE ${APP_PORT}
 CMD ["node", "--max-old-space-size=50", "./sbin/server.js"]
