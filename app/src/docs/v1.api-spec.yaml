@@ -72,12 +72,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /contact/{contactId}:
@@ -101,8 +101,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Contact'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -129,14 +129,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Contact'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -200,12 +200,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Contact'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /contact/search:
@@ -283,12 +283,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Contact'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/accessRequest:
@@ -306,8 +306,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-AccessRequest'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -338,14 +338,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-AccessRequest'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/accessRequest/{accessRequestId}:
@@ -371,16 +371,16 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/document:
@@ -405,12 +405,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/document/{documentId}:
@@ -429,14 +429,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/document/list/{activityId}:
@@ -457,14 +457,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/enquiry:
@@ -485,8 +485,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -510,14 +510,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-CreateEnquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/enquiry/{enquiryId}:
@@ -535,8 +535,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -563,14 +563,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -584,14 +584,14 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/enquiry/search:
@@ -636,12 +636,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/note:
@@ -663,12 +663,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/note/{noteHistoryId}:
@@ -692,14 +692,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -717,8 +717,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -743,8 +743,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-BringForwardNotes'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -767,12 +767,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/permit:
@@ -800,12 +800,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/permit/{permitId}:
@@ -823,14 +823,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -843,14 +843,14 @@ paths:
       responses:
         '204':
           description: No Content – permit deleted successfully.
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/permit/types:
@@ -868,8 +868,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -895,7 +895,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DB-PermitNote'
         '401':
-          $ref: "#/components/responses/Unauthorized"
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '422':
@@ -917,8 +917,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -935,12 +935,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-ElectrificationProjectCreate'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/{electrificationProjectId}:
@@ -958,14 +958,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     put:
@@ -988,14 +988,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -1009,14 +1009,14 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/draft:
@@ -1041,8 +1041,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-DraftElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1067,8 +1067,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1094,12 +1094,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/search:
@@ -1144,12 +1144,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-ElectrificationProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/statistics:
@@ -1193,12 +1193,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-ElectrificationSubmissionStatistics'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /electrification/roadmap:
@@ -1220,12 +1220,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/accessRequest:
@@ -1243,8 +1243,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-AccessRequest'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1275,14 +1275,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-AccessRequest'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/accessRequest/{accessRequestId}:
@@ -1308,16 +1308,16 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/document:
@@ -1342,12 +1342,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/document/{documentId}:
@@ -1366,14 +1366,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/document/list/{activityId}:
@@ -1394,14 +1394,14 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Document'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/enquiry:
@@ -1422,8 +1422,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1447,14 +1447,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-CreateEnquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/enquiry/{enquiryId}:
@@ -1472,8 +1472,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1500,14 +1500,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -1521,14 +1521,14 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/enquiry/search:
@@ -1573,12 +1573,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-Enquiry'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/note:
@@ -1600,12 +1600,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/note/{noteHistoryId}:
@@ -1629,14 +1629,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -1654,8 +1654,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -1680,8 +1680,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-BringForwardNotes'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1704,12 +1704,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-NoteHistory'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/permit:
@@ -1737,12 +1737,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/permit/{permitId}:
@@ -1760,14 +1760,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Permit'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -1780,14 +1780,14 @@ paths:
       responses:
         '204':
           description: No Content – permit deleted successfully.
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/permit/types:
@@ -1805,8 +1805,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1832,7 +1832,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/DB-PermitNote'
         '401':
-          $ref: "#/components/responses/Unauthorized"
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '422':
@@ -1854,8 +1854,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -1872,12 +1872,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-HousingProjectCreate'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/project/{housingProjectId}:
@@ -1895,14 +1895,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     put:
@@ -1925,14 +1925,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
     delete:
@@ -1945,14 +1945,14 @@ paths:
       responses:
         '204':
           description: Returns no content success
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
           $ref: '#/components/responses/NotFound'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/project/draft:
@@ -1977,8 +1977,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-DraftHousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2003,8 +2003,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         '404':
@@ -2030,12 +2030,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/project/search:
@@ -2088,12 +2088,12 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/DB-HousingProject'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/project/statistics:
@@ -2137,12 +2137,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-HousingSubmissionStatistics'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/roadmap:
@@ -2164,12 +2164,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-Email'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
-        "422":
-          $ref: "#/components/responses/UnprocessableEntity"
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /reporting/electrificationProject/permit:
@@ -2187,8 +2187,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-HousingProjectPermitData'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2208,8 +2208,8 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-HousingProjectPermitData'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
         '403':
           $ref: '#/components/responses/Forbidden'
         default:
@@ -2228,8 +2228,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/DB-SourceSystemKind'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
   /user:
     get:
       summary: Search users
@@ -2244,8 +2244,8 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Response-SearchUsers'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
 components:
   parameters:
     Path-AccessRequestId:
@@ -3068,7 +3068,7 @@ components:
         note:
           type: string
           description: The text content of the note
-          example: "This is a note about the permit."
+          example: 'This is a note about the permit.'
         createdAt:
           type: string
           format: date-time
@@ -3438,7 +3438,7 @@ components:
         note:
           type: string
           description: The text content of the note
-          example: "This is a note about the permit."
+          example: 'This is a note about the permit.'
     Request-Roadmap:
       title: Request Roadmap
       type: object
@@ -3963,7 +3963,7 @@ components:
       title: Response Conflict
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           properties:
             status:
@@ -4050,7 +4050,7 @@ components:
             note:
               type: array
               items:
-                $ref: "#/components/schemas/DB-Note"
+                $ref: '#/components/schemas/DB-Note'
     Response-Error:
       title: Response Error
       type: object
@@ -4093,28 +4093,28 @@ components:
             type:
               example: https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/404
     Response-Permit:
-     title: Response of Permit
-     type: object
-     allOf:
-      - $ref: '#/components/schemas/DB-Permit'
-      - type: object
-        properties:
-          permitNotes:
-            type: array
-            description: Notes associated with this permit (if `include` is set to true in service call)
-            items:
-              $ref: '#/components/schemas/DB-PermitNote'
+      title: Response of Permit
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/DB-Permit'
+        - type: object
+          properties:
+            permitNotes:
+              type: array
+              description: Notes associated with this permit (if `include` is set to true in service call)
+              items:
+                $ref: '#/components/schemas/DB-PermitNote'
 
-          permitTracking:
-            type: array
-            description: Tracking entries associated with this permit (if `include` is set to true in service call)
-            items:
-              $ref: '#/components/schemas/DB-PermitTracking'
+            permitTracking:
+              type: array
+              description: Tracking entries associated with this permit (if `include` is set to true in service call)
+              items:
+                $ref: '#/components/schemas/DB-PermitTracking'
 
-          permitType:
-            type: object
-            description: The permit type associated with this permit (if `include` is set to true in service call)
-            $ref: '#/components/schemas/DB-PermitType'
+            permitType:
+              type: object
+              description: The permit type associated with this permit (if `include` is set to true in service call)
+              $ref: '#/components/schemas/DB-PermitType'
     Response-Problem:
       title: Response Problem
       type: object
@@ -4434,7 +4434,7 @@ components:
       title: Response Validation Error
       type: object
       allOf:
-        - $ref: "#/components/schemas/Response-Problem"
+        - $ref: '#/components/schemas/Response-Problem'
         - type: object
           required:
             - errors
@@ -4502,7 +4502,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/Response-ValidationError"
+            $ref: '#/components/schemas/Response-ValidationError'
   securitySchemes:
     BearerAuth:
       type: http
