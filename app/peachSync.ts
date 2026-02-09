@@ -1,12 +1,15 @@
 import { syncPeachRecords } from './src/controllers/peach.ts';
 import { sendPermitUpdateNotifications } from './src/controllers/permit.ts';
 import { getLogger } from './src/utils/log.ts';
+import { state } from './state.ts';
 
 import type { Permit } from './src/types';
 
 const log = getLogger(module.filename);
 
 async function syncPeachToPcns() {
+  if (!state.features.peach) return;
+
   const started = Date.now();
   let updatedPermits: Permit[] = [];
 
