@@ -25,7 +25,7 @@ import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/key
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ElectrificationProject, HousingProject, Pagination } from '@/types';
+import type { Pagination, Project } from '@/types';
 
 // Types
 interface FilterOption {
@@ -35,7 +35,7 @@ interface FilterOption {
 
 // Props
 const { projects } = defineProps<{
-  projects: (ElectrificationProject | HousingProject)[] | undefined;
+  projects: Project[] | undefined;
 }>();
 
 // Injections
@@ -73,7 +73,7 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
-const selection: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
+const selection: Ref<Project | undefined> = ref(undefined);
 const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
 
 /**

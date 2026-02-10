@@ -39,6 +39,7 @@ export type { Permit } from './Permit';
 export type { PermitNote } from './PermitNote';
 export type { PermitTracking } from './PermitTracking';
 export type { PermitType } from './PermitType';
+export type { Project } from './Project';
 export type { SourceSystemKind } from './SourceSystemKind';
 export type { DateTimeStrings } from './DateTimeStrings';
 export type { Statistics } from './Statistics';

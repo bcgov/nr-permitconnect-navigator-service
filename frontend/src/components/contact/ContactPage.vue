@@ -13,7 +13,7 @@ import { contactInitiativeRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Contact, ElectrificationProject, Enquiry, HousingProject, User } from '@/types';
+import type { ActivityContact, Contact, Enquiry, Project, User } from '@/types';
 
 // Props
 const { contactId } = defineProps<{
@@ -34,7 +34,7 @@ const toast = useToast();
 const assignedUsers: Ref<Record<string, string>> = ref({});
 const contact: Ref<Contact | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const projectsEnquiries: Ref<(ElectrificationProject | HousingProject | Enquiry)[]> = ref([]);
+const projectsEnquiries: Ref<(Project | Enquiry)[]> = ref([]);
 const updateContactModalVisible: Ref<boolean> = ref(false);
 
 const fullName = computed(() => {

@@ -10,12 +10,12 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ElectrificationProject, Enquiry, HousingProject, Pagination } from '@/types';
+import type { Enquiry, Pagination, Project } from '@/types';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
   assignedUsers: Record<string, string>;
-  contactsHistory: (ElectrificationProject | HousingProject | Enquiry)[];
+  contactsHistory: (Project | Enquiry)[];
   loading: boolean;
 }>();
 
@@ -32,14 +32,14 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
-const selection: Ref<ElectrificationProject | HousingProject | Enquiry | undefined> = ref(undefined);
+const selection: Ref<Project | Enquiry | undefined> = ref(undefined);
 
 // Actions
 function getUsersName(userId: string) {
   return assignedUsers[userId];
 }
 
-function getRouteToObject(data: ElectrificationProject | HousingProject | Enquiry) {
+function getRouteToObject(data: Project | Enquiry) {
   let toObject = {};
   if ('electrificationProjectId' in data) {
     toObject = {

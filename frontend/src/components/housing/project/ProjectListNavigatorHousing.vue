@@ -7,14 +7,14 @@ import { Action, BasicResponse } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { projectRouteNameKey, resourceKey } from '@/utils/keys';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { Project } from '@/types';
 
 // Props
 const { onDeleteCallback } = defineProps<{
   onDeleteCallback: (projectId: string, activityId: string) => void;
 }>();
 
-const selection = defineModel<ElectrificationProject | HousingProject | undefined>('selection');
+const selection = defineModel<Project | undefined>('selection');
 
 // Injections
 const projectResource = inject(resourceKey);

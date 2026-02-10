@@ -36,7 +36,7 @@ import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { BringForward, ElectrificationProject, Enquiry, HousingProject, Permit, Statistics } from '@/types';
+import type { BringForward, Enquiry, Permit, Project, Statistics } from '@/types';
 
 // Constants
 const TAB_INDEX = {
@@ -48,7 +48,7 @@ const TAB_INDEX = {
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
 const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
 const permits = defineModel<Permit[]>('permits', { required: true });
-const projects = defineModel<(ElectrificationProject | HousingProject)[]>('projects', { required: true });
+const projects = defineModel<Project[]>('projects', { required: true });
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
