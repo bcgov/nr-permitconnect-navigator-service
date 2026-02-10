@@ -29,6 +29,7 @@ import {
 } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
+import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 import {
   APPLICATION_STATUS_LIST,
   ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
@@ -264,9 +265,9 @@ function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
-async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
-  if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+async function getOrgBookOptions(companyNameRegistered: string) {
+  if (companyNameRegistered.length >= 2) {
+    const results = (await externalApiService.searchOrgBook(companyNameRegistered))?.data?.results ?? [];
     orgBookOptions.value = results
       .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
@@ -274,6 +275,15 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
+    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
+    if (BC_HYDRO_POWER_AUTHORITY.includes(companyNameRegistered.toUpperCase())) {
+      orgBookOptions.value.push({
+        registeredName: BC_HYDRO_POWER_AUTHORITY,
+        registeredId: ''
+      });
+    }
+    // sort options alphabetically
+    orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
   }
 }
 
@@ -392,6 +402,9 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
   }
 
+  // Load options for org book autocomplete to prevent schema validation errors on existing values
+  if (project.companyNameRegistered) await getOrgBookOptions(project.companyNameRegistered);
+
   // Default form values
   initialFormValues.value = initilizeFormValues(project);
 });
@@ -469,7 +482,7 @@ onBeforeMount(async () => {
               :placeholder="t('i.common.projectForm.searchBCRegistered')"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
               :suggestions="orgBookOptions"
-              @on-complete="onRegisteredNameInput"
+              @on-complete="(e: AutoCompleteCompleteEvent) => getOrgBookOptions(e.query)"
               @on-select="
                 (orgBookOption: OrgBookOption) => {
                   setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);

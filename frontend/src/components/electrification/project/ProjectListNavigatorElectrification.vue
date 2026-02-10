@@ -88,20 +88,20 @@ const { codeDisplay } = codeStore;
     style="min-width: 150px"
   />
   <Column
-    field="activity.activity_contact.0.contact.first_name"
+    field="activity.activityContact.0.contact.firstName"
     header="First name"
     :sortable="true"
     style="min-width: 150px"
   />
   <Column
-    field="activity.activity_contact.0.contact.last_name"
+    field="activity.activityContact.0.contact.lastName"
     header="Last name"
     :sortable="true"
     style="min-width: 150px"
   />
   <Column
     field="user.fullName"
-    header="Assigned-to"
+    header="Assigned to"
     :sortable="true"
     style="min-width: 200px"
   />

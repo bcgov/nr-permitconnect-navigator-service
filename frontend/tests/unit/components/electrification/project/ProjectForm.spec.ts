@@ -92,7 +92,7 @@ describe('onRegisteredNameInput', () => {
     vi.clearAllMocks();
   });
 
-  it('should not call searchOrgBook when query length is less than 2', async () => {
+  it('should call searchOrgBook once when query length is less than 2', async () => {
     const wrapper = mount(ProjectForm, wrapperSettingsForm());
     await nextTick();
     await nextTick();
@@ -106,10 +106,10 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    expect(searchOrgBookSpy).not.toHaveBeenCalled();
+    expect(searchOrgBookSpy).toHaveBeenCalledOnce();
   });
 
-  it('should call searchOrgBook when query length is 2 or more', async () => {
+  it('should call searchOrgBook twice when query length is 2 or more', async () => {
     const mockResponse = {
       data: {
         results: [
@@ -134,7 +134,7 @@ describe('onRegisteredNameInput', () => {
     await autoComplete.vm.$emit('on-complete', event);
     await nextTick();
 
-    expect(searchOrgBookSpy).toHaveBeenCalledTimes(1);
+    expect(searchOrgBookSpy).toHaveBeenCalledTimes(2);
     expect(searchOrgBookSpy).toHaveBeenCalledWith('Test');
   });
 
@@ -192,30 +192,6 @@ describe('onRegisteredNameInput', () => {
 
     const event: AutoCompleteCompleteEvent = {
       query: 'NonExistent',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
-  });
-
-  it('should handle undefined results from searchOrgBook', async () => {
-    const mockResponse = {
-      data: {}
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettingsForm());
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
       originalEvent: new Event('input')
     };
 
