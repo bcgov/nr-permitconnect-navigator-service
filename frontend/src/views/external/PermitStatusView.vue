@@ -98,8 +98,8 @@ onBeforeMount(async () => {
         const updatedByUser = (await contactService.searchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
         if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
       }
-    } catch {
-      throw new Error(t('views.e.permitStatusView.unableToLoad'));
+    } catch (e) {
+      throw new Error(t('views.e.permitStatusView.unableToLoad'), { cause: e });
     }
   } catch (e) {
     generalErrorHandler(e);

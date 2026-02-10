@@ -161,16 +161,16 @@ onBeforeMount(async () => {
       const activityId = projectValue.activityId;
       const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
       projectStore.setPermits(permitsValue);
-    } catch {
-      throw new Error(t('views.e.projectView.toastPermitLoadFailed'));
+    } catch (e) {
+      throw new Error(t('views.e.projectView.toastPermitLoadFailed'), { cause: e });
     }
 
     try {
       const activityId = projectValue.activityId;
       const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
       projectStore.setNoteHistory(noteHistory);
-    } catch {
-      throw new Error(t('views.e.projectView.toastNoteHistoryLoadFailed'));
+    } catch (e) {
+      throw new Error(t('views.e.projectView.toastNoteHistoryLoadFailed'), { cause: e });
     }
 
     projectStore.setProject(projectValue);
