@@ -275,10 +275,13 @@ async function getOrgBookOptions(companyNameRegistered: string) {
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
-    orgBookOptions.value.push({
-      registeredName: BC_HYDRO_POWER_AUTHORITY,
-      registeredId: ''
-    });
+    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
+    if (BC_HYDRO_POWER_AUTHORITY.includes(companyNameRegistered.toUpperCase())) {
+      orgBookOptions.value.push({
+        registeredName: BC_HYDRO_POWER_AUTHORITY,
+        registeredId: ''
+      });
+    }
     // sort options alphabetically
     orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
   }

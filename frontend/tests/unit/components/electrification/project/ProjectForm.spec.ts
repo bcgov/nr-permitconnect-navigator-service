@@ -92,7 +92,7 @@ describe('onRegisteredNameInput', () => {
     vi.clearAllMocks();
   });
 
-  it('should not call searchOrgBook when query length is less than 2', async () => {
+  it('should call searchOrgBook once when query length is less than 2', async () => {
     const wrapper = mount(ProjectForm, wrapperSettingsForm());
     await nextTick();
     await nextTick();
@@ -109,7 +109,7 @@ describe('onRegisteredNameInput', () => {
     expect(searchOrgBookSpy).toHaveBeenCalledOnce();
   });
 
-  it('should call searchOrgBook when query length is 2 or more', async () => {
+  it('should call searchOrgBook twice when query length is 2 or more', async () => {
     const mockResponse = {
       data: {
         results: [
@@ -166,14 +166,14 @@ describe('onRegisteredNameInput', () => {
 
     // Access internal state through wrapper
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(3);
+    expect(orgBookOptions).toHaveLength(2);
     expect(orgBookOptions[0]).toEqual({
-      registeredName: 'BC HYDRO AND POWER AUTHORITY',
-      registeredId: ''
-    });
-    expect(orgBookOptions[1]).toEqual({
       registeredName: 'Test Company Ltd',
       registeredId: 'FM0001234'
+    });
+    expect(orgBookOptions[1]).toEqual({
+      registeredName: 'Test Corp',
+      registeredId: 'FM0005678'
     });
   });
 
@@ -200,7 +200,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(1);
+    expect(orgBookOptions).toHaveLength(0);
   });
 
   it('should handle results with only non-name types', async () => {
@@ -229,7 +229,7 @@ describe('onRegisteredNameInput', () => {
     await nextTick();
 
     const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(1);
+    expect(orgBookOptions).toHaveLength(0);
   });
 
   it('should call searchOrgBook with exact query string', async () => {
