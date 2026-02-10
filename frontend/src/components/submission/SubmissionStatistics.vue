@@ -130,7 +130,7 @@ watch(
     <div class="flex justify-end mb-4">
       <Button
         class="download-production-btn"
-        :disabled="!useAuthZStore().can(useAppStore().getInitiative, Resource.REPORTING, Action.READ)"
+        :disabled="!useAuthZStore().can(Initiative.PCNS, Resource.REPORTING, Action.READ)"
         @click="onDownloadProjectPermitData"
       >
         <font-awesome-icon
