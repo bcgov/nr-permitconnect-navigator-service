@@ -43,12 +43,7 @@ import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/s
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDateLong } from '@/utils/formatters';
-import {
-  projectAuthorizationRouteNameKey,
-  projectNoteRouteNameKey,
-  projectProponentNameKey,
-  projectServiceKey
-} from '@/utils/keys';
+import { projectServiceKey } from '@/utils/keys';
 import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -67,24 +62,24 @@ interface InitiativeState {
   projectAuthorizationRouteName: RouteName;
   projectNoteRouteName: RouteName;
   projectProponentName: RouteName;
-  provideProjectService: IDraftableProjectService;
+  projectService: IDraftableProjectService;
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectAddAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
   projectNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
   projectProponentName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
-  provideProjectService: electrificationProjectService
+  projectService: electrificationProjectService
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   projectAddAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
   projectNoteRouteName: RouteName.INT_HOUSING_PROJECT_NOTE,
   projectProponentName: RouteName.INT_HOUSING_PROJECT_PROPONENT,
-  provideProjectService: housingProjectService
+  projectService: housingProjectService
 };
 
 const SORT_ORDER = {
@@ -125,7 +120,7 @@ const {
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const liveName: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
@@ -135,13 +130,7 @@ const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
 // Providers
-const provideProjectAuthorizationRouteName = computed(() => initiativeState.value.projectAuthorizationRouteName);
-const provideProjectNoteRouteName = computed(() => initiativeState.value.projectNoteRouteName);
-const provideProjectProponentRouteName = computed(() => initiativeState.value.projectProponentName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
-provide(projectAuthorizationRouteNameKey, provideProjectAuthorizationRouteName);
-provide(projectNoteRouteNameKey, provideProjectNoteRouteName);
-provide(projectProponentNameKey, provideProjectProponentRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(projectServiceKey, provideProjectService);
 
 // Actions
@@ -212,16 +201,16 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));
     }
 
-    const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
+    const project = (await initiativeState.value.projectService.getProject(projectId)).data;
     activityId.value = project.activityId;
     const [documents, notes, permits, relatedEnquiries, contacts] = (
       await Promise.all([

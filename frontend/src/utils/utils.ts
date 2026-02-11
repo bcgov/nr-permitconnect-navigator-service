@@ -1,11 +1,11 @@
+import { isAxiosError } from 'axios';
+import { useToast } from '@/lib/primevue';
 import { useConfigStore } from '@/store';
 import { DELIMITER } from '@/utils/constants/application';
 import { FileCategory, IdentityProviderKind } from '@/utils/enums/application';
 
 import type { DateTimeStrings, IdentityProvider } from '@/types';
 import type { ToastMessageOptions } from 'primevue/toast';
-import { isAxiosError } from 'axios';
-import { useToast } from '@/lib/primevue';
 
 /**
  * @function combineDateTime
@@ -239,23 +239,6 @@ export function joinPath(...items: string[]): string {
     });
     return parts.join(DELIMITER);
   } else return '';
-}
-
-/**
- * @function objectToOptions
- * Converts an object into an array of option items that a UI Form component could consume
- * Each item has a value and label property
- * @template E The enum object type
- * @param {E} enm the enum to convert to option objects
- * @return {Array<{ value: keyof E; label: string | number }>} An array of options objects
- */
-export function objectToOptions<E extends Record<string, string | number>>(
-  enm: E
-): { value: keyof E; label: string | number }[] {
-  return (Object.keys(enm) as (keyof E)[]).map((key) => ({
-    value: key,
-    label: enm[key]
-  })) as { value: keyof E; label: string | number }[];
 }
 
 /**

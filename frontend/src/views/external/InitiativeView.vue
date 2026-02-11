@@ -47,7 +47,7 @@ const route = useRoute();
 const router = useRouter();
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   headerText: t('views.e.initiativeView.electrification.header'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   provideDraftableProjectService: electrificationProjectService,
@@ -57,7 +57,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   provideProjectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   headerText: t('views.e.initiativeView.housing.header'),
   initiativeRouteName: RouteName.EXT_HOUSING,
   provideNavigationPermission: NavigationPermission.EXT_HOUSING,
@@ -79,7 +79,7 @@ const authorizations: Ref<Permit[]> = ref([]);
 const drafts: Ref<Draft[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 const projects: Ref<HousingProject[]> = ref([]);
 
@@ -179,10 +179,10 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

@@ -37,7 +37,7 @@ const { t } = useI18n();
 const authzStore = useAuthZStore();
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   headerText: t('views.i.initiativeView.electrification.header'),
   navigationPermission: NavigationPermission.INT_ELECTRIFICATION,
   provideEnquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
@@ -46,7 +46,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   provideResource: Resource.ELECTRIFICATION_PROJECT
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   headerText: t('views.i.initiativeView.housing.header'),
   navigationPermission: NavigationPermission.INT_HOUSING,
   provideEnquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
@@ -58,7 +58,7 @@ const HOUSING_VIEW_STATE: InitiativeState = {
 // State
 const bringForward: Ref<BringForward[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 const permits: Ref<Permit[]> = ref([]);
 const projects: Ref<HousingProject[]> = ref([]);
@@ -79,10 +79,10 @@ onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

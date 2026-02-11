@@ -11,8 +11,8 @@ import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { Enquiry } from '@/types';
 import type { RouteLocationRaw } from 'vue-router';
+import type { Enquiry } from '@/types';
 
 // Props
 const {

@@ -55,7 +55,7 @@ interface InitiativeState {
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryProjectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY,
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   internalNavigationPermission: NavigationPermission.INT_ELECTRIFICATION,
@@ -67,7 +67,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   provideEnquiryRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   enquiryProjectRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY,
   initiativeRouteName: RouteName.EXT_HOUSING,
   internalNavigationPermission: NavigationPermission.INT_HOUSING,
@@ -103,7 +103,7 @@ const {
 const activeTab: Ref<number> = ref(Number(initialTab));
 const assignee: Ref<Contact | undefined> = ref(undefined);
 const createdBy: Ref<Contact | undefined> = ref(undefined);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const isAdmin: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryVisible: Ref<boolean> = ref(false);
@@ -136,10 +136,10 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

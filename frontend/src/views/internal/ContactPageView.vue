@@ -6,7 +6,7 @@ import ContactPage from '@/components/contact/ContactPage.vue';
 import { electrificationProjectService, housingProjectService } from '@/services';
 import { useAppStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
-import { initiativeContactRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
@@ -23,12 +23,12 @@ interface InitiativeState {
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   provideInitiativeContactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE,
   provideProjectService: electrificationProjectService
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   provideInitiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE,
   provideProjectService: housingProjectService
 };
@@ -37,22 +37,22 @@ const HOUSING_VIEW_STATE: InitiativeState = {
 const { t } = useI18n();
 
 // State
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 
 // Providers
 const provideContactInitiativeRouteName = computed(() => initiativeState.value.provideInitiativeContactRouteName);
 const provideProjectService = computed(() => initiativeState.value.provideProjectService);
-provide(initiativeContactRouteNameKey, provideContactInitiativeRouteName);
+provide(contactRouteNameKey, provideContactInitiativeRouteName);
 provide(projectServiceKey, provideProjectService);
 
 onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

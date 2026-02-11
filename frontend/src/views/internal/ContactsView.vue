@@ -9,7 +9,7 @@ import { Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/primevue';
 import { contactService } from '@/services';
 import { useAppStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
-import { initiativeContactRouteNameKey } from '@/utils/keys';
+import { contactRouteNameKey } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -17,16 +17,16 @@ import type { Contact } from '@/types';
 
 // Interfaces
 interface InitiativeState {
-  provideContactInitiativeRouteName: RouteName;
+  provideInitiativeContactRouteName: RouteName;
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
-  provideContactInitiativeRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
+  provideInitiativeContactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
-  provideContactInitiativeRouteName: RouteName.INT_HOUSING_CONTACT_PAGE
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
+  provideInitiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE
 };
 
 // Composables
@@ -37,12 +37,12 @@ const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const contacts: Ref<Contact[]> = ref([]);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
 // Providers
-const provideContactInitiativeRouteName = computed(() => initiativeState.value.provideContactInitiativeRouteName);
-provide(initiativeContactRouteNameKey, provideContactInitiativeRouteName);
+const provideContactInitiativeRouteName = computed(() => initiativeState.value.provideInitiativeContactRouteName);
+provide(contactRouteNameKey, provideContactInitiativeRouteName);
 
 // Actions
 function removeContact(contact: Contact) {
@@ -54,10 +54,10 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

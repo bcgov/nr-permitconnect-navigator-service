@@ -41,13 +41,13 @@ interface InitiativeState {
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   provideEnquiryPermitConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
   provideEnquiryProjectConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION,
   provideProjectService: electrificationProjectService
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   provideEnquiryConfirmRouteName: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
   provideEnquiryPermitConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
   provideEnquiryProjectConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
@@ -67,7 +67,7 @@ const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
 // Providers
@@ -89,10 +89,10 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

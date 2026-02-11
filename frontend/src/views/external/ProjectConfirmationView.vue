@@ -30,7 +30,7 @@ interface InitiativeState {
 const { t } = useI18n();
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.electrification.backTo'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   projectService: electrificationProjectService,
@@ -38,7 +38,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   message: t('views.e.projectConfirmationView.electrification.message')
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
   projectService: housingProjectService,
@@ -51,17 +51,17 @@ const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const activityId: Ref<string | undefined> = ref(undefined);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 
 // Actions
 onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

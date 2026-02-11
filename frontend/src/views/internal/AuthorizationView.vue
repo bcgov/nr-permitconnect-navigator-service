@@ -27,18 +27,18 @@ interface InitiativeState {
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   provideProjectService: electrificationProjectService
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,
   provideProjectService: housingProjectService
 };
 
 // State
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
 // Composables
@@ -60,10 +60,10 @@ onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

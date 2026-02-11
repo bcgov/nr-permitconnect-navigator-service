@@ -21,7 +21,6 @@ import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import {
   atsEnquiryPartnerAgenciesKey,
   atsEnquiryTypeCodeKey,
-  enquiryNoteRouteNameKey,
   projectRouteNameKey,
   projectServiceKey
 } from '@/utils/keys';
@@ -52,7 +51,7 @@ interface InitiativeState {
 }
 
 // Constants
-const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   provideAtsEnquiryPartnerAgencies: Initiative.ELECTRIFICATION,
   provideAtsEnquiryTypeCode: toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   provideEnquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
@@ -60,7 +59,7 @@ const ELECTRIFICATION_VIEW_STATE: InitiativeState = {
   provideProjectService: electrificationProjectService
 };
 
-const HOUSING_VIEW_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_STATE: InitiativeState = {
   provideAtsEnquiryPartnerAgencies: Initiative.HOUSING,
   provideAtsEnquiryTypeCode: toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   provideEnquiryNoteRouteName: RouteName.INT_HOUSING_ENQUIRY_NOTE,
@@ -81,7 +80,7 @@ const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_VIEW_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const relatedProject: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
@@ -89,12 +88,10 @@ const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFulln
 // Providers
 const provideAtsEnquiryPartnerAgencies = computed(() => initiativeState.value.provideAtsEnquiryPartnerAgencies);
 const provideAtsEnquiryTypeCode = computed(() => initiativeState.value.provideAtsEnquiryTypeCode);
-const provideEnquiryNoteRouteName = computed(() => initiativeState.value.provideEnquiryNoteRouteName);
 const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
 const provideProjectService = computed(() => initiativeState.value.provideProjectService);
 provide(atsEnquiryPartnerAgenciesKey, provideAtsEnquiryPartnerAgencies);
 provide(atsEnquiryTypeCodeKey, provideAtsEnquiryTypeCode);
-provide(enquiryNoteRouteNameKey, provideEnquiryNoteRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
 
@@ -131,10 +128,10 @@ onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = ELECTRIFICATION_VIEW_STATE;
+        initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
-        initiativeState.value = HOUSING_VIEW_STATE;
+        initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));
