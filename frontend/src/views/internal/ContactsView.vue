@@ -17,16 +17,16 @@ import type { Contact } from '@/types';
 
 // Interfaces
 interface InitiativeState {
-  provideInitiativeContactRouteName: RouteName;
+  contactRouteName: RouteName;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  provideInitiativeContactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE
+  contactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  provideInitiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE
+  contactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE
 };
 
 // Composables
@@ -41,8 +41,8 @@ const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
 // Providers
-const provideContactInitiativeRouteName = computed(() => initiativeState.value.provideInitiativeContactRouteName);
-provide(contactRouteNameKey, provideContactInitiativeRouteName);
+const provideContactRouteName = computed(() => initiativeState.value.contactRouteName);
+provide(contactRouteNameKey, provideContactRouteName);
 
 // Actions
 function removeContact(contact: Contact) {

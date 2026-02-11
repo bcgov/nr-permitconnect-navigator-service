@@ -30,15 +30,15 @@ import { storeToRefs } from 'pinia';
 
 // Interfaces
 interface InitiativeState {
+  draftableProjectService: IDraftableProjectService;
+  enquiryIntakeRouteName?: RouteName;
+  enquiryRouteName?: RouteName;
   headerText: string;
   initiativeRouteName: RouteName;
-  provideDraftableProjectService: IDraftableProjectService;
-  provideEnquiryRouteName?: RouteName;
-  provideNavigationPermission: NavigationPermission;
+  navigationPermission: NavigationPermission;
+  projectIntakeRouteName: RouteName;
   projectRouteName: RouteName;
   projectTooltip: string;
-  provideProjectIntakeRouteName: RouteName;
-  enquiryIntakeRouteName?: RouteName;
 }
 
 // Composables
@@ -48,25 +48,25 @@ const router = useRouter();
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
+  draftableProjectService: electrificationProjectService,
   headerText: t('views.e.initiativeView.electrification.header'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
-  provideDraftableProjectService: electrificationProjectService,
-  provideNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
+  navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
+  projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE,
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-  projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip'),
-  provideProjectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE
+  projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip')
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
+  draftableProjectService: housingProjectService,
+  enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
+  enquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
   headerText: t('views.e.initiativeView.housing.header'),
   initiativeRouteName: RouteName.EXT_HOUSING,
-  provideNavigationPermission: NavigationPermission.EXT_HOUSING,
-  provideDraftableProjectService: housingProjectService,
-  provideEnquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
+  navigationPermission: NavigationPermission.EXT_HOUSING,
+  projectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-  projectTooltip: t('views.e.initiativeView.housing.projectsTooltip'),
-  provideProjectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
-  enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE
+  projectTooltip: t('views.e.initiativeView.housing.projectsTooltip')
 };
 
 const PAGE_ROWS = 5;
@@ -84,10 +84,10 @@ const loading: Ref<boolean> = ref(true);
 const projects: Ref<HousingProject[]> = ref([]);
 
 // Providers
-const provideDraftableProjectService = computed(() => initiativeState.value.provideDraftableProjectService);
-const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
-const provideNavigationPermission = computed(() => initiativeState.value.provideNavigationPermission);
-const provideProjectIntakeRouteName = computed(() => initiativeState.value.provideProjectIntakeRouteName);
+const provideDraftableProjectService = computed(() => initiativeState.value.draftableProjectService);
+const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
+const provideNavigationPermission = computed(() => initiativeState.value.navigationPermission);
+const provideProjectIntakeRouteName = computed(() => initiativeState.value.projectIntakeRouteName);
 provide(draftableProjectServiceKey, provideDraftableProjectService);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(navigationPermissionKey, provideNavigationPermission);

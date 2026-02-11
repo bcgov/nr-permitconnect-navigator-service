@@ -18,19 +18,19 @@ const { contactId } = defineProps<{
 
 // Interfaces
 interface InitiativeState {
-  provideInitiativeContactRouteName: RouteName;
-  provideProjectService: IDraftableProjectService;
+  initiativeContactRouteName: RouteName;
+  projectService: IDraftableProjectService;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  provideInitiativeContactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE,
-  provideProjectService: electrificationProjectService
+  initiativeContactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE,
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  provideInitiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE,
-  provideProjectService: housingProjectService
+  initiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE,
+  projectService: housingProjectService
 };
 
 // Composables
@@ -40,8 +40,8 @@ const { t } = useI18n();
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 
 // Providers
-const provideContactInitiativeRouteName = computed(() => initiativeState.value.provideInitiativeContactRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+const provideContactInitiativeRouteName = computed(() => initiativeState.value.initiativeContactRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(contactRouteNameKey, provideContactInitiativeRouteName);
 provide(projectServiceKey, provideProjectService);
 

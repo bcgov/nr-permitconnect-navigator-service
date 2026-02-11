@@ -43,28 +43,28 @@ const {
 
 // Interfaces
 interface InitiativeState {
-  provideAtsEnquiryPartnerAgencies: Initiative;
-  provideAtsEnquiryTypeCode: string;
-  provideEnquiryNoteRouteName: RouteName;
-  provideProjectRouteName: RouteName;
-  provideProjectService: IDraftableProjectService;
+  atsEnquiryPartnerAgencies: Initiative;
+  atsEnquiryTypeCode: string;
+  enquiryNoteRouteName: RouteName;
+  projectRouteName: RouteName;
+  projectService: IDraftableProjectService;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  provideAtsEnquiryPartnerAgencies: Initiative.ELECTRIFICATION,
-  provideAtsEnquiryTypeCode: toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
-  provideEnquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
-  provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
-  provideProjectService: electrificationProjectService
+  atsEnquiryPartnerAgencies: Initiative.ELECTRIFICATION,
+  atsEnquiryTypeCode: toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
+  enquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+  projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  provideAtsEnquiryPartnerAgencies: Initiative.HOUSING,
-  provideAtsEnquiryTypeCode: toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
-  provideEnquiryNoteRouteName: RouteName.INT_HOUSING_ENQUIRY_NOTE,
-  provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,
-  provideProjectService: housingProjectService
+  atsEnquiryPartnerAgencies: Initiative.HOUSING,
+  atsEnquiryTypeCode: toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
+  enquiryNoteRouteName: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+  projectRouteName: RouteName.INT_HOUSING_PROJECT,
+  projectService: housingProjectService
 };
 
 // Composables
@@ -86,10 +86,10 @@ const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
 // Providers
-const provideAtsEnquiryPartnerAgencies = computed(() => initiativeState.value.provideAtsEnquiryPartnerAgencies);
-const provideAtsEnquiryTypeCode = computed(() => initiativeState.value.provideAtsEnquiryTypeCode);
-const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+const provideAtsEnquiryPartnerAgencies = computed(() => initiativeState.value.atsEnquiryPartnerAgencies);
+const provideAtsEnquiryTypeCode = computed(() => initiativeState.value.atsEnquiryTypeCode);
+const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(atsEnquiryPartnerAgenciesKey, provideAtsEnquiryPartnerAgencies);
 provide(atsEnquiryTypeCodeKey, provideAtsEnquiryTypeCode);
 provide(projectRouteNameKey, provideProjectRouteName);
@@ -107,7 +107,7 @@ function onEnquiryFormSaved() {
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
     relatedProject.value = (
-      await initiativeState.value.provideProjectService.searchProjects({
+      await initiativeState.value.projectService.searchProjects({
         activityId: [getEnquiry?.value?.relatedActivityId]
       })
     ).data[0];
@@ -150,7 +150,7 @@ onBeforeMount(async () => {
     }
 
     if (projectId) {
-      const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
+      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
       projectStore.setProject(project);
     }
 
@@ -214,7 +214,7 @@ onBeforeMount(async () => {
           {{ t('views.i.enquiryView.linkedActivity') }}
           <router-link
             :to="{
-              name: initiativeState.provideProjectRouteName,
+              name: initiativeState.projectRouteName,
               params: { projectId: relatedProject.projectId }
             }"
           >
@@ -248,7 +248,7 @@ onBeforeMount(async () => {
             :disabled="!isCompleted && !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
             @click="
               router.push({
-                name: initiativeState.provideEnquiryNoteRouteName,
+                name: initiativeState.enquiryNoteRouteName,
                 params: {
                   enquiryId: enquiryId
                 }

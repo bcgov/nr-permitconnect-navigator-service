@@ -22,19 +22,19 @@ const { projectId, permitId = undefined } = defineProps<{
 
 // Interfaces
 interface InitiativeState {
-  provideProjectRouteName: RouteName;
-  provideProjectService: IDraftableProjectService;
+  projectRouteName: RouteName;
+  projectService: IDraftableProjectService;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
-  provideProjectService: electrificationProjectService
+  projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,
-  provideProjectService: housingProjectService
+  projectRouteName: RouteName.INT_HOUSING_PROJECT,
+  projectService: housingProjectService
 };
 
 // State
@@ -51,8 +51,8 @@ const { getPermit } = storeToRefs(permitStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Providers
-const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
 
@@ -70,7 +70,7 @@ onBeforeMount(async () => {
     }
 
     if (!getProject.value) {
-      const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
+      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
       projectStore.setProject(project);
     }
 

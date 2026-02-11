@@ -33,26 +33,26 @@ const {
 
 // Interfaces
 interface InitiativeState {
-  provideEnquiryConfirmRouteName?: RouteName;
-  provideEnquiryPermitConfirmRouteName: RouteName;
-  provideEnquiryProjectConfirmRouteName: RouteName;
-  provideEnquiryIntakeRouteName?: RouteName;
-  provideProjectService: IProjectService;
+  enquiryConfirmRouteName?: RouteName;
+  enquiryIntakeRouteName?: RouteName;
+  enquiryPermitConfirmRouteName: RouteName;
+  enquiryProjectConfirmRouteName: RouteName;
+  projectService: IProjectService;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  provideEnquiryPermitConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
-  provideEnquiryProjectConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION,
-  provideProjectService: electrificationProjectService
+  enquiryPermitConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
+  enquiryProjectConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION,
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  provideEnquiryConfirmRouteName: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
-  provideEnquiryPermitConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
-  provideEnquiryProjectConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
-  provideEnquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-  provideProjectService: housingProjectService
+  enquiryConfirmRouteName: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+  enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
+  enquiryPermitConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
+  enquiryProjectConfirmRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
+  projectService: housingProjectService
 };
 
 // Composables
@@ -71,13 +71,11 @@ const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
 // Providers
-const provideEnquiryConfirmRouteName = computed(() => initiativeState.value.provideEnquiryConfirmRouteName);
-const provideEnquiryPermitConfirmRouteName = computed(() => initiativeState.value.provideEnquiryPermitConfirmRouteName);
-const provideEnquiryProjectConfirmRouteName = computed(
-  () => initiativeState.value.provideEnquiryProjectConfirmRouteName
-);
-const provideEnquiryIntakeRouteName = computed(() => initiativeState.value.provideEnquiryIntakeRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
+const provideEnquiryConfirmRouteName = computed(() => initiativeState.value.enquiryConfirmRouteName);
+const provideEnquiryPermitConfirmRouteName = computed(() => initiativeState.value.enquiryPermitConfirmRouteName);
+const provideEnquiryProjectConfirmRouteName = computed(() => initiativeState.value.enquiryProjectConfirmRouteName);
+const provideEnquiryIntakeRouteName = computed(() => initiativeState.value.enquiryIntakeRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(enquiryConfirmRouteNameKey, provideEnquiryConfirmRouteName);
 provide(enquiryPermitConfirmRouteNameKey, provideEnquiryPermitConfirmRouteName);
 provide(enquiryProjectConfirmRouteNameKey, provideEnquiryProjectConfirmRouteName);

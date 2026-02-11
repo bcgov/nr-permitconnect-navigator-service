@@ -44,39 +44,39 @@ const { initialTab = '0', projectId } = defineProps<{
 // Interfaces
 interface InitiativeState {
   enquiryProjectRouteName: RouteName;
+  enquiryRouteName?: RouteName;
   initiativeRouteName: RouteName;
   internalNavigationPermission: NavigationPermission;
   internalProjectProponentAuthorizationRouteName: RouteName;
+  navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectIntakeRouteName: RouteName;
   projectService: IProjectService;
-  provideEnquiryRouteName?: RouteName;
-  provideNavigationPermission: NavigationPermission;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryProjectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY,
+  enquiryRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY,
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   internalNavigationPermission: NavigationPermission.INT_ELECTRIFICATION,
   internalProjectProponentAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT,
+  navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectAuthorizationRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_INTAKE,
-  projectService: electrificationProjectService,
-  provideNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
-  provideEnquiryRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   enquiryProjectRouteName: RouteName.EXT_HOUSING_PROJECT_ENQUIRY,
+  enquiryRouteName: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY,
   initiativeRouteName: RouteName.EXT_HOUSING,
   internalNavigationPermission: NavigationPermission.INT_HOUSING,
   internalProjectProponentAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_PROPONENT_PERMIT,
+  navigationPermission: NavigationPermission.EXT_HOUSING,
   projectAuthorizationRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-  projectService: housingProjectService,
-  provideNavigationPermission: NavigationPermission.EXT_HOUSING,
-  provideEnquiryRouteName: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY
+  projectService: housingProjectService
 };
 
 // Composables
@@ -109,8 +109,8 @@ const loading: Ref<boolean> = ref(true);
 const noteHistoryVisible: Ref<boolean> = ref(false);
 
 // Providers
-const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
-const provideNavigationPermission = computed(() => initiativeState.value.provideNavigationPermission);
+const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
+const provideNavigationPermission = computed(() => initiativeState.value.navigationPermission);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(navigationPermissionKey, provideNavigationPermission);
 

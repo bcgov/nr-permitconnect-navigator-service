@@ -88,7 +88,7 @@ describe('ContactsView.vue', () => {
     const wrapper = shallowMount(ContactsView, wrapperSettings(value.initiative));
     // No other way to test this without casting
     const vm = wrapper.vm as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(vm.initiativeState.provideContactInitiativeRouteName).toBe(value.route);
+    expect(vm.initiativeState.contactRouteName).toBe(value.route);
   });
 
   it('throws error if unknown initiative', async () => {

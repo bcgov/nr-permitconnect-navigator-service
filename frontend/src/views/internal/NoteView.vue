@@ -27,35 +27,35 @@ const {
 
 // Interfaces
 interface InitiativeState {
-  provideEnquiryRouteName?: RouteName;
-  provideProjectRouteName?: RouteName;
-  provideProjectService: IDraftableProjectService;
-  provideResource: Resource;
+  enquiryRouteName?: RouteName;
+  projectRouteName?: RouteName;
+  projectService: IDraftableProjectService;
+  resource: Resource;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE: InitiativeState = {
-  provideEnquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
-  provideProjectService: electrificationProjectService,
-  provideResource: Resource.ENQUIRY
+  enquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
+  projectService: electrificationProjectService,
+  resource: Resource.ENQUIRY
 };
 
 const ELECTRIFICATION_INITIATIVE_PROJECT_STATE: InitiativeState = {
-  provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
-  provideProjectService: electrificationProjectService,
-  provideResource: Resource.ELECTRIFICATION_PROJECT
+  projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
+  projectService: electrificationProjectService,
+  resource: Resource.ELECTRIFICATION_PROJECT
 };
 
 const HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
-  provideEnquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
-  provideProjectService: housingProjectService,
-  provideResource: Resource.ENQUIRY
+  enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
+  projectService: housingProjectService,
+  resource: Resource.ENQUIRY
 };
 
 const HOUSING_INITIATIVE_PROJECT_PROJECT_STATE: InitiativeState = {
-  provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,
-  provideProjectService: housingProjectService,
-  provideResource: Resource.HOUSING_PROJECT
+  projectRouteName: RouteName.INT_HOUSING_PROJECT,
+  projectService: housingProjectService,
+  resource: Resource.HOUSING_PROJECT
 };
 
 // State
@@ -73,10 +73,10 @@ const { getEnquiry } = storeToRefs(enquiryStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Providers
-const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
-const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
-const provideResource = computed(() => initiativeState.value.provideResource);
+const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
+const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
+const provideResource = computed(() => initiativeState.value.resource);
 provide(resourceKey, provideResource);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
@@ -101,8 +101,8 @@ onBeforeMount(async () => {
         throw new Error(t('views.initiativeStateError'));
     }
 
-    if (!getProject.value && initiativeState.value.provideProjectService && projectId) {
-      const project = (await initiativeState.value.provideProjectService.getProject(projectId)).data;
+    if (!getProject.value && initiativeState.value.projectService && projectId) {
+      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
       projectStore.setProject(project);
     }
     if (!getEnquiry.value && enquiryId) {

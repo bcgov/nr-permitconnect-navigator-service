@@ -21,9 +21,9 @@ const { projectId } = defineProps<{
 interface InitiativeState {
   backTo: string;
   initiativeRouteName: RouteName;
-  projectService: IProjectService;
-  projectRouteName: RouteName;
   message: string;
+  projectRouteName: RouteName;
+  projectService: IProjectService;
 }
 
 // Composables
@@ -33,17 +33,17 @@ const { t } = useI18n();
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.electrification.backTo'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
-  projectService: electrificationProjectService,
+  message: t('views.e.projectConfirmationView.electrification.message'),
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-  message: t('views.e.projectConfirmationView.electrification.message')
+  projectService: electrificationProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
-  projectService: housingProjectService,
+  message: t('views.e.projectConfirmationView.housing.message'),
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-  message: t('views.e.projectConfirmationView.housing.message')
+  projectService: housingProjectService
 };
 
 // Store

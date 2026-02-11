@@ -24,12 +24,12 @@ import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '
 
 // Interfaces
 interface InitiativeState {
+  enquiryRouteName: RouteName;
   headerText: string;
   navigationPermission: NavigationPermission;
-  provideEnquiryRouteName: RouteName;
-  provideProjectRouteName: RouteName;
-  provideProjectService: IDraftableProjectService;
-  provideResource: Resource;
+  projectRouteName: RouteName;
+  projectService: IDraftableProjectService;
+  resource: Resource;
 }
 
 // Composables
@@ -38,21 +38,21 @@ const authzStore = useAuthZStore();
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
   headerText: t('views.i.initiativeView.electrification.header'),
   navigationPermission: NavigationPermission.INT_ELECTRIFICATION,
-  provideEnquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
-  provideProjectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
-  provideProjectService: electrificationProjectService,
-  provideResource: Resource.ELECTRIFICATION_PROJECT
+  projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
+  projectService: electrificationProjectService,
+  resource: Resource.ELECTRIFICATION_PROJECT
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
   headerText: t('views.i.initiativeView.housing.header'),
   navigationPermission: NavigationPermission.INT_HOUSING,
-  provideEnquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
-  provideProjectRouteName: RouteName.INT_HOUSING_PROJECT,
-  provideProjectService: housingProjectService,
-  provideResource: Resource.HOUSING_PROJECT
+  projectRouteName: RouteName.INT_HOUSING_PROJECT,
+  projectService: housingProjectService,
+  resource: Resource.HOUSING_PROJECT
 };
 
 // State
@@ -65,10 +65,10 @@ const projects: Ref<HousingProject[]> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
-const provideEnquiryRouteName = computed(() => initiativeState.value.provideEnquiryRouteName);
-const provideProjectRouteName = computed(() => initiativeState.value.provideProjectRouteName);
-const provideProjectService = computed(() => initiativeState.value.provideProjectService);
-const provideResource = computed(() => initiativeState.value.provideResource);
+const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
+const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
+const provideProjectService = computed(() => initiativeState.value.projectService);
+const provideResource = computed(() => initiativeState.value.resource);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
@@ -92,10 +92,10 @@ onBeforeMount(async () => {
       await Promise.all([
         enquiryService.searchEnquiries(),
         permitService.listPermits(),
-        initiativeState.value.provideProjectService.searchProjects({
+        initiativeState.value.projectService.searchProjects({
           includeUser: true
         }),
-        initiativeState.value.provideProjectService.getStatistics(),
+        initiativeState.value.projectService.getStatistics(),
         noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)
       ])
     ).map((r) => r.data);
