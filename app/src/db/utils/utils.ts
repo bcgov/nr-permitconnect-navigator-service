@@ -1,3 +1,4 @@
+import { Knex } from 'knex';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -52,6 +53,7 @@ export function checkDatabaseSchema(): boolean {
       'electrification_project_type_code',
       'email_log',
       'enquiry',
+      'general_project',
       'housing_project',
       'identity_provider',
       'initiative',
@@ -147,4 +149,50 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient): Pro
 export function jsonToPrismaInputJson(json: Prisma.JsonValue): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
   return json as Prisma.InputJsonValue;
+}
+
+/**
+ * Create Audit Log Trigger for a given table
+ * @param knex Knex instance
+ * @param schema Schema
+ * @param table Table
+ */
+export async function createAuditLogTrigger(knex: Knex, schema: string, table: string): Promise<void> {
+  await knex.schema.raw(`CREATE TRIGGER audit_${table}_trigger
+    AFTER UPDATE OR DELETE ON ${schema}.${table}
+    FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`);
+}
+
+/**
+ * Create an updated at trigger for a given table
+ * @param knex Knex instance
+ * @param schema Schema
+ * @param table Table
+ */
+export async function createUpdatedAtTrigger(knex: Knex, schema: string, table: string): Promise<void> {
+  await knex.schema.raw(`CREATE TRIGGER before_update_${table}_trigger
+    BEFORE UPDATE ON ${schema}.${table}
+    FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`);
+}
+
+/**
+ * Drop Audit Log Trigger for a given table
+ * @param knex Knex instance
+ * @param schema Schema
+ * @param table Table
+ * @returns Query Builder Promise
+ */
+export async function dropAuditLogTrigger(knex: Knex, schema: string, table: string): Promise<void> {
+  await knex.schema.raw(`DROP TRIGGER IF EXISTS audit_${table}_trigger ON ${schema}.${table}`);
+}
+
+/**
+ * Drop an updated at trigger for a given table
+ * @param knex Knex instance
+ * @param schema Schema
+ * @param table Table
+ * @returns Query Builder Result
+ */
+export async function dropUpdatedAtTrigger(knex: Knex, schema: string, table: string): Promise<void> {
+  await knex.schema.raw(`DROP TRIGGER IF EXISTS before_update_${table}_trigger ON ${schema}.${table}`);
 }

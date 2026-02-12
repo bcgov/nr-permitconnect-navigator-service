@@ -42,6 +42,7 @@ model activity {
   draft                  draft[]
   electrificationProject electrification_project[]
   enquiry                enquiry[]
+  generalProject         general_project[]
   housingProject         housing_project[]
   noteHistory            note_history[]
   permit                 permit[]
@@ -273,6 +274,7 @@ model user {
   contact                contact[]
   electrificationProject electrification_project[]
   enquiry                enquiry[]
+  generalProject         general_project[]
   housingProject         housing_project[]
   identityProvider       identity_provider?        @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
 
@@ -785,6 +787,53 @@ model permit_type_source_system_kind_xref {
   sourceSystemKind   source_system_kind @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_type_source_system_kind_xref_source_system_kind_id_forei")
 
   @@id([permitTypeId, sourceSystemKindId])
+  @@schema("public")
+}
+
+model general_project {
+  generalProjectId            String    @id @map("general_project_id") @db.Uuid
+  activityId                  String    @map("activity_id")
+  assignedUserId              String?   @map("assigned_user_id") @db.Uuid
+  submittedAt                 DateTime  @map("submitted_at") @db.Timestamptz(6)
+  locationPids                String?   @map("location_pids")
+  companyNameRegistered       String?   @map("company_name_registered")
+  projectName                 String?   @map("project_name")
+  streetAddress               String?   @map("street_address")
+  latitude                    Decimal?  @db.Decimal(8, 6)
+  longitude                   Decimal?  @db.Decimal(9, 6)
+  queuePriority               Int?      @map("queue_priority")
+  relatedPermits              String?   @map("related_permits")
+  astNotes                    String?   @map("ast_notes")
+  astUpdated                  Boolean   @default(false) @map("ast_updated")
+  addedToAts                  Boolean   @default(false) @map("added_to_ats")
+  atsClientId                 Int?      @map("ats_client_id")
+  ltsaCompleted               Boolean   @default(false) @map("ltsa_completed")
+  bcOnlineCompleted           Boolean   @default(false) @map("bc_online_completed")
+  naturalDisaster             Boolean   @default(false) @map("natural_disaster")
+  aaiUpdated                  Boolean   @default(false) @map("aai_updated")
+  applicationStatus           String?   @map("application_status")
+  projectDescription          String?   @map("project_description")
+  projectLocation             String?   @map("project_location")
+  projectLocationDescription  String?   @map("project_location_description")
+  locality                    String?
+  province                    String?
+  hasAppliedProvincialPermits String?   @map("has_applied_provincial_permits")
+  checkProvincialPermits      String?   @map("check_provincial_permits")
+  submissionType              String?   @map("submission_type")
+  consentToFeedback           Boolean   @default(false) @map("consent_to_feedback")
+  geoJson                     Json?     @map("geo_json") @db.Json
+  geomarkUrl                  String?   @map("geomark_url")
+  atsEnquiryId                Int?      @map("ats_enquiry_id")
+  companyIdRegistered         String?   @map("company_id_registered")
+  createdBy                   String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt                   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy                   String?   @map("updated_by")
+  updatedAt                   DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy                   String?   @map("deleted_by")
+  deletedAt                   DateTime? @map("deleted_at") @db.Timestamptz(6)
+  activity                    activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "generic_project_activity_id_foreign")
+  user                        user?     @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "generic_project_assigned_user_id_foreign")
+
   @@schema("public")
 }
 
