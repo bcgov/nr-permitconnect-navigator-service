@@ -17,7 +17,7 @@ import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/proje
 import { GroupName, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
-import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
+import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '@/utils/templates';
 import { scrollToFirstError } from '@/utils/utils';
 
@@ -32,6 +32,7 @@ const { editable, noteHistory = undefined } = defineProps<{
 }>();
 
 // Injections
+const enquiryRouteName = inject(enquiryRouteNameKey);
 const projectRouteName = inject(projectRouteNameKey);
 const projectService = inject(projectServiceKey);
 const resource = inject(resourceKey);
@@ -219,7 +220,7 @@ function navigateToOrigin() {
   if (!resource?.value) throw new Error('Resource not defined');
   if (resource.value === Resource.ENQUIRY) {
     router.push({
-      name: projectRouteName?.value,
+      name: enquiryRouteName?.value,
       params: { enquiryId: getEnquiry.value?.enquiryId },
       query: {
         initialTab: NOTES_TAB_INDEX.ENQUIRY

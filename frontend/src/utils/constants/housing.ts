@@ -1,7 +1,7 @@
 /*
  * Housing initiative constants
  */
-import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '../enums/housing';
+import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,

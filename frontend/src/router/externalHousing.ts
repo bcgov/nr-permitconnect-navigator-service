@@ -14,7 +14,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: '',
         name: RouteName.EXT_HOUSING,
-        component: () => import('../views/external/housing/HousingView.vue'),
+        component: () => import('@/views/external/InitiativeView.vue'),
         beforeEnter: accessHandler
       },
       {
@@ -25,21 +25,21 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
-            component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
+            component: () => import('@/views/external/EnquiryIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps
           },
           {
             path: ':enquiryId',
             name: RouteName.EXT_HOUSING_ENQUIRY,
-            component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
+            component: () => import('@/views/external/EnquiryIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps
           },
           {
             path: ':enquiryId/confirmation',
             name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
-            component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
+            component: () => import('@/views/external/EnquiryConfirmationView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: { hideBreadcrumb: true }
@@ -54,14 +54,14 @@ const routes: RouteRecordRaw[] = [
           {
             path: ':draftId',
             name: RouteName.EXT_HOUSING_INTAKE,
-            component: () => import('@/views/external/housing/project/ProjectIntakeView.vue'),
+            component: () => import('@/views/external/ProjectIntakeView.vue'),
             beforeEnter: accessHandler,
             props: createProps
           },
           {
             path: ':projectId/confirmation',
             name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
-            component: () => import('@/views/external/housing/project/ProjectConfirmationView.vue'),
+            component: () => import('@/views/external/ProjectConfirmationView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: { hideBreadcrumb: true }
@@ -80,7 +80,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: '',
                 name: RouteName.EXT_HOUSING_PROJECT,
-                component: () => import('@/views/external/housing/project/ProjectView.vue'),
+                component: () => import('@/views/external/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
@@ -92,21 +92,21 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: '',
                     name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY,
-                    component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
+                    component: () => import('@/views/external/EnquiryIntakeView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
                   {
                     path: ':enquiryId',
                     name: RouteName.EXT_HOUSING_PROJECT_RELATED_ENQUIRY,
-                    component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
+                    component: () => import('@/views/external/EnquiryIntakeView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
                   {
                     path: ':enquiryId/confirmation',
                     name: RouteName.EXT_HOUSING_PROJECT_ENQUIRY_CONFIRMATION,
-                    component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
+                    component: () => import('@/views/external/EnquiryConfirmationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { hideBreadcrumb: true }
@@ -116,7 +116,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: 'intake',
                 name: RouteName.EXT_HOUSING_PROJECT_INTAKE,
-                component: () => import('@/views/external/housing/project/ProjectIntakeView.vue'),
+                component: () => import('@/views/external/ProjectIntakeView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps,
                 meta: { breadcrumb: 'Project Intake Form' }
@@ -129,7 +129,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: '',
                     name: RouteName.EXT_HOUSING_PROJECT_PERMIT,
-                    component: () => import('@/views/external/housing/permit/PermitStatusView.vue'),
+                    component: () => import('@/views/external/PermitStatusView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
@@ -141,14 +141,14 @@ const routes: RouteRecordRaw[] = [
                       {
                         path: '',
                         name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY,
-                        component: () => import('@/views/external/housing/enquiry/EnquiryIntakeView.vue'),
+                        component: () => import('@/views/external/EnquiryIntakeView.vue'),
                         beforeEnter: accessHandler,
                         props: createProps
                       },
                       {
                         path: ':enquiryId/confirmation',
                         name: RouteName.EXT_HOUSING_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
-                        component: () => import('@/views/external/housing/enquiry/EnquiryConfirmationView.vue'),
+                        component: () => import('@/views/external/EnquiryConfirmationView.vue'),
                         beforeEnter: accessHandler,
                         props: createProps,
                         meta: { hideBreadcrumb: true }

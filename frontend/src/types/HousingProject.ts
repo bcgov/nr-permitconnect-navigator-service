@@ -1,5 +1,5 @@
 import type { GeoJSON } from 'geojson';
-import type { IProject } from '../interfaces/IProject';
+import type { IProject } from '@/interfaces/IProject';
 import type { BasicResponse } from '@/utils/enums/application';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 

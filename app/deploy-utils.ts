@@ -142,7 +142,7 @@ export function copyFileSync(source: string, target: string) {
  * @param  target Target directory location
  */
 export function copyDirRecursiveSync(source: string, target: string) {
-  let files = [];
+  let files;
 
   // Check if folder needs to be created or integrated
   const targetFolder = join(target, basename(source));

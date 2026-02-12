@@ -9,7 +9,7 @@ import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { Button, Card, Message, Tab, Tabs, TabList, TabPanel, TabPanels, useConfirm, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, userService } from '@/services';
 import { IdentityProviderKind } from '@/utils/enums/application';
-import { contactInitiativeRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -21,7 +21,7 @@ const { contactId } = defineProps<{
 }>();
 
 // Injections
-const contactInitiativeRoute = inject(contactInitiativeRouteNameKey);
+const contactInitiativeRoute = inject(contactRouteNameKey);
 const projectService = inject(projectServiceKey);
 
 // Composables
@@ -75,7 +75,7 @@ function onDelete() {
           toast.error(t('contactsProponentsList.deleteContactFailed'), String(e.message));
       }
       router.push({
-        name: contactInitiativeRoute
+        name: contactInitiativeRoute?.value
       });
     }
   });

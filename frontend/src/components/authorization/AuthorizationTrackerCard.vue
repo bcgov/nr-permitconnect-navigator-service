@@ -262,7 +262,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
               @keydown.enter.prevent="descriptionModalVisible = true"
               @keydown.space.prevent="descriptionModalVisible = true"
             >
-              {{ t('e.common.permitStatusView.statusDescriptionMeaning') }}
+              {{ t('views.e.permitStatusView.statusDescriptionMeaning') }}
             </span>
           </div>
         </div>

@@ -8,7 +8,7 @@ import { mount } from '@vue/test-utils';
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { contactService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
-import { contactInitiativeRouteNameKey } from '@/utils/keys';
+import { contactRouteNameKey } from '@/utils/keys';
 
 import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
 
@@ -78,7 +78,7 @@ const wrapperSettings = (loading = false, contacts = testContacts) => ({
       ToastService
     ],
     provide: {
-      [contactInitiativeRouteNameKey]: 'ContactView'
+      [contactRouteNameKey]: 'ContactView'
     },
     stubs: ['Button', 'DataTable', 'Column', 'FilterMatchMode', 'InputIcon', 'InputText', 'router-link']
   }

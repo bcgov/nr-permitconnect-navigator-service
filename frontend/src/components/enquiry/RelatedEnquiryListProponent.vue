@@ -46,12 +46,12 @@ function getRouteToObject(data: Enquiry) {
   let toObject = {};
   if (enquiries?.[0]?.relatedActivityId) {
     toObject = {
-      name: enquiryRouteName,
+      name: enquiryRouteName?.value,
       params: { enquiryId: data.enquiryId, projectId }
     };
   } else {
     toObject = {
-      name: enquiryRouteName,
+      name: enquiryRouteName?.value,
       params: { enquiryId: data.enquiryId }
     };
   }

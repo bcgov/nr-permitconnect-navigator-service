@@ -11,7 +11,7 @@ async function syncPeachToPcns() {
   if (!state.features.peach) return;
 
   const started = Date.now();
-  let updatedPermits: Permit[] = [];
+  let updatedPermits: Permit[];
 
   log.info('PEACH sync job started');
   try {

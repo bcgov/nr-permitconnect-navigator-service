@@ -115,7 +115,7 @@ function handleCreateNewActivity() {
         ).data;
         if (response?.activityId) {
           router.push({
-            name: enquiryRouteName,
+            name: enquiryRouteName?.value,
             params: { enquiryId: response.enquiryId }
           });
         }

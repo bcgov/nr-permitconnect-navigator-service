@@ -47,7 +47,7 @@ export const createUserAccessRequestController = async (
     if (!existingUser) userResponse = await createUser(tx, user);
     else userResponse = await readUser(tx, user.userId);
 
-    let accessUserGroups: Group[] = [];
+    let accessUserGroups: Group[];
 
     if (!userResponse) {
       throw new Problem(404, { detail: 'User not found' });
@@ -83,7 +83,7 @@ export const createUserAccessRequestController = async (
       // Remove all user groups for initiative
       const groupsToRemove = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
       for (const g of groupsToRemove) {
-        data = await removeGroup(tx, userResponse?.sub, g.groupId);
+        await removeGroup(tx, userResponse?.sub, g.groupId);
       }
 
       // Assign new group

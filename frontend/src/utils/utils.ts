@@ -1,8 +1,11 @@
+import { isAxiosError } from 'axios';
+import { useToast } from '@/lib/primevue';
 import { useConfigStore } from '@/store';
 import { DELIMITER } from '@/utils/constants/application';
 import { FileCategory, IdentityProviderKind } from '@/utils/enums/application';
 
 import type { DateTimeStrings, IdentityProvider } from '@/types';
+import type { ToastMessageOptions } from 'primevue/toast';
 
 /**
  * @function combineDateTime
@@ -50,23 +53,6 @@ export function differential<T extends Record<PropertyKey, unknown>>(source: T, 
 }
 
 /**
- * @function objectToOptions
- * Converts an object into an array of option items that a UI Form component could consume
- * Each item has a value and label property
- * @template E The enum object type
- * @param {E} enm the enum to convert to option objects
- * @return {Array<{ value: keyof E; label: string | number }>} An array of options objects
- */
-export function objectToOptions<E extends Record<string, string | number>>(
-  enm: E
-): { value: keyof E; label: string | number }[] {
-  return (Object.keys(enm) as (keyof E)[]).map((key) => ({
-    value: key,
-    label: enm[key]
-  })) as { value: keyof E; label: string | number }[];
-}
-
-/**
  * @function findIdpConfig
  * Get the identity provider configuration for the given kind
  * @param {IdentityProviderKind} kind The kind of identity provider
@@ -74,6 +60,18 @@ export function objectToOptions<E extends Record<string, string | number>>(
  */
 export function findIdpConfig(kind: IdentityProviderKind): IdentityProvider | undefined {
   return useConfigStore().getConfig?.idpList?.find((x: IdentityProvider) => x.kind === kind);
+}
+
+/**
+ * Basic error handler to display a toast message
+ * @param error The error object
+ * @param title Optional title. If not given the error message will be used
+ * @param options Optional toast message options
+ */
+export function generalErrorHandler(error: unknown, title?: string, options?: ToastMessageOptions) {
+  if (isAxiosError(error) || error instanceof Error) {
+    useToast().error(title ?? error.message, title ? error.message : undefined, options);
+  } else useToast().error(String(error), undefined, options);
 }
 
 /**

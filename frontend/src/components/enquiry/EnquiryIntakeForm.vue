@@ -140,21 +140,21 @@ async function emailConfirmation(activityId: string, enquiryId: string) {
 function getEnquiryConfirmationRoute(enquiry: Enquiry) {
   if (isOnlyProjectRelated.value) {
     return {
-      name: enquiryProjectConfirmRouteName,
+      name: enquiryProjectConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else if (isPermitRelated.value) {
     return {
-      name: enquiryPermitConfirmRouteName,
+      name: enquiryPermitConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }
     };
   } else {
     return {
-      name: enquiryConfirmRouteName,
+      name: enquiryConfirmRouteName?.value,
       params: {
         enquiryId: enquiry.enquiryId
       }
@@ -191,7 +191,7 @@ async function loadEnquiry() {
       }
     };
   } catch (e) {
-    if (getInitiative.value === Initiative.HOUSING) router.replace({ name: enquiryRouteName });
+    if (getInitiative.value === Initiative.HOUSING) router.replace({ name: enquiryRouteName?.value });
     else router.replace({ name: RouteName.EXT_ELECTRIFICATION });
     toast.error('Failed to load enquiry', String(e));
   }

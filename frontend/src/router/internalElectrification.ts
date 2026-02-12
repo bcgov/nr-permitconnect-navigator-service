@@ -18,7 +18,7 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.INT_ELECTRIFICATION,
-            component: () => import('@/views/internal/electrification/ElectrificationView.vue'),
+            component: () => import('@/views/internal/InitiativeView.vue'),
             beforeEnter: accessHandler
           },
           {
@@ -29,7 +29,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: '',
                 name: RouteName.INT_ELECTRIFICATION_ENQUIRY,
-                component: () => import('@/views/internal/electrification/enquiry/EnquiryView.vue'),
+                component: () => import('@/views/internal/EnquiryView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
@@ -41,7 +41,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
-                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    component: () => import('@/views/internal/NoteView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -57,7 +57,7 @@ const routes: RouteRecordRaw[] = [
               {
                 path: '',
                 name: RouteName.INT_ELECTRIFICATION_PROJECT,
-                component: () => import('@/views/internal/electrification/project/ProjectView.vue'),
+                component: () => import('@/views/internal/ProjectView.vue'),
                 beforeEnter: accessHandler,
                 props: createProps
               },
@@ -68,7 +68,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':enquiryId',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY,
-                    component: () => import('@/views/internal/electrification/enquiry/EnquiryView.vue'),
+                    component: () => import('@/views/internal/EnquiryView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { dynamicBreadcrumb: 'enquiry' }
@@ -83,14 +83,14 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: '',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
-                    component: () => import('@/views/internal/electrification/authorization/AuthorizationView.vue'),
+                    component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
                   {
                     path: ':permitId',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
-                    component: () => import('@/views/internal/electrification/authorization/AuthorizationView.vue'),
+                    component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -104,7 +104,7 @@ const routes: RouteRecordRaw[] = [
                   {
                     path: ':noteHistoryId?',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
-                    component: () => import('@/views/internal/note/NoteView.vue'),
+                    component: () => import('@/views/internal/NoteView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   }
@@ -119,7 +119,7 @@ const routes: RouteRecordRaw[] = [
                     path: '',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
                     // TODO: Consider creating reuse component from view so we can create a separate internal view
-                    component: () => import('@/views/external/electrification/project/ProjectView.vue'),
+                    component: () => import('@/views/external/ProjectView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps
                   },
@@ -127,7 +127,7 @@ const routes: RouteRecordRaw[] = [
                     path: ':permitId',
                     name: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT,
                     // TODO: Consider creating reuse component from view so we can create a separate internal view
-                    component: () => import('@/views/external/electrification/permit/PermitStatusView.vue'),
+                    component: () => import('@/views/external/PermitStatusView.vue'),
                     beforeEnter: accessHandler,
                     props: createProps,
                     meta: { dynamicBreadcrumb: 'authorization' }
@@ -146,13 +146,13 @@ const routes: RouteRecordRaw[] = [
           {
             path: '',
             name: RouteName.INT_ELECTRIFICATION_CONTACT,
-            component: () => import('@/views/internal/electrification/contact/ContactsView.vue'),
+            component: () => import('@/views/internal/ContactsView.vue'),
             beforeEnter: accessHandler
           },
           {
             path: ':contactId',
             name: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE,
-            component: () => import('@/views/internal/electrification/contact/ContactPageView.vue'),
+            component: () => import('@/views/internal/ContactPageView.vue'),
             beforeEnter: accessHandler,
             props: createProps,
             meta: { breadcrumb: 'Contact Details' }
@@ -162,7 +162,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'user',
         name: RouteName.INT_ELECTRIFICATION_USER_MANAGEMENT,
-        component: () => import('@/views/internal/user/UserManagementView.vue'),
+        component: () => import('@/views/internal/UserManagementView.vue'),
         beforeEnter: accessHandler,
         meta: {
           access: [NavigationPermission.INT_USER_MANAGEMENT],

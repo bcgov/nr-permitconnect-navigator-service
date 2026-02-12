@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { Spinner } from '@/components/layout';
 import { Button, Column, DataTable, useConfirm, useToast } from '@/lib/primevue';
 import { formatDate } from '@/utils/formatters';
-import { draftableProjectServiceKey, projectRouteNameKey } from '@/utils/keys';
+import { draftableProjectServiceKey, projectIntakeRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Draft, Project } from '@/types';
@@ -17,7 +17,7 @@ const { loading, drafts } = defineProps<{
 }>();
 
 // Injections
-const projectRoute = inject(projectRouteNameKey);
+const projectIntakeRoute = inject(projectIntakeRouteNameKey);
 const projectService = inject(draftableProjectServiceKey);
 
 // Emit
@@ -90,7 +90,7 @@ function onDelete(draftId: string) {
         <div :data-draftId="data.draftId">
           <router-link
             :to="{
-              name: projectRoute,
+              name: projectIntakeRoute,
               params: { draftId: data.draftId }
             }"
           >

@@ -154,10 +154,10 @@ async function createATSEnquiry(atsClientId?: number) {
       regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
       enquiryFileNumbers: [formRef.value?.values.activityId],
-      enquiryPartnerAgencies: [atsEnquiryPartnerAgencies ?? ''],
+      enquiryPartnerAgencies: [atsEnquiryPartnerAgencies?.value ?? ''],
       enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.enquiryDescription,
-      enquiryTypeCodes: [atsEnquiryTypeCode ?? '']
+      enquiryTypeCodes: [atsEnquiryTypeCode?.value ?? '']
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
     if (response.status === 201) {

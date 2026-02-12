@@ -11,6 +11,7 @@ import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 import type { Enquiry } from '@/types';
 
 // Props
@@ -38,16 +39,16 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
 // Actions
 const { t } = useI18n();
 
-function getRouteToObject(data: Enquiry) {
-  let toObject = {};
+function getRouteToObject(data: Enquiry): RouteLocationRaw {
+  let toObject: RouteLocationRaw = {};
   if (enquiries?.[0]?.relatedActivityId) {
     toObject = {
-      name: enquiryRouteName,
+      name: enquiryRouteName?.value,
       params: { enquiryId: data.enquiryId, projectId }
     };
   } else {
     toObject = {
-      name: enquiryRouteName,
+      name: enquiryRouteName?.value,
       params: { enquiryId: data.enquiryId }
     };
   }
