@@ -46,15 +46,14 @@ import {
   useToast
 } from '@/lib/primevue';
 import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
-import { useAppStore, useConfigStore, useContactStore, useProjectStore, usePermitStore } from '@/store';
+import { useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/housing';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { IntakeFormCategory, SubmissionType } from '@/utils/enums/projectCommon';
-import { confirmationTemplateEnquiry, confirmationTemplateHousingSubmission } from '@/utils/templates';
-import { getHTMLElement, omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
@@ -86,7 +85,6 @@ const VALIDATION_BANNER_TEXT = t('projectIntakeForm.validationBanner');
 const contactStore = useContactStore();
 const projectStore = useProjectStore();
 const permitStore = usePermitStore();
-const { getConfig } = storeToRefs(useConfigStore());
 const { getPermitTypes } = storeToRefs(permitStore);
 
 // State
@@ -125,46 +123,6 @@ function confirmSubmit(data: GenericObject) {
   });
 }
 
-async function emailConfirmation(actId: string, projectId: string, forProjectSubmission: boolean) {
-  try {
-    const configCC = getConfig.value?.ches?.submission?.cc;
-    const applicantName = formRef.value?.values.contacts.contactFirstName;
-    const applicantEmail = formRef.value?.values.contacts.contactEmail;
-    const initiative = toTitleCase(useAppStore().getInitiative);
-    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
-    let body: string;
-
-    if (!configCC) throw new Error('No "from" email');
-
-    if (forProjectSubmission) {
-      body = confirmationTemplateHousingSubmission({
-        '{{ contactName }}': applicantName,
-        '{{ initiative }}': initiative,
-        '{{ activityId }}': actId,
-        '{{ projectId }}': projectId
-      });
-    } else {
-      body = confirmationTemplateEnquiry({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ enquiryDescription }}': t('projectIntakeForm.assistanceMessage'),
-        '{{ enquiryId }}': projectId
-      });
-    }
-    const emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: [configCC],
-      subject: subject,
-      bodyType: 'html',
-      body: body
-    };
-    await housingProjectService.emailConfirmation(emailData);
-  } catch (e) {
-    toast.error('Failed to send confirmation email.', String(e));
-  }
-}
-
 async function onAssistanceRequest(values: GenericObject) {
   try {
     const enquiryData = {
@@ -187,9 +145,6 @@ async function onAssistanceRequest(values: GenericObject) {
 
     if (enquiryResponse.activityId) {
       toast.success('Form saved');
-
-      // Send confirmation email
-      emailConfirmation(enquiryResponse.activityId, enquiryResponse.housingProjectId, false);
 
       router.push({
         name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
@@ -335,9 +290,6 @@ async function onSubmit(data: GenericObject) {
 
     if (response.data.activityId && response.data.housingProjectId) {
       assignedActivityId.value = response.data.activityId;
-
-      // Send confirmation email
-      emailConfirmation(response.data.activityId, response.data.housingProjectId, true);
 
       // Save contact data to store
       contactStore.setContact(response.data.contact);
