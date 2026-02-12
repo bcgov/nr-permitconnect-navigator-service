@@ -10,6 +10,14 @@ const projectIdTransform = Prisma.defineExtension({
         }
       }
     },
+    general_project: {
+      projectId: {
+        needs: { generalProjectId: true },
+        compute(data: { generalProjectId: string }) {
+          return data.generalProjectId;
+        }
+      }
+    },
     housing_project: {
       projectId: {
         needs: { housingProjectId: true },
