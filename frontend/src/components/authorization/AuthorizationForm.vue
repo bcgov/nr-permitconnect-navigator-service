@@ -12,22 +12,13 @@ import AuthorizationStatusUpdatesCard from '@/components/authorization/Authoriza
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
-import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
-import { useCodeStore, useConfigStore, useFeatureStore, useProjectStore } from '@/store';
+import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
+import { useCodeStore, useFeatureStore, useProjectStore } from '@/store';
 import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
-import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
-import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
-import { peachPermitNoteNotificationTemplate, permitNoteNotificationTemplate } from '@/utils/templates';
-import {
-  combineDateTime,
-  differential,
-  isEmptyObject,
-  omit,
-  scrollToFirstError,
-  setEmptyStringsToNull,
-  splitDateTime
-} from '@/utils/utils';
+import { formatDateTime } from '@/utils/formatters';
+import { projectRouteNameKey } from '@/utils/keys';
+import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
@@ -46,7 +37,6 @@ const AUTHORIZATION_TAB = '2';
 
 // Composables
 const codeStore = useCodeStore();
-const configStore = useConfigStore();
 const confirmDialog = useConfirm();
 const featureStore = useFeatureStore();
 const { locale, t } = useI18n();
@@ -116,7 +106,6 @@ type FormSchemaType = InferType<typeof formSchema> & { authorizationType: Permit
 // Store
 const { codeDisplay } = codeStore;
 const { isPeachEnabled } = storeToRefs(featureStore);
-const { getConfig } = storeToRefs(configStore);
 const { getProject } = storeToRefs(projectStore);
 
 // State
@@ -138,18 +127,8 @@ const isPeachIntegrated = computed(() => isPeachIntegratedAuthType.value && isPe
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
-const projectService = inject(projectServiceKey);
 
 // Actions
-const snapshotPermitStatus = (p: Partial<Permit>) => ({
-  state: p.state,
-  stage: p.stage,
-  decisionDate: p.decisionDate,
-  submittedDate: p.submittedDate,
-  statusLastChanged: p.statusLastChanged,
-  statusLastVerified: p.statusLastVerified
-});
-
 const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
   const sourceA = codeDisplay.SourceSystem[a.sourceSystem];
   const sourceB = codeDisplay.SourceSystem[b.sourceSystem];
@@ -174,47 +153,6 @@ function checkIfPeachIntegratedTrackingId(permitTrackings: PermitTracking[]): bo
     );
     return !!sourceSystemKind;
   });
-}
-
-async function emailNotification(data: Permit, permitNote: string) {
-  const emailTemplateData = {
-    '{{ contactName }}':
-      getProject.value?.contacts?.[0]?.firstName ||
-      getProject.value?.activity?.activityContact?.[0]?.contact?.firstName,
-    '{{ activityId }}': getProject.value?.activityId,
-    '{{ permitName }}': data.permitType?.name,
-    '{{ submittedDate }}': data.submittedDate ? formatDateOnly(data.submittedDate) : formatDate(data.createdAt),
-    '{{ projectId }}': getProject.value?.projectId,
-    '{{ permitId }}': data.permitId
-  };
-  const configCC = getConfig.value?.ches?.submission?.cc;
-  if (!configCC) throw new Error('No "from" email');
-
-  const peachUpdateNotePlaceholder = t('authorization.authorizationForm.peachNoteUpdate');
-  const isOnlyTemplate = permitNote.trim() === peachUpdateNotePlaceholder;
-  const isFirstNote = !authorization?.permitNote?.length;
-
-  let body;
-  if (isValidPeachPermit.value && isOnlyTemplate && isFirstNote && isPeachEnabled.value) {
-    body = peachPermitNoteNotificationTemplate(emailTemplateData);
-  } else {
-    body = permitNoteNotificationTemplate(emailTemplateData);
-  }
-
-  let applicantEmail =
-    (getProject.value?.contacts?.[0]?.email as string) ||
-    (getProject.value?.activity?.activityContact?.[0]?.contact?.email as string);
-  let emailData = {
-    from: configCC,
-    to: [applicantEmail],
-    cc: [configCC],
-    subject: `Updates for project ${getProject.value?.activityId}, ${data.permitType?.name}`,
-    bodyType: 'html',
-    body: body
-  };
-
-  if (!projectService?.value) throw new Error('No service');
-  await projectService.value.emailConfirmation(emailData);
 }
 
 async function getPeachSummary(permitTrackings: PermitTracking[]) {
@@ -398,31 +336,12 @@ async function onSubmit(data: GenericObject) {
       } else return;
     }
     const permitSubmitData = setEmptyStringsToNull(permitData);
-    const result = (await permitService.upsertPermit({ ...permitSubmitData })).data;
 
-    const before = snapshotPermitStatus(authorization ?? {});
-    const after = snapshotPermitStatus(result);
-    const diff = differential(before, after);
-
-    const statusChanged = !isEmptyObject(diff);
-    const permitNoteText = (permitNote ?? '').trim();
-    const isEmptyPermitNote = permitNoteText.length === 0;
-
-    // Prevent creating notes and sending an update email if the above call fails or if note is empty
-    if (result?.permitId && (!isEmptyPermitNote || (isValidPeachPermit.value && statusChanged))) {
-      const note = isEmptyPermitNote
-        ? `This application is ${result.state.toLocaleLowerCase()} in the ${result.stage.toLocaleLowerCase()}.`
-        : permitNoteText;
-      await permitNoteService.createPermitNote({
-        permitId: result.permitId,
-        note
-      });
-
-      // Send email to the user if permit is needed or if permit stage is not pre-submission
-      if (result.needed === PermitNeeded.YES || result.stage !== PermitStage.PRE_SUBMISSION)
-        await emailNotification(result, note);
-    }
-
+    await permitService.upsertPermit({
+      ...permitSubmitData,
+      permitNote: [{ note: permitNote }],
+      permitType: authorizationType
+    });
     toast.success(t('authorization.authorizationForm.permitSaved'));
 
     if (!projectRouteName?.value) throw new Error('No route');

@@ -12,13 +12,12 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { Checkbox, DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Button, Card, Message, ToggleSwitch, useConfirm, useToast } from '@/lib/primevue';
 import { noteHistoryService, userService } from '@/services';
-import { useAppStore, useAuthZStore, useCodeStore, useConfigStore, useEnquiryStore, useProjectStore } from '@/store';
+import { useAuthZStore, useCodeStore, useEnquiryStore, useProjectStore } from '@/store';
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { GroupName, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
-import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
-import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '@/utils/templates';
+import { enquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -34,7 +33,6 @@ const { editable, noteHistory = undefined } = defineProps<{
 // Injections
 const enquiryRouteName = inject(enquiryRouteNameKey);
 const projectRouteName = inject(projectRouteNameKey);
-const projectService = inject(projectServiceKey);
 const resource = inject(resourceKey);
 
 // Constants
@@ -95,7 +93,6 @@ const formSchema = object({
 export type FormSchemaType = InferType<typeof formSchema>;
 
 // Store
-const { getConfig } = storeToRefs(useConfigStore());
 const { getProject } = storeToRefs(projectStore);
 const { getEnquiry } = storeToRefs(enquiryStore);
 
@@ -181,18 +178,13 @@ async function onSubmit(data: GenericObject) {
         note: data.note
       });
     } else {
-      await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
-        ...body,
-        activityId,
-        note: data.note
-      });
-      if (
-        body.type === NoteType.BRING_FORWARD &&
-        body.escalateToSupervisor &&
-        !authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])
-      ) {
-        emailNotification();
-      }
+      if (resource?.value)
+        await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
+          ...body,
+          activityId,
+          note: data.note,
+          resource: resource.value
+        });
     }
     toast.success(t('note.noteForm.noteSaved'));
     navigateToOrigin();
@@ -235,41 +227,6 @@ function navigateToOrigin() {
       }
     });
   }
-}
-
-async function emailNotification() {
-  const supervisors = (
-    await userService.searchUsers({ group: [GroupName.SUPERVISOR], initiative: [useAppStore().getInitiative] })
-  ).data;
-  const supervisorsEmails = supervisors.map((u: User) => u.email);
-
-  if (supervisorsEmails.length === 0) return;
-
-  const configCC = getConfig.value?.ches?.submission?.cc;
-  if (!configCC) throw new Error('No "from" email');
-
-  let body: string;
-  if (resource?.value === Resource.ENQUIRY) {
-    body = bringForwardEnquiryNotificationTemplate({
-      '{{ activityId }}': getEnquiry.value?.activityId
-    });
-  } else {
-    body = bringForwardProjectNotificationTemplate({
-      '{{ projectName }}': getProject.value?.projectName,
-      '{{ activityId }}': getProject.value?.activityId
-    });
-  }
-
-  let emailData = {
-    from: configCC,
-    to: supervisorsEmails,
-    subject: t('note.noteForm.escalationEmailTitle'),
-    bodyType: 'html',
-    body: body
-  };
-
-  if (!projectService?.value) throw new Error('No service');
-  await projectService.value.emailConfirmation(emailData);
 }
 
 onBeforeMount(async () => {
