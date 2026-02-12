@@ -43,6 +43,7 @@ const schema = {
         .allow(null),
       note: Joi.string().allow(null),
       noteHistoryId: uuidv4.allow(null),
+      resource: Joi.string().required(),
       shownToProponent: Joi.boolean(),
       title: Joi.string().max(255).required(),
       type: Joi.string().max(255).required()
