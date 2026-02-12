@@ -41,6 +41,9 @@
       "apiPath": "SERVER_CHES_APIPATH",
       "clientId": "SERVER_CHES_CLIENTID",
       "clientSecret": "SERVER_CHES_CLIENTSECRET",
+      "submission": {
+        "cc": "SERVER_CHES_SUBMISSION_CC"
+      },
       "tokenUrl": "SERVER_CHES_TOKENURL"
     },
     "chefs": {

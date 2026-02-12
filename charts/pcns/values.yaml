@@ -148,6 +148,7 @@ config:
     SERVER_CHEFS_APIPATH: ~
 
     SERVER_CHES_APIPATH: ~
+    SERVER_CHES_SUBMISSION_CC: ~
     SERVER_CHES_TOKENURL: ~
 
     SERVER_DB_HOST: ~
@@ -227,7 +228,7 @@ peachSync:
   enabled: true
 
   # -- Cron schedule for PEACH sync
-  schedule: "5 3 * * *"
+  schedule: "5 11 * * *"
 
   # -- Suspend subsequent runs of the CronJob without deleting it
   suspend: false
