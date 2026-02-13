@@ -139,6 +139,7 @@ const testProject: HousingProject = {
   applicationStatus: ApplicationStatus.COMPLETED,
   contacts: [exampleContact],
   user: testUser,
+  roadmapNote: 'Roadmap note.',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

@@ -16,10 +16,11 @@ import {
   enquiryService,
   housingProjectService,
   noteHistoryService,
-  permitService
+  permitService,
+  roadmapService
 } from '@/services';
 import { useAuthZStore, useProjectStore } from '@/store';
-import { Action, GroupName, Initiative, Resource, RouteName } from '@/utils/enums/application';
+import { Action, GroupName, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
@@ -96,6 +97,12 @@ vi.mock('@/services/documentService', () => ({
   }
 }));
 
+vi.mock('@/services/roadmapService', () => ({
+  default: {
+    getRoadmapNote: vi.fn()
+  }
+}));
+
 // Default component mounting wrapper settings
 const wrapperSettings = (initiative = Initiative.HOUSING) => ({
   props: {
@@ -124,6 +131,16 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
+  sessionStorage.setItem(
+    StorageKey.CONFIG,
+    JSON.stringify({
+      oidc: {
+        authority: 'http://localhost',
+        clientId: 'test-client'
+      }
+    })
+  );
+
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
     mockAxiosResponse({ electrificationProjectId: '123', activityId: '123' })
   );
@@ -138,9 +155,11 @@ beforeEach(() => {
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([{ permitId: '123' }]));
   vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([{ permitTypeId: '123' }]));
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([{ enquiryId: '123' }]));
+  vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue(mockAxiosResponse({ roadmapNoteId: '123' }));
 });
 
 afterEach(() => {
+  sessionStorage.clear();
   vi.clearAllMocks();
 });
 
