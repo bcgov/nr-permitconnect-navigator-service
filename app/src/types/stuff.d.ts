@@ -187,6 +187,76 @@ export interface EnquirySearchParameters {
   includeUser?: boolean;
 }
 
+export interface GeneralProjectIntake {
+  activityId: string | null;
+  draftId: string | null;
+  submittedAt: string | null;
+  applicationStatus?: ApplicationStatus;
+  submissionType?: SubmissionType;
+
+  basic: {
+    consentToFeedback: boolean;
+    projectApplicantType: string | null;
+    registeredId: string | null;
+    registeredName: string | null;
+  };
+
+  general: {
+    projectName: string;
+    projectDescription: string;
+  };
+
+  location: {
+    naturalDisaster: string;
+    projectLocation: string;
+    projectLocationDescription: string;
+    geomarkUrl: string | null;
+    geoJson: Prisma.JsonValue;
+    ltsaPidLookup: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    streetAddress: string;
+    locality: string;
+    province: string;
+  };
+
+  permits: {
+    hasAppliedProvincialPermits?: string | null;
+  };
+
+  appliedPermits: Permit[];
+  investigatePermits: Permit[];
+  contact: Contact;
+}
+
+export interface GeneralProjectSearchParameters {
+  activityId?: string[];
+  createdBy?: string[];
+  generalProjectId?: string[];
+  submissionType?: string[];
+  includeUser?: boolean;
+}
+
+export interface GeneralProjectStatistics {
+  total_submissions: number;
+  total_submissions_between: number;
+  total_submissions_monthyear: number;
+  total_submissions_assignedto: number;
+  state_new: number;
+  state_inprogress: number;
+  state_delayed: number;
+  state_completed: number;
+  queue_1: number;
+  queue_2: number;
+  queue_3: number;
+  escalation: number;
+  general_enquiry: number;
+  guidance: number;
+  inapplicable: number;
+  status_request: number;
+  multi_permits_needed: number;
+}
+
 export interface Group extends Partial<IStamps> {
   groupId: number;
   initiativeCode: string;
@@ -263,9 +333,6 @@ export interface HousingProjectStatistics {
   total_submissions_between: number;
   total_submissions_monthyear: number;
   total_submissions_assignedto: number;
-  intake_submitted: number;
-  intake_assigned: number;
-  intake_completed: number;
   state_new: number;
   state_inprogress: number;
   state_delayed: number;

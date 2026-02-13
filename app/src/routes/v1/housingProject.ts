@@ -47,7 +47,7 @@ router.get(
 router.get(
   '/search',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  housingProjectValidator.searcHousingProjects,
+  housingProjectValidator.searchHousingProjects,
   filterActivityResponseByScope,
   searchHousingProjectsController
 );
