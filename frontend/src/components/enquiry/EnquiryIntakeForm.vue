@@ -12,17 +12,15 @@ import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/c
 import { CollectionDisclaimer } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { useAppStore, useConfigStore, useContactStore } from '@/store';
+import { useAppStore, useContactStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import {
   enquiryConfirmRouteNameKey,
   enquiryPermitConfirmRouteNameKey,
   enquiryProjectConfirmRouteNameKey,
-  enquiryRouteNameKey,
-  projectServiceKey
+  enquiryRouteNameKey
 } from '@/utils/keys';
-import { confirmationTemplateEnquiry } from '@/utils/templates';
 import { omit } from '@/utils/utils';
 import { contactValidator } from '@/validators';
 
@@ -47,7 +45,6 @@ const enquiryConfirmRouteName = inject(enquiryConfirmRouteNameKey);
 const enquiryPermitConfirmRouteName = inject(enquiryPermitConfirmRouteNameKey);
 const enquiryProjectConfirmRouteName = inject(enquiryProjectConfirmRouteNameKey);
 const enquiryRouteName = inject(enquiryRouteNameKey);
-const projectService = inject(projectServiceKey);
 
 // Composables
 const { t } = useI18n();
@@ -58,7 +55,6 @@ const toast = useToast();
 // Store
 const appStore = useAppStore();
 const contactStore = useContactStore();
-const { getConfig } = storeToRefs(useConfigStore());
 const { getInitiative } = storeToRefs(appStore);
 
 // State
@@ -91,50 +87,6 @@ function confirmSubmit(data: GenericObject) {
     rejectProps: { outlined: true },
     accept: () => onSubmit(data)
   });
-}
-
-async function emailConfirmation(activityId: string, enquiryId: string) {
-  const configCC = getConfig.value?.ches?.submission?.cc;
-  if (!configCC) throw new Error('No "from" email');
-
-  let permitDescription = '';
-  let enquiryDescription: string = formRef.value?.values.basic.enquiryDescription || '';
-  let firstTwoSentences: string;
-
-  // If has permit description convert \n to <br>
-  if (enquiryDescription.includes('Tracking ID:')) {
-    const descriptionSplit = enquiryDescription.split('\n\n');
-    permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
-    enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
-  }
-
-  // Get the first two sentences of the enquiry description
-  // If there are more than two sentences in enquiryDescription, add '..' to the end
-  firstTwoSentences = enquiryDescription.split('.').slice(0, 2).join('.') + '.';
-  const sentences = enquiryDescription.split('.').filter((sentence: string) => sentence.trim().length > 0);
-  firstTwoSentences = sentences.length > 2 ? firstTwoSentences.concat('..') : firstTwoSentences;
-
-  if (permitDescription) firstTwoSentences = permitDescription + firstTwoSentences;
-
-  const body = confirmationTemplateEnquiry({
-    '{{ contactName }}': formRef.value?.values.contactFirstName,
-    '{{ activityId }}': activityId,
-    '{{ enquiryDescription }}': firstTwoSentences.trim(),
-    '{{ enquiryId }}': enquiryId,
-    '{{ projectId }}': project?.projectId ?? undefined,
-    '{{ initiative }}': getInitiative.value.toLowerCase()
-  });
-  let applicantEmail = formRef.value?.values.contactEmail;
-  let emailData = {
-    from: configCC,
-    to: [applicantEmail],
-    cc: [configCC],
-    subject: 'Confirmation of Enquiry Submission',
-    bodyType: 'html',
-    body: body
-  };
-  if (!projectService?.value) throw new Error('No service');
-  await projectService.value.emailConfirmation(emailData);
 }
 
 function getEnquiryConfirmationRoute(enquiry: Enquiry) {
@@ -249,9 +201,6 @@ async function onSubmit(values: GenericObject) {
 
     // Save contact data to store
     contactStore.setContact(response.data.contact);
-
-    // Send confirmation email
-    emailConfirmation(response.data.activityId, response.data.enquiryId);
 
     router.push(getEnquiryConfirmationRoute(response.data));
   } catch (e) {

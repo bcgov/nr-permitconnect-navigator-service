@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
 import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -12,11 +11,10 @@ import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/c
 import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
-import { useAppStore, useConfigStore, useCodeStore, useContactStore, useProjectStore } from '@/store';
+import { useCodeStore, useContactStore, useProjectStore } from '@/store';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 import { RouteName } from '@/utils/enums/application';
-import { confirmationTemplateElectrificationSubmission, confirmationTemplateEnquiry } from '@/utils/templates';
-import { omit, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
@@ -43,7 +41,6 @@ const VALIDATION_BANNER_TEXT = t('e.electrification.projectIntakeForm.validation
 const contactStore = useContactStore();
 const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
-const { getConfig } = storeToRefs(useConfigStore());
 
 // State
 const activityId: Ref<string | undefined> = ref(undefined);
@@ -72,46 +69,6 @@ function confirmSubmit(data: GenericObject) {
     rejectProps: { outlined: true },
     accept: () => onSubmit(data)
   });
-}
-
-async function emailConfirmation(actId: string, projectId: string, forProjectSubmission: boolean) {
-  try {
-    const configCC = getConfig.value?.ches?.submission?.cc;
-    const applicantName = formRef.value?.values.contacts.contactFirstName;
-    const applicantEmail = formRef.value?.values.contacts.contactEmail;
-    const initiative = toTitleCase(useAppStore().getInitiative);
-    const subject = `Confirmation of ${forProjectSubmission ? 'Project' : 'Enquiry'} Submission`;
-    let body: string;
-
-    if (!configCC) throw new Error('No "from" email');
-
-    if (forProjectSubmission) {
-      body = confirmationTemplateElectrificationSubmission({
-        '{{ contactName }}': applicantName,
-        '{{ initiative }}': initiative,
-        '{{ activityId }}': actId,
-        '{{ projectId }}': projectId
-      });
-    } else {
-      body = confirmationTemplateEnquiry({
-        '{{ contactName }}': applicantName,
-        '{{ activityId }}': actId,
-        '{{ enquiryDescription }}': t('e.electrification.projectIntakeForm.assistanceMessage'),
-        '{{ enquiryId }}': projectId
-      });
-    }
-    const emailData = {
-      from: configCC,
-      to: [applicantEmail],
-      cc: [configCC],
-      subject: subject,
-      bodyType: 'html',
-      body: body
-    };
-    await electrificationProjectService.emailConfirmation(emailData);
-  } catch (e) {
-    toast.error(t('e.electrification.projectIntakeForm.failedConfirmationEmail'), String(e));
-  }
 }
 
 // Callback function for FormNavigationGuard
@@ -200,9 +157,6 @@ async function onSubmit(data: GenericObject) {
 
     if (response.data.activityId && response.data.electrificationProjectId) {
       assignedActivityId.value = response.data.activityId;
-
-      // Send confirmation email
-      emailConfirmation(response.data.activityId, response.data.electrificationProjectId, true);
 
       // Save contact data to store
       contactStore.setContact(response.data.contact);

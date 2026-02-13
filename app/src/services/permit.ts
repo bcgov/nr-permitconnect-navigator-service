@@ -180,7 +180,8 @@ export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase
       permitId: data.permitId
     },
     include: {
-      permitType: true
+      permitType: true,
+      permitNote: { orderBy: { createdAt: 'desc' } }
     }
   });
 

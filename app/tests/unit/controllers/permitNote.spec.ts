@@ -1,8 +1,13 @@
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { TEST_CURRENT_CONTEXT, TEST_PERMIT_NOTE_1 } from '../data/index.ts';
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_NOTE_1, TEST_PERMIT_1, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
 import { createPermitNoteController } from '../../../src/controllers/permitNote.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
+import * as permitService from '../../../src/services/permit.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
+import * as projectService from '../../../src/services/project.ts';
+import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { PermitNote } from '../../../src/types/index.ts';
@@ -27,8 +32,15 @@ afterEach(() => {
   jest.resetAllMocks();
 });
 
+// Set an initiative for the context
+TEST_CURRENT_CONTEXT.initiative = Initiative.HOUSING;
+
 describe('createPermitNoteController', () => {
   const createPermitNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote');
+  const getPermitSpy = jest.spyOn(permitService, 'getPermit');
+  const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
+  const getSourceSystemKindsSpy = jest.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
+  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -39,6 +51,10 @@ describe('createPermitNoteController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
+    getPermitSpy.mockResolvedValue({ ...TEST_PERMIT_1, createdAt: new Date() });
+    searchHousingProjectsSpy.mockResolvedValue([]);
+    getSourceSystemKindsSpy.mockResolvedValue([]);
+    getProjectByActivityIdSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
     createPermitNoteSpy.mockResolvedValue(TEST_PERMIT_NOTE_1);
 
     await createPermitNoteController(req as unknown as Request<never, never, PermitNote>, res as unknown as Response);

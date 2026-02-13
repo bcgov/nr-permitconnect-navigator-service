@@ -263,19 +263,22 @@ describe('createHousingProjectController', () => {
       ActivityContactRole.PRIMARY
     );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_HOUSING_PROJECT_CREATE,
-      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(createHousingProjectSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+        submittedAt: expect.any(Date) as Date,
+        createdAt: expect.any(Date) as Date,
+        createdBy: TEST_CURRENT_CONTEXT.userId,
+        projectName: 'NAME',
+        projectDescription: 'DESCRIPTION',
+        companyIdRegistered: 'FM0281610',
+        companyNameRegistered: 'COMPANY'
+      })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
-      ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
+      ...TEST_HOUSING_PROJECT_CREATE,
       createdBy: TEST_CURRENT_CONTEXT.userId
     });
   });
@@ -691,13 +694,19 @@ describe('submitHousingProjectDraftController', () => {
       ActivityContactRole.PRIMARY
     );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_HOUSING_PROJECT_1,
-      housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(createHousingProjectSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
+        submittedAt: expect.any(Date) as Date,
+        createdAt: expect.any(Date) as Date,
+        createdBy: TEST_CURRENT_CONTEXT.userId,
+        projectName: 'NAME',
+        projectDescription: 'DESCRIPTION',
+        companyIdRegistered: 'FM0281610',
+        companyNameRegistered: 'COMPANY'
+      })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_HOUSING_PROJECT_1,

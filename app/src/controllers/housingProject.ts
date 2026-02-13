@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -29,7 +30,8 @@ import { BasicResponse, Initiative } from '../utils/enums/application.ts';
 import { NumResidentialUnits } from '../utils/enums/housing.ts';
 import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
-import { getCurrentUsername, isTruthy, omit } from '../utils/utils.ts';
+import { confirmationTemplateHousingSubmission } from '../utils/templates';
+import { getCurrentUsername, isTruthy, omit, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -417,12 +419,36 @@ export const submitHousingProjectDraftController = async (
         { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
       ]);
 
+      await emailProjectConfirmation(contactResponse[0], data);
+
       return { ...data, contact: contactResponse[0] };
     }
   );
 
   res.status(201).json({ ...result, contact: result.contact });
 };
+
+async function emailProjectConfirmation(contact: Contact, housingProject: HousingProject) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+
+  const body = confirmationTemplateHousingSubmission({
+    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    initiative: toTitleCase(Initiative.HOUSING),
+    activityId: housingProject.activityId,
+    projectId: housingProject.housingProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [contact.email!],
+    cc: [configCC],
+    subject: 'Confirmation of Project Submission',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 export const upsertHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;

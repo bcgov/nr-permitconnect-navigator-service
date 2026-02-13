@@ -37,6 +37,7 @@ import {
   housingProjectService,
   noteHistoryService,
   permitService,
+  roadmapService,
   userService
 } from '@/services';
 import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/store';
@@ -209,8 +210,9 @@ onBeforeMount(async () => {
       default:
         throw new Error(t('views.initiativeStateError'));
     }
-
-    const project = (await initiativeState.value.projectService.getProject(projectId)).data;
+    const project = (await housingProjectService.getProject(projectId)).data;
+    const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
+    project.roadmapNote = roadMapNote;
     activityId.value = project.activityId;
     const [documents, notes, permits, relatedEnquiries, contacts] = (
       await Promise.all([

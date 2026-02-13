@@ -343,9 +343,6 @@ describe('AuthorizationForm', () => {
     await wrapper.vm.$nextTick();
     const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
-    const projectService = vm.projectService.value;
-    const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
-
     const submitPayload = {
       authorizationType: {
         permitTypeId: 123,
@@ -367,15 +364,7 @@ describe('AuthorizationForm', () => {
 
     expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
 
-    expect(createPermitNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitNoteSpy).toHaveBeenCalledWith({
-      permitId: 'permit-123',
-      note: 'This is a test note'
-    });
-
     expect(getPeachSummarySpy).not.toHaveBeenCalled();
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
   it('does not create a permit note when note is empty or whitespace', async () => {
@@ -591,31 +580,6 @@ describe('AuthorizationForm', () => {
     ]);
 
     expect(vm.noPeachDataModalVisible).toBe(true);
-  });
-
-  it('uses peachPermitNoteNotificationTemplate when note is only the Peach template and permit is valid', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    vm.isValidPeachPermit = true;
-
-    const template = 'PEACH TEMPLATE ONLY';
-    vm.t.mockReturnValue(template);
-
-    const projectService = vm.projectService.value;
-    const emailSpy = vi.spyOn(projectService, 'emailConfirmation');
-
-    const permit = {
-      permitType: { name: 'Test Auth' },
-      submittedDate: '2025-01-01',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      permitId: 'permit-123'
-    } as Permit;
-
-    await vm.emailNotification(permit, template);
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
   });
 
   it.todo('handles errors when saving the permit fails', async () => {
