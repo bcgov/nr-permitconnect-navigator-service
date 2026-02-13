@@ -30,8 +30,8 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
 
     let groups = await getSubjectGroups(tx, sub);
 
-    if (idp !== IdentityProviderKind.IDIR) {
-      const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
+    if (idp !== IdentityProvider.IDIR) {
+      const required = [Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING, Initiative.PCNS];
       const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
 
       if (missing.length) {

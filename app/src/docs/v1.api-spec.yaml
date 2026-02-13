@@ -34,6 +34,22 @@ tags:
     description: Operations for managing Electrification Projects, Drafts, and Statistics
   - name: Electrification Roadmap
     description: Operations for validating Electrification Roadmaps
+  - name: General Access Request
+    description: Operations for managing General Access Requests
+  - name: General Document
+    description: Operations for managing General Documents
+  - name: General Enquiry
+    description: Operations for managing General Enquiries
+  - name: General Note
+    description: Operations for managing General Notes
+  - name: General Permit
+    description: Operations for managing General Permits
+  - name: General Permit Note
+    description: Operations for General Permit Notes
+  - name: General Project
+    description: Operations for managing General Projects, Drafts, and Statistics
+  - name: General Roadmap
+    description: Operations for validating General Roadmaps
   - name: Housing Access Request
     description: Operations for managing Housing Access Requests
   - name: Housing Document
@@ -1228,6 +1244,950 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+  /general/accessRequest:
+    get:
+      summary: Get access requests
+      description: >-
+        Get a list of access requests
+      operationId: getGeneralAccessRequest
+      tags:
+        - General Access Request
+      responses:
+        '200':
+          description: A list of access requests for the initiative
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create access request
+      description: >-
+        Create a request to grant or revoke a users access
+      operationId: createGeneralAccessRequest
+      tags:
+        - General Access Request
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-AccessRequest'
+      responses:
+        '200':
+          description: Access request processed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        '201':
+          description: Access request created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-AccessRequest'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/accessRequest/{accessRequestId}:
+    post:
+      summary: Process access request
+      description: >-
+        Process a request to grant or revoke a users access
+      operationId: processGeneralAccessRequest
+      tags:
+        - General Access Request
+      parameters:
+        - $ref: '#/components/parameters/Path-AccessRequestId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                approve:
+                  type: boolean
+                  example: true
+      responses:
+        '204':
+          description: Returns no content success
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/document:
+    post:
+      summary: Create a document
+      description: >-
+        Creates a link between an activity and a previously existing object in
+        COMS.
+      operationId: createGeneralDocument
+      tags:
+        - General Document
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Document'
+      responses:
+        '201':
+          description: Document created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/document/{documentId}:
+    delete:
+      summary: Delete a document by ID
+      description: Deletes the document associated with the provided document ID.
+      operationId: deleteGeneralDocument
+      tags:
+        - General Document
+      parameters:
+        - $ref: '#/components/parameters/Path-DocumentId'
+      responses:
+        '200':
+          description: Document deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/document/list/{activityId}:
+    get:
+      summary: List documents by Activity ID
+      description: Retrieves a list of documents associated with a given activity.
+      operationId: listGeneralDocuments
+      tags:
+        - General Document
+      parameters:
+        - $ref: '#/components/parameters/Path-ActivityId'
+      responses:
+        '200':
+          description: A list of documents for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Document'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/enquiry:
+    get:
+      summary: Gets a list of enquiries
+      description: >-
+        Gets a list of enquiries, if the current authorization includes scope:self
+        the list returned will contain just the enquiries made by the user.
+      operationId: getGeneralEnquiries
+      tags:
+        - General Enquiry
+      responses:
+        '200':
+          description: A list of enquiries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create an enquiry
+      description: Creates an enquiry and set status to Submitted
+      operationId: putGeneralEnquiry
+      tags:
+        - General Enquiry
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-CreateEnquiry'
+      responses:
+        '201':
+          description: Enquiry created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-CreateEnquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/enquiry/{enquiryId}:
+    get:
+      summary: Get a specific enquiry
+      operationId: getGeneralEnquiry
+      tags:
+        - General Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      responses:
+        '200':
+          description: Details of the specific enquiry
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update an enquiry
+      operationId: updateGeneralEnquiry
+      tags:
+        - General Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Enquiry'
+      responses:
+        '200':
+          description: Enquiry updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a general enquiry
+      description: Delete a general enquiry
+      operationId: deleteGeneralEnquiry
+      tags:
+        - General Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Path-EnquiryId'
+      responses:
+        '204':
+          description: Returns no content success
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/enquiry/search:
+    get:
+      summary: Search enquiries
+      description: Returns a list of enquiries based on the given queries
+      operationId: searchGeneralEnquiries
+      tags:
+        - General Enquiry
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: enquiryId
+          required: false
+          schema:
+            type: array
+            description: The Enquiry IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-EnquiryId'
+      responses:
+        '200':
+          description: A list of enquiries matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-Enquiry'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/note:
+    post:
+      summary: Create a note history
+      operationId: createGeneralNoteHistory
+      tags:
+        - General Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-NoteHistory'
+      responses:
+        '201':
+          description: Note history created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-NoteHistory'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/note/{noteHistoryId}:
+    put:
+      summary: Update a note history
+      operationId: updateGeneralNoteHistory
+      tags:
+        - General Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-NoteHistory'
+      responses:
+        '200':
+          description: Note history updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-NoteHistory'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a note history
+      description: Deletes a note history
+      operationId: deleteGeneralNoteHistory
+      tags:
+        - General Note
+      parameters:
+        - $ref: '#/components/parameters/Path-NoteHistoryId'
+      responses:
+        '200':
+          description: Note history deleted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-NoteHistory'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/note/bringForward:
+    get:
+      summary: List note histories with bring forward type
+      description: Retrieve a list of note histories with the Bring forward type given
+      operationId: listGeneralBringForward
+      tags:
+        - General Note
+      parameters:
+        - $ref: '#/components/parameters/Query-BringForwardState'
+      responses:
+        '200':
+          description: A list of bring forward note histories
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-BringForwardNotes'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/note/list/{activityId}:
+    get:
+      summary: List note histories by Activity ID
+      description: Return a list of note histories that have the given Activity ID
+      operationId: listGeneralNoteHistory
+      tags:
+        - General Note
+      parameters:
+        - $ref: '#/components/parameters/Path-ActivityId'
+      responses:
+        '200':
+          description: A list of note histories for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-NoteHistory'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/permit:
+    get:
+      summary: List permits by Activity ID
+      description: Gets a list of permits that are associated to a specific activity
+      operationId: listGeneralPermits
+      tags:
+        - General Permit
+      parameters:
+        - $ref: '#/components/parameters/Query-ActivityId'
+        - in: query
+          name: includeNotes
+          description: Whether to include associated permit notes in the response.
+          required: false
+          schema:
+            type: boolean
+            example: true
+      responses:
+        '200':
+          description: A list of permits for the specified activity
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/permit/{permitId}:
+    get:
+      summary: Get a permit
+      operationId: getGeneralPermit
+      tags:
+        - General Permit
+      parameters:
+        - $ref: '#/components/parameters/Path-PermitId'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a permit
+      operationId: deleteGeneralPermit
+      tags:
+        - General Permit
+      parameters:
+        - $ref: '#/components/parameters/Path-PermitId'
+      responses:
+        '204':
+          description: No Content – permit deleted successfully.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/permit/types:
+    get:
+      summary: Get all permit types
+      operationId: getGeneralPermitTypes
+      tags:
+        - General Permit
+      responses:
+        '200':
+          description: A list of all permit types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-PermitType'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/permit/note:
+    post:
+      summary: Create a permit note
+      description: Creates a new permit note for a specified permit.
+      operationId: createGeneralPermitNote
+      tags:
+        - General Permit Note
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitNote'
+      responses:
+        '201':
+          description: Permit note created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-PermitNote'
+        '401':
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '422':
+          $ref: '#/components/responses/UnprocessableEntity'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project:
+    get:
+      summary: Get a list of general projects
+      operationId: getGeneralProjects
+      tags:
+        - General Project
+      responses:
+        '200':
+          description: A list of general projects
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-GeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Create a general project
+      operationId: createGeneralProject
+      tags:
+        - General Project
+      responses:
+        '201':
+          description: General Project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-GeneralProjectCreate'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/{generalProjectId}:
+    get:
+      summary: Get a specific general project
+      operationId: getGeneralProject
+      tags:
+        - General Project
+      parameters:
+        - $ref: '#/components/parameters/Path-GeneralProjectId'
+      responses:
+        '200':
+          description: Details of the specific general project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-GeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    put:
+      summary: Update a general project
+      operationId: updateGeneralProject
+      tags:
+        - General Project
+      parameters:
+        - $ref: '#/components/parameters/Path-GeneralProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-GeneralProjectUpdate'
+      responses:
+        '200':
+          description: General Project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-GeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    delete:
+      summary: Delete a general project
+      operationId: deleteGeneralProject
+      tags:
+        - General Project
+      parameters:
+        - $ref: '#/components/parameters/Path-GeneralProjectId'
+      responses:
+        '204':
+          description: Returns no content success
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/draft:
+    put:
+      summary: Create or update a draft general project
+      description: >-
+        Creates or updates an intake and set status to Draft
+        so unfinished/unvalidatd general projects can be saved
+      operationId: generalProject-createDraft
+      tags:
+        - General Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveGeneralProjectDraft'
+      responses:
+        '201':
+          description: Draft general project created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-DraftGeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/draft/submit:
+    put:
+      summary: Submit a draft general project
+      description: Creates or updates an intake and set status to Submitted
+      operationId: generalProject-updateDraft
+      tags:
+        - General Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-SaveGeneralProjectDraft'
+      responses:
+        '200':
+          description: Draft general project updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-GeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/email:
+    put:
+      summary: Send confirmation Email
+      operationId: generalEmailConfirmation
+      tags:
+        - General Project
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmailData'
+      responses:
+        '201':
+          description: Email Confirmation was set
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Email'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/search:
+    get:
+      summary: Search general projects
+      description: Returns a list of general projects based on the given queries
+      operationId: searchGeneralProjects
+      tags:
+        - General Project
+      parameters:
+        - $ref: '#/components/parameters/Query-IncludeUser'
+        - in: query
+          name: activityId
+          required: false
+          schema:
+            type: array
+            description: The Activity IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-ActivityId'
+        - in: query
+          name: createdBy
+          required: false
+          schema:
+            type: array
+            description: The User IDs to filter on
+            items:
+              $ref: '#/components/parameters/Query-CreatedBy'
+        - in: query
+          name: generalProjectId
+          required: false
+          schema:
+            type: array
+            description: The General Project IDs to filter on
+            items:
+              $ref: '#/components/parameters/Path-GeneralProjectId'
+        - in: query
+          name: submissionType
+          required: false
+          schema:
+            type: array
+            description: The general submission types to filter on
+            items:
+              $ref: '#/components/parameters/Query-SubmissionType'
+      responses:
+        '200':
+          description: A list of general projects matching the search criteria
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-GeneralProject'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/project/statistics:
+    get:
+      summary: Get general project and enquiry statistics
+      description: Gets a set of general project and enquiry related statistics
+      operationId: getGeneralStatistics
+      tags:
+        - General Project
+      parameters:
+        - in: query
+          name: dateFrom
+          required: false
+          schema:
+            type: string
+            format: date
+            description: Start date for the statistics
+        - in: query
+          name: dateTo
+          required: false
+          schema:
+            type: string
+            format: date
+            description: End date for the statistics
+        - in: query
+          name: monthYear
+          required: false
+          schema:
+            type: string
+            description: Month and year for the statistics
+        - in: query
+          name: userId
+          required: false
+          schema:
+            type: string
+            description: User ID to filter statistics
+      responses:
+        '200':
+          description: General submission statistics
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-GeneralSubmissionStatistics'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /general/roadmap:
+    put:
+      summary: Send an email with the roadmap data
+      operationId: generalRoadmap
+      tags:
+        - General Roadmap
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-Roadmap'
+      responses:
+        '201':
+          description: Permit created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Email'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /housing/accessRequest:
     get:
       summary: Get access requests
@@ -2300,6 +3260,15 @@ components:
         type: string
         format: uuid
         example: b76469a3-896c-4435-aa83-b8b87db60921
+    Path-GeneralProjectId:
+      in: path
+      name: generalProjectId
+      description: UUID of a General Project
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: da5c5031-0e84-4234-7766-1ba846997482
     Path-HousingProjectId:
       in: path
       name: housingProjectId
@@ -2635,6 +3604,153 @@ components:
           example: 68a9a188-4d67-46e3-92a4-b5717435cda8
         user:
           $ref: '#/components/schemas/DB-User'
+    DB-GeneralProject:
+      type: object
+      required:
+        - generalProjectId
+        - activityId
+        - submittedAt
+        - addedToAts
+        - ltsaCompleted
+        - bcOnlineCompleted
+        - naturalDisaster
+        - aaiUpdated
+      properties:
+        generalProjectId:
+          type: string
+          description: UUID for the general project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        assignedUserId:
+          type: string
+          description: User assigned to the housing project
+          example: Smith, John
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: '2024-04-03T00:57:09.070Z'
+        locationPids:
+          type: string
+          description: Location PIDs
+          example: 006-209-521, 007-209-522
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription:
+          type: string
+          description: A description of the project
+          example: Project description example.
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        streetAddress:
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+        latitude:
+          type: number
+          description: Latitude Cordinate for project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude Cordinate for project
+          example: -123.377677
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          example: 3
+        relatedPermits:
+          type: string
+          description: Permits related to the project
+        astNotes:
+          type: string
+          description: Notes from AST
+        astUpdated:
+          type: boolean
+          description: Whether updated by AST
+          example: false
+        addedToAts:
+          type: boolean
+          description: Whether added to AST
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+        ltsaCompleted:
+          type: boolean
+          description: Ltsa completed
+          example: false
+        bcOnlineCompleted:
+          type: boolean
+          description: Completed
+          example: false
+        naturalDisaster:
+          type: string
+          description: Is it affected by Natural disaster?
+          example: 'No'
+        aaiUpdated:
+          type: boolean
+          description: Updated by aai
+          example: false
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        projectApplicantType:
+          type: string
+          enum: [Business, Individual]
+          description: Are you applying as an individual or as a business?
+          example: 'Business'
+        multiFamilyUnits:
+          type: string
+          description: Range of multi-family units in the project
+          example: 10-49
+        otherUnits:
+          type: string
+          description: Range of "other" units in the project
+          example: 10-49
+        otherUnitsDescription:
+          type: string
+          description: Description of the "other" units
+          example: detached garages
+        rentalUnits:
+          type: string
+          description: Range of rental units
+          example: 1-9
+        projectLocation:
+          type: string
+          description: Project's location
+          example: Street address
+        projectLocationDescription:
+          type: string
+          description: Description of the location of the project
+          example: 'no'
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Maple Ridge
+        province:
+          type: string
+          description: Province (Location) of project
+          example: BC
+        hasAppliedProvincialPermits:
+          type: string
+          description: Has applied for provincial permits
+          example: 'Yes'
+        checkProvincialPermits:
+          type: string
+          description: Needs to check for provincial permits
+          example: 'Yes'
+        consentToFeedback:
+          type: boolean
+          description: Whether or not user consents to feedback requests
     DB-HousingProject:
       type: object
       required:
@@ -3481,6 +4597,125 @@ components:
           format: date-time
           description: Date it was submitted
           example: '2024-04-03T00:57:09.070Z'
+    Request-SaveGeneralProjectDraft:
+      title: Save draft of General Project
+      type: object
+      required:
+        - contacts
+        - basic
+        - general
+        - location
+        - permits
+      properties:
+        contacts:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Contact'
+        basic:
+          type: object
+          properties:
+            projectApplicantType:
+              type: string
+              enum: [Business, Individual]
+              description: Are you applying as an individual or as a business?
+              example: 'Business'
+            companyNameRegistered:
+              type: string
+              description: Name of the company associated with the project
+              example: QW URBAN FOOD LTD.
+        general:
+          type: object
+          properties:
+            projectName:
+              type: string
+              description: Name of the Project
+              example: New Project
+            projectDescription:
+              type: string
+              description: A description of the project
+              example: Project description example.
+        location:
+          type: object
+          properties:
+            naturalDisaster:
+              type: string
+              description: Indicates if the project is affected by a natural disaster
+              example: 'No'
+            projectLocation:
+              type: string
+              description: Location of the project
+              example: Street address
+            projectLocationDescription:
+              type: string
+              description: Description of the project’s location
+              example: Near the downtown area
+            locationPids:
+              type: string
+              description: Location PIDs for the project
+              example: 006-209-521, 007-209-522
+            latitude:
+              type: number
+              description: Latitude coordinate for the project
+              example: 48.440531
+            longitude:
+              type: number
+              description: Longitude coordinate for the project
+              example: -123.377677
+            streetAddress:
+              type: string
+              description: Street address of the project
+              example: 2975 Jutland Rd
+            locality:
+              type: string
+              description: City, town, etc. (location) of the project
+              example: Maple Ridge
+            province:
+              type: string
+              description: Province (location) of the project
+              example: BC
+        permits:
+          type: object
+          properties:
+            hasAppliedProvincialPermits:
+              type: boolean
+              description: Indicates whether the project has applied for provincial permits
+              example: true
+            checkProvincialPermits:
+              type: boolean
+              description: >-
+                Indicates whether the project needs to check for provincial
+                permits
+              example: true
+        appliedPermits:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Permit'
+        investigatePermits:
+          type: array
+          items:
+            $ref: '#/components/schemas/DB-Permit'
+        generalProjectId:
+          type: string
+          description: UUID for the general project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        submittedAt:
+          type: string
+          format: date-time
+          description: Date it was submitted
+          example: '2024-04-03T00:57:09.070Z'
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        submissionType:
+          type: string
+          description: The submission type of the project
+          example: Guidance
     Request-SaveHousingProjectDraft:
       title: Save draft of Housing Project
       type: object
@@ -3708,6 +4943,136 @@ components:
           description: Date it was submitted
           format: date-time
           example: '2024-04-03T00:57:09.070Z'
+    Request-GeneralProjectUpdate:
+      title: Request to Update General Project
+      type: object
+      required:
+        - generalProjectId
+        - activityId
+        - queuePriority
+        - submissionType
+        - submittedAt
+        - projectName
+        - naturalDisaster
+        - addedToAts
+        - ltsaCompleted
+        - bcOnlineCompleted
+        - aaiUpdated
+      properties:
+        generalProjectId:
+          type: string
+          description: UUID for the general project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          format: integer
+          example: 2
+          default: 3
+        submissionType:
+          type: string
+          description: The submission type of the project
+          example: Guidance
+        submittedAt:
+          type: string
+          description: Date it was submitted
+          format: date-time
+          example: '2024-04-03T00:57:09.070Z'
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        projectDescription:
+          type: string
+          description: Description of the project
+          example: Project description example.
+          nullable: true
+        streetAddress:
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+          maxLength: 255
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Victoria
+          maxLength: 255
+        province:
+          type: string
+          description: Province (Location) of project
+          example: BC
+          maxLength: 255
+        locationPids:
+          type: string
+          description: Location PIDs
+          example: 006-209-521, 007-209-522
+          maxLength: 255
+        latitude:
+          type: number
+          description: Latitude coordinate for the project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude coordinate for the project
+          example: -123.377677
+        geomarkUrl:
+          type: string
+          description: URL for geomark
+          example: http://geomark.com
+          maxLength: 255
+        naturalDisaster:
+          type: string
+          description: Is it affected by a natural disaster?
+          example: 'No'
+        projectLocationDescription:
+          type: string
+          description: Description of the location of the project
+          example: Near the river
+          maxLength: 4000
+        addedToAts:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+          example: ATS-001
+          maxLength: 255
+        ltsaCompleted:
+          type: boolean
+          description: Ltsa completed
+          example: false
+        bcOnlineCompleted:
+          type: boolean
+          description: BC Online completed
+          example: false
+        aaiUpdated:
+          type: boolean
+          description: Updated by AAI
+          example: false
+        astNotes:
+          type: string
+          description: Notes from AST
+          example: AST notes here
+          maxLength: 4000
+        assignedUserId:
+          type: string
+          description: User ID assigned to the housing project
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
     Request-HousingProjectUpdate:
       title: Request to Update Housing Project
       type: object
@@ -4002,6 +5367,22 @@ components:
           type: string
           description: Activity Id
           example: D95F1DE6
+    Response-DraftGeneralProject:
+      title: Response Draft General Project
+      type: object
+      required:
+        - activityId
+        - generalProjectId
+      properties:
+        generalProjectId:
+          type: string
+          description: UUID for the general project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+        activityId:
+          type: string
+          description: Activity Id
+          example: D95F1DE6
     Response-DraftHousingProject:
       title: Response Draft Housing Project
       type: object
@@ -4171,6 +5552,22 @@ components:
         housingProjectId:
           type: string
           description: UUID for the housing project
+          format: uuid
+          example: d95f1de6-698b-4d9d-b938-487eb446ace8
+    Response-GeneralProjectCreate:
+      title: Response for Create General Project
+      type: object
+      required:
+        - activityId
+        - generalProjectId
+      properties:
+        activityId:
+          type: string
+          description: Activity ID
+          example: D95F1DE6
+        generalProjectId:
+          type: string
+          description: UUID for the general project
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
     Response-HousingProjectCreate:
@@ -4355,6 +5752,102 @@ components:
         total_submissions:
           type: number
           example: 112
+        total_submissions_between:
+          type: number
+          example: 0
+        total_submissions_monthyear:
+          type: number
+          example: 0
+        total_submissions_assignedto:
+          type: number
+          example: 0
+        state_new:
+          type: number
+          example: 112
+        state_inprogress:
+          type: number
+          example: 0
+        state_delayed:
+          type: number
+          example: 0
+        state_completed:
+          type: number
+          example: 0
+        queue_1:
+          type: number
+          example: 7
+        queue_2:
+          type: number
+          example: 4
+        queue_3:
+          type: number
+          example: 50
+        escalation:
+          type: number
+          example: 0
+        general_enquiry:
+          type: number
+          example: 0
+        guidance:
+          type: number
+          example: 50
+        inapplicable:
+          type: number
+          example: 0
+        status_request:
+          type: number
+          example: 0
+    Response-GeneralSubmissionStatistics:
+      type: object
+      properties:
+        total_submissions:
+          type: number
+          example: 112
+        total_submissions_between:
+          type: number
+          example: 0
+        total_submissions_monthyear:
+          type: number
+          example: 0
+        total_submissions_assignedto:
+          type: number
+          example: 0
+        state_new:
+          type: number
+          example: 112
+        state_inprogress:
+          type: number
+          example: 0
+        state_delayed:
+          type: number
+          example: 0
+        state_completed:
+          type: number
+          example: 0
+        queue_1:
+          type: number
+          example: 7
+        queue_2:
+          type: number
+          example: 4
+        queue_3:
+          type: number
+          example: 50
+        escalation:
+          type: number
+          example: 0
+        general_enquiry:
+          type: number
+          example: 0
+        guidance:
+          type: number
+          example: 50
+        inapplicable:
+          type: number
+          example: 0
+        status_request:
+          type: number
+          example: 0
     Response-HousingSubmissionStatistics:
       type: object
       properties:
@@ -4370,15 +5863,6 @@ components:
         total_submissions_assignedto:
           type: number
           example: 0
-        intake_submitted:
-          type: number
-          example: 80
-        intake_assigned:
-          type: number
-          example: 6
-        intake_completed:
-          type: number
-          example: 1
         state_new:
           type: number
           example: 112

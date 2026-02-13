@@ -47,6 +47,7 @@ describe('checkDatabaseSchema', () => {
         'electrification_project_type_code',
         'email_log',
         'enquiry',
+        'general_project',
         'housing_project',
         'identity_provider',
         'initiative',
