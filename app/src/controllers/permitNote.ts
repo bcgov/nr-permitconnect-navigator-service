@@ -10,11 +10,13 @@ import type { PermitNote } from '../types/index.ts';
 
 export const createPermitNoteController = async (req: Request<never, never, PermitNote>, res: Response) => {
   const response = await transactionWrapper<PermitNote>(async (tx: PrismaTransactionClient) => {
-    return await createPermitNote(tx, {
+    const permitNoteResponse = await createPermitNote(tx, {
       ...req.body,
       permitNoteId: uuidv4(),
       ...generateCreateStamps(req.currentContext)
     });
+    return permitNoteResponse;
   });
+
   res.status(201).json(response);
 };

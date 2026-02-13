@@ -75,6 +75,19 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
 }
 
 /**
+ * @function differential
+ * Create a key/value differential from source against comparer
+ * @param source Source object
+ * @param comparer The object to be compared against
+ * @returns Object containing the non-matching key/value pairs in the source object
+ */
+export function differential<T extends Record<PropertyKey, unknown>>(source: T, comparer: Partial<T>): Partial<T> {
+  return Object.fromEntries(
+    (Object.entries(source) as [keyof T, T[keyof T]][]).filter(([key, value]) => comparer[key] !== value)
+  ) as Partial<T>;
+}
+
+/**
  * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
  * @param value A date only string
  * @returns A string representation of `value`
@@ -186,6 +199,16 @@ export function getCurrentUsername(currentContext: CurrentContext | undefined): 
   }
 
   return undefined;
+}
+
+/**
+ * Checks whether the given object is empty, no properties
+ *
+ * @param {object} obj - The object to check.
+ * @returns {boolean} True if the object is empty, false otherwise.
+ */
+export function isEmptyObject(obj: object): boolean {
+  return Object.keys(obj).length === 0;
 }
 
 /**
