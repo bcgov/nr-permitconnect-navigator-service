@@ -34,6 +34,7 @@ export enum EnquirySubmittedMethod {
 
 export enum DraftCode {
   ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
+  GENERAL_PROJECT = 'GENERAL_PROJECT',
   HOUSING_PROJECT = 'HOUSING_PROJECT'
 }
 

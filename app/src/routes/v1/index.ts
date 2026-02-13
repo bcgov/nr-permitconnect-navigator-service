@@ -9,6 +9,7 @@ import code from './code.ts';
 import contact from './contact.ts';
 import docs from './docs.ts';
 import electrification from './electrification.ts';
+import general from './general.ts';
 import housing from './housing.ts';
 import peach from './peach.ts';
 import reporting from './reporting.ts';
@@ -30,6 +31,7 @@ router.get('/', (_req, res) => {
       '/contact',
       '/docs',
       '/electrification',
+      '/general',
       '/housing',
       '/peach',
       '/reporting',
@@ -47,6 +49,7 @@ router.use('/code', code);
 router.use('/contact', contact);
 router.use('/docs', docs);
 router.use('/electrification', electrification);
+router.use('/general', general);
 router.use('/housing', housing);
 router.use('/peach', peach);
 router.use('/reporting', reporting);
