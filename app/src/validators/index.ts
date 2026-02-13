@@ -5,6 +5,7 @@ export { default as contactValidator } from './contact.ts';
 export { default as documentValidator } from './document.ts';
 export { default as electrificationProjectValidator } from './electrificationProject.ts';
 export { default as enquiryValidator } from './enquiry.ts';
+export { default as generalProjectValidator } from './generalProject.ts';
 export { default as housingProjectValidator } from './housingProject.ts';
 export { default as noteHistoryValidator } from './noteHistory.ts';
 export { default as peachValidator } from './peach.ts';

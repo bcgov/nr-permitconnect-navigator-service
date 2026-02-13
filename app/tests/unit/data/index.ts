@@ -32,6 +32,8 @@ import type {
   Email,
   Enquiry,
   EnquiryIntake,
+  GeneralProject,
+  GeneralProjectIntake,
   HousingProject,
   HousingProjectIntake,
   Initiative as InitiativeModel,
@@ -60,6 +62,17 @@ export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
 export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_ACTIVITY_GENERAL: Activity = {
+  activityId: 'ACTI1234',
+  initiativeId: Initiative.GENERAL,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
@@ -295,6 +308,19 @@ export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
   }
 };
 
+export const TEST_GENERAL_DRAFT: Draft = {
+  draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+  activityId: 'ACTI1234',
+  data: {} as Prisma.JsonValue,
+  draftCode: DraftCode.GENERAL_PROJECT,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
 export const TEST_HOUSING_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
@@ -306,6 +332,131 @@ export const TEST_HOUSING_DRAFT: Draft = {
   updatedBy: null,
   deletedBy: null,
   deletedAt: null
+};
+
+export const TEST_GENERAL_PROJECT_1: GeneralProject = {
+  generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  locationPids: null,
+  companyIdRegistered: 'FM0281610',
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectDescription: 'DESCRIPTION',
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: null,
+  relatedPermits: null,
+  astNotes: null,
+  astUpdated: false,
+  addedToAts: false,
+  atsClientId: null,
+  ltsaCompleted: false,
+  bcOnlineCompleted: false,
+  naturalDisaster: false,
+  aaiUpdated: false,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  consentToFeedback: false,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  locality: 'Place',
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  submissionType: SubmissionType.GUIDANCE,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
+  generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  locationPids: null,
+  companyIdRegistered: 'FM0281610',
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectDescription: 'DESCRIPTION',
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: null,
+  relatedPermits: null,
+  astNotes: null,
+  astUpdated: false,
+  addedToAts: false,
+  atsClientId: null,
+  ltsaCompleted: false,
+  bcOnlineCompleted: false,
+  naturalDisaster: false,
+  aaiUpdated: false,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  consentToFeedback: false,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  locality: 'Place',
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  submissionType: SubmissionType.GUIDANCE,
+  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
+  createdAt: new Date(),
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
+  activityId: null,
+  submittedAt: new Date().toISOString(),
+  applicationStatus: ApplicationStatus.NEW,
+  appliedPermits: [],
+  basic: {
+    consentToFeedback: false,
+    projectApplicantType: null,
+    registeredId: 'FM0281610',
+    registeredName: 'COMPANY'
+  },
+  contact: TEST_CONTACT_1,
+  draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+  general: {
+    projectName: 'NAME',
+    projectDescription: 'DESCRIPTION'
+  },
+  investigatePermits: [],
+  location: {
+    geoJson: null,
+    naturalDisaster: BasicResponse.NO,
+    geomarkUrl: null,
+    latitude: null,
+    longitude: null,
+    locality: 'Place',
+    ltsaPidLookup: null,
+    projectLocation: 'Location',
+    projectLocationDescription: 'Location description',
+    province: 'AA',
+    streetAddress: '123 Street'
+  },
+  submissionType: SubmissionType.GUIDANCE,
+  permits: {
+    hasAppliedProvincialPermits: null
+  }
 };
 
 export const TEST_HOUSING_PROJECT_1: HousingProject = {

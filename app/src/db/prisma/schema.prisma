@@ -813,6 +813,7 @@ model general_project {
   aaiUpdated                  Boolean   @default(false) @map("aai_updated")
   applicationStatus           String?   @map("application_status")
   projectDescription          String?   @map("project_description")
+  projectApplicantType        String?   @map("project_applicant_type")
   projectLocation             String?   @map("project_location")
   projectLocationDescription  String?   @map("project_location_description")
   locality                    String?

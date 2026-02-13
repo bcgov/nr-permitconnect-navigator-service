@@ -6,23 +6,22 @@ import { basicIntake } from './basic.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
-import { housing } from './housing';
 import { permits } from './permits';
 import { validate } from '../middleware/validation';
-import { YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
-import { BasicResponse } from '../utils/enums/application';
 
 const schema = {
-  createHousingProject: {
+  createGeneralProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
       activityId: Joi.string().min(8).max(8).allow(null),
       contact: contactSchema,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
       basic: basicIntake,
-      housing: housing,
+      general: Joi.object({
+        projectName: Joi.string().required().max(255).trim(),
+        projectDescription: Joi.string().max(4000).allow(null)
+      }),
       location: Joi.any(),
       investigatePermits: Joi.array()
         .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
@@ -41,9 +40,9 @@ const schema = {
       to: Joi.array().items(email).required()
     })
   },
-  deleteHousingProject: {
+  deleteGeneralProject: {
     params: Joi.object({
-      housingProjectId: uuidv4.required()
+      generalProjectId: uuidv4.required()
     })
   },
   deleteDraft: {
@@ -59,23 +58,23 @@ const schema = {
       userId: uuidv4.allow(null)
     })
   },
-  getHousingProject: {
+  getGeneralProject: {
     params: Joi.object({
-      housingProjectId: uuidv4.required()
+      generalProjectId: uuidv4.required()
     })
   },
-  searchHousingProjects: {
+  searchGeneralProjects: {
     query: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
-      housingProjectId: Joi.array().items(uuidv4),
+      generalProjectId: Joi.array().items(uuidv4),
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
-  updateHousingProject: {
+  updateGeneralProject: {
     body: Joi.object({
-      housingProjectId: uuidv4.required(),
+      generalProjectId: uuidv4.required(),
       activityId: activityId,
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
@@ -87,57 +86,6 @@ const schema = {
       companyIdRegistered: Joi.string().allow(null),
       projectName: Joi.string().required(),
       projectDescription: Joi.string().allow(null),
-      singleFamilyUnits: Joi.string()
-        .allow(null)
-        .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-      multiFamilyUnits: Joi.string()
-        .allow(null)
-        .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-      otherUnitsDescription: Joi.string().allow(null).max(255),
-      otherUnits: Joi.when('otherUnitsDescription', {
-        is: BasicResponse.YES,
-        then: Joi.string()
-          .required()
-          .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-        otherwise: Joi.string().allow(null)
-      }),
-      hasRentalUnits: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      rentalUnits: Joi.when('hasRentalUnits', {
-        is: BasicResponse.YES,
-        then: Joi.string()
-          .required()
-          .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedBc: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      financiallySupportedIndigenous: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      indigenousDescription: Joi.when('financiallySupportedIndigenous', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedNonProfit: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      nonProfitDescription: Joi.when('financiallySupportedNonProfit', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedHousingCoop: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      housingCoopDescription: Joi.when('financiallySupportedHousingCoop', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
       streetAddress: Joi.string().allow(null).max(255),
       locality: Joi.string().allow(null).max(255),
       province: Joi.string().allow(null).max(255),
@@ -156,18 +104,18 @@ const schema = {
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
     }),
     params: Joi.object({
-      housingProjectId: uuidv4.required()
+      generalProjectId: uuidv4.required()
     })
   }
 };
 
 export default {
-  createHousingProject: validate(schema.createHousingProject),
+  createGeneralProject: validate(schema.createGeneralProject),
   emailConfirmation: validate(schema.emailConfirmation),
-  deleteHousingProject: validate(schema.deleteHousingProject),
+  deleteGeneralProject: validate(schema.deleteGeneralProject),
   deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
-  getHousingProject: validate(schema.getHousingProject),
-  searchHousingProjects: validate(schema.searchHousingProjects),
-  updateHousingProject: validate(schema.updateHousingProject)
+  getGeneralProject: validate(schema.getGeneralProject),
+  searchGeneralProjects: validate(schema.searchGeneralProjects),
+  updateGeneralProject: validate(schema.updateGeneralProject)
 };
