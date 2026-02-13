@@ -31,7 +31,7 @@ export function createProjectFormSchema(
         .oneOf(PROJECT_RELATIONSHIP_LIST)
         .label('Relationship to project'),
       contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-      userId: string()
+      userId: string().notRequired()
     }),
     locationDescription: string().notRequired().max(4000).label('Location'),
     project: object({

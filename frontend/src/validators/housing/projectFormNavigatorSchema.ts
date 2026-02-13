@@ -36,7 +36,7 @@ export function createProjectFormNavigatorSchema() {
         .required()
         .oneOf(CONTACT_PREFERENCE_LIST)
         .label(t('i.housing.project.projectFormNavigatorSchema.contactPreference')),
-      userId: string()
+      userId: string().notRequired()
     }),
     consentToFeedback: string()
       .notRequired()
