@@ -43,7 +43,9 @@ const getTeamMemberEmailTemplateData = async (
     const templateParams = {
       dearName: `${contact.firstName} ${contact.lastName}`,
       adminName: adminContact?.length ? `${adminContact[0].firstName} ${adminContact[0].lastName}` : undefined,
-      projectName
+      projectName,
+      initiative: project.activity?.initiative?.code.toLowerCase(),
+      projectId: project.projectId
     };
 
     const navEmail: string = config.get('server.pcns.navEmail');
