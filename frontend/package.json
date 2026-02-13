@@ -40,7 +40,7 @@
     "@types/proj4": "^2.19.0",
     "@vee-validate/yup": "^4.15.1",
     "async-mutex": "^0.5.0",
-    "axios": "^1.13.2",
+    "axios": "^1.13.5",
     "date-fns": "^4.1.0",
     "filesize": "^11.0.13",
     "geojson": "^0.5.0",
