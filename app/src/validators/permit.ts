@@ -13,6 +13,13 @@ const sharedPermitSchema = {
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().allow(null),
+  permitNote: Joi.array()
+    .items(
+      Joi.object({
+        note: Joi.string()
+      }).allow(null)
+    )
+    .allow(null),
   permitTracking: permitTrackingSchema,
   needed: Joi.string().max(255).required(),
   state: Joi.string()

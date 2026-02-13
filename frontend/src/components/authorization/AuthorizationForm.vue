@@ -340,8 +340,16 @@ async function onSubmit(data: GenericObject) {
     await permitService.upsertPermit({
       ...permitSubmitData,
       permitNote: [{ note: permitNote }],
-      permitType: authorizationType
+      permitType: {
+        permitTypeId: authorizationType.permitTypeId,
+        agency: authorizationType.agency,
+        type: authorizationType.type,
+        name: authorizationType.name,
+        trackedInAts: authorizationType.trackedInAts ?? false,
+        sourceSystem: authorizationType.sourceSystem
+      }
     });
+
     toast.success(t('authorization.authorizationForm.permitSaved'));
 
     if (!projectRouteName?.value) throw new Error('No route');
