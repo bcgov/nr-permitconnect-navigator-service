@@ -230,7 +230,8 @@ describe('upsertPermit', () => {
       create: TEST_PERMIT_1,
       where: { permitId: TEST_PERMIT_1.permitId },
       include: {
-        permitType: true
+        permitType: true,
+        permitNote: { orderBy: { createdAt: 'desc' } }
       }
     });
     expect(response).toStrictEqual(TEST_PERMIT_1);

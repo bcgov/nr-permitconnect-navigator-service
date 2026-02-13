@@ -237,7 +237,11 @@ describe('updateNoteHistoryController', () => {
     updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
 
     await updateNoteHistoryController(
-      req as unknown as Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+      req as unknown as Request<
+        { noteHistoryId: string },
+        never,
+        NoteHistory & { note: string | undefined; resource: string }
+      >,
       res as unknown as Response
     );
 
@@ -266,7 +270,11 @@ describe('updateNoteHistoryController', () => {
     updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
 
     await updateNoteHistoryController(
-      req as unknown as Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined }>,
+      req as unknown as Request<
+        { noteHistoryId: string },
+        never,
+        NoteHistory & { note: string | undefined; resource: string }
+      >,
       res as unknown as Response
     );
 

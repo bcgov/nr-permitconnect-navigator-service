@@ -128,6 +128,7 @@ describe('createElectrificationProjectController', () => {
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ELECTRIFICATION_PROJECT_CREATE,
       electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      projectId: expect.stringMatching(uuidv4Pattern) as string,
       submittedAt: expect.any(Date) as Date,
       createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
@@ -136,6 +137,7 @@ describe('createElectrificationProjectController', () => {
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_ELECTRIFICATION_PROJECT_CREATE,
       electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      projectId: expect.stringMatching(uuidv4Pattern) as string,
       submittedAt: expect.any(Date) as Date,
       createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
@@ -463,6 +465,7 @@ describe('submitElectrificationProjectDraftController', () => {
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
       ...TEST_ELECTRIFICATION_PROJECT_1,
       electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+      projectId: expect.stringMatching(uuidv4Pattern) as string,
       submittedAt: expect.any(Date) as Date,
       createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId
