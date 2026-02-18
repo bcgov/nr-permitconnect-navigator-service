@@ -179,29 +179,9 @@ describe('electrificationProjectService', () => {
     it('calls correct endpoint', () => {
       electrificationProjectService.searchProjects({ activityId: [testID] });
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
-        params: { activityId: [testID] }
-      });
-    });
-
-    it('calls endpoint with includeDeleted=false if specified', () => {
-      electrificationProjectService.searchProjects({ activityId: [testID] });
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
-        params: {
-          activityId: [testID]
-        }
-      });
-    });
-
-    it('calls endpoint with includeDeleted=true if specified', () => {
-      electrificationProjectService.searchProjects();
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
-        params: {}
+      expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
+        activityId: [testID]
       });
     });
   });

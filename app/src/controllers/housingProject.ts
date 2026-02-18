@@ -366,13 +366,13 @@ export const getHousingProjectsController = async (req: Request, res: Response) 
 };
 
 export const searchHousingProjectsController = async (
-  req: Request<never, never, never, HousingProjectSearchParameters>,
+  req: Request<never, never, HousingProjectSearchParameters | undefined, never>,
   res: Response
 ) => {
   const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
     return await searchHousingProjects(tx, {
-      ...req.query,
-      includeUser: isTruthy(req.query.includeUser)
+      ...req.body,
+      includeUser: isTruthy(req.body?.includeUser)
     });
   });
   res.status(200).json(response);

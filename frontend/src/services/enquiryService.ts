@@ -54,7 +54,7 @@ export default {
    * @returns {Promise} An axios response
    */
   searchEnquiries(filters?: EnquirySearchParameters) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
+    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, filters);
   },
 
   /**

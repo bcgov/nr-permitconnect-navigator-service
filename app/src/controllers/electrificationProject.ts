@@ -202,13 +202,13 @@ export const getElectrificationProjectsController = async (req: Request, res: Re
 };
 
 export const searchElectrificationProjectsController = async (
-  req: Request<never, never, never, ElectrificationProjectSearchParameters>,
+  req: Request<never, never, ElectrificationProjectSearchParameters | undefined, never>,
   res: Response
 ) => {
   const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
     return await searchElectrificationProjects(tx, {
-      ...req.query,
-      includeUser: isTruthy(req.query.includeUser)
+      ...req.body,
+      includeUser: isTruthy(req.body?.includeUser)
     });
   });
   res.status(200).json(response);

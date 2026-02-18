@@ -30,7 +30,7 @@ router.get(
 );
 
 /** Search all enquiries */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.ENQUIRY, Action.READ),
   enquiryValidator.searchEnquiries,

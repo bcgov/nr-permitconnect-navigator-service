@@ -44,7 +44,7 @@ router.get(
 );
 
 /** Search electrification projects */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
   electrificationProjectValidator.searcElectrificationProjects,

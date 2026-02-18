@@ -394,14 +394,14 @@ describe('searchElectrificationProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
+      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     searchElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
 
     await searchElectrificationProjectsController(
-      req as unknown as Request<never, never, never, ElectrificationProjectSearchParameters>,
+      req as unknown as Request<never, never, ElectrificationProjectSearchParameters, never>,
       res as unknown as Response
     );
 

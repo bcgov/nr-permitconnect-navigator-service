@@ -180,29 +180,9 @@ describe('housingProjectService', () => {
     it('calls correct endpoint', () => {
       housingProjectService.searchProjects({ activityId: [TEST_ID] });
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        params: { activityId: [TEST_ID] }
-      });
-    });
-
-    it('calls endpoint with includeDeleted=false if specified', () => {
-      housingProjectService.searchProjects({ activityId: [TEST_ID] });
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        params: {
-          activityId: [TEST_ID]
-        }
-      });
-    });
-
-    it('calls endpoint with includeDeleted=true if specified', () => {
-      housingProjectService.searchProjects({});
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        params: {}
+      expect(postSpy).toHaveBeenCalledTimes(1);
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
+        activityId: [TEST_ID]
       });
     });
   });

@@ -30,7 +30,7 @@ router.post(
 );
 
 /** Search contacts */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.CONTACT, Action.READ),
   contactValidator.searchContacts,

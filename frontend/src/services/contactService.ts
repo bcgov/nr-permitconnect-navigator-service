@@ -51,7 +51,7 @@ export default {
    * @returns {Promise<AxiosResponse>} An axios response or empty array
    */
   searchContacts(params: ContactSearchParameters): Promise<AxiosResponse<Contact[]>> {
-    return appAxios().get(`${PATH}/search`, { params: params });
+    return appAxios().post(`${PATH}/search`, params);
   },
 
   /**
