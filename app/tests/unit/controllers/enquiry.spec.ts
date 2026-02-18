@@ -199,16 +199,16 @@ describe('searchEnquiriesController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'], includeUser: true },
+      body: { enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'], includeUser: true },
       currentContext: TEST_CURRENT_CONTEXT,
       currentAuthorization: { attributes: [] }
-    } as unknown as Request<never, never, never, EnquirySearchParameters>;
+    } as unknown as Request<never, never, EnquirySearchParameters, never>;
 
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     searchEnquiriesSpy.mockResolvedValue(enquiries);
 
     await searchEnquiriesController(
-      req as unknown as Request<never, never, never, EnquirySearchParameters>,
+      req as unknown as Request<never, never, EnquirySearchParameters, never>,
       res as unknown as Response
     );
 

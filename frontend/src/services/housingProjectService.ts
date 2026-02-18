@@ -103,7 +103,7 @@ const service: IDraftableProjectService = {
    * @returns {Promise} An axios response
    */
   searchProjects(filters?: HousingProjectSearchParameters) {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, { params: { ...filters } });
+    return appAxios().post(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, filters);
   },
 
   /**

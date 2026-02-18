@@ -621,8 +621,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'fd0bed40-f006-407e-aee9-ad511c9b0ff1',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Trinity',
@@ -651,8 +650,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Maple Ridge Heights',
@@ -681,8 +679,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b2c3d4e5-f6a7-4b8c-9d0e-1f2a3b4c5d6e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Cedar Grove',
@@ -711,8 +708,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c3d4e5f6-a7b8-4c9d-8e1f-2a3b4c5d6e7f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Harbor View Residences',
@@ -741,8 +737,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd4e5f6a7-b8c9-4d0e-9f2a-3b4c5d6e7f8a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Oakwood Commons',
@@ -771,8 +766,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e5f6a7b8-c9d0-4e1f-8a3b-4c5d6e7f8a9b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Riverside Estates',
@@ -801,8 +795,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f6a7b8c9-d0e1-4f2a-8b4c-5d6e7f8a9b0c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Willow Park Terrace',
@@ -831,8 +824,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a7b8c9d0-e1f2-4a3b-8c5d-6e7f8a9b0c1d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Summit Place',
@@ -861,8 +853,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b8c9d0e1-f2a3-4b4c-8d6e-7f8a9b0c1d2e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Lakeside Gardens',
@@ -891,8 +882,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c9d0e1f2-a3b4-4c5d-8e7f-8a9b0c1d2e3f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Birchwood Square',
@@ -921,8 +911,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd0e1f2a3-b4c5-4d6e-8f8a-9b0c1d2e3f4a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Sunset Meadows',
@@ -951,8 +940,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e1f2a3b4-c5d6-4e7f-8a9b-0c1d2e3f4a5b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Northgate Village',
@@ -981,8 +969,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f2a3b4c5-d6e7-4f8a-9b0c-1d2e3f4a5b6c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Creekside Crossing',
@@ -1011,8 +998,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a3b4c5d6-e7f8-4a9b-8c1d-2e3f4a5b6c7d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Parkside Heights',
@@ -1041,8 +1027,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b4c5d6e7-f8a9-4b0c-8d2e-3f4a5b6c7d8e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Forest Glen Estates',
@@ -1071,8 +1056,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c5d6e7f8-a9b0-4c1d-8e3f-4a5b6c7d8e9f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Bayshore Point',
@@ -1101,8 +1085,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd6e7f8a9-b0c1-4d2e-8f4a-5b6c7d8e9f0a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Hillcrest Manor',
@@ -1131,8 +1114,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e7f8a9b0-c1d2-4e3f-8a5b-6c7d8e9f0a1b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Meadowbrook Plaza',
@@ -1161,8 +1143,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f8a9b0c1-d2e3-4f4a-8b6c-7d8e9f0a1b2c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Stonegate Crossing',
@@ -1191,8 +1172,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a9b0c1d2-e3f4-4a5b-8c7d-8e9f0a1b2c3d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Ridgemont Terrace',
@@ -1221,8 +1201,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b0c1d2e3-f4a5-4b6c-8d8e-9f0a1b2c3d4e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Westfield Gardens',
@@ -1251,8 +1230,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c1d2e3f4-a5b6-4c7d-8e9f-0a1b2c3d4e5f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Harborfront Landing',
@@ -1281,8 +1259,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd2e3f4a5-b6c7-4d8e-9f0a-1b2c3d4e5f6a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Pinehurst Village',
@@ -1311,8 +1288,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e3f4a5b6-c7d8-4e9f-8a1b-2c3d4e5f6a7b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Eastgate Commons',
@@ -1341,8 +1317,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f4a5b6c7-d8e9-4f0a-8b2c-3d4e5f6a7b8c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Brookhaven Estates',
@@ -1371,8 +1346,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a5b6c7d8-e9f0-4a1b-8c3d-4e5f6a7b8c9d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Greenfield Park',
@@ -1401,8 +1375,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b6c7d8e9-f0a1-4b2c-8d4e-5f6a7b8c9d0e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Woodland Crossing',
@@ -1431,8 +1404,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c7d8e9f0-a1b2-4c3d-8e5f-6a7b8c9d0e1f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Maplewood Plaza',
@@ -1461,8 +1433,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd8e9f0a1-b2c3-4d4e-8f6a-7b8c9d0e1f2a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Lighthouse Terrace',
@@ -1491,8 +1462,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e9f0a1b2-c3d4-4e5f-8a7b-8c9d0e1f2a3b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Springwater Heights',
@@ -1521,8 +1491,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f0a1b2c3-d4e5-4f6a-8b8c-9d0e1f2a3b4c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Clearview Estates',
@@ -1551,8 +1520,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a1b2c3d4-e5f6-4a8b-9c0d-1e2f3a4b5c6d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Valley Springs',
@@ -1581,8 +1549,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b2c3d4e5-f6a7-4b9c-8d1e-2f3a4b5c6d7e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Foxwood Meadows',
@@ -1611,8 +1578,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c3d4e5f6-a7b8-4c0d-8e2f-3a4b5c6d7e8f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Oceanview Square',
@@ -1641,8 +1607,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'd4e5f6a7-b8c9-4d1e-8f3a-4b5c6d7e8f9a',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Ashwood Terrace',
@@ -1671,8 +1636,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'e5f6a7b8-c9d0-4e2f-8a4b-5c6d7e8f9a0b',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Rosewood Gardens',
@@ -1701,8 +1665,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'f6a7b8c9-d0e1-4f3a-8b5c-6d7e8f9a0b1c',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Elmwood Village',
@@ -1731,8 +1694,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'a7b8c9d0-e1f2-4a4b-8c6d-7e8f9a0b1c2d',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Shoreline Estates',
@@ -1761,8 +1723,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'b8c9d0e1-f2a3-4b5c-8d7e-8f9a0b1c2d3e',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Fairview Heights',
@@ -1791,8 +1752,7 @@ export async function seed(knex: Knex): Promise<void> {
       financially_supported_non_profit: 'No',
       has_rental_units: 'No',
       housing_project_id: 'c9d0e1f2-a3b4-4c6d-8e8f-9a0b1c2d3e4f',
-      intake_status: 'Submitted',
-      is_developed_in_bc: 'Yes',
+
       ltsa_completed: false,
       natural_disaster: false,
       project_name: 'Grandview Terrace',

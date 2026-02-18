@@ -101,7 +101,7 @@ describe('searchContactsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
+      body: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
       currentContext: TEST_CURRENT_CONTEXT
     } as unknown as Request;
 
@@ -110,7 +110,7 @@ describe('searchContactsController', () => {
     searchContactsSpy.mockResolvedValue(contacts);
 
     await searchContactsController(
-      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      req as unknown as Request<never, never, ContactSearchParameters, never>,
       res as unknown as Response
     );
 
@@ -130,7 +130,7 @@ describe('searchContactsController', () => {
 
   it('adds dashes to user IDs', async () => {
     const req = {
-      query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
+      body: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
       currentContext: TEST_CURRENT_CONTEXT
     } as unknown as Request;
 
@@ -139,7 +139,7 @@ describe('searchContactsController', () => {
     searchContactsSpy.mockResolvedValue(contacts);
 
     await searchContactsController(
-      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      req as unknown as Request<never, never, ContactSearchParameters, never>,
       res as unknown as Response
     );
 
@@ -157,7 +157,7 @@ describe('searchContactsController', () => {
 
   it('adds dashes to contact IDs', async () => {
     const req = {
-      query: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
+      body: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
       currentContext: TEST_CURRENT_CONTEXT
     } as unknown as Request;
 
@@ -166,7 +166,7 @@ describe('searchContactsController', () => {
     searchContactsSpy.mockResolvedValue(contacts);
 
     await searchContactsController(
-      req as unknown as Request<never, never, never, ContactSearchParameters>,
+      req as unknown as Request<never, never, ContactSearchParameters, never>,
       res as unknown as Response
     );
 

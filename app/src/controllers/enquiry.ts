@@ -145,15 +145,15 @@ export const listRelatedEnquiriesController = async (req: Request<{ activityId: 
 };
 
 export const searchEnquiriesController = async (
-  req: Request<never, never, never, EnquirySearchParameters>,
+  req: Request<never, never, EnquirySearchParameters | undefined, never>,
   res: Response
 ) => {
   const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
     return await searchEnquiries(
       tx,
       {
-        ...req.query,
-        includeUser: isTruthy(req.query.includeUser)
+        ...req.body,
+        includeUser: isTruthy(req.body?.includeUser)
       },
       req.currentContext.initiative!
     );

@@ -43,7 +43,7 @@ const schema = {
     })
   },
   searchContacts: {
-    query: Joi.object({
+    body: Joi.object({
       userId: Joi.array().items(uuidv4).allow(null),
       contactId: Joi.array().items(uuidv4).allow(null),
       email: Joi.string().max(255).allow(null),

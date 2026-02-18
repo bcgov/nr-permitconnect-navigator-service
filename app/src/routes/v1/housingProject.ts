@@ -44,7 +44,7 @@ router.get(
 );
 
 /** Search housing projects */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
   housingProjectValidator.searcHousingProjects,

@@ -50,22 +50,22 @@ export const matchContactsController = async (
 };
 
 export const searchContactsController = async (
-  req: Request<never, never, never, ContactSearchParameters>,
+  req: Request<never, never, ContactSearchParameters | undefined, never>,
   res: Response
 ) => {
-  const contactIds = mixedQueryToArray(req.query.contactId);
-  const userIds = mixedQueryToArray(req.query.userId);
+  const contactIds = mixedQueryToArray(req.body?.contactId);
+  const userIds = mixedQueryToArray(req.body?.userId);
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
     return await searchContacts(tx, {
       userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
       contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
-      email: req.query.email,
-      firstName: req.query.firstName,
-      lastName: req.query.lastName,
-      contactApplicantRelationship: req.query.contactApplicantRelationship,
-      phoneNumber: req.query.phoneNumber,
-      initiative: req.query.initiative,
-      includeActivities: isTruthy(req.query.includeActivities)
+      email: req.body?.email,
+      firstName: req.body?.firstName,
+      lastName: req.body?.lastName,
+      contactApplicantRelationship: req.body?.contactApplicantRelationship,
+      phoneNumber: req.body?.phoneNumber,
+      initiative: req.body?.initiative,
+      includeActivities: isTruthy(req.body?.includeActivities)
     });
   });
   res.status(200).json(response);

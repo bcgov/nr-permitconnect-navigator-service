@@ -143,9 +143,9 @@ describe('enquiryService', () => {
       it('calls searchEnquiries with correct data', () => {
         enquiryService.searchEnquiries({ activityId: [TEST_ACTIVITY_ID] });
 
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/search`, {
-          params: { activityId: [TEST_ACTIVITY_ID] }
+        expect(postSpy).toHaveBeenCalledTimes(1);
+        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/search`, {
+          activityId: [TEST_ACTIVITY_ID]
         });
       });
 

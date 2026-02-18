@@ -41,6 +41,7 @@ const sampleContactSearchParameters: ContactSearchParameters = {
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
 const patchSpy = vi.fn();
+const postSpy = vi.fn();
 const putSpy = vi.fn();
 
 vi.mock('@/services/interceptors');
@@ -48,6 +49,7 @@ vi.mocked(appAxios).mockReturnValue({
   get: getSpy,
   delete: deleteSpy,
   patch: patchSpy,
+  post: postSpy,
   put: putSpy
 } as unknown as AxiosInstance);
 
@@ -65,8 +67,8 @@ describe('contactService', () => {
   it('calls searchContacts with correct data', () => {
     contactService.searchContacts(sampleContactSearchParameters);
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('contact/search', { params: sampleContactSearchParameters });
+    expect(postSpy).toHaveBeenCalledTimes(1);
+    expect(postSpy).toHaveBeenCalledWith('contact/search', sampleContactSearchParameters);
   });
 
   it('calls updateContact with correct data', () => {

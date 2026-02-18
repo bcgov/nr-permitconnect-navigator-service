@@ -23,7 +23,7 @@ const schema = {
     })
   },
   searchEnquiries: {
-    query: Joi.object({
+    body: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       enquiryId: Joi.array().items(Joi.string()),
