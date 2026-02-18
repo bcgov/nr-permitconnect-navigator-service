@@ -235,19 +235,39 @@ onBeforeMount(() => {
         >
           <font-awesome-icon icon="fa fa-eye" />
         </Button>
-        <Button
-          aria-label="Edit contact"
-          class="p-button-lg p-button-text p-0"
-          :disabled="data.userId"
-          @click="
-            () => {
-              selection = data;
-              updateContactModalVisible = true;
-            }
-          "
+        <span
+          v-if="data.userId"
+          v-tooltip="t('contactsProponentsList.editDisabledReason')"
         >
-          <font-awesome-icon icon="fa fa-pen-to-square" />
-        </Button>
+          <Button
+            aria-label="Edit contact"
+            class="p-button-lg p-button-text p-0"
+            :disabled="data.userId"
+            @click="
+              () => {
+                selection = data;
+                updateContactModalVisible = true;
+              }
+            "
+          >
+            <font-awesome-icon icon="fa fa-pen-to-square" />
+          </Button>
+        </span>
+        <span v-else>
+          <Button
+            aria-label="Edit contact"
+            class="p-button-lg p-button-text p-0"
+            :disabled="data.userId"
+            @click="
+              () => {
+                selection = data;
+                updateContactModalVisible = true;
+              }
+            "
+          >
+            <font-awesome-icon icon="fa fa-pen-to-square" />
+          </Button>
+        </span>
         <Button
           aria-label="Delete contact"
           class="p-button-lg p-button-text p-button-danger p-0"

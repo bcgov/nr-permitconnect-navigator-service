@@ -672,6 +672,7 @@
     "deleteContactNotLoaded": "Contact not loaded into Contact Details page",
     "deleteContactSuccess": "Contact deleted",
     "deleteContactSuccessMessage": "has been deleted.",
+    "editDisabledReason": "Edit is disabled because this is a not a manually entered contact",
     "email": "Email",
     "firstName": "First name",
     "lastName": "Last name",
