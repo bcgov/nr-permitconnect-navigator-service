@@ -25,7 +25,7 @@ import {
   listPermitsController,
   upsertPermitController,
   sendPermitUpdateEmail,
-  createNoteAndDraftEmails
+  sendPermitUpdateNotifications
 } from '../../../src/controllers/permit.ts';
 import * as permitController from '../../../src/controllers/permit.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -328,7 +328,7 @@ describe('createNoteAndSendUpdateEmails', () => {
       submittedDate: '2024-01-01'
     };
 
-    await createNoteAndDraftEmails(permit, true);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 
@@ -391,7 +391,7 @@ describe('createNoteAndSendUpdateEmails', () => {
       submittedDate: '2024-02-01'
     };
 
-    await createNoteAndDraftEmails(permit, true);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
 
@@ -424,7 +424,7 @@ describe('createNoteAndSendUpdateEmails', () => {
       submittedDate: '2024-03-01'
     };
 
-    await createNoteAndDraftEmails(permit, true);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 

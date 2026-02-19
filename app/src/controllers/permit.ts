@@ -120,7 +120,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
  * @param note A permit note to be used in permit note creation, if given
  * @param tx Optional Prisma transaction client - Use the existing transaction if provided, otherwise create a new one
  */
-export const createNoteAndDraftEmails = async (
+export const sendPermitUpdateNotifications = async (
   permit: Permit,
   fromPeachSync: boolean,
   note?: string,
@@ -128,7 +128,7 @@ export const createNoteAndDraftEmails = async (
 ) => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
 
-  const createNoteAndBuildUpdateEmails = async (tx: PrismaTransactionClient) => {
+  const createNoteAndDraftEmails = async (tx: PrismaTransactionClient) => {
     const project = await getProjectByActivityId(tx, permit.activityId);
 
     const initiative = project.activity!.initiative!.code as Initiative;
@@ -196,9 +196,9 @@ export const createNoteAndDraftEmails = async (
   };
 
   if (tx) {
-    await createNoteAndBuildUpdateEmails(tx);
+    await createNoteAndDraftEmails(tx);
   } else {
-    await transactionWrapper<void>(createNoteAndBuildUpdateEmails);
+    await transactionWrapper<void>(createNoteAndDraftEmails);
   }
 
   // Send out permit update emails
@@ -291,7 +291,7 @@ export const upsertPermitController = async (req: Request<never, never, Permit>,
         const note = isEmptyPermitNote
           ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
           : permitNoteText;
-        await createNoteAndDraftEmails(data, false, note, tx);
+        await sendPermitUpdateNotifications(data, false, note, tx);
       }
     }
 
