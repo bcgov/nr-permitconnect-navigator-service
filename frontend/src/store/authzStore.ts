@@ -22,6 +22,7 @@ export enum NavigationPermission {
    * External navigation permissions
    */
   EXT_ELECTRIFICATION = 'ext_electrification',
+  EXT_GENERAL = 'ext_general',
   EXT_HOUSING = 'ext_housing',
 
   /*
@@ -29,6 +30,7 @@ export enum NavigationPermission {
    */
   INT_CONTACT = 'int_contact',
   INT_ELECTRIFICATION = 'int_electrification',
+  INT_GENERAL = 'int_general',
   INT_HOUSING = 'int_housing',
   INT_USER_MANAGEMENT = 'int_user_management'
 }
@@ -73,6 +75,41 @@ const NavigationAuthorizationMap: NavigationAuthorizationMapT[] = [
     permissions: [
       NavigationPermission.INT_CONTACT,
       NavigationPermission.INT_ELECTRIFICATION,
+      NavigationPermission.INT_USER_MANAGEMENT
+    ]
+  },
+
+  // General
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.ADMIN,
+    permissions: [
+      NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_GENERAL,
+      NavigationPermission.INT_USER_MANAGEMENT
+    ]
+  },
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.NAVIGATOR,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_GENERAL]
+  },
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.NAVIGATOR_READ_ONLY,
+    permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_GENERAL]
+  },
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.PROPONENT,
+    permissions: [NavigationPermission.EXT_GENERAL]
+  },
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.SUPERVISOR,
+    permissions: [
+      NavigationPermission.INT_CONTACT,
+      NavigationPermission.INT_GENERAL,
       NavigationPermission.INT_USER_MANAGEMENT
     ]
   },

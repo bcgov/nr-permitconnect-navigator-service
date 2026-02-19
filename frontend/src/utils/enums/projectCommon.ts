@@ -40,11 +40,23 @@ export enum EnquirySubmittedMethod {
 export enum IntakeFormCategory {
   BASIC = 'basic',
   CONTACTS = 'contacts',
+  GENERAL = 'general',
   HOUSING = 'housing',
   LOCATION = 'location',
   PERMITS = 'permits',
   APPLIED_PERMITS = 'appliedPermits',
   INVESTIGATE_PERMIS = 'investigatePermits'
+}
+
+export enum IntakeType {
+  NEW = 0,
+  DRAFT = 1,
+  PROJECT = 2
+}
+
+export enum IntakeState {
+  LOCKED = 0,
+  UNLOCKED = 1
 }
 
 export enum NoteType {
