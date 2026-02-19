@@ -4,9 +4,6 @@
     "ches": {
       "roadmap": {
         "bcc": "FRONTEND_CHES_ROADMAP_BCC"
-      },
-      "submission": {
-        "cc": "FRONTEND_CHES_SUBMISSION_CC"
       }
     },
     "coms": {

@@ -4,7 +4,6 @@ config:
   configMap:
     FRONTEND_APIPATH: api/v1
     FRONTEND_CHES_ROADMAP_BCC: Navigator.Service@gov.bc.ca
-    FRONTEND_CHES_SUBMISSION_CC: Navigator.Service@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 0089d041-5aab-485e-842d-8875475d0ed6
     FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
