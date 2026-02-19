@@ -236,54 +236,72 @@ export const templateConfig = {
 };
 
 export const confirmationTemplateElectrificationSubmission: EmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ contactName }},<br><br>' +
-    '<b>Project ID: {{ activityId }}</b><br><br>' +
-    // eslint-disable-next-line max-len
-    'Thank you for registering your {{ initiative }} project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
-    'View your project submission <a href="' +
-    PCNS_URL +
-    '/e/electrification/project/{{ projectId }}/intake">here<a>.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem"
+    width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ contactName }},<br><br>
+
+    <b>Project ID: {{ activityId }}</b><br><br>
+    Thank you for registering your {{ initiative }} project with the Navigator Service.
+    We have successfully received your project submission.
+    A Navigator will review your submission and contact you.
+    Please keep your project ID for future reference.<br><br>
+
+    View your project submission
+    <a href="${PCNS_URL}/e/electrification/project/{{ projectId }}/intake">here<a>.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+
+    <img src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
 export const confirmationTemplateHousingSubmission: EmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ contactName }},<br><br>' +
-    '<b>Project ID: {{ activityId }}</b><br><br>' +
-    // eslint-disable-next-line max-len
-    'Thank you for registering your {{ initiative }} project with the Navigator Service. We have successfully received your project submission. A Navigator will review your submission and contact you. Please keep your project ID for future reference.<br><br>' +
-    'View your project submission <a href="' +
-    PCNS_URL +
-    '/e/housing/project/{{ projectId }}/intake">here<a>.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ contactName }},<br><br>
+
+    <b>Project ID: {{ activityId }}</b><br><br>
+
+    Thank you for registering your {{ initiative }} project with the Navigator Service.
+    We have successfully received your project submission.
+    A Navigator will review your submission and contact you.
+    Please keep your project ID for future reference.<br><br>
+
+    View your project submission
+    <a href="${PCNS_URL}/e/housing/project/{{ projectId }}/intake">here<a>.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
@@ -291,106 +309,127 @@ export const confirmationTemplateEnquiry: EmailTemplate = (replaceConfig) => {
   const ENQUIRY_URL = replaceConfig['projectId']
     ? '/e/{{ initiative }}/project/{{ projectId }}/enquiry/{{ enquiryId }}'
     : '/e/{{ initiative }}/enquiry/{{ enquiryId }}';
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ contactName }},<br><br>' +
-    '<b>Enquiry ID: {{ activityId }}</b><br><br>' +
-    // eslint-disable-next-line max-len
-    'Thank you for submitting an enquiry to the Navigator Service. We have successfully received your enquiry. A Navigator will review your enquiry and contact you. Please keep your enquiry ID for future reference.<br><br>' +
-    '<b>Enquiry detail:</b><br><br>' +
-    '{{ enquiryDescription }}<br><br>' +
-    'View your enquiry <a href="' +
-    PCNS_URL +
-    ENQUIRY_URL +
-    '">here<a>.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ contactName }},<br><br>
+
+    <b>Enquiry ID: {{ activityId }}</b><br><br>
+
+    Thank you for submitting an enquiry to the Navigator Service.
+    We have successfully received your enquiry.
+    A Navigator will review your enquiry and contact you.
+    Please keep your enquiry ID for future reference.<br><br>
+    <b>Enquiry detail:</b><br><br>
+    {{ enquiryDescription }}<br><br>
+
+    View your enquiry <a href="${PCNS_URL}${ENQUIRY_URL}">here<a>.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
 export const initialPeachPermitUpdateTemplate: EmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'Dear {{ dearName }},<br><br>' +
-    'Your navigator has an update for you.<br><br>' +
-    '<b>Project ID: {{ activityId }}</b><br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '/e/{{ initiative }}/project/{{ projectId }}#{{ permitId }}' +
-    '">{{ permitName }}<a> (submitted on {{ submittedDate }}):' +
-    'You can now track your application progress here.<br><br>' +
-    'You will receive an email if the status or stage changes, or when your Navigator posts an update.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ dearName }},<br><br>
+
+    Your navigator has an update for you.<br><br>
+    <b>Project ID: {{ activityId }}</b><br><br>
+
+    <a href="${PCNS_URL}/e/{{ initiative }}/project/{{ projectId }}#{{ permitId }}">{{ permitName }}<a>
+    (submitted on {{ submittedDate }}):
+    You can now track your application progress here.<br><br>
+    You will receive an email if the status or stage changes, or when your Navigator posts an update.<br><br>
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
 export const bringForwardProjectNotificationTemplate: EmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'A navigator has escalated <b>{{ projectName }}: {{ activityId }}</b> to your attention.<br> Please login to the ' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a>' +
-    ' and review the matter under your Bring Forward notifications.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    A navigator has escalated <b>{{ projectName }}: {{ activityId }}</b> to your attention.<br> Please login to the
+    <a href="${PCNS_URL}">Navigator Service<a>
+    and review the matter under your Bring Forward notifications.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
 export const bringForwardEnquiryNotificationTemplate: EmailTemplate = (replaceConfig) => {
-  const baseTemplate =
-    '<div style="width: 880px">' +
-    '<img src="' +
-    BC_EMAIL_BANNER_IMG +
-    '" height="120rem" width="880px"  alt="B.C. Government Logo" /><br><br>' +
-    '<div style="margin-left: 3rem; margin-right: 3rem;">' +
-    'A navigator has escalated <b>Enquiry ID: {{ activityId }}</b> to you.<br> Please login to the ' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a>' +
-    ' and review the matter under your Bring Forward notifications.<br><br>' +
-    'Regards,<br><br>' +
-    '<a href="' +
-    PCNS_URL +
-    '">Navigator Service<a><br><br><br>' +
-    '</div>' +
-    '<img src="' +
-    BC_EMAIL_FOOTER_IMG +
-    '" width="100%" alt="B.C. Government Footer" /><br><br>' +
-    '</div>';
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    A navigator has escalated <b>Enquiry ID: {{ activityId }}</b> to you.<br> Please login to the
+    <a href="${PCNS_URL}">Navigator Service<a>
+    and review the matter under your Bring Forward notifications.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
