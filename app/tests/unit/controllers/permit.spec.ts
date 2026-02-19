@@ -24,8 +24,8 @@ import {
   getPermitTypesController,
   listPermitsController,
   upsertPermitController,
-  sendPermitUpdateNotification,
-  sendPermitUpdateEmail
+  sendPermitUpdateEmail,
+  createNoteAndDraftEmails
 } from '../../../src/controllers/permit.ts';
 import * as permitController from '../../../src/controllers/permit.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -240,7 +240,7 @@ describe('sendPermitUpdateEmail', () => {
 
   it('builds the template context and sends an email', async () => {
     (config.get as jest.Mock).mockImplementation((key: string) => {
-      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
     });
 
@@ -289,21 +289,25 @@ describe('sendPermitUpdateEmail', () => {
   });
 });
 
-describe('sendPermitUpdateNotification', () => {
+describe('createNoteAndSendUpdateEmails', () => {
   const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
   const readUserSpy = jest.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
   const createNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
+  const emailSpy = jest.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
   const sendEmailJobSpy = jest.spyOn(permitController, 'sendPermitUpdateEmail');
 
   beforeEach(() => {
+    emailSpy.mockClear();
+    sendEmailJobSpy.mockClear();
     (config.get as jest.Mock).mockImplementation((key: string) => {
       if (key === 'server.pcns.navEmail') return 'navteam@example.com';
-      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
     });
 
     getProjectSpy.mockResolvedValue({
       ...TEST_ELECTRIFICATION_PROJECT_1,
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       assignedUserId: TEST_IDIR_USER_1.userId,
       activity: {
         ...TEST_ACTIVITY_ELECTRIFICATION,
@@ -324,7 +328,7 @@ describe('sendPermitUpdateNotification', () => {
       submittedDate: '2024-01-01'
     };
 
-    await sendPermitUpdateNotification(permit, true);
+    await createNoteAndDraftEmails(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 
@@ -364,6 +368,7 @@ describe('sendPermitUpdateNotification', () => {
   it('skips proponent email when contact email is missing but still sends navigator email', async () => {
     getProjectSpy.mockResolvedValueOnce({
       ...TEST_ELECTRIFICATION_PROJECT_1,
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       assignedUserId: 'user-2',
       activity: {
         ...TEST_ACTIVITY_ELECTRIFICATION,
@@ -386,7 +391,7 @@ describe('sendPermitUpdateNotification', () => {
       submittedDate: '2024-02-01'
     };
 
-    await sendPermitUpdateNotification(permit, true);
+    await createNoteAndDraftEmails(permit, true);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
 
@@ -419,7 +424,7 @@ describe('sendPermitUpdateNotification', () => {
       submittedDate: '2024-03-01'
     };
 
-    await sendPermitUpdateNotification(permit, true);
+    await createNoteAndDraftEmails(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 

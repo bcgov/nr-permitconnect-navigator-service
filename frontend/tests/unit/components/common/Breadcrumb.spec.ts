@@ -87,7 +87,6 @@ const testProject: HousingProject = {
   astNotes: 'AST notes.',
   applicationStatus: ApplicationStatus.COMPLETED,
   contacts: [exampleContact],
-  roadmapNote: 'Roadmap note.',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',

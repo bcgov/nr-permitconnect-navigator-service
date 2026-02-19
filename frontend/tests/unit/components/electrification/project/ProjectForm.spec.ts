@@ -51,8 +51,7 @@ const testProject: ElectrificationProject = {
   atsEnquiryId: null,
   aaiUpdated: false,
   addedToAts: false,
-  contacts: [],
-  roadmapNote: 'Roadmap note'
+  contacts: []
 };
 
 const wrapperSettingsForm = (editable = true) => ({

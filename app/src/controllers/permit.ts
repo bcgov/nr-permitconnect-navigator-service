@@ -277,7 +277,6 @@ export const upsertPermitController = async (req: Request<never, never, Permit>,
     await deleteManyPermitTracking(tx, permitData);
     await upsertPermitTracking(tx, permitData);
 
-    // Note stuff
     const before = snapshotPermitStatus(oldAuthorization ?? {});
     const after = snapshotPermitStatus(data);
     const diff = differential(before, after);
