@@ -1,0 +1,170 @@
+<script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { FieldArray, useFormValues, useSetFieldValue } from 'vee-validate';
+import { nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
+
+import Tooltip from '@/components/common/Tooltip.vue';
+import { InputText, DatePicker, RadioList, Select } from '@/components/form';
+import { Card, Button, Divider } from '@/lib/primevue';
+import { usePermitStore } from '@/store';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { BasicResponse } from '@/utils/enums/application';
+import { getHTMLElement } from '@/utils/utils';
+
+import type { PermitType } from '@/types';
+
+// Props
+const { editable = true } = defineProps<{
+  editable?: boolean;
+}>();
+
+// Composables
+const { t } = useI18n();
+const values = useFormValues();
+const setAppliedPermits = useSetFieldValue('appliedPermits');
+
+// State
+const { getPermitTypes } = storeToRefs(usePermitStore());
+
+// Actions
+function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value: unknown) => void) {
+  if (e === BasicResponse.YES || e === BasicResponse.UNSURE) {
+    if (fieldsLength === 0) {
+      push({
+        permitTypeId: undefined,
+        trackingId: undefined,
+        stage: undefined
+      });
+    }
+  } else {
+    setAppliedPermits(undefined);
+  }
+}
+</script>
+
+<template>
+  <Card>
+    <template #title>
+      <div class="flex">
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('projectIntakeForm.provincialPermitsCard') }}
+        </span>
+        <Tooltip
+          class="mb-2"
+          right
+          icon="fa-solid fa-circle-question"
+          :text="t('projectIntakeForm.appliedPermitsTooltip')"
+        />
+      </div>
+      <Divider type="solid" />
+    </template>
+    <template #content>
+      <FieldArray
+        v-slot="{ fields, push, remove }"
+        name="appliedPermits"
+      >
+        <RadioList
+          name="permits.hasAppliedProvincialPermits"
+          :bold="false"
+          :disabled="!editable"
+          :options="YES_NO_UNSURE_LIST"
+          @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push)"
+        />
+        <div
+          v-if="
+            values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+            values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
+          "
+          ref="appliedPermitsContainer"
+        >
+          <div class="mb-2">
+            <span class="app-primary-color">
+              {{ t('projectIntakeForm.appliedPermitsShareNotification') }}
+            </span>
+          </div>
+          <Card class="no-shadow">
+            <template #content>
+              <div
+                v-for="(permit, idx) in fields"
+                :key="idx"
+                :index="idx"
+                class="grid grid-cols-3 gap-3"
+              >
+                <div>
+                  <input
+                    type="hidden"
+                    :name="`appliedPermits[${idx}].permitId`"
+                  />
+                  <Select
+                    :disabled="!editable"
+                    :name="`appliedPermits[${idx}].permitTypeId`"
+                    placeholder="Select Permit type"
+                    :options="getPermitTypes"
+                    :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                    option-value="permitTypeId"
+                    :loading="getPermitTypes === undefined"
+                  />
+                </div>
+                <InputText
+                  :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
+                  :disabled="!editable"
+                  placeholder="Tracking #"
+                />
+                <div class="flex justify-center">
+                  <DatePicker
+                    class="w-full"
+                    :name="`appliedPermits[${idx}].submittedDate`"
+                    :disabled="!editable"
+                    placeholder="Date applied"
+                    :max-date="new Date()"
+                  />
+                  <div class="flex items-center ml-2 mb-4">
+                    <Button
+                      v-if="editable"
+                      class="p-button-lg p-button-text p-button-danger p-0"
+                      aria-label="Delete"
+                      @click="remove(idx)"
+                    >
+                      <font-awesome-icon icon="fa-solid fa-trash" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+              <Button
+                v-if="editable"
+                class="w-full flex justify-center font-bold h-10"
+                @click="
+                  push({
+                    permitTypeId: undefined,
+                    trackingId: undefined,
+                    submittedDate: undefined
+                  });
+                  nextTick(() => {
+                    const addedPermit = getHTMLElement(
+                      $refs.appliedPermitsContainer as HTMLElement,
+                      'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                    );
+                    if (addedPermit) {
+                      addedPermit.focus();
+                    }
+                  });
+                "
+              >
+                <font-awesome-icon
+                  icon="fa-solid fa-plus"
+                  fixed-width
+                />
+                Add permit
+              </Button>
+            </template>
+          </Card>
+        </div>
+      </FieldArray>
+    </template>
+  </Card>
+</template>

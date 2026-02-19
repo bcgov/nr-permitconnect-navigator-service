@@ -44,7 +44,7 @@ router.get(
 );
 
 /** Search general projects */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
   generalProjectValidator.searchGeneralProjects,

@@ -302,13 +302,13 @@ export const getGeneralProjectsController = async (req: Request, res: Response) 
 };
 
 export const searchGeneralProjectsController = async (
-  req: Request<never, never, never, GeneralProjectSearchParameters>,
+  req: Request<never, never, GeneralProjectSearchParameters | undefined, never>,
   res: Response
 ) => {
   const response = await transactionWrapper<GeneralProject[]>(async (tx: PrismaTransactionClient) => {
     return await searchGeneralProjects(tx, {
-      ...req.query,
-      includeUser: isTruthy(req.query.includeUser)
+      ...req.body,
+      includeUser: isTruthy(req.body?.includeUser)
     });
   });
   res.status(200).json(response);
