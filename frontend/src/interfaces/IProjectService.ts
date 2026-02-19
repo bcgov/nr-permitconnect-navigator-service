@@ -18,7 +18,7 @@ export interface IProjectService {
 
 export interface IDraftableProjectService extends IProjectService {
   deleteDraft(draftId: string): Promise<AxiosResponse>;
-  getDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse<Draft<unknown>>>;
   getDrafts(): Promise<AxiosResponse>;
-  updateDraft(data?: Partial<Draft>): Promise<AxiosResponse>;
+  upsertDraft(data?: Partial<Draft<unknown>>): Promise<AxiosResponse>;
 }

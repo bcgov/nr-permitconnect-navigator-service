@@ -259,217 +259,207 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-center">
-      <h2
-        role="heading"
-        aria-level="1"
-      >
-        Project Intake Form
-      </h2>
-    </div>
-    <Form
-      v-if="initialFormValues"
-      id="form"
-      v-slot="{ isSubmitting, setFieldValue, values }"
-      ref="formRef"
-      :initial-values="initialFormValues"
-      :validation-schema="validationSchema"
-      @invalid-submit="onInvalidSubmit"
-      @submit="confirmSubmit"
+  <Form
+    v-if="initialFormValues"
+    id="form"
+    v-slot="{ isSubmitting, setFieldValue, values }"
+    ref="formRef"
+    :initial-values="initialFormValues"
+    :validation-schema="validationSchema"
+    @invalid-submit="onInvalidSubmit"
+    @submit="confirmSubmit"
+  >
+    <FormNavigationGuard
+      v-if="editable"
+      :auto-save-ref="autoSaveRef"
+      :callback="onBeforeRouteLeaveCallback"
+    />
+    <FormAutosave
+      v-if="editable"
+      ref="autoSaveRef"
+      :callback="() => onSaveDraft(values, true)"
+    />
+
+    <input
+      type="hidden"
+      name="draftId"
+    />
+
+    <input
+      type="hidden"
+      name="project.activityId"
+    />
+
+    <CollectionDisclaimer />
+
+    <Message
+      v-if="validationErrors.length"
+      severity="error"
+      icon="pi pi-exclamation-circle"
+      :closable="false"
+      class="message-banner text-center"
     >
-      <FormNavigationGuard
-        v-if="editable"
-        :auto-save-ref="autoSaveRef"
-        :callback="onBeforeRouteLeaveCallback"
-      />
-      <FormAutosave
-        v-if="editable"
-        ref="autoSaveRef"
-        :callback="() => onSaveDraft(values, true)"
-      />
+      {{ VALIDATION_BANNER_TEXT }}
+    </Message>
 
-      <input
-        type="hidden"
-        name="draftId"
-      />
+    <ContactCardIntakeForm
+      :editable="editable"
+      :initial-form-values="initialFormValues"
+    />
 
-      <input
-        type="hidden"
-        name="project.activityId"
-      />
-
-      <CollectionDisclaimer />
-
-      <Message
-        v-if="validationErrors.length"
-        severity="error"
-        icon="pi pi-exclamation-circle"
-        :closable="false"
-        class="message-banner text-center"
-      >
-        {{ VALIDATION_BANNER_TEXT }}
-      </Message>
-
-      <ContactCardIntakeForm
-        :editable="editable"
-        :initial-form-values="initialFormValues"
-      />
-
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            {{ t('e.electrification.projectIntakeForm.declareBusinessName') }}
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <AutoComplete
-            name="project.companyNameRegistered"
-            :bold="false"
-            :disabled="!editable"
-            :editable="true"
-            :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
-            :get-option-label="(option: OrgBookOption) => option.registeredName"
-            :suggestions="orgBookOptions"
-            @on-complete="onRegisteredNameInput"
-            @on-select="
-              (orgBookOption: OrgBookOption) => {
-                setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
-                setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
-              }
-            "
-          />
-          <input
-            hidden
-            name="project.companyIdRegistered"
-          />
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            {{ t('e.electrification.projectIntakeForm.projectNameCard') }}
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <InputText
-            name="project.projectName"
-            :bold="false"
-            :disabled="!editable"
-          />
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            {{ t('e.electrification.projectIntakeForm.projectTypeCard') }}
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <RadioList
-            name="project.projectType"
-            :disabled="!editable"
-            :options="options.ElectrificationProjectType"
-            @on-change="
-              (e: string) => {
-                if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('project.bcHydroNumber', null);
-              }
-            "
-          />
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            {{ t('e.electrification.projectIntakeForm.bcHydroNumber') }}
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <InputText
-            name="project.bcHydroNumber"
-            :bold="false"
-            :disabled="!editable"
-          />
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            <span v-if="values.project.projectType === enums.ElectrificationProjectType.OTHER">
-              {{ t('e.electrification.projectIntakeForm.projectDescriptionCard') }}
-            </span>
-            <span v-else>
-              {{ t('e.electrification.projectIntakeForm.projectDescriptionCardOptional') }}
-            </span>
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <!-- eslint-disable max-len -->
-          <TextArea
-            class="col-span-12 mb-0 pb-0"
-            name="project.projectDescription"
-            :placeholder="t('e.electrification.projectIntakeForm.provideDetails')"
-            :disabled="!editable"
-          />
-          <!-- eslint-enable max-len -->
-
-          <label class="col-span-12 mt-0 pt-0">
-            {{ t('e.electrification.projectIntakeForm.upload1') }}
-            <a
-              href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-              target="_blank"
-              class="text-blue-500 underline"
-            >
-              {{ t('e.electrification.projectIntakeForm.upload2') }}
-            </a>
-            {{ t('e.electrification.projectIntakeForm.upload3') }}
-          </label>
-          <AdvancedFileUpload
-            :activity-id="activityId"
-            :disabled="!editable"
-          />
-        </template>
-      </Card>
-
-      <div class="flex items-center justify-center mt-6">
-        <Button
-          :label="t('e.electrification.projectIntakeForm.submit')"
-          type="submit"
-          icon="pi pi-upload"
-          :disabled="!editable || isSubmitting"
+    <Card>
+      <template #title>
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('e.electrification.projectIntakeForm.declareBusinessName') }}
+        </span>
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <AutoComplete
+          name="project.companyNameRegistered"
+          :bold="false"
+          :disabled="!editable"
+          :editable="true"
+          :placeholder="t('e.electrification.projectIntakeForm.searchBCRegistered')"
+          :get-option-label="(option: OrgBookOption) => option.registeredName"
+          :suggestions="orgBookOptions"
+          @on-complete="onRegisteredNameInput"
+          @on-select="
+            (orgBookOption: OrgBookOption) => {
+              setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
+              setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
+            }
+          "
         />
-      </div>
-    </Form>
-  </div>
+        <input
+          hidden
+          name="project.companyIdRegistered"
+        />
+      </template>
+    </Card>
+
+    <Card>
+      <template #title>
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('e.electrification.projectIntakeForm.projectNameCard') }}
+        </span>
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <InputText
+          name="project.projectName"
+          :bold="false"
+          :disabled="!editable"
+        />
+      </template>
+    </Card>
+
+    <Card>
+      <template #title>
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('e.electrification.projectIntakeForm.projectTypeCard') }}
+        </span>
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <RadioList
+          name="project.projectType"
+          :disabled="!editable"
+          :options="options.ElectrificationProjectType"
+          @on-change="
+            (e: string) => {
+              if (e === enums.ElectrificationProjectType.OTHER) setFieldValue('project.bcHydroNumber', null);
+            }
+          "
+        />
+      </template>
+    </Card>
+
+    <Card>
+      <template #title>
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          {{ t('e.electrification.projectIntakeForm.bcHydroNumber') }}
+        </span>
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <InputText
+          name="project.bcHydroNumber"
+          :bold="false"
+          :disabled="!editable"
+        />
+      </template>
+    </Card>
+
+    <Card>
+      <template #title>
+        <span
+          class="section-header"
+          role="heading"
+          aria-level="2"
+        >
+          <span v-if="values.project.projectType === enums.ElectrificationProjectType.OTHER">
+            {{ t('e.electrification.projectIntakeForm.projectDescriptionCard') }}
+          </span>
+          <span v-else>
+            {{ t('e.electrification.projectIntakeForm.projectDescriptionCardOptional') }}
+          </span>
+        </span>
+        <Divider type="solid" />
+      </template>
+      <template #content>
+        <!-- eslint-disable max-len -->
+        <TextArea
+          class="col-span-12 mb-0 pb-0"
+          name="project.projectDescription"
+          :placeholder="t('e.electrification.projectIntakeForm.provideDetails')"
+          :disabled="!editable"
+        />
+        <!-- eslint-enable max-len -->
+
+        <label class="col-span-12 mt-0 pt-0">
+          {{ t('e.electrification.projectIntakeForm.upload1') }}
+          <a
+            href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+            target="_blank"
+            class="text-blue-500 underline"
+          >
+            {{ t('e.electrification.projectIntakeForm.upload2') }}
+          </a>
+          {{ t('e.electrification.projectIntakeForm.upload3') }}
+        </label>
+        <AdvancedFileUpload
+          :activity-id="activityId"
+          :disabled="!editable"
+        />
+      </template>
+    </Card>
+
+    <div class="flex items-center justify-center mt-6">
+      <Button
+        :label="t('e.electrification.projectIntakeForm.submit')"
+        type="submit"
+        icon="pi pi-upload"
+        :disabled="!editable || isSubmitting"
+      />
+    </div>
+  </Form>
 </template>
 
 <style scoped lang="scss">
