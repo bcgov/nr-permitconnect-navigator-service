@@ -111,74 +111,70 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       );
     }
 
-    await emailEnquiryConfirmation(
-      tx,
-      contactResponse[0],
-      data,
-      req.currentContext.initiative!,
-      req.body.basic?.relatedActivityId
-    );
-
     return { ...data, contact: contactResponse[0] };
   });
 
+  await emailEnquiryConfirmation(result, req.currentContext.initiative!, req.body.basic?.relatedActivityId);
   res.status(201).json(result);
 };
 
 async function emailEnquiryConfirmation(
-  tx: PrismaTransactionClient,
-  contact: Contact,
-  enquiry: Enquiry,
+  enquiryWithContact: Enquiry & { contact: Contact },
   initiative: string,
   relatedActivityId?: string
 ) {
-  const configCC = config.get<string>('server.ches.submission.cc');
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    const configCC = config.get<string>('server.ches.submission.cc');
 
-  let permitDescription = '';
-  let enquiryDescription: string = enquiry.enquiryDescription || '';
-  let firstTwoSentences: string;
+    let permitDescription = '';
+    let enquiryDescription: string = enquiryWithContact.enquiryDescription || '';
+    let firstTwoSentences: string;
 
-  // If has permit description convert \n to <br>
-  if (enquiryDescription.includes('Tracking ID:')) {
-    const descriptionSplit = enquiryDescription.split('\n\n');
-    permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
-    enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
-  }
+    // If has permit description convert \n to <br>
+    if (enquiryDescription.includes('Tracking ID:')) {
+      const descriptionSplit = enquiryDescription.split('\n\n');
+      permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
+      enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
+    }
 
-  // Get the first two sentences of the enquiry description using proper sentence segmentation
-  // If there are more than two sentences in enquiryDescription, add '..' to the end
-  const segmenter = new Intl.Segmenter('en', { granularity: 'sentence' });
-  const segments = Array.from(segmenter.segment(enquiryDescription));
-  const sentences = segments.map((s) => s.segment.trim()).filter((sentence: string) => sentence.length > 0);
+    // Get the first two sentences of the enquiry description using proper sentence segmentation
+    // If there are more than two sentences in enquiryDescription, add '..' to the end
+    const segmenter = new Intl.Segmenter('en', { granularity: 'sentence' });
+    const segments = Array.from(segmenter.segment(enquiryDescription));
+    const sentences = segments.map((s) => s.segment.trim()).filter((sentence: string) => sentence.length > 0);
 
-  firstTwoSentences = sentences.slice(0, 2).join(' ');
-  if (sentences.length > 2) {
-    firstTwoSentences = firstTwoSentences.concat('..');
-  }
+    firstTwoSentences = sentences.slice(0, 2).join(' ');
+    if (sentences.length > 2) {
+      firstTwoSentences = firstTwoSentences.concat('..');
+    }
 
-  if (permitDescription) firstTwoSentences = permitDescription + firstTwoSentences;
+    if (permitDescription) firstTwoSentences = permitDescription + firstTwoSentences;
 
-  const projectId = relatedActivityId ? (await getProjectByActivityId(tx, relatedActivityId))?.projectId : undefined;
+    const projectId = relatedActivityId ? (await getProjectByActivityId(tx, relatedActivityId))?.projectId : undefined;
 
-  const body = confirmationTemplateEnquiry({
-    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
-    activityId: enquiry.activityId,
-    enquiryDescription: firstTwoSentences.trim(),
-    enquiryId: enquiry.enquiryId,
-    projectId: projectId,
-    initiative: initiative.toLowerCase()
+    const body = confirmationTemplateEnquiry({
+      contactName:
+        enquiryWithContact.contact?.firstName && enquiryWithContact.contact?.lastName
+          ? `${enquiryWithContact.contact?.firstName} ${enquiryWithContact.contact?.lastName}`
+          : '',
+      activityId: enquiryWithContact.activityId,
+      enquiryDescription: firstTwoSentences.trim(),
+      enquiryId: enquiryWithContact.enquiryId,
+      projectId: projectId,
+      initiative: initiative.toLowerCase()
+    });
+
+    const emailData = {
+      from: configCC,
+      to: [enquiryWithContact.contact.email!],
+      cc: [configCC],
+      subject: 'Confirmation of Enquiry Submission',
+      bodyType: 'html',
+      body: body
+    };
+
+    await email(emailData);
   });
-
-  const emailData = {
-    from: configCC,
-    to: [contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Enquiry Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
 }
 
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {

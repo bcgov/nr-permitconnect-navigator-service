@@ -154,7 +154,6 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
@@ -187,7 +186,6 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
 
 export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802c',
   activityId: 'ACTI1234',
   submittedAt: new Date(),
   projectName: null,

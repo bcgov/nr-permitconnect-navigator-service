@@ -30,7 +30,7 @@ export type ElectrificationProjectBase = Prisma.electrification_projectGetPayloa
 export type ElectrificationProject = ElectrificationProjectBase & {
   activity?: Activity;
   user?: User | null;
-  projectId: string;
+  projectId?: string;
 };
 
 const electrificationProjectCategoryCodeBase =

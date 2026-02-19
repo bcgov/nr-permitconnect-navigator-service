@@ -79,7 +79,6 @@ const generateElectrificationProjectData = async (
     hasEpa: null,
     megawatts: null,
     bcEnvironmentAssessNeeded: null,
-    projectId: UUID,
     assignedUserId: null,
     astNotes: null,
     queuePriority: null,
@@ -239,29 +238,30 @@ export const submitElectrificationProjectDraftController = async (
         { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
       ]);
 
-      await emailProjectConfirmation(contactResponse[0], data);
-
       return { ...data, contact: contactResponse[0] };
     }
   );
-
+  await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
 
-async function emailProjectConfirmation(contact: Contact, electrificationProject: ElectrificationProject) {
+async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
   const configCC = config.get<string>('server.ches.submission.cc');
   const subject = 'Confirmation of Project Submission';
 
   const body = confirmationTemplateElectrificationSubmission({
-    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
     initiative: toTitleCase(Initiative.ELECTRIFICATION),
-    activityId: electrificationProject.activityId,
-    projectId: electrificationProject.electrificationProjectId
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.electrificationProjectId
   });
 
   const emailData = {
     from: configCC,
-    to: [contact.email!],
+    to: [projectWithContact.contact.email!],
     cc: [configCC],
     subject: subject,
     bodyType: 'html',

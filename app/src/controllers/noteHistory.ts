@@ -25,6 +25,7 @@ import {
 import { getProjectByActivityId } from '../services/project.ts';
 import { searchUsers } from '../services/user.ts';
 import { getUsersWithGroups } from './user.ts';
+import { Problem } from '../utils';
 import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 import { BringForwardType, NoteType } from '../utils/enums/projectCommon.ts';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
@@ -177,13 +178,12 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
  * @param res Express Response object
  */
 export const updateNoteHistoryController = async (
-  req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: string }>,
+  req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: Resource }>,
   res: Response
 ) => {
+  const { note, resource, ...history } = req.body;
   const response = await transactionWrapper<NoteHistory>(async (tx: PrismaTransactionClient) => {
-    const { note, resource, ...history } = req.body;
-
-    const noteHistoryResponse = await updateNoteHistory(tx, {
+    await updateNoteHistory(tx, {
       ...history,
       noteHistoryId: req.params.noteHistoryId,
       ...generateUpdateStamps(req.currentContext)
@@ -200,63 +200,58 @@ export const updateNoteHistoryController = async (
       });
     }
 
-    const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
-    if (isNavigator)
-      await emailBringForwardNotification(tx, noteHistoryResponse, req.currentContext.initiative!, resource);
-
     return await getNoteHistory(tx, req.params.noteHistoryId);
   });
+
+  const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
+  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative!, resource);
 
   res.status(200).json(response);
 };
 
-async function emailBringForwardNotification(
-  tx: PrismaTransactionClient,
-  noteHistory: NoteHistory,
-  initiative: Initiative,
-  resource: string
-) {
-  if (noteHistory.type !== NoteType.BRING_FORWARD || !noteHistory.escalateToSupervisor) {
-    return;
-  }
+async function emailBringForwardNotification(noteHistory: NoteHistory, initiative: Initiative, resource: Resource) {
+  if (noteHistory.type !== NoteType.BRING_FORWARD || !noteHistory.escalateToSupervisor) return;
 
-  const allUsers = await searchUsers(tx, { active: true });
+  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    const allUsers = await searchUsers(tx, { active: true });
 
-  const supervisors = await getUsersWithGroups(tx, allUsers, {
-    group: [GroupName.SUPERVISOR],
-    initiative: [initiative]
+    const supervisors = await getUsersWithGroups(tx, allUsers, {
+      group: [GroupName.SUPERVISOR],
+      initiative: [initiative]
+    });
+
+    const supervisorsEmails = supervisors.flatMap((user: User) => (user.email ? [user.email] : []));
+
+    if (supervisorsEmails.length === 0) return;
+
+    let body: string;
+
+    if (resource === Resource.ENQUIRY) {
+      body = bringForwardEnquiryNotificationTemplate({
+        activityId: noteHistory.activityId
+      });
+    } else if (resource === Resource.ELECTRIFICATION_PROJECT || resource === Resource.HOUSING_PROJECT) {
+      const project = await getProjectByActivityId(tx, noteHistory.activityId);
+
+      if (!project) return;
+
+      body = bringForwardProjectNotificationTemplate({
+        projectName: project.projectName,
+        activityId: noteHistory.activityId
+      });
+    } else {
+      throw new Problem(422, { detail: 'Invalid resource type for bring forward notification' });
+    }
+
+    const configCC = config.get<string>('server.ches.submission.cc');
+
+    const emailData = {
+      from: configCC,
+      to: supervisorsEmails,
+      subject: 'New escalation in PCNS',
+      bodyType: 'html',
+      body: body
+    };
+    await email(emailData);
   });
-
-  const supervisorsEmails = supervisors.flatMap((user: User) => (user.email ? [user.email] : []));
-
-  if (supervisorsEmails.length === 0) return;
-
-  let body: string;
-
-  if (resource === Resource.ENQUIRY) {
-    body = bringForwardEnquiryNotificationTemplate({
-      activityId: noteHistory.activityId
-    });
-  } else {
-    const project = await getProjectByActivityId(tx, noteHistory.activityId);
-
-    if (!project) return;
-
-    body = bringForwardProjectNotificationTemplate({
-      projectName: project.projectName,
-      activityId: noteHistory.activityId
-    });
-  }
-
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const emailData = {
-    from: configCC,
-    to: supervisorsEmails,
-    subject: 'New escalation in PCNS',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
 }

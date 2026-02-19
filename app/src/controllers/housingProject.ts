@@ -419,28 +419,29 @@ export const submitHousingProjectDraftController = async (
         { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
       ]);
 
-      await emailProjectConfirmation(contactResponse[0], data);
-
       return { ...data, contact: contactResponse[0] };
     }
   );
-
+  await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
 
-async function emailProjectConfirmation(contact: Contact, housingProject: HousingProject) {
+async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
   const configCC = config.get<string>('server.ches.submission.cc');
 
   const body = confirmationTemplateHousingSubmission({
-    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
     initiative: toTitleCase(Initiative.HOUSING),
-    activityId: housingProject.activityId,
-    projectId: housingProject.housingProjectId
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.housingProjectId
   });
 
   const emailData = {
     from: configCC,
-    to: [contact.email!],
+    to: [projectWithContact.contact.email!],
     cc: [configCC],
     subject: 'Confirmation of Project Submission',
     bodyType: 'html',
