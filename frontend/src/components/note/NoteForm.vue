@@ -178,13 +178,13 @@ async function onSubmit(data: GenericObject) {
         note: data.note
       });
     } else {
-      if (resource?.value)
-        await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
-          ...body,
-          activityId,
-          note: data.note,
-          resource: resource.value
-        });
+      if (!resource?.value) throw new Error(t('note.noteForm.resourceNotDef'));
+      await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
+        ...body,
+        activityId,
+        note: data.note,
+        resource: resource.value
+      });
     }
     toast.success(t('note.noteForm.noteSaved'));
     navigateToOrigin();

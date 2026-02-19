@@ -75,7 +75,6 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
 }
 
 /**
- * @function differential
  * Create a key/value differential from source against comparer
  * @param source Source object
  * @param comparer The object to be compared against
@@ -203,9 +202,8 @@ export function getCurrentUsername(currentContext: CurrentContext | undefined): 
 
 /**
  * Checks whether the given object is empty, no properties
- *
- * @param {object} obj - The object to check.
- * @returns {boolean} True if the object is empty, false otherwise.
+ * @param obj - The object to check.
+ * @returns True if the object is empty, false otherwise.
  */
 export function isEmptyObject(obj: object): boolean {
   return Object.keys(obj).length === 0;

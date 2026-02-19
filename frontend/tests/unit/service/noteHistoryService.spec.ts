@@ -148,7 +148,7 @@ describe('noteHistoryService', () => {
             TEST_NOTE_HISTORY.noteHistoryId as string,
             { ...TEST_NOTE_HISTORY, note: 'text', resource: Resource.ELECTRIFICATION_PROJECT } as NoteHistory & {
               note: string;
-              resource: string;
+              resource: Resource;
             }
           );
 

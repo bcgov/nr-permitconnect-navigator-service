@@ -9,21 +9,21 @@ import { createNoteHistory } from '../services/noteHistory';
 import { listPermits } from '../services/permit';
 import { getProjectByActivityId } from '../services/project.ts';
 import { Problem } from '../utils';
-import { PCNS_FULL_NAME } from '../utils/constants/application.ts';
 import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { roadmapTemplate } from '../utils/templates';
+import { description } from '../../package.json';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
 import type { Email, EmailAttachment, NoteHistory, Permit } from '../types';
 
-function getPermitTypeNamesByNeeded(permits: Permit[], needed: string) {
-  return permits.filter((p) => p.needed === needed).map((p) => p.permitType?.name);
+function getPermitTypeNamesByNeeded(permits: Permit[], permitNeeded: PermitNeeded) {
+  return permits.filter((p) => p.needed === permitNeeded).map((p) => p.permitType?.name);
 }
 
-function getPermitTypeNamesByStatus(permits: Permit[], status: string) {
-  return permits.filter((p) => p.stage === status).map((p) => p.permitType?.name);
+function getPermitTypeNamesByStage(permits: Permit[], permitStage: PermitStage) {
+  return permits.filter((p) => p.stage === permitStage).map((p) => p.permitType?.name);
 }
 
 /**
@@ -128,12 +128,12 @@ export const getRoadmapNoteController = async (
       (ac) => ac.role === ActivityContactRole.PRIMARY
     )?.contact;
 
-    const permitStateApplied = getPermitTypeNamesByStatus(permits, PermitStage.APPLICATION_SUBMISSION);
-    const permitStateCompleted = getPermitTypeNamesByStatus(permits, PermitStage.POST_DECISION);
-    const permitPossiblyNeeded = getPermitTypeNamesByStatus(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+    const permitStateApplied = getPermitTypeNamesByStage(permits, PermitStage.APPLICATION_SUBMISSION);
+    const permitStateCompleted = getPermitTypeNamesByStage(permits, PermitStage.POST_DECISION);
+    const permitPossiblyNeeded = getPermitTypeNamesByStage(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
       getPermitTypeNamesByNeeded(permits, PermitNeeded.UNDER_INVESTIGATION).includes(value)
     );
-    const permitStateNew = getPermitTypeNamesByStatus(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+    const permitStateNew = getPermitTypeNamesByStage(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
       getPermitTypeNamesByNeeded(permits, PermitNeeded.YES).includes(value)
     );
 
@@ -148,7 +148,7 @@ export const getRoadmapNoteController = async (
       permitPossiblyNeeded: permitPossiblyNeeded,
       permitStateApplied: permitStateApplied,
       permitStateCompleted: permitStateCompleted,
-      navigatorName: PCNS_FULL_NAME
+      navigatorName: description
     });
     return rodmapNote;
   });

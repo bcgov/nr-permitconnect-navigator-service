@@ -16,8 +16,6 @@ export const GROUP_NAME_LIST = [
   GroupName.SUPERVISOR
 ];
 
-export const PCNS_FULL_NAME = 'Permit Connect Navigator Service';
-
 /**
  * Minimally valid UUIDv4 for the system ID
  * @see https://www.rfc-editor.org/rfc/rfc9562#variant_field

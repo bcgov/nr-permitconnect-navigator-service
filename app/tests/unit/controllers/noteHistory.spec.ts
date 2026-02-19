@@ -21,7 +21,7 @@ import * as housingProjectService from '../../../src/services/housingProject.ts'
 import * as noteService from '../../../src/services/note.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
 import * as userService from '../../../src/services/user.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import { Initiative, Resource } from '../../../src/utils/enums/application.ts';
 import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
@@ -240,7 +240,7 @@ describe('updateNoteHistoryController', () => {
       req as unknown as Request<
         { noteHistoryId: string },
         never,
-        NoteHistory & { note: string | undefined; resource: string }
+        NoteHistory & { note: string | undefined; resource: Resource }
       >,
       res as unknown as Response
     );
@@ -273,7 +273,7 @@ describe('updateNoteHistoryController', () => {
       req as unknown as Request<
         { noteHistoryId: string },
         never,
-        NoteHistory & { note: string | undefined; resource: string }
+        NoteHistory & { note: string | undefined; resource: Resource }
       >,
       res as unknown as Response
     );

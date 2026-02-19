@@ -24,7 +24,6 @@ export interface IProject extends IStamps {
   atsEnquiryId: string | null;
   addedToAts: boolean;
   aaiUpdated: boolean;
-  roadmapNote: string;
 
   // Joined
   activity?: Activity;

@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { ref, watchEffect } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { array, object, string, type InferType } from 'yup';
 
@@ -57,7 +57,7 @@ export type FormSchemaType = InferType<typeof formSchema>;
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
+const { getDocuments, getProject } = storeToRefs(useProjectStore());
 const projectStore = useProjectStore();
 
 // State
@@ -105,9 +105,6 @@ function onFileSelect(data: Document[]) {
 }
 
 watchEffect(async () => {
-  // Dumb, but need to do something with the ref for it to be watched properly
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const permits = getPermits.value.concat();
   const project = getProject.value;
 
   // Get navigator details
@@ -141,13 +138,20 @@ watchEffect(async () => {
     bcc: [bcc],
     subject: `Here is your ${initiative} project's Permit Roadmap`,
     bodyType: 'text',
-    body: project?.roadmapNote
+    body: projectStore.roadmapNote
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
   formRef.value?.setFieldValue('to', contact?.email);
   formRef.value?.setFieldValue('bcc', bcc);
-  formRef.value?.setFieldValue('body', project?.roadmapNote);
+  formRef.value?.setFieldValue('body', projectStore.roadmapNote);
+});
+
+watch(getProject, async () => {
+  if (getProject.value?.activityId) {
+    const roadMapNote = (await roadmapService.getRoadmapNote(getProject.value.activityId)).data;
+    projectStore.setRoadmapNote(roadMapNote);
+  }
 });
 </script>
 
