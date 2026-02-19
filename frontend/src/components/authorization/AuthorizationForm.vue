@@ -339,7 +339,7 @@ async function onSubmit(data: GenericObject) {
 
     await permitService.upsertPermit({
       ...permitSubmitData,
-      permitNote: [{ note: permitNote }],
+      permitNote: [{ note: permitNote, permitId: permitSubmitData.permitId ?? null, permitNoteId: null }],
       permitType: {
         permitTypeId: authorizationType.permitTypeId,
         agency: authorizationType.agency,

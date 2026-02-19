@@ -21,7 +21,8 @@ import {
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
 } from '../utils/templates';
-import { differential, formatDateOnly, isEmptyObject, isTruthy, readFeatureList, omit } from '../utils/utils.ts';
+import { Problem } from '../utils/index.ts';
+import { differential, formatDateOnly, isEmptyObject, isTruthy } from '../utils/utils.ts';
 import { state } from '../../state.ts';
 
 import type { Request, Response } from 'express';
@@ -84,7 +85,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   const permitName = permit.permitType?.name;
   const submittedDate = formatDateOnly(permit.submittedDate);
 
-  const nrmPermitEmail: string = config.get('frontend.ches.submission.cc');
+  const nrmPermitEmail: string = config.get('server.ches.submission.cc');
 
   const emailBody = emailTemplate({
     activityId,
@@ -114,14 +115,20 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
 
 /**
  * Creates update notes and sends out email notifications for updated permits
- * @param permit Array of Permits to send notifications for
+ * @param permit Permit to send notifications for
  * @param fromPeachSync Indicates if the update is coming from a PEACH sync
  * @param note A permit note to be used in permit note creation, if given
+ * @param tx Optional Prisma transaction client - Use the existing transaction if provided, otherwise create a new one
  */
-export const sendPermitUpdateNotification = async (permit: Permit, fromPeachSync: boolean, note?: string) => {
+export const createNoteAndDraftEmails = async (
+  permit: Permit,
+  fromPeachSync: boolean,
+  note?: string,
+  tx?: PrismaTransactionClient
+) => {
   const permitUpdateEmails: PermitUpdateEmailParams[] = [];
 
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+  const createNoteAndBuildUpdateEmails = async (tx: PrismaTransactionClient) => {
     const project = await getProjectByActivityId(tx, permit.activityId);
 
     const initiative = project.activity!.initiative!.code as Initiative;
@@ -136,15 +143,15 @@ export const sendPermitUpdateNotification = async (permit: Permit, fromPeachSync
         navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
       }
       const navEmail: string = config.get('server.pcns.navEmail');
-
-      permitUpdateEmails.push({
-        permit,
-        initiative,
-        dearName: navigatorName,
-        projectId: project.projectId,
-        toEmails: [navEmail],
-        emailTemplate: navPermitStatusUpdateTemplate
-      });
+      if (project.projectId)
+        permitUpdateEmails.push({
+          permit,
+          initiative,
+          dearName: navigatorName,
+          projectId: project.projectId,
+          toEmails: [navEmail],
+          emailTemplate: navPermitStatusUpdateTemplate
+        });
     }
 
     // Create update note for status change
@@ -170,9 +177,13 @@ export const sendPermitUpdateNotification = async (permit: Permit, fromPeachSync
     const isOnlyTemplate = permitNote.note.trim() === peachUpdateNotePlaceholder;
     const isFirstNote = !permit?.permitNote?.length;
 
-    const usePeachTemplate = isOnlyTemplate && isFirstNote && readFeatureList().peach;
+    const usePeachTemplate = isOnlyTemplate && isFirstNote && state.features.peach;
 
-    if (primaryContact?.email && (permit.needed === PermitNeeded.YES || permit.stage !== PermitStage.PRE_SUBMISSION)) {
+    if (
+      project.projectId &&
+      primaryContact?.email &&
+      (permit.needed === PermitNeeded.YES || permit.stage !== PermitStage.PRE_SUBMISSION)
+    ) {
       permitUpdateEmails.push({
         permit,
         initiative,
@@ -182,7 +193,13 @@ export const sendPermitUpdateNotification = async (permit: Permit, fromPeachSync
         emailTemplate: usePeachTemplate ? initialPeachPermitUpdateTemplate : permitNoteUpdateTemplate
       });
     }
-  });
+  };
+
+  if (tx) {
+    await createNoteAndBuildUpdateEmails(tx);
+  } else {
+    await transactionWrapper<void>(createNoteAndBuildUpdateEmails);
+  }
 
   // Send out permit update emails
   for (const emailJob of permitUpdateEmails) {
@@ -195,27 +212,12 @@ function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds:
   return !!sourceSystemKind;
 }
 
-function checkIfPeachIntegratedTrackingId(
-  permitTrackings: PermitTracking[] | undefined,
-  sourceSystemKinds: SourceSystemKind[]
-): boolean {
-  if (!permitTrackings || permitTrackings.length === 0) return false;
-
-  return permitTrackings.some((pt) => {
-    const sourceSystemKind = sourceSystemKinds.find(
-      (ssk) => ssk.integrated && ssk.sourceSystemKindId === pt.sourceSystemKindId
-    );
-    return !!sourceSystemKind;
-  });
-}
-
 const snapshotPermitStatus = (p: Partial<Permit>) => ({
   state: p.state,
   stage: p.stage,
   decisionDate: p.decisionDate,
   submittedDate: p.submittedDate,
-  statusLastChanged: p.statusLastChanged,
-  statusLastVerified: p.statusLastVerified
+  statusLastChanged: p.statusLastChanged
 });
 
 export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {
@@ -233,21 +235,19 @@ export const upsertPermitController = async (req: Request<never, never, Permit>,
     };
 
     const { permitType, permitNote, ...permit } = req.body;
-
     const sourceSystemKinds = await getSourceSystemKinds(tx);
-
-    const isPeachIntegratedAuth = permitType?.sourceSystem
-      ? checkIfPeachIntegratedAuthType(permitType.sourceSystem, sourceSystemKinds)
-      : false;
-
-    const isPeachIntegratedTrackingId = checkIfPeachIntegratedTrackingId(permit.permitTracking, sourceSystemKinds);
+    const isPeachIntegratedAuth = checkIfPeachIntegratedAuthType(permitType?.sourceSystem ?? '', sourceSystemKinds);
+    const peachIntegratedTracking = findPriorityPermitTracking(permit.permitTracking);
     let isValidPeachPermit = false;
-    if (isPeachIntegratedAuth && isPeachIntegratedTrackingId) {
-      isValidPeachPermit = await checkPeachValidity(tx, permitData, sourceSystemKinds);
 
-      if (!isValidPeachPermit) {
-        throw new Error('Invalid Peach record summary');
-      }
+    if (isPeachIntegratedAuth && !!peachIntegratedTracking) {
+      const peachRecord = await getPeachRecord(
+        peachIntegratedTracking.trackingId!,
+        peachIntegratedTracking.sourceSystemKind!.sourceSystem
+      );
+      const peachSummary = summarizePeachRecord(peachRecord);
+      isValidPeachPermit = !!peachSummary;
+      if (!isValidPeachPermit) throw new Problem(400, { detail: 'Invalid Peach record summary' });
     }
 
     // Add data to tracking IDs if necessary
@@ -288,12 +288,11 @@ export const upsertPermitController = async (req: Request<never, never, Permit>,
 
     // Prevent creating notes and sending an update email if the above call fails
     if (data?.permitId) {
-      // if (data?.permitId && (!isEmptyPermitNote || (isValidPeachPermit && statusChanged))) {
       if (!isEmptyPermitNote || (isValidPeachPermit && statusChanged)) {
         const note = isEmptyPermitNote
           ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
           : permitNoteText;
-        sendPermitUpdateNotification(data, false, note);
+        await createNoteAndDraftEmails(data, false, note, tx);
       }
     }
 
@@ -301,34 +300,3 @@ export const upsertPermitController = async (req: Request<never, never, Permit>,
   });
   res.status(200).json(response);
 };
-
-async function checkPeachValidity(
-  tx: PrismaTransactionClient,
-  permit: Permit,
-  sourceSystemKinds: SourceSystemKind[]
-): Promise<boolean> {
-  let priorityPermitTracking = undefined;
-
-  if (permit.permitTracking) {
-    // Add source system kind information to permit tracking
-    const permitTrackings: PermitTracking[] = permit.permitTracking.map((pt) => {
-      const found =
-        sourceSystemKinds.find((ssk) => ssk.sourceSystemKindId === pt.sourceSystemKindId) || ({} as SourceSystemKind);
-      return {
-        ...pt,
-        sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
-      };
-    }) as [];
-
-    priorityPermitTracking = findPriorityPermitTracking(permitTrackings);
-  }
-  let peachSummary;
-  if (state.features.peach && priorityPermitTracking) {
-    const peachRecord = await getPeachRecord(
-      priorityPermitTracking.trackingId!,
-      priorityPermitTracking.sourceSystemKind!.sourceSystem
-    );
-    peachSummary = summarizePeachRecord(peachRecord);
-  }
-  return !!peachSummary;
-}

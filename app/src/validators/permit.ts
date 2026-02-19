@@ -16,7 +16,10 @@ const sharedPermitSchema = {
   permitNote: Joi.array()
     .items(
       Joi.object({
-        note: Joi.string()
+        permitNoteId: Joi.number().allow(null),
+        permitId: Joi.string().allow(null),
+        note: Joi.string().allow(null),
+        ...createStamps
       }).allow(null)
     )
     .allow(null),
@@ -41,8 +44,6 @@ const sharedPermitSchema = {
   ...createStamps
 };
 
-export const upsertPermitBodySchema = Joi.object(sharedPermitSchema);
-
 const schema = {
   deletePermit: {
     params: Joi.object({
@@ -61,9 +62,11 @@ const schema = {
     })
   },
   upsertPermit: {
-    body: upsertPermitBodySchema
+    body: Joi.object(sharedPermitSchema)
   }
 };
+
+export const upsertPermitBodySchema = schema.upsertPermit.body;
 
 export default {
   deletePermit: validate(schema.deletePermit),

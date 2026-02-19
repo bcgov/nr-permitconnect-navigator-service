@@ -1,5 +1,5 @@
 import { syncPeachRecords } from './src/controllers/peach.ts';
-import { sendPermitUpdateNotification } from './src/controllers/permit.ts';
+import { createNoteAndDraftEmails } from './src/controllers/permit.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 
@@ -31,7 +31,7 @@ async function syncPeachToPcns() {
 
   try {
     for (const permit of updatedPermits) {
-      await sendPermitUpdateNotification(permit, true);
+      await createNoteAndDraftEmails(permit, true);
     }
   } catch (error) {
     log.warn('PEACH sync completed but sending notifications failed', error);
