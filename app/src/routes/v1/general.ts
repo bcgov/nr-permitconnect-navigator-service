@@ -13,7 +13,7 @@ import permit from './permit.ts';
 import roadmap from './roadmap.ts';
 
 const router = express.Router();
-router.use(currentContext(Initiative.HOUSING));
+router.use(currentContext(Initiative.GENERAL));
 
 // Base v1 Responder
 router.get('/general', (_req, res) => {

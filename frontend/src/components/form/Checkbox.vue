@@ -1,7 +1,8 @@
 <script setup lang="ts">
-import { useField, ErrorMessage } from 'vee-validate';
+import { useField, ErrorMessage, useSetFieldValue } from 'vee-validate';
 
 import { Checkbox } from '@/lib/primevue';
+import { watchEffect } from 'vue';
 
 // Props
 const {
@@ -20,7 +21,15 @@ const {
   invalid?: boolean;
 }>();
 
+// Composables
 const { errorMessage, handleBlur, value } = useField<string>(name);
+const setFieldValue = useSetFieldValue(name);
+
+// Actions
+// Default to false if value is null or undefined
+watchEffect(() => {
+  if (value.value === null || value.value === undefined) setFieldValue(false);
+});
 </script>
 
 <template>

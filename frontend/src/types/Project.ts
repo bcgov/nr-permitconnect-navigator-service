@@ -1,3 +1,3 @@
-import type { ElectrificationProject, HousingProject } from './index';
+import type { ElectrificationProject, GeneralProject, HousingProject } from './index';
 
-export type Project = ElectrificationProject | HousingProject;
+export type Project = ElectrificationProject | GeneralProject | HousingProject;

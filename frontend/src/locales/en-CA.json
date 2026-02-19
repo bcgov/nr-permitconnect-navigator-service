@@ -33,6 +33,15 @@
     }
   },
   "views": {
+    "homeView": {
+      "cantNavigate": "Please contact and administrator to verify your permissions",
+      "chooseProject": "Choose your project type",
+      "electrification": "Electrification",
+      "general": "General",
+      "housing": "Housing",
+      "pcns": "Permit Connect Services",
+      "welcome": "Welcome to the"
+    },
     "initiativeStateError": "Unable to determine initiative state",
     "e": {
       "enquiryConfirmationView": {
@@ -56,6 +65,10 @@
           "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
         },
         "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
+        "general": {
+          "header": "General",
+          "projectsTooltip": "Submit a general project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+        },
         "generalEnquiries": "General enquiries",
         "housing": {
           "header": "Housing",
@@ -77,6 +90,10 @@
         "electrification": {
           "backTo": "Back to Electrification",
           "message": "Your submission will be reviewed and you will be contacted by an Electrification Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+        },
+        "general": {
+          "backTo": "Back to General",
+          "message": "Your submission will be reviewed and you will be contacted by a General Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
         },
         "housing": {
           "backTo": "Back to Housing",
@@ -759,14 +776,6 @@
     "navigatorReadOnly": "NAVIGATOR_READ_ONLY",
     "supervisor": "SUPERVISOR",
     "admin": "ADMIN"
-  },
-  "homeView": {
-    "cantNavigate": "Please contact and administrator to verify your permissions",
-    "chooseProject": "Choose your project type",
-    "electrification": "Electrification",
-    "housing": "Housing",
-    "pcns": "Permit Connect Services",
-    "welcome": "Welcome to the"
   },
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",

@@ -1,4 +1,5 @@
 import { default as externalElectrificationRoutes } from '@/router/externalElectrification';
+import { default as externalGeneralRoutes } from '@/router/externalGeneral';
 import { default as externalHousingRoutes } from '@/router/externalHousing';
 import { useAppStore } from '@/store';
 import { Zone } from '@/utils/enums/application';
@@ -9,7 +10,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/e',
     beforeEnter: [() => useAppStore().setZone(Zone.EXTERNAL)],
-    children: [...externalElectrificationRoutes, ...externalHousingRoutes]
+    children: [...externalElectrificationRoutes, ...externalGeneralRoutes, ...externalHousingRoutes]
   }
 ];
 

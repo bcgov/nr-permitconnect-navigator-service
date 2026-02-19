@@ -1,8 +1,8 @@
 import type { IStamps } from '@/interfaces';
 
-export type Draft = {
+export type Draft<T> = {
   draftId: string; // Primary key
   activityId: string;
   draftCode: string;
-  data: object;
+  data: T;
 } & IStamps;

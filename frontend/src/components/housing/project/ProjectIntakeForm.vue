@@ -449,843 +449,939 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div>
-    <div class="flex justify-center">
-      <h2
-        role="heading"
-        aria-level="1"
-      >
-        Housing Project Intake Form
-      </h2>
-    </div>
-    <Form
-      v-if="initialFormValues"
-      id="form"
-      v-slot="{ setFieldValue, errors, meta, values }"
-      ref="formRef"
-      :initial-values="initialFormValues"
-      :validation-schema="validationSchema"
-      @invalid-submit="onInvalidSubmit"
-      @submit="confirmSubmit"
-    >
-      <FormNavigationGuard
-        v-if="editable"
-        :auto-save-ref="autoSaveRef"
-        :callback="onBeforeRouteLeaveCallback"
-      />
-      <FormAutosave
-        v-if="editable"
-        ref="autoSaveRef"
-        :callback="() => onSaveDraft(values, true)"
-      />
+  <Form
+    v-if="initialFormValues"
+    id="form"
+    v-slot="{ setFieldValue, errors, meta, values }"
+    ref="formRef"
+    :initial-values="initialFormValues"
+    :validation-schema="validationSchema"
+    @invalid-submit="onInvalidSubmit"
+    @submit="confirmSubmit"
+  >
+    <FormNavigationGuard
+      v-if="editable"
+      :auto-save-ref="autoSaveRef"
+      :callback="onBeforeRouteLeaveCallback"
+    />
+    <FormAutosave
+      v-if="editable"
+      ref="autoSaveRef"
+      :callback="() => onSaveDraft(values, true)"
+    />
 
-      <ProjectIntakeAssistance
-        v-if="editable && values?.contacts"
-        :form-values="values"
-        @on-submit-assistance="onAssistanceRequest(values)"
-      />
+    <ProjectIntakeAssistance
+      v-if="editable && values?.contacts"
+      :form-values="values"
+      @on-submit-assistance="onAssistanceRequest(values)"
+    />
 
-      <input
-        type="hidden"
-        name="draftId"
-      />
+    <input
+      type="hidden"
+      name="draftId"
+    />
 
-      <input
-        type="hidden"
-        name="activityId"
-      />
+    <input
+      type="hidden"
+      name="activityId"
+    />
 
-      <Stepper :value="activeStep">
-        <StepList class="!mb-6">
-          <Step
-            :value="0"
-            as-child
+    <Stepper :value="activeStep">
+      <StepList class="!mb-6">
+        <Step
+          :value="0"
+          as-child
+        >
+          <StepperHeader
+            :index="0"
+            :active-step="activeStep"
+            :click-callback="() => (activeStep = 0)"
+            title="Basic info"
+            icon="fa-user"
+            :errors="
+              validationErrors.includes(IntakeFormCategory.CONTACTS) ||
+              validationErrors.includes(IntakeFormCategory.BASIC)
+            "
+          />
+        </Step>
+        <Step
+          :value="1"
+          as-child
+        >
+          <StepperHeader
+            :index="1"
+            :active-step="activeStep"
+            :click-callback="() => (activeStep = 1)"
+            title="Housing"
+            icon="fa-house"
+            :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
+          />
+        </Step>
+        <Step
+          :value="2"
+          as-child
+        >
+          <StepperHeader
+            :index="2"
+            :active-step="activeStep"
+            :click-callback="() => (activeStep = 2)"
+            title="Location"
+            icon="fa-location-dot"
+            :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
+          />
+        </Step>
+        <Step
+          :value="3"
+          as-child
+        >
+          <StepperHeader
+            :index="3"
+            :active-step="activeStep"
+            :click-callback="() => (activeStep = 3)"
+            title="Permits & Reports"
+            icon="fa-file"
+            :errors="
+              validationErrors.includes(IntakeFormCategory.PERMITS) ||
+              validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
+            "
+            :divider="false"
+          />
+        </Step>
+      </StepList>
+
+      <!-- Basic info -->
+      <StepPanels>
+        <StepPanel :value="0">
+          <CollectionDisclaimer />
+
+          <Message
+            v-if="validationErrors.length"
+            severity="error"
+            icon="pi pi-exclamation-circle"
+            :closable="false"
+            class="message-banner text-center"
           >
-            <StepperHeader
-              :index="0"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 0)"
-              title="Basic info"
-              icon="fa-user"
-              :errors="
-                validationErrors.includes(IntakeFormCategory.CONTACTS) ||
-                validationErrors.includes(IntakeFormCategory.BASIC)
-              "
-            />
-          </Step>
-          <Step
-            :value="1"
-            as-child
-          >
-            <StepperHeader
-              :index="1"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 1)"
-              title="Housing"
-              icon="fa-house"
-              :errors="validationErrors.includes(IntakeFormCategory.HOUSING)"
-            />
-          </Step>
-          <Step
-            :value="2"
-            as-child
-          >
-            <StepperHeader
-              :index="2"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 2)"
-              title="Location"
-              icon="fa-location-dot"
-              :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
-            />
-          </Step>
-          <Step
-            :value="3"
-            as-child
-          >
-            <StepperHeader
-              :index="3"
-              :active-step="activeStep"
-              :click-callback="() => (activeStep = 3)"
-              title="Permits & Reports"
-              icon="fa-file"
-              :errors="
-                validationErrors.includes(IntakeFormCategory.PERMITS) ||
-                validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-              "
-              :divider="false"
-            />
-          </Step>
-        </StepList>
+            {{ VALIDATION_BANNER_TEXT }}
+          </Message>
 
-        <!-- Basic info -->
-        <StepPanels>
-          <StepPanel :value="0">
-            <CollectionDisclaimer />
+          <ContactCardIntakeForm
+            :editable="editable"
+            :initial-form-values="initialFormValues"
+          />
 
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="message-banner text-center"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
+          <Card>
+            <template #title>
+              <span
+                class="section-header"
+                role="heading"
+                aria-level="2"
+              >
+                {{ t('projectIntakeForm.projectApplicantTypeCard') }}
+              </span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="grid grid-cols-12 gap-4">
+                <RadioList
+                  class="col-span-12"
+                  name="basic.projectApplicantType"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="PROJECT_APPLICANT_LIST"
+                  @on-change="
+                    (e: string) => {
+                      if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBc', null);
+                    }
+                  "
+                />
 
-            <ContactCardIntakeForm
-              :editable="editable"
-              :initial-form-values="initialFormValues"
-            />
-
-            <Card>
-              <template #title>
                 <span
-                  class="section-header"
-                  role="heading"
-                  aria-level="2"
+                  v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
+                  class="col-span-12"
                 >
-                  {{ t('projectIntakeForm.projectApplicantTypeCard') }}
-                </span>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
+                  <div class="flex items-center">
+                    <p class="font-bold">Is it registered in B.C?</p>
+                    <Tooltip
+                      class="pl-2"
+                      right
+                      icon="fa-solid fa-circle-question"
+                      :text="t('projectIntakeForm.isRegisteredTooltip')"
+                    />
+                  </div>
                   <RadioList
-                    class="col-span-12"
-                    name="basic.projectApplicantType"
+                    class="col-span-12 mt-2 pl-0"
+                    name="basic.isDevelopedInBc"
                     :bold="false"
                     :disabled="!editable"
-                    :options="PROJECT_APPLICANT_LIST"
+                    :options="YES_NO_LIST"
                     @on-change="
-                      (e: string) => {
-                        if (e === ProjectApplicant.BUSINESS) setFieldValue('basic.isDevelopedInBc', null);
+                      () => {
+                        setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName);
+                        setFieldValue('basic.registeredId', null);
                       }
                     "
                   />
-
-                  <span
-                    v-if="values.basic?.projectApplicantType === ProjectApplicant.BUSINESS"
-                    class="col-span-12"
-                  >
-                    <div class="flex items-center">
-                      <p class="font-bold">Is it registered in B.C?</p>
-                      <Tooltip
-                        class="pl-2"
-                        right
-                        icon="fa-solid fa-circle-question"
-                        :text="t('projectIntakeForm.isRegisteredTooltip')"
-                      />
-                    </div>
-                    <RadioList
-                      class="col-span-12 mt-2 pl-0"
-                      name="basic.isDevelopedInBc"
+                  <div v-if="values.basic.isDevelopedInBc === BasicResponse.YES">
+                    <AutoComplete
+                      class="col-span-6 mt-4 pl-0"
+                      name="basic.registeredName"
                       :bold="false"
                       :disabled="!editable"
-                      :options="YES_NO_LIST"
-                      @on-change="
-                        () => {
-                          setFieldValue('basic.registeredName', contactStore.getContact?.bceidBusinessName);
-                          setFieldValue('basic.registeredId', null);
+                      :editable="true"
+                      :placeholder="'Type to search the B.C registered name'"
+                      :get-option-label="(option: OrgBookOption) => option.registeredName"
+                      :suggestions="orgBookOptions"
+                      @on-complete="onRegisteredNameInput"
+                      @on-select="
+                        (orgBookOption: OrgBookOption) => {
+                          setFieldValue('basic.registeredId', orgBookOption.registeredId);
+                          setFieldValue('basic.registeredName', orgBookOption.registeredName);
                         }
                       "
                     />
-                    <div v-if="values.basic.isDevelopedInBc === BasicResponse.YES">
-                      <AutoComplete
-                        class="col-span-6 mt-4 pl-0"
-                        name="basic.registeredName"
-                        :bold="false"
-                        :disabled="!editable"
-                        :editable="true"
-                        :placeholder="'Type to search the B.C registered name'"
-                        :get-option-label="(option: OrgBookOption) => option.registeredName"
-                        :suggestions="orgBookOptions"
-                        @on-complete="onRegisteredNameInput"
-                        @on-select="
-                          (orgBookOption: OrgBookOption) => {
-                            setFieldValue('basic.registeredId', orgBookOption.registeredId);
-                            setFieldValue('basic.registeredName', orgBookOption.registeredName);
-                          }
-                        "
-                      />
-                      <input
-                        hidden
-                        name="basic.registeredId"
-                      />
-                    </div>
-                    <InputText
-                      v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
-                      class="col-span-6 mt-4 pl-0"
-                      name="basic.registeredName"
-                      :placeholder="'Type the business/company/organization name'"
-                      :bold="false"
-                      :disabled="!editable"
-                      @on-change="setFieldValue('basic.registeredId', null)"
+                    <input
+                      hidden
+                      name="basic.registeredId"
                     />
-                  </span>
-                </div>
-              </template>
-            </Card>
-            <StepperNavigation
-              :editable="editable"
-              :next-callback="() => activeStep++"
-              :prev-disabled="true"
-            >
-              <template #content>
-                <Button
-                  class="p-button-sm"
-                  outlined
-                  label="Save draft"
-                  :disabled="!editable"
-                  @click="onSaveDraft(values)"
-                />
-              </template>
-            </StepperNavigation>
-          </StepPanel>
-
-          <!-- Housing -->
-          <StepPanel :value="1">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="message-banner text-center"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
-
-            <Card>
-              <template #title>
-                <span
-                  class="section-header"
-                  role="heading"
-                  aria-level="2"
-                >
-                  {{ t('projectIntakeForm.projectNameCard') }}
-                </span>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
+                  </div>
                   <InputText
-                    class="col-span-6"
-                    name="housing.projectName"
-                    label="Project name - your preferred name for your project"
+                    v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
+                    class="col-span-6 mt-4 pl-0"
+                    name="basic.registeredName"
+                    :placeholder="'Type the business/company/organization name'"
                     :bold="false"
                     :disabled="!editable"
+                    @on-change="setFieldValue('basic.registeredId', null)"
                   />
-                  <div class="col-span-6" />
-                </div>
-              </template>
-            </Card>
-
-            <Card>
-              <template #title>
-                <span
-                  class="section-header"
-                  role="heading"
-                  aria-level="2"
-                >
-                  {{ t('projectIntakeForm.singleFamilySelectedCard') }}
                 </span>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-12">
+              </div>
+            </template>
+          </Card>
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => activeStep++"
+            :prev-disabled="true"
+          >
+            <template #content>
+              <Button
+                class="p-button-sm"
+                outlined
+                label="Save draft"
+                :disabled="!editable"
+                @click="onSaveDraft(values)"
+              />
+            </template>
+          </StepperNavigation>
+        </StepPanel>
+
+        <!-- Housing -->
+        <StepPanel :value="1">
+          <Message
+            v-if="validationErrors.length"
+            severity="error"
+            icon="pi pi-exclamation-circle"
+            :closable="false"
+            class="message-banner text-center"
+          >
+            {{ VALIDATION_BANNER_TEXT }}
+          </Message>
+
+          <Card>
+            <template #title>
+              <span
+                class="section-header"
+                role="heading"
+                aria-level="2"
+              >
+                {{ t('projectIntakeForm.projectNameCard') }}
+              </span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="grid grid-cols-12 gap-4">
+                <InputText
+                  class="col-span-6"
+                  name="housing.projectName"
+                  label="Project name - your preferred name for your project"
+                  :bold="false"
+                  :disabled="!editable"
+                />
+                <div class="col-span-6" />
+              </div>
+            </template>
+          </Card>
+
+          <Card>
+            <template #title>
+              <span
+                class="section-header"
+                role="heading"
+                aria-level="2"
+              >
+                {{ t('projectIntakeForm.singleFamilySelectedCard') }}
+              </span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="grid grid-cols-12 gap-4">
+                <div class="col-span-12">
+                  <Checkbox
+                    name="housing.singleFamilySelected"
+                    label="Single-family"
+                    :bold="false"
+                    :disabled="!editable"
+                    :invalid="!!errors.housing && meta.touched"
+                  />
+                </div>
+                <Select
+                  v-if="values.housing.singleFamilySelected"
+                  class="col-span-6"
+                  name="housing.singleFamilyUnits"
+                  :disabled="!editable || !values.housing.singleFamilySelected"
+                  :options="NUM_RESIDENTIAL_UNITS_LIST"
+                  placeholder="How many expected units?"
+                />
+                <div class="col-span-12">
+                  <div class="flex">
                     <Checkbox
-                      name="housing.singleFamilySelected"
-                      label="Single-family"
+                      class="content-center"
+                      name="housing.multiFamilySelected"
+                      label="Multi-family"
                       :bold="false"
                       :disabled="!editable"
                       :invalid="!!errors.housing && meta.touched"
                     />
-                  </div>
-                  <Select
-                    v-if="values.housing.singleFamilySelected"
-                    class="col-span-6"
-                    name="housing.singleFamilyUnits"
-                    :disabled="!editable || !values.housing.singleFamilySelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
-                  />
-                  <div class="col-span-12">
-                    <div class="flex">
-                      <Checkbox
-                        class="content-center"
-                        name="housing.multiFamilySelected"
-                        label="Multi-family"
-                        :bold="false"
-                        :disabled="!editable"
-                        :invalid="!!errors.housing && meta.touched"
-                      />
-                      <Tooltip
-                        class="pl-2"
-                        right
-                        icon="fa-solid fa-circle-question"
-                        :text="t('projectIntakeForm.multiFamilyTooltip')"
-                      />
-                    </div>
-                  </div>
-                  <Select
-                    v-if="values.housing.multiFamilySelected"
-                    class="col-span-6 content-center"
-                    name="housing.multiFamilyUnits"
-                    :disabled="!editable || !values.housing.multiFamilySelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
-                  />
-                  <div class="col-span-12">
-                    <Checkbox
-                      name="housing.otherSelected"
-                      label="Other"
-                      :bold="false"
-                      :disabled="!editable"
-                      :invalid="!!errors?.housing && meta.touched"
+                    <Tooltip
+                      class="pl-2"
+                      right
+                      icon="fa-solid fa-circle-question"
+                      :text="t('projectIntakeForm.multiFamilyTooltip')"
                     />
                   </div>
-                  <InputText
-                    v-if="values.housing.otherSelected"
-                    class="col-span-6"
-                    name="housing.otherUnitsDescription"
-                    :disabled="!editable || !values.housing.otherSelected"
-                    placeholder="Type to describe what other type of housing"
-                  />
-                  <div class="col-span-6" />
-                  <Select
-                    v-if="values.housing.otherSelected"
-                    class="col-span-6"
-                    name="housing.otherUnits"
-                    :disabled="!editable || !values.housing.otherSelected"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
-                  />
-                  <ErrorMessage
-                    v-if="meta.touched"
-                    class="col-span-12"
-                    name="housing"
-                  />
                 </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span
-                    class="section-header"
-                    role="heading"
-                    aria-level="2"
-                  >
-                    {{ t('projectIntakeForm.hasRentalUnitsCard') }}
-                  </span>
-                  <Tooltip
-                    right
-                    icon="fa-solid fa-circle-question"
-                    :text="t('projectIntakeForm.rentalUnitsTooltip')"
-                  />
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="grid grid-cols-12 gap-4">
-                  <RadioList
-                    class="col-span-12"
-                    name="housing.hasRentalUnits"
+                <Select
+                  v-if="values.housing.multiFamilySelected"
+                  class="col-span-6 content-center"
+                  name="housing.multiFamilyUnits"
+                  :disabled="!editable || !values.housing.multiFamilySelected"
+                  :options="NUM_RESIDENTIAL_UNITS_LIST"
+                  placeholder="How many expected units?"
+                />
+                <div class="col-span-12">
+                  <Checkbox
+                    name="housing.otherSelected"
+                    label="Other"
                     :bold="false"
                     :disabled="!editable"
-                    :options="YES_NO_UNSURE_LIST"
-                  />
-                  <Select
-                    v-if="values.housing.hasRentalUnits === BasicResponse.YES"
-                    class="col-span-6"
-                    name="housing.rentalUnits"
-                    :disabled="!editable"
-                    :options="NUM_RESIDENTIAL_UNITS_LIST"
-                    placeholder="How many expected units?"
+                    :invalid="!!errors?.housing && meta.touched"
                   />
                 </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex items-center justify-between">
-                  <div class="flex flex-grow-1">
-                    <span
-                      class="section-header"
-                      role="heading"
-                      aria-level="2"
-                    >
-                      {{ t('projectIntakeForm.financiallySupportedCard') }}
-                    </span>
-                  </div>
-                  <Button
-                    class="p-button-sm mr-4 p-button-danger"
-                    outlined
-                    :disabled="!editable"
-                    @click="
-                      () => {
-                        setFieldValue('housing.financiallySupportedBc', BasicResponse.NO);
-                        setFieldValue('housing.financiallySupportedIndigenous', BasicResponse.NO);
-                        setFieldValue('housing.financiallySupportedNonProfit', BasicResponse.NO);
-                        setFieldValue('housing.financiallySupportedHousingCoop', BasicResponse.NO);
-                      }
-                    "
-                  >
-                    No to all
-                  </Button>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div>
-                  <div class="mb-6">
-                    <div class="flex items-center">
-                      <label>
-                        <a
-                          href="https://www.bchousing.org/projects-partners/partner-with-us"
-                          target="_blank"
-                        >
-                          BC Housing
-                        </a>
-                      </label>
-                      <Tooltip
-                        class="pl-2 mb-2"
-                        right
-                        icon="fa-solid fa-circle-question"
-                        :text="t('projectIntakeForm.bcHousingTooltip')"
-                      />
-                    </div>
-
-                    <RadioList
-                      name="housing.financiallySupportedBc"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                    />
-                  </div>
-
-                  <div class="mb-6">
-                    <label>
-                      <a
-                        href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
-                        target="_blank"
-                      >
-                        Indigenous Housing Provider
-                      </a>
-                    </label>
-                    <RadioList
-                      name="housing.financiallySupportedIndigenous"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                    />
-                    <InputText
-                      v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
-                      class="w-1/2 pl-0"
-                      name="housing.indigenousDescription"
-                      :disabled="!editable"
-                      placeholder="Name of Indigenous Housing Provider"
-                    />
-                  </div>
-
-                  <div class="mb-6">
-                    <label>
-                      <a
-                        href="https://bcnpha.ca/member-programs-list/"
-                        target="_blank"
-                      >
-                        Non-profit housing society
-                      </a>
-                    </label>
-                    <RadioList
-                      name="housing.financiallySupportedNonProfit"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                    />
-                    <InputText
-                      v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
-                      class="w-1/2 pl-0"
-                      name="housing.nonProfitDescription"
-                      :disabled="!editable"
-                      placeholder="Name of Non-profit housing society"
-                    />
-                  </div>
-
-                  <div>
-                    <label>
-                      <a
-                        href="https://www.chf.bc.ca/find-co-op/"
-                        target="_blank"
-                      >
-                        Housing co-operative
-                      </a>
-                    </label>
-                    <RadioList
-                      name="housing.financiallySupportedHousingCoop"
-                      :bold="false"
-                      :disabled="!editable"
-                      :options="YES_NO_UNSURE_LIST"
-                    />
-                    <InputText
-                      v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
-                      class="w-1/2 pl-0"
-                      name="housing.housingCoopDescription"
-                      :disabled="!editable"
-                      placeholder="Name of Housing co-operative"
-                    />
-                  </div>
-                </div>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
+                <InputText
+                  v-if="values.housing.otherSelected"
+                  class="col-span-6"
+                  name="housing.otherUnitsDescription"
+                  :disabled="!editable || !values.housing.otherSelected"
+                  placeholder="Type to describe what other type of housing"
+                />
+                <div class="col-span-6" />
+                <Select
+                  v-if="values.housing.otherSelected"
+                  class="col-span-6"
+                  name="housing.otherUnits"
+                  :disabled="!editable || !values.housing.otherSelected"
+                  :options="NUM_RESIDENTIAL_UNITS_LIST"
+                  placeholder="How many expected units?"
+                />
+                <ErrorMessage
+                  v-if="meta.touched"
+                  class="col-span-12"
+                  name="housing"
+                />
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex">
                 <span
                   class="section-header"
                   role="heading"
                   aria-level="2"
                 >
-                  {{ t('projectIntakeForm.projectDescriptionCard') }}
+                  {{ t('projectIntakeForm.hasRentalUnitsCard') }}
                 </span>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <div class="col-span-12 my-0 py-0">
-                  <div class="flex items-center">
-                    <label>Provide additional information</label>
-                    <Tooltip
-                      class="pl-2 mb-2"
-                      right
-                      icon="fa-solid fa-circle-question"
-                      :text="t('projectIntakeForm.additionalInfoTooltip')"
-                    />
-                  </div>
-                </div>
-
-                <!-- eslint-disable max-len -->
-                <TextArea
-                  class="col-span-12 mb-0 pb-0"
-                  name="housing.projectDescription"
-                  placeholder="Provide us with additional information - short description about the project and/or project website link"
-                  :disabled="!editable"
+                <Tooltip
+                  right
+                  icon="fa-solid fa-circle-question"
+                  :text="t('projectIntakeForm.rentalUnitsTooltip')"
                 />
-                <!-- eslint-enable max-len -->
-                <label class="col-span-12 mt-0 pt-0">
-                  Upload documents about your housing project (pdfs, maps,
-                  <a
-                    href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-                    target="_blank"
-                    class="text-blue-500 underline"
-                  >
-                    shape files
-                  </a>
-                  , etc)
-                </label>
-                <AdvancedFileUpload
-                  :activity-id="activityId"
-                  :disabled="!editable"
-                />
-              </template>
-            </Card>
-            <StepperNavigation
-              :editable="editable"
-              :next-callback="() => activeStep++"
-              :prev-callback="() => activeStep--"
-            >
-              <template #content>
-                <Button
-                  class="p-button-sm"
-                  outlined
-                  label="Save draft"
-                  :disabled="!editable"
-                  @click="onSaveDraft(values)"
-                />
-              </template>
-            </StepperNavigation>
-          </StepPanel>
-
-          <!-- Location -->
-          <StepPanel :value="2">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="message-banner text-center"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
-
-            <NaturalDisasterCard :editable="editable" />
-
-            <LocationCard
-              ref="locationRef"
-              :editable="editable"
-            />
-
-            <Card>
-              <template #title>
-                <div class="flex align-items-center">
-                  <div class="flex flex-grow-1">
-                    <span
-                      class="section-header"
-                      role="heading"
-                      aria-level="2"
-                    >
-                      {{ t('projectIntakeForm.additionalLocationCard') }}
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <Accordion
-                  collapse-icon="pi pi-chevron-up"
-                  expand-icon="pi pi-chevron-right"
-                  :value="parcelAccordionIndex"
-                >
-                  <AccordionPanel value="0">
-                    <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
-                    <AccordionContent>
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12">
-                              <label>
-                                <a
-                                  href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                                  target="_blank"
-                                >
-                                  LTSA PID Lookup
-                                </a>
-                              </label>
-                            </div>
-                            <!-- eslint-disable max-len -->
-                            <InputText
-                              class="col-span-12"
-                              name="location.ltsaPidLookup"
-                              :bold="false"
-                              :disabled="!editable"
-                              help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
-                            />
-                            <!-- eslint-enable max-len -->
-                          </div>
-                        </template>
-                      </Card>
-                    </AccordionContent>
-                  </AccordionPanel>
-                </Accordion>
-                <Accordion
-                  collapse-icon="pi pi-chevron-up"
-                  expand-icon="pi pi-chevron-right"
-                  :value="geomarkAccordionIndex"
-                  class="mt-6 mb-2"
-                >
-                  <AccordionPanel value="0">
-                    <AccordionHeader>Geomark</AccordionHeader>
-                    <AccordionContent>
-                      <Card class="no-shadow">
-                        <template #content>
-                          <div class="grid grid-cols-12 gap-4">
-                            <div class="col-span-12">
-                              <label>
-                                <a
-                                  href="https://apps.gov.bc.ca/pub/geomark/overview"
-                                  target="_blank"
-                                >
-                                  Open Geomark Web Service
-                                </a>
-                              </label>
-                            </div>
-                            <InputText
-                              class="col-span-12"
-                              name="location.geomarkUrl"
-                              :bold="false"
-                              :disabled="!editable"
-                              placeholder="Type in URL"
-                            />
-                          </div>
-                        </template>
-                      </Card>
-                    </AccordionContent>
-                  </AccordionPanel>
-                </Accordion>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex items-center">
-                  <div class="flex grow">
-                    <span
-                      class="section-header"
-                      role="heading"
-                      aria-level="2"
-                    >
-                      {{ t('projectIntakeForm.projectLocationDescriptionCard') }}
-                    </span>
-                  </div>
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <TextArea
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="grid grid-cols-12 gap-4">
+                <RadioList
                   class="col-span-12"
-                  name="location.projectLocationDescription"
+                  name="housing.hasRentalUnits"
+                  :bold="false"
                   :disabled="!editable"
+                  :options="YES_NO_UNSURE_LIST"
                 />
-              </template>
-            </Card>
-
-            <StepperNavigation
-              :editable="editable"
-              :next-callback="() => activeStep++"
-              :prev-callback="() => activeStep--"
-            >
-              <template #content>
-                <Button
-                  class="p-button-sm"
-                  outlined
-                  label="Save draft"
+                <Select
+                  v-if="values.housing.hasRentalUnits === BasicResponse.YES"
+                  class="col-span-6"
+                  name="housing.rentalUnits"
                   :disabled="!editable"
-                  @click="onSaveDraft(values)"
+                  :options="NUM_RESIDENTIAL_UNITS_LIST"
+                  placeholder="How many expected units?"
                 />
-              </template>
-            </StepperNavigation>
-          </StepPanel>
-
-          <!-- Permits & Reports -->
-          <StepPanel :value="3">
-            <Message
-              v-if="validationErrors.length"
-              severity="error"
-              icon="pi pi-exclamation-circle"
-              :closable="false"
-              class="message-banner text-center"
-            >
-              {{ VALIDATION_BANNER_TEXT }}
-            </Message>
-
-            <Card>
-              <template #title>
-                <div class="flex">
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex items-center justify-between">
+                <div class="flex flex-grow-1">
                   <span
                     class="section-header"
                     role="heading"
                     aria-level="2"
                   >
-                    {{ t('projectIntakeForm.provincialPermitsCard') }}
+                    {{ t('projectIntakeForm.financiallySupportedCard') }}
                   </span>
-                  <Tooltip
-                    class="mb-2"
-                    right
-                    icon="fa-solid fa-circle-question"
-                    :text="t('projectIntakeForm.appliedPermitsTooltip')"
-                  />
                 </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <FieldArray
-                  v-slot="{ fields, push, remove }"
-                  name="appliedPermits"
+                <Button
+                  class="p-button-sm mr-4 p-button-danger"
+                  outlined
+                  :disabled="!editable"
+                  @click="
+                    () => {
+                      setFieldValue('housing.financiallySupportedBc', BasicResponse.NO);
+                      setFieldValue('housing.financiallySupportedIndigenous', BasicResponse.NO);
+                      setFieldValue('housing.financiallySupportedNonProfit', BasicResponse.NO);
+                      setFieldValue('housing.financiallySupportedHousingCoop', BasicResponse.NO);
+                    }
+                  "
                 >
+                  No to all
+                </Button>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div>
+                <div class="mb-6">
+                  <div class="flex items-center">
+                    <label>
+                      <a
+                        href="https://www.bchousing.org/projects-partners/partner-with-us"
+                        target="_blank"
+                      >
+                        BC Housing
+                      </a>
+                    </label>
+                    <Tooltip
+                      class="pl-2 mb-2"
+                      right
+                      icon="fa-solid fa-circle-question"
+                      :text="t('projectIntakeForm.bcHousingTooltip')"
+                    />
+                  </div>
+
                   <RadioList
-                    name="permits.hasAppliedProvincialPermits"
+                    name="housing.financiallySupportedBc"
                     :bold="false"
                     :disabled="!editable"
                     :options="YES_NO_UNSURE_LIST"
-                    @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
                   />
-                  <div
-                    v-if="
-                      values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
-                      values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
-                    "
-                    ref="appliedPermitsContainer"
+                </div>
+
+                <div class="mb-6">
+                  <label>
+                    <a
+                      href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
+                      target="_blank"
+                    >
+                      Indigenous Housing Provider
+                    </a>
+                  </label>
+                  <RadioList
+                    name="housing.financiallySupportedIndigenous"
+                    :bold="false"
+                    :disabled="!editable"
+                    :options="YES_NO_UNSURE_LIST"
+                  />
+                  <InputText
+                    v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
+                    class="w-1/2 pl-0"
+                    name="housing.indigenousDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Indigenous Housing Provider"
+                  />
+                </div>
+
+                <div class="mb-6">
+                  <label>
+                    <a
+                      href="https://bcnpha.ca/member-programs-list/"
+                      target="_blank"
+                    >
+                      Non-profit housing society
+                    </a>
+                  </label>
+                  <RadioList
+                    name="housing.financiallySupportedNonProfit"
+                    :bold="false"
+                    :disabled="!editable"
+                    :options="YES_NO_UNSURE_LIST"
+                  />
+                  <InputText
+                    v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
+                    class="w-1/2 pl-0"
+                    name="housing.nonProfitDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Non-profit housing society"
+                  />
+                </div>
+
+                <div>
+                  <label>
+                    <a
+                      href="https://www.chf.bc.ca/find-co-op/"
+                      target="_blank"
+                    >
+                      Housing co-operative
+                    </a>
+                  </label>
+                  <RadioList
+                    name="housing.financiallySupportedHousingCoop"
+                    :bold="false"
+                    :disabled="!editable"
+                    :options="YES_NO_UNSURE_LIST"
+                  />
+                  <InputText
+                    v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
+                    class="w-1/2 pl-0"
+                    name="housing.housingCoopDescription"
+                    :disabled="!editable"
+                    placeholder="Name of Housing co-operative"
+                  />
+                </div>
+              </div>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <span
+                class="section-header"
+                role="heading"
+                aria-level="2"
+              >
+                {{ t('projectIntakeForm.projectDescriptionCard') }}
+              </span>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <div class="col-span-12 my-0 py-0">
+                <div class="flex items-center">
+                  <label>Provide additional information</label>
+                  <Tooltip
+                    class="pl-2 mb-2"
+                    right
+                    icon="fa-solid fa-circle-question"
+                    :text="t('projectIntakeForm.additionalInfoTooltip')"
+                  />
+                </div>
+              </div>
+
+              <!-- eslint-disable max-len -->
+              <TextArea
+                class="col-span-12 mb-0 pb-0"
+                name="housing.projectDescription"
+                placeholder="Provide us with additional information - short description about the project and/or project website link"
+                :disabled="!editable"
+              />
+              <!-- eslint-enable max-len -->
+              <label class="col-span-12 mt-0 pt-0">
+                Upload documents about your housing project (pdfs, maps,
+                <a
+                  href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+                  target="_blank"
+                  class="text-blue-500 underline"
+                >
+                  shape files
+                </a>
+                , etc)
+              </label>
+              <AdvancedFileUpload
+                :activity-id="activityId"
+                :disabled="!editable"
+              />
+            </template>
+          </Card>
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => activeStep++"
+            :prev-callback="() => activeStep--"
+          >
+            <template #content>
+              <Button
+                class="p-button-sm"
+                outlined
+                label="Save draft"
+                :disabled="!editable"
+                @click="onSaveDraft(values)"
+              />
+            </template>
+          </StepperNavigation>
+        </StepPanel>
+
+        <!-- Location -->
+        <StepPanel :value="2">
+          <Message
+            v-if="validationErrors.length"
+            severity="error"
+            icon="pi pi-exclamation-circle"
+            :closable="false"
+            class="message-banner text-center"
+          >
+            {{ VALIDATION_BANNER_TEXT }}
+          </Message>
+
+          <NaturalDisasterCard :editable="editable" />
+
+          <LocationCard
+            ref="locationRef"
+            :editable="editable"
+          />
+
+          <Card>
+            <template #title>
+              <div class="flex align-items-center">
+                <div class="flex flex-grow-1">
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
                   >
-                    <div class="mb-2">
-                      <span class="app-primary-color">
-                        {{ t('projectIntakeForm.appliedPermitsShareNotification') }}
-                      </span>
-                    </div>
+                    {{ t('projectIntakeForm.additionalLocationCard') }}
+                  </span>
+                </div>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <Accordion
+                collapse-icon="pi pi-chevron-up"
+                expand-icon="pi pi-chevron-right"
+                :value="parcelAccordionIndex"
+              >
+                <AccordionPanel value="0">
+                  <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+                  <AccordionContent>
                     <Card class="no-shadow">
                       <template #content>
-                        <div
-                          v-for="(permit, idx) in fields"
-                          :key="idx"
-                          :index="idx"
-                          class="grid grid-cols-3 gap-3"
-                        >
-                          <div>
-                            <input
-                              type="hidden"
-                              :name="`appliedPermits[${idx}].permitId`"
-                            />
+                        <div class="grid grid-cols-12 gap-4">
+                          <div class="col-span-12">
+                            <label>
+                              <a
+                                href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
+                                target="_blank"
+                              >
+                                LTSA PID Lookup
+                              </a>
+                            </label>
+                          </div>
+                          <!-- eslint-disable max-len -->
+                          <InputText
+                            class="col-span-12"
+                            name="location.ltsaPidLookup"
+                            :bold="false"
+                            :disabled="!editable"
+                            help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                          />
+                          <!-- eslint-enable max-len -->
+                        </div>
+                      </template>
+                    </Card>
+                  </AccordionContent>
+                </AccordionPanel>
+              </Accordion>
+              <Accordion
+                collapse-icon="pi pi-chevron-up"
+                expand-icon="pi pi-chevron-right"
+                :value="geomarkAccordionIndex"
+                class="mt-6 mb-2"
+              >
+                <AccordionPanel value="0">
+                  <AccordionHeader>Geomark</AccordionHeader>
+                  <AccordionContent>
+                    <Card class="no-shadow">
+                      <template #content>
+                        <div class="grid grid-cols-12 gap-4">
+                          <div class="col-span-12">
+                            <label>
+                              <a
+                                href="https://apps.gov.bc.ca/pub/geomark/overview"
+                                target="_blank"
+                              >
+                                Open Geomark Web Service
+                              </a>
+                            </label>
+                          </div>
+                          <InputText
+                            class="col-span-12"
+                            name="location.geomarkUrl"
+                            :bold="false"
+                            :disabled="!editable"
+                            placeholder="Type in URL"
+                          />
+                        </div>
+                      </template>
+                    </Card>
+                  </AccordionContent>
+                </AccordionPanel>
+              </Accordion>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex items-center">
+                <div class="flex grow">
+                  <span
+                    class="section-header"
+                    role="heading"
+                    aria-level="2"
+                  >
+                    {{ t('projectIntakeForm.projectLocationDescriptionCard') }}
+                  </span>
+                </div>
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <TextArea
+                class="col-span-12"
+                name="location.projectLocationDescription"
+                :disabled="!editable"
+              />
+            </template>
+          </Card>
+
+          <StepperNavigation
+            :editable="editable"
+            :next-callback="() => activeStep++"
+            :prev-callback="() => activeStep--"
+          >
+            <template #content>
+              <Button
+                class="p-button-sm"
+                outlined
+                label="Save draft"
+                :disabled="!editable"
+                @click="onSaveDraft(values)"
+              />
+            </template>
+          </StepperNavigation>
+        </StepPanel>
+
+        <!-- Permits & Reports -->
+        <StepPanel :value="3">
+          <Message
+            v-if="validationErrors.length"
+            severity="error"
+            icon="pi pi-exclamation-circle"
+            :closable="false"
+            class="message-banner text-center"
+          >
+            {{ VALIDATION_BANNER_TEXT }}
+          </Message>
+
+          <Card>
+            <template #title>
+              <div class="flex">
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
+                  {{ t('projectIntakeForm.provincialPermitsCard') }}
+                </span>
+                <Tooltip
+                  class="mb-2"
+                  right
+                  icon="fa-solid fa-circle-question"
+                  :text="t('projectIntakeForm.appliedPermitsTooltip')"
+                />
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <FieldArray
+                v-slot="{ fields, push, remove }"
+                name="appliedPermits"
+              >
+                <RadioList
+                  name="permits.hasAppliedProvincialPermits"
+                  :bold="false"
+                  :disabled="!editable"
+                  :options="YES_NO_UNSURE_LIST"
+                  @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push, setFieldValue)"
+                />
+                <div
+                  v-if="
+                    values.permits?.hasAppliedProvincialPermits === BasicResponse.YES ||
+                    values.permits?.hasAppliedProvincialPermits === BasicResponse.UNSURE
+                  "
+                  ref="appliedPermitsContainer"
+                >
+                  <div class="mb-2">
+                    <span class="app-primary-color">
+                      {{ t('projectIntakeForm.appliedPermitsShareNotification') }}
+                    </span>
+                  </div>
+                  <Card class="no-shadow">
+                    <template #content>
+                      <div
+                        v-for="(permit, idx) in fields"
+                        :key="idx"
+                        :index="idx"
+                        class="grid grid-cols-3 gap-3"
+                      >
+                        <div>
+                          <input
+                            type="hidden"
+                            :name="`appliedPermits[${idx}].permitId`"
+                          />
+                          <Select
+                            :disabled="!editable"
+                            :name="`appliedPermits[${idx}].permitTypeId`"
+                            placeholder="Select Permit type"
+                            :options="getPermitTypes"
+                            :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
+                            option-value="permitTypeId"
+                            :loading="getPermitTypes === undefined"
+                          />
+                        </div>
+                        <InputText
+                          :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
+                          :disabled="!editable"
+                          placeholder="Tracking #"
+                        />
+                        <div class="flex justify-center">
+                          <DatePicker
+                            class="w-full"
+                            :name="`appliedPermits[${idx}].submittedDate`"
+                            :disabled="!editable"
+                            placeholder="Date applied"
+                            :max-date="new Date()"
+                          />
+                          <div class="flex items-center ml-2 mb-4">
+                            <Button
+                              v-if="editable"
+                              class="p-button-lg p-button-text p-button-danger p-0"
+                              aria-label="Delete"
+                              @click="remove(idx)"
+                            >
+                              <font-awesome-icon icon="fa-solid fa-trash" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                      <Button
+                        v-if="editable"
+                        class="w-full flex justify-center font-bold h-10"
+                        @click="
+                          push({
+                            permitTypeId: undefined,
+                            trackingId: undefined,
+                            submittedDate: undefined
+                          });
+                          nextTick(() => {
+                            const addedPermit = getHTMLElement(
+                              $refs.appliedPermitsContainer as HTMLElement,
+                              'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
+                            );
+                            if (addedPermit) {
+                              addedPermit.focus();
+                            }
+                          });
+                        "
+                      >
+                        <font-awesome-icon
+                          icon="fa-solid fa-plus"
+                          fixed-width
+                        />
+                        Add permit
+                      </Button>
+                    </template>
+                  </Card>
+                </div>
+              </FieldArray>
+            </template>
+          </Card>
+          <Card>
+            <template #content>
+              <span class="flex font-bold">
+                <p>
+                  Go to
+                  <a
+                    class="no-underline"
+                    href="https://permitconnectbc.gov.bc.ca/#authorizations"
+                    target="_blank"
+                  >
+                    Permit Connect BC
+                  </a>
+                  to learn more about permits issued by the provincial government
+                </p>
+              </span>
+            </template>
+          </Card>
+          <Card>
+            <template #title>
+              <div class="flex">
+                <span
+                  class="section-header"
+                  role="heading"
+                  aria-level="2"
+                >
+                  {{ t('projectIntakeForm.investigatePermitsCard') }}
+                </span>
+                <Tooltip
+                  right
+                  icon="fa-solid fa-circle-question"
+                  :text="t('projectIntakeForm.potentialPermitsTooltip')"
+                />
+              </div>
+              <Divider type="solid" />
+            </template>
+            <template #content>
+              <FieldArray
+                v-slot="{ fields, push, remove }"
+                name="investigatePermits"
+              >
+                <Card class="no-shadow">
+                  <template #content>
+                    <div ref="investigatePermitsContainer">
+                      <div
+                        v-for="(permit, idx) in fields"
+                        :key="idx"
+                        :index="idx"
+                        class="grid grid-cols-3"
+                      >
+                        <div class="col-span-1">
+                          <div class="flex">
                             <Select
+                              class="w-full"
                               :disabled="!editable"
-                              :name="`appliedPermits[${idx}].permitTypeId`"
+                              :name="`investigatePermits[${idx}].permitTypeId`"
                               placeholder="Select Permit type"
                               :options="getPermitTypes"
                               :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                               option-value="permitTypeId"
                               :loading="getPermitTypes === undefined"
                             />
-                          </div>
-                          <InputText
-                            :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
-                            :disabled="!editable"
-                            placeholder="Tracking #"
-                          />
-                          <div class="flex justify-center">
-                            <DatePicker
-                              class="w-full"
-                              :name="`appliedPermits[${idx}].submittedDate`"
-                              :disabled="!editable"
-                              placeholder="Date applied"
-                              :max-date="new Date()"
-                            />
-                            <div class="flex items-center ml-2 mb-4">
+                            <div class="flex items-center ml-2 mb-6">
                               <Button
                                 v-if="editable"
                                 class="p-button-lg p-button-text p-button-danger p-0"
@@ -1297,185 +1393,79 @@ watchEffect(() => {
                             </div>
                           </div>
                         </div>
-                        <Button
-                          v-if="editable"
-                          class="w-full flex justify-center font-bold h-10"
-                          @click="
-                            push({
-                              permitTypeId: undefined,
-                              trackingId: undefined,
-                              submittedDate: undefined
-                            });
-                            nextTick(() => {
-                              const addedPermit = getHTMLElement(
-                                $refs.appliedPermitsContainer as HTMLElement,
-                                'div[name*=\'permitTypeId\'] span[role=\'combobox\']'
-                              );
-                              if (addedPermit) {
-                                addedPermit.focus();
-                              }
-                            });
-                          "
-                        >
-                          <font-awesome-icon
-                            icon="fa-solid fa-plus"
-                            fixed-width
-                          />
-                          Add permit
-                        </Button>
-                      </template>
-                    </Card>
-                  </div>
-                </FieldArray>
-              </template>
-            </Card>
-            <Card>
-              <template #content>
-                <span class="flex font-bold">
-                  <p>
-                    Go to
-                    <a
-                      class="no-underline"
-                      href="https://permitconnectbc.gov.bc.ca/#authorizations"
-                      target="_blank"
-                    >
-                      Permit Connect BC
-                    </a>
-                    to learn more about permits issued by the provincial government
-                  </p>
-                </span>
-              </template>
-            </Card>
-            <Card>
-              <template #title>
-                <div class="flex">
-                  <span
-                    class="section-header"
-                    role="heading"
-                    aria-level="2"
-                  >
-                    {{ t('projectIntakeForm.investigatePermitsCard') }}
-                  </span>
-                  <Tooltip
-                    right
-                    icon="fa-solid fa-circle-question"
-                    :text="t('projectIntakeForm.potentialPermitsTooltip')"
-                  />
-                </div>
-                <Divider type="solid" />
-              </template>
-              <template #content>
-                <FieldArray
-                  v-slot="{ fields, push, remove }"
-                  name="investigatePermits"
-                >
-                  <Card class="no-shadow">
-                    <template #content>
-                      <div ref="investigatePermitsContainer">
-                        <div
-                          v-for="(permit, idx) in fields"
-                          :key="idx"
-                          :index="idx"
-                          class="grid grid-cols-3"
-                        >
-                          <div class="col-span-1">
-                            <div class="flex">
-                              <Select
-                                class="w-full"
-                                :disabled="!editable"
-                                :name="`investigatePermits[${idx}].permitTypeId`"
-                                placeholder="Select Permit type"
-                                :options="getPermitTypes"
-                                :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
-                                option-value="permitTypeId"
-                                :loading="getPermitTypes === undefined"
-                              />
-                              <div class="flex items-center ml-2 mb-6">
-                                <Button
-                                  v-if="editable"
-                                  class="p-button-lg p-button-text p-button-danger p-0"
-                                  aria-label="Delete"
-                                  @click="remove(idx)"
-                                >
-                                  <font-awesome-icon icon="fa-solid fa-trash" />
-                                </Button>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <Button
-                          v-if="editable"
-                          class="w-full flex justify-center font-bold h-10"
-                          @click="
-                            push({ permitTypeId: undefined });
-                            nextTick(() => {
-                              const newPermitDropdown = getHTMLElement(
-                                $refs.investigatePermitsContainer as HTMLElement,
-                                'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
-                              );
-                              if (newPermitDropdown) {
-                                newPermitDropdown.focus();
-                              }
-                            });
-                          "
-                        >
-                          <font-awesome-icon
-                            icon="fa-solid fa-plus"
-                            fixed-width
-                          />
-                          Add permit
-                        </Button>
                       </div>
-                    </template>
-                  </Card>
-                </FieldArray>
-              </template>
-            </Card>
-            <Card>
-              <template #content>
-                <div class="mb-2 flex items-center">
-                  <Checkbox
-                    class="m-0 inline-block"
-                    name="basic.consentToFeedback"
-                    :bold="false"
-                    :disabled="!editable"
-                  />
-                  <span class="font-bold inline">
-                    Check this box if you agree to be contacted for user feedback, helping us improve our digital
-                    service. Your personal information will not be shared with third parties.
-                  </span>
-                </div>
-              </template>
-            </Card>
-
-            <StepperNavigation
-              :editable="editable"
-              :next-disabled="true"
-              :prev-callback="() => activeStep--"
-            >
-              <template #content>
-                <Button
-                  class="p-button-sm"
-                  outlined
-                  label="Save draft"
+                      <Button
+                        v-if="editable"
+                        class="w-full flex justify-center font-bold h-10"
+                        @click="
+                          push({ permitTypeId: undefined });
+                          nextTick(() => {
+                            const newPermitDropdown = getHTMLElement(
+                              $refs.investigatePermitsContainer as HTMLElement,
+                              'div[name*=\'investigatePermits\'] span[role=\'combobox\']'
+                            );
+                            if (newPermitDropdown) {
+                              newPermitDropdown.focus();
+                            }
+                          });
+                        "
+                      >
+                        <font-awesome-icon
+                          icon="fa-solid fa-plus"
+                          fixed-width
+                        />
+                        Add permit
+                      </Button>
+                    </div>
+                  </template>
+                </Card>
+              </FieldArray>
+            </template>
+          </Card>
+          <Card>
+            <template #content>
+              <div class="mb-2 flex items-center">
+                <Checkbox
+                  class="m-0 inline-block"
+                  name="basic.consentToFeedback"
+                  :bold="false"
                   :disabled="!editable"
-                  @click="onSaveDraft(values)"
                 />
-              </template>
-            </StepperNavigation>
-          </StepPanel>
-        </StepPanels>
-      </Stepper>
-      <div class="flex items-center justify-center mt-6">
-        <Button
-          label="Submit"
-          type="submit"
-          icon="pi pi-upload"
-          :disabled="!editable || !isSubmittable"
-        />
-      </div>
-    </Form>
-  </div>
+                <span class="font-bold inline">
+                  Check this box if you agree to be contacted for user feedback, helping us improve our digital service.
+                  Your personal information will not be shared with third parties.
+                </span>
+              </div>
+            </template>
+          </Card>
+
+          <StepperNavigation
+            :editable="editable"
+            :next-disabled="true"
+            :prev-callback="() => activeStep--"
+          >
+            <template #content>
+              <Button
+                class="p-button-sm"
+                outlined
+                label="Save draft"
+                :disabled="!editable"
+                @click="onSaveDraft(values)"
+              />
+            </template>
+          </StepperNavigation>
+        </StepPanel>
+      </StepPanels>
+    </Stepper>
+    <div class="flex items-center justify-center mt-6">
+      <Button
+        label="Submit"
+        type="submit"
+        icon="pi pi-upload"
+        :disabled="!editable || !isSubmittable"
+      />
+    </div>
+  </Form>
 </template>
 
 <style scoped lang="scss">

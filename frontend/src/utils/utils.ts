@@ -67,11 +67,18 @@ export function findIdpConfig(kind: IdentityProviderKind): IdentityProvider | un
  * @param error The error object
  * @param title Optional title. If not given the error message will be used
  * @param options Optional toast message options
+ * @param toast Optional toast instance. Required if called outside of setup()
  */
-export function generalErrorHandler(error: unknown, title?: string, options?: ToastMessageOptions) {
+export function generalErrorHandler(
+  error: unknown,
+  title?: string,
+  options?: ToastMessageOptions,
+  toast?: ReturnType<typeof useToast>
+) {
+  if (!toast) toast = useToast();
   if (isAxiosError(error) || error instanceof Error) {
-    useToast().error(title ?? error.message, title ? error.message : undefined, options);
-  } else useToast().error(String(error), undefined, options);
+    toast.error(title ?? error.message, title ? error.message : undefined, options);
+  } else toast.error(title ?? String(error), title ? String(error) : undefined, options);
 }
 
 /**

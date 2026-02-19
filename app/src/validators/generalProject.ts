@@ -64,7 +64,7 @@ const schema = {
     })
   },
   searchGeneralProjects: {
-    query: Joi.object({
+    body: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),

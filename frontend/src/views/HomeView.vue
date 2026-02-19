@@ -24,10 +24,22 @@ const toElectrification = (): void => {
     else if (authZStore.canNavigate(NavigationPermission.EXT_ELECTRIFICATION))
       router.push({ name: RouteName.EXT_ELECTRIFICATION });
     else {
-      toast.warn(t('homeView.cantNavigate'));
+      toast.warn(t('views.homeView.cantNavigate'));
     }
   } else {
     router.push({ name: RouteName.EXT_ELECTRIFICATION });
+  }
+};
+
+const toGeneral = (): void => {
+  if (authNStore.getIsAuthenticated) {
+    if (authZStore.canNavigate(NavigationPermission.INT_GENERAL)) router.push({ name: RouteName.INT_GENERAL });
+    else if (authZStore.canNavigate(NavigationPermission.EXT_GENERAL)) router.push({ name: RouteName.EXT_GENERAL });
+    else {
+      toast.warn(t('views.homeView.cantNavigate'));
+    }
+  } else {
+    router.push({ name: RouteName.EXT_GENERAL });
   }
 };
 
@@ -36,7 +48,7 @@ const toHousing = (): void => {
     if (authZStore.canNavigate(NavigationPermission.INT_HOUSING)) router.push({ name: RouteName.INT_HOUSING });
     else if (authZStore.canNavigate(NavigationPermission.EXT_HOUSING)) router.push({ name: RouteName.EXT_HOUSING });
     else {
-      toast.warn(t('homeView.cantNavigate'));
+      toast.warn(t('views.homeView.cantNavigate'));
     }
   } else {
     router.push({ name: RouteName.EXT_HOUSING });
@@ -50,9 +62,9 @@ const toHousing = (): void => {
     <div class="poly" />
     <div class="flex items-center justify-start h-full">
       <div class="text-left">
-        <h3>{{ t('homeView.welcome') }}</h3>
-        <h1 class="!mt-0">{{ t('homeView.pcns') }}</h1>
-        <h3 class="mb-7">{{ t('homeView.chooseProject') }}</h3>
+        <h3>{{ t('views.homeView.welcome') }}</h3>
+        <h1 class="!mt-0">{{ t('views.homeView.pcns') }}</h1>
+        <h3 class="mb-7">{{ t('views.homeView.chooseProject') }}</h3>
         <div class="space-x-4">
           <Button @click="toHousing">
             <img
@@ -60,7 +72,7 @@ const toHousing = (): void => {
               src="@/assets/images/H.Land.Button.svg"
               alt="Housing image"
             />
-            {{ t('homeView.housing') }}
+            {{ t('views.homeView.housing') }}
           </Button>
           <Button @click="toElectrification">
             <img
@@ -68,7 +80,15 @@ const toHousing = (): void => {
               src="@/assets/images/E.Land.Button.svg"
               alt="Electrification image"
             />
-            {{ t('homeView.electrification') }}
+            {{ t('views.homeView.electrification') }}
+          </Button>
+          <Button @click="toGeneral">
+            <img
+              class="mr-4"
+              src="@/assets/images/G.Land.Button.svg"
+              alt="General image"
+            />
+            {{ t('views.homeView.general') }}
           </Button>
         </div>
       </div>

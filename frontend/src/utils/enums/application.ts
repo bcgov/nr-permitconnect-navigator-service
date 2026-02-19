@@ -52,6 +52,7 @@ export enum GroupName {
 export enum Initiative {
   PCNS = 'PCNS',
   ELECTRIFICATION = 'ELECTRIFICATION',
+  GENERAL = 'GENERAL',
   HOUSING = 'HOUSING'
 }
 
@@ -83,6 +84,22 @@ export enum RouteName {
   EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY = 'ext_electrification_project_permit_enquiry',
   EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_electrification_project_permit_enquiry_confirmation',
   EXT_ELECTRIFICATION_PROJECT_RELATED_ENQUIRY = 'ext_electrification_project_related_enquiry',
+
+  EXT_GENERAL = 'ext_general',
+  EXT_GENERAL_ENQUIRY_CONFIRMATION = 'ext_general_enquiry_confirmation',
+  EXT_GENERAL_ENQUIRY = 'ext_general_enquiry',
+  EXT_GENERAL_ENQUIRY_INTAKE = 'ext_general_enquiry_intake',
+  EXT_GENERAL_INTAKE = 'ext_general_intake',
+  EXT_GENERAL_INTAKE_CONFIRMATION = 'ext_general_intake_confirmation',
+  EXT_GENERAL_GUIDE = 'ext_general_guide',
+  EXT_GENERAL_PROJECT = 'ext_general_project',
+  EXT_GENERAL_PROJECT_ENQUIRY = 'ext_general_project_enquiry',
+  EXT_GENERAL_PROJECT_ENQUIRY_CONFIRMATION = 'ext_general_project_enquiry_confirmation',
+  EXT_GENERAL_PROJECT_INTAKE = 'ext_general_project_intake',
+  EXT_GENERAL_PROJECT_PERMIT = 'ext_general_project_permit',
+  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY = 'ext_general_project_permit_enquiry',
+  EXT_GENERAL_PROJECT_PERMIT_ENQUIRY_CONFIRMATION = 'ext_general_project_permit_enquiry_confirmation',
+  EXT_GENERAL_PROJECT_RELATED_ENQUIRY = 'ext_general_project_related_enquiry',
 
   EXT_HOUSING = 'ext_housing',
   EXT_HOUSING_ENQUIRY_CONFIRMATION = 'ext_housing_enquiry_confirmation',
@@ -119,6 +136,20 @@ export enum RouteName {
   INT_ELECTRIFICATION_PROJECT_PROPONENT = 'int_electrification_project_proponent',
   INT_ELECTRIFICATION_PROJECT_PROPONENT_PERMIT = 'int_electrification_project_proponent_permit',
   INT_ELECTRIFICATION_USER_MANAGEMENT = 'int_electrification_user_management',
+
+  INT_GENERAL = 'int_general',
+  INT_GENERAL_CONTACT = 'int_general_contact',
+  INT_GENERAL_CONTACT_PAGE = 'int_general_contact_page',
+  INT_GENERAL_ENQUIRY = 'int_general_enquiry',
+  INT_GENERAL_ENQUIRY_NOTE = 'int_general_enquiry_note',
+  INT_GENERAL_PROJECT = 'int_general_project',
+  INT_GENERAL_PROJECT_ADD_AUTHORIZATION = 'int_general_project_add_authorization',
+  INT_GENERAL_PROJECT_AUTHORIZATION = 'int_general_project_authorization',
+  INT_GENERAL_PROJECT_ENQUIRY = 'int_general_project_enquiry',
+  INT_GENERAL_PROJECT_NOTE = 'int_general_project_note',
+  INT_GENERAL_PROJECT_PROPONENT = 'int_general_project_proponent',
+  INT_GENERAL_PROJECT_PROPONENT_PERMIT = 'int_general_project_proponent_permit',
+  INT_GENERAL_USER_MANAGEMENT = 'int_general_user_management',
 
   INT_HOUSING = 'int_housing',
   INT_HOUSING_CONTACT = 'int_housing_contact',

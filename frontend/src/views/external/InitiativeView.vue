@@ -8,7 +8,13 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { electrificationProjectService, enquiryService, housingProjectService, permitService } from '@/services';
+import {
+  electrificationProjectService,
+  enquiryService,
+  generalProjectService,
+  housingProjectService,
+  permitService
+} from '@/services';
 import { useAppStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
@@ -57,6 +63,18 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip')
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  draftableProjectService: generalProjectService,
+  enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
+  enquiryRouteName: RouteName.EXT_GENERAL_ENQUIRY,
+  headerText: t('views.e.initiativeView.general.header'),
+  initiativeRouteName: RouteName.EXT_GENERAL,
+  navigationPermission: NavigationPermission.EXT_GENERAL,
+  projectIntakeRouteName: RouteName.EXT_GENERAL_INTAKE,
+  projectRouteName: RouteName.EXT_GENERAL_PROJECT,
+  projectTooltip: t('views.e.initiativeView.general.projectsTooltip')
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: housingProjectService,
   enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
@@ -76,7 +94,7 @@ const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const authorizations: Ref<Permit[]> = ref([]);
-const drafts: Ref<Draft[]> = ref([]);
+const drafts: Ref<Draft<unknown>[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
@@ -95,27 +113,24 @@ provide(projectIntakeRouteNameKey, provideProjectIntakeRouteName);
 
 // Actions
 async function createIntake() {
-  const contact = useContactStore().getContact;
-  const response = await provideDraftableProjectService.value.updateDraft({
-    data: {
-      contacts: {
-        contactId: contact?.contactId,
-        userId: contact?.userId,
-        contactFirstName: contact?.firstName,
-        contactLastName: contact?.lastName,
-        contactEmail: contact?.email,
-        contactPhoneNumber: contact?.phoneNumber,
-        contactApplicantRelationship: contact?.contactApplicantRelationship,
-        contactPreference: contact?.contactPreference
-      }
-    }
-  });
+  // const contact = useContactStore().getContact;
+  // const response = await provideDraftableProjectService.value.updateDraft({
+  //   data: {
+  //     contacts: {
+  //       contactId: contact?.contactId,
+  //       userId: contact?.userId,
+  //       contactFirstName: contact?.firstName,
+  //       contactLastName: contact?.lastName,
+  //       contactEmail: contact?.email,
+  //       contactPhoneNumber: contact?.phoneNumber,
+  //       contactApplicantRelationship: contact?.contactApplicantRelationship,
+  //       contactPreference: contact?.contactPreference
+  //     }
+  //   }
+  // });
 
   router.push({
-    name: provideProjectIntakeRouteName.value,
-    params: {
-      draftId: response.data.draftId
-    }
+    name: provideProjectIntakeRouteName.value
   });
 }
 
@@ -180,6 +195,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
@@ -248,7 +266,7 @@ onBeforeMount(async () => {
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#drafts' })"
         >
         {{ t('views.e.initiativeView.drafts') }}</router-link>
-        <span v-if="getInitiative === Initiative.HOUSING">
+        <span v-if="getInitiative !== Initiative.ELECTRIFICATION">
           |
           <router-link
             :to="{
@@ -393,7 +411,7 @@ onBeforeMount(async () => {
       Enquiries
     -->
     <div
-      v-if="getInitiative === Initiative.HOUSING"
+      v-if="getInitiative !== Initiative.ELECTRIFICATION"
       class="w-full"
     >
       <div class="flex flex-row items-center w-full justify-between">

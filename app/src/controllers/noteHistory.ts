@@ -230,7 +230,11 @@ async function emailBringForwardNotification(noteHistory: NoteHistory, initiativ
       body = bringForwardEnquiryNotificationTemplate({
         activityId: noteHistory.activityId
       });
-    } else if (resource === Resource.ELECTRIFICATION_PROJECT || resource === Resource.HOUSING_PROJECT) {
+    } else if (
+      [Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, resource === Resource.HOUSING_PROJECT].includes(
+        resource
+      )
+    ) {
       const project = await getProjectByActivityId(tx, noteHistory.activityId);
 
       if (!project) return;

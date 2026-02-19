@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SelectChangeEvent } from 'primevue/select';
 import { useFormValues, useSetFieldValue, useValidateField } from 'vee-validate';
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Divider from '@/components/common/Divider.vue';
@@ -33,6 +33,7 @@ const { editable = true } = defineProps<{
 // Composables
 const { t } = useI18n();
 const values = useFormValues();
+const setAddressSearch = useSetFieldValue('location.addressSearch');
 const setLatitude = useSetFieldValue('location.latitude');
 const setLongitude = useSetFieldValue('location.longitude');
 const setStreetAddress = useSetFieldValue('location.streetAddress');
@@ -133,6 +134,16 @@ function resizeMap() {
 }
 
 defineExpose({ resizeMap, onLatLongInput });
+
+onBeforeMount(async () => {
+  // Force the search bar to load & display the last set text when loading a draft
+  if (values.value.location.addressSearch?.properties?.fullAddress) {
+    await onAddressSearchInput({
+      target: { value: values.value.location.addressSearch.properties.fullAddress }
+    } as IInputEvent);
+    setAddressSearch(values.value.location.addressSearch.properties.fullAddress);
+  }
+});
 </script>
 
 <template>
@@ -176,7 +187,7 @@ defineExpose({ resizeMap, onLatLongInput });
               <div class="grid grid-cols-12 gap-4 nested-grid">
                 <EditableSelect
                   class="col-span-12"
-                  name="addressSearch"
+                  name="location.addressSearch"
                   :get-option-label="getAddressSearchLabel"
                   :options="addressGeocoderFeatures"
                   :placeholder="t('locationCard.addressSearchPlaceholder')"

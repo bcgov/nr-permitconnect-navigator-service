@@ -3,7 +3,7 @@ import { ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Menubar } from '@/lib/primevue';
-import { electrificationProjectService, housingProjectService } from '@/services';
+import { electrificationProjectService, generalProjectService, housingProjectService } from '@/services';
 import { useAppStore, useAuthZStore, useContactStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
@@ -116,6 +116,70 @@ watchEffect(() => {
             label: 'Contact a Navigator',
             mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
             access: [NavigationPermission.EXT_ELECTRIFICATION]
+          }
+        ],
+        public: true
+      }
+    ];
+  } else if (appStore.getInitiative === Initiative.GENERAL) {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'General',
+        items: [
+          {
+            label: 'Submit a general project to the Navigator Service',
+            func: () => createIntake(generalProjectService, RouteName.EXT_GENERAL_INTAKE),
+            access: NavigationPermission.EXT_GENERAL
+          },
+          {
+            label: 'Submit general enquiries',
+            route: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
+            access: NavigationPermission.EXT_GENERAL
+          }
+        ],
+        access: [NavigationPermission.EXT_GENERAL]
+      },
+      {
+        label: 'Submissions',
+        route: RouteName.INT_GENERAL,
+        access: NavigationPermission.INT_GENERAL
+      },
+      {
+        label: 'Contacts',
+        route: RouteName.INT_GENERAL_CONTACT,
+        access: NavigationPermission.INT_CONTACT
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_GENERAL_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      },
+      {
+        label: 'Help',
+        items: [
+          {
+            label: 'User Guide',
+            route: RouteName.EXT_GENERAL_GUIDE
+          },
+          {
+            label: 'Report a problem',
+            mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
+            public: true
+          },
+          {
+            label: 'Contact a Navigator',
+            mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
+            access: [NavigationPermission.EXT_GENERAL]
           }
         ],
         public: true

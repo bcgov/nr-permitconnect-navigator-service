@@ -1,4 +1,5 @@
 import { default as internalElectrificationRoutes } from '@/router/internalElectrification';
+import { default as internalGeneralRoutes } from '@/router/internalGeneral';
 import { default as internalHousingRoutes } from '@/router/internalHousing';
 import { useAppStore } from '@/store';
 import { Zone } from '@/utils/enums/application';
@@ -9,7 +10,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/i',
     beforeEnter: [() => useAppStore().setZone(Zone.INTERNAL)],
-    children: [...internalElectrificationRoutes, ...internalHousingRoutes]
+    children: [...internalElectrificationRoutes, ...internalGeneralRoutes, ...internalHousingRoutes]
   }
 ];
 

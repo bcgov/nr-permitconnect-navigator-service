@@ -1,24 +1,19 @@
 <script setup lang="ts">
-import { useFormValues } from 'vee-validate';
+import { Button, useConfirm } from '@/lib/primevue';
 import { ref } from 'vue';
-import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { object } from 'yup';
 
-import { Button, useConfirm, useToast } from '@/lib/primevue';
-import { enquiryService } from '@/services';
-import { RouteName } from '@/utils/enums/application';
-import { SubmissionType } from '@/utils/enums/projectCommon';
-import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
 import { contactValidator } from '@/validators';
+import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 
-// Composables
-const formValues = useFormValues();
-const { t } = useI18n();
-const router = useRouter();
-const toast = useToast();
+// Props
+const { formValues } = defineProps<{
+  formValues: Record<string, string>;
+}>();
+// Emits
+const emit = defineEmits(['onSubmitAssistance']);
 
 // State
 const showTab: Ref<boolean> = ref(true);
@@ -27,9 +22,10 @@ const showTab: Ref<boolean> = ref(true);
 const confirm = useConfirm();
 const contactSchema = object(contactValidator);
 
-// Check if applicant section is filled
-const checkApplicantValuesValid = (): boolean => {
-  return contactSchema.isValidSync(formValues.value.contacts);
+const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
+  // Check applicant section is filled
+  let applicant = values?.[IntakeFormCategory.CONTACTS];
+  return contactSchema.isValidSync(applicant);
 };
 
 const confirmSubmit = () => {
@@ -39,48 +35,11 @@ const confirmSubmit = () => {
     acceptLabel: 'Confirm',
     rejectLabel: 'Cancel',
     rejectProps: { outlined: true },
-    accept: async () => {
-      await onAssistanceRequest();
+    accept: () => {
+      emit('onSubmitAssistance');
     }
   });
 };
-
-async function onAssistanceRequest() {
-  try {
-    const enquiryData = {
-      basic: {
-        enquiryDescription: t('projectIntakeForm.assistanceMessage'),
-        submissionType: SubmissionType.ASSISTANCE
-      },
-      contact: setEmptyStringsToNull({
-        contactId: formValues.value.contacts.contactId,
-        firstName: formValues.value.contacts.contactFirstName,
-        lastName: formValues.value.contacts.contactLastName,
-        phoneNumber: formValues.value.contacts.contactPhoneNumber,
-        email: formValues.value.contacts.contactEmail,
-        contactApplicantRelationship: formValues.value.contacts.contactApplicantRelationship,
-        contactPreference: formValues.value.contacts.contactPreference
-      })
-    };
-
-    const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
-
-    if (enquiryResponse.activityId) {
-      toast.success('Form saved');
-
-      router.push({
-        name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
-        params: {
-          enquiryId: enquiryResponse.enquiryId
-        }
-      });
-    } else {
-      toast.error('Failed to submit enquiry');
-    }
-  } catch (e) {
-    generalErrorHandler(e, 'Failed to save enquiry');
-  }
-}
 </script>
 
 <template>
@@ -119,7 +78,7 @@ async function onAssistanceRequest() {
         <div class="flex justify-center">
           <Button
             label="Get assistance"
-            :disabled="!checkApplicantValuesValid()"
+            :disabled="!checkApplicantValuesValid(formValues)"
             @click="() => confirmSubmit()"
           />
         </div>

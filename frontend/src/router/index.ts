@@ -73,6 +73,23 @@ export function createProps(route: { query: LocationQuery; params: RouteParamsGe
 export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   const authzStore = useAuthZStore();
 
+  // Electrification
+  if (to.name === RouteName.INT_HOUSING && !authzStore.canNavigate(NavigationPermission.INT_HOUSING)) {
+    return { name: RouteName.EXT_HOUSING };
+  }
+  if (to.name === RouteName.EXT_HOUSING && !authzStore.canNavigate(NavigationPermission.EXT_HOUSING)) {
+    return { name: RouteName.INT_HOUSING };
+  }
+
+  // General
+  if (to.name === RouteName.INT_GENERAL && !authzStore.canNavigate(NavigationPermission.INT_GENERAL)) {
+    return { name: RouteName.EXT_GENERAL };
+  }
+  if (to.name === RouteName.EXT_GENERAL && !authzStore.canNavigate(NavigationPermission.EXT_GENERAL)) {
+    return { name: RouteName.INT_GENERAL };
+  }
+
+  // Housing
   if (to.name === RouteName.INT_HOUSING && !authzStore.canNavigate(NavigationPermission.INT_HOUSING)) {
     return { name: RouteName.EXT_HOUSING };
   }
@@ -172,13 +189,8 @@ export default function getRouter() {
     }
   });
 
-  router.beforeEach(async (to) => {
+  router.beforeEach(async (to, from) => {
     appStore.beginDeterminateLoading();
-
-    // If no router params reset specific stores
-    if (!('enquiryId' in to.params)) useEnquiryStore().reset();
-    if (!('permitId' in to.params)) usePermitStore().reset();
-    if (!('projectId' in to.params)) useProjectStore().reset();
 
     // Backend Redirection Handler
     if (to.query?.r) {
@@ -198,6 +210,15 @@ export default function getRouter() {
         router.push({ name: RouteName.OIDC_LOGIN });
         return;
       }
+    }
+
+    // Reset stores if navigating to a new route
+    // We do not want to reset stores if navigating to the same named route
+    // Typically this means param, query, or hash is being silently updated
+    if (to.name !== from.name) {
+      useEnquiryStore().reset();
+      usePermitStore().reset();
+      useProjectStore().reset();
     }
   });
 

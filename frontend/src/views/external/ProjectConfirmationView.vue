@@ -4,7 +4,7 @@ import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Message } from '@/lib/primevue';
-import { electrificationProjectService, housingProjectService } from '@/services';
+import { electrificationProjectService, generalProjectService, housingProjectService } from '@/services';
 import { useAppStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { generalErrorHandler } from '@/utils/utils';
@@ -38,6 +38,14 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectService: electrificationProjectService
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  backTo: t('views.e.projectConfirmationView.general.backTo'),
+  initiativeRouteName: RouteName.EXT_GENERAL,
+  message: t('views.e.projectConfirmationView.general.message'),
+  projectRouteName: RouteName.EXT_GENERAL_PROJECT,
+  projectService: generalProjectService
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
@@ -59,6 +67,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
