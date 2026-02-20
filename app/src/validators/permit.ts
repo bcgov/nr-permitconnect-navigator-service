@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
+import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
 import { createStamps } from './stamps.ts';
@@ -13,16 +14,7 @@ const sharedPermitSchema = {
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().allow(null),
-  permitNote: Joi.array()
-    .items(
-      Joi.object({
-        permitNoteId: Joi.number().allow(null),
-        permitId: Joi.string().allow(null),
-        note: Joi.string().allow(null),
-        ...createStamps
-      }).allow(null)
-    )
-    .allow(null),
+  permitNote: Joi.array().items(Joi.object(sharedPermitNoteSchema).allow(null)).allow(null),
   permitTracking: permitTrackingSchema,
   needed: Joi.string().max(255).required(),
   state: Joi.string()

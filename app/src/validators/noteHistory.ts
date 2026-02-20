@@ -46,7 +46,7 @@ const schema = {
       noteHistoryId: uuidv4.allow(null),
       resource: Joi.string()
         .required()
-        .valid(...Object.values(Resource)),
+        .valid(Resource.ENQUIRY, Resource.HOUSING_PROJECT, Resource.ELECTRIFICATION_PROJECT),
       shownToProponent: Joi.boolean(),
       title: Joi.string().max(255).required(),
       type: Joi.string().max(255).required()

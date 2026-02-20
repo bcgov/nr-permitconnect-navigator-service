@@ -29,8 +29,8 @@ const electrificationProjectBase = Prisma.validator<Prisma.electrification_proje
 export type ElectrificationProjectBase = Prisma.electrification_projectGetPayload<typeof electrificationProjectBase>;
 export type ElectrificationProject = ElectrificationProjectBase & {
   activity?: Activity;
-  user?: User | null;
   projectId?: string;
+  user?: User | null;
 };
 
 const electrificationProjectCategoryCodeBase =
@@ -62,8 +62,8 @@ const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
 export type HousingProject = HousingProjectBase & {
   activity?: Activity;
-  user?: User | null;
   projectId: string;
+  user?: User | null;
 };
 
 const identityProviderBase = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
