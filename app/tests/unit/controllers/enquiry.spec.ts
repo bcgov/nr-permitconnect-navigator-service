@@ -11,6 +11,7 @@ import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as contactService from '../../../src/services/contact.ts';
+import * as projectService from '../../../src/services/project.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
@@ -20,7 +21,8 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ENQUIRY_1,
-  TEST_ENQUIRY_INTAKE
+  TEST_ENQUIRY_INTAKE,
+  TEST_HOUSING_PROJECT_1
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
@@ -55,6 +57,7 @@ describe('createEnquiryController', () => {
   const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
   const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
   const createEnquirySpy = jest.spyOn(enquiryService, 'createEnquiry');
+  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -74,7 +77,9 @@ describe('createEnquiryController', () => {
         contactId: TEST_CONTACT_1.contactId
       } as ActivityContact
     ]);
+    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
+    getProjectByActivityIdSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
 
     await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);
 
@@ -99,7 +104,7 @@ describe('createEnquiryController', () => {
     ]);
     expect(createEnquirySpy).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
+    expect(res.json).toHaveBeenCalledWith({ ...TEST_ENQUIRY_1, contact: TEST_CONTACT_1 });
   });
 });
 

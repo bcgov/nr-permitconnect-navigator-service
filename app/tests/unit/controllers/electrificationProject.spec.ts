@@ -460,13 +460,16 @@ describe('submitElectrificationProjectDraftController', () => {
       ActivityContactRole.PRIMARY
     );
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_ELECTRIFICATION_PROJECT_1,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        ...TEST_ELECTRIFICATION_PROJECT_1,
+        electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
+        submittedAt: expect.any(Date) as Date,
+        createdAt: expect.any(Date) as Date,
+        createdBy: TEST_CURRENT_CONTEXT.userId
+      })
+    );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
       ...TEST_ELECTRIFICATION_PROJECT_1,

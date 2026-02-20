@@ -812,6 +812,7 @@
       "noteSaved": "Note saved",
       "noteSaveFailed": "Failed to save note",
       "noteReqd": "Note is a required field",
+      "resourceNotDef": "Resource not defined",
       "showProponent": "Show to Proponent",
       "shownToPropBanner": "The title, date, and latest note history will get shared with the proponent. You may turn this off anytime.",
       "titleLong": "Title too long"

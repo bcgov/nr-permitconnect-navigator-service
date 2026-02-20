@@ -1,6 +1,8 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
+import { Resource } from '@/utils/enums/application';
+
 import type { NoteHistory } from '@/types';
 
 const PATH = 'note';
@@ -44,7 +46,7 @@ export default {
    * @function updateNoteHistory
    * @returns {Promise} An axios response
    */
-  async updateNoteHistory(noteHistoryId: string, data: NoteHistory & { note: string }) {
+  async updateNoteHistory(noteHistoryId: string, data: NoteHistory & { note: string; resource: Resource }) {
     return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`, data);
   }
 };

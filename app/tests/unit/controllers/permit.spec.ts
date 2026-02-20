@@ -24,8 +24,8 @@ import {
   getPermitTypesController,
   listPermitsController,
   upsertPermitController,
-  sendPermitUpdateNotifications,
-  sendPermitUpdateEmail
+  sendPermitUpdateEmail,
+  sendPermitUpdateNotifications
 } from '../../../src/controllers/permit.ts';
 import * as permitController from '../../../src/controllers/permit.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -33,11 +33,12 @@ import * as projectService from '../../../src/services/project.ts';
 import * as userService from '../../../src/services/user.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
 import * as emailService from '../../../src/services/email.ts';
+import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
 import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
-import { permitNoteUpdateTemplate, permitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
+import { permitNoteUpdateTemplate, navPermitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
 
 import type { Request, Response } from 'express';
 import type { ListPermitsOptions, Permit, PermitUpdateEmailParams } from '../../../src/types/index.ts';
@@ -192,6 +193,7 @@ describe('listPermitsController', () => {
 
 describe('upsertPermitController', () => {
   const upsertSpy = jest.spyOn(permitService, 'upsertPermit');
+  const getSourceSystemKindsSpy = jest.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
   it('should call services and respond with 200 and result', async () => {
     const now = new Date();
@@ -212,6 +214,7 @@ describe('upsertPermitController', () => {
     };
 
     upsertSpy.mockResolvedValue(TEST_PERMIT_1);
+    getSourceSystemKindsSpy.mockResolvedValue([]);
 
     await upsertPermitController(req as unknown as Request<never, never, Permit>, res as unknown as Response);
 
@@ -221,6 +224,7 @@ describe('upsertPermitController', () => {
       permitId: expect.stringMatching(uuidv4Pattern) as string,
       permitNote: undefined,
       permitTracking: undefined,
+      permitType: undefined,
       createdAt: expect.any(Date) as Date,
       createdBy: TEST_CURRENT_CONTEXT.userId,
       updatedAt: expect.any(Date) as Date,
@@ -236,7 +240,7 @@ describe('sendPermitUpdateEmail', () => {
 
   it('builds the template context and sends an email', async () => {
     (config.get as jest.Mock).mockImplementation((key: string) => {
-      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
     });
 
@@ -285,21 +289,25 @@ describe('sendPermitUpdateEmail', () => {
   });
 });
 
-describe('sendPermitUpdateNotifications', () => {
+describe('createNoteAndSendUpdateEmails', () => {
   const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
   const readUserSpy = jest.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
   const createNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
+  const emailSpy = jest.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
   const sendEmailJobSpy = jest.spyOn(permitController, 'sendPermitUpdateEmail');
 
   beforeEach(() => {
+    emailSpy.mockClear();
+    sendEmailJobSpy.mockClear();
     (config.get as jest.Mock).mockImplementation((key: string) => {
       if (key === 'server.pcns.navEmail') return 'navteam@example.com';
-      if (key === 'frontend.ches.submission.cc') return 'noreply@example.com';
+      if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
     });
 
     getProjectSpy.mockResolvedValue({
       ...TEST_ELECTRIFICATION_PROJECT_1,
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       assignedUserId: TEST_IDIR_USER_1.userId,
       activity: {
         ...TEST_ACTIVITY_ELECTRIFICATION,
@@ -320,11 +328,9 @@ describe('sendPermitUpdateNotifications', () => {
       submittedDate: '2024-01-01'
     };
 
-    await sendPermitUpdateNotifications([permit]);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
-
-    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, TEST_IDIR_USER_1.userId);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(
@@ -346,7 +352,7 @@ describe('sendPermitUpdateNotifications', () => {
       dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
       projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       toEmails: ['navteam@example.com'],
-      emailTemplate: permitStatusUpdateTemplate
+      emailTemplate: navPermitStatusUpdateTemplate
     });
 
     expect(secondJob).toMatchObject({
@@ -362,6 +368,7 @@ describe('sendPermitUpdateNotifications', () => {
   it('skips proponent email when contact email is missing but still sends navigator email', async () => {
     getProjectSpy.mockResolvedValueOnce({
       ...TEST_ELECTRIFICATION_PROJECT_1,
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       assignedUserId: 'user-2',
       activity: {
         ...TEST_ACTIVITY_ELECTRIFICATION,
@@ -384,7 +391,7 @@ describe('sendPermitUpdateNotifications', () => {
       submittedDate: '2024-02-01'
     };
 
-    await sendPermitUpdateNotifications([permit]);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
 
@@ -396,7 +403,7 @@ describe('sendPermitUpdateNotifications', () => {
       dearName: 'Another Navigator',
       projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
       toEmails: ['navteam@example.com'],
-      emailTemplate: permitStatusUpdateTemplate
+      emailTemplate: navPermitStatusUpdateTemplate
     });
   });
 
@@ -417,7 +424,7 @@ describe('sendPermitUpdateNotifications', () => {
       submittedDate: '2024-03-01'
     };
 
-    await sendPermitUpdateNotifications([permit]);
+    await sendPermitUpdateNotifications(permit, true);
 
     expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, permit.activityId);
 
@@ -436,7 +443,7 @@ describe('sendPermitUpdateNotifications', () => {
       dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
       projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
       toEmails: ['navteam@example.com'],
-      emailTemplate: permitStatusUpdateTemplate
+      emailTemplate: navPermitStatusUpdateTemplate
     });
 
     expect(secondJob).toMatchObject({

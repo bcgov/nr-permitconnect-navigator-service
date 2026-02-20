@@ -13,6 +13,7 @@ export interface ProjectStoreState {
   noteHistory: Ref<NoteHistory[]>;
   permits: Ref<Permit[]>;
   project: Ref<Project | undefined>;
+  roadmapNote: Ref<string | undefined>;
 }
 
 export const useProjectStore = defineStore('project', () => {
@@ -23,7 +24,8 @@ export const useProjectStore = defineStore('project', () => {
     relatedEnquiries: ref([]),
     noteHistory: ref([]),
     permits: ref([]),
-    project: ref(undefined)
+    project: ref(undefined),
+    roadmapNote: ref(undefined)
   };
 
   // Getters
@@ -104,7 +106,8 @@ export const useProjectStore = defineStore('project', () => {
     }),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
-    getProject: computed(() => state.project.value)
+    getProject: computed(() => state.project.value),
+    getRoadmapNote: computed(() => state.roadmapNote.value)
   };
 
   // Actions
@@ -203,6 +206,10 @@ export const useProjectStore = defineStore('project', () => {
     state.project.value = data;
   }
 
+  function setRoadmapNote(data: string | undefined) {
+    state.roadmapNote.value = data;
+  }
+
   function reset() {
     state.activityContacts.value = [];
     state.documents.value = [];
@@ -239,6 +246,7 @@ export const useProjectStore = defineStore('project', () => {
     removeRelatedEnquiry,
     setRelatedEnquiries,
     setProject,
+    setRoadmapNote,
     reset
   };
 });

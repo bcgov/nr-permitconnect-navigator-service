@@ -4,6 +4,7 @@ import { activityId, uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
 import { escalationTypeCodes } from '../utils/cache/codes.ts';
 import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon.ts';
+import { Resource } from '../utils/enums/application.ts';
 
 const schema = {
   createNoteHistory: {
@@ -43,6 +44,9 @@ const schema = {
         .allow(null),
       note: Joi.string().allow(null),
       noteHistoryId: uuidv4.allow(null),
+      resource: Joi.string()
+        .required()
+        .valid(Resource.ENQUIRY, Resource.HOUSING_PROJECT, Resource.ELECTRIFICATION_PROJECT),
       shownToProponent: Joi.boolean(),
       title: Joi.string().max(255).required(),
       type: Joi.string().max(255).required()

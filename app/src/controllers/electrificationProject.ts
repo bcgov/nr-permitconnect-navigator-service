@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -24,7 +25,8 @@ import {
 } from '../services/electrificationProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
-import { isTruthy } from '../utils/utils.ts';
+import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
+import { isTruthy, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -61,11 +63,11 @@ const generateElectrificationProjectData = async (
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
-
+  const UUID = uuidv4();
   // Put new electrification project together
   const electrificationProjectData: ElectrificationProject = {
     ...data.project,
-    electrificationProjectId: uuidv4(),
+    electrificationProjectId: UUID,
     activityId: activityId,
     submittedAt: new Date(),
     submissionType: SubmissionType.GUIDANCE,
@@ -239,9 +241,35 @@ export const submitElectrificationProjectDraftController = async (
       return { ...data, contact: contactResponse[0] };
     }
   );
-
+  await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
+
+async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+  const subject = 'Confirmation of Project Submission';
+
+  const body = confirmationTemplateElectrificationSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.ELECTRIFICATION),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.electrificationProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: subject,
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 export const upsertElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;

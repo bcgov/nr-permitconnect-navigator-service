@@ -29,5 +29,11 @@ export default {
       selectedFileIds,
       emailData
     });
+  },
+
+  getRoadmapNote(activityId: string) {
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/note`, {
+      params: { activityId }
+    });
   }
 };

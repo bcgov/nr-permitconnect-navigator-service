@@ -6,11 +6,25 @@ import { getObject } from '../services/coms';
 import { email } from '../services/email';
 import { createNote } from '../services/note';
 import { createNoteHistory } from '../services/noteHistory';
+import { listPermits } from '../services/permit';
+import { getProjectByActivityId } from '../services/project.ts';
 import { Problem } from '../utils';
+import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon';
+import { roadmapTemplate } from '../utils/templates';
+import { description } from '../../package.json';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection';
-import type { Email, EmailAttachment, NoteHistory } from '../types';
+import type { Email, EmailAttachment, NoteHistory, Permit } from '../types';
+
+function getPermitTypeNamesByNeeded(permits: Permit[], permitNeeded: PermitNeeded) {
+  return permits.filter((p) => p.needed === permitNeeded).map((p) => p.permitType?.name);
+}
+
+function getPermitTypeNamesByStage(permits: Permit[], permitStage: PermitStage) {
+  return permits.filter((p) => p.stage === permitStage).map((p) => p.permitType?.name);
+}
 
 /**
  * Send an email with the roadmap data
@@ -94,6 +108,49 @@ export const sendRoadmapController = async (
     } else {
       throw new Problem(500, { detail: 'Failed to send roadmap email.' });
     }
+  });
+  res.status(201).json(response);
+};
+
+/**
+ * Returns roadmap note content
+ * @param req Express Request object
+ * @param res Express Response object
+ */
+export const getRoadmapNoteController = async (
+  req: Request<never, never, never, { activityId: string }>,
+  res: Response
+) => {
+  const response = await transactionWrapper<string>(async (tx: PrismaTransactionClient) => {
+    const project = await getProjectByActivityId(tx, req.query.activityId);
+    const permits = await listPermits(tx, { activityId: req.query.activityId });
+    const primaryContact = project?.activity?.activityContact?.find(
+      (ac) => ac.role === ActivityContactRole.PRIMARY
+    )?.contact;
+
+    const permitStateApplied = getPermitTypeNamesByStage(permits, PermitStage.APPLICATION_SUBMISSION);
+    const permitStateCompleted = getPermitTypeNamesByStage(permits, PermitStage.POST_DECISION);
+    const permitPossiblyNeeded = getPermitTypeNamesByStage(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+      getPermitTypeNamesByNeeded(permits, PermitNeeded.UNDER_INVESTIGATION).includes(value)
+    );
+    const permitStateNew = getPermitTypeNamesByStage(permits, PermitStage.PRE_SUBMISSION).filter((value) =>
+      getPermitTypeNamesByNeeded(permits, PermitNeeded.YES).includes(value)
+    );
+
+    const rodmapNote = roadmapTemplate({
+      contactName:
+        primaryContact?.firstName && primaryContact?.lastName
+          ? `${primaryContact?.firstName} ${primaryContact?.lastName}`
+          : '',
+      projectName: project?.projectName,
+      activityId: project?.activityId,
+      permitStateNew: permitStateNew,
+      permitPossiblyNeeded: permitPossiblyNeeded,
+      permitStateApplied: permitStateApplied,
+      permitStateCompleted: permitStateCompleted,
+      navigatorName: description
+    });
+    return rodmapNote;
   });
   res.status(201).json(response);
 };

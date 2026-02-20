@@ -2,10 +2,13 @@ import Joi from 'joi';
 
 import { uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
+import { createStamps } from './stamps.ts';
 
-const sharedPermitNoteSchema = {
-  permitId: uuidv4.required(),
-  note: Joi.string().required()
+export const sharedPermitNoteSchema = {
+  permitId: uuidv4.allow(null),
+  permitNoteId: uuidv4.allow(null),
+  note: Joi.string().required(),
+  ...createStamps
 };
 
 const schema = {

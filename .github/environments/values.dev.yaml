@@ -4,7 +4,6 @@ config:
   configMap:
     FRONTEND_APIPATH: api/v1
     FRONTEND_CHES_ROADMAP_BCC: NRM.PermittingAndData@gov.bc.ca
-    FRONTEND_CHES_SUBMISSION_CC: NRM.PermittingAndData@gov.bc.ca
     FRONTEND_COMS_APIPATH: https://coms-dev.api.gov.bc.ca/api/v1
     FRONTEND_COMS_BUCKETID: 5aa446ca-23c5-4f3b-9300-d8623bc4d101
     FRONTEND_GEOCODER_APIPATH: https://geocoder.api.gov.bc.ca
@@ -18,6 +17,7 @@ config:
     SERVER_BODYLIMIT: 30mb
     SERVER_CHEFS_APIPATH: https://submit.digital.gov.bc.ca/app/api/v1
     SERVER_CHES_APIPATH: https://ches-dev.api.gov.bc.ca/api/v1
+    SERVER_CHES_SUBMISSION_CC: NRM.PermittingAndData@gov.bc.ca
     SERVER_CHES_TOKENURL: https://dev.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token
     SERVER_DB_PORT: "5432"
     SERVER_ENV: dev

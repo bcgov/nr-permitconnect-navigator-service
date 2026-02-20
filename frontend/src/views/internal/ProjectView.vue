@@ -37,6 +37,7 @@ import {
   housingProjectService,
   noteHistoryService,
   permitService,
+  roadmapService,
   userService
 } from '@/services';
 import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/store';
@@ -209,7 +210,6 @@ onBeforeMount(async () => {
       default:
         throw new Error(t('views.initiativeStateError'));
     }
-
     const project = (await initiativeState.value.projectService.getProject(projectId)).data;
     activityId.value = project.activityId;
     const [documents, notes, permits, relatedEnquiries, contacts] = (
@@ -221,6 +221,7 @@ onBeforeMount(async () => {
         activityContactService.listActivityContacts(project.activityId)
       ])
     ).map((r) => r.data);
+    const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
 
     project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');
     documents.forEach((d: Document) => {
@@ -234,6 +235,7 @@ onBeforeMount(async () => {
     projectStore.setNoteHistory(notes);
     projectStore.setPermits(permits);
     projectStore.setRelatedEnquiries(relatedEnquiries);
+    projectStore.setRoadmapNote(roadMapNote);
 
     liveName.value = project.projectName;
 

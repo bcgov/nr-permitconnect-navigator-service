@@ -30,7 +30,9 @@ async function syncPeachToPcns() {
   if (updatedPermits.length === 0) return;
 
   try {
-    await sendPermitUpdateNotifications(updatedPermits);
+    for (const permit of updatedPermits) {
+      await sendPermitUpdateNotifications(permit, true);
+    }
   } catch (error) {
     log.warn('PEACH sync completed but sending notifications failed', error);
   }

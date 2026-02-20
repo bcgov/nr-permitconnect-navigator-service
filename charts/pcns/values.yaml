@@ -133,7 +133,6 @@ config:
   configMap:
     FRONTEND_APIPATH: api/v1
     FRONTEND_CHES_ROADMAP_BCC: ~
-    FRONTEND_CHES_SUBMISSION_CC: ~
     FRONTEND_COMS_APIPATH: ~
     FRONTEND_COMS_BUCKETID: ~
     FRONTEND_GEOCODER_APIPATH: ~
@@ -148,6 +147,7 @@ config:
     SERVER_CHEFS_APIPATH: ~
 
     SERVER_CHES_APIPATH: ~
+    SERVER_CHES_SUBMISSION_CC: ~
     SERVER_CHES_TOKENURL: ~
 
     SERVER_DB_HOST: ~
@@ -227,7 +227,7 @@ peachSync:
   enabled: true
 
   # -- Cron schedule for PEACH sync
-  schedule: "5 3 * * *"
+  schedule: "5 11 * * *"
 
   # -- Suspend subsequent runs of the CronJob without deleting it
   suspend: false

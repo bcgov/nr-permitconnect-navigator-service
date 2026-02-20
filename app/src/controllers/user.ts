@@ -9,9 +9,9 @@ import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { Group, User, UserSearchParameters } from '../types/index.ts';
 
-export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {
-  type UserWithGroup = User & { groups?: Group[] };
+type UserWithGroup = User & { groups?: Group[] };
 
+export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {
   const response = await transactionWrapper<UserWithGroup[]>(async (tx: PrismaTransactionClient) => {
     const reqGroup = mixedQueryToArray(req.query.group) as GroupName[];
     const reqInitiative = mixedQueryToArray(req.query.initiative) as Initiative[];
@@ -28,40 +28,55 @@ export const searchUsersController = async (req: Request<never, never, never, Us
       active: isTruthy(req.query.active)
     });
 
-    // Inject found users with their groups if necessary
-    let userWithGroups: UserWithGroup[] = response;
-
-    if (reqGroup?.length || isTruthy(req.query.includeUserGroups)) {
-      for (const user of userWithGroups) {
-        user.groups = await getSubjectGroups(tx, user.sub);
-      }
-
-      // Filters users based on groups
-      if (reqGroup?.length) {
-        userWithGroups = userWithGroups.filter((user) =>
-          reqGroup.some((g) => user.groups?.some((ug) => ug.name === g))
-        );
-      }
-
-      // Filters user groups based on initiative
-      if (reqInitiative?.length) {
-        const initiative = (await Promise.all(reqInitiative.map((i) => getInitiative(tx, i)))).flatMap((r) => r);
-        userWithGroups.forEach((user) => {
-          if (user.groups)
-            user.groups = user.groups.filter((ug) => initiative.some((i) => ug.initiativeId === i.initiativeId));
-        });
-      }
-
-      // Remove groups if not requested
-      if (!isTruthy(req.query.includeUserGroups)) {
-        for (const user of userWithGroups) {
-          delete user.groups;
-        }
-      }
-    }
-
-    return userWithGroups;
+    return await getUsersWithGroups(tx, response, {
+      group: reqGroup,
+      initiative: reqInitiative,
+      includeUserGroups: isTruthy(req.query.includeUserGroups)
+    });
   });
 
   res.status(200).json(response);
 };
+
+export async function getUsersWithGroups(
+  tx: PrismaTransactionClient,
+  users: User[],
+  options: {
+    group?: GroupName[];
+    initiative?: Initiative[];
+    includeUserGroups?: boolean;
+  }
+) {
+  // Inject found users with their groups if necessary
+  let userWithGroups: UserWithGroup[] = users;
+
+  if (options.group?.length || isTruthy(options.includeUserGroups)) {
+    for (const user of userWithGroups) {
+      user.groups = await getSubjectGroups(tx, user.sub);
+    }
+
+    // Filters users based on groups
+    if (options.group?.length) {
+      userWithGroups = userWithGroups.filter((user) =>
+        options.group?.some((g) => user.groups?.some((ug) => ug.name === g))
+      );
+    }
+
+    // Filters user groups based on initiative
+    if (options.initiative?.length) {
+      const initiative = (await Promise.all(options.initiative.map((i) => getInitiative(tx, i)))).flatMap((r) => r);
+      userWithGroups.forEach((user) => {
+        if (user.groups)
+          user.groups = user.groups.filter((ug) => initiative.some((i) => ug.initiativeId === i.initiativeId));
+      });
+    }
+
+    // Remove groups if not requested
+    if (!isTruthy(options.includeUserGroups)) {
+      for (const user of userWithGroups) {
+        delete user.groups;
+      }
+    }
+  }
+  return userWithGroups;
+}

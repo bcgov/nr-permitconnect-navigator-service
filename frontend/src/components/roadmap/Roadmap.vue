@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { ref, watchEffect } from 'vue';
+import { ref, watch, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { array, object, string, type InferType } from 'yup';
 
@@ -11,9 +11,8 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
-import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
-import { roadmapTemplate } from '@/utils/templates';
-import { delimitEmails, isDefined, setEmptyStringsToNull } from '@/utils/utils';
+import { ActivityContactRole } from '@/utils/enums/projectCommon';
+import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
@@ -58,7 +57,7 @@ export type FormSchemaType = InferType<typeof formSchema>;
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getPermits, getProject } = storeToRefs(useProjectStore());
+const { getDocuments, getProject } = storeToRefs(useProjectStore());
 const projectStore = useProjectStore();
 
 // State
@@ -97,17 +96,6 @@ const confirmSubmit = (data: GenericObject) => {
   });
 };
 
-function getPermitTypeNamesByStatus(status: string): string[] {
-  return getPermits.value
-    .filter((p) => p.stage === status)
-    .map((p) => p.permitType?.name)
-    .filter(isDefined);
-}
-
-function getPermitTypeNamesByNeeded(needed: string) {
-  return getPermits.value.filter((p) => p.needed === needed).map((p) => p.permitType?.name);
-}
-
 function onFileRemove(document: Document) {
   selectedFiles.value = selectedFiles.value.filter((x) => x.documentId !== document.documentId);
 }
@@ -117,9 +105,6 @@ function onFileSelect(data: Document[]) {
 }
 
 watchEffect(async () => {
-  // Dumb, but need to do something with the ref for it to be watched properly
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const permits = getPermits.value.concat();
   const project = getProject.value;
 
   // Get navigator details
@@ -140,29 +125,8 @@ watchEffect(async () => {
     }
   }
 
-  // Permits
-  const permitStateNew = getPermitTypeNamesByStatus(PermitStage.PRE_SUBMISSION).filter((value) =>
-    getPermitTypeNamesByNeeded(PermitNeeded.YES).includes(value)
-  );
-  const permitPossiblyNeeded = getPermitTypeNamesByStatus(PermitStage.PRE_SUBMISSION).filter((value) =>
-    getPermitTypeNamesByNeeded(PermitNeeded.UNDER_INVESTIGATION).includes(value)
-  );
-  const permitStateApplied = getPermitTypeNamesByStatus(PermitStage.APPLICATION_SUBMISSION);
-  const permitStateCompleted = getPermitTypeNamesByStatus(PermitStage.POST_DECISION);
-
-  // TODO: Remove nullish coalescing operator when prisma db has mappings for housing projects
-  const contact = project?.activity?.activityContact?.[0]?.contact ?? project?.contacts?.[0];
-
-  const body = roadmapTemplate({
-    '{{ contactName }}': contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
-    '{{ projectName }}': project?.projectName,
-    '{{ activityId }}': project?.activityId,
-    '{{ permitStateNew }}': permitStateNew,
-    '{{ permitPossiblyNeeded }}': permitPossiblyNeeded,
-    '{{ permitStateApplied }}': permitStateApplied,
-    '{{ permitStateCompleted }}': permitStateCompleted,
-    '{{ navigatorName }}': navigator.fullName
-  });
+  // Get primary contact
+  const contact = project?.activity?.activityContact?.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact;
 
   const initiative = useAppStore().getInitiative.toLowerCase();
 
@@ -174,13 +138,20 @@ watchEffect(async () => {
     bcc: [bcc],
     subject: `Here is your ${initiative} project's Permit Roadmap`,
     bodyType: 'text',
-    body: body
+    body: projectStore.roadmapNote
   };
 
   formRef.value?.setFieldValue('from', navigator.email);
   formRef.value?.setFieldValue('to', contact?.email);
   formRef.value?.setFieldValue('bcc', bcc);
-  formRef.value?.setFieldValue('body', body);
+  formRef.value?.setFieldValue('body', projectStore.roadmapNote);
+});
+
+watch(getProject, async () => {
+  if (getProject.value?.activityId) {
+    const roadMapNote = (await roadmapService.getRoadmapNote(getProject.value.activityId)).data;
+    projectStore.setRoadmapNote(roadMapNote);
+  }
 });
 </script>
 

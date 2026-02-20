@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
+import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
 import { createStamps } from './stamps.ts';
@@ -13,6 +14,7 @@ const sharedPermitSchema = {
   permitTypeId: Joi.number().max(255).required(),
   activityId: activityId,
   issuedPermitId: Joi.string().allow(null),
+  permitNote: Joi.array().items(Joi.object(sharedPermitNoteSchema).allow(null)).allow(null),
   permitTracking: permitTrackingSchema,
   needed: Joi.string().max(255).required(),
   state: Joi.string()
@@ -34,8 +36,6 @@ const sharedPermitSchema = {
   ...createStamps
 };
 
-export const upsertPermitBodySchema = Joi.object(sharedPermitSchema);
-
 const schema = {
   deletePermit: {
     params: Joi.object({
@@ -54,9 +54,11 @@ const schema = {
     })
   },
   upsertPermit: {
-    body: upsertPermitBodySchema
+    body: Joi.object(sharedPermitSchema)
   }
 };
+
+export const upsertPermitBodySchema = schema.upsertPermit.body;
 
 export default {
   deletePermit: validate(schema.deletePermit),

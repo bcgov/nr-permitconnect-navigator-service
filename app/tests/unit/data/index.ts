@@ -310,6 +310,7 @@ export const TEST_HOUSING_DRAFT: Draft = {
 
 export const TEST_HOUSING_PROJECT_1: HousingProject = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
@@ -369,6 +370,7 @@ export const TEST_HOUSING_PROJECT_1: HousingProject = {
 
 export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802c',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
