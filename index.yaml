@@ -3,6 +3,36 @@ entries:
   nr-permitconnect-navigator-service:
   - apiVersion: v2
     appVersion: 0.9.0
+    created: "2026-02-20T17:35:58.08504229Z"
+    dependencies:
+    - name: patroni
+      repository: https://bcgov.github.io/nr-patroni-chart
+      version: 0.0.4
+    description: PermitConnect Navigator Service
+    digest: 2f06d9e8d2ca04d66fd59c624ceaa3a0d7133377787325323db7b9d311c53eec
+    home: https://bcgov.github.io/nr-permitconnect-navigator-service
+    keywords:
+    - nodejs
+    - typescript
+    - docker
+    - microservice
+    - access-control
+    - object-storage
+    - vue
+    kubeVersion: '>= 1.13.0'
+    maintainers:
+    - email: NRM.PermittingAndData@gov.bc.ca
+      name: NRM Permitting and Data Solutions
+      url: https://github.com/bcgov/nr-permitconnect-navigator-service
+    name: nr-permitconnect-navigator-service
+    sources:
+    - https://github.com/bcgov/nr-permitconnect-navigator-service
+    type: application
+    urls:
+    - https://github.com/bcgov/nr-permitconnect-navigator-service/releases/download/nr-permitconnect-navigator-service-0.0.30/nr-permitconnect-navigator-service-0.0.30.tgz
+    version: 0.0.30
+  - apiVersion: v2
+    appVersion: 0.9.0
     created: "2026-02-04T15:55:43.131115034Z"
     dependencies:
     - name: patroni
@@ -841,4 +871,4 @@ entries:
     urls:
     - https://github.com/bcgov/nr-permitconnect-navigator-service/releases/download/nr-permitconnect-navigator-service-0.0.1/nr-permitconnect-navigator-service-0.0.1.tgz
     version: 0.0.1
-generated: "2026-02-04T15:55:43.131343749Z"
+generated: "2026-02-20T17:35:58.085322092Z"
