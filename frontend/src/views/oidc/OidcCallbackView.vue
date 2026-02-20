@@ -27,8 +27,8 @@ onMounted(async () => {
   }
 
   // Return user back to original login entrypoint if specified
-  const entrypoint = window.sessionStorage.getItem(StorageKey.AUTH);
-  if (entrypoint) window.sessionStorage.removeItem(StorageKey.AUTH);
+  const entrypoint = globalThis.sessionStorage.getItem(StorageKey.AUTH);
+  if (entrypoint) globalThis.sessionStorage.removeItem(StorageKey.AUTH);
   router.replace(entrypoint || '/');
 });
 </script>

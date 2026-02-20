@@ -1,10 +1,10 @@
 import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 
-import { default as externalRoutes } from '@/router/external';
-import { default as internalRoutes } from '@/router/internal';
-import { default as oidcRoutes } from '@/router/oidc';
-import { default as contactRoutes } from '@/router/contact';
+import externalRoutes from '@/router/external';
+import internalRoutes from '@/router/internal';
+import oidcRoutes from '@/router/oidc';
+import contactRoutes from '@/router/contact';
 import { AuthService, contactService, yarsService } from '@/services';
 import {
   useAppStore,
@@ -29,7 +29,7 @@ import type { Contact } from '@/types';
 export function accessHandler(to: RouteLocationNormalizedGeneric) {
   const access = to.meta.access as NavigationPermission[];
 
-  if (access && access.length) {
+  if (access?.length) {
     const authzStore = useAuthZStore();
     if (!authzStore.canNavigate(access)) {
       return { name: RouteName.NOT_FOUND };
@@ -88,7 +88,7 @@ export function entryRedirect(to: RouteLocationNormalizedGeneric) {
 }
 
 function convertRemToPixels(rem: number) {
-  const pixels = rem * parseFloat(getComputedStyle(document.documentElement).fontSize);
+  const pixels = rem * Number.parseFloat(getComputedStyle(document.documentElement).fontSize);
   return pixels || 64;
 }
 
@@ -200,7 +200,7 @@ export default function getRouter() {
     if (to.meta.requiresAuth) {
       const user = await authService.getUser();
       if (!user || user.expired) {
-        window.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
+        globalThis.sessionStorage.setItem(StorageKey.AUTH, `${to.fullPath}`);
         router.push({ name: RouteName.OIDC_LOGIN });
         return;
       }
