@@ -1,5 +1,8 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 import Divider from '@/components/common/Divider.vue';
+import { useFormCategoryErrors } from '@/composables/useFormCategoryErrors';
 
 import type { CallbackFn } from '@/types/index.ts';
 
@@ -7,20 +10,28 @@ import type { CallbackFn } from '@/types/index.ts';
 const {
   index,
   activeStep,
-  clickCallback = () => {},
+  onClickCallback = () => {},
   title,
   icon,
-  errors = false,
-  divider = true
+  divider = true,
+  errorCategories = []
 } = defineProps<{
   index: number;
   activeStep: number;
-  clickCallback?: CallbackFn;
+  onClickCallback?: CallbackFn;
   title: string;
   icon: string;
-  errors?: boolean;
   divider?: boolean;
+  errorCategories?: string[];
 }>();
+
+// Composables
+const { getFormCategoryErrors } = useFormCategoryErrors();
+
+// State
+const errors = computed(
+  () => getFormCategoryErrors().length && errorCategories.some((field) => getFormCategoryErrors().includes(field))
+);
 </script>
 
 <template>
@@ -30,7 +41,7 @@ const {
       :aria-label="`Go to ${title} step`"
       class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
-      @click="clickCallback()"
+      @click="onClickCallback()"
     >
       <span
         aria-hidden="true"

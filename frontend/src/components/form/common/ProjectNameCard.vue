@@ -1,20 +1,36 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Card, Divider } from '@/lib/primevue';
 import { InputText } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
+import { Card, Divider } from '@/lib/primevue';
+import { useFormStore } from '@/store';
+
+import type { ComponentPublicInstance, Ref } from 'vue';
 
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { tab = 0 } = defineProps<{
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
+
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+
+// Actions
+useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <span
         class="section-header"
@@ -33,7 +49,7 @@ const { t } = useI18n();
           name="general.projectName"
           label="Project name - your preferred name for your project"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
         />
         <div class="col-span-6" />
       </div>

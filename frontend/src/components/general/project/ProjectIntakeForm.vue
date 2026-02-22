@@ -1,6 +1,7 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { Form } from 'vee-validate';
-import { computed, onBeforeMount, nextTick, ref, watchEffect } from 'vue';
+import { computed, onBeforeMount, nextTick, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
 
@@ -19,17 +20,17 @@ import {
   AppliedPermitsCard,
   PermitLearnCard,
   InvestigatePermitsCard,
-  FeedbackConsentCard
+  FeedbackConsentCard,
+  SaveDraftButton
 } from '@/components/form/common';
 import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
 import { createProjectIntakeSchema } from '@/validators/general/projectIntakeFormSchema';
 import { Button, Step, StepList, Stepper, StepPanel, StepPanels, useConfirm, useToast } from '@/lib/primevue';
 import { generalProjectService } from '@/services';
-import { useContactStore, useProjectStore } from '@/store';
-
+import { useContactStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
-import { ActivityContactRole, IntakeFormCategory, IntakeState, IntakeType } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, FormState, FormType, IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { GenericObject } from 'vee-validate';
@@ -46,14 +47,11 @@ import type {
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 // Props
-const { project = undefined, editable } = defineProps<{
+const { project = undefined } = defineProps<{
   project?: GeneralProject;
-  editable: boolean;
 }>();
 
 const draft = defineModel<Draft<FormSchemaType>>('draft');
-const intakeState = defineModel<IntakeState>('intakeState');
-const intakeType = defineModel<IntakeType>('intakeType');
 
 // Composables
 const { t } = useI18n();
@@ -63,6 +61,8 @@ const toast = useToast();
 
 // Store
 const contactStore = useContactStore();
+const formStore = useFormStore();
+const { getEditable, getFirstErrorTab } = storeToRefs(formStore);
 
 // State
 const activeStep: Ref<number> = ref(0);
@@ -70,13 +70,7 @@ const autoSaveRef: Ref<InstanceType<typeof FormAutosave> | null> = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const isSubmittable: Ref<boolean> = ref(false);
-const locationRef: Ref<InstanceType<typeof LocationCard> | null> = ref(null);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const validationErrors = computed(() => {
-  // Parse errors from vee-validate into a string[] of category headings
-  if (!formRef?.value?.errors) return [];
-  else return Array.from(new Set(Object.keys(formRef.value.errors).flatMap((x) => x.split('.')[0]!.split('[')[0])));
-});
 const validationSchema = computed(() => {
   return createProjectIntakeSchema(orgBookOptions.value);
 });
@@ -94,27 +88,7 @@ function confirmSubmit(data: GenericObject) {
 }
 
 async function onInvalidSubmit() {
-  switch (validationErrors.value[0]) {
-    case IntakeFormCategory.CONTACTS:
-    case IntakeFormCategory.BASIC:
-      activeStep.value = 0;
-      break;
-
-    case IntakeFormCategory.GENERAL:
-      activeStep.value = 1;
-      break;
-
-    case IntakeFormCategory.LOCATION:
-      activeStep.value = 2;
-      break;
-
-    case IntakeFormCategory.PERMITS:
-    case IntakeFormCategory.APPLIED_PERMITS:
-    case IntakeFormCategory.INVESTIGATE_PERMIS:
-      activeStep.value = 3;
-      break;
-  }
-
+  activeStep.value = getFirstErrorTab.value;
   await nextTick();
   document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
 }
@@ -130,7 +104,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
     });
 
     draft.value = response.data;
-    intakeType.value = IntakeType.DRAFT;
+    formStore.setFormType(FormType.DRAFT);
 
     router.replace({
       params: { draftId: response.data.draftId }
@@ -143,7 +117,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
 }
 
 async function onSubmit(data: FormSchemaType) {
-  intakeState.value = IntakeState.LOCKED;
+  formStore.setFormState(FormState.LOCKED);
 
   try {
     autoSaveRef.value?.stopAutoSave();
@@ -216,7 +190,7 @@ async function onSubmit(data: FormSchemaType) {
     }
   } catch (e) {
     generalErrorHandler(e, 'Failed to save intake', undefined, toast);
-    intakeState.value = IntakeState.UNLOCKED;
+    formStore.setFormState(FormState.UNLOCKED);
   }
 }
 
@@ -310,17 +284,13 @@ onBeforeMount(async () => {
         }
       };
     }
-
-    locationRef.value?.onLatLongInput();
   } catch (e) {
     generalErrorHandler(e, 'Failed to load intake');
     router.replace({ name: RouteName.EXT_GENERAL });
   }
 });
 
-watchEffect(() => {
-  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
-  if (activeStep.value === 2) nextTick().then(() => locationRef?.value?.resizeMap());
+watch(activeStep, () => {
   if (activeStep.value === 3) isSubmittable.value = true;
 });
 </script>
@@ -337,15 +307,15 @@ watchEffect(() => {
     @submit="confirmSubmit"
   >
     <FormNavigationGuard
-      v-if="editable"
+      v-if="getEditable"
       :auto-save-ref="autoSaveRef"
     />
     <FormAutosave
-      v-if="editable"
+      v-if="getEditable"
       ref="autoSaveRef"
       :callback="() => onSaveDraft(values, true)"
     />
-    <ProjectIntakeAssistance v-if="editable && values?.contacts" />
+    <ProjectIntakeAssistance v-if="getEditable && values?.contacts" />
 
     <Stepper :value="activeStep">
       <StepList class="!mb-6">
@@ -356,13 +326,10 @@ watchEffect(() => {
           <StepperHeader
             :index="0"
             :active-step="activeStep"
-            :click-callback="() => (activeStep = 0)"
             title="Basic info"
             icon="fa-user"
-            :errors="
-              validationErrors.includes(IntakeFormCategory.CONTACTS) ||
-              validationErrors.includes(IntakeFormCategory.BASIC)
-            "
+            :error-categories="[IntakeFormCategory.CONTACTS, IntakeFormCategory.BASIC]"
+            @click-callback="() => (activeStep = 0)"
           />
         </Step>
         <Step
@@ -372,10 +339,10 @@ watchEffect(() => {
           <StepperHeader
             :index="1"
             :active-step="activeStep"
-            :click-callback="() => (activeStep = 1)"
             title="Project"
             icon="fa-house"
-            :errors="validationErrors.includes(IntakeFormCategory.GENERAL)"
+            :error-categories="[IntakeFormCategory.GENERAL]"
+            @click-callback="() => (activeStep = 1)"
           />
         </Step>
         <Step
@@ -385,10 +352,10 @@ watchEffect(() => {
           <StepperHeader
             :index="2"
             :active-step="activeStep"
-            :click-callback="() => (activeStep = 2)"
             title="Location"
             icon="fa-location-dot"
-            :errors="validationErrors.includes(IntakeFormCategory.LOCATION)"
+            :error-categories="[IntakeFormCategory.LOCATION]"
+            @click-callback="() => (activeStep = 2)"
           />
         </Step>
         <Step
@@ -398,14 +365,11 @@ watchEffect(() => {
           <StepperHeader
             :index="3"
             :active-step="activeStep"
-            :click-callback="() => (activeStep = 3)"
             title="Permits & Reports"
             icon="fa-file"
-            :errors="
-              validationErrors.includes(IntakeFormCategory.PERMITS) ||
-              validationErrors.includes(IntakeFormCategory.APPLIED_PERMITS)
-            "
+            :error-categories="[IntakeFormCategory.PERMITS, IntakeFormCategory.APPLIED_PERMITS]"
             :divider="false"
+            @click-callback="() => (activeStep = 3)"
           />
         </Step>
       </StepList>
@@ -414,104 +378,76 @@ watchEffect(() => {
       <StepPanels>
         <StepPanel :value="0">
           <CollectionDisclaimer />
-          <ValidationBanner :validation-errors="validationErrors" />
+          <ValidationBanner />
           <ContactCardIntakeForm
-            :editable="editable"
-            :initial-form-values="initialFormValues"
+            :initial-form-values="initialFormValues.contacts"
+            :tab="0"
           />
           <RegisteredBusinessCard
             v-model:org-book-options="orgBookOptions"
-            :editable="editable"
+            :tab="0"
           />
           <StepperNavigation
-            :editable="editable"
             :next-callback="() => activeStep++"
             :prev-disabled="true"
           >
             <template #content>
-              <Button
-                class="p-button-sm"
-                outlined
-                label="Save draft"
-                :disabled="!editable"
-                @click="onSaveDraft(values)"
-              />
+              <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
           </StepperNavigation>
         </StepPanel>
 
         <!-- Project -->
         <StepPanel :value="1">
-          <ValidationBanner :validation-errors="validationErrors" />
-          <ProjectNameCard :editable="editable" />
+          <ValidationBanner />
+          <ProjectNameCard :tab="1" />
           <ProjectDescriptionCard
             :activity-id="draft?.activityId ?? project?.activityId"
-            :editable="editable"
+            :tab="1"
           />
           <StepperNavigation
-            :editable="editable"
             :next-callback="() => activeStep++"
             :prev-callback="() => activeStep--"
           >
             <template #content>
-              <Button
-                class="p-button-sm"
-                outlined
-                label="Save draft"
-                :disabled="!editable"
-                @click="onSaveDraft(values)"
-              />
+              <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
           </StepperNavigation>
         </StepPanel>
 
         <!-- Location -->
         <StepPanel :value="2">
-          <ValidationBanner :validation-errors="validationErrors" />
-          <NaturalDisasterCard :editable="editable" />
+          <ValidationBanner />
+          <NaturalDisasterCard :tab="2" />
           <LocationCard
-            ref="locationRef"
-            :editable="editable"
+            :active-step="activeStep"
+            :tab="2"
           />
-          <LocationAdditionalCard :editable="editable" />
-          <LocationDescriptionCard :editable="editable" />
+          <LocationAdditionalCard :tab="2" />
+          <LocationDescriptionCard :tab="2" />
           <StepperNavigation
-            :editable="editable"
             :next-callback="() => activeStep++"
             :prev-callback="() => activeStep--"
           >
             <template #content>
-              <Button
-                class="p-button-sm"
-                outlined
-                label="Save draft"
-                :disabled="!editable"
-                @click="onSaveDraft(values)"
-              />
+              <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
           </StepperNavigation>
         </StepPanel>
 
         <!-- Permits & Reports -->
         <StepPanel :value="3">
-          <ValidationBanner :validation-errors="validationErrors" />
-          <AppliedPermitsCard :editable="editable" />
-          <PermitLearnCard :editable="editable" />
-          <InvestigatePermitsCard :editable="editable" />
-          <FeedbackConsentCard :editable="editable" />
+          <ValidationBanner />
+          <AppliedPermitsCard :tab="3" />
+          <PermitLearnCard />
+          <InvestigatePermitsCard :tab="3" />
+          <FeedbackConsentCard :tab="3" />
           <StepperNavigation
-            :editable="editable"
             :next-disabled="true"
             :prev-callback="() => activeStep--"
           >
             <template #content>
-              <Button
-                class="p-button-sm"
-                outlined
-                label="Save draft"
-                :disabled="!editable"
-                @click="onSaveDraft(values)"
-              />
+              <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
           </StepperNavigation>
         </StepPanel>
@@ -522,7 +458,7 @@ watchEffect(() => {
         label="Submit"
         type="submit"
         icon="pi pi-upload"
-        :disabled="!editable || !isSubmittable"
+        :disabled="!getEditable || !isSubmittable"
       />
     </div>
   </Form>

@@ -1,24 +1,27 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useFormValues, useSetFieldValue } from 'vee-validate';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Tooltip from '@/components/common/Tooltip.vue';
 import { AutoComplete, InputText, RadioList } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card, Divider } from '@/lib/primevue';
 import { externalApiService } from '@/services';
-import { useContactStore } from '@/store';
+import { useContactStore, useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/housing'; // TODO: Shared list
 import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/housing'; // TODO: Shared enum
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
+import type { ComponentPublicInstance, Ref } from 'vue';
 import type { OrgBookOption } from '@/types';
 
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { tab = 0 } = defineProps<{
+  tab?: number;
 }>();
 
 const orgBookOptions = defineModel<OrgBookOption[]>('orgBookOptions');
@@ -31,7 +34,12 @@ const setRegisteredName = useSetFieldValue('basic.registeredName');
 const setRegisteredId = useSetFieldValue('basic.registeredId');
 
 // Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
 const { getContact } = storeToRefs(useContactStore());
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 
 // Actions
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
@@ -46,10 +54,12 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
       }));
   }
 }
+
+useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <span
         class="section-header"
@@ -66,7 +76,7 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
           class="col-span-12"
           name="basic.projectApplicantType"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :options="PROJECT_APPLICANT_LIST"
           @on-change="
             (e: string) => {
@@ -92,7 +102,7 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
             class="col-span-12 mt-2 pl-0"
             name="basic.isDevelopedInBc"
             :bold="false"
-            :disabled="!editable"
+            :disabled="!getEditable"
             :options="YES_NO_LIST"
             @on-change="
               () => {
@@ -106,11 +116,11 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
               class="col-span-6 mt-4 pl-0"
               name="basic.registeredName"
               :bold="false"
-              :disabled="!editable"
+              :disabled="!getEditable"
               :editable="true"
               :placeholder="'Type to search the B.C registered name'"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
-              :suggestions="orgBookOptions"
+              :suggestions="orgBookOptions ?? []"
               @on-complete="onRegisteredNameInput"
               @on-select="
                 (orgBookOption: OrgBookOption) => {
@@ -130,7 +140,7 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
             name="basic.registeredName"
             :placeholder="'Type the business/company/organization name'"
             :bold="false"
-            :disabled="!editable"
+            :disabled="!getEditable"
             @on-change="setRegisteredId(null)"
           />
         </span>

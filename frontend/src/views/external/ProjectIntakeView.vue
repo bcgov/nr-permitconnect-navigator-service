@@ -8,9 +8,9 @@ import { default as ElectrificationProjectIntakeForm } from '@/components/electr
 import { default as GeneralProjectIntakeForm } from '@/components/general/project/ProjectIntakeForm.vue';
 import { default as HousingProjectIntakeForm } from '@/components/housing/project/ProjectIntakeForm.vue';
 import { documentService, generalProjectService, permitService } from '@/services';
-import { useAppStore, usePermitStore, useProjectStore } from '@/store';
+import { useAppStore, useFormStore, usePermitStore, useProjectStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { IntakeState, IntakeType } from '@/utils/enums/projectCommon';
+import { FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -46,15 +46,13 @@ const { t } = useI18n();
 const route = useRoute();
 
 // Store
+const formStore = useFormStore();
 const projectStore = useProjectStore();
 const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const draft: Ref<Draft<FormSchemaType> | undefined> = ref(undefined);
 const project: Ref<GeneralProject | undefined> = ref(undefined);
-const editable = computed(() => intakeType.value !== IntakeType.PROJECT && intakeState.value === IntakeState.UNLOCKED);
-const intakeType: Ref<IntakeType> = ref(IntakeType.NEW);
-const intakeState: Ref<IntakeState> = ref(IntakeState.UNLOCKED);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
@@ -74,8 +72,8 @@ async function loadDraft() {
   });
   projectStore.setDocuments(documents);
 
-  intakeState.value = IntakeState.UNLOCKED;
-  intakeType.value = IntakeType.DRAFT;
+  formStore.setFormType(FormType.DRAFT);
+  formStore.setFormState(FormState.UNLOCKED);
 }
 
 /**
@@ -96,16 +94,16 @@ async function loadProject() {
   projectStore.setPermits(permits);
 
   // Disallow form editing for submitted intake
-  intakeState.value = IntakeState.LOCKED;
-  intakeType.value = IntakeType.PROJECT;
+  formStore.setFormType(FormType.SUBMISSION);
+  formStore.setFormState(FormState.LOCKED);
 }
 
 /**
  * Load data for new submission
  **/
 async function loadNewSubmission() {
-  intakeState.value = IntakeState.UNLOCKED;
-  intakeType.value = IntakeType.NEW;
+  formStore.setFormType(FormType.NEW);
+  formStore.setFormState(FormState.UNLOCKED);
 }
 
 onBeforeMount(async () => {
@@ -165,10 +163,7 @@ onBeforeMount(async () => {
       <GeneralProjectIntakeForm
         v-if="getInitiative === Initiative.GENERAL"
         v-model:draft="draft"
-        v-model:intake-state="intakeState"
-        v-model:intake-type="intakeType"
         :project="project"
-        :editable="editable"
       />
       <HousingProjectIntakeForm
         v-if="getInitiative === Initiative.HOUSING"

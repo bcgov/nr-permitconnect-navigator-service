@@ -1,28 +1,41 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { InputMask, InputText, Select } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card } from '@/lib/primevue';
+import { useFormStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
-import type { DeepPartial } from '@/types';
-import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectIntakeSchema';
-import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
+import type { ComponentPublicInstance, Ref } from 'vue';
+import type { ContactSchemaType } from '@/validators/contact';
 
 // Props
-const { editable = true, initialFormValues } = defineProps<{
-  editable?: boolean;
-  initialFormValues: DeepPartial<ElectrificationFormSchemaType> | DeepPartial<HousingFormSchemaType>;
+const { initialFormValues = undefined, tab = 0 } = defineProps<{
+  initialFormValues?: Partial<ContactSchemaType>;
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
+
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+
+// Actions
+useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex">
         <span
@@ -46,39 +59,39 @@ const { t } = useI18n();
           :name="`contacts.contactFirstName`"
           label="First name"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
+          :disabled="!!initialFormValues?.contactFirstName || !getEditable"
         />
         <InputText
           :name="`contacts.contactLastName`"
           label="Last name"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
+          :disabled="!!initialFormValues?.contactLastName || !getEditable"
         />
         <InputMask
           :name="`contacts.contactPhoneNumber`"
           mask="(999) 999-9999"
           label="Phone number"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
+          :disabled="!!initialFormValues?.contactPhoneNumber || !getEditable"
         />
         <InputText
           :name="`contacts.contactEmail`"
           label="Email"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
+          :disabled="!!initialFormValues?.contactEmail || !getEditable"
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"
           label="Relationship to project"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactApplicantRelationship || !editable"
+          :disabled="!!initialFormValues?.contactApplicantRelationship || !getEditable"
           :options="PROJECT_RELATIONSHIP_LIST"
         />
         <Select
           :name="`contacts.contactPreference`"
           label="Preferred contact method"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactPreference || !editable"
+          :disabled="!!initialFormValues?.contactPreference || !getEditable"
           :options="CONTACT_PREFERENCE_LIST"
         />
       </div>
