@@ -1,23 +1,38 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Divider from '@/components/common/Divider.vue';
 import { RadioList } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card } from '@/lib/primevue';
-
+import { useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 
+import type { ComponentPublicInstance, Ref } from 'vue';
+
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { tab = 0 } = defineProps<{
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
+
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+
+// Actions
+useFormErrorWatcher(formRef, 'NaturalDisasterCard', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex">
         <span
@@ -36,7 +51,7 @@ const { t } = useI18n();
           class="col-span-12"
           name="location.naturalDisaster"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :options="YES_NO_LIST"
         />
       </div>

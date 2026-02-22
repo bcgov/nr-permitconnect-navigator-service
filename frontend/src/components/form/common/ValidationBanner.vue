@@ -1,20 +1,21 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
+import { useFormCategoryErrors } from '@/composables/useFormCategoryErrors';
 import { Message } from '@/lib/primevue';
 
-// Props
-const { validationErrors } = defineProps<{
-  validationErrors: (string | undefined)[];
-}>();
-
 // Composables
+const { getFormCategoryErrors } = useFormCategoryErrors();
 const { t } = useI18n();
+
+// State
+const hasErrors = computed(() => getFormCategoryErrors().length);
 </script>
 
 <template>
   <Message
-    v-if="validationErrors.length"
+    v-if="hasErrors"
     severity="error"
     icon="pi pi-exclamation-circle"
     :closable="false"

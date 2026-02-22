@@ -5,19 +5,33 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import { TextArea } from '@/components/form';
 import { Card, Divider } from '@/lib/primevue';
+import { ref, type ComponentPublicInstance, type Ref } from 'vue';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
+import { useFormStore } from '@/store';
+import { storeToRefs } from 'pinia';
 
 // Props
-const { activityId = undefined, editable = true } = defineProps<{
+const { activityId = undefined, tab = 0 } = defineProps<{
   activityId?: string;
-  editable?: boolean;
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
+
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+
+// Actions
+useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <span
         class="section-header"
@@ -46,7 +60,7 @@ const { t } = useI18n();
         class="col-span-12 mb-0 pb-0"
         name="general.projectDescription"
         placeholder="Provide us with additional information - short description about the project and/or project website link"
-        :disabled="!editable"
+        :disabled="!getEditable"
       />
       <!-- eslint-enable max-len -->
       <label class="col-span-12 mt-0 pt-0">
@@ -62,7 +76,7 @@ const { t } = useI18n();
       </label>
       <AdvancedFileUpload
         :activity-id="activityId"
-        :disabled="!editable"
+        :disabled="!getEditable"
       />
     </template>
   </Card>
