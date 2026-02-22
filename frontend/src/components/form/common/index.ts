@@ -12,4 +12,5 @@ export { default as PermitLearnCard } from './PermitLearnCard.vue';
 export { default as ProjectDescriptionCard } from './ProjectDescriptionCard.vue';
 export { default as ProjectNameCard } from './ProjectNameCard.vue';
 export { default as RegisteredBusinessCard } from './RegisteredBusinessCard.vue';
+export { default as SaveDraftButton } from './SaveDraftButton.vue';
 export { default as ValidationBanner } from './ValidationBanner.vue';

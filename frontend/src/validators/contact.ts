@@ -1,4 +1,4 @@
-import { string } from 'yup';
+import { string, object, type InferType } from 'yup';
 
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { emailValidator } from '@/validators/common';
@@ -13,3 +13,7 @@ const contact = {
 };
 
 export default contact;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const yupContact = object({ ...contact });
+export type ContactSchemaType = InferType<typeof yupContact>;

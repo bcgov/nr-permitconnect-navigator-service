@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick } from 'vue';
+
 import { Button } from '@/lib/primevue';
 
 import type { CallbackFn } from '@/types';

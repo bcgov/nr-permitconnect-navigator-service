@@ -1,22 +1,24 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { FieldArray, useFormValues, useSetFieldValue } from 'vee-validate';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Tooltip from '@/components/common/Tooltip.vue';
 import { InputText, DatePicker, RadioList, Select } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card, Button, Divider } from '@/lib/primevue';
-import { usePermitStore } from '@/store';
+import { useFormStore, usePermitStore } from '@/store';
 import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { BasicResponse } from '@/utils/enums/application';
 import { getHTMLElement } from '@/utils/utils';
 
+import type { ComponentPublicInstance, Ref } from 'vue';
 import type { PermitType } from '@/types';
 
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { tab } = defineProps<{
+  tab: number;
 }>();
 
 // Composables
@@ -24,8 +26,13 @@ const { t } = useI18n();
 const values = useFormValues();
 const setAppliedPermits = useSetFieldValue('appliedPermits');
 
-// State
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
 const { getPermitTypes } = storeToRefs(usePermitStore());
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 
 // Actions
 function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value: unknown) => void) {
@@ -41,10 +48,12 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value
     setAppliedPermits(undefined);
   }
 }
+
+useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex">
         <span
@@ -71,7 +80,7 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value
         <RadioList
           name="permits.hasAppliedProvincialPermits"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :options="YES_NO_UNSURE_LIST"
           @on-change="(e: string) => onPermitsHasAppliedChange(e, fields.length, push)"
         />
@@ -101,7 +110,7 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value
                     :name="`appliedPermits[${idx}].permitId`"
                   />
                   <Select
-                    :disabled="!editable"
+                    :disabled="!getEditable"
                     :name="`appliedPermits[${idx}].permitTypeId`"
                     placeholder="Select Permit type"
                     :options="getPermitTypes"
@@ -112,20 +121,20 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value
                 </div>
                 <InputText
                   :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   placeholder="Tracking #"
                 />
                 <div class="flex justify-center">
                   <DatePicker
                     class="w-full"
                     :name="`appliedPermits[${idx}].submittedDate`"
-                    :disabled="!editable"
+                    :disabled="!getEditable"
                     placeholder="Date applied"
                     :max-date="new Date()"
                   />
                   <div class="flex items-center ml-2 mb-4">
                     <Button
-                      v-if="editable"
+                      v-if="getEditable"
                       class="p-button-lg p-button-text p-button-danger p-0"
                       aria-label="Delete"
                       @click="remove(idx)"
@@ -136,7 +145,7 @@ function onPermitsHasAppliedChange(e: string, fieldsLength: number, push: (value
                 </div>
               </div>
               <Button
-                v-if="editable"
+                v-if="getEditable"
                 class="w-full flex justify-center font-bold h-10"
                 @click="
                   push({
