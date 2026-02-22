@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { SelectChangeEvent } from 'primevue/select';
+import { storeToRefs } from 'pinia';
 import { useFormValues, useSetFieldValue, useValidateField } from 'vee-validate';
 import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
@@ -8,13 +8,16 @@ import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { EditableSelect, InputNumber, InputText, RadioList } from '@/components/form';
 import Map from '@/components/housing/maps/Map.vue';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Button, Card } from '@/lib/primevue';
 import { externalApiService } from '@/services';
+import { useFormStore } from '@/store';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/housing';
 import { ProjectLocation } from '@/utils/enums/housing';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { GeoJSON } from 'geojson';
-import type { Ref } from 'vue';
+import type { ComponentPublicInstance, Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { GeocoderFeature } from '@/types';
 
@@ -26,8 +29,8 @@ interface PinUpdateEvent {
 }
 
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { tab = 0 } = defineProps<{
+  tab?: number;
 }>();
 
 // Composables
@@ -43,7 +46,12 @@ const setGeoJson = useSetFieldValue('location.geoJson');
 const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
 
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
 // State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
@@ -135,6 +143,8 @@ function resizeMap() {
 
 defineExpose({ resizeMap, onLatLongInput });
 
+useFormErrorWatcher(formRef, 'LocationCard', tab);
+
 onBeforeMount(async () => {
   // Force the search bar to load & display the last set text when loading a draft
   if (values.value.location.addressSearch?.properties?.fullAddress) {
@@ -147,7 +157,7 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex flex-grow-1">
@@ -174,7 +184,7 @@ onBeforeMount(async () => {
           class="col-span-12"
           name="location.projectLocation"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :options="PROJECT_LOCATION_LIST"
           @on-click="handleProjectLocationClick"
         />
@@ -192,7 +202,7 @@ onBeforeMount(async () => {
                   :options="addressGeocoderFeatures"
                   :placeholder="t('locationCard.addressSearchPlaceholder')"
                   :bold="false"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   @on-input="onAddressSearchInput"
                   @on-change="onAddressSelect"
                 />
@@ -256,7 +266,7 @@ onBeforeMount(async () => {
                 <InputNumber
                   class="col-span-4"
                   name="location.latitude"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   :help-text="t('locationCard.provideLatitude')"
                   :placeholder="t('locationCard.latitudePlaceholder')"
                   @keyup.enter="onLatLongInput"
@@ -264,7 +274,7 @@ onBeforeMount(async () => {
                 <InputNumber
                   class="col-span-4"
                   name="location.longitude"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   :help-text="t('locationCard.provideLongitude')"
                   :placeholder="t('locationCard.longitudePlaceholder')"
                   @keyup.enter="onLatLongInput"
@@ -273,7 +283,7 @@ onBeforeMount(async () => {
                   <Button
                     class="lat-long-btn"
                     :label="t('locationCard.showOnMap')"
-                    :disabled="!editable"
+                    :disabled="!getEditable"
                     @click="onLatLongInput"
                   />
                 </div>
@@ -290,7 +300,7 @@ onBeforeMount(async () => {
       <div v-if="values.location?.projectLocation !== ProjectLocation.PIN_OR_DRAW">
         <Map
           ref="mapRef"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :latitude="mapLatitude"
           :longitude="mapLongitude"
         />
@@ -299,7 +309,7 @@ onBeforeMount(async () => {
         <Map
           ref="mapRef"
           :pin-or-draw="true"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :geo-json-data="values.location.geoJson"
           :latitude="mapLatitude"
           :longitude="mapLongitude"
