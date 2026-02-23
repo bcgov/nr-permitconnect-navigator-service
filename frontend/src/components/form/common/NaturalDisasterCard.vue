@@ -40,7 +40,7 @@ useFormErrorWatcher(formRef, 'NaturalDisasterCard', tab);
           role="heading"
           aria-level="2"
         >
-          {{ t('projectIntakeForm.naturalDisasterCard') }}
+          {{ t('naturalDisasterCard.header') }}
         </span>
       </div>
       <Divider type="solid" />

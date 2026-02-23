@@ -38,14 +38,14 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
         role="heading"
         aria-level="2"
       >
-        {{ t('projectIntakeForm.projectDescriptionCard') }}
+        {{ t('projectDescriptionCard.header') }}
       </span>
       <Divider type="solid" />
     </template>
     <template #content>
       <div class="col-span-12 my-0 py-0">
         <div class="flex items-center">
-          <label>Provide additional information</label>
+          <label>{{ t('projectDescriptionCard.labels.projectDescription') }}</label>
           <Tooltip
             class="pl-2 mb-2"
             right
@@ -54,26 +54,28 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
           />
         </div>
       </div>
-
-      <!-- eslint-disable max-len -->
       <TextArea
         class="col-span-12 mb-0 pb-0"
         name="general.projectDescription"
-        placeholder="Provide us with additional information - short description about the project and/or project website link"
+        :placeholder="t('projectDescriptionCard.placeholders.projectDescription')"
         :disabled="!getEditable"
       />
-      <!-- eslint-enable max-len -->
-      <label class="col-span-12 mt-0 pt-0">
-        Upload documents about your project (pdfs, maps,
-        <a
-          href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
-          target="_blank"
-          class="text-blue-500 underline"
-        >
-          shape files
-        </a>
-        , etc)
-      </label>
+      <i18n-t
+        keypath="projectDescriptionCard.upload"
+        tag="label"
+        class="col-span-12 mt-0 pt-0"
+        scope="global"
+      >
+        <template #shapeLink>
+          <a
+            href="https://portal.nrs.gov.bc.ca/documents/10184/0/SpatialFileFormats.pdf/39b29b91-d2a7-b8d1-af1b-7216f8db38b4"
+            target="_blank"
+            class="text-blue-500 underline"
+          >
+            {{ t('projectDescriptionCard.links.shapeFiles') }}
+          </a>
+        </template>
+      </i18n-t>
       <AdvancedFileUpload
         :activity-id="activityId"
         :disabled="!getEditable"

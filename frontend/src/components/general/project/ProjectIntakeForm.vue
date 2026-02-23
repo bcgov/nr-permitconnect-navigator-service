@@ -78,10 +78,10 @@ const validationSchema = computed(() => {
 // Actions
 function confirmSubmit(data: GenericObject) {
   confirm.require({
-    message: 'Are you sure you wish to submit this form?',
-    header: 'Please confirm submission',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('projectIntakeForm.submit.message'),
+    header: t('projectIntakeForm.submit.header'),
+    acceptLabel: t('ui.actions.confirm'),
+    rejectLabel: t('ui.actions.cancel'),
     rejectProps: { outlined: true },
     accept: () => onSubmit(data as FormSchemaType)
   });
@@ -110,9 +110,10 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
       params: { draftId: response.data.draftId }
     });
 
-    if (showToast) toast.success(isAutoSave ? 'Draft autosaved' : 'Draft saved');
+    if (showToast)
+      toast.success(isAutoSave ? t('projectIntakeForm.draft.autosaved') : t('projectIntakeForm.draft.saved'));
   } catch (e) {
-    generalErrorHandler(e, 'Failed to save draft', undefined, toast);
+    generalErrorHandler(e, t('projectIntakeForm.draft.saveFailed'), undefined, toast);
   }
 }
 
@@ -186,17 +187,17 @@ async function onSubmit(data: FormSchemaType) {
         }
       });
     } else {
-      throw new Error('Failed to retrieve correct draft data');
+      throw new Error(t('projectIntakeForm.submit.badResponse'));
     }
   } catch (e) {
-    generalErrorHandler(e, 'Failed to save intake', undefined, toast);
+    generalErrorHandler(e, t('projectIntakeForm.submit.saveFailed'), undefined, toast);
     formStore.setFormState(FormState.UNLOCKED);
   }
 }
 
 onBeforeMount(async () => {
   try {
-    if (draft.value && project) throw new Error('Draft & Project supplied');
+    if (draft.value && project) throw new Error(t('projectIntakeForm.load.tooManyProps'));
 
     if (draft.value) {
       initialFormValues.value = {
@@ -285,7 +286,7 @@ onBeforeMount(async () => {
       };
     }
   } catch (e) {
-    generalErrorHandler(e, 'Failed to load intake');
+    generalErrorHandler(e, t('projectIntakeForm.load.failed'));
     router.replace({ name: RouteName.EXT_GENERAL });
   }
 });
@@ -326,7 +327,7 @@ watch(activeStep, () => {
           <StepperHeader
             v-model:active-step="activeStep"
             :index="0"
-            title="Basic info"
+            :title="t('projectIntakeForm.headers.basic')"
             icon="fa-user"
             :error-categories="[IntakeFormCategory.CONTACTS, IntakeFormCategory.BASIC]"
           />
@@ -338,7 +339,7 @@ watch(activeStep, () => {
           <StepperHeader
             v-model:active-step="activeStep"
             :index="1"
-            title="Project"
+            :title="t('projectIntakeForm.headers.project')"
             icon="fa-house"
             :error-categories="[IntakeFormCategory.GENERAL]"
           />
@@ -350,7 +351,7 @@ watch(activeStep, () => {
           <StepperHeader
             v-model:active-step="activeStep"
             :index="2"
-            title="Location"
+            :title="t('projectIntakeForm.headers.location')"
             icon="fa-location-dot"
             :error-categories="[IntakeFormCategory.LOCATION]"
           />
@@ -362,7 +363,7 @@ watch(activeStep, () => {
           <StepperHeader
             v-model:active-step="activeStep"
             :index="3"
-            title="Permits & Reports"
+            :title="t('projectIntakeForm.headers.permits')"
             icon="fa-file"
             :error-categories="[IntakeFormCategory.PERMITS, IntakeFormCategory.APPLIED_PERMITS]"
             :divider="false"
@@ -445,7 +446,7 @@ watch(activeStep, () => {
     </Stepper>
     <div class="flex items-center justify-center mt-6">
       <Button
-        label="Submit"
+        :label="t('ui.actions.submit')"
         type="submit"
         icon="pi pi-upload"
         :disabled="!getEditable || !isSubmittable"
