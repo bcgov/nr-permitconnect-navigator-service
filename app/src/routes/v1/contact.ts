@@ -33,7 +33,7 @@ router.post(
 /** Search contacts */
 router.post(
   '/search',
-  hasIdentity(IdentityProviderKind.IDIR),
+  hasIdentity(IdentityProviderKind.AZUREIDIR),
   hasAuthorization(Resource.CONTACT, Action.READ),
   contactValidator.searchContacts,
   searchContactsController

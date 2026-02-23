@@ -52,7 +52,7 @@ export const matchContactsController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    if (hasIdentity(IdentityProviderKind.IDIR, req.currentContext)) return await matchContacts(tx, req.body);
+    if (hasIdentity(IdentityProviderKind.AZUREIDIR, req.currentContext)) return await matchContacts(tx, req.body);
     return await matchContactsExact(tx, req.body);
   });
   res.status(200).json(response);

@@ -1076,7 +1076,7 @@ export const TEST_PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE_1];
 export const TEST_IDIR_USER_1: User = {
   bceidBusinessName: null,
   userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-  idp: IdentityProviderKind.IDIR,
+  idp: IdentityProviderKind.AZUREIDIR,
   sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
   email: 'John.Doe@example.com',
   firstName: 'John',

@@ -26,8 +26,8 @@ jest.mock('../../../src/utils/log', () => ({
 
 const IDP_LIST = [
   {
-    idp: IdentityProviderKind.IDIR,
-    kind: 'idir',
+    idp: IdentityProviderKind.AZUREIDIR,
+    kind: 'azureidir',
     username: 'idir_username'
   }
 ];
@@ -75,10 +75,10 @@ describe('hasIdentity middleware', () => {
   });
 
   it('calls next and allows the request if the user has the required identity', async () => {
-    const app = buildApp(IdentityProviderKind.IDIR, {
+    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
       authType: AuthType.BEARER,
       initiative: Initiative.PCNS,
-      tokenPayload: { identity_provider: IdentityProviderKind.IDIR }
+      tokenPayload: { identity_provider: IdentityProviderKind.AZUREIDIR }
     });
 
     const res = await request(app).get('/test');
@@ -88,7 +88,7 @@ describe('hasIdentity middleware', () => {
   });
 
   it('throws a 403 Problem if the user does not have the required identity', async () => {
-    const app = buildApp(IdentityProviderKind.IDIR, {
+    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
       authType: AuthType.BEARER,
       initiative: Initiative.PCNS,
       tokenPayload: { identity_provider: IdentityProviderKind.BCEID } // Mismatch
@@ -101,7 +101,7 @@ describe('hasIdentity middleware', () => {
   });
 
   it('throws a 403 Problem if the token payload is missing entirely', async () => {
-    const app = buildApp(IdentityProviderKind.IDIR, {
+    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
       authType: AuthType.NONE,
       initiative: Initiative.PCNS,
       tokenPayload: undefined

@@ -29,7 +29,7 @@ jest.mock('uuid', () => ({
 
 const TOKEN_PAYLOAD: JwtPayload = {
   sub: '12345678-90ab-cdef-1234-567890abcdef',
-  identity_provider: 'idir',
+  identity_provider: 'azureidir',
   idir_username: 'alice.smith',
   email: 'alice.smith@example.com',
   given_name: 'Alice',
@@ -48,8 +48,8 @@ const CURRENT_CONTEXT = {
 
 const IDP_LIST = [
   {
-    idp: IdentityProviderKind.IDIR,
-    kind: 'idir',
+    idp: IdentityProviderKind.AZUREIDIR,
+    kind: 'azureidir',
     username: 'idir_username'
   },
   {
@@ -380,11 +380,11 @@ describe('utils', () => {
       (existsSync as jest.Mock).mockReturnValue(true);
       (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
 
-      const result = utils.getIdpAttributesByKind(IdentityProviderKind.IDIR);
+      const result = utils.getIdpAttributesByKind(IdentityProviderKind.AZUREIDIR);
 
       expect(result).toEqual({
-        idp: IdentityProviderKind.IDIR,
-        kind: 'idir',
+        idp: IdentityProviderKind.AZUREIDIR,
+        kind: 'azureidir',
         username: 'idir_username'
       });
     });
@@ -408,7 +408,7 @@ describe('utils', () => {
     });
 
     it('returns true when the identity kind matches the current context user identity', () => {
-      expect(utils.hasIdentity(IdentityProviderKind.IDIR, CURRENT_CONTEXT)).toBe(true);
+      expect(utils.hasIdentity(IdentityProviderKind.AZUREIDIR, CURRENT_CONTEXT)).toBe(true);
     });
 
     it('returns false when the identity kind does not match the current context user identity', () => {
@@ -418,7 +418,7 @@ describe('utils', () => {
     it('returns false when the current context token payload is missing', () => {
       const contextWithoutPayload = { ...CURRENT_CONTEXT, tokenPayload: undefined };
 
-      expect(utils.hasIdentity(IdentityProviderKind.IDIR, contextWithoutPayload)).toBe(false);
+      expect(utils.hasIdentity(IdentityProviderKind.AZUREIDIR, contextWithoutPayload)).toBe(false);
     });
 
     it('returns false when the identity kind is not found in the IDP list', () => {
@@ -500,8 +500,8 @@ describe('utils', () => {
 
     it('prefers override idplist-local.json', () => {
       (existsSync as jest.Mock).mockImplementation((p: string) => ('' + p).endsWith('idplist-local.json'));
-      (readFileSync as jest.Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'idir' }]));
-      expect(utils.readIdpList()).toEqual([{ idp: 'idir' }]);
+      (readFileSync as jest.Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'azureidir' }]));
+      expect(utils.readIdpList()).toEqual([{ idp: 'azureidir' }]);
     });
 
     it('falls back to idplist-default.json', () => {

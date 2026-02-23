@@ -258,7 +258,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
   try {
     loading.value = true;
 
-    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
     user.idp = idpCfg.idp;
@@ -323,7 +323,7 @@ onBeforeMount(async () => {
   loading.value = true;
 
   try {
-    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
     const users: User[] = (

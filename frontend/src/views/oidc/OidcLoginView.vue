@@ -55,12 +55,12 @@ function login(kind: IdentityProviderKind) {
           <h4 class="my-3">{{ t('oidcLoginView.internalGovUsers') }}</h4>
 
           <Button
-            class="p-button-outlined"
-            data-test="idir-login-button"
-            :aria-label="t('oidcLoginView.loginIDIR')"
-            @click="login(IdentityProviderKind.IDIR)"
+            class="p-button-outlined mt-3"
+            data-test="idir-mfa-login-button"
+            :aria-label="t('oidcLoginView.loginIDIRMFA')"
+            @click="login(IdentityProviderKind.AZUREIDIR)"
           >
-            {{ t('oidcLoginView.loginIDIR') }}
+            {{ t('oidcLoginView.loginIDIRMFA') }}
           </Button>
           <div class="my-3">
             <Divider />

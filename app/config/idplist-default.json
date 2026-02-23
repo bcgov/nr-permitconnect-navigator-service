@@ -1,7 +1,7 @@
 [
   {
-    "idp": "idir",
-    "kind": "idir",
+    "idp": "azureidir",
+    "kind": "azureidir",
     "username": "idir_username"
   },
   {

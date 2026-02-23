@@ -112,17 +112,17 @@ describe('OidcLoginView', () => {
     expect(authNStore.login).toHaveBeenCalled();
   });
 
-  it('should invoke auth login flow with IDIR when the IDIR button is clicked', async () => {
-    findIdpConfigSpy.mockResolvedValue({ kind: IdentityProviderKind.IDIR, idp: 'idir', username: '' });
+  it('should invoke auth login flow with IDIR-MFA when the IDIR-MFA button is clicked', async () => {
+    findIdpConfigSpy.mockResolvedValue({ kind: IdentityProviderKind.AZUREIDIR, idp: 'azureidir', username: '' });
 
     const wrapper = mount(OidcLoginView, wrapperSettings());
     const authNStore = useAuthNStore();
-    const idirButton = wrapper.find('[data-test="idir-login-button"]');
+    const idirButton = wrapper.find('[data-test="idir-mfa-login-button"]');
 
     await idirButton.trigger('click');
 
     expect(findIdpConfigSpy).toHaveBeenCalled();
-    expect(findIdpConfigSpy).toHaveBeenCalledWith(IdentityProviderKind.IDIR);
+    expect(findIdpConfigSpy).toHaveBeenCalledWith(IdentityProviderKind.AZUREIDIR);
     expect(authNStore.login).toHaveBeenCalled();
   });
 
@@ -183,7 +183,7 @@ describe('OidcLoginView', () => {
     expect(loginMock).toHaveBeenCalledWith(IdentityProviderKind.BCEIDBUSINESS);
   });
 
-  it('calls login function IDIR when IDIR button is clicked', async () => {
+  it('calls login function IDIR-MFA when IDIR-MFA button is clicked', async () => {
     // Mock the login function
     const loginMock = vi.fn();
     const wrapper = mount(OidcLoginView, {
@@ -194,11 +194,11 @@ describe('OidcLoginView', () => {
       }
     });
 
-    // Find the BCSC button and simulate a click
-    const idirButton = wrapper.find('[data-test="idir-login-button"]');
+    // Find the IDIR-MFA button and simulate a click
+    const idirButton = wrapper.find('[data-test="idir-mfa-login-button"]');
     await idirButton.trigger('click');
 
     // Assert that the login function was called with the correct argument
-    expect(loginMock).toHaveBeenCalledWith(IdentityProviderKind.IDIR);
+    expect(loginMock).toHaveBeenCalledWith(IdentityProviderKind.AZUREIDIR);
   });
 });

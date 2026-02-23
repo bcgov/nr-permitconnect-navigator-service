@@ -184,7 +184,7 @@ export const processUserAccessRequestController = async (
             if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
               throw new Problem(409, { detail: 'User is already assigned this role' });
             }
-            if (userResponse.idp !== IdentityProviderKind.IDIR) {
+            if (userResponse.idp !== IdentityProviderKind.AZUREIDIR) {
               throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
             }
 
