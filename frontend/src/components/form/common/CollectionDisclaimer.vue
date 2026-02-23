@@ -10,7 +10,7 @@ const { t } = useI18n();
 <template>
   <Card>
     <template #title>
-      <span class="section-header">Notice for collection, use and disclosure of personal information</span>
+      <span class="section-header">{{ t('collectionDisclaimer.header') }}</span>
       <Divider type="solid" />
     </template>
     <template #content>

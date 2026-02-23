@@ -66,7 +66,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
         role="heading"
         aria-level="2"
       >
-        {{ t('projectIntakeForm.projectApplicantTypeCard') }}
+        {{ t('registeredBusinessCard.projectApplicantTypeCard') }}
       </span>
       <Divider type="solid" />
     </template>
@@ -90,12 +90,12 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
           class="col-span-12"
         >
           <div class="flex items-center">
-            <p class="font-bold">Is it registered in B.C?</p>
+            <p class="font-bold">{{ t('registeredBusinessCard.registeredInBc') }}</p>
             <Tooltip
               class="pl-2"
               right
               icon="fa-solid fa-circle-question"
-              :text="t('projectIntakeForm.isRegisteredTooltip')"
+              :text="t('registeredBusinessCard.isRegisteredTooltip')"
             />
           </div>
           <RadioList
@@ -118,7 +118,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
               :bold="false"
               :disabled="!getEditable"
               :editable="true"
-              :placeholder="'Type to search the B.C registered name'"
+              :placeholder="t('registeredBusinessCard.placeholders.inBcRegisteredName')"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
               :suggestions="orgBookOptions ?? []"
               @on-complete="onRegisteredNameInput"
@@ -138,7 +138,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
             v-else-if="values.basic.isDevelopedInBc === BasicResponse.NO"
             class="col-span-6 mt-4 pl-0"
             name="basic.registeredName"
-            :placeholder="'Type the business/company/organization name'"
+            :placeholder="t('registeredBusinessCard.placeholders.notInBcRegisteredName')"
             :bold="false"
             :disabled="!getEditable"
             @on-change="setRegisteredId(null)"

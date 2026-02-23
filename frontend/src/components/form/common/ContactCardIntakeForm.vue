@@ -43,12 +43,12 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           role="heading"
           aria-level="2"
         >
-          {{ t('common.contactCardIntakeForm.header') }}
+          {{ t('contactCardIntakeForm.header') }}
         </span>
         <Tooltip
           icon="fa-solid fa-circle-question"
           right
-          :text="t('common.contactCardIntakeForm.contactTooltip')"
+          :text="t('contactCardIntakeForm.contactTooltip')"
         />
       </div>
       <Divider type="solid" />
@@ -57,39 +57,39 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
       <div class="grid grid-cols-2 gap-4">
         <InputText
           :name="`contacts.contactFirstName`"
-          label="First name"
+          :label="t('contactCardIntakeForm.labels.firstName')"
           :bold="false"
           :disabled="!!initialFormValues?.contactFirstName || !getEditable"
         />
         <InputText
           :name="`contacts.contactLastName`"
-          label="Last name"
+          :label="t('contactCardIntakeForm.labels.lastName')"
           :bold="false"
           :disabled="!!initialFormValues?.contactLastName || !getEditable"
         />
         <InputMask
           :name="`contacts.contactPhoneNumber`"
           mask="(999) 999-9999"
-          label="Phone number"
+          :label="t('contactCardIntakeForm.labels.phoneNumber')"
           :bold="false"
           :disabled="!!initialFormValues?.contactPhoneNumber || !getEditable"
         />
         <InputText
           :name="`contacts.contactEmail`"
-          label="Email"
+          :label="t('contactCardIntakeForm.labels.email')"
           :bold="false"
           :disabled="!!initialFormValues?.contactEmail || !getEditable"
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"
-          label="Relationship to project"
+          :label="t('contactCardIntakeForm.labels.contactApplicantRelationship')"
           :bold="false"
           :disabled="!!initialFormValues?.contactApplicantRelationship || !getEditable"
           :options="PROJECT_RELATIONSHIP_LIST"
         />
         <Select
           :name="`contacts.contactPreference`"
-          label="Preferred contact method"
+          :label="t('contactCardIntakeForm.labels.contactPreference')"
           :bold="false"
           :disabled="!!initialFormValues?.contactPreference || !getEditable"
           :options="CONTACT_PREFERENCE_LIST"

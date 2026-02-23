@@ -208,7 +208,7 @@ watchEffect(() => {
                   name="location.addressSearch"
                   :get-option-label="getAddressSearchLabel"
                   :options="addressGeocoderFeatures"
-                  :placeholder="t('locationCard.addressSearchPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.addressSearch')"
                   :bold="false"
                   :disabled="!getEditable"
                   @on-input="onAddressSearchInput"
@@ -218,19 +218,19 @@ watchEffect(() => {
                   class="col-span-4"
                   name="location.streetAddress"
                   disabled
-                  :placeholder="t('locationCard.streetAddressPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.streetAddress')"
                 />
                 <InputText
                   class="col-span-4"
                   name="location.locality"
                   disabled
-                  :placeholder="t('locationCard.localityPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.locality')"
                 />
                 <InputText
                   class="col-span-4"
                   name="location.province"
                   disabled
-                  :placeholder="t('locationCard.provincePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.province')"
                 />
                 <InputNumber
                   class="col-span-4"
@@ -241,7 +241,7 @@ watchEffect(() => {
                       ? t('locationCard.provideLatitude')
                       : ''
                   "
-                  :placeholder="t('locationCard.latitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.latitude')"
                 />
                 <InputNumber
                   class="col-span-4"
@@ -252,7 +252,7 @@ watchEffect(() => {
                       ? t('locationCard.provideLongitude')
                       : ''
                   "
-                  :placeholder="t('locationCard.longitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.longitude')"
                 />
                 <div
                   v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
@@ -276,7 +276,7 @@ watchEffect(() => {
                   name="location.latitude"
                   :disabled="!getEditable"
                   :help-text="t('locationCard.provideLatitude')"
-                  :placeholder="t('locationCard.latitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.latitude')"
                   @keyup.enter="onLatLongInput"
                 />
                 <InputNumber
@@ -284,13 +284,13 @@ watchEffect(() => {
                   name="location.longitude"
                   :disabled="!getEditable"
                   :help-text="t('locationCard.provideLongitude')"
-                  :placeholder="t('locationCard.longitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.longitude')"
                   @keyup.enter="onLatLongInput"
                 />
                 <div class="col-span-4">
                   <Button
                     class="lat-long-btn"
-                    :label="t('locationCard.showOnMap')"
+                    :label="t('locationCard.labels.showOnMap')"
                     :disabled="!getEditable"
                     @click="onLatLongInput"
                   />
@@ -335,19 +335,19 @@ watchEffect(() => {
                 class="col-span-4"
                 name="location.streetAddress"
                 disabled
-                :placeholder="t('locationCard.streetAddressPlaceholder')"
+                :placeholder="t('locationCard.placeholders.streetAddress')"
               />
               <InputText
                 class="col-span-4"
                 name="location.locality"
                 disabled
-                :placeholder="t('locationCard.localityPlaceholder')"
+                :placeholder="t('locationCard.placeholders.locality')"
               />
               <InputText
                 class="col-span-4"
                 name="location.province"
                 disabled
-                :placeholder="t('locationCard.provincePlaceholder')"
+                :placeholder="t('locationCard.placeholders.province')"
               />
               <InputNumber
                 class="col-span-4"
@@ -358,7 +358,7 @@ watchEffect(() => {
                     ? t('locationCard.provideLatitude')
                     : ''
                 "
-                :placeholder="t('locationCard.latitudePlaceholder')"
+                :placeholder="t('locationCard.placeholders.latitude')"
               />
               <InputNumber
                 class="col-span-4"
@@ -369,7 +369,7 @@ watchEffect(() => {
                     ? t('locationCard.provideLongitude')
                     : ''
                 "
-                :placeholder="t('locationCard.longitudePlaceholder')"
+                :placeholder="t('locationCard.placeholders.longitude')"
               />
             </div>
           </template>

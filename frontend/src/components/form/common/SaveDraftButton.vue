@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useFormValues } from 'vee-validate';
+import { useI18n } from 'vue-i18n';
 
 import { Button } from '@/lib/primevue';
 import { useFormStore } from '@/store';
@@ -14,6 +15,7 @@ const { onClickCallback } = defineProps<{
 
 // Composables
 const values = useFormValues();
+const { t } = useI18n();
 
 // Store
 const formStore = useFormStore();
@@ -24,7 +26,7 @@ const { getEditable } = storeToRefs(formStore);
   <Button
     class="p-button-sm"
     outlined
-    label="Save draft"
+    :label="t('saveDraftButton.label')"
     :disabled="!getEditable"
     @click="onClickCallback(values)"
   />

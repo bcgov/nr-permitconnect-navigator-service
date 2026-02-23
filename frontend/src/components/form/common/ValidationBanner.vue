@@ -21,7 +21,7 @@ const hasErrors = computed(() => getFormCategoryErrors().length);
     :closable="false"
     class="message-banner text-center"
   >
-    {{ t('projectIntakeForm.validationBanner') }}
+    {{ t('validationBanner.message') }}
   </Message>
 </template>
 

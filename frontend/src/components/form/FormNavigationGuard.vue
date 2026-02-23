@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { useConfirm } from '@/lib/primevue';
-import { onBeforeRouteLeave, useRouter } from 'vue-router';
 import { useIsFormDirty } from 'vee-validate';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
+import { onBeforeRouteLeave, useRouter } from 'vue-router';
 
 import { FormAutosave } from '@/components/form';
+import { useConfirm } from '@/lib/primevue';
 
 import type { Ref } from 'vue';
 import type { CallbackFn } from '@/types';
@@ -14,6 +15,9 @@ const { autoSaveRef = null, callback = () => {} } = defineProps<{
   autoSaveRef?: InstanceType<typeof FormAutosave> | null;
   callback?: CallbackFn;
 }>();
+
+// Composables
+const { t } = useI18n();
 
 // State
 const isAccepted: Ref<boolean> = ref(false);
@@ -33,11 +37,11 @@ onBeforeRouteLeave(async (to) => {
   if (isDirty.value && !isOpen.value) {
     isOpen.value = true;
     confirm.require({
-      message: 'Are you sure you want to leave this page? Any unsaved changes will be lost.',
-      header: 'Leave this page?',
-      acceptLabel: 'Leave',
+      message: t('formNavigationGuard.message'),
+      header: t('formNavigationGuard.header'),
+      acceptLabel: t('ui.actions.leave'),
       acceptClass: 'p-button-danger',
-      rejectLabel: 'Cancel',
+      rejectLabel: t('ui.actions.cancel'),
       rejectProps: { outlined: true },
       accept: async () => {
         isAccepted.value = true;

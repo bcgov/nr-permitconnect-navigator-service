@@ -4,10 +4,6 @@
       "header": "Basic information",
       "searchContacts": "Search Contacts"
     },
-    "contactCardIntakeForm": {
-      "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
-      "header": "Who is the primary contact regarding this project?"
-    },
     "footer": {
       "about": "About gov.bc.ca",
       "accessibility": "Accessibility",
@@ -645,7 +641,8 @@
     "btnText": "Cancel"
   },
   "collectionDisclaimer": {
-    "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact the Navigator Service at"
+    "disclaimer": "This information is being collected under the legal authority of section 26 (c)(e) and 27 (1)(a)(i) of the Freedom of Information and Protection of Privacy Act (the Act) and is being used for the purpose of creating a client relationship between you or your organization and Government of British Columbia. It may also be shared when strictly necessary with partner agencies that are also subject to the provisions of the Act. Personal information may be used by the Permitting Solutions Branch for survey purposes. If you have any questions regarding the use of this personal information, please contact the Navigator Service at",
+    "header": "Notice for collection, use and disclosure of personal information"
   },
   "contactForm": {
     "cancel": "Cancel",
@@ -779,17 +776,41 @@
   },
   "locationCard": {
     "acceptableCoordinates": "The accepted coordinates are to be decimal degrees (dd.dddd) and to the extent of the province.",
-    "addressSearchPlaceholder": "Type to search the address of your housing project",
     "addressTooltip": "A civic address contains a street name and number where a non-civic does not.",
     "header": "Provide one of the following project locations",
-    "latitudePlaceholder": "Latitude",
-    "localityPlaceholder": "Locality",
-    "longitudePlaceholder": "Longitude",
+    "placeholders": {
+      "addressSearch": "Type to search the address of your housing project",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "locality": "Locality",
+      "province": "Province",
+      "streetAddress": "Street address"
+    },
     "provideLatitude": "Provide a coordinate between 48 and 60",
     "provideLongitude": "Provide a coordinate between -114 and -139",
-    "provincePlaceholder": "Province",
-    "showOnMap": "Show on map",
-    "streetAddressPlaceholder": "Street address"
+    "labels": {
+      "showOnMap": "Show on map"
+    }
+  },
+  "locationAdditionalCard": {
+    "accordion": {
+      "headers": {
+        "geomark": "Geomark",
+        "parcel": "Parcel ID (PID Number)"
+      }
+    },
+    "header": "Provide additional location details (optional)",
+    "help": "List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522",
+    "labels": {
+      "geomark": "Open Geomark Web Service",
+      "ltsa": "LTSA PID Lookup"
+    },
+    "placeholders": {
+      "geomarkUrl": "Type in URL"
+    }
+  },
+  "locationDescriptionCard": {
+    "header": "Is there anything else you would like to tell us about this project's location? (optional)"
   },
   "loginButton": {
     "login": "Log in",
@@ -859,28 +880,146 @@
     "addTitle": "Add permit",
     "editTitle": "Edit permit"
   },
-  "projectIntakeForm": {
+  "saveDraftButton": {
+    "label": "Save draft"
+  },
+  "contactCardIntakeForm": {
+    "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
+    "header": "Who is the primary contact regarding this project?",
+    "labels": {
+      "firstName": "First name",
+      "lastName": "Last name",
+      "phoneNumber": "Phone Number",
+      "email": "Email",
+      "contactApplicantRelationship": "Relationship to project",
+      "contactPreference": "Preferred contact method"
+    }
+  },
+  "ui": {
+    "actions": {
+      "cancel": "Cancel",
+      "confirm": "Confirm",
+      "delete": "Delete",
+      "leave": "Leave",
+      "submit": "Submit"
+    }
+  },
+  "formNavigationGuard": {
+    "header": "Leave this page?",
+    "message": "Are you sure you want to leave this page? Any unsaved changes will be lost."
+  },
+  "projectIntakeAssistance": {
+    "assistanceHeader": "assistance",
     "assistanceMessage": "Assistance requested",
+    "getAssistance": "Get assistance",
+    "needAssistance": "Need assistance with the form?",
+    "needAssistanceMessage": "Are you unable to complete this form and need assistance? Please follow the instructions below. You will be contacted by a housing navigator.",
+    "instructions1": "Make sure the {primary} section under the {basic} tab is filled out.",
+    "instructions2": "Try to fill out the form as much as you can.",
+    "instructions3": "Click 'Get assistance' below to submit the form.",
+    "labels": {
+      "primaryContact": "Primary Contact",
+      "basicInformation": "Basic Information"
+    },
+    "submit": {
+      "header": "Please confirm assistance",
+      "message": "Are you sure you want to request assistance for this form",
+      "failed": "Failed to save enquiry"
+    }
+  },
+  "validationBanner": {
+    "message": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+  },
+  "projectNameCard": {
+    "header": "Tell us your project name",
+    "labels": {
+      "projectName": "Project name - your preferred name for your project"
+    }
+  },
+  "projectDescriptionCard": {
+    "header": "Help us learn more about your housing project",
+    "labels": {
+      "projectDescription": "Provide additional information"
+    },
+    "links": {
+      "shapeFiles": "shape files"
+    },
+    "placeholders": {
+      "projectDescription": "Provide us with additional information - short description about the project and/or project website link"
+    },
+    "upload": "Upload documents about your project (PDFs, maps, {shapeLink}, etc)"
+  },
+  "naturalDisasterCard": {
+    "header": "Has the location of this project been affected by natural disaster?"
+  },
+  "registeredBusinessCard": {
+    "isRegisteredTooltip": "Are you registered with OrgBook BC?",
+    "projectApplicantTypeCard": "Are you applying as an individual or as a business?",
+    "registeredInBc": "Is it registered in B.C?",
+    "placeholders": {
+      "inBcRegisteredName": "Type to search the B.C registered name",
+      "notInBcRegisteredName": "Type the business/company/organization name"
+    }
+  },
+  "appliedPermitsCard": {
+    "header": "Have you applied for any provincial permits for this project?",
+    "headerTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
+    "shareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",
+    "placeholders": {
+      "permitTypeId": "Select Permit type",
+      "submittedDate": "Date applied",
+      "trackingId": "Tracking #"
+    }
+  },
+  "investigatePermitsCard": {
+    "header": "Select all provincially issued permits you plan to submit (optional)",
+    "headerTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
+    "placeholders": {
+      "permitTypeId": "Select Permit type"
+    }
+  },
+  "permitLearnCard": {
+    "links": {
+      "permitConnectBc": "Permit Connect BC"
+    },
+    "message": "Go to {permitLink} to learn more about permits issued by the provincial government"
+  },
+  "stepperNavigation": {
+    "next": "Go to next page",
+    "previous": "Go to previous page"
+  },
+  "feedbackConsentCard": {
+    "message": "Check this box if you agree to be contacted for user feedback, helping us improve our digital service. Your personal information will not be shared with third parties."
+  },
+  "projectIntakeForm": {
+    "draft": {
+      "autoSaved": "Draft autosaved",
+      "saved": "Draft saved",
+      "saveFailed": "Failed to save draft"
+    },
+    "headers": {
+      "basic": "Basic info",
+      "location": "Location",
+      "permits": "Permits & Reports",
+      "project": "Project"
+    },
+    "load": {
+      "failed": "Failed to load intake",
+      "tooManyProps": "Only supply one of draft or project as props"
+    },
+    "submit": {
+      "header": "Please confirm submission",
+      "message": "Are you sure you wish to submit this form?",
+      "badResponse": "No activityId or projectId in response",
+      "saveFailed": "Failed to save intake"
+    },
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
-    "additionalLocationCard": "Provide additional location details (optional)",
-    "appliedPermitsShareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",
-    "appliedPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "bcHousingTooltip": "BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.",
     "financiallySupportedCard": "Is this project associated with any of the following?",
     "hasRentalUnitsCard": "Will this project include rental units?",
-    "investigatePermitsCard": "Select all provincially issued permits you plan to submit (optional)",
-    "isRegisteredTooltip": "Are you registered with OrgBook BC?",
     "multiFamilyTooltip": "Multi-family dwelling: a residential building that contains two or more attached dwellings, including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.",
-    "naturalDisasterCard": "Has the location of this project been affected by natural disaster?",
-    "potentialPermitsTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
-    "projectApplicantTypeCard": "Are you applying as an individual or as a business?",
-    "projectDescriptionCard": "Help us learn more about your housing project",
-    "projectLocationDescriptionCard": "Is there anything else you would like to tell us about this project's location? (optional)",
-    "projectNameCard": "Tell us your project name",
-    "provincialPermitsCard": "Have you applied for any provincial permits for this project?",
     "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants.",
-    "singleFamilySelectedCard": "Select the types of residential units being developed",
-    "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+    "singleFamilySelectedCard": "Select the types of residential units being developed"
   },
   "oidcLoginView": {
     "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",

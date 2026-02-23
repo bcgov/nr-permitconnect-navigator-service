@@ -41,7 +41,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
             role="heading"
             aria-level="2"
           >
-            {{ t('projectIntakeForm.additionalLocationCard') }}
+            {{ t('locationAdditionalCard.header') }}
           </span>
         </div>
       </div>
@@ -54,7 +54,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
         :value="parcelAccordionIndex"
       >
         <AccordionPanel value="0">
-          <AccordionHeader>Parcel ID (PID Number)</AccordionHeader>
+          <AccordionHeader>{{ t('locationAdditionalCard.accordion.headers.parcel') }}</AccordionHeader>
           <AccordionContent>
             <Card class="no-shadow">
               <template #content>
@@ -65,7 +65,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
                         href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
                         target="_blank"
                       >
-                        LTSA PID Lookup
+                        {{ t('locationAdditionalCard.labels.ltsa') }}
                       </a>
                     </label>
                   </div>
@@ -75,7 +75,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
                     name="location.ltsaPidLookup"
                     :bold="false"
                     :disabled="!getEditable"
-                    help-text="List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522"
+                    :help-text="t('locationAdditionalCard.help')"
                   />
                   <!-- eslint-enable max-len -->
                 </div>
@@ -91,7 +91,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
         class="mt-6 mb-2"
       >
         <AccordionPanel value="0">
-          <AccordionHeader>Geomark</AccordionHeader>
+          <AccordionHeader>{{ t('locationAdditionalCard.accordion.headers.geomark') }}</AccordionHeader>
           <AccordionContent>
             <Card class="no-shadow">
               <template #content>
@@ -102,7 +102,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
                         href="https://apps.gov.bc.ca/pub/geomark/overview"
                         target="_blank"
                       >
-                        Open Geomark Web Service
+                        {{ t('locationAdditionalCard.labels.geomark') }}
                       </a>
                     </label>
                   </div>
@@ -111,7 +111,7 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
                     name="location.geomarkUrl"
                     :bold="false"
                     :disabled="!getEditable"
-                    placeholder="Type in URL"
+                    :placeholder="t('locationAdditionalCard.placeholders.geomarkUrl')"
                   />
                 </div>
               </template>
