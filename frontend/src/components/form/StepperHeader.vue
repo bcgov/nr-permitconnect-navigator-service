@@ -9,7 +9,6 @@ import type { CallbackFn } from '@/types/index.ts';
 // Props
 const {
   index,
-  activeStep,
   onClickCallback = () => {},
   title,
   icon,
@@ -17,13 +16,16 @@ const {
   errorCategories = []
 } = defineProps<{
   index: number;
-  activeStep: number;
   onClickCallback?: CallbackFn;
   title: string;
   icon: string;
   divider?: boolean;
   errorCategories?: string[];
 }>();
+
+const activeStep = defineModel<number>('activeStep', {
+  required: true
+});
 
 // Composables
 const { getFormCategoryErrors } = useFormCategoryErrors();
@@ -41,7 +43,12 @@ const errors = computed(
       :aria-label="`Go to ${title} step`"
       class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
-      @click="onClickCallback()"
+      @click="
+        () => {
+          activeStep = index;
+          onClickCallback();
+        }
+      "
     >
       <span
         aria-hidden="true"
