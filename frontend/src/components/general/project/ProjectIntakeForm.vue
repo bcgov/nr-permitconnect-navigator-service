@@ -324,12 +324,11 @@ watch(activeStep, () => {
           as-child
         >
           <StepperHeader
+            v-model:active-step="activeStep"
             :index="0"
-            :active-step="activeStep"
             title="Basic info"
             icon="fa-user"
             :error-categories="[IntakeFormCategory.CONTACTS, IntakeFormCategory.BASIC]"
-            @click-callback="() => (activeStep = 0)"
           />
         </Step>
         <Step
@@ -337,12 +336,11 @@ watch(activeStep, () => {
           as-child
         >
           <StepperHeader
+            v-model:active-step="activeStep"
             :index="1"
-            :active-step="activeStep"
             title="Project"
             icon="fa-house"
             :error-categories="[IntakeFormCategory.GENERAL]"
-            @click-callback="() => (activeStep = 1)"
           />
         </Step>
         <Step
@@ -350,12 +348,11 @@ watch(activeStep, () => {
           as-child
         >
           <StepperHeader
+            v-model:active-step="activeStep"
             :index="2"
-            :active-step="activeStep"
             title="Location"
             icon="fa-location-dot"
             :error-categories="[IntakeFormCategory.LOCATION]"
-            @click-callback="() => (activeStep = 2)"
           />
         </Step>
         <Step
@@ -363,13 +360,12 @@ watch(activeStep, () => {
           as-child
         >
           <StepperHeader
+            v-model:active-step="activeStep"
             :index="3"
-            :active-step="activeStep"
             title="Permits & Reports"
             icon="fa-file"
             :error-categories="[IntakeFormCategory.PERMITS, IntakeFormCategory.APPLIED_PERMITS]"
             :divider="false"
-            @click-callback="() => (activeStep = 3)"
           />
         </Step>
       </StepList>
@@ -388,7 +384,7 @@ watch(activeStep, () => {
             :tab="0"
           />
           <StepperNavigation
-            :next-callback="() => activeStep++"
+            v-model:active-step="activeStep"
             :prev-disabled="true"
           >
             <template #content>
@@ -405,10 +401,7 @@ watch(activeStep, () => {
             :activity-id="draft?.activityId ?? project?.activityId"
             :tab="1"
           />
-          <StepperNavigation
-            :next-callback="() => activeStep++"
-            :prev-callback="() => activeStep--"
-          >
+          <StepperNavigation v-model:active-step="activeStep">
             <template #content>
               <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
@@ -425,10 +418,7 @@ watch(activeStep, () => {
           />
           <LocationAdditionalCard :tab="2" />
           <LocationDescriptionCard :tab="2" />
-          <StepperNavigation
-            :next-callback="() => activeStep++"
-            :prev-callback="() => activeStep--"
-          >
+          <StepperNavigation v-model:active-step="activeStep">
             <template #content>
               <SaveDraftButton @click-callback="onSaveDraft" />
             </template>
@@ -443,8 +433,8 @@ watch(activeStep, () => {
           <InvestigatePermitsCard :tab="3" />
           <FeedbackConsentCard :tab="3" />
           <StepperNavigation
+            v-model:active-step="activeStep"
             :next-disabled="true"
-            :prev-callback="() => activeStep--"
           >
             <template #content>
               <SaveDraftButton @click-callback="onSaveDraft" />
