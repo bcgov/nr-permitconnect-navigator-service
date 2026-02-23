@@ -5,6 +5,11 @@
     "username": "idir_username"
   },
   {
+    "idp": "azureidir",
+    "kind": "azureidir",
+    "username": "idir_username"
+  },
+  {
     "idp": "bceidbasic",
     "kind": "bceidbasic",
     "username": "bceid_username"

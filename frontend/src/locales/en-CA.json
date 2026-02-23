@@ -885,6 +885,7 @@
     "loginBCServicesCard": "Login with BC Services Card",
     "loginBusinessBCeID": "Login with Business BCeID",
     "loginIDIR": "Login with IDIR",
+    "loginIDIRMFA": "Login with IDIR - MFA",
     "register": "Need an account?",
     "setupBCServicesCard": "Set up a BC Services Card account."
   },
