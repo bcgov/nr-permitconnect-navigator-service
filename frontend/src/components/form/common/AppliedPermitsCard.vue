@@ -61,13 +61,13 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
           role="heading"
           aria-level="2"
         >
-          {{ t('projectIntakeForm.provincialPermitsCard') }}
+          {{ t('appliedPermitsCard.header') }}
         </span>
         <Tooltip
           class="mb-2"
           right
           icon="fa-solid fa-circle-question"
-          :text="t('projectIntakeForm.appliedPermitsTooltip')"
+          :text="t('appliedPermitsCard.headerTooltip')"
         />
       </div>
       <Divider type="solid" />
@@ -93,7 +93,7 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
         >
           <div class="mb-2">
             <span class="app-primary-color">
-              {{ t('projectIntakeForm.appliedPermitsShareNotification') }}
+              {{ t('appliedPermitsCard.shareNotification') }}
             </span>
           </div>
           <Card class="no-shadow">
@@ -112,7 +112,7 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                   <Select
                     :disabled="!getEditable"
                     :name="`appliedPermits[${idx}].permitTypeId`"
-                    placeholder="Select Permit type"
+                    :placeholder="t('appliedPermitsCard.placeholders.permitTypeId')"
                     :options="getPermitTypes"
                     :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                     option-value="permitTypeId"
@@ -122,21 +122,21 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                 <InputText
                   :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
                   :disabled="!getEditable"
-                  placeholder="Tracking #"
+                  :placeholder="t('appliedPermitsCard.placeholders.trackingId')"
                 />
                 <div class="flex justify-center">
                   <DatePicker
                     class="w-full"
                     :name="`appliedPermits[${idx}].submittedDate`"
                     :disabled="!getEditable"
-                    placeholder="Date applied"
+                    :placeholder="t('appliedPermitsCard.placeholders.submittedDate')"
                     :max-date="new Date()"
                   />
                   <div class="flex items-center ml-2 mb-4">
                     <Button
                       v-if="getEditable"
                       class="p-button-lg p-button-text p-button-danger p-0"
-                      aria-label="Delete"
+                      :aria-label="t('ui.actions.delete')"
                       @click="remove(idx)"
                     >
                       <font-awesome-icon icon="fa-solid fa-trash" />

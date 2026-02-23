@@ -39,7 +39,7 @@ useFormErrorWatcher(formRef, 'LocationDescriptionCard', tab);
             role="heading"
             aria-level="2"
           >
-            {{ t('projectIntakeForm.projectLocationDescriptionCard') }}
+            {{ t('locationDescriptionCard.header') }}
           </span>
         </div>
       </div>

@@ -43,12 +43,12 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
           role="heading"
           aria-level="2"
         >
-          {{ t('projectIntakeForm.investigatePermitsCard') }}
+          {{ t('investigatePermitsCard.header') }}
         </span>
         <Tooltip
           right
           icon="fa-solid fa-circle-question"
-          :text="t('projectIntakeForm.potentialPermitsTooltip')"
+          :text="t('investigatePermitsCard.headerTooltip')"
         />
       </div>
       <Divider type="solid" />
@@ -73,7 +73,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                       class="w-full"
                       :disabled="!getEditable"
                       :name="`investigatePermits[${idx}].permitTypeId`"
-                      placeholder="Select Permit type"
+                      :placeholder="t('investigatePermitsCard.placeholders.permitTypeId')"
                       :options="getPermitTypes"
                       :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                       option-value="permitTypeId"
@@ -83,7 +83,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                       <Button
                         v-if="getEditable"
                         class="p-button-lg p-button-text p-button-danger p-0"
-                        aria-label="Delete"
+                        :aria-label="t('ui.actions.delete')"
                         @click="remove(idx)"
                       >
                         <font-awesome-icon icon="fa-solid fa-trash" />
