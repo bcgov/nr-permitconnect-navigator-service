@@ -18,6 +18,10 @@ const {
   prevDisabled?: boolean;
 }>();
 
+const activeStep = defineModel<number>('activeStep', {
+  required: true
+});
+
 // Actions
 function scrollToTop() {
   const stepperPanel = document.querySelector('.p-stepper');
@@ -27,11 +31,13 @@ function scrollToTop() {
 }
 
 function handleNextClick() {
+  activeStep.value++;
   nextCallback?.();
   nextTick(() => scrollToTop());
 }
 
 function handlePrevClick() {
+  activeStep.value--;
   prevCallback?.();
   nextTick(() => scrollToTop());
 }
