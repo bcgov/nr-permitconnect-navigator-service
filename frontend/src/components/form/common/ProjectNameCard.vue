@@ -37,7 +37,7 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
         role="heading"
         aria-level="2"
       >
-        {{ t('projectIntakeForm.projectNameCard') }}
+        {{ t('projectNameCard.header') }}
       </span>
       <Divider type="solid" />
     </template>
@@ -47,7 +47,7 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
         <InputText
           class="col-span-6"
           name="general.projectName"
-          label="Project name - your preferred name for your project"
+          :label="t('projectNameCard.labels.projectName')"
           :bold="false"
           :disabled="!getEditable"
         />

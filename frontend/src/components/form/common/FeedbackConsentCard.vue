@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Checkbox } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
@@ -13,6 +14,9 @@ import type { ComponentPublicInstance, Ref } from 'vue';
 const { tab = 0 } = defineProps<{
   tab?: number;
 }>();
+
+// Composables
+const { t } = useI18n();
 
 // Store
 const formStore = useFormStore();
@@ -36,8 +40,7 @@ useFormErrorWatcher(formRef, 'FeedbackConsentCard', tab);
           :disabled="!getEditable"
         />
         <span class="font-bold inline">
-          Check this box if you agree to be contacted for user feedback, helping us improve our digital service. Your
-          personal information will not be shared with third parties.
+          {{ t('feedbackConsentCard.message') }}
         </span>
       </div>
     </template>

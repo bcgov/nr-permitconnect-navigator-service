@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { nextTick } from 'vue';
+import { useI18n } from 'vue-i18n';
 
 import { Button } from '@/lib/primevue';
 
@@ -21,6 +22,9 @@ const {
 const activeStep = defineModel<number>('activeStep', {
   required: true
 });
+
+// Composables
+const { t } = useI18n();
 
 // Actions
 function scrollToTop() {
@@ -46,7 +50,7 @@ function handlePrevClick() {
 <template>
   <div class="flex pt-6 justify-between">
     <Button
-      aria-label="Go to previous page"
+      :aria-label="t('stepperNavigation.next')"
       :class="prevDisabled ? 'button-hidden' : 'button-visible'"
       class="px-6 py-1"
       outlined
@@ -57,7 +61,7 @@ function handlePrevClick() {
     />
     <slot name="content" />
     <Button
-      aria-label="Go to next page"
+      :aria-label="t('stepperNavigation.previous')"
       :class="nextDisabled ? 'button-hidden' : 'button-visible'"
       class="px-6 py-1"
       outlined
