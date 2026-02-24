@@ -5,7 +5,7 @@ import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
-import { array, boolean, mixed, number, object, string, type InferType } from 'yup';
+import { array, boolean, date, mixed, number, object, string, type InferType } from 'yup';
 
 import type { OrgBookOption } from '@/types';
 
@@ -14,16 +14,27 @@ const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 
 export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
   return object({
-    activityId: string(),
-    housingProjectId: string(),
-    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string() }),
+    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string().required() }),
     [IntakeFormCategory.BASIC]: object({
-      consentToFeedback: boolean().notRequired().nullable().label('Consent to feedback'),
+      consentToFeedback: boolean().required().label('Consent to feedback'),
       projectApplicantType: string().required().oneOf(PROJECT_APPLICANT_LIST).label('Project developed'),
       isDevelopedInBc: string().when('projectApplicantType', {
         is: (value: string) => value === ProjectApplicant.BUSINESS,
         then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
         otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
+      }),
+      registeredId: string().when('isDevelopedInBc', {
+        is: (value: string) => value === BasicResponse.YES,
+        then: (schema) =>
+          schema
+            .required()
+            .max(255)
+            .test('valid-business-id', 'Business ID must be a valid value from the list of suggestions', (value) => {
+              if (!value) return false;
+              return orgBookOptions.some((option) => option.registeredId === value);
+            })
+            .label('Business name'),
+        otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
       }),
       registeredName: string().when('isDevelopedInBc', {
         is: (value: string) => value === BasicResponse.YES,
@@ -41,12 +52,12 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
             )
             .label('Business name'),
         otherwise: (schema) => schema.notRequired().nullable().label('Business name')
-      })
+      }),
+      projectName: string().required().max(255).label('Project name'),
+      projectDescription: string().required().label('Project description')
     }),
     [IntakeFormCategory.HOUSING]: object().shape(
       {
-        projectName: string().required().max(255).label('Project name'),
-        projectDescription: string().required().label('Project description'),
         hasRentalUnits: YesNoUnsureSchema.label('Rental units'),
         financiallySupportedBc: YesNoUnsureSchema.label('BC Housing'),
         financiallySupportedIndigenous: YesNoUnsureSchema.label('Indigenous Housing Provider'),
@@ -159,7 +170,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
         then: () => number().required().min(-139).max(-114).label('Longitude'),
         otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
       }),
-      ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
+      ltsaPidLookup: string().max(255).label('Parcel ID'),
       geomarkUrl: string().max(255).label('Geomark web service url'),
       geoJson: mixed().nullable().label('geoJson'),
       projectLocationDescription: string()
@@ -170,14 +181,14 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
     [IntakeFormCategory.APPLIED_PERMITS]: array().of(
       object({
         permitTypeId: number().required().label('Permit type'),
-        submittedDate: mixed()
+        submittedDate: date()
           .test(
             'submitted-date',
             'Submitted date must be valid or empty',
             (val) => val instanceof Date || val === undefined
           )
           .label('Submitted date'),
-        trackingId: string().max(255).nullable().label('Tracking ID')
+        permitTracking: array().of(object({ trackingId: string().max(255).nullable().label('Tracking ID') }))
       })
     ),
     [IntakeFormCategory.INVESTIGATE_PERMIS]: array().of(

@@ -8,7 +8,7 @@ import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import Divider from '@/components/common/Divider.vue';
 import { AutoComplete, FormAutosave, FormNavigationGuard, InputText, RadioList, TextArea } from '@/components/form';
 import { CollectionDisclaimer, ContactCardIntakeForm } from '@/components/form/common';
-import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeSchema';
+import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeFormSchema';
 import { Button, Card, Message, useConfirm, useToast } from '@/lib/primevue';
 import { documentService, electrificationProjectService, externalApiService } from '@/services';
 import { useCodeStore, useContactStore, useProjectStore } from '@/store';
@@ -20,7 +20,7 @@ import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { DeepPartial, Document, OrgBookOption } from '@/types';
-import type { FormSchemaType } from '@/validators/electrification/projectIntakeSchema';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Props
 const { draftId = undefined, electrificationProjectId = undefined } = defineProps<{

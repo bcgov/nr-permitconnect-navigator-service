@@ -1,6 +1,6 @@
 import type { GeoJSON } from 'geojson';
 import type { IProject } from '@/interfaces/IProject';
-import type { ProjectApplicant } from '@/utils/enums/housing';
+import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 
 export type GeneralProject = {
   generalProjectId: string;

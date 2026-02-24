@@ -37,8 +37,8 @@
       "cantNavigate": "Please contact and administrator to verify your permissions",
       "chooseProject": "Choose your project type",
       "electrification": "Electrification",
-      "general": "General",
       "housing": "Housing",
+      "other": "Other",
       "pcns": "Permit Connect Services",
       "welcome": "Welcome to the"
     },
@@ -1004,6 +1004,7 @@
     },
     "headers": {
       "basic": "Basic info",
+      "housing": "Housing",
       "location": "Location",
       "permits": "Permits & Reports",
       "project": "Project"
