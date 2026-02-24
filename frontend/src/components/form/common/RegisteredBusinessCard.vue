@@ -11,9 +11,9 @@ import { Card, Divider } from '@/lib/primevue';
 import { externalApiService } from '@/services';
 import { useContactStore, useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
-import { PROJECT_APPLICANT_LIST } from '@/utils/constants/housing'; // TODO: Shared list
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/housing'; // TODO: Shared enum
+import { ProjectApplicant } from '@/utils/enums/projectCommon';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { ComponentPublicInstance, Ref } from 'vue';
