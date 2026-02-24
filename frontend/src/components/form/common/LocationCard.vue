@@ -12,8 +12,8 @@ import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Button, Card } from '@/lib/primevue';
 import { externalApiService } from '@/services';
 import { useFormStore } from '@/store';
-import { PROJECT_LOCATION_LIST } from '@/utils/constants/housing';
-import { ProjectLocation } from '@/utils/enums/housing';
+import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
+import { ProjectLocation } from '@/utils/enums/projectCommon';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GeoJSON } from 'geojson';

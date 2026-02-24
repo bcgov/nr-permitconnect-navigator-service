@@ -1,7 +1,7 @@
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
-import { ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
+import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { contactValidator } from '@/validators';
 import { array, boolean, date, mixed, number, object, string, type InferType } from 'yup';

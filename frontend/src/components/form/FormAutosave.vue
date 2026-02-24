@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useField, useFormValues, useIsFormDirty } from 'vee-validate';
+import { useFormValues, useIsFormDirty } from 'vee-validate';
 import { onBeforeUnmount, ref, watch } from 'vue';
 
 import type { Ref } from 'vue';
@@ -18,7 +18,6 @@ const { callback, delay = DEFAULT_DELAY } = defineProps<{
 const isDirty = useIsFormDirty();
 const timeoutId: Ref<ReturnType<typeof setTimeout> | null> = ref(null);
 const values = useFormValues();
-const { value: activityId } = useField('activityId');
 
 // Actions
 defineExpose({ stopAutoSave });
@@ -35,17 +34,9 @@ onBeforeUnmount(() => {
 });
 
 watch(
-  [() => values.value, activityId],
-  ([newVals, newActId], [oldVals, oldActId]) => {
+  values.value,
+  () => {
     if (!isDirty.value) {
-      return;
-    }
-
-    // check to see if only activity id was changed, then skip autosave
-    if (
-      newActId !== oldActId &&
-      JSON.stringify({ ...newVals, activityId: undefined }) === JSON.stringify({ ...oldVals, activityId: undefined })
-    ) {
       return;
     }
 
