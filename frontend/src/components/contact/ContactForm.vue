@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import { ErrorMessage, Form } from 'vee-validate';
-
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
 import { object, string } from 'yup';
 
 import { FormNavigationGuard, InputText, InputMask, Select } from '@/components/form';
@@ -17,8 +15,9 @@ import type { GenericObject } from 'vee-validate';
 import type { Contact } from '@/types';
 
 // Props
-const { contact } = defineProps<{
+const { contact, editable } = defineProps<{
   contact: Contact;
+  editable: boolean;
 }>();
 
 // Types
@@ -39,7 +38,6 @@ const emit = defineEmits<{
 
 // Composables
 const { t } = useI18n();
-const router = useRouter();
 const toast = useToast();
 
 // State
@@ -78,7 +76,6 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
         }
       });
       emit('updateContact', result.data);
-      router.back();
     } else toast.error(t('contactForm.failedToSaveTheForm'));
   } catch (e) {
     toast.error(t('contactForm.failedToSaveTheForm'), String(e));
@@ -101,11 +98,13 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
         class="mb-6"
         name="firstName"
         :label="t('contactForm.firstName')"
+        :disabled="!editable"
       />
       <InputText
         class="mb-6"
         name="lastName"
         :label="t('contactForm.lastName')"
+        :disabled="!editable"
       />
       <InputText
         class="mb-6"
@@ -118,6 +117,7 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
         name="phoneNumber"
         mask="(999) 999-9999"
         :label="t('contactForm.phone')"
+        :disabled="!editable"
       />
       <Select
         class="mb-6"
@@ -125,15 +125,20 @@ const onSubmit = async (values: GenericObject | ContactForm) => {
         :label="t('contactForm.relationshipToProject')"
         :bold="true"
         :options="PROJECT_RELATIONSHIP_LIST"
+        :disabled="!editable"
       />
       <Select
-        class="mb-7"
+        :class="editable ? 'mb-7' : ''"
         name="contactPreference"
         :label="t('contactForm.preferredContact')"
         :bold="true"
         :options="CONTACT_PREFERENCE_LIST"
+        :disabled="!editable"
       />
-      <div class="flex flex-col">
+      <div
+        v-if="editable"
+        class="flex flex-col"
+      >
         <div class="">
           <Button
             class="mr-2"

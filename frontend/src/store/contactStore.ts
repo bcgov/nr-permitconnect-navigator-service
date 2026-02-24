@@ -16,7 +16,11 @@ export const useContactStore = defineStore('contact', () => {
 
   // Getters
   const getters = {
-    getContact: computed(() => state.contact.value)
+    getContact: computed(() => state.contact.value),
+    needsContactDetails: computed(() => {
+      const contact = state.contact.value;
+      return !contact?.phoneNumber || !contact?.contactApplicantRelationship || !contact?.contactPreference;
+    })
   };
 
   // Actions

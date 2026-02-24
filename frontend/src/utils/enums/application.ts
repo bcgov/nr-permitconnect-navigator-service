@@ -170,7 +170,8 @@ export enum Resource {
 export enum StorageKey {
   AUTH = 'entrypoint',
   BF_ACCORDION_IDX = 'bf_accordion_idx',
-  CONFIG = 'config'
+  CONFIG = 'config',
+  CONTACT_REDIRECT = 'contact_redirect'
 }
 
 export enum ToastTimeout {

@@ -30,7 +30,7 @@ const testContact: Contact = {
 };
 
 const wrapperSettingsForm = () => ({
-  props: { contact: testContact },
+  props: { contact: testContact, editable: false },
   global: {
     plugins: [() => createTestingPinia({ initialState: { auth: { user: {} } } }), PrimeVue, ToastService],
     stubs: ['FormNavigationGuard', 'InputText', 'InputMask', 'Select']

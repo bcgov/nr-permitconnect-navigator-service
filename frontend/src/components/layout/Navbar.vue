@@ -283,10 +283,4 @@ a:hover {
     border-top: 2px solid #fcba19;
   }
 }
-
-:deep(.p-menubar-submenu) {
-  li:first-child {
-    border-top: 2px solid #fcba19;
-  }
-}
 </style>
