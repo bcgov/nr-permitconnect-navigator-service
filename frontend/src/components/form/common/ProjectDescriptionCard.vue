@@ -56,7 +56,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
       </div>
       <TextArea
         class="col-span-12 mb-0 pb-0"
-        name="general.projectDescription"
+        name="basic.projectDescription"
         :placeholder="t('projectDescriptionCard.placeholders.projectDescription')"
         :disabled="!getEditable"
       />

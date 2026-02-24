@@ -2,20 +2,28 @@
 import { storeToRefs } from 'pinia';
 import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import { default as ElectrificationProjectIntakeForm } from '@/components/electrification/project/ProjectIntakeForm.vue';
 import { default as GeneralProjectIntakeForm } from '@/components/general/project/ProjectIntakeForm.vue';
 import { default as HousingProjectIntakeForm } from '@/components/housing/project/ProjectIntakeForm.vue';
-import { documentService, generalProjectService, permitService } from '@/services';
+import {
+  documentService,
+  electrificationProjectService,
+  generalProjectService,
+  housingProjectService,
+  permitService
+} from '@/services';
 import { useAppStore, useFormStore, usePermitStore, useProjectStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, Draft, GeneralProject } from '@/types';
-import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
+import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { Document, Draft, ElectrificationProject, GeneralProject, HousingProject, Project } from '@/types';
+import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
+import type { FormSchemaType as GeneralFormSchemaType } from '@/validators/general/projectIntakeFormSchema';
+import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Props
 const { draftId = undefined, projectId = undefined } = defineProps<{
@@ -26,24 +34,27 @@ const { draftId = undefined, projectId = undefined } = defineProps<{
 // Interfaces
 interface InitiativeState {
   headerText: string;
+  projectService: IDraftableProjectService;
 }
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  headerText: 'Electrification Project Intake Form'
+  headerText: 'Electrification Project Intake Form',
+  projectService: electrificationProjectService
 };
 
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
-  headerText: 'General Project Intake Form'
+  headerText: 'General Project Intake Form',
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  headerText: 'Housing Project Intake Form'
+  headerText: 'Housing Project Intake Form',
+  projectService: housingProjectService
 };
 
 // Composables
 const { t } = useI18n();
-const route = useRoute();
 
 // Store
 const formStore = useFormStore();
@@ -51,8 +62,8 @@ const projectStore = useProjectStore();
 const { getInitiative } = storeToRefs(useAppStore());
 
 // State
-const draft: Ref<Draft<FormSchemaType> | undefined> = ref(undefined);
-const project: Ref<GeneralProject | undefined> = ref(undefined);
+const draft: Ref<Draft<unknown> | undefined> = ref(undefined);
+const project: Ref<Project | undefined> = ref(undefined);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 
@@ -64,7 +75,7 @@ const loading: Ref<boolean> = ref(true);
 async function loadDraft() {
   if (!draftId) throw new Error('No draft ID');
 
-  draft.value = (await generalProjectService.getDraft(draftId)).data;
+  draft.value = (await initiativeState.value.projectService.getDraft(draftId)).data;
 
   const documents = (await documentService.listDocuments(draft.value.activityId)).data;
   documents.forEach((d: Document) => {
@@ -82,15 +93,15 @@ async function loadDraft() {
 async function loadProject() {
   if (!projectId) throw new Error('No project ID');
 
-  project.value = (await generalProjectService.getProject(projectId)).data;
+  project.value = (await initiativeState.value.projectService.getProject(projectId)).data;
 
-  const documents = (await documentService.listDocuments(project.value.activityId)).data;
+  const documents = (await documentService.listDocuments(project.value!.activityId)).data;
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);
   });
   projectStore.setDocuments(documents);
 
-  const permits = (await permitService.listPermits({ activityId: project.value.activityId })).data;
+  const permits = (await permitService.listPermits({ activityId: project.value!.activityId })).data;
   projectStore.setPermits(permits);
 
   // Disallow form editing for submitted intake
@@ -156,20 +167,18 @@ onBeforeMount(async () => {
     <div v-if="!loading">
       <ElectrificationProjectIntakeForm
         v-if="getInitiative === Initiative.ELECTRIFICATION"
-        :key="route.fullPath"
-        :draft-id="draftId"
-        :electrification-project-id="projectId"
+        v-model:draft="draft as Draft<ElectrificationFormSchemaType>"
+        :project="project as ElectrificationProject"
       />
       <GeneralProjectIntakeForm
         v-if="getInitiative === Initiative.GENERAL"
-        v-model:draft="draft"
-        :project="project"
+        v-model:draft="draft as Draft<GeneralFormSchemaType>"
+        :project="project as GeneralProject"
       />
       <HousingProjectIntakeForm
         v-if="getInitiative === Initiative.HOUSING"
-        :key="route.fullPath"
-        :draft-id="draftId"
-        :housing-project-id="projectId"
+        v-model:draft="draft as Draft<HousingFormSchemaType>"
+        :project="project as HousingProject"
       />
     </div>
   </div>

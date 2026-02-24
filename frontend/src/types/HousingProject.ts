@@ -2,12 +2,15 @@ import type { GeoJSON } from 'geojson';
 import type { IProject } from '@/interfaces/IProject';
 import type { BasicResponse } from '@/utils/enums/application';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
+import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 
 export type HousingProject = {
   housingProjectId: string;
   relatedEnquiries: string;
+  projectApplicantType: ProjectApplicant;
   consentToFeedback?: boolean;
   geoJson?: GeoJSON;
+  projectLocation: string;
   projectLocationDescription: string;
   singleFamilyUnits: NumResidentialUnits;
   multiFamilyUnits: NumResidentialUnits;
@@ -32,4 +35,5 @@ export type HousingProject = {
   naturalDisaster: boolean;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
+  hasAppliedProvincialPermits: boolean;
 } & IProject;

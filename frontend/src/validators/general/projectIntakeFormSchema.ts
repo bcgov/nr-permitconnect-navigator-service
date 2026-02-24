@@ -49,9 +49,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
             )
             .label('Business name'),
         otherwise: (schema) => schema.notRequired().nullable().label('Business name')
-      })
-    }),
-    [IntakeFormCategory.GENERAL]: object().shape({
+      }),
       projectName: string().required().max(255).label('Project name'),
       projectDescription: string().required().label('Project description')
     }),

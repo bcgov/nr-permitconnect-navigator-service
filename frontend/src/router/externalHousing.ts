@@ -52,7 +52,7 @@ const routes: RouteRecordRaw[] = [
         meta: { breadcrumb: 'Project Intake Form' },
         children: [
           {
-            path: ':draftId',
+            path: ':draftId?',
             name: RouteName.EXT_HOUSING_INTAKE,
             component: () => import('@/views/external/ProjectIntakeView.vue'),
             beforeEnter: accessHandler,

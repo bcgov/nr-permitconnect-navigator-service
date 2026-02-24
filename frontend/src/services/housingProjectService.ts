@@ -3,12 +3,22 @@ import { Initiative } from '@/utils/enums/application';
 
 import { delimitEmails } from '@/utils/utils';
 
+import type { AxiosResponse } from 'axios';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { Email, Draft, HousingProject, HousingProjectSearchParameters, StatisticFilters } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 const PATH = 'project';
 
-const service: IDraftableProjectService = {
+export interface IHousingProjectService extends IDraftableProjectService {
+  getProject(projectId: string): Promise<AxiosResponse<HousingProject>>;
+  deleteDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+  getDrafts(): Promise<AxiosResponse<Draft<FormSchemaType>[]>>;
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+}
+
+const service: IHousingProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -115,10 +125,10 @@ const service: IDraftableProjectService = {
   },
 
   /**
-   * @function updateDraft
+   * @function upsertDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(data?: Partial<Draft>) {
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>) {
     return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, data);
   },
 

@@ -1,17 +1,23 @@
+import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
+import type { BasicResponse } from '@/utils/enums/application';
 
 export interface HousingProjectIntake {
-  basic?: {
-    consentToFeedback?: boolean;
-    projectApplicantType?: string;
+  basic: {
+    consentToFeedback: boolean;
+    projectApplicantType: ProjectApplicant;
     registeredId?: string;
     registeredName?: string;
+
+    projectName: string;
+    projectDescription?: string;
   };
 
-  housing?: {
-    projectName?: string;
-    projectDescription?: string;
+  housing: {
+    singleFamilySelected?: boolean;
+    multiFamilySelected?: boolean;
+    otherSelected?: boolean;
     singleFamilyUnits?: string;
     multiFamilyUnits?: string;
     otherUnitsDescription?: string;
@@ -27,26 +33,27 @@ export interface HousingProjectIntake {
     housingCoopDescription?: string;
   };
 
-  location?: {
-    naturalDisaster?: string;
-    projectLocation?: string;
+  location: {
+    naturalDisaster: BasicResponse;
+    projectLocation: string;
     projectLocationDescription?: string;
     ltsaPidLookup?: string;
     latitude?: number;
     longitude?: number;
-    streetAddress?: string;
     locality?: string;
     province?: string;
-    geomarkUrl: string;
+    geomarkUrl?: string;
   };
 
-  permits?: {
-    hasAppliedProvincialPermits?: string;
+  permits: {
+    hasAppliedProvincialPermits: BasicResponse;
   };
 
-  appliedPermits?: Permit[];
+  appliedPermits?: Partial<Permit>[];
+  investigatePermits?: Partial<Permit>[];
 
-  investigatePermits?: Permit[];
+  contact: Contact;
 
-  contacts: Contact[];
+  activityId?: string;
+  draftId?: string;
 }

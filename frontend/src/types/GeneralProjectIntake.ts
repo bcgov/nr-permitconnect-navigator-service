@@ -1,4 +1,4 @@
-import type { ProjectApplicant } from '@/utils/enums/housing';
+import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
 import type { BasicResponse } from '@/utils/enums/application';
@@ -9,9 +9,6 @@ export interface GeneralProjectIntake {
     projectApplicantType: ProjectApplicant;
     registeredId?: string;
     registeredName?: string;
-  };
-
-  general: {
     projectName: string;
     projectDescription: string;
   };

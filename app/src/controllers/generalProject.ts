@@ -59,7 +59,7 @@ const generateGeneralProjectData = async (
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
-  let basic, general, location, permits;
+  let basic, location, permits;
   let appliedPermits: Permit[] = [],
     investigatePermits: Permit[] = [];
 
@@ -68,14 +68,9 @@ const generateGeneralProjectData = async (
       consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName
-    };
-  }
-
-  if (data.general) {
-    general = {
-      projectName: data.general.projectName,
-      projectDescription: data.general.projectDescription
+      companyNameRegistered: data.basic.registeredName,
+      projectName: data.basic.projectName,
+      projectDescription: data.basic.projectDescription
     };
   }
 
@@ -155,7 +150,6 @@ const generateGeneralProjectData = async (
   const generalProjectData = {
     generalProject: {
       ...basic,
-      ...general,
       ...location,
       ...permits,
       generalProjectId: uuidv4(),

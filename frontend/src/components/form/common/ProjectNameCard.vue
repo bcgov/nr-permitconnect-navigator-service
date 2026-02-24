@@ -43,10 +43,9 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
     </template>
     <template #content>
       <div class="grid grid-cols-12 gap-4">
-        <!-- TODO change general.projectName to something shared OR allow name field as a prop -->
         <InputText
           class="col-span-6"
-          name="general.projectName"
+          name="basic.projectName"
           :label="t('projectNameCard.labels.projectName')"
           :bold="false"
           :disabled="!getEditable"
