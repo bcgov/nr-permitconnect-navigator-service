@@ -65,7 +65,7 @@ const toHousing = (): void => {
         <h3>{{ t('views.homeView.welcome') }}</h3>
         <h1 class="!mt-0">{{ t('views.homeView.pcns') }}</h1>
         <h3 class="mb-7">{{ t('views.homeView.chooseProject') }}</h3>
-        <div class="space-x-4">
+        <div class="mb-4 space-x-4">
           <Button @click="toHousing">
             <img
               class="mr-4"
@@ -82,13 +82,15 @@ const toHousing = (): void => {
             />
             {{ t('views.homeView.electrification') }}
           </Button>
+        </div>
+        <div class="space-x-4">
           <Button @click="toGeneral">
             <img
               class="mr-4"
               src="@/assets/images/G.Land.Button.svg"
               alt="General image"
             />
-            {{ t('views.homeView.general') }}
+            {{ t('views.homeView.other') }}
           </Button>
         </div>
       </div>

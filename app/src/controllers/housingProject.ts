@@ -112,14 +112,14 @@ const generateHousingProjectData = async (
       consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName
+      companyNameRegistered: data.basic.registeredName,
+      projectName: data.basic.projectName,
+      projectDescription: data.basic.projectDescription
     };
   }
 
   if (data.housing) {
     housing = {
-      projectName: data.housing.projectName,
-      projectDescription: data.housing.projectDescription,
       singleFamilyUnits: data.housing.singleFamilyUnits,
       multiFamilyUnits: data.housing.multiFamilyUnits,
       otherUnitsDescription: data.housing.otherUnitsDescription,

@@ -128,12 +128,9 @@ async function onSubmit(data: FormSchemaType) {
         consentToFeedback: data.basic.consentToFeedback,
         projectApplicantType: data.basic.projectApplicantType,
         registeredId: data.basic.registeredId,
-        registeredName: data.basic.registeredName
-      },
-
-      general: {
-        projectName: data.general.projectName,
-        projectDescription: data.general.projectDescription
+        registeredName: data.basic.registeredName,
+        projectName: data.basic.projectName,
+        projectDescription: data.basic.projectDescription
       },
 
       location: {
@@ -239,9 +236,7 @@ onBeforeMount(async () => {
           consentToFeedback: project.consentToFeedback,
           projectApplicantType: project.projectApplicantType,
           isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered
-        },
-        general: {
+          registeredName: project.companyNameRegistered,
           projectName: project.projectName,
           projectDescription: project.projectDescription
         },
