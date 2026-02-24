@@ -23,7 +23,9 @@ export const useFormStore = defineStore('form', () => {
     getFirstErrorTab: computed(() => state.formErrors.value.sort((a, b) => a.tab - b.tab)[0]?.tab ?? 0),
     getEditable: computed(
       () => state.formType.value !== FormType.SUBMISSION && state.formState.value === FormState.UNLOCKED
-    )
+    ),
+    getFormState: computed(() => state.formState.value),
+    getFormType: computed(() => state.formType.value)
   };
 
   // Actions

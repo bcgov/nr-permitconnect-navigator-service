@@ -65,6 +65,17 @@ export enum NoteType {
   ROADMAP = 'Roadmap'
 }
 
+export enum ProjectApplicant {
+  BUSINESS = 'Business',
+  INDIVIDUAL = 'Individual'
+}
+
+export enum ProjectLocation {
+  STREET_ADDRESS = 'Street address',
+  LOCATION_COORDINATES = 'Location coordinates',
+  PIN_OR_DRAW = 'Pin or draw your location'
+}
+
 export enum ProjectRelationship {
   OWNER = 'Property owner',
   CONSULTANT = 'Project consultant',

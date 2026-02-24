@@ -395,7 +395,7 @@ export const upsertGeneralProjectDraftController = async (req: Request<never, ne
     }
   });
 
-  res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
+  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateGeneralProjectController = async (req: Request<never, never, GeneralProject>, res: Response) => {

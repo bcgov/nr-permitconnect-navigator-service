@@ -138,9 +138,7 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient): Pro
 
   do {
     id = uuidToActivityId(uuidv4());
-    // No op any errors, 404 is potentially expected here
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    queryResult = await getActivity(tx, id).catch(() => {});
+    queryResult = await getActivity(tx, id);
   } while (queryResult);
 
   return id;

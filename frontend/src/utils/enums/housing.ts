@@ -9,14 +9,3 @@ export enum NumResidentialUnits {
   GREATER_THAN_FIVE_HUNDRED = '>500',
   UNSURE = 'Unsure'
 }
-
-export enum ProjectApplicant {
-  BUSINESS = 'Business',
-  INDIVIDUAL = 'Individual'
-}
-
-export enum ProjectLocation {
-  STREET_ADDRESS = 'Street address',
-  LOCATION_COORDINATES = 'Location coordinates',
-  PIN_OR_DRAW = 'Pin or draw your location'
-}
