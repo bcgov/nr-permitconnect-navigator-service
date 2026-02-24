@@ -11,7 +11,6 @@ const PATH = 'project';
 
 export interface IGeneralProjectService extends IDraftableProjectService {
   getProject(projectId: string): Promise<AxiosResponse<GeneralProject>>;
-
   deleteDraft(draftId: string): Promise<AxiosResponse>;
   getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;
   getDrafts(): Promise<AxiosResponse<Draft<FormSchemaType>[]>>;

@@ -51,7 +51,6 @@ export enum FormState {
 export enum IntakeFormCategory {
   BASIC = 'basic',
   CONTACTS = 'contacts',
-  GENERAL = 'general',
   HOUSING = 'housing',
   LOCATION = 'location',
   PERMITS = 'permits',

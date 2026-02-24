@@ -7,7 +7,7 @@ import { useI18n } from 'vue-i18n';
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { EditableSelect, InputNumber, InputText, RadioList } from '@/components/form';
-import Map from '@/components/housing/maps/Map.vue';
+import Map from '@/components/maps/Map.vue';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Button, Card } from '@/lib/primevue';
 import { externalApiService } from '@/services';

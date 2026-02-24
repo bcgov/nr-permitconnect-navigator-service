@@ -197,13 +197,10 @@ export interface GeneralProjectIntake {
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
-    registeredId: string | null;
-    registeredName: string | null;
-  };
-
-  general: {
     projectName: string;
     projectDescription: string;
+    registeredId: string | null;
+    registeredName: string | null;
   };
 
   location: {
@@ -275,13 +272,13 @@ export interface HousingProjectIntake {
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
+    projectName: string;
+    projectDescription: string;
     registeredId: string | null;
     registeredName: string | null;
   };
 
   housing: {
-    projectName: string;
-    projectDescription: string;
     singleFamilyUnits: string;
     multiFamilyUnits: string;
     otherUnitsDescription: string | null;
