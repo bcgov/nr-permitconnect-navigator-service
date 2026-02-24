@@ -62,7 +62,7 @@ const toast = useToast();
 // Store
 const contactStore = useContactStore();
 const formStore = useFormStore();
-const { getEditable, getFirstErrorTab } = storeToRefs(formStore);
+const { getEditable, getFormType, getFirstErrorTab } = storeToRefs(formStore);
 
 // State
 const activeStep: Ref<number> = ref(0);
@@ -111,7 +111,7 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
     });
 
     if (showToast)
-      toast.success(isAutoSave ? t('projectIntakeForm.draft.autosaved') : t('projectIntakeForm.draft.saved'));
+      toast.success(isAutoSave ? t('projectIntakeForm.draft.autoSaved') : t('projectIntakeForm.draft.saved'));
   } catch (e) {
     generalErrorHandler(e, t('projectIntakeForm.draft.saveFailed'), undefined, toast);
   }
@@ -342,6 +342,14 @@ watch(activeStep, () => {
             :title="t('projectIntakeForm.headers.project')"
             icon="fa-house"
             :error-categories="[IntakeFormCategory.GENERAL]"
+            @click-callback="
+              () => {
+                // Force an autosave to get an activity ID for file uploads
+                if (getFormType === FormType.NEW) {
+                  onSaveDraft(values, true, false);
+                }
+              }
+            "
           />
         </Step>
         <Step

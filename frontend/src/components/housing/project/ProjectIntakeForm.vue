@@ -48,9 +48,10 @@ import {
 import { documentService, enquiryService, externalApiService, housingProjectService, permitService } from '@/services';
 import { useContactStore, useProjectStore, usePermitStore } from '@/store';
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '@/utils/constants/housing';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/housing';
+import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { IntakeFormCategory, SubmissionType } from '@/utils/enums/projectCommon';
 import { getHTMLElement, omit, setEmptyStringsToNull } from '@/utils/utils';
