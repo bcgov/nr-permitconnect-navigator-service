@@ -5,7 +5,7 @@
       "searchContacts": "Search Contacts"
     },
     "contactCardIntakeForm": {
-      "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “contact profile.”",
+      "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “Contact profile.”",
       "header": "Who is the primary contact regarding this project?"
     },
     "footer": {
@@ -636,7 +636,7 @@
     "email": "Email",
     "failedToSaveTheForm": "Failed to save the form",
     "firstName": "First name",
-    "formSaved": "Form saved",
+    "formSaved": "Contact saved",
     "getStarted": "Get started",
     "lastName": "Last name",
     "phone": "Phone",
@@ -660,6 +660,7 @@
   },
   "contactProfileView": {
     "contactProfile": "Contact profile",
+    "getStarted": "Get started",
     "fillOutProfile": "Please fill out your contact profile"
   },
   "contactsProponentsList": {

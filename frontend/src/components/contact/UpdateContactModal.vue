@@ -33,6 +33,7 @@ function updateContact(updatedContact: Contact) {
     <ContactForm
       v-if="contact"
       :contact="contact"
+      :editable="!!visible"
       @update-contact="updateContact"
     >
       <template #cancel>

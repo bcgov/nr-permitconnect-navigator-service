@@ -1,4 +1,4 @@
-import { default as i18n } from '@/i18n';
+import i18n from '@/i18n';
 
 import type { AxiosRequestHeaders, AxiosResponse } from 'axios';
 
@@ -34,6 +34,9 @@ export const PRIMEVUE_STUBS = {
             <slot />
           </button>
         `
+  },
+  Card: {
+    template: '<div><slot name="title" /><slot name="content" /></div>'
   },
   Message: { template: '<div><slot /></div>' },
   Tabs: { template: '<div><slot /></div>' },

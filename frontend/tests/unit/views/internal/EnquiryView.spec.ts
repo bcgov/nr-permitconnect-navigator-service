@@ -3,7 +3,7 @@ import PrimeVue from 'primevue/config';
 import { nextTick } from 'vue';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 
-import { default as i18n } from '@/i18n';
+import i18n from '@/i18n';
 import EnquiryForm from '@/components/enquiry/EnquiryForm.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import { enquiryService, noteHistoryService, userService } from '@/services';
