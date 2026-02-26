@@ -138,7 +138,7 @@ const generateHousingProjectData = async (
 
   if (data.location) {
     location = {
-      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES ? true : false,
+      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,

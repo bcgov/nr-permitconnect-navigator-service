@@ -7,11 +7,11 @@ import { useRouter } from 'vue-router';
 
 import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
-import { default as ElectrificationProjectForm } from '@/components/electrification/project/ProjectFormNavigator.vue';
+import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
-import { default as HousingProjectForm } from '@/components/housing/project/ProjectFormNavigator.vue';
+import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
 import ProjectTeamTable from '@/components/projectCommon/ProjectTeamTable.vue';
@@ -171,7 +171,8 @@ const isCompleted = computed(() => {
 });
 
 function sortComparator(sortValue: number | undefined, a: string | number, b: string | number) {
-  return sortValue === SORT_ORDER.ASCENDING ? (a > b ? 1 : -1) : a < b ? 1 : -1;
+  if (sortValue === SORT_ORDER.ASCENDING) return a > b ? 1 : -1;
+  else return a < b ? 1 : -1;
 }
 
 function toAuthorization(authId: string) {
@@ -557,7 +558,7 @@ onBeforeMount(async () => {
           </div>
           <Button
             data-test-id="add-authorization-button"
-            aria-label="Add authorization"
+            :aria-label="t('views.i.projectView.addAuthorization')"
             :disabled="isCompleted || !useAuthZStore().can(getInitiative, Resource.PERMIT, Action.CREATE)"
             @click="
               router.push({
