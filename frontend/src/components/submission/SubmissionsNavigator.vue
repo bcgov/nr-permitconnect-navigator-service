@@ -38,12 +38,6 @@ import { projectServiceKey } from '@/utils/keys';
 import type { Ref } from 'vue';
 import type { BringForward, Enquiry, Permit, Project, Statistics } from '@/types';
 
-// Constants
-const TAB_INDEX = {
-  SUBMISSION: 0,
-  ENQUIRY: 1
-};
-
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
 const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
@@ -70,7 +64,6 @@ const accordionIndex: Ref<string | null> = ref(null);
 const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
 const relevantBringForwards: Ref<BringForward[]> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
-const showToggle: Ref<boolean> = ref(true);
 
 // Actions
 function assignEnquiriesAndFullName() {
@@ -127,7 +120,12 @@ function getBringForwardInterval(bf: BringForward) {
 
 function getBringForwardStyling(bf: BringForward) {
   const { pastOrToday, withinWeek, withinMonth } = getBringForwardInterval(bf);
-  return pastOrToday ? 'pastOrToday' : withinWeek ? 'withinWeek' : withinMonth ? 'withinMonth' : undefined;
+
+  if (pastOrToday) return 'pastOrToday';
+  if (withinWeek) return 'withinWeek';
+  if (withinMonth) return 'withinMonth';
+
+  return undefined;
 }
 
 function getNameObject(bf: BringForward) {
@@ -219,29 +217,22 @@ onBeforeMount(async () => {
     }
   });
 
-  const accordionKey = window.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
+  const accordionKey = globalThis.sessionStorage.getItem(StorageKey.BF_ACCORDION_IDX);
   if (accordionKey) accordionIndex.value = accordionKey;
 });
 
 watch(accordionIndex, () => {
   if (accordionIndex.value) {
-    window.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value);
+    globalThis.sessionStorage.setItem(StorageKey.BF_ACCORDION_IDX, accordionIndex.value);
   } else {
-    window.sessionStorage.removeItem(StorageKey.BF_ACCORDION_IDX);
+    globalThis.sessionStorage.removeItem(StorageKey.BF_ACCORDION_IDX);
   }
 });
 
 // Watch for changes in the active tab index
 watch(activeTabIndex, (newIndex) => {
-  // wipe out the query when switching tabs otherwise append the tab index to the query
-  if (route.query.tab != newIndex.toString()) {
-    router.replace({
-      name: RouteName.INT_HOUSING,
-      query: {
-        tab: newIndex.toString()
-      }
-    });
-  } else {
+  // Preserve existing queries if the tab index hasn't changed
+  if (route.query.tab === newIndex.toString()) {
     router.replace({
       name: RouteName.INT_HOUSING,
       query: {
@@ -249,10 +240,15 @@ watch(activeTabIndex, (newIndex) => {
         tab: newIndex.toString()
       }
     });
+  } else {
+    // Wipe out the query when switching to a new tab
+    router.replace({
+      name: RouteName.INT_HOUSING,
+      query: {
+        tab: newIndex.toString()
+      }
+    });
   }
-
-  // Show toggle only for submissions and enquiries tab
-  showToggle.value = newIndex === TAB_INDEX.SUBMISSION || newIndex === TAB_INDEX.ENQUIRY;
 });
 
 watchEffect(() => {
