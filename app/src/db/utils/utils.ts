@@ -2,7 +2,6 @@ import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import prisma from '../../db/dataConnection.ts';
-import { getActivity } from '../../services/activity.ts';
 import { SYSTEM_ID } from '../../utils/constants/application.ts';
 import { getLogger } from '../../utils/log.ts';
 import { uuidToActivityId } from '../../utils/utils.ts';
@@ -136,9 +135,10 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient): Pro
 
   do {
     id = uuidToActivityId(uuidv4());
-    // No op any errors, 404 is potentially expected here
-    // eslint-disable-next-line @typescript-eslint/no-empty-function
-    queryResult = await getActivity(tx, id).catch(() => {});
+    queryResult = await tx.activity.findUnique({
+      where: { activityId: id },
+      select: { activityId: true }
+    });
   } while (queryResult);
 
   return id;
