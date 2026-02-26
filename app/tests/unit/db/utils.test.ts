@@ -1,5 +1,6 @@
-import { prismaMock } from '../../__mocks__/prismaMock.ts';
-import { checkDatabaseHealth, checkDatabaseSchema } from '../../../src/db/utils/utils.ts';
+import { TEST_ACTIVITY_HOUSING } from '../data/index.ts';
+import { prismaMock, prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { checkDatabaseHealth, checkDatabaseSchema, generateUniqueActivityId } from '../../../src/db/utils/utils.ts';
 
 describe('checkDatabaseHealth', () => {
   it('should return true when the database is healthy', async () => {
@@ -27,7 +28,7 @@ describe('checkDatabaseSchema', () => {
   const freezeSpy = jest.spyOn(Object, 'freeze');
 
   it('should return true when the database schema matches the expected structure', async () => {
-    const result = await checkDatabaseSchema();
+    const result = checkDatabaseSchema();
 
     expect(result).toBe(true);
     expect(freezeSpy).toHaveBeenCalledTimes(1);
@@ -58,5 +59,25 @@ describe('checkDatabaseSchema', () => {
         'permit_type_initiative_xref'
       ]
     });
+  });
+});
+
+describe('generateUniqueActivityId', () => {
+  it('should return a unique ID on the first attempt if no collision occurs', async () => {
+    prismaTxMock.activity.findUnique.mockResolvedValueOnce(null);
+
+    const result = await generateUniqueActivityId(prismaTxMock);
+
+    expect(prismaTxMock.activity.findUnique).toHaveBeenCalledTimes(1);
+    expect(typeof result).toBe('string');
+  });
+
+  it('should loop and retry generating an ID if a collision is detected', async () => {
+    prismaTxMock.activity.findUnique.mockResolvedValueOnce(TEST_ACTIVITY_HOUSING).mockResolvedValueOnce(null);
+
+    const result = await generateUniqueActivityId(prismaTxMock);
+
+    expect(prismaTxMock.activity.findUnique).toHaveBeenCalledTimes(2);
+    expect(typeof result).toBe('string');
   });
 });
