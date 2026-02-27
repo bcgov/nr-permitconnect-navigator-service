@@ -4,16 +4,17 @@ import type { Permit } from './Permit';
 import type { BasicResponse } from '@/utils/enums/application';
 
 export interface HousingProjectIntake {
+  activityId?: string;
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: ProjectApplicant;
-    registeredId?: string;
-    registeredName?: string;
-
-    projectName: string;
     projectDescription?: string;
+    projectName: string;
+    registeredName?: string;
+    registeredId?: string;
   };
-
+  contact: Contact;
+  draftId?: string;
   housing: {
     singleFamilySelected?: boolean;
     multiFamilySelected?: boolean;
@@ -32,28 +33,20 @@ export interface HousingProjectIntake {
     nonProfitDescription?: string;
     housingCoopDescription?: string;
   };
-
   location: {
+    geomarkUrl?: string;
+    latitude?: number;
+    locality?: string;
+    longitude?: number;
+    ltsaPidLookup?: string;
     naturalDisaster: BasicResponse;
     projectLocation: string;
     projectLocationDescription?: string;
-    ltsaPidLookup?: string;
-    latitude?: number;
-    longitude?: number;
-    locality?: string;
     province?: string;
-    geomarkUrl?: string;
   };
-
   permits: {
+    appliedPermits?: Partial<Permit>[];
     hasAppliedProvincialPermits: BasicResponse;
+    investigatePermits?: Partial<Permit>[];
   };
-
-  appliedPermits?: Partial<Permit>[];
-  investigatePermits?: Partial<Permit>[];
-
-  contact: Contact;
-
-  activityId?: string;
-  draftId?: string;
 }

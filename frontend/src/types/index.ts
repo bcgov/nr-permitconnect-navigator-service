@@ -17,6 +17,7 @@ export type { DeepPartial } from './DeepPartial';
 export type { Document } from './Document';
 export type { Draft } from './Draft';
 export type { ElectrificationProject } from './ElectrificationProject';
+export type { ElectrificationProjectIntake } from './ElectrificationProjectIntake';
 export type { ElectrificationProjectSearchParameters } from './ElectrificationProjectSearchParameters';
 export type { Email } from './Email';
 export type { Enquiry } from './Enquiry';

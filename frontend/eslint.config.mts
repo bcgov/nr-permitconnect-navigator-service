@@ -64,7 +64,6 @@ export default defineConfig([
   {
     rules: {
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
       'linebreak-style': ['error', 'unix'],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
       'max-len': ['warn', { code: 120, comments: 120, ignorePattern: '^(import\\s.+|\\} from)', ignoreUrls: true }],
