@@ -53,9 +53,7 @@ export enum IntakeFormCategory {
   CONTACTS = 'contacts',
   HOUSING = 'housing',
   LOCATION = 'location',
-  PERMITS = 'permits',
-  APPLIED_PERMITS = 'appliedPermits',
-  INVESTIGATE_PERMIS = 'investigatePermits'
+  PERMITS = 'permits'
 }
 
 export enum NoteType {

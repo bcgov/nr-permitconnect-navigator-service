@@ -5,26 +5,44 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import { TextArea } from '@/components/form';
 import { Card, Divider } from '@/lib/primevue';
-import { ref, type ComponentPublicInstance, type Ref } from 'vue';
+import { computed, ref, type ComponentPublicInstance, type Ref } from 'vue';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
-import { useFormStore } from '@/store';
+import { useAppStore, useCodeStore, useFormStore } from '@/store';
 import { storeToRefs } from 'pinia';
+import { Initiative } from '@/utils/enums/application';
+import { useFormValues } from 'vee-validate';
 
 // Props
-const { activityId = undefined, tab = 0 } = defineProps<{
+const {
+  activityId = undefined,
+  tab = 0,
+  tooltip = false
+} = defineProps<{
   activityId?: string;
   tab?: number;
+  tooltip?: boolean;
 }>();
 
 // Composables
 const { t } = useI18n();
+const values = useFormValues();
 
 // Store
-const formStore = useFormStore();
-const { getEditable } = storeToRefs(formStore);
+const { getInitiative } = storeToRefs(useAppStore());
+const { enums } = useCodeStore();
+const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+const header = computed(() => {
+  if (getInitiative.value === Initiative.ELECTRIFICATION) {
+    if (values.value.project.projectType === enums.ElectrificationProjectType.OTHER)
+      return t('projectDescriptionCard.headers.required');
+    else return t('projectDescriptionCard.headers.optional');
+  } else {
+    return t('projectDescriptionCard.headers.required');
+  }
+});
 
 // Actions
 useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
@@ -38,12 +56,15 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
         role="heading"
         aria-level="2"
       >
-        {{ t('projectDescriptionCard.header') }}
+        {{ header }}
       </span>
       <Divider type="solid" />
     </template>
     <template #content>
-      <div class="col-span-12 my-0 py-0">
+      <div
+        v-if="tooltip"
+        class="col-span-12 my-0 py-0"
+      >
         <div class="flex items-center">
           <label>{{ t('projectDescriptionCard.labels.projectDescription') }}</label>
           <Tooltip

@@ -1,4 +1,5 @@
 export { default as AppliedPermitsCard } from './AppliedPermitsCard.vue';
+export { default as BcHydroNumberCard } from './BcHydroNumberCard.vue';
 export { default as CollectionDisclaimer } from './CollectionDisclaimer.vue';
 export { default as ContactCardIntakeForm } from './ContactCardIntakeForm.vue';
 export { default as ContactCardNavForm } from './ContactCardNavForm.vue';
@@ -12,6 +13,7 @@ export { default as NaturalDisasterCard } from './NaturalDisasterCard.vue';
 export { default as PermitLearnCard } from './PermitLearnCard.vue';
 export { default as ProjectDescriptionCard } from './ProjectDescriptionCard.vue';
 export { default as ProjectNameCard } from './ProjectNameCard.vue';
+export { default as ProjectTypeCard } from './ProjectTypeCard.vue';
 export { default as RegisteredBusinessCard } from './RegisteredBusinessCard.vue';
 export { default as RentalUnitsCard } from './RentalUnitsCard.vue';
 export { default as ResidentialUnitsCard } from './ResidentialUnitsCard.vue';
