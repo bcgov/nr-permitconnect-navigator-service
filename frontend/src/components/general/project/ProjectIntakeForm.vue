@@ -20,7 +20,6 @@ import {
   AppliedPermitsCard,
   PermitLearnCard,
   InvestigatePermitsCard,
-  FeedbackConsentCard,
   SaveDraftButton
 } from '@/components/form/common';
 import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
@@ -124,15 +123,24 @@ async function onSubmit(data: FormSchemaType) {
     autoSaveRef.value?.stopAutoSave();
 
     const payload: GeneralProjectIntake = {
+      activityId: draft.value?.activityId,
       basic: {
-        consentToFeedback: data.basic.consentToFeedback,
         projectApplicantType: data.basic.projectApplicantType,
         registeredId: data.basic.registeredId,
         registeredName: data.basic.registeredName,
         projectName: data.basic.projectName,
         projectDescription: data.basic.projectDescription
       },
-
+      contact: {
+        contactId: data.contacts.contactId,
+        firstName: data.contacts.contactFirstName,
+        lastName: data.contacts.contactLastName,
+        email: data.contacts.contactEmail,
+        phoneNumber: data.contacts.contactPhoneNumber,
+        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+        contactPreference: data.contacts.contactPreference
+      },
+      draftId: draft.value?.draftId,
       location: {
         naturalDisaster: data.location.naturalDisaster,
         projectLocation: data.location.projectLocation,
@@ -144,31 +152,15 @@ async function onSubmit(data: FormSchemaType) {
         province: data.location.province,
         geomarkUrl: data.location.geomarkUrl
       },
-
       permits: {
-        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-      },
-
-      appliedPermits: data.appliedPermits?.map((x) => ({
-        submittedDate: x.submittedDate?.toISOString(),
-        permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
-        permitTypeId: x.permitTypeId
-      })),
-
-      investigatePermits: data.investigatePermits,
-
-      contact: {
-        contactId: data.contacts.contactId,
-        firstName: data.contacts.contactFirstName,
-        lastName: data.contacts.contactLastName,
-        email: data.contacts.contactEmail,
-        phoneNumber: data.contacts.contactPhoneNumber,
-        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-        contactPreference: data.contacts.contactPreference
-      },
-
-      activityId: draft.value?.activityId,
-      draftId: draft.value?.draftId
+        appliedPermits: data.permits.appliedPermits?.map((x) => ({
+          submittedDate: x.submittedDate?.toISOString(),
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
+          permitTypeId: x.permitTypeId
+        })),
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+        investigatePermits: data.permits.investigatePermits
+      }
     };
 
     const response = await generalProjectService.submitDraft(payload);
@@ -199,16 +191,19 @@ onBeforeMount(async () => {
     if (draft.value) {
       initialFormValues.value = {
         ...draft.value.data,
-        appliedPermits:
-          draft.value.data.appliedPermits?.map((x) => ({
-            permitTypeId: x.permitTypeId,
-            permitTracking: [
-              {
-                trackingId: x.permitTracking?.[0]?.trackingId
-              }
-            ],
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-          })) ?? []
+        permits: {
+          ...draft.value.data.permits,
+          appliedPermits:
+            draft.value.data.permits.appliedPermits?.map((x) => ({
+              permitTypeId: x.permitTypeId,
+              permitTracking: [
+                {
+                  trackingId: x.permitTracking?.[0]?.trackingId
+                }
+              ],
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })) ?? []
+        }
       };
 
       // Load org book option if company name is already filled
@@ -223,6 +218,13 @@ onBeforeMount(async () => {
         : useContactStore().getContact;
 
       initialFormValues.value = {
+        basic: {
+          projectApplicantType: project.projectApplicantType,
+          isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
+          registeredName: project.companyNameRegistered,
+          projectName: project.projectName,
+          projectDescription: project.projectDescription
+        },
         contacts: {
           contactFirstName: primaryContact?.firstName,
           contactLastName: primaryContact?.lastName,
@@ -231,14 +233,6 @@ onBeforeMount(async () => {
           contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
           contactPreference: primaryContact?.contactPreference,
           contactId: primaryContact?.contactId
-        },
-        basic: {
-          consentToFeedback: project.consentToFeedback,
-          projectApplicantType: project.projectApplicantType,
-          isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered,
-          projectName: project.projectName,
-          projectDescription: project.projectDescription
         },
         location: {
           naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
@@ -253,18 +247,18 @@ onBeforeMount(async () => {
           projectLocationDescription: project?.projectLocationDescription,
           geoJson: project.geoJson
         },
-        appliedPermits: useProjectStore()
-          .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
-          .map((x: Permit) => ({
-            ...x,
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-          })),
         permits: {
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO
-        },
-        investigatePermits: useProjectStore().getPermits.filter(
-          (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
-        )
+          appliedPermits: useProjectStore()
+            .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
+            .map((x: Permit) => ({
+              ...x,
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })),
+          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
+          investigatePermits: useProjectStore().getPermits.filter(
+            (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
+          )
+        }
       };
     } else {
       const userContact = useContactStore().getContact;
@@ -336,7 +330,7 @@ watch(activeStep, () => {
             :index="1"
             :title="t('projectIntakeForm.headers.project')"
             icon="fa-house"
-            :error-categories="[IntakeFormCategory.GENERAL]"
+            :error-categories="[IntakeFormCategory.BASIC]"
             @click-callback="
               () => {
                 // Force an autosave to get an activity ID for file uploads
@@ -368,7 +362,7 @@ watch(activeStep, () => {
             :index="3"
             :title="t('projectIntakeForm.headers.permits')"
             icon="fa-file"
-            :error-categories="[IntakeFormCategory.PERMITS, IntakeFormCategory.APPLIED_PERMITS]"
+            :error-categories="[IntakeFormCategory.PERMITS]"
             :divider="false"
           />
         </Step>
@@ -404,6 +398,7 @@ watch(activeStep, () => {
           <ProjectDescriptionCard
             :activity-id="draft?.activityId ?? project?.activityId"
             :tab="1"
+            :tooltip="true"
           />
           <StepperNavigation v-model:active-step="activeStep">
             <template #content>
@@ -435,7 +430,6 @@ watch(activeStep, () => {
           <AppliedPermitsCard :tab="3" />
           <PermitLearnCard />
           <InvestigatePermitsCard :tab="3" />
-          <FeedbackConsentCard :tab="3" />
           <StepperNavigation
             v-model:active-step="activeStep"
             :next-disabled="true"
