@@ -2,6 +2,7 @@ import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 import { delimitEmails } from '@/utils/utils';
 
+import type { AxiosResponse } from 'axios';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type {
   Email,
@@ -10,10 +11,19 @@ import type {
   ElectrificationProject,
   StatisticFilters
 } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 const PATH = 'project';
 
-const service: IDraftableProjectService = {
+export interface IElectrificationProjectService extends IDraftableProjectService {
+  getProject(projectId: string): Promise<AxiosResponse<ElectrificationProject>>;
+  deleteDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+  getDrafts(): Promise<AxiosResponse<Draft<FormSchemaType>[]>>;
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+}
+
+const service: IElectrificationProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -123,7 +133,7 @@ const service: IDraftableProjectService = {
    * @function updateDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(data?: Partial<Draft>) {
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>) {
     return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, data);
   },
 

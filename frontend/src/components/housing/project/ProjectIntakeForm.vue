@@ -23,7 +23,8 @@ import {
   FeedbackConsentCard,
   SaveDraftButton,
   ResidentialUnitsCard,
-  RentalUnitsCard
+  RentalUnitsCard,
+  FinanciallySupportedCard
 } from '@/components/form/common';
 import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
 import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
@@ -47,7 +48,6 @@ import type {
   PermitTracking
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
-import FinanciallySupportedCard from '@/components/form/common/FinanciallySupportedCard.vue';
 
 // Props
 const { project = undefined } = defineProps<{
@@ -127,6 +127,7 @@ async function onSubmit(data: FormSchemaType) {
     autoSaveRef.value?.stopAutoSave();
 
     const payload: HousingProjectIntake = {
+      activityId: draft.value?.activityId,
       basic: {
         consentToFeedback: data.basic.consentToFeedback,
         projectApplicantType: data.basic.projectApplicantType,
@@ -135,7 +136,16 @@ async function onSubmit(data: FormSchemaType) {
         projectName: data.basic.projectName,
         projectDescription: data.basic.projectDescription
       },
-
+      contact: {
+        contactId: data.contacts.contactId,
+        firstName: data.contacts.contactFirstName,
+        lastName: data.contacts.contactLastName,
+        email: data.contacts.contactEmail,
+        phoneNumber: data.contacts.contactPhoneNumber,
+        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+        contactPreference: data.contacts.contactPreference
+      },
+      draftId: draft.value?.draftId,
       housing: {
         // TODO: Can these 3 'selected' values be removed from the payload/server validator?
         singleFamilySelected: data.housing.singleFamilySelected,
@@ -155,7 +165,6 @@ async function onSubmit(data: FormSchemaType) {
         nonProfitDescription: data.housing.nonProfitDescription,
         housingCoopDescription: data.housing.housingCoopDescription
       },
-
       location: {
         naturalDisaster: data.location.naturalDisaster,
         projectLocation: data.location.projectLocation,
@@ -167,31 +176,15 @@ async function onSubmit(data: FormSchemaType) {
         province: data.location.province,
         geomarkUrl: data.location.geomarkUrl
       },
-
       permits: {
-        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-      },
-
-      appliedPermits: data.appliedPermits?.map((x) => ({
-        submittedDate: x.submittedDate?.toISOString(),
-        permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
-        permitTypeId: x.permitTypeId
-      })),
-
-      investigatePermits: data.investigatePermits,
-
-      contact: {
-        contactId: data.contacts.contactId,
-        firstName: data.contacts.contactFirstName,
-        lastName: data.contacts.contactLastName,
-        email: data.contacts.contactEmail,
-        phoneNumber: data.contacts.contactPhoneNumber,
-        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-        contactPreference: data.contacts.contactPreference
-      },
-
-      activityId: draft.value?.activityId,
-      draftId: draft.value?.draftId
+        appliedPermits: data.permits.appliedPermits?.map((x) => ({
+          submittedDate: x.submittedDate?.toISOString(),
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
+          permitTypeId: x.permitTypeId
+        })),
+        hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
+        investigatePermits: data.permits.investigatePermits
+      }
     };
 
     const response = await housingProjectService.submitDraft(payload);
@@ -222,16 +215,19 @@ onBeforeMount(async () => {
     if (draft.value) {
       initialFormValues.value = {
         ...draft.value.data,
-        appliedPermits:
-          draft.value.data.appliedPermits?.map((x) => ({
-            permitTypeId: x.permitTypeId,
-            permitTracking: [
-              {
-                trackingId: x.permitTracking?.[0]?.trackingId
-              }
-            ],
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-          })) ?? []
+        permits: {
+          ...draft.value.data.permits,
+          appliedPermits:
+            draft.value.data.permits.appliedPermits?.map((x) => ({
+              permitTypeId: x.permitTypeId,
+              permitTracking: [
+                {
+                  trackingId: x.permitTracking?.[0]?.trackingId
+                }
+              ],
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })) ?? []
+        }
       };
 
       // Load org book option if company name is already filled
@@ -246,6 +242,15 @@ onBeforeMount(async () => {
         : useContactStore().getContact;
 
       initialFormValues.value = {
+        basic: {
+          consentToFeedback: project.consentToFeedback,
+          projectApplicantType: project.projectApplicantType,
+          isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
+          registeredName: project.companyNameRegistered,
+          registeredId: project.companyIdRegistered,
+          projectName: project.projectName,
+          projectDescription: project.projectDescription
+        },
         contacts: {
           contactFirstName: primaryContact?.firstName,
           contactLastName: primaryContact?.lastName,
@@ -254,14 +259,6 @@ onBeforeMount(async () => {
           contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
           contactPreference: primaryContact?.contactPreference,
           contactId: primaryContact?.contactId
-        },
-        basic: {
-          consentToFeedback: project.consentToFeedback,
-          projectApplicantType: project.projectApplicantType,
-          isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered,
-          projectName: project.projectName,
-          projectDescription: project.projectDescription
         },
         housing: {
           singleFamilySelected: !!project.singleFamilyUnits,
@@ -294,18 +291,18 @@ onBeforeMount(async () => {
           projectLocationDescription: project?.projectLocationDescription,
           geoJson: project.geoJson
         },
-        appliedPermits: useProjectStore()
-          .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
-          .map((x: Permit) => ({
-            ...x,
-            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-          })),
         permits: {
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO
-        },
-        investigatePermits: useProjectStore().getPermits.filter(
-          (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
-        )
+          appliedPermits: useProjectStore()
+            .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
+            .map((x: Permit) => ({
+              ...x,
+              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+            })),
+          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
+          investigatePermits: useProjectStore().getPermits.filter(
+            (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
+          )
+        }
       };
     } else {
       const userContact = useContactStore().getContact;
@@ -409,7 +406,7 @@ watch(activeStep, () => {
             :index="3"
             :title="t('projectIntakeForm.headers.permits')"
             icon="fa-file"
-            :error-categories="[IntakeFormCategory.PERMITS, IntakeFormCategory.APPLIED_PERMITS]"
+            :error-categories="[IntakeFormCategory.PERMITS]"
             :divider="false"
           />
         </Step>
@@ -448,6 +445,7 @@ watch(activeStep, () => {
           <ProjectDescriptionCard
             :activity-id="draft?.activityId ?? project?.activityId"
             :tab="1"
+            :tooltip="true"
           />
           <StepperNavigation v-model:active-step="activeStep">
             <template #content>

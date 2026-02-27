@@ -4,36 +4,30 @@ import type { Permit } from './Permit';
 import type { BasicResponse } from '@/utils/enums/application';
 
 export interface GeneralProjectIntake {
+  activityId?: string;
   basic: {
-    consentToFeedback: boolean;
     projectApplicantType: ProjectApplicant;
+    projectDescription: string;
+    projectName: string;
     registeredId?: string;
     registeredName?: string;
-    projectName: string;
-    projectDescription: string;
   };
-
+  contact: Contact;
+  draftId?: string;
   location: {
+    geomarkUrl?: string;
+    latitude?: number;
+    locality?: string;
+    longitude?: number;
+    ltsaPidLookup?: string;
     naturalDisaster: BasicResponse;
     projectLocation: string;
     projectLocationDescription?: string;
-    ltsaPidLookup?: string;
-    latitude?: number;
-    longitude?: number;
-    locality?: string;
     province?: string;
-    geomarkUrl?: string;
   };
-
   permits: {
+    appliedPermits?: Partial<Permit>[];
     hasAppliedProvincialPermits: BasicResponse;
+    investigatePermits?: Partial<Permit>[];
   };
-
-  appliedPermits?: Partial<Permit>[];
-  investigatePermits?: Partial<Permit>[];
-
-  contact: Contact;
-
-  activityId?: string;
-  draftId?: string;
 }

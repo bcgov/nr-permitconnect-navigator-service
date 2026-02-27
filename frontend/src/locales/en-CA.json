@@ -259,12 +259,10 @@
     },
     "electrification": {
       "projectIntakeForm": {
-        "bcHydroNumber": "What is your BC Hydro Call for Power project number? (optional)",
         "cancel": "Cancel",
         "confirm": "Confirm",
         "confirmSubmitMessage": "Are you sure you wish to submit this form?",
         "confirmSubmitHeader": "Please confirm submission",
-        "declareBusinessName": "What is the name of your business?",
         "draftAutoSaved": "Draft autosaved",
         "draftSaved": "Draft saved",
         "failedConfirmationEmail": "Failed to send confirmation email",
@@ -937,7 +935,10 @@
     }
   },
   "projectDescriptionCard": {
-    "header": "Help us learn more about your housing project",
+    "headers": {
+      "required": "Help us learn more about your project",
+      "optional": "Help us learn more about your project (optional)"
+    },
     "labels": {
       "projectDescription": "Provide additional information"
     },
@@ -956,10 +957,17 @@
     "isRegisteredTooltip": "Are you registered with OrgBook BC?",
     "projectApplicantTypeCard": "Are you applying as an individual or as a business?",
     "registeredInBc": "Is it registered in B.C?",
+    "declareBusinessName": "What is the name of your business?",
     "placeholders": {
       "inBcRegisteredName": "Type to search the B.C registered name",
       "notInBcRegisteredName": "Type the business/company/organization name"
     }
+  },
+  "projectTypeCard": {
+    "header": "What is your project type?"
+  },
+  "bcHydroNumberCard": {
+    "header": "What is your BC Hydro Call for Power project number? (optional)"
   },
   "appliedPermitsCard": {
     "header": "Have you applied for any provincial permits for this project?",

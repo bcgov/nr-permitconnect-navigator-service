@@ -1,10 +1,11 @@
+import { defineConfig } from 'eslint/config';
 import eslint from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig([
   {
     ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**', 'sbin/**']
   },
@@ -28,7 +29,6 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-require-imports': 'error',
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
       'linebreak-style': ['error', 'unix'],
       'max-len': ['warn', { code: 120, comments: 120, ignoreUrls: true }],
@@ -42,4 +42,4 @@ export default tseslint.config(
       'preserve-caught-error': ['error', { requireCatchParameter: true }]
     }
   }
-);
+]);

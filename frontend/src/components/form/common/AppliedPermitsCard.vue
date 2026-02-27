@@ -24,7 +24,7 @@ const { tab } = defineProps<{
 // Composables
 const { t } = useI18n();
 const values = useFormValues();
-const setAppliedPermits = useSetFieldValue('appliedPermits');
+const setAppliedPermits = useSetFieldValue('permits.appliedPermits');
 
 // Store
 const formStore = useFormStore();
@@ -75,7 +75,7 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
     <template #content>
       <FieldArray
         v-slot="{ fields, push, remove }"
-        name="appliedPermits"
+        name="permits.appliedPermits"
       >
         <RadioList
           name="permits.hasAppliedProvincialPermits"
@@ -107,11 +107,11 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                 <div>
                   <input
                     type="hidden"
-                    :name="`appliedPermits[${idx}].permitId`"
+                    :name="`permits.appliedPermits[${idx}].permitId`"
                   />
                   <Select
                     :disabled="!getEditable"
-                    :name="`appliedPermits[${idx}].permitTypeId`"
+                    :name="`permits.appliedPermits[${idx}].permitTypeId`"
                     :placeholder="t('appliedPermitsCard.placeholders.permitTypeId')"
                     :options="getPermitTypes"
                     :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
@@ -120,14 +120,14 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                   />
                 </div>
                 <InputText
-                  :name="`appliedPermits[${idx}].permitTracking[0].trackingId`"
+                  :name="`permits.appliedPermits[${idx}].permitTracking[0].trackingId`"
                   :disabled="!getEditable"
                   :placeholder="t('appliedPermitsCard.placeholders.trackingId')"
                 />
                 <div class="flex justify-center">
                   <DatePicker
                     class="w-full"
-                    :name="`appliedPermits[${idx}].submittedDate`"
+                    :name="`permits.appliedPermits[${idx}].submittedDate`"
                     :disabled="!getEditable"
                     :placeholder="t('appliedPermitsCard.placeholders.submittedDate')"
                     :max-date="new Date()"

@@ -56,7 +56,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
     <template #content>
       <FieldArray
         v-slot="{ fields, push, remove }"
-        name="investigatePermits"
+        name="permits.investigatePermits"
       >
         <Card class="no-shadow">
           <template #content>
@@ -72,7 +72,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                     <Select
                       class="w-full"
                       :disabled="!getEditable"
-                      :name="`investigatePermits[${idx}].permitTypeId`"
+                      :name="`permits.investigatePermits[${idx}].permitTypeId`"
                       :placeholder="t('investigatePermitsCard.placeholders.permitTypeId')"
                       :options="getPermitTypes"
                       :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
