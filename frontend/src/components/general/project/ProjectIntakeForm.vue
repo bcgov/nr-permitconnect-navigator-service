@@ -29,7 +29,7 @@ import { generalProjectService } from '@/services';
 import { useContactStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
-import { ActivityContactRole, FormState, FormType, IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { GenericObject } from 'vee-validate';
@@ -150,7 +150,8 @@ async function onSubmit(data: FormSchemaType) {
         longitude: data.location.longitude,
         locality: data.location.locality,
         province: data.location.province,
-        geomarkUrl: data.location.geomarkUrl
+        geomarkUrl: data.location.geomarkUrl,
+        streetAddress: data.location.streetAddress
       },
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({
@@ -318,7 +319,6 @@ watch(activeStep, () => {
             :index="0"
             :title="t('projectIntakeForm.headers.basic')"
             icon="fa-user"
-            :error-categories="[IntakeFormCategory.CONTACTS, IntakeFormCategory.BASIC]"
           />
         </Step>
         <Step
@@ -330,7 +330,6 @@ watch(activeStep, () => {
             :index="1"
             :title="t('projectIntakeForm.headers.project')"
             icon="fa-house"
-            :error-categories="[IntakeFormCategory.BASIC]"
             @click-callback="
               () => {
                 // Force an autosave to get an activity ID for file uploads
@@ -350,7 +349,6 @@ watch(activeStep, () => {
             :index="2"
             :title="t('projectIntakeForm.headers.location')"
             icon="fa-location-dot"
-            :error-categories="[IntakeFormCategory.LOCATION]"
           />
         </Step>
         <Step
@@ -362,7 +360,6 @@ watch(activeStep, () => {
             :index="3"
             :title="t('projectIntakeForm.headers.permits')"
             icon="fa-file"
-            :error-categories="[IntakeFormCategory.PERMITS]"
             :divider="false"
           />
         </Step>

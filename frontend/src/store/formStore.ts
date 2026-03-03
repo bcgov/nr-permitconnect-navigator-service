@@ -24,6 +24,7 @@ export const useFormStore = defineStore('form', () => {
     getEditable: computed(
       () => state.formType.value !== FormType.SUBMISSION && state.formState.value === FormState.UNLOCKED
     ),
+    getFormErrors: computed(() => state.formErrors.value),
     getFormState: computed(() => state.formState.value),
     getFormType: computed(() => state.formType.value)
   };

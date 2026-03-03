@@ -54,7 +54,7 @@ const generateElectrificationProjectData = async (
   data: ElectrificationProjectIntake,
   currentContext: CurrentContext
 ) => {
-  let activityId = data.project.activityId;
+  let activityId = data.activityId;
 
   // Create activity and link contact if required
   if (!activityId) {
@@ -63,10 +63,17 @@ const generateElectrificationProjectData = async (
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
-  const UUID = uuidv4();
+
   // Put new electrification project together
+  const UUID = uuidv4();
+
   const electrificationProjectData: ElectrificationProject = {
-    ...data.project,
+    companyIdRegistered: data.basic.registeredId ?? null,
+    companyNameRegistered: data.basic.registeredName ?? null,
+    projectName: data.basic.projectName,
+    projectDescription: data.basic.projectDescription,
+    bcHydroNumber: data.project.bcHydroNumber ?? null,
+    projectType: data.project.projectType ?? null,
     electrificationProjectId: UUID,
     activityId: activityId,
     submittedAt: new Date(),

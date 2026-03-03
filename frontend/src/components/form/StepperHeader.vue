@@ -2,9 +2,9 @@
 import { computed } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
-import { useFormCategoryErrors } from '@/composables/useFormCategoryErrors';
 
 import type { CallbackFn } from '@/types/index.ts';
+import { useFormStore } from '@/store';
 
 // Props
 const {
@@ -12,28 +12,21 @@ const {
   onClickCallback = () => {},
   title,
   icon,
-  divider = true,
-  errorCategories = []
+  divider = true
 } = defineProps<{
   index: number;
   onClickCallback?: CallbackFn;
   title: string;
   icon: string;
   divider?: boolean;
-  errorCategories?: string[];
 }>();
 
 const activeStep = defineModel<number>('activeStep', {
   required: true
 });
 
-// Composables
-const { getFormCategoryErrors } = useFormCategoryErrors();
-
 // State
-const errors = computed(
-  () => getFormCategoryErrors().length && errorCategories.some((field) => getFormCategoryErrors().includes(field))
-);
+const errors = computed(() => useFormStore().getFormErrors.some((x) => x.tab === index));
 </script>
 
 <template>

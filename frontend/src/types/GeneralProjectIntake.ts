@@ -24,6 +24,7 @@ export interface GeneralProjectIntake {
     projectLocation: string;
     projectLocationDescription?: string;
     province?: string;
+    streetAddress?: string;
   };
   permits: {
     appliedPermits?: Partial<Permit>[];
