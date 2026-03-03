@@ -18,10 +18,10 @@ export function useFormNames(target: MaybeRef<ComponentPublicInstance | null>) {
     // Select all elements with a name attribute
     const formElements = root.querySelectorAll('[name]');
 
-    // Obtain a unique list of names, removing any array indice referencefs
+    // Obtain a unique list of form names
     const names = Array.from(formElements).map((el) => (el as HTMLElement).getAttribute('name'));
-    const setNames = Array.from(new Set(Object.values(names).flatMap((x) => x?.split('.')[0]!.split('[')[0])));
-    return setNames.filter((x) => !!x && x.length) as string[];
+
+    return names.filter((x) => !!x && x.length) as string[];
   };
 
   return {
