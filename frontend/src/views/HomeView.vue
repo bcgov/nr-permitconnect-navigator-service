@@ -84,7 +84,10 @@ const toHousing = (): void => {
           </Button>
         </div>
         <div class="space-x-4">
-          <Button @click="toGeneral">
+          <Button
+            v-if="authNStore.getIsAuthenticated && authZStore.canNavigate(NavigationPermission.INT_GENERAL)"
+            @click="toGeneral"
+          >
             <img
               class="mr-4"
               src="@/assets/images/G.Land.Button.svg"

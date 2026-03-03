@@ -7,8 +7,7 @@ import {
   generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
-  generateUpdateStamps,
-  jsonToPrismaInputJson
+  generateUpdateStamps
 } from '../db/utils/utils.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
@@ -142,13 +141,12 @@ const generateHousingProjectData = async (
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
-      geoJson: jsonToPrismaInputJson(data.location.geoJson),
       locationPids: data.location.ltsaPidLookup,
       latitude: data.location.latitude,
       longitude: data.location.longitude,
-      streetAddress: data.location.streetAddress,
       locality: data.location.locality,
-      province: data.location.province
+      province: data.location.province,
+      streetAddress: data.location.streetAddress
     };
   }
 
@@ -158,8 +156,8 @@ const generateHousingProjectData = async (
     };
   }
 
-  if (data.appliedPermits?.length) {
-    appliedPermits = data.appliedPermits.map((x: Permit) => ({
+  if (data.permits.appliedPermits?.length) {
+    appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
       permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId,
       activityId: activityId,
@@ -185,8 +183,8 @@ const generateHousingProjectData = async (
     }));
   }
 
-  if (data.investigatePermits?.length) {
-    investigatePermits = data.investigatePermits.map((x: Permit) => ({
+  if (data.permits.investigatePermits?.length) {
+    investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
       permitId: x.permitId ?? uuidv4(),
       permitTypeId: x.permitTypeId,
       activityId: activityId,
@@ -217,10 +215,10 @@ const generateHousingProjectData = async (
       ...permits,
       housingProjectId: uuidv4(),
       activityId: activityId,
-      submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
+      submittedAt: new Date(),
       submittedBy: getCurrentUsername(currentContext),
-      applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
-      submissionType: data?.submissionType ?? SubmissionType.GUIDANCE,
+      applicationStatus: ApplicationStatus.NEW,
+      submissionType: SubmissionType.GUIDANCE,
       createdAt: null,
       createdBy: null,
       updatedAt: null,

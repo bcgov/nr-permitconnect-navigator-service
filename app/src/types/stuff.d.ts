@@ -98,17 +98,18 @@ export interface CurrentContext {
 }
 
 export interface ElectrificationProjectIntake {
+  activityId?: string;
+  basic: {
+    projectDescription: string | null;
+    projectName: string;
+    registeredId?: string;
+    registeredName?: string;
+  };
   contact: Contact;
   draftId?: string;
   project: {
-    activityId?: string;
-    projectName: string | null;
-    projectDescription: string | null;
-    companyNameRegistered: string | null;
-    companyIdRegistered: string | null;
-    projectType: string | null;
-    bcHydroNumber: string | null;
-    submissionType?: string;
+    bcHydroNumber?: string;
+    projectType?: string;
   };
 }
 
@@ -195,7 +196,6 @@ export interface GeneralProjectIntake {
   submissionType?: SubmissionType;
 
   basic: {
-    consentToFeedback: boolean;
     projectApplicantType: string | null;
     projectName: string;
     projectDescription: string;
@@ -264,11 +264,6 @@ export interface Group extends Partial<IStamps> {
 
 export interface HousingProjectIntake {
   activityId: string | null;
-  draftId: string | null;
-  submittedAt: string | null;
-  applicationStatus?: ApplicationStatus;
-  submissionType?: SubmissionType;
-
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
@@ -277,7 +272,8 @@ export interface HousingProjectIntake {
     registeredId: string | null;
     registeredName: string | null;
   };
-
+  contact: Contact;
+  draftId: string | null;
   housing: {
     singleFamilyUnits: string;
     multiFamilyUnits: string;
@@ -293,28 +289,23 @@ export interface HousingProjectIntake {
     nonProfitDescription: string | null;
     housingCoopDescription: string | null;
   };
-
   location: {
+    geomarkUrl: string | null;
+    latitude: number | null;
+    locality: string;
+    longitude: number | null;
+    ltsaPidLookup: string | null;
     naturalDisaster: string;
     projectLocation: string;
     projectLocationDescription: string;
-    geomarkUrl: string | null;
-    geoJson: Prisma.JsonValue;
-    ltsaPidLookup: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    streetAddress: string;
-    locality: string;
     province: string;
+    streetAddress: string | null;
   };
-
   permits: {
+    appliedPermits: Permit[];
     hasAppliedProvincialPermits?: string | null;
+    investigatePermits: Permit[];
   };
-
-  appliedPermits: Permit[];
-  investigatePermits: Permit[];
-  contact: Contact;
 }
 
 export interface HousingProjectSearchParameters {

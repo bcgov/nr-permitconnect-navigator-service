@@ -2,15 +2,6 @@
  * Housing initiative enums
  */
 
-export enum IntakeFormCategory {
-  APPLICANT = 'applicant',
-  BASIC = 'basic',
-  HOUSING = 'housing',
-  LOCATION = 'location',
-  PERMITS = 'permits',
-  APPLIED_PERMITS = 'appliedPermits'
-}
-
 export enum NumResidentialUnits {
   ONE_TO_NINE = '1-9',
   TEN_TO_FOURTY_NINE = '10-49',

@@ -174,7 +174,8 @@ async function onSubmit(data: FormSchemaType) {
         longitude: data.location.longitude,
         locality: data.location.locality,
         province: data.location.province,
-        geomarkUrl: data.location.geomarkUrl
+        geomarkUrl: data.location.geomarkUrl,
+        streetAddress: data.location.streetAddress
       },
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({
@@ -315,6 +316,11 @@ onBeforeMount(async () => {
           contactPhoneNumber: userContact?.phoneNumber,
           contactApplicantRelationship: userContact?.contactApplicantRelationship,
           contactPreference: userContact?.contactPreference
+        },
+        housing: {
+          singleFamilySelected: false,
+          multiFamilySelected: false,
+          otherSelected: false
         }
       };
     }
@@ -362,7 +368,6 @@ watch(activeStep, () => {
             :index="0"
             :title="t('projectIntakeForm.headers.basic')"
             icon="fa-user"
-            :error-categories="[IntakeFormCategory.CONTACTS, IntakeFormCategory.BASIC]"
           />
         </Step>
         <Step
@@ -374,7 +379,6 @@ watch(activeStep, () => {
             :index="1"
             :title="t('projectIntakeForm.headers.housing')"
             icon="fa-house"
-            :error-categories="[IntakeFormCategory.HOUSING]"
             @click-callback="
               () => {
                 // Force an autosave to get an activity ID for file uploads
@@ -394,7 +398,6 @@ watch(activeStep, () => {
             :index="2"
             :title="t('projectIntakeForm.headers.location')"
             icon="fa-location-dot"
-            :error-categories="[IntakeFormCategory.LOCATION]"
           />
         </Step>
         <Step
@@ -406,7 +409,6 @@ watch(activeStep, () => {
             :index="3"
             :title="t('projectIntakeForm.headers.permits')"
             icon="fa-file"
-            :error-categories="[IntakeFormCategory.PERMITS]"
             :divider="false"
           />
         </Step>
