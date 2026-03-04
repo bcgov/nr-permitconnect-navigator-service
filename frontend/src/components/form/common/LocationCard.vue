@@ -169,13 +169,12 @@ watchEffect(() => {
     <template #title>
       <div class="flex align-items-center">
         <div class="flex flex-grow-1">
-          <span
+          <h6
             class="section-header"
-            role="heading"
             aria-level="2"
           >
             {{ t('locationCard.header') }}
-          </span>
+          </h6>
           <Tooltip
             class="mb-2"
             right

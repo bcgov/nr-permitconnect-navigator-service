@@ -30,6 +30,15 @@ const toast = useToast();
 
 // State
 const formRef = ref<InstanceType<typeof Form> | null>(null);
+const initialFormValues = ref({
+  contactId: contact.contactId,
+  firstName: contact.firstName,
+  lastName: contact.lastName,
+  email: contact.email,
+  phoneNumber: contact.phoneNumber,
+  contactApplicantRelationship: contact.contactApplicantRelationship,
+  contactPreference: contact.contactPreference
+});
 
 // Actions
 const onSubmit = async (values: GenericObject) => {
@@ -58,7 +67,7 @@ const onSubmit = async (values: GenericObject) => {
       v-slot="{ meta }"
       ref="formRef"
       :validation-schema="contactSchema"
-      :initial-values="contact"
+      :initial-values="initialFormValues"
       @submit="onSubmit"
     >
       <FormNavigationGuard />

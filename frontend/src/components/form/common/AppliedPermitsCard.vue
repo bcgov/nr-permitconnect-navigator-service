@@ -56,13 +56,12 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
   <Card ref="formRef">
     <template #title>
       <div class="flex">
-        <span
+        <h6
           class="section-header"
-          role="heading"
           aria-level="2"
         >
           {{ t('appliedPermitsCard.header') }}
-        </span>
+        </h6>
         <Tooltip
           class="mb-2"
           right

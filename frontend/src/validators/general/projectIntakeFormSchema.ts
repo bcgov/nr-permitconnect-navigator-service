@@ -1,8 +1,7 @@
 import { YES_NO_LIST } from '@/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/projectCommon';
-import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { IntakeFormCategory, ProjectApplicant } from '@/utils/enums/projectCommon';
 import { contactSchema, locationValidator, permitsValidator } from '@/validators';
 import { object, string, type InferType } from 'yup';
 
