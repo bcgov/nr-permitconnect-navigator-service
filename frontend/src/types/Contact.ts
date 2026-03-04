@@ -4,12 +4,12 @@ import type { ContactPreference, ProjectRelationship } from '@/utils/enums/proje
 
 interface ContactBase {
   bceidBusinessName?: string;
-  contactApplicantRelationship: ProjectRelationship;
-  contactPreference: ContactPreference;
+  contactApplicantRelationship?: ProjectRelationship;
+  contactPreference?: ContactPreference;
   email: string;
   firstName: string;
   lastName?: string;
-  phoneNumber: string;
+  phoneNumber?: string;
 }
 
 export interface Contact extends ContactBase, IStamps {

@@ -4,9 +4,9 @@ import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 
 export type GeneralProject = {
   generalProjectId: string;
+  projectNumber?: string;
   relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
-  consentToFeedback?: boolean;
   geoJson?: GeoJSON;
   projectLocation: string;
   projectLocationDescription: string;

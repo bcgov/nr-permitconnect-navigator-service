@@ -9,6 +9,7 @@ export interface GeneralProjectIntake {
     projectApplicantType: ProjectApplicant;
     projectDescription: string;
     projectName: string;
+    projectNumber?: string;
     registeredId?: string;
     registeredName?: string;
   };
