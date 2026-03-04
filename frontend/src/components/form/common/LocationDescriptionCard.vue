@@ -34,13 +34,12 @@ useFormErrorWatcher(formRef, 'LocationDescriptionCard', tab);
     <template #title>
       <div class="flex items-center">
         <div class="flex grow">
-          <span
+          <h6
             class="section-header"
-            role="heading"
             aria-level="2"
           >
             {{ t('locationDescriptionCard.header') }}
-          </span>
+          </h6>
         </div>
       </div>
       <Divider type="solid" />

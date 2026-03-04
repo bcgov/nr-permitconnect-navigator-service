@@ -1,6 +1,6 @@
-import { default as externalElectrificationRoutes } from '@/router/externalElectrification';
-import { default as externalGeneralRoutes } from '@/router/externalGeneral';
-import { default as externalHousingRoutes } from '@/router/externalHousing';
+import externalElectrificationRoutes from '@/router/externalElectrification';
+import externalGeneralRoutes from '@/router/externalGeneral';
+import externalHousingRoutes from '@/router/externalHousing';
 import { useAppStore, useContactStore } from '@/store';
 import { RouteName, StorageKey, Zone } from '@/utils/enums/application';
 

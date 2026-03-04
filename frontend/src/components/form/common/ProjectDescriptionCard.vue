@@ -59,13 +59,12 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
 <template>
   <Card ref="formRef">
     <template #title>
-      <span
+      <h6
         class="section-header"
-        role="heading"
         aria-level="2"
       >
         {{ header }}
-      </span>
+      </h6>
       <Divider type="solid" />
     </template>
     <template #content>

@@ -1,6 +1,6 @@
-import { default as internalElectrificationRoutes } from '@/router/internalElectrification';
-import { default as internalGeneralRoutes } from '@/router/internalGeneral';
-import { default as internalHousingRoutes } from '@/router/internalHousing';
+import internalElectrificationRoutes from '@/router/internalElectrification';
+import internalGeneralRoutes from '@/router/internalGeneral';
+import internalHousingRoutes from '@/router/internalHousing';
 import { useAppStore } from '@/store';
 import { Zone } from '@/utils/enums/application';
 
