@@ -1,10 +1,9 @@
 <script setup lang="ts">
 import { Button, useConfirm } from '@/lib/primevue';
 import { ref } from 'vue';
-import { object } from 'yup';
 
-import { contactValidator } from '@/validators';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { contactSchema } from '@/validators';
 
 import type { Ref } from 'vue';
 
@@ -12,6 +11,7 @@ import type { Ref } from 'vue';
 const { formValues } = defineProps<{
   formValues: Record<string, string>;
 }>();
+
 // Emits
 const emit = defineEmits(['onSubmitAssistance']);
 
@@ -20,7 +20,6 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
-const contactSchema = object(contactValidator);
 
 const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
   // Check applicant section is filled

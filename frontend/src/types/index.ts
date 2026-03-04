@@ -11,7 +11,7 @@ export type { BusinessBCeIDAttribute } from './BusinessBCeIDAttribute';
 export type { CallbackFn } from './Callback';
 export type { Code } from './Code';
 export type { Config } from './Config';
-export type { Contact } from './Contact';
+export type { Contact, CreateContactDto } from './Contact';
 export type { ContactSearchParameters } from './ContactSearchParameters';
 export type { DeepPartial } from './DeepPartial';
 export type { Document } from './Document';

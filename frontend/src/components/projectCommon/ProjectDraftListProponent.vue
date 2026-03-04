@@ -13,7 +13,7 @@ import type { Draft, Project } from '@/types';
 // Props
 const { loading, drafts } = defineProps<{
   loading: boolean;
-  drafts: Draft[] | undefined;
+  drafts: Draft<unknown>[] | undefined;
 }>();
 
 // Injections
