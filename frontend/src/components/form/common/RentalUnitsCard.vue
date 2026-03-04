@@ -39,13 +39,12 @@ useFormErrorWatcher(formRef, 'RentalUnitsCard', tab);
   <Card ref="formRef">
     <template #title>
       <div class="flex">
-        <span
+        <h6
           class="section-header"
-          role="heading"
           aria-level="2"
         >
           {{ t('projectIntakeForm.hasRentalUnitsCard') }}
-        </span>
+        </h6>
         <Tooltip
           right
           icon="fa-solid fa-circle-question"

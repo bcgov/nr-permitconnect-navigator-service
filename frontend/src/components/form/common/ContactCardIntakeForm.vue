@@ -38,13 +38,12 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
   <Card ref="formRef">
     <template #title>
       <div class="flex">
-        <span
+        <h6
           class="section-header"
-          role="heading"
           aria-level="2"
         >
           {{ t('contactCardIntakeForm.header') }}
-        </span>
+        </h6>
         <Tooltip
           icon="fa-solid fa-circle-question"
           right

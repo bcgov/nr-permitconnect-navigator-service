@@ -419,6 +419,6 @@ export function toTitleCase(str: string): string {
  * @returns {number | undefined} The number if possible
  */
 export function toNumber(input: string): number | undefined {
-  const i = parseInt(input);
+  const i = Number.parseInt(input);
   return Number.isNaN(i) ? undefined : i;
 }

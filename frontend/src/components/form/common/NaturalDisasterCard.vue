@@ -35,13 +35,12 @@ useFormErrorWatcher(formRef, 'NaturalDisasterCard', tab);
   <Card ref="formRef">
     <template #title>
       <div class="flex">
-        <span
+        <h6
           class="section-header"
-          role="heading"
           aria-level="2"
         >
           {{ t('naturalDisasterCard.header') }}
-        </span>
+        </h6>
       </div>
       <Divider type="solid" />
     </template>

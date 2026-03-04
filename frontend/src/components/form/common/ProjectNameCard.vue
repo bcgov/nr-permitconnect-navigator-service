@@ -33,13 +33,12 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
 <template>
   <Card ref="formRef">
     <template #title>
-      <span
+      <h6
         class="section-header"
-        role="heading"
         aria-level="2"
       >
         {{ t(showNumber ? 'projectNameCard.header.nameAndNumber' : 'projectNameCard.header.name') }}
-      </span>
+      </h6>
       <Divider type="solid" />
     </template>
     <template #content>

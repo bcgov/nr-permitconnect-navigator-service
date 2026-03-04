@@ -43,13 +43,12 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
     <template #title>
       <div class="flex items-center justify-between">
         <div class="flex flex-grow-1">
-          <span
+          <h6
             class="section-header"
-            role="heading"
             aria-level="2"
           >
             {{ t('projectIntakeForm.financiallySupportedCard') }}
-          </span>
+          </h6>
         </div>
         <Button
           class="p-button-sm mr-4 p-button-danger"
