@@ -359,6 +359,7 @@ export const TEST_GENERAL_PROJECT_1: GeneralProject = {
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'COMPANY',
   projectName: 'NAME',
+  projectNumber: null,
   projectDescription: 'DESCRIPTION',
   streetAddress: '123 Street',
   latitude: null,
@@ -402,6 +403,7 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'COMPANY',
   projectName: 'NAME',
+  projectNumber: null,
   projectDescription: 'DESCRIPTION',
   streetAddress: '123 Street',
   latitude: null,
@@ -443,6 +445,7 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   appliedPermits: [],
   basic: {
     projectName: 'NAME',
+    projectNumber: null,
     projectDescription: 'DESCRIPTION',
     projectApplicantType: null,
     registeredId: 'FM0281610',

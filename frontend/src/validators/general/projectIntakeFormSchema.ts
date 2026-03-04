@@ -53,7 +53,8 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
         otherwise: (schema) => schema.notRequired().nullable().label('Business name')
       }),
       projectName: string().required().max(255).label('Project name'),
-      projectDescription: string().required().label('Project description')
+      projectDescription: string().required().label('Project description'),
+      projectNumber: string().max(255).label('Project number')
     }),
     [IntakeFormCategory.LOCATION]: locationValidator,
     [IntakeFormCategory.PERMITS]: permitsValidator

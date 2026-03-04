@@ -129,6 +129,7 @@ async function onSubmit(data: FormSchemaType) {
         registeredId: data.basic.registeredId,
         registeredName: data.basic.registeredName,
         projectName: data.basic.projectName,
+        projectNumber: data.basic.projectNumber,
         projectDescription: data.basic.projectDescription
       },
       contact: {
@@ -224,6 +225,7 @@ onBeforeMount(async () => {
           isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
           registeredName: project.companyNameRegistered,
           projectName: project.projectName,
+          projectNumber: project.projectNumber,
           projectDescription: project.projectDescription
         },
         contacts: {
@@ -391,7 +393,10 @@ watch(activeStep, () => {
         <!-- Project -->
         <StepPanel :value="1">
           <ValidationBanner />
-          <ProjectNameCard :tab="1" />
+          <ProjectNameCard
+            :tab="1"
+            :show-number="true"
+          />
           <ProjectDescriptionCard
             :activity-id="draft?.activityId ?? project?.activityId"
             :tab="1"

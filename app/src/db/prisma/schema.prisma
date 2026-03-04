@@ -813,6 +813,7 @@ model general_project {
   naturalDisaster             Boolean   @default(false) @map("natural_disaster")
   aaiUpdated                  Boolean   @default(false) @map("aai_updated")
   applicationStatus           String?   @map("application_status")
+  projectNumber               String?   @map("project_number")
   projectDescription          String?   @map("project_description")
   projectApplicantType        String?   @map("project_applicant_type")
   projectLocation             String?   @map("project_location")

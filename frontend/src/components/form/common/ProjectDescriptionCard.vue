@@ -44,6 +44,14 @@ const header = computed(() => {
   }
 });
 
+const textAreaPlaceholder = computed(() => {
+  if (getInitiative.value === Initiative.GENERAL) {
+    return t('projectDescriptionCard.placeholders.projectDescription');
+  } else {
+    return t('projectDescriptionCard.placeholders.projectDescriptionShort');
+  }
+});
+
 // Actions
 useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
 </script>
@@ -78,7 +86,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
       <TextArea
         class="col-span-12 mb-0 pb-0"
         name="basic.projectDescription"
-        :placeholder="t('projectDescriptionCard.placeholders.projectDescription')"
+        :placeholder="textAreaPlaceholder"
         :disabled="!getEditable"
       />
       <i18n-t

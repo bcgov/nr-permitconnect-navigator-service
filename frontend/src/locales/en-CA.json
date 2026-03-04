@@ -893,9 +893,17 @@
     "message": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
   },
   "projectNameCard": {
-    "header": "Tell us your project name",
+    "header": {
+      "name": "Tell us your project name",
+      "nameAndNumber": "Tell us your project name and number"
+    },
     "labels": {
-      "projectName": "Project name - your preferred name for your project"
+      "projectName": "Project name",
+      "projectNameLong": "Project name - your preferred name for your project",
+      "projectNumber": "Project number"
+    },
+    "tooltips": {
+      "projectNumber": "Please provide the project number you are currently using for this work. This will help us ensure we reference the project number you are familiar with."
     }
   },
   "projectDescriptionCard": {
@@ -910,7 +918,8 @@
       "shapeFiles": "shape files"
     },
     "placeholders": {
-      "projectDescription": "Provide us with additional information - short description about the project and/or project website link"
+      "projectDescriptionShort": "Provide us with additional information - short description about the project and/or project website link.",
+      "projectDescription": "A short description about the planned activities on the project and whether the project requires any environmental or last use considerations."
     },
     "upload": "Upload documents about your project (PDFs, maps, {shapeLink}, etc)"
   },

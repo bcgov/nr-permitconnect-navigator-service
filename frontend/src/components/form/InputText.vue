@@ -12,7 +12,8 @@ const {
   placeholder = '',
   disabled = false,
   floatLabel = false,
-  bold = true
+  bold = true,
+  tooltip = undefined
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -21,6 +22,7 @@ const {
   disabled?: boolean;
   bold?: boolean;
   floatLabel?: boolean;
+  tooltip?: string;
 }>();
 
 // Emits
@@ -31,7 +33,7 @@ const emit = defineEmits(['onChange', 'onClick', 'onInput']);
   <div>
     <FloatLabel v-if="floatLabel">
       <InputTextInternal
-        v-bind="{ label, name, placeholder, disabled, bold }"
+        v-bind="{ label, name, placeholder, disabled, bold, tooltip }"
         @on-change="(e: Event) => emit('onChange', e)"
         @on-click="(e: Event) => emit('onClick', e)"
         @on-input="(e: Event) => emit('onInput', e)"
@@ -39,7 +41,7 @@ const emit = defineEmits(['onChange', 'onClick', 'onInput']);
     </FloatLabel>
     <InputTextInternal
       v-else
-      v-bind="{ label, name, placeholder, disabled, bold }"
+      v-bind="{ label, name, placeholder, disabled, bold, tooltip }"
       @on-change="(e: Event) => emit('onChange', e)"
       @on-click="(e: Event) => emit('onClick', e)"
       @on-input="(e: Event) => emit('onInput', e)"
