@@ -133,10 +133,10 @@ async function onSubmit(data: FormSchemaType) {
       },
       contact: {
         contactId: data.contacts.contactId,
-        firstName: data.contacts.contactFirstName,
-        lastName: data.contacts.contactLastName,
-        email: data.contacts.contactEmail,
-        phoneNumber: data.contacts.contactPhoneNumber,
+        firstName: data.contacts.firstName,
+        lastName: data.contacts.lastName,
+        email: data.contacts.email,
+        phoneNumber: data.contacts.phoneNumber,
         contactApplicantRelationship: data.contacts.contactApplicantRelationship,
         contactPreference: data.contacts.contactPreference
       },
@@ -227,10 +227,10 @@ onBeforeMount(async () => {
           projectDescription: project.projectDescription
         },
         contacts: {
-          contactFirstName: primaryContact?.firstName,
-          contactLastName: primaryContact?.lastName,
-          contactPhoneNumber: primaryContact?.phoneNumber,
-          contactEmail: primaryContact?.email,
+          firstName: primaryContact?.firstName,
+          lastName: primaryContact?.lastName,
+          phoneNumber: primaryContact?.phoneNumber,
+          email: primaryContact?.email,
           contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
           contactPreference: primaryContact?.contactPreference,
           contactId: primaryContact?.contactId
@@ -266,10 +266,10 @@ onBeforeMount(async () => {
       initialFormValues.value = {
         contacts: {
           contactId: userContact?.contactId,
-          contactFirstName: userContact?.firstName,
-          contactLastName: userContact?.lastName,
-          contactEmail: userContact?.email,
-          contactPhoneNumber: userContact?.phoneNumber,
+          firstName: userContact?.firstName,
+          lastName: userContact?.lastName,
+          email: userContact?.email,
+          phoneNumber: userContact?.phoneNumber,
           contactApplicantRelationship: userContact?.contactApplicantRelationship,
           contactPreference: userContact?.contactPreference
         }

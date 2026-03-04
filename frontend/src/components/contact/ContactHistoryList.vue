@@ -52,7 +52,7 @@ function getRouteToObject(data: Project | Enquiry) {
       name: RouteName.INT_HOUSING_PROJECT,
       params: { projectId: data.housingProjectId }
     };
-  } else {
+  } else if ('enquiryId' in data) {
     toObject = {
       name: RouteName.INT_HOUSING_ENQUIRY,
       params: { enquiryId: data.enquiryId }

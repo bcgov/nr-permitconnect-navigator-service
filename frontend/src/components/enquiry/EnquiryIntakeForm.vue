@@ -22,7 +22,7 @@ import {
   enquiryRouteNameKey
 } from '@/utils/keys';
 import { omit } from '@/utils/utils';
-import { contactValidator } from '@/validators';
+import { contactSchema } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -70,8 +70,7 @@ const trackingId: Ref<string> = computed(() => {
 });
 
 // Form validation schema
-const formSchema = object({
-  ...contactValidator,
+const formSchema = contactSchema.shape({
   [IntakeFormCategory.BASIC]: object({
     enquiryDescription: string().required().label('Enquiry')
   })

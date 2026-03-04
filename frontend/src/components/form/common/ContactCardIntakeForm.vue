@@ -12,11 +12,11 @@ import { useFormStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
-import type { ContactSchemaType } from '@/validators/contact';
+import type { Contact } from '@/types';
 
 // Props
 const { initialFormValues = undefined, tab = 0 } = defineProps<{
-  initialFormValues?: Partial<ContactSchemaType>;
+  initialFormValues?: Partial<Contact>;
   tab?: number;
 }>();
 
@@ -59,26 +59,26 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           :name="`contacts.firstName`"
           :label="t('contactCardIntakeForm.labels.firstName')"
           :bold="false"
-          :disabled="!!initialFormValues.contacts?.firstName || !editable"
+          :disabled="!!initialFormValues?.firstName || !getEditable"
         />
         <InputText
           :name="`contacts.lastName`"
           :label="t('contactCardIntakeForm.labels.lastName')"
           :bold="false"
-          :disabled="!!initialFormValues.contacts?.lastName || !editable"
+          :disabled="!!initialFormValues?.lastName || !getEditable"
         />
         <InputMask
           :name="`contacts.phoneNumber`"
           mask="(999) 999-9999"
           :label="t('contactCardIntakeForm.labels.phoneNumber')"
           :bold="false"
-          :disabled="!!initialFormValues.contacts?.phoneNumber || !editable"
+          :disabled="!!initialFormValues?.phoneNumber || !getEditable"
         />
         <InputText
           :name="`contacts.email`"
           :label="t('contactCardIntakeForm.labels.email')"
           :bold="false"
-          :disabled="!!initialFormValues.contacts?.email || !editable"
+          :disabled="!!initialFormValues?.email || !getEditable"
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"
