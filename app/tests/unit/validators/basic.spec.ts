@@ -1,27 +1,4 @@
-import { ProjectApplicant } from '../../../src/utils/enums/housing';
-import { basicIntake, basicEnquiry } from '../../../src/validators/basic';
-
-describe('basicIntakeSchema', () => {
-  it('should validate when projectApplicantType is valid', () => {
-    const data = {
-      projectApplicantType: ProjectApplicant.BUSINESS,
-      registeredName: 'My Company'
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeUndefined();
-  });
-
-  it('should throw an error when projectApplicantType is invalid', () => {
-    const data = {
-      projectApplicantType: 'invalid',
-      registeredName: 'My Company'
-    };
-
-    const result = basicIntake.validate(data);
-    expect(result.error).toBeDefined();
-  });
-});
+import { basicEnquiry } from '../../../src/validators/basic';
 
 function validEnquiryData() {
   return {

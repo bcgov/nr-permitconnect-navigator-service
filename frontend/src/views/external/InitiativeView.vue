@@ -113,22 +113,6 @@ provide(projectIntakeRouteNameKey, provideProjectIntakeRouteName);
 
 // Actions
 async function createIntake() {
-  // const contact = useContactStore().getContact;
-  // const response = await provideDraftableProjectService.value.updateDraft({
-  //   data: {
-  //     contacts: {
-  //       contactId: contact?.contactId,
-  //       userId: contact?.userId,
-  //       contactFirstName: contact?.firstName,
-  //       contactLastName: contact?.lastName,
-  //       contactEmail: contact?.email,
-  //       contactPhoneNumber: contact?.phoneNumber,
-  //       contactApplicantRelationship: contact?.contactApplicantRelationship,
-  //       contactPreference: contact?.contactPreference
-  //     }
-  //   }
-  // });
-
   router.push({
     name: provideProjectIntakeRouteName.value
   });

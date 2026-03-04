@@ -6,6 +6,8 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
+import type { Draft } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Constants
 const PATH = 'project';
@@ -17,11 +19,11 @@ const testObj = {
   field2: 'testField2'
 };
 
-const testDraft = {
+const testDraft: Partial<Draft<FormSchemaType>> = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
-  data: { key: 'value' },
+  data: {} as FormSchemaType,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
@@ -197,7 +199,7 @@ describe('electrificationProjectService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.updateDraft(testDraft);
+      electrificationProjectService.upsertDraft(testDraft);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);

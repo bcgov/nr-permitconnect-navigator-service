@@ -1,13 +1,9 @@
+import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 
+import { default as i18n } from '@/i18n';
 import { shallowMount } from '@vue/test-utils';
 import NaturalDisasterCard from '@/components/form/common/NaturalDisasterCard.vue';
-
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -20,7 +16,13 @@ afterEach(() => {
 const wrapperSettings = () => ({
   props: {},
   global: {
-    plugins: [PrimeVue],
+    plugins: [
+      createTestingPinia({
+        initialState: {}
+      }),
+      i18n,
+      PrimeVue
+    ],
     stubs: ['font-awesome-icon']
   }
 });

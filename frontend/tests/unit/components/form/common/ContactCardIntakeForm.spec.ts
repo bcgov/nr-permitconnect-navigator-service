@@ -1,14 +1,10 @@
+import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
-
 import { shallowMount } from '@vue/test-utils';
+
+import { default as i18n } from '@/i18n';
 import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
-
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -21,18 +17,23 @@ afterEach(() => {
 const wrapperSettings = () => ({
   props: {
     initialFormValues: {
-      contacts: {
-        contactFirstName: 'Test',
-        contactLastName: 'Test',
-        contactPhoneNumber: 'Test',
-        contactEmail: 'Test',
-        contactApplicantRelationship: ProjectRelationship.OWNER,
-        contactPreference: ContactPreference.EITHER
-      }
+      contactId: '123',
+      firstName: 'Test',
+      lastName: 'Test',
+      phoneNumber: 'Test',
+      email: 'Test',
+      contactApplicantRelationship: ProjectRelationship.OWNER,
+      contactPreference: ContactPreference.EITHER
     }
   },
   global: {
-    plugins: [PrimeVue],
+    plugins: [
+      createTestingPinia({
+        initialState: {}
+      }),
+      i18n,
+      PrimeVue
+    ],
     stubs: ['font-awesome-icon']
   }
 });

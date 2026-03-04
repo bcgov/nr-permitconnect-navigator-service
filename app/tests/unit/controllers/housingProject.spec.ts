@@ -293,8 +293,10 @@ describe('createHousingProjectController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -740,8 +742,10 @@ describe('submitHousingProjectDraftController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -828,12 +832,12 @@ describe('updateHousingProjectDraftController', () => {
     const req = {
       body: {
         data: {
-          contactFirstName: 'test',
-          contactLastName: 'person',
-          basic: {
-            projectApplicantType: 'Business'
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
           },
-          housing: {
+          basic: {
+            projectApplicantType: 'Business',
             projectName: 'TheProject'
           },
           location: {
@@ -870,10 +874,14 @@ describe('updateHousingProjectDraftController', () => {
       deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.HOUSING_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 
   it('updates draft with the given draftId and activityId', async () => {
@@ -881,19 +889,21 @@ describe('updateHousingProjectDraftController', () => {
       body: {
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
         activityId: 'ACTI1234',
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        housing: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
+          },
+          basic: {
+            projectApplicantType: 'Business',
+            projectName: 'TheProject'
+          },
+          location: {
+            projectLocation: 'Some place'
+          },
+          permits: {
+            hasAppliedProvincialPermits: true
+          }
         }
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -913,10 +923,14 @@ describe('updateHousingProjectDraftController', () => {
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.HOUSING_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 });
 
