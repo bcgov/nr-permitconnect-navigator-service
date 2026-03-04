@@ -9,6 +9,8 @@ import { Initiative } from '@/utils/enums/application';
 import NoteView from '@/views/internal/NoteView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
+import type { ElectrificationProject, HousingProject } from '@/types';
+
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
 
@@ -95,10 +97,13 @@ beforeEach(() => {
     mockAxiosResponse([{ noteHistoryId: '1', createdBy: '123' }])
   );
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ activityId: '2', electrificationProjectId: '2' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ activityId: '3', housingProjectId: '3' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
 });
 

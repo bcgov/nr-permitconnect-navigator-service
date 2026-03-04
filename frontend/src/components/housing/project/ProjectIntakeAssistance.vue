@@ -51,10 +51,10 @@ async function onAssistanceRequest() {
       },
       contact: setEmptyStringsToNull({
         contactId: formValues.value.contacts.contactId,
-        firstName: formValues.value.contacts.contactFirstName,
-        lastName: formValues.value.contacts.contactLastName,
-        phoneNumber: formValues.value.contacts.contactPhoneNumber,
-        email: formValues.value.contacts.contactEmail,
+        firstName: formValues.value.contacts.firstName,
+        lastName: formValues.value.contacts.lastName,
+        phoneNumber: formValues.value.contacts.phoneNumber,
+        email: formValues.value.contacts.email,
         contactApplicantRelationship: formValues.value.contacts.contactApplicantRelationship,
         contactPreference: formValues.value.contacts.contactPreference
       })

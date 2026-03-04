@@ -65,7 +65,6 @@ const generateGeneralProjectData = async (
 
   if (data.basic) {
     basic = {
-      consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
       companyNameRegistered: data.basic.registeredName,

@@ -83,11 +83,13 @@ describe('createElectrificationProjectController', () => {
   it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
-        project: {
+        basic: {
           projectName: null,
           projectDescription: null,
-          companyIdRegistered: null,
-          companyNameRegistered: null,
+          registeredId: null,
+          registeredName: null
+        },
+        project: {
           projectType: null,
           bcHydroNumber: null
         }
@@ -506,19 +508,13 @@ describe('updateElectrificationProjectDraftController', () => {
     const req = {
       body: {
         data: {
-          contactFirstName: 'test',
-          contactLastName: 'person',
           basic: {
-            projectApplicantType: 'Business'
-          },
-          electrification: {
+            projectApplicantType: 'Business',
             projectName: 'TheProject'
           },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
           }
         }
       },
@@ -548,10 +544,14 @@ describe('updateElectrificationProjectDraftController', () => {
       deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 
   it('updates draft with the given draftId and activityId', async () => {
@@ -559,19 +559,15 @@ describe('updateElectrificationProjectDraftController', () => {
       body: {
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
         activityId: 'ACTI1234',
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        electrification: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          basic: {
+            projectApplicantType: 'Business',
+            projectName: 'TheProject'
+          },
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
+          }
         }
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -591,10 +587,14 @@ describe('updateElectrificationProjectDraftController', () => {
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 });
 

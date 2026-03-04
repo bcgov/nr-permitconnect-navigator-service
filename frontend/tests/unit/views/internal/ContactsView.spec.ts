@@ -11,7 +11,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import ContactsView from '@/views/internal/ContactsView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ActivityContact } from '@/types';
+import type { ActivityContact, Contact } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -119,7 +119,7 @@ describe('ContactsView.vue', () => {
 
   it('passes contacts to ContactsProponentsList', async () => {
     vi.mocked(contactService.searchContacts).mockResolvedValueOnce(
-      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }])
+      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }] as Contact[])
     );
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
@@ -133,7 +133,7 @@ describe('ContactsView.vue', () => {
 
   it('filters to contacts with activityContacts', async () => {
     vi.mocked(contactService.searchContacts).mockResolvedValueOnce(
-      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }, { contactId: '2' }])
+      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }, { contactId: '2' }] as Contact[])
     );
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
@@ -150,7 +150,7 @@ describe('ContactsView.vue', () => {
       mockAxiosResponse([
         { contactId: '1', activityContact: [{} as ActivityContact] },
         { contactId: '2', activityContact: [{} as ActivityContact] }
-      ])
+      ] as Contact[])
     );
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());

@@ -55,10 +55,10 @@ getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
 getProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 interface FormValues {
-  contactFirstName: string;
-  contactLastName: string;
-  contactEmail: string;
-  contactPhoneNumber: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: string;
   contactApplicantRelationship: ProjectRelationship;
   contactPreference: ContactPreference;
   contactId?: string;
@@ -70,13 +70,13 @@ interface FormValues {
 
 function basicValidFormValues(): FormValues {
   return {
-    contactFirstName: 'testFirst',
-    contactLastName: 'testLast',
-    contactEmail: 'test@email.com',
-    contactPhoneNumber: '1234567890',
+    firstName: 'testFirst',
+    lastName: 'testLast',
+    email: 'test@email.com',
+    phoneNumber: '1234567890',
     contactApplicantRelationship: ProjectRelationship.OWNER,
     contactPreference: ContactPreference.EMAIL,
-    contactId: 'someId',
+    contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
     basic: {
       enquiryDescription: 'test description',
       relatedActivityId: 'some Id'
@@ -140,10 +140,10 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const firstNameInput = wrapper.get('[name="contactFirstName"]');
-      const lastNameInput = wrapper.get('[name="contactLastName"]');
-      const phoneInput = wrapper.get('[name="contactPhoneNumber"]');
-      const emailInput = wrapper.get('[name="contactEmail"]');
+      const firstNameInput = wrapper.get('[name="firstName"]');
+      const lastNameInput = wrapper.get('[name="lastName"]');
+      const phoneInput = wrapper.get('[name="phoneNumber"]');
+      const emailInput = wrapper.get('[name="email"]');
 
       expect(firstNameInput.isVisible()).toBeTruthy();
       expect(lastNameInput.isVisible()).toBeTruthy();
@@ -166,12 +166,12 @@ describe('EnquiryIntakeForm', () => {
         ...basicValidFormValues()
       };
 
-      modifiedFormValues.contactEmail = 'bad@email';
+      modifiedFormValues.email = 'bad@email';
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
       expect(Object.keys(result.errors).length).toBe(1);
-      expect(result.errors['contactEmail']).toBeTruthy();
+      expect(result.errors['email']).toBeTruthy();
     });
 
     it('generates missing first name error', async () => {
@@ -184,15 +184,16 @@ describe('EnquiryIntakeForm', () => {
         ...basicValidFormValues()
       };
 
-      modifiedFormValues.contactFirstName = '';
+      modifiedFormValues.firstName = '';
 
       formRef.setValues(modifiedFormValues);
 
       const result = await formRef?.validate();
       expect(Object.keys(result.errors).length).toBe(1);
-      expect(result.errors['contactFirstName']).toBeTruthy();
+      expect(result.errors['firstName']).toBeTruthy();
     });
   });
+
   it('sets editable to false when enquiry ID given', async () => {
     const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
 

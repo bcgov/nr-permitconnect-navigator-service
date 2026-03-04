@@ -9,6 +9,8 @@ import { Initiative } from '@/utils/enums/application';
 import EnquiryIntakeView from '@/views/external/EnquiryIntakeView.vue';
 import { mockAxiosResponse, t } from '../../../helpers';
 
+import type { ElectrificationProject, HousingProject } from '@/types';
+
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
 
@@ -73,10 +75,13 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
   vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse({ permitId: '123', activityId: '123' }));
 });

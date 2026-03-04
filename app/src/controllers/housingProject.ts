@@ -484,7 +484,7 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
     }
   });
 
-  res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
+  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {

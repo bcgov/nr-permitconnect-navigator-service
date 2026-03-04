@@ -45,11 +45,11 @@ describe('deleteActivityHard', () => {
 });
 
 describe('getActivity', () => {
-  it('calls activity.findFirstOrThrow and returns result', async () => {
-    prismaTxMock.activity.findFirstOrThrow.mockResolvedValueOnce(ACTIVITY);
+  it('calls activity.findFirst and returns result', async () => {
+    prismaTxMock.activity.findFirst.mockResolvedValueOnce(ACTIVITY);
     const response = await activityService.getActivity(prismaTxMock, 'ABCD1234');
 
-    expect(prismaTxMock.activity.findFirstOrThrow).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.activity.findFirst).toHaveBeenCalledTimes(1);
     expect(response).toStrictEqual(ACTIVITY);
   });
 });
