@@ -1,19 +1,26 @@
-import { string, object, type InferType } from 'yup';
+import { object, ObjectSchema, string } from 'yup';
 
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { emailValidator } from '@/validators/common';
 
-const contact = {
+import type { Contact, CreateContactDto } from '@/types';
+import type { IStamps } from '@/interfaces';
+
+export const createContactSchema: ObjectSchema<CreateContactDto> = object({
+  bceidBusinessName: string().optional().label('BCeID business name'),
+  contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
   contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-  contactEmail: emailValidator('Contact email must be valid').required().label('Contact email'),
-  contactFirstName: string().required().max(255).label('Contact first name'),
-  contactLastName: string().max(255).label('Contact last name'),
-  contactPhoneNumber: string().required().label('Contact phone number'),
-  contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project')
-};
+  email: emailValidator('Email must be valid').required().label('Email'),
+  firstName: string().required().max(255).label('First name'),
+  lastName: string().max(255).optional().label('Last name'),
+  phoneNumber: string().required().label('Phone number')
+});
 
-export default contact;
+type ContactDto = Omit<Contact, keyof IStamps | 'activityContact'>;
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const yupContact = object({ ...contact });
-export type ContactSchemaType = InferType<typeof yupContact>;
+export const contactSchema: ObjectSchema<ContactDto> = createContactSchema.concat(
+  object({
+    contactId: string().required().uuid('v4').label('Contact ID'),
+    userId: string().uuid('v4').optional().label('User ID')
+  })
+);

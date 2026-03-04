@@ -22,7 +22,7 @@ import {
   enquiryRouteNameKey
 } from '@/utils/keys';
 import { omit } from '@/utils/utils';
-import { contactValidator } from '@/validators';
+import { contactSchema } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -70,8 +70,7 @@ const trackingId: Ref<string> = computed(() => {
 });
 
 // Form validation schema
-const formSchema = object({
-  ...contactValidator,
+const formSchema = contactSchema.shape({
   [IntakeFormCategory.BASIC]: object({
     enquiryDescription: string().required().label('Enquiry')
   })
@@ -130,10 +129,10 @@ async function loadEnquiry() {
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contactFirstName: firstContact?.firstName,
-      contactLastName: firstContact?.lastName,
-      contactPhoneNumber: firstContact?.phoneNumber,
-      contactEmail: firstContact?.email,
+      firstName: firstContact?.firstName,
+      lastName: firstContact?.lastName,
+      phoneNumber: firstContact?.phoneNumber,
+      email: firstContact?.email,
       contactApplicantRelationship: firstContact?.contactApplicantRelationship,
       contactPreference: firstContact?.contactPreference,
       contactId: firstContact?.contactId,
@@ -166,10 +165,10 @@ async function onSubmit(values: GenericObject) {
     // Grab the contact information
     const contact = {
       contactId: values.contactId,
-      firstName: values.contactFirstName,
-      lastName: values.contactLastName,
-      phoneNumber: values.contactPhoneNumber,
-      email: values.contactEmail,
+      firstName: values.firstName,
+      lastName: values.lastName,
+      phoneNumber: values.phoneNumber,
+      email: values.email,
       contactApplicantRelationship: values.contactApplicantRelationship,
       contactPreference: values.contactPreference
     };
@@ -177,10 +176,10 @@ async function onSubmit(values: GenericObject) {
     // Omit all the fields we dont want to send
     const dataOmitted = omit({ ...values }, [
       'contactId',
-      'contactFirstName',
-      'contactLastName',
-      'contactPhoneNumber',
-      'contactEmail',
+      'firstName',
+      'lastName',
+      'phoneNumber',
+      'email',
       'contactApplicantRelationship',
       'contactPreference'
     ]);
@@ -308,32 +307,32 @@ onBeforeMount(async () => {
           <div class="grid grid-cols-12 gap-4">
             <InputText
               class="col-span-6"
-              name="contactFirstName"
+              name="firstName"
               label="First name"
               :bold="false"
-              :disabled="!!initialFormValues?.contactFirstName || !editable"
+              :disabled="!!initialFormValues?.firstName || !editable"
             />
             <InputText
               class="col-span-6"
-              name="contactLastName"
+              name="lastName"
               label="Last name"
               :bold="false"
-              :disabled="!!initialFormValues?.contactLastName || !editable"
+              :disabled="!!initialFormValues?.lastName || !editable"
             />
             <InputMask
               class="col-span-6"
-              name="contactPhoneNumber"
+              name="phoneNumber"
               mask="(999) 999-9999"
               label="Phone number"
               :bold="false"
-              :disabled="!!initialFormValues?.contactPhoneNumber || !editable"
+              :disabled="!!initialFormValues?.phoneNumber || !editable"
             />
             <InputText
               class="col-span-6"
-              name="contactEmail"
+              name="email"
               label="Email"
               :bold="false"
-              :disabled="!!initialFormValues?.contactEmail || !editable"
+              :disabled="!!initialFormValues?.email || !editable"
             />
             <Select
               class="col-span-6"

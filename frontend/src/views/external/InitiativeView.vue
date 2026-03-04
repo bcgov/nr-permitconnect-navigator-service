@@ -15,7 +15,7 @@ import {
   housingProjectService,
   permitService
 } from '@/services';
-import { useAppStore, useContactStore } from '@/store';
+import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitState } from '@/utils/enums/permit';

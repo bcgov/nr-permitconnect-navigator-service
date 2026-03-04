@@ -4,7 +4,7 @@ import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
-import { contactValidator, locationValidator, permitsValidator } from '@/validators';
+import { contactSchema, locationValidator, permitsValidator } from '@/validators';
 import { boolean, object, string, type InferType } from 'yup';
 
 import type { OrgBookOption } from '@/types';
@@ -58,7 +58,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       projectName: string().required().max(255).label('Project name'),
       projectDescription: string().required().label('Project description')
     }),
-    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string().required() }),
+    [IntakeFormCategory.CONTACTS]: contactSchema,
     [IntakeFormCategory.HOUSING]: object().shape(
       {
         hasRentalUnits: YesNoUnsureSchema.label('Rental units'),

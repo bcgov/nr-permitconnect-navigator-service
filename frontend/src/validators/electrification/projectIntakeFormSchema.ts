@@ -1,7 +1,7 @@
 import { object, string, type InferType } from 'yup';
 
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
-import { contactValidator } from '@/validators';
+import { contactSchema } from '@/validators';
 
 import type { CodeName } from '@/store/codeStore';
 import type { OrgBookOption } from '@/types';
@@ -36,7 +36,7 @@ export function createProjectIntakeSchema(
         })
         .label('Business name')
     }),
-    [IntakeFormCategory.CONTACTS]: object({ ...contactValidator, contactId: string().required() }),
+    [IntakeFormCategory.CONTACTS]: contactSchema,
     project: object({
       projectType: string().required().max(255).oneOf(codeList.ElectrificationProjectType).label('Project type'),
       bcHydroNumber: string().notRequired().max(255).label('BC Hydro Call for Power project number')

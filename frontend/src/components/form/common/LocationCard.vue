@@ -146,7 +146,7 @@ useFormErrorWatcher(formRef, 'LocationCard', tab);
 
 onBeforeMount(async () => {
   // Force the search bar to load & display the last set text when loading a draft
-  if (values.value.location.addressSearch?.properties?.fullAddress) {
+  if (values.value.location?.addressSearch?.properties?.fullAddress) {
     await onAddressSearchInput({
       target: { value: values.value.location.addressSearch.properties.fullAddress }
     } as IInputEvent);

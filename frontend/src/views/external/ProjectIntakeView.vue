@@ -136,6 +136,8 @@ onBeforeMount(async () => {
     // Clear certain store data on load
     projectStore.setDocuments([]);
 
+    usePermitStore().setPermitTypes((await permitService.getPermitTypes(getInitiative.value)).data);
+
     if (draftId) {
       await loadDraft();
     } else if (projectId) {
@@ -143,8 +145,6 @@ onBeforeMount(async () => {
     } else {
       await loadNewSubmission();
     }
-
-    usePermitStore().setPermitTypes((await permitService.getPermitTypes(getInitiative.value)).data);
 
     loading.value = false;
   } catch (e) {

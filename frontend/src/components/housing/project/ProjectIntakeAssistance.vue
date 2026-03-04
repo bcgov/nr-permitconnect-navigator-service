@@ -3,14 +3,13 @@ import { useFormValues } from 'vee-validate';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object } from 'yup';
 
 import { Button, useConfirm } from '@/lib/primevue';
 import { enquiryService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
-import { contactValidator } from '@/validators';
+import { contactSchema } from '@/validators';
 
 import type { Ref } from 'vue';
 
@@ -24,7 +23,6 @@ const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
-const contactSchema = object(contactValidator);
 
 // Check if applicant section is filled
 const checkApplicantValuesValid = (): boolean => {

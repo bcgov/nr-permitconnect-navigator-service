@@ -38,7 +38,7 @@ const items: Ref<NavItem[]> = ref([]);
 // Actions
 async function createIntake(service: IDraftableProjectService, route: RouteName) {
   const contact = useContactStore().getContact;
-  const response = await service.updateDraft({
+  const response = await service.upsertDraft({
     data: {
       contacts: {
         contactId: contact?.contactId,
