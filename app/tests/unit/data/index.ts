@@ -168,14 +168,15 @@ export const TEST_ELECTRIFICATION_DRAFT: Draft = {
 };
 
 export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
-  project: {
+  basic: {
     projectName: 'NAME',
     projectDescription: 'DESCRIPTION',
-    companyIdRegistered: 'FM0281610',
-    companyNameRegistered: 'COMPANY',
+    registeredId: 'FM0281610',
+    registeredName: 'COMPANY'
+  },
+  project: {
     projectType: ProjectType.IPP_WIND,
-    bcHydroNumber: '12345',
-    submissionType: SubmissionType.GUIDANCE
+    bcHydroNumber: '12345'
   },
   contact: TEST_CONTACT_1
 };
@@ -375,7 +376,6 @@ export const TEST_GENERAL_PROJECT_1: GeneralProject = {
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,
-  consentToFeedback: false,
   geoJson: null,
   geomarkUrl: null,
   hasAppliedProvincialPermits: null,
@@ -419,7 +419,6 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   applicationStatus: ApplicationStatus.NEW,
   atsEnquiryId: null,
   checkProvincialPermits: null,
-  consentToFeedback: false,
   geoJson: null,
   geomarkUrl: null,
   hasAppliedProvincialPermits: null,
@@ -443,17 +442,15 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   applicationStatus: ApplicationStatus.NEW,
   appliedPermits: [],
   basic: {
-    consentToFeedback: false,
+    projectName: 'NAME',
+    projectDescription: 'DESCRIPTION',
     projectApplicantType: null,
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
   },
   contact: TEST_CONTACT_1,
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-  general: {
-    projectName: 'NAME',
-    projectDescription: 'DESCRIPTION'
-  },
+
   investigatePermits: [],
   location: {
     geoJson: null,
@@ -596,12 +593,11 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
 
 export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   activityId: null,
-  submittedAt: new Date().toISOString(),
-  applicationStatus: ApplicationStatus.NEW,
-  appliedPermits: [],
   basic: {
     consentToFeedback: false,
     projectApplicantType: null,
+    projectName: 'NAME',
+    projectDescription: 'DESCRIPTION',
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
   },
@@ -615,8 +611,6 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     hasRentalUnits: BasicResponse.NO,
     multiFamilyUnits: BasicResponse.NO,
     otherUnits: BasicResponse.NO,
-    projectName: 'NAME',
-    projectDescription: 'DESCRIPTION',
     housingCoopDescription: null,
     indigenousDescription: null,
     nonProfitDescription: null,
@@ -624,9 +618,7 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     rentalUnits: BasicResponse.NO,
     singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE
   },
-  investigatePermits: [],
   location: {
-    geoJson: null,
     naturalDisaster: BasicResponse.NO,
     geomarkUrl: null,
     latitude: null,
@@ -638,9 +630,10 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     province: 'AA',
     streetAddress: '123 Street'
   },
-  submissionType: SubmissionType.GUIDANCE,
   permits: {
-    hasAppliedProvincialPermits: null
+    appliedPermits: [],
+    hasAppliedProvincialPermits: null,
+    investigatePermits: []
   }
 };
 

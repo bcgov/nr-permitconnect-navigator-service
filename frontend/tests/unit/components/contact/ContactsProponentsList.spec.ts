@@ -11,6 +11,7 @@ import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCom
 import { contactRouteNameKey } from '@/utils/keys';
 
 import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
+import type { Contact } from '@/types';
 
 const CONTACT_DATA = {
   contactId: 'contact123',
@@ -50,13 +51,15 @@ vi.spyOn(contactService, 'getContact').mockResolvedValue({
 
 vi.spyOn(contactService, 'deleteContact').mockResolvedValue({ status: 204 } as AxiosResponse);
 
-const testContacts = [
+const testContacts: Contact[] = [
   {
     contactId: 'contact123',
     firstName: 'John',
     lastName: 'Doe',
     email: 'john.doe@example.com',
-    phoneNumber: '123-456-7890'
+    phoneNumber: '123-456-7890',
+    contactApplicantRelationship: ProjectRelationship.CONSULTANT,
+    contactPreference: ContactPreference.EITHER
   }
 ];
 

@@ -82,13 +82,8 @@ const testSubmission: HousingProject = {
   aaiUpdated: false,
   astNotes: '',
   assignedUserId: 'user123',
-  applicationStatus: ApplicationStatus.NEW,
-  contacts: [],
-  createdAt: undefined,
-  createdBy: undefined,
-  updatedAt: undefined,
-  updatedBy: undefined
-};
+  applicationStatus: ApplicationStatus.NEW
+} as HousingProject;
 
 const testHistory = [testEnquiry, testSubmission];
 

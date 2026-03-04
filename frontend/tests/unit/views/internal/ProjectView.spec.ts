@@ -142,10 +142,13 @@ beforeEach(() => {
   );
 
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ electrificationProjectId: '123', activityId: '123' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(documentService.listDocuments).mockResolvedValue(

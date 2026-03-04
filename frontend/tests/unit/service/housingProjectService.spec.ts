@@ -6,6 +6,8 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { StoreGeneric } from 'pinia';
 import type { AxiosInstance } from 'axios';
+import type { Draft } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Constants
 const PATH = 'project';
@@ -18,11 +20,11 @@ const TEST_OBJ = {
   field2: 'testField2'
 };
 
-const TEST_DRAFT = {
+const TEST_DRAFT: Partial<Draft<FormSchemaType>> = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
-  data: { key: 'value' },
+  data: {} as FormSchemaType,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
@@ -198,7 +200,7 @@ describe('housingProjectService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.updateDraft(TEST_DRAFT);
+      housingProjectService.upsertDraft(TEST_DRAFT);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);

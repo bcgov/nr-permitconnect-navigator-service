@@ -89,7 +89,6 @@ export async function up(knex: Knex): Promise<void> {
           table.text('has_applied_provincial_permits');
           table.text('check_provincial_permits');
           table.text('submission_type');
-          table.boolean('consent_to_feedback').notNullable().defaultTo(false);
           table.json('geo_json');
           table.text('geomark_url');
           table.integer('ats_enquiry_id');

@@ -133,4 +133,4 @@ export type SourceSystemKind = SourceSystemKindBase & { permitTypeIds?: number[]
 
 const user = Prisma.validator<Prisma.userDefaultArgs>()({});
 export type UserBase = Prisma.userGetPayload<typeof user>;
-export type User = Prisma.userGetPayload<{ include: { identityProvider: true } }>;
+export type User = UserBase & { identityProvider?: IdentityProvider };

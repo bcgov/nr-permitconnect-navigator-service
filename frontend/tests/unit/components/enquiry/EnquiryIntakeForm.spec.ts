@@ -76,7 +76,7 @@ function basicValidFormValues(): FormValues {
     phoneNumber: '1234567890',
     contactApplicantRelationship: ProjectRelationship.OWNER,
     contactPreference: ContactPreference.EMAIL,
-    contactId: 'someId',
+    contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
     basic: {
       enquiryDescription: 'test description',
       relatedActivityId: 'some Id'
@@ -193,6 +193,7 @@ describe('EnquiryIntakeForm', () => {
       expect(result.errors['firstName']).toBeTruthy();
     });
   });
+
   it('sets editable to false when enquiry ID given', async () => {
     const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
 
