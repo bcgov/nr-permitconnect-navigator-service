@@ -2,8 +2,6 @@
 import { ErrorMessage, Form } from 'vee-validate';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRouter } from 'vue-router';
-import { object, string } from 'yup';
 
 import { FormNavigationGuard, InputText, InputMask, Select } from '@/components/form';
 import { Button, useToast } from '@/lib/primevue';

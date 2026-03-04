@@ -11,8 +11,9 @@ import { useFormStore } from '@/store';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 // Props
-const { tab = 0 } = defineProps<{
+const { tab = 0, showNumber = false } = defineProps<{
   tab?: number;
+  showNumber?: boolean;
 }>();
 
 // Composables
@@ -37,7 +38,7 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
         role="heading"
         aria-level="2"
       >
-        {{ t('projectNameCard.header') }}
+        {{ t(showNumber ? 'projectNameCard.header.nameAndNumber' : 'projectNameCard.header.name') }}
       </span>
       <Divider type="solid" />
     </template>
@@ -46,11 +47,24 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
         <InputText
           class="col-span-6"
           name="basic.projectName"
-          :label="t('projectNameCard.labels.projectName')"
+          :label="showNumber ? t('projectNameCard.labels.projectName') : t('projectNameCard.labels.projectNameLong')"
           :bold="false"
           :disabled="!getEditable"
         />
-        <div class="col-span-6" />
+
+        <InputText
+          v-if="showNumber"
+          class="col-span-6"
+          name="basic.projectNumber"
+          :label="t('projectNameCard.labels.projectNumber')"
+          :bold="false"
+          :tooltip="t('projectNameCard.tooltips.projectNumber')"
+          :disabled="!getEditable"
+        />
+        <div
+          v-else
+          class="col-span-6"
+        />
       </div>
     </template>
   </Card>

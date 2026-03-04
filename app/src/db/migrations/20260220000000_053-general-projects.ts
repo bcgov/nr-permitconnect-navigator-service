@@ -80,6 +80,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('natural_disaster').notNullable().defaultTo(false);
           table.boolean('aai_updated').notNullable().defaultTo(false);
           table.text('application_status');
+          table.text('project_number');
           table.text('project_description');
           table.text('project_applicant_type');
           table.text('project_location');

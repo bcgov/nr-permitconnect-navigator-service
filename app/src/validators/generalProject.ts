@@ -23,6 +23,7 @@ const schema = {
           .required()
           .valid(...PROJECT_APPLICANT_LIST),
         projectName: Joi.string().required().max(255).trim(),
+        projectNumber: Joi.string().max(255).trim(),
         projectDescription: Joi.string().max(4000).allow(null),
         registeredId: Joi.string().allow(null),
         registeredName: Joi.when('projectApplicantType', {

@@ -197,7 +197,8 @@ export interface GeneralProjectIntake {
 
   basic: {
     projectApplicantType: string | null;
-    projectName: string;
+    projectName: string | null;
+    projectNumber: string | null;
     projectDescription: string;
     registeredId: string | null;
     registeredName: string | null;
