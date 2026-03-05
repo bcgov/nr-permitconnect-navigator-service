@@ -99,12 +99,11 @@ const NavigationAuthorizationMap: NavigationAuthorizationMapT[] = [
     group: GroupName.NAVIGATOR_READ_ONLY,
     permissions: [NavigationPermission.INT_CONTACT, NavigationPermission.INT_GENERAL]
   },
-  // TODO: Temp disable general for proponents
-  // {
-  //   initiative: Initiative.GENERAL,
-  //   group: GroupName.PROPONENT,
-  //   permissions: [NavigationPermission.EXT_GENERAL]
-  // },
+  {
+    initiative: Initiative.GENERAL,
+    group: GroupName.PROPONENT,
+    permissions: [NavigationPermission.EXT_GENERAL]
+  },
   {
     initiative: Initiative.GENERAL,
     group: GroupName.SUPERVISOR,

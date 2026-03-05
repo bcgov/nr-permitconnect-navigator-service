@@ -10,7 +10,13 @@ import AuthorizationTrackerCard from '@/components/authorization/AuthorizationTr
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { AskMyNavigator } from '@/components/common/icons';
 import { Button } from '@/lib/primevue';
-import { contactService, electrificationProjectService, housingProjectService, permitService } from '@/services';
+import {
+  contactService,
+  electrificationProjectService,
+  generalProjectService,
+  housingProjectService,
+  permitService
+} from '@/services';
 import { useProjectStore, usePermitStore, useAppStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
@@ -38,6 +44,12 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryPermitRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY,
   initiativeNavigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  enquiryPermitRouteName: RouteName.EXT_GENERAL_PROJECT_PERMIT_ENQUIRY,
+  initiativeNavigationPermission: NavigationPermission.EXT_GENERAL,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -77,6 +89,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

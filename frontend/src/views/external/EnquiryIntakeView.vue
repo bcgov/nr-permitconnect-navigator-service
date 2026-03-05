@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
-import { permitService, housingProjectService, electrificationProjectService } from '@/services';
+import { permitService, generalProjectService, housingProjectService, electrificationProjectService } from '@/services';
 import { useProjectStore, usePermitStore, useAppStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import {
@@ -45,6 +45,14 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryPermitConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
   enquiryProjectConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  enquiryConfirmRouteName: RouteName.EXT_GENERAL_ENQUIRY_CONFIRMATION,
+  enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
+  enquiryPermitConfirmRouteName: RouteName.EXT_GENERAL_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
+  enquiryProjectConfirmRouteName: RouteName.EXT_GENERAL_PROJECT_ENQUIRY_CONFIRMATION,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -88,6 +96,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
