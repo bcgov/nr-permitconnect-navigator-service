@@ -5,15 +5,13 @@ import {
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT,
-  TEST_CONTACT_1,
-  TEST_EMAIL_RESPONSE
+  TEST_CONTACT_1
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
-  emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
   getElectrificationProjectDraftController,
@@ -28,7 +26,6 @@ import {
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
-import * as emailService from '../../../src/services/email.ts';
 import * as draftService from '../../../src/services/draft.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
@@ -45,7 +42,6 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  Email,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -205,33 +201,6 @@ describe('deleteElectrificationProjectDraftController', () => {
     expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_DRAFT.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('emailElectrificationProjectConfirmationController', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-
-  it('should call services and respond with status and result', async () => {
-    const req = {
-      body: {
-        to: 'test@test.com',
-        subject: 'Subject',
-        body: 'Some body text'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
-
-    await emailElectrificationProjectConfirmationController(
-      req as unknown as Request<never, never, Email>,
-      res as unknown as Response
-    );
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 

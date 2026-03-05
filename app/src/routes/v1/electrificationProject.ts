@@ -4,7 +4,6 @@ import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
-  emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
   getElectrificationProjectsController,
@@ -84,14 +83,6 @@ router.put(
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   electrificationProjectValidator.createElectrificationProject,
   submitElectrificationProjectDraftController
-);
-
-/** Send an email with the confirmation of electrification project */
-router.put(
-  '/email',
-  hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
-  electrificationProjectValidator.emailConfirmation,
-  emailElectrificationProjectConfirmationController
 );
 
 /** Creates a blank electrification project */

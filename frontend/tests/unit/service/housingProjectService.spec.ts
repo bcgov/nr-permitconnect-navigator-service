@@ -31,19 +31,6 @@ const TEST_DRAFT: Partial<Draft<FormSchemaType>> = {
   updatedAt: new Date().toISOString()
 };
 
-const TEST_EMAIL = {
-  bodyType: 'text/plain',
-  body: 'This is a test email body.',
-  from: 'sender@example.com',
-  subject: 'Test Email Subject',
-  to: ['recipient1@example.com', 'recipient2@example.com'],
-  cc: ['cc1@example.com'],
-  bcc: ['bcc1@example.com'],
-  encoding: 'UTF-8',
-  priority: 'high',
-  tag: 'test'
-};
-
 // Mocks
 const getSpy = vi.fn();
 const deleteSpy = vi.fn();
@@ -219,15 +206,6 @@ describe('housingProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
-    });
-  });
-
-  describe('emailConfirmation', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.emailConfirmation(TEST_EMAIL);
-
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/email`, TEST_EMAIL);
     });
   });
 });

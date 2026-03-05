@@ -219,11 +219,11 @@ export interface GeneralProjectIntake {
   };
 
   permits: {
+    appliedPermits: Permit[];
     hasAppliedProvincialPermits?: string | null;
+    investigatePermits: Permit[];
   };
 
-  appliedPermits: Permit[];
-  investigatePermits: Permit[];
   contact: Contact;
 }
 
