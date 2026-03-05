@@ -1,11 +1,9 @@
 import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 
-import { delimitEmails } from '@/utils/utils';
-
 import type { AxiosResponse } from 'axios';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { Email, Draft, HousingProject, HousingProjectSearchParameters, StatisticFilters } from '@/types';
+import type { Draft, HousingProject, HousingProjectSearchParameters, StatisticFilters } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 const PATH = 'project';
@@ -41,21 +39,6 @@ const service: IHousingProjectService = {
    */
   deleteDraft(draftId: string) {
     return appAxios().delete(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${draftId}`);
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the housing project/enquiry/permit confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**

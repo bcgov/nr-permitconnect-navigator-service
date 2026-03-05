@@ -38,7 +38,6 @@ import type {
   Contact,
   CurrentContext,
   Draft,
-  Email,
   HousingProject,
   HousingProjectIntake,
   HousingProjectSearchParameters,
@@ -88,6 +87,42 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
   }
 };
 
+/**
+ * Generates and sends a templated email with the given data
+ * @param projectWithContact Email data
+ */
+async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+
+  const body = confirmationTemplateHousingSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.HOUSING),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.housingProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: 'Confirmation of Project Submission',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
+
+/**
+ * Transforms intake data to match DB schema
+ * @param tx Prismas transaction client
+ * @param data Intake data
+ * @param currentContext The current context of the Express request
+ * @returns Transformed project and permit data
+ */
 const generateHousingProjectData = async (
   tx: PrismaTransactionClient,
   data: HousingProjectIntake,
@@ -253,16 +288,6 @@ const generateHousingProjectData = async (
   return housingProjectData;
 };
 
-/**
- * Send an email with the confirmation of housing project
- * @param req Express Request object
- * @param res Express Response object
- */
-export const emailHousingProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
-  const { data, status } = await email(req.body);
-  res.status(status).json(data);
-};
-
 export const getHousingProjectActivityIdsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
     return await getHousingProjects(tx);
@@ -423,31 +448,6 @@ export const submitHousingProjectDraftController = async (
   await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
-
-async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const body = confirmationTemplateHousingSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.HOUSING),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.housingProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Project Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
 
 export const upsertHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;

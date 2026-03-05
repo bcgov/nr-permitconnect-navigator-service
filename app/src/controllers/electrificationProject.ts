@@ -38,9 +38,38 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  Email,
   StatisticsFilters
 } from '../types/index.ts';
+
+/**
+ * Generates and sends a templated email with the given data
+ * @param projectWithContact Email data
+ */
+async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+  const subject = 'Confirmation of Project Submission';
+
+  const body = confirmationTemplateElectrificationSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.ELECTRIFICATION),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.electrificationProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: subject,
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 /**
  * Handles creating a project from intake data
@@ -100,19 +129,6 @@ const generateElectrificationProjectData = async (
   };
 
   return electrificationProjectData;
-};
-
-/**
- * Send an email with the confirmation of electrification project
- * @param req Express Request object
- * @param res Express Response object
- */
-export const emailElectrificationProjectConfirmationController = async (
-  req: Request<never, never, Email>,
-  res: Response
-) => {
-  const { data, status } = await email(req.body);
-  res.status(status).json(data);
 };
 
 export const getElectrificationProjectActivityIdsController = async (req: Request, res: Response) => {
@@ -251,32 +267,6 @@ export const submitElectrificationProjectDraftController = async (
   await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
-
-async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-  const subject = 'Confirmation of Project Submission';
-
-  const body = confirmationTemplateElectrificationSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.ELECTRIFICATION),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.electrificationProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: subject,
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
 
 export const upsertElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
