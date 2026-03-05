@@ -63,7 +63,7 @@ onBeforeMount(async () => {
   try {
     if (enquiries && enquiries.length > 0) {
       const createdByUsersArray = enquiries.map((enquiry) => enquiry.createdBy as string);
-      const createdByUserlist = (await contactService.searchContacts({ userId: createdByUsersArray })).data;
+      const createdByUserlist = (await contactService.matchContacts({ userId: createdByUsersArray })).data;
 
       createdByUserlist.forEach((contact: Contact) => {
         if (contact.userId)

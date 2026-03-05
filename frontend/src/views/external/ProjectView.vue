@@ -181,7 +181,7 @@ onBeforeMount(async () => {
     const userIds = [projectValue.assignedUserId, projectValue.createdBy]
       .filter(isDefined)
       .filter((x) => !UUID_V4_PATTERN.test(x!));
-    const contacts = (await contactService.searchContacts({ userId: userIds })).data;
+    const contacts = (await contactService.matchContacts({ userId: userIds })).data;
     assignee.value = contacts.find(
       (contact: Contact) => contact.userId && contact.userId === projectValue?.assignedUserId
     );

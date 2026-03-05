@@ -58,12 +58,7 @@ async function searchProponents() {
       try {
         loading.value = true;
 
-        contacts.value = (
-          await contactService.matchContacts({
-            firstName: searchTag.value,
-            lastName: searchTag.value
-          })
-        ).data;
+        contacts.value = (await contactService.matchContacts({ email: searchTag.value })).data;
       } catch (error) {
         toast.error(t('userCreateModal.searchError'), String(error));
       } finally {
@@ -158,11 +153,6 @@ watch(visible, () => {
       <Column
         field="lastName"
         :header="t('e.common.projectTeamAddModal.headerLastName')"
-        sortable
-      />
-      <Column
-        field="phoneNumber"
-        :header="t('e.common.projectTeamAddModal.headerPhone')"
         sortable
       />
       <Column

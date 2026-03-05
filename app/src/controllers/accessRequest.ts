@@ -9,7 +9,7 @@ import { getInitiative } from '../services/initiative.ts';
 import { createUser, readUser } from '../services/user.ts';
 import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
-import { AccessRequestStatus, GroupName, IdentityProvider } from '../utils/enums/application.ts';
+import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -68,7 +68,7 @@ export const createUserAccessRequestController = async (
       ) {
         throw new Problem(409, { detail: 'User is already assigned this group' });
       }
-      if (userResponse.idp !== IdentityProvider.IDIR) {
+      if (userResponse.idp !== IdentityProviderKind.IDIR) {
         throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
       }
       if (accessRequest.grant && !accessRequest.groupId) {
@@ -153,7 +153,7 @@ export const processUserAccessRequestController = async (
             if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
               throw new Problem(409, { detail: 'User is already assigned this role' });
             }
-            if (userResponse.idp !== IdentityProvider.IDIR) {
+            if (userResponse.idp !== IdentityProviderKind.IDIR) {
               throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
             }
 

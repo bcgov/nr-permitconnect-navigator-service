@@ -2,7 +2,7 @@ import config from 'config';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { validate, version } from 'uuid';
 
-import { AuthType, IdentityProvider, Initiative } from '../../../src/utils/enums/application.ts';
+import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 import * as utils from '../../../src/utils/utils.ts';
 
 import type { JwtPayload } from 'jsonwebtoken';
@@ -48,17 +48,17 @@ const CURRENT_CONTEXT = {
 
 const IDP_LIST = [
   {
-    idp: IdentityProvider.IDIR,
+    idp: IdentityProviderKind.IDIR,
     kind: 'idir',
     username: 'idir_username'
   },
   {
-    idp: IdentityProvider.BCEID,
+    idp: IdentityProviderKind.BCEID,
     kind: 'bceidbasic',
     username: 'bceid_username'
   },
   {
-    idp: IdentityProvider.BCEIDBUSINESS,
+    idp: IdentityProviderKind.BCEIDBUSINESS,
     kind: 'bceidbusiness',
     username: 'bceid_username'
   }
@@ -331,7 +331,7 @@ describe('utils', () => {
         expect(enc).toBe('utf8');
         return JSON.stringify([
           {
-            idp: IdentityProvider.BCEID,
+            idp: IdentityProviderKind.BCEID,
             kind: 'bceidbasic',
             username: 'bceid_username'
           }
@@ -342,6 +342,62 @@ describe('utils', () => {
 
     it('returns undefined when no current context', () => {
       expect(utils.getCurrentUsername(undefined)).toBeUndefined();
+    });
+  });
+
+  describe('getIdpAttributesByKind', () => {
+    beforeEach(() => {
+      (existsSync as jest.Mock).mockReset();
+      (readFileSync as jest.Mock).mockReset();
+    });
+
+    it('returns the correct IDP config for a given kind', () => {
+      (existsSync as jest.Mock).mockReturnValue(true);
+      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+
+      const result = utils.getIdpAttributesByKind(IdentityProviderKind.IDIR);
+
+      expect(result).toEqual({
+        idp: IdentityProviderKind.IDIR,
+        kind: 'idir',
+        username: 'idir_username'
+      });
+    });
+
+    it('returns undefined if the kind is not found', () => {
+      (existsSync as jest.Mock).mockReturnValue(true);
+      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+
+      const result = utils.getIdpAttributesByKind('non-existent-kind' as unknown as IdentityProviderKind);
+
+      expect(result).toBeUndefined();
+    });
+  });
+
+  describe('hasIdentity', () => {
+    beforeEach(() => {
+      (existsSync as jest.Mock).mockReset();
+      (readFileSync as jest.Mock).mockReset();
+      (existsSync as jest.Mock).mockReturnValue(true);
+      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+    });
+
+    it('returns true when the identity kind matches the current context user identity', () => {
+      expect(utils.hasIdentity(IdentityProviderKind.IDIR, CURRENT_CONTEXT)).toBe(true);
+    });
+
+    it('returns false when the identity kind does not match the current context user identity', () => {
+      expect(utils.hasIdentity(IdentityProviderKind.BCEID, CURRENT_CONTEXT)).toBe(false);
+    });
+
+    it('returns false when the current context token payload is missing', () => {
+      const contextWithoutPayload = { ...CURRENT_CONTEXT, tokenPayload: undefined };
+
+      expect(utils.hasIdentity(IdentityProviderKind.IDIR, contextWithoutPayload)).toBe(false);
+    });
+
+    it('returns false when the identity kind is not found in the IDP list', () => {
+      expect(utils.hasIdentity('non-existent-kind' as unknown as IdentityProviderKind, CURRENT_CONTEXT)).toBe(false);
     });
   });
 
