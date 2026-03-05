@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ErrorMessage, useFormValues, useSetFieldValue } from 'vee-validate';
+import { useFormValues, useSetFieldValue } from 'vee-validate';
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -124,11 +124,6 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
       <InputText
         v-show="false"
         name="basic.registeredId"
-      />
-      <!-- Visible error message for registeredId -->
-      <ErrorMessage
-        name="basic.registeredId"
-        class="app-error-message"
       />
     </template>
   </Card>

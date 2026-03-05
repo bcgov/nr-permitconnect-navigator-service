@@ -224,6 +224,7 @@ onBeforeMount(async () => {
           projectApplicantType: project.projectApplicantType,
           isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
           registeredName: project.companyNameRegistered,
+          registeredId: project.companyIdRegistered,
           projectName: project.projectName,
           projectNumber: project.projectNumber,
           projectDescription: project.projectDescription
