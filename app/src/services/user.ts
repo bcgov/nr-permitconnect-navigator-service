@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { searchContacts, upsertContacts } from './contact.ts';
 import { SYSTEM_ID } from '../utils/constants/application.ts';
-import { IdentityProvider as enumIDP } from '../utils/enums/application.ts';
+import { IdentityProviderKind } from '../utils/enums/application.ts';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
 import { Problem } from '../utils/index.ts';
 
@@ -175,7 +175,9 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
       // This does not guarantee name correctness, but a null last name breaks ATS
       let firstNameOverride: string | null = null,
         lastNameOverride: string | null = null;
-      if ([enumIDP.BCEID, enumIDP.BCEIDBUSINESS].includes(newUser.idp as enumIDP)) {
+      if (
+        [IdentityProviderKind.BCEID, IdentityProviderKind.BCEIDBUSINESS].includes(newUser.idp as IdentityProviderKind)
+      ) {
         const split = newUser.firstName?.indexOf(' ');
         if (newUser.firstName && split && split > 0) {
           firstNameOverride = newUser.firstName.substring(0, split);

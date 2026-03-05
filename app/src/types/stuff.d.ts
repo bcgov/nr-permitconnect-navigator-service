@@ -292,9 +292,8 @@ export interface IdirSearchParameters extends ParsedQs {
 }
 
 export interface IdpAttributes {
-  identityKey: string;
   idp: string;
-  name: string;
+  kind: string;
   username: string;
 }
 

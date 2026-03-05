@@ -5,13 +5,13 @@ import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src
 import * as contactService from '../../../src/services/contact.ts';
 import * as userService from '../../../src/services/user.ts';
 import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
-import { IdentityProvider } from '../../../src/utils/enums/application.ts';
+import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
-import type { Contact, IdentityProvider as IDPType, User } from '../../../src/types/index.ts';
+import type { Contact, IdentityProvider, User } from '../../../src/types/index.ts';
 
-const idirIdentityProvider: IDPType = {
-  idp: IdentityProvider.IDIR,
+const idirIdentityProvider: IdentityProvider = {
+  idp: IdentityProviderKind.IDIR,
   active: true,
   createdAt: new Date(),
   createdBy: SYSTEM_ID,
@@ -24,7 +24,7 @@ const idirIdentityProvider: IDPType = {
 const bceidUser: User = {
   bceidBusinessName: null,
   userId: uuidv4(),
-  idp: IdentityProvider.BCEID,
+  idp: IdentityProviderKind.BCEID,
   sub: 'sub',
   email: 'test@email.com',
   firstName: 'BCeID User',
@@ -42,7 +42,7 @@ const bceidUser: User = {
 const idirUser: User = {
   bceidBusinessName: null,
   userId: uuidv4(),
-  idp: IdentityProvider.IDIR,
+  idp: IdentityProviderKind.IDIR,
   sub: 'sub',
   email: 'test@email.com',
   firstName: 'Test',
@@ -83,7 +83,7 @@ afterEach(() => {
 describe('createIdp', () => {
   it('creates the idp', async () => {
     prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
-    const response = await userService.createIdp(prismaTxMock, IdentityProvider.IDIR);
+    const response = await userService.createIdp(prismaTxMock, IdentityProviderKind.IDIR);
 
     expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
     expect(response).toEqual(idirIdentityProvider);
@@ -308,14 +308,14 @@ describe('login', () => {
 describe('readIdp', () => {
   it('calls identity_provider.findUnique', async () => {
     prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    await userService.readIdp(prismaTxMock, IdentityProvider.IDIR);
+    await userService.readIdp(prismaTxMock, IdentityProviderKind.IDIR);
 
     expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
   });
 
   it('converts prisma model to application model', async () => {
     prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    const response = await userService.readIdp(prismaTxMock, IdentityProvider.IDIR);
+    const response = await userService.readIdp(prismaTxMock, IdentityProviderKind.IDIR);
 
     expect(response).toStrictEqual(idirIdentityProvider);
   });

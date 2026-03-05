@@ -9,9 +9,10 @@ import {
   upsertContactController
 } from '../../controllers/contact.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
+import { hasIdentity } from '../../middleware/identity.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
+import { Action, IdentityProviderKind, Resource } from '../../utils/enums/application.ts';
 import { contactValidator } from '../../validators/index.ts';
 
 const router = express.Router();
@@ -32,6 +33,7 @@ router.post(
 /** Search contacts */
 router.post(
   '/search',
+  hasIdentity(IdentityProviderKind.IDIR),
   hasAuthorization(Resource.CONTACT, Action.READ),
   contactValidator.searchContacts,
   searchContactsController

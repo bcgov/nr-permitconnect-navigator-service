@@ -195,7 +195,7 @@
     "common": {
       "projectTeamAddModal": {
         "header": "Add user",
-        "searchPlaceholder": "Search by First and Last name",
+        "searchPlaceholder": "Search by exact email",
         "empty": "No users found",
         "headerFirstName": "First name",
         "headerLastName": "Last name",

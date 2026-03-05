@@ -58,7 +58,7 @@ vi.mock('@/services/activityContactService', () => ({
 
 vi.mock('@/services/contactService', () => ({
   default: {
-    searchContacts: vi.fn()
+    matchContacts: vi.fn()
   }
 }));
 
@@ -121,7 +121,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(contactService.searchContacts).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.listPermits).mockResolvedValue(
     mockAxiosResponse([{ needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }])
