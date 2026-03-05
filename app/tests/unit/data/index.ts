@@ -442,7 +442,6 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   activityId: null,
   submittedAt: new Date().toISOString(),
   applicationStatus: ApplicationStatus.NEW,
-  appliedPermits: [],
   basic: {
     projectName: 'NAME',
     projectNumber: null,
@@ -453,8 +452,6 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   },
   contact: TEST_CONTACT_1,
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-
-  investigatePermits: [],
   location: {
     geoJson: null,
     naturalDisaster: BasicResponse.NO,
@@ -470,7 +467,9 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   },
   submissionType: SubmissionType.GUIDANCE,
   permits: {
-    hasAppliedProvincialPermits: null
+    appliedPermits: [],
+    hasAppliedProvincialPermits: null,
+    investigatePermits: []
   }
 };
 

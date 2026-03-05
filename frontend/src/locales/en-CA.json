@@ -903,7 +903,7 @@
       "projectNumber": "Project number"
     },
     "tooltips": {
-      "projectNumber": "Please provide the project number you are currently using for this work. This will help us ensure we reference the project number you are familiar with."
+      "projectNumber": "Please provide the project number used in your own system. This will help us ensure we reference the project number you are familiar with."
     }
   },
   "projectDescriptionCard": {

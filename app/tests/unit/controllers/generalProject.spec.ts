@@ -2,7 +2,6 @@ import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
-  emailGeneralProjectConfirmationController,
   getGeneralProjectActivityIdsController,
   getGeneralProjectController,
   getGeneralProjectDraftController,
@@ -18,7 +17,6 @@ import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as emailService from '../../../src/services/email.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -31,7 +29,6 @@ import type { Request, Response } from 'express';
 import type {
   ActivityContact,
   Draft,
-  Email,
   GeneralProject,
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
@@ -49,8 +46,7 @@ import {
   TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_EMAIL_RESPONSE
+  TEST_PERMIT_3
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import * as utils from '../../../src/utils/utils';
@@ -154,8 +150,10 @@ describe('createGeneralProjectController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -292,33 +290,6 @@ describe('deleteGeneralProjectDraftController', () => {
     expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_GENERAL_DRAFT.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('emailGeneralProjectConfirmationController', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-
-  it('should call services and respond with status and result', async () => {
-    const req = {
-      body: {
-        to: 'test@test.com',
-        subject: 'Subject',
-        body: 'Some body text'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
-
-    await emailGeneralProjectConfirmationController(
-      req as unknown as Request<never, never, Email>,
-      res as unknown as Response
-    );
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 
@@ -591,8 +562,7 @@ describe('submitGeneralProjectDraftController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: { appliedPermits: [permit1NoTracking, permit2NoTracking], investigatePermits: [TEST_PERMIT_3] }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };

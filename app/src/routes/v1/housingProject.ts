@@ -4,7 +4,6 @@ import {
   createHousingProjectController,
   deleteHousingProjectController,
   deleteHousingProjectDraftController,
-  emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
   getHousingProjectController,
   getHousingProjectsController,
@@ -85,14 +84,6 @@ router.put(
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.createHousingProject,
   submitHousingProjectDraftController
-);
-
-/** Send an email with the confirmation of housing project */
-router.put(
-  '/email',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.emailConfirmation,
-  emailHousingProjectConfirmationController
 );
 
 /** Creates a blank housing project */
