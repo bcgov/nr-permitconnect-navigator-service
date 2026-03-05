@@ -843,7 +843,7 @@
     "message": "Are you sure you want to leave this page? Any unsaved changes will be lost."
   },
   "projectIntakeAssistance": {
-    "assistanceHeader": "assistance",
+    "assistanceHeader": "Assistance",
     "assistanceMessage": "Assistance requested",
     "getAssistance": "Get assistance",
     "needAssistance": "Need assistance with the form?",

@@ -154,56 +154,56 @@ const generateHousingProjectData = async (
     permits = {
       hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
     };
-  }
 
-  if (data.permits.appliedPermits?.length) {
-    appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      needed: PermitNeeded.YES,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.IN_PROGRESS,
-      submittedDate: x.submittedDate,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      permitTracking: x.permitTracking?.map((pt) => ({
-        ...pt,
-        ...generateCreateStamps(currentContext)
-      })),
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
-  }
+    if (data.permits.appliedPermits?.length) {
+      appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: x.submittedDate,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        permitTracking: x.permitTracking?.map((pt) => ({
+          ...pt,
+          ...generateCreateStamps(currentContext)
+        })),
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
 
-  if (data.permits.investigatePermits?.length) {
-    investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      needed: PermitNeeded.UNDER_INVESTIGATION,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.NONE,
-      submittedDate: null,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
+    if (data.permits.investigatePermits?.length) {
+      investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.PRE_SUBMISSION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.NONE,
+        submittedDate: null,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
   }
 
   // Put new housing project together
