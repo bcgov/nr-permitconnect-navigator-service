@@ -68,12 +68,12 @@ const generateElectrificationProjectData = async (
   const UUID = uuidv4();
 
   const electrificationProjectData: ElectrificationProject = {
-    companyIdRegistered: data.basic.registeredId ?? null,
-    companyNameRegistered: data.basic.registeredName ?? null,
-    projectName: data.basic.projectName,
-    projectDescription: data.basic.projectDescription,
-    bcHydroNumber: data.project.bcHydroNumber ?? null,
-    projectType: data.project.projectType ?? null,
+    companyIdRegistered: data.basic?.registeredId ?? null,
+    companyNameRegistered: data.basic?.registeredName ?? null,
+    projectName: data.basic?.projectName,
+    projectDescription: data.basic?.projectDescription,
+    bcHydroNumber: data.project?.bcHydroNumber ?? null,
+    projectType: data.project?.projectType ?? null,
     electrificationProjectId: UUID,
     activityId: activityId,
     submittedAt: new Date(),
