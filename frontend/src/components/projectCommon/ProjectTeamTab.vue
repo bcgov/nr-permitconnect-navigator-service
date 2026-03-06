@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { isAxiosError } from 'axios';
 import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -12,7 +13,6 @@ import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
-import { isAxiosError } from 'axios';
 
 // Props
 const { activityId } = defineProps<{

@@ -2,7 +2,6 @@ import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
-  emailGeneralProjectConfirmationController,
   getGeneralProjectActivityIdsController,
   getGeneralProjectController,
   getGeneralProjectDraftController,
@@ -18,7 +17,6 @@ import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as emailService from '../../../src/services/email.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -31,7 +29,6 @@ import type { Request, Response } from 'express';
 import type {
   ActivityContact,
   Draft,
-  Email,
   GeneralProject,
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
@@ -49,8 +46,7 @@ import {
   TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_EMAIL_RESPONSE
+  TEST_PERMIT_3
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import * as utils from '../../../src/utils/utils';
@@ -154,8 +150,10 @@ describe('createGeneralProjectController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -292,33 +290,6 @@ describe('deleteGeneralProjectDraftController', () => {
     expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_GENERAL_DRAFT.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('emailGeneralProjectConfirmationController', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-
-  it('should call services and respond with status and result', async () => {
-    const req = {
-      body: {
-        to: 'test@test.com',
-        subject: 'Subject',
-        body: 'Some body text'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
-
-    await emailGeneralProjectConfirmationController(
-      req as unknown as Request<never, never, Email>,
-      res as unknown as Response
-    );
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 
@@ -480,14 +451,14 @@ describe('searchGeneralProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
+      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     searchGeneralProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
 
     await searchGeneralProjectsController(
-      req as unknown as Request<never, never, never, GeneralProjectSearchParameters>,
+      req as unknown as Request<never, never, GeneralProjectSearchParameters, never>,
       res as unknown as Response
     );
 
@@ -591,8 +562,7 @@ describe('submitGeneralProjectDraftController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: { appliedPermits: [permit1NoTracking, permit2NoTracking], investigatePermits: [TEST_PERMIT_3] }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -679,13 +649,13 @@ describe('updateGeneralProjectDraftController', () => {
     const req = {
       body: {
         data: {
-          contactFirstName: 'test',
-          contactLastName: 'person',
-          basic: {
-            projectApplicantType: 'Business'
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
           },
-          general: {
-            projectName: 'TheProject'
+          basic: {
+            projectName: 'TheProject',
+            projectApplicantType: 'Business'
           },
           location: {
             projectLocation: 'Some place'
@@ -721,10 +691,14 @@ describe('updateGeneralProjectDraftController', () => {
       deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.GENERAL_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 
   it('updates draft with the given draftId and activityId', async () => {
@@ -732,19 +706,21 @@ describe('updateGeneralProjectDraftController', () => {
       body: {
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
         activityId: 'ACTI1234',
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        general: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
+          },
+          basic: {
+            projectName: 'TheProject',
+            projectApplicantType: 'Business'
+          },
+          location: {
+            projectLocation: 'Some place'
+          },
+          permits: {
+            hasAppliedProvincialPermits: true
+          }
         }
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -764,10 +740,14 @@ describe('updateGeneralProjectDraftController', () => {
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.GENERAL_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 });
 

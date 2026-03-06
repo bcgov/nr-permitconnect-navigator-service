@@ -6,6 +6,8 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { StoreGeneric } from 'pinia';
 import type { AxiosInstance } from 'axios';
+import type { Draft } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Constants
 const PATH = 'project';
@@ -18,28 +20,15 @@ const TEST_OBJ = {
   field2: 'testField2'
 };
 
-const TEST_DRAFT = {
+const TEST_DRAFT: Partial<Draft<FormSchemaType>> = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
-  data: { key: 'value' },
+  data: {} as FormSchemaType,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
   updatedAt: new Date().toISOString()
-};
-
-const TEST_EMAIL = {
-  bodyType: 'text/plain',
-  body: 'This is a test email body.',
-  from: 'sender@example.com',
-  subject: 'Test Email Subject',
-  to: ['recipient1@example.com', 'recipient2@example.com'],
-  cc: ['cc1@example.com'],
-  bcc: ['bcc1@example.com'],
-  encoding: 'UTF-8',
-  priority: 'high',
-  tag: 'test'
 };
 
 // Mocks
@@ -198,7 +187,7 @@ describe('housingProjectService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.updateDraft(TEST_DRAFT);
+      housingProjectService.upsertDraft(TEST_DRAFT);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
@@ -217,15 +206,6 @@ describe('housingProjectService', () => {
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
-    });
-  });
-
-  describe('emailConfirmation', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.emailConfirmation(TEST_EMAIL);
-
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/email`, TEST_EMAIL);
     });
   });
 });

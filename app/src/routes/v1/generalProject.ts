@@ -4,7 +4,6 @@ import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
-  emailGeneralProjectConfirmationController,
   getGeneralProjectActivityIdsController,
   getGeneralProjectController,
   getGeneralProjectsController,
@@ -44,7 +43,7 @@ router.get(
 );
 
 /** Search general projects */
-router.get(
+router.post(
   '/search',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
   generalProjectValidator.searchGeneralProjects,
@@ -85,14 +84,6 @@ router.put(
   hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
   generalProjectValidator.createGeneralProject,
   submitGeneralProjectDraftController
-);
-
-/** Send an email with the confirmation of general project */
-router.put(
-  '/email',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
-  generalProjectValidator.emailConfirmation,
-  emailGeneralProjectConfirmationController
 );
 
 /** Creates a blank general project */

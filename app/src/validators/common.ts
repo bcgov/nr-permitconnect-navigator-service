@@ -2,7 +2,7 @@ import Joi from 'joi';
 
 import { Regex } from '../utils/enums/application.ts';
 
-export const activityId = Joi.string().min(8).max(8).required();
+export const activityId = Joi.string().min(8).max(8);
 
 export const dateOnlyString = Joi.string()
   .pattern(new RegExp(Regex.DATE_ONLY))

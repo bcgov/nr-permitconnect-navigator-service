@@ -5,15 +5,13 @@ import {
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT,
-  TEST_CONTACT_1,
-  TEST_EMAIL_RESPONSE
+  TEST_CONTACT_1
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
-  emailElectrificationProjectConfirmationController,
   getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
   getElectrificationProjectDraftController,
@@ -28,7 +26,6 @@ import {
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
-import * as emailService from '../../../src/services/email.ts';
 import * as draftService from '../../../src/services/draft.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
@@ -45,7 +42,6 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  Email,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -83,11 +79,13 @@ describe('createElectrificationProjectController', () => {
   it('should call services and respond with 201 and result', async () => {
     const req = {
       body: {
-        project: {
+        basic: {
           projectName: null,
           projectDescription: null,
-          companyIdRegistered: null,
-          companyNameRegistered: null,
+          registeredId: null,
+          registeredName: null
+        },
+        project: {
           projectType: null,
           bcHydroNumber: null
         }
@@ -203,33 +201,6 @@ describe('deleteElectrificationProjectDraftController', () => {
     expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_DRAFT.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('emailElectrificationProjectConfirmationController', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-
-  it('should call services and respond with status and result', async () => {
-    const req = {
-      body: {
-        to: 'test@test.com',
-        subject: 'Subject',
-        body: 'Some body text'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
-
-    await emailElectrificationProjectConfirmationController(
-      req as unknown as Request<never, never, Email>,
-      res as unknown as Response
-    );
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
   });
 });
 
@@ -506,19 +477,13 @@ describe('updateElectrificationProjectDraftController', () => {
     const req = {
       body: {
         data: {
-          contactFirstName: 'test',
-          contactLastName: 'person',
           basic: {
-            projectApplicantType: 'Business'
-          },
-          electrification: {
+            projectApplicantType: 'Business',
             projectName: 'TheProject'
           },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
           }
         }
       },
@@ -548,10 +513,14 @@ describe('updateElectrificationProjectDraftController', () => {
       deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 
   it('updates draft with the given draftId and activityId', async () => {
@@ -559,19 +528,15 @@ describe('updateElectrificationProjectDraftController', () => {
       body: {
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
         activityId: 'ACTI1234',
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        electrification: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          basic: {
+            projectApplicantType: 'Business',
+            projectName: 'TheProject'
+          },
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
+          }
         }
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -591,10 +556,14 @@ describe('updateElectrificationProjectDraftController', () => {
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 });
 

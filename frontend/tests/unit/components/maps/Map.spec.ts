@@ -5,7 +5,7 @@ import * as L from 'leaflet';
 import '@geoman-io/leaflet-geoman-free';
 import { nextTick } from 'vue';
 
-import Map from '@/components/housing/maps/Map.vue';
+import Map from '@/components/maps/Map.vue';
 import { externalApiService } from '@/services';
 import { mount } from '@vue/test-utils';
 import PrimeVue from 'primevue/config';

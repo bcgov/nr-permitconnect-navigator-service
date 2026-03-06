@@ -4,24 +4,19 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 import { nextTick } from 'vue';
-import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
+import { default as i18n } from '@/i18n';
 import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
 import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
-import { contactService, documentService, permitService, housingProjectService } from '@/services';
+import { contactService, permitService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/housing';
+import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
 import type { Contact } from '@/types';
-
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -88,8 +83,8 @@ const testPermitData = [
 ];
 
 const sampleContact: Contact = {
-  contactId: 'contact123',
-  userId: 'user123',
+  contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
+  userId: 'd3245118-f4d6-429a-be8e-f13f049ade3a',
   firstName: 'John',
   lastName: 'Doe',
   phoneNumber: '123-456-7890',
@@ -105,14 +100,14 @@ searchContactsSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
 const wrapperSettings = () => ({
   global: {
     plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
+      createTestingPinia({
+        initialState: {
+          auth: {
+            user: {}
           }
-        }),
+        }
+      }),
+      i18n,
       PrimeVue,
       ConfirmationService,
       ToastService
@@ -156,207 +151,166 @@ describe('ProjectIntakeForm', () => {
   });
 
   describe('onBeforeMount', () => {
-    it('keeps editable true in draft mode', async () => {
-      const getDraftSpy = vi.spyOn(housingProjectService, 'getDraft');
-
-      getDraftSpy.mockResolvedValue({ data: { draftId: '123' } } as AxiosResponse);
-
-      const wrapper = shallowMount(ProjectIntakeForm, { ...wrapperSettings(), props: { draftId: '123' } });
-
+    it('checks submit btn disabled conditions', async () => {
+      const wrapper = mount(ProjectIntakeForm, wrapperSettings());
       await nextTick();
       await flushPromises();
-
-      const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
-      expect(editable).toBeTruthy();
+      const submitButton = wrapper.find('[type="submit"]');
+      expect(submitButton.attributes('disabled')).toBeDefined();
     });
 
-    // No clue why this one is exploding the tests
-    it.todo('sets editable to false when housing project ID given', async () => {
-      const getProjectSpy = vi.spyOn(housingProjectService, 'getProject');
-      const listPermitsSpy = vi.spyOn(permitService, 'listPermits');
-      const listDocumentsSpy = vi.spyOn(documentService, 'listDocuments');
+    it('checks categories for valid data', async () => {
+      // Contacts are kinda whack right now
+      // const applicantTest = submissionIntakeSchema.validate(
+      //   {
+      //     contactFirstName: '',
+      //     contactLastName: 'testLastName',
+      //     contactPhoneNumber: '2501234567',
+      //     contactEmail: 'test@test.com',
+      //     contactApplicantRelationship: ProjectRelationship.OTHER,
+      //     contactPreference: ContactPreference.PHONE_CALL
+      //   }
+      // );
 
-      getProjectSpy.mockResolvedValue({ data: { activityId: '123', housingProjectId: '456' } } as AxiosResponse);
-      listPermitsSpy.mockResolvedValue({ data: { permitId: '123' } } as AxiosResponse);
-      listDocumentsSpy.mockResolvedValue({ data: { documentId: '123' } } as AxiosResponse);
-
-      const wrapper = shallowMount(ProjectIntakeForm, {
-        ...wrapperSettings(),
-        props: { housingProjectId: '456' }
+      const basicTest = createProjectIntakeSchema([
+        { registeredName: 'testString3', registeredId: 'FM0281610' }
+      ]).validateAt('basic', {
+        basic: {
+          consentToFeedback: false,
+          projectApplicantType: ProjectApplicant.BUSINESS,
+          isDevelopedInBc: BasicResponse.NO,
+          registeredId: 'FM0281610',
+          registeredName: 'testString3',
+          projectName: 'Project',
+          projectDescription: 'Desc'
+        }
       });
 
-      await nextTick();
-      await flushPromises();
-
-      const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
-      expect(editable).toBeFalsy();
-    });
-  });
-
-  it('checks submit btn disabled conditions', async () => {
-    const wrapper = mount(ProjectIntakeForm, wrapperSettings());
-    await nextTick();
-    await flushPromises();
-    const submitButton = wrapper.find('[type="submit"]');
-    expect(submitButton.attributes('disabled')).toBeDefined();
-  });
-
-  it('checks categories for valid data', async () => {
-    // Contacts are kinda whack right now
-    // const applicantTest = submissionIntakeSchema.validate(
-    //   {
-    //     contactFirstName: '',
-    //     contactLastName: 'testLastName',
-    //     contactPhoneNumber: '2501234567',
-    //     contactEmail: 'test@test.com',
-    //     contactApplicantRelationship: ProjectRelationship.OTHER,
-    //     contactPreference: ContactPreference.PHONE_CALL
-    //   }
-    // );
-
-    const basicTest = createProjectIntakeSchema([
-      { registeredName: 'testString3', registeredId: 'FM0281610' }
-    ]).validateAt('basic', {
-      basic: {
-        projectApplicantType: ProjectApplicant.BUSINESS,
-        isDevelopedInBc: BasicResponse.NO,
-        registeredId: 'FM0281610',
-        registeredName: 'testString3'
-      }
-    });
-
-    const housingTest = createProjectIntakeSchema([]).validateAt('housing', {
-      housing: {
-        projectName: 'testString1',
-        projectDescription: 'testString2',
-        hasRentalUnits: 'Yes',
-        financiallySupportedBc: 'No',
-        financiallySupportedIndigenous: 'No',
-        financiallySupportedNonProfit: 'No',
-        financiallySupportedHousingCoop: 'No',
-        rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-        indigenousDescription: 'No',
-        nonProfitDescription: 'No',
-        housingCoopDescription: 'No',
-        singleFamilySelected: true,
-        singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-        multiFamilyUnits: 'No',
-        otherUnitsDescription: 'No',
-        otherUnits: 'No'
-      }
-    });
-
-    const locationTest = createProjectIntakeSchema([]).validateAt('location', {
-      location: {
-        naturalDisaster: 'Yes',
-        projectLocation: 'testString1',
-        streetAddress: 'testString2',
-        locality: 'testString3',
-        province: 'testString4',
-        latitude: '51',
-        longitude: '-139',
-        ltsaPIDLookup: '',
-        geomarkUrl: ''
-      }
-    });
-
-    const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
-      permits: {
-        hasAppliedProvincialPermits: BasicResponse.YES
-      }
-    });
-
-    const appliedPermitsTest = createProjectIntakeSchema([]).validateAt('appliedPermits', {
-      appliedPermits: [
-        {
-          permitTypeId: 1,
-          submittedDate: new Date(),
-          trackingId: 'testString'
+      const housingTest = createProjectIntakeSchema([]).validateAt('housing', {
+        housing: {
+          projectName: 'testString1',
+          projectDescription: 'testString2',
+          hasRentalUnits: 'Yes',
+          financiallySupportedBc: 'No',
+          financiallySupportedIndigenous: 'No',
+          financiallySupportedNonProfit: 'No',
+          financiallySupportedHousingCoop: 'No',
+          rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
+          indigenousDescription: 'No',
+          nonProfitDescription: 'No',
+          housingCoopDescription: 'No',
+          singleFamilySelected: true,
+          singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
+          multiFamilyUnits: 'No',
+          otherUnitsDescription: 'No',
+          otherUnits: 'No'
         }
-      ]
-    });
+      });
 
-    //await expect(applicantTest).resolves.toBeTruthy();
-    await expect(basicTest).resolves.toBeTruthy();
-    await expect(housingTest).resolves.toBeTruthy();
-    await expect(locationTest).resolves.toBeTruthy();
-    await expect(permitsTest).resolves.toBeTruthy();
-    await expect(appliedPermitsTest).resolves.toBeTruthy();
-  });
-
-  it('checks categories for successful fail', async () => {
-    // Contacts are kinda whack right now
-    // const applicantTestFail = submissionIntakeSchema.validate({
-    //   contactFirstName: '',
-    //   contactLastName: 'testcontactLastName',
-    //   contactPhoneNumber: '2501234567',
-    //   contactEmail: 'test@test.com',
-    //   contactApplicantRelationship: ProjectRelationship.OTHER,
-    //   contactPreference: ContactPreference.PHONE_CALL
-    // });
-
-    const basicTestFail = createProjectIntakeSchema([]).validateAt('basic', {
-      basic: {
-        projectApplicantType: 'testString1',
-        isDevelopedInBC: 'testString2',
-        registeredName: 'testString3'
-      }
-    });
-
-    const housingTestFail = createProjectIntakeSchema([]).validateAt('housing', {
-      housing: {
-        projectName: 'testString1',
-        projectDescription: 'testString2',
-        hasRentalUnits: 'wrongRentalUnit',
-        financiallySupportedBC: 'No',
-        financiallySupportedIndigenous: 'No',
-        financiallySupportedNonProfit: 'No',
-        financiallySupportedHousingCoop: 'No',
-        rentalUnits: 'No',
-        indigenousDescription: 'No',
-        nonProfitDescription: 'No',
-        housingCoopDescription: 'No',
-        singleFamilyUnits: 'No',
-        multiFamilyUnits: 'No',
-        otherUnitsDescription: 'No',
-        otherUnits: 'No'
-      }
-    });
-
-    const locationTestFail = createProjectIntakeSchema([]).validateAt('location', {
-      location: {
-        projectLocation: '',
-        streetAddress: 'testString2',
-        locality: 'testString3',
-        province: 'testString4',
-        latitude: '12',
-        longitude: '-139',
-        ltsaPIDLookup: '',
-        geomarkUrl: ''
-      }
-    });
-
-    const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
-      permits: {
-        hasAppliedProvincialPermits: 123
-      }
-    });
-
-    const appliedPermitsTestFail = createProjectIntakeSchema([]).validateAt('appliedPermits', {
-      appliedPermits: [
-        {
-          permitTypeId: '',
-          submittedDate: new Date(),
-          trackingId: 'testString'
+      const locationTest = createProjectIntakeSchema([]).validateAt('location', {
+        location: {
+          naturalDisaster: 'Yes',
+          projectLocation: 'testString1',
+          streetAddress: 'testString2',
+          locality: 'testString3',
+          province: 'testString4',
+          latitude: '51',
+          longitude: '-139',
+          ltsaPIDLookup: '',
+          geomarkUrl: ''
         }
-      ]
+      });
+
+      const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
+        permits: {
+          appliedPermits: [
+            {
+              permitTypeId: 1,
+              submittedDate: new Date(),
+              trackingId: 'testString'
+            }
+          ],
+          hasAppliedProvincialPermits: BasicResponse.YES
+        }
+      });
+
+      //await expect(applicantTest).resolves.toBeTruthy();
+      await expect(basicTest).resolves.toBeTruthy();
+      await expect(housingTest).resolves.toBeTruthy();
+      await expect(locationTest).resolves.toBeTruthy();
+      await expect(permitsTest).resolves.toBeTruthy();
     });
 
-    //await expect(applicantTestFail).rejects.toThrowError();
-    await expect(basicTestFail).rejects.toThrowError();
-    await expect(housingTestFail).rejects.toThrowError();
-    await expect(locationTestFail).rejects.toThrowError();
-    await expect(permitsTest).rejects.toThrowError();
-    await expect(appliedPermitsTestFail).rejects.toThrowError();
+    it('checks categories for successful fail', async () => {
+      // Contacts are kinda whack right now
+      // const applicantTestFail = submissionIntakeSchema.validate({
+      //   contactFirstName: '',
+      //   contactLastName: 'testcontactLastName',
+      //   contactPhoneNumber: '2501234567',
+      //   contactEmail: 'test@test.com',
+      //   contactApplicantRelationship: ProjectRelationship.OTHER,
+      //   contactPreference: ContactPreference.PHONE_CALL
+      // });
+
+      const basicTestFail = createProjectIntakeSchema([]).validateAt('basic', {
+        basic: {
+          projectApplicantType: 'testString1',
+          isDevelopedInBC: 'testString2',
+          registeredName: 'testString3'
+        }
+      });
+
+      const housingTestFail = createProjectIntakeSchema([]).validateAt('housing', {
+        housing: {
+          projectName: 'testString1',
+          projectDescription: 'testString2',
+          hasRentalUnits: 'wrongRentalUnit',
+          financiallySupportedBC: 'No',
+          financiallySupportedIndigenous: 'No',
+          financiallySupportedNonProfit: 'No',
+          financiallySupportedHousingCoop: 'No',
+          rentalUnits: 'No',
+          indigenousDescription: 'No',
+          nonProfitDescription: 'No',
+          housingCoopDescription: 'No',
+          singleFamilyUnits: 'No',
+          multiFamilyUnits: 'No',
+          otherUnitsDescription: 'No',
+          otherUnits: 'No'
+        }
+      });
+
+      const locationTestFail = createProjectIntakeSchema([]).validateAt('location', {
+        location: {
+          projectLocation: '',
+          streetAddress: 'testString2',
+          locality: 'testString3',
+          province: 'testString4',
+          latitude: '12',
+          longitude: '-139',
+          ltsaPIDLookup: '',
+          geomarkUrl: ''
+        }
+      });
+
+      const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
+        permits: {
+          appliedPermits: [
+            {
+              permitTypeId: '',
+              submittedDate: new Date(),
+              trackingId: 'testString'
+            }
+          ],
+          hasAppliedProvincialPermits: 123
+        }
+      });
+
+      //await expect(applicantTestFail).rejects.toThrowError();
+      await expect(basicTestFail).rejects.toThrowError();
+      await expect(housingTestFail).rejects.toThrowError();
+      await expect(locationTestFail).rejects.toThrowError();
+      await expect(permitsTest).rejects.toThrowError();
+    });
   });
 });

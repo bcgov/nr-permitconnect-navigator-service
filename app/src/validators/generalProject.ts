@@ -2,13 +2,14 @@ import Joi from 'joi';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
-import { basicIntake } from './basic.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
-import { permits } from './permits';
 import { validate } from '../middleware/validation';
+import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
+import { ProjectApplicant } from '../utils/enums/housing.ts';
+import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
 
 const schema = {
   createGeneralProject: {
@@ -17,7 +18,20 @@ const schema = {
       activityId: Joi.string().min(8).max(8).allow(null),
       contact: contactSchema,
       appliedPermits: Joi.array().items(appliedPermit).allow(null),
-      basic: basicIntake,
+      basic: Joi.object({
+        projectApplicantType: Joi.string()
+          .required()
+          .valid(...PROJECT_APPLICANT_LIST),
+        projectName: Joi.string().required().max(255).trim(),
+        projectNumber: Joi.string().max(255).trim(),
+        projectDescription: Joi.string().max(4000).allow(null),
+        registeredId: Joi.string().allow(null),
+        registeredName: Joi.when('projectApplicantType', {
+          is: ProjectApplicant.BUSINESS,
+          then: Joi.string().required().max(255).trim(),
+          otherwise: Joi.string().allow(null)
+        })
+      }),
       general: Joi.object({
         projectName: Joi.string().required().max(255).trim(),
         projectDescription: Joi.string().max(4000).allow(null)
@@ -26,7 +40,15 @@ const schema = {
       investigatePermits: Joi.array()
         .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
         .allow(null),
-      permits: permits
+      permits: Joi.object({
+        appliedPermits: Joi.array().items(appliedPermit).allow(null),
+        hasAppliedProvincialPermits: Joi.string()
+          .required()
+          .valid(...YES_NO_UNSURE_LIST),
+        investigatePermits: Joi.array()
+          .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+          .allow(null)
+      })
     })
   },
   emailConfirmation: {
@@ -64,7 +86,7 @@ const schema = {
     })
   },
   searchGeneralProjects: {
-    query: Joi.object({
+    body: Joi.object({
       activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),

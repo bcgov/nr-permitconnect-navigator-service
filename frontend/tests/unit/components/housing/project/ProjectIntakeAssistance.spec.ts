@@ -2,43 +2,27 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import { useForm } from 'vee-validate';
 import { shallowMount } from '@vue/test-utils';
 
+import { default as i18n } from '@/i18n';
 import ProjectIntakeAssistance from '@/components/housing/project/ProjectIntakeAssistance.vue';
-import { userService } from '@/services';
-import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
-import type { AxiosResponse } from 'axios';
-
-const useUserService = vi.spyOn(userService, 'searchUsers');
-
-const testFormErrors: Record<string, string | undefined> = {
-  [`${IntakeFormCategory.CONTACTS}.name`]: undefined,
-  [`${IntakeFormCategory.CONTACTS}.email`]: 'Invalid email address'
-};
-
-const testFormValues: Record<string, string> = {
-  [`${IntakeFormCategory.CONTACTS}`]: 'John Doe',
-  [`${IntakeFormCategory.CONTACTS}.email`]: 'john.doe@example.com'
-};
-
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-
-const wrapperSettings = (testFormErrorsProp = testFormErrors, testFormValuesProp = testFormValues) => ({
-  props: {
-    formErrors: testFormErrorsProp,
-    formValues: testFormValuesProp
+const TestWrapper = {
+  components: { ProjectIntakeAssistance },
+  setup() {
+    useForm(); // provides vee-validate form context
   },
+  template: '<ProjectIntakeAssistance  />'
+};
+
+const wrapperSettings = () => ({
   global: {
     plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
+      createTestingPinia({
+        initialState: {}
+      }),
+      i18n,
       PrimeVue,
       ConfirmationService,
       ToastService
@@ -53,7 +37,7 @@ describe('ProjectIntakeAssistance.vue', () => {
   });
 
   it('renders the component with the provided props', () => {
-    const wrapper = shallowMount(ProjectIntakeAssistance, wrapperSettings());
-    expect(wrapper).toBeTruthy();
+    const wrapper = shallowMount(TestWrapper, wrapperSettings());
+    expect(wrapper.findComponent(ProjectIntakeAssistance).exists()).toBe(true);
   });
 });

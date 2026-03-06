@@ -10,6 +10,8 @@ import { Initiative } from '@/utils/enums/application';
 import AuthorizationView from '@/views/internal/AuthorizationView.vue';
 import { mockAxiosResponse, t } from '../../../helpers';
 
+import type { ElectrificationProject, HousingProject } from '@/types';
+
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
 
@@ -78,9 +80,14 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse([{ electrificationProjectId: '1' }])
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(mockAxiosResponse([{ housingProjectId: '1' }]));
+  vi.mocked(housingProjectService.getProject).mockResolvedValue(
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
+  );
   vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse({ permitId: '3' }));
 });
 

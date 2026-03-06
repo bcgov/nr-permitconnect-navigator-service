@@ -1,26 +1,32 @@
 <script setup lang="ts">
+import { computed } from 'vue';
+
 import Divider from '@/components/common/Divider.vue';
 
 import type { CallbackFn } from '@/types/index.ts';
+import { useFormStore } from '@/store';
 
 // Props
 const {
   index,
-  activeStep,
-  clickCallback = () => {},
+  onClickCallback = () => {},
   title,
   icon,
-  errors = false,
   divider = true
 } = defineProps<{
   index: number;
-  activeStep: number;
-  clickCallback?: CallbackFn;
+  onClickCallback?: CallbackFn;
   title: string;
   icon: string;
-  errors?: boolean;
   divider?: boolean;
 }>();
+
+const activeStep = defineModel<number>('activeStep', {
+  required: true
+});
+
+// State
+const errors = computed(() => useFormStore().getFormErrors.some((x) => x.tab === index));
 </script>
 
 <template>
@@ -30,7 +36,12 @@ const {
       :aria-label="`Go to ${title} step`"
       class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
-      @click="clickCallback()"
+      @click="
+        () => {
+          activeStep = index;
+          onClickCallback();
+        }
+      "
     >
       <span
         aria-hidden="true"

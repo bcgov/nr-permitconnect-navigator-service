@@ -21,6 +21,8 @@ import {
 import ProjectView from '@/views/external/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
+import type { ElectrificationProject, HousingProject } from '@/types';
+
 // Mock functions we need to test
 const routerReplace = vi.fn();
 const toastErrorMock = vi.fn();
@@ -127,10 +129,13 @@ beforeEach(() => {
     mockAxiosResponse([{ needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }])
   );
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ electrificationProjectId: '123', activityId: '123' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
     mockAxiosResponse([{ noteHistoryId: '123', shownToProponent: true, note: [{}] }])

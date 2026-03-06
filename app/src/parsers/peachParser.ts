@@ -182,13 +182,11 @@ export const getRecordEvents = (
     ? [...record.process_event_set].sort((a, b) => compareProcessEvents(a, b, true))
     : [];
   // TODO: Once onHold is implemented a tie breaker compartive function will be needed
-  /*  eslint-disable indent */
   const onHoldEvents = record.on_hold_event_set
     ? [...record.on_hold_event_set].sort((a, b) =>
         compareDates(piesEventToDate(a.event), piesEventToDate(b.event), true)
       )
     : [];
-  /* eslint-enable indent */
 
   const processEvent = processEvents && processEvents.length > n ? processEvents[n] : undefined;
   const onHoldEvent = onHoldEvents && onHoldEvents.length > m ? onHoldEvents[m] : undefined;

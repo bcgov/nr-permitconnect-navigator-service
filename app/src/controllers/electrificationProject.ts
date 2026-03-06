@@ -38,9 +38,38 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  Email,
   StatisticsFilters
 } from '../types/index.ts';
+
+/**
+ * Generates and sends a templated email with the given data
+ * @param projectWithContact Email data
+ */
+async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+  const subject = 'Confirmation of Project Submission';
+
+  const body = confirmationTemplateElectrificationSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.ELECTRIFICATION),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.electrificationProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: subject,
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
 
 /**
  * Handles creating a project from intake data
@@ -54,7 +83,7 @@ const generateElectrificationProjectData = async (
   data: ElectrificationProjectIntake,
   currentContext: CurrentContext
 ) => {
-  let activityId = data.project.activityId;
+  let activityId = data.activityId;
 
   // Create activity and link contact if required
   if (!activityId) {
@@ -63,10 +92,17 @@ const generateElectrificationProjectData = async (
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
-  const UUID = uuidv4();
+
   // Put new electrification project together
+  const UUID = uuidv4();
+
   const electrificationProjectData: ElectrificationProject = {
-    ...data.project,
+    companyIdRegistered: data.basic?.registeredId ?? null,
+    companyNameRegistered: data.basic?.registeredName ?? null,
+    projectName: data.basic?.projectName,
+    projectDescription: data.basic?.projectDescription,
+    bcHydroNumber: data.project?.bcHydroNumber ?? null,
+    projectType: data.project?.projectType ?? null,
     electrificationProjectId: UUID,
     activityId: activityId,
     submittedAt: new Date(),
@@ -93,19 +129,6 @@ const generateElectrificationProjectData = async (
   };
 
   return electrificationProjectData;
-};
-
-/**
- * Send an email with the confirmation of electrification project
- * @param req Express Request object
- * @param res Express Response object
- */
-export const emailElectrificationProjectConfirmationController = async (
-  req: Request<never, never, Email>,
-  res: Response
-) => {
-  const { data, status } = await email(req.body);
-  res.status(status).json(data);
 };
 
 export const getElectrificationProjectActivityIdsController = async (req: Request, res: Response) => {
@@ -245,32 +268,6 @@ export const submitElectrificationProjectDraftController = async (
   res.status(201).json({ ...result, contact: result.contact });
 };
 
-async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-  const subject = 'Confirmation of Project Submission';
-
-  const body = confirmationTemplateElectrificationSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.ELECTRIFICATION),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.electrificationProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: subject,
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
-
 export const upsertElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
@@ -306,7 +303,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
     }
   });
 
-  res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
+  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateElectrificationProjectController = async (

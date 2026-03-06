@@ -4,6 +4,8 @@ import {
   BringForwardType,
   EnquirySubmittedMethod,
   NoteType,
+  ProjectApplicant,
+  ProjectLocation,
   ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
@@ -44,6 +46,14 @@ export const ENQUIRY_TYPE_LIST = [
 ];
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ROADMAP];
+
+export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
+
+export const PROJECT_LOCATION_LIST = [
+  ProjectLocation.LOCATION_COORDINATES,
+  ProjectLocation.STREET_ADDRESS,
+  ProjectLocation.PIN_OR_DRAW
+];
 
 export const PROJECT_RELATIONSHIP_LIST = [
   ProjectRelationship.OWNER,

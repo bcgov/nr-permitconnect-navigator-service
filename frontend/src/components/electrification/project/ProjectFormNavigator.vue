@@ -352,8 +352,8 @@ const onSubmit = async (values: GenericObject) => {
           submissionType: values.submissionState.submissionType,
           assignedUserId: values.submissionState.assignedUser?.userId,
           applicationStatus: values.submissionState.applicationStatus,
-          atsClientId: parseInt(values.atsClientId) || '',
-          atsEnquiryId: parseInt(values.atsEnquiryId) || '',
+          atsClientId: Number.parseInt(values.atsClientId) || '',
+          atsEnquiryId: Number.parseInt(values.atsEnquiryId) || '',
           aaiUpdated: values.aaiUpdated,
           addedToAts: values.addedToAts
         }
