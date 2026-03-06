@@ -89,6 +89,39 @@ export const matchContacts = async (
 };
 
 /**
+ * Retrieve all contacts exactly matching any of the search parameters
+ * @param tx Prisma transaction client
+ * @param params - The search parameters
+ * @returns A Promise that resolves to the contacts matching the given params and are users
+ */
+export const matchContactsExact = async (
+  tx: PrismaTransactionClient,
+  params: ContactSearchParameters
+): Promise<Contact[]> => {
+  const response = await tx.contact.findMany({
+    where: {
+      OR: [
+        {
+          contactId: { in: params.contactId }
+        },
+        {
+          userId: { in: params.userId }
+        },
+        {
+          email: params.email ?? { in: params.email, mode: 'insensitive' }
+        }
+      ],
+      userId: { not: null }
+    },
+    include: {
+      user: true
+    }
+  });
+
+  return response;
+};
+
+/**
  * Retrieve all contacts matching the search parameters
  * @param tx Prisma transaction client
  * @param params - The search parameters

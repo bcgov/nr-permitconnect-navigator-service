@@ -136,6 +136,68 @@ describe('matchContacts', () => {
   });
 });
 
+describe('matchContactsExact', () => {
+  it('calls contact.findMany and returns result', async () => {
+    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
+
+    const response = await contactService.matchContactsExact(prismaTxMock, {});
+
+    expect(prismaTxMock.contact.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          {
+            contactId: { in: undefined }
+          },
+          {
+            userId: { in: undefined }
+          },
+          {
+            email: { in: undefined, mode: 'insensitive' }
+          }
+        ],
+        userId: { not: null }
+      },
+      include: {
+        user: true
+      }
+    });
+    expect(response).toStrictEqual([{ contactId: '1' }]);
+  });
+
+  it('passes parameters', async () => {
+    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
+
+    const params = {
+      contactId: ['123'],
+      userId: ['456'],
+      email: 'test@test.com'
+    };
+
+    await contactService.matchContactsExact(prismaTxMock, params);
+
+    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
+      where: {
+        OR: [
+          {
+            contactId: { in: params.contactId }
+          },
+          {
+            userId: { in: params.userId }
+          },
+          {
+            email: params.email
+          }
+        ],
+        userId: { not: null }
+      },
+      include: {
+        user: true
+      }
+    });
+  });
+});
+
 describe('searchContacts', () => {
   it('calls contact.findMany and returns result', async () => {
     prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);

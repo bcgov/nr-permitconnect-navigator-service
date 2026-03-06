@@ -2,8 +2,16 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
-import { deleteContact, getContact, matchContacts, searchContacts, upsertContacts } from '../services/contact.ts';
-import { addDashesToUuid, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
+import {
+  deleteContact,
+  getContact,
+  matchContacts,
+  matchContactsExact,
+  searchContacts,
+  upsertContacts
+} from '../services/contact.ts';
+import { IdentityProviderKind } from '../utils/enums/application.ts';
+import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -44,7 +52,8 @@ export const matchContactsController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    return await matchContacts(tx, req.body);
+    if (hasIdentity(IdentityProviderKind.IDIR, req.currentContext)) return await matchContacts(tx, req.body);
+    return await matchContactsExact(tx, req.body);
   });
   res.status(200).json(response);
 };

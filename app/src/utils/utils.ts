@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { cwd } from 'node:process';
 import { validate, version } from 'uuid';
 
+import { IdentityProviderKind } from './enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
@@ -84,6 +85,17 @@ export function differential<T extends Record<PropertyKey, unknown>>(source: T, 
   return Object.fromEntries(
     (Object.entries(source) as [keyof T, T[keyof T]][]).filter(([key, value]) => comparer[key] !== value)
   ) as Partial<T>;
+}
+
+/**
+ * Get the identity provider configuration for the given kind
+ * @param kind The kind of identity provider
+ * @returns IDP config for the given kind or undefined if not found
+ */
+export function getIdpAttributesByKind(kind: IdentityProviderKind): IdpAttributes | undefined {
+  const idpList: IdpAttributes[] = readIdpList();
+
+  return idpList.find((i) => i.kind === kind);
 }
 
 /**
@@ -199,6 +211,18 @@ export function getCurrentUsername(currentContext: CurrentContext | undefined): 
 
   return undefined;
 }
+
+/**
+ * Determines if given identity kind is equal to current user identity
+ * @param identityKind The kind of identity provider
+ * @param currentContext The context of the current authorized user
+ * @returns True if identities match
+ */
+export const hasIdentity = (identityKind: IdentityProviderKind, currentContext: CurrentContext): boolean => {
+  const idp = getIdpAttributesByKind(identityKind);
+  const userIdp = currentContext.tokenPayload?.identity_provider;
+  return idp?.idp === userIdp;
+};
 
 /**
  * Checks whether the given object is empty, no properties
