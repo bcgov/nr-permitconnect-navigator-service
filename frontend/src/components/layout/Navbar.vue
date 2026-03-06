@@ -3,15 +3,13 @@ import { ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Menubar } from '@/lib/primevue';
-import { electrificationProjectService, housingProjectService } from '@/services';
-import { useAppStore, useAuthZStore, useContactStore } from '@/store';
+import { useAppStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_ASSISTANCE } from '@/utils/constants/housing';
 import { Initiative, RouteName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
 import type { CallbackFn } from '@/types';
 
 // Types
@@ -36,28 +34,9 @@ const authzStore = useAuthZStore();
 const items: Ref<NavItem[]> = ref([]);
 
 // Actions
-async function createIntake(service: IDraftableProjectService, route: RouteName) {
-  const contact = useContactStore().getContact;
-  const response = await service.updateDraft({
-    data: {
-      contacts: {
-        contactId: contact?.contactId,
-        userId: contact?.userId,
-        contactFirstName: contact?.firstName,
-        contactLastName: contact?.lastName,
-        contactEmail: contact?.email,
-        contactPhoneNumber: contact?.phoneNumber,
-        contactApplicantRelationship: contact?.contactApplicantRelationship,
-        contactPreference: contact?.contactPreference
-      }
-    }
-  });
-
+async function createIntake(route: RouteName) {
   router.push({
-    name: route,
-    params: {
-      draftId: response.data.draftId
-    }
+    name: route
   });
 }
 
@@ -74,7 +53,7 @@ watchEffect(() => {
         items: [
           {
             label: 'Submit an electrification project to the Navigator Service',
-            func: () => createIntake(electrificationProjectService, RouteName.EXT_ELECTRIFICATION_INTAKE),
+            func: () => createIntake(RouteName.EXT_ELECTRIFICATION_INTAKE),
             access: NavigationPermission.EXT_ELECTRIFICATION
           }
         ],
@@ -121,6 +100,70 @@ watchEffect(() => {
         public: true
       }
     ];
+  } else if (appStore.getInitiative === Initiative.GENERAL) {
+    items.value = [
+      {
+        label: 'Home',
+        route: RouteName.HOME,
+        public: true
+      },
+      {
+        label: 'General',
+        items: [
+          {
+            label: 'Submit a general project to the Navigator Service',
+            func: () => createIntake(RouteName.EXT_GENERAL_INTAKE),
+            access: NavigationPermission.EXT_GENERAL
+          },
+          {
+            label: 'Submit general enquiries',
+            route: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
+            access: NavigationPermission.EXT_GENERAL
+          }
+        ],
+        access: [NavigationPermission.EXT_GENERAL]
+      },
+      {
+        label: 'Submissions',
+        route: RouteName.INT_GENERAL,
+        access: NavigationPermission.INT_GENERAL
+      },
+      {
+        label: 'Contacts',
+        route: RouteName.INT_GENERAL_CONTACT,
+        access: NavigationPermission.INT_CONTACT
+      },
+      {
+        label: 'User Management',
+        route: RouteName.INT_GENERAL_USER_MANAGEMENT,
+        access: NavigationPermission.INT_USER_MANAGEMENT
+      },
+      {
+        label: 'Developer',
+        route: RouteName.DEVELOPER,
+        access: NavigationPermission.DEVELOPER
+      },
+      {
+        label: 'Help',
+        items: [
+          {
+            label: 'User Guide',
+            route: RouteName.EXT_GENERAL_GUIDE
+          },
+          {
+            label: 'Report a problem',
+            mailTo: `mailto:${PCNS_CONTACT.email}?subject=${PCNS_CONTACT.subject}`,
+            public: true
+          },
+          {
+            label: 'Contact a Navigator',
+            mailTo: `mailto:${HOUSING_ASSISTANCE.email}?subject=${HOUSING_ASSISTANCE.subject}`,
+            access: [NavigationPermission.EXT_GENERAL]
+          }
+        ],
+        public: true
+      }
+    ];
   } else if (appStore.getInitiative === Initiative.HOUSING) {
     items.value = [
       {
@@ -133,7 +176,7 @@ watchEffect(() => {
         items: [
           {
             label: 'Submit a housing project to the Navigator Service',
-            func: () => createIntake(housingProjectService, RouteName.EXT_HOUSING_INTAKE),
+            func: () => createIntake(RouteName.EXT_HOUSING_INTAKE),
             access: NavigationPermission.EXT_HOUSING
           },
           {

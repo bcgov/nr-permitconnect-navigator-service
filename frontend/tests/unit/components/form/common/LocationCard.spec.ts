@@ -1,13 +1,19 @@
+import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
+import { useForm } from 'vee-validate';
 
+import { default as i18n } from '@/i18n';
 import { shallowMount } from '@vue/test-utils';
 import LocationCard from '@/components/form/common/LocationCard.vue';
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
+const TestWrapper = {
+  components: { LocationCard },
+  props: ['activeStep'],
+  setup() {
+    useForm(); // provides vee-validate form context
+  },
+  template: '<LocationCard :activeStep="activeStep" />'
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -18,17 +24,25 @@ afterEach(() => {
 });
 
 const wrapperSettings = () => ({
-  props: {},
+  props: {
+    activeStep: 0
+  },
   global: {
-    plugins: [PrimeVue],
+    plugins: [
+      createTestingPinia({
+        initialState: {}
+      }),
+      i18n,
+      PrimeVue
+    ],
     stubs: ['font-awesome-icon']
   }
 });
 
 describe('LocationCard.vue', () => {
   it('renders', () => {
-    const wrapper = shallowMount(LocationCard, wrapperSettings());
+    const wrapper = shallowMount(TestWrapper, wrapperSettings());
 
-    expect(wrapper).toBeTruthy();
+    expect(wrapper.findComponent(LocationCard).exists()).toBe(true);
   });
 });

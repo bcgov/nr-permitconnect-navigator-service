@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { useField, ErrorMessage } from 'vee-validate';
+import { useField, ErrorMessage, useSetFieldValue } from 'vee-validate';
+import { watch } from 'vue';
 
 import { Checkbox } from '@/lib/primevue';
 
@@ -20,7 +21,19 @@ const {
   invalid?: boolean;
 }>();
 
+// Composables
 const { errorMessage, handleBlur, value } = useField<string>(name);
+const setFieldValue = useSetFieldValue(name);
+
+// Actions
+// Default to false if value is null or undefined
+watch(
+  value,
+  () => {
+    if (value.value === null || value.value === undefined) setFieldValue(false);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

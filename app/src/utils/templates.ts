@@ -270,6 +270,41 @@ export const confirmationTemplateElectrificationSubmission: EmailTemplate = (rep
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
+export const confirmationTemplateGeneralSubmission: EmailTemplate = (replaceConfig) => {
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ contactName }},<br><br>
+
+    <b>Project ID: {{ activityId }}</b><br><br>
+
+    Thank you for registering your {{ initiative }} project with the Navigator Service.
+    We have successfully received your project submission.
+    A Navigator will review your submission and contact you.
+    Please keep your project ID for future reference.<br><br>
+
+    View your project submission
+    <a href="${PCNS_URL}/e/general/project/{{ projectId }}/intake">here<a>.<br><br>
+
+    Regards,<br><br>
+
+    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    </div>
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
 export const confirmationTemplateHousingSubmission: EmailTemplate = (replaceConfig) => {
   const baseTemplate = `
     <div style="width: 880px">

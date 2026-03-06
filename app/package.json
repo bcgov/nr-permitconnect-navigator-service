@@ -56,8 +56,8 @@
     "seed:dev": "tsx ./node_modules/knex/bin/cli.js seed:run --specific=dev_groups.ts",
     "seed:housing": "tsx ./node_modules/knex/bin/cli.js seed:run --specific=housing_projects.ts",
     "seed": "knex seed:run",
-    "serve": "tsx watch --include \"./config/*\" --include \"./dist/*\" ./server --clear-screen=false",
-    "start": "tsx ./server",
+    "serve": "tsx watch --include \"./config/*\" --include \"./src/**/*\" ./server.ts --clear-screen=false",
+    "start": "tsx ./server.ts",
     "test": "jest --verbose --forceExit --detectOpenHandles",
     "typecheck": "tsc --noEmit"
   },

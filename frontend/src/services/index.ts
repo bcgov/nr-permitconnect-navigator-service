@@ -10,6 +10,7 @@ export { default as documentService } from './documentService';
 export { default as electrificationProjectService } from './electrificationProjectService';
 export { default as enquiryService } from './enquiryService';
 export { default as externalApiService } from './externalApiService';
+export { default as generalProjectService } from './generalProjectService';
 export { default as housingProjectService } from './housingProjectService';
 export { default as mapService } from './mapService';
 export { default as noteHistoryService } from './noteHistoryService';
