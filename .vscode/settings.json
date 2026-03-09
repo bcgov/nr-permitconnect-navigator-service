@@ -29,5 +29,13 @@
   "yaml.schemas": {
     "openapi:v3": "./app/src/docs/v1.api-spec.yaml"
   },
-  "todo-tree.tree.scanMode": "workspace only"
+  "todo-tree.tree.scanMode": "workspace only",
+  "i18n-ally.localesPaths": [
+    "frontend/src/locales"
+  ],
+  "i18n-ally.keystyle": "nested",
+  "i18n-ally.sourceLanguage": "en-CA",
+  "i18n-ally.enabledFrameworks": [
+    "vue"
+  ]
 }
