@@ -10,18 +10,27 @@ import { usePermitStore } from '@/store/permitStore';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { PermitStage, PermitState } from '@/utils/enums/permit';
-import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
+import {
+  ApplicationStatus,
+  ContactPreference,
+  EnquirySubmittedMethod,
+  ProjectRelationship,
+  SubmissionType
+} from '@/utils/enums/projectCommon';
 
-import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
+import type { Contact, Enquiry, HousingProject, Permit, PermitType } from '@/types';
 
 let mockRoute = {};
 const currentDate = new Date().toISOString();
 
-const exampleContact = {
+const exampleContact: Contact = {
   contactId: 'contact123',
-  name: 'John Doe',
+  firstName: 'John',
+  lastName: 'Doe',
   email: 'john.doe@example.com',
-  phone: '123-456-7890'
+  phoneNumber: '123-456-7890',
+  contactApplicantRelationship: ProjectRelationship.OWNER,
+  contactPreference: ContactPreference.EITHER
 };
 
 const testEnquiry: Enquiry = {
@@ -91,7 +100,7 @@ const testProject: HousingProject = {
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate
-};
+} as HousingProject;
 
 const testPermitType: PermitType = {
   permitTypeId: 1,

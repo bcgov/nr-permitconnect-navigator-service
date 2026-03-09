@@ -1,41 +1,53 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { InputMask, InputText, Select } from '@/components/form';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card } from '@/lib/primevue';
+import { useFormStore } from '@/store';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 
-import type { DeepPartial } from '@/types';
-import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectIntakeSchema';
-import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
+import type { ComponentPublicInstance, Ref } from 'vue';
+import type { Contact } from '@/types';
 
 // Props
-const { editable = true, initialFormValues } = defineProps<{
-  editable?: boolean;
-  initialFormValues: DeepPartial<ElectrificationFormSchemaType> | DeepPartial<HousingFormSchemaType>;
+const { initialFormValues = undefined, tab = 0 } = defineProps<{
+  initialFormValues?: Partial<Contact>;
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
+
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
+// State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+
+// Actions
+useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex">
-        <span
+        <h6
           class="section-header"
-          role="heading"
           aria-level="2"
         >
-          {{ t('common.contactCardIntakeForm.header') }}
-        </span>
+          {{ t('contactCardIntakeForm.header') }}
+        </h6>
         <Tooltip
           icon="fa-solid fa-circle-question"
           right
-          :text="t('common.contactCardIntakeForm.contactTooltip')"
+          :text="t('contactCardIntakeForm.contactTooltip')"
         />
       </div>
       <Divider type="solid" />
@@ -43,42 +55,42 @@ const { t } = useI18n();
     <template #content>
       <div class="grid grid-cols-2 gap-4">
         <InputText
-          :name="`contacts.contactFirstName`"
-          label="First name"
+          :name="`contacts.firstName`"
+          :label="t('contactCardIntakeForm.labels.firstName')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
+          :disabled="!!initialFormValues?.firstName || !getEditable"
         />
         <InputText
-          :name="`contacts.contactLastName`"
-          label="Last name"
+          :name="`contacts.lastName`"
+          :label="t('contactCardIntakeForm.labels.lastName')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
+          :disabled="!!initialFormValues?.lastName || !getEditable"
         />
         <InputMask
-          :name="`contacts.contactPhoneNumber`"
+          :name="`contacts.phoneNumber`"
           mask="(999) 999-9999"
-          label="Phone number"
+          :label="t('contactCardIntakeForm.labels.phoneNumber')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
+          :disabled="!!initialFormValues?.phoneNumber || !getEditable"
         />
         <InputText
-          :name="`contacts.contactEmail`"
-          label="Email"
+          :name="`contacts.email`"
+          :label="t('contactCardIntakeForm.labels.email')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
+          :disabled="!!initialFormValues?.email || !getEditable"
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"
-          label="Relationship to project"
+          :label="t('contactCardIntakeForm.labels.contactApplicantRelationship')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactApplicantRelationship || !editable"
+          :disabled="!!initialFormValues?.contactApplicantRelationship || !getEditable"
           :options="PROJECT_RELATIONSHIP_LIST"
         />
         <Select
           :name="`contacts.contactPreference`"
-          label="Preferred contact method"
+          :label="t('contactCardIntakeForm.labels.contactPreference')"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactPreference || !editable"
+          :disabled="!!initialFormValues?.contactPreference || !getEditable"
           :options="CONTACT_PREFERENCE_LIST"
         />
       </div>

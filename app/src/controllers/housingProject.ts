@@ -7,8 +7,7 @@ import {
   generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
-  generateUpdateStamps,
-  jsonToPrismaInputJson
+  generateUpdateStamps
 } from '../db/utils/utils.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
@@ -39,7 +38,6 @@ import type {
   Contact,
   CurrentContext,
   Draft,
-  Email,
   HousingProject,
   HousingProjectIntake,
   HousingProjectSearchParameters,
@@ -89,6 +87,42 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
   }
 };
 
+/**
+ * Generates and sends a templated email with the given data
+ * @param projectWithContact Email data
+ */
+async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+
+  const body = confirmationTemplateHousingSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.HOUSING),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.housingProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: 'Confirmation of Project Submission',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
+
+/**
+ * Transforms intake data to match DB schema
+ * @param tx Prismas transaction client
+ * @param data Intake data
+ * @param currentContext The current context of the Express request
+ * @returns Transformed project and permit data
+ */
 const generateHousingProjectData = async (
   tx: PrismaTransactionClient,
   data: HousingProjectIntake,
@@ -112,14 +146,14 @@ const generateHousingProjectData = async (
       consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName
+      companyNameRegistered: data.basic.registeredName,
+      projectName: data.basic.projectName,
+      projectDescription: data.basic.projectDescription
     };
   }
 
   if (data.housing) {
     housing = {
-      projectName: data.housing.projectName,
-      projectDescription: data.housing.projectDescription,
       singleFamilyUnits: data.housing.singleFamilyUnits,
       multiFamilyUnits: data.housing.multiFamilyUnits,
       otherUnitsDescription: data.housing.otherUnitsDescription,
@@ -142,13 +176,12 @@ const generateHousingProjectData = async (
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
-      geoJson: jsonToPrismaInputJson(data.location.geoJson),
       locationPids: data.location.ltsaPidLookup,
       latitude: data.location.latitude,
       longitude: data.location.longitude,
-      streetAddress: data.location.streetAddress,
       locality: data.location.locality,
-      province: data.location.province
+      province: data.location.province,
+      streetAddress: data.location.streetAddress
     };
   }
 
@@ -156,56 +189,56 @@ const generateHousingProjectData = async (
     permits = {
       hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
     };
-  }
 
-  if (data.appliedPermits?.length) {
-    appliedPermits = data.appliedPermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      needed: PermitNeeded.YES,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.IN_PROGRESS,
-      submittedDate: x.submittedDate,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      permitTracking: x.permitTracking?.map((pt) => ({
-        ...pt,
-        ...generateCreateStamps(currentContext)
-      })),
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
-  }
+    if (data.permits.appliedPermits?.length) {
+      appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: x.submittedDate,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        permitTracking: x.permitTracking?.map((pt) => ({
+          ...pt,
+          ...generateCreateStamps(currentContext)
+        })),
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
 
-  if (data.investigatePermits?.length) {
-    investigatePermits = data.investigatePermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      needed: PermitNeeded.UNDER_INVESTIGATION,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.NONE,
-      submittedDate: null,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
+    if (data.permits.investigatePermits?.length) {
+      investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.PRE_SUBMISSION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.NONE,
+        submittedDate: null,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
   }
 
   // Put new housing project together
@@ -217,10 +250,10 @@ const generateHousingProjectData = async (
       ...permits,
       housingProjectId: uuidv4(),
       activityId: activityId,
-      submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
+      submittedAt: new Date(),
       submittedBy: getCurrentUsername(currentContext),
-      applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
-      submissionType: data?.submissionType ?? SubmissionType.GUIDANCE,
+      applicationStatus: ApplicationStatus.NEW,
+      submissionType: SubmissionType.GUIDANCE,
       createdAt: null,
       createdBy: null,
       updatedAt: null,
@@ -253,16 +286,6 @@ const generateHousingProjectData = async (
   assignPriority(housingProjectData.housingProject);
 
   return housingProjectData;
-};
-
-/**
- * Send an email with the confirmation of housing project
- * @param req Express Request object
- * @param res Express Response object
- */
-export const emailHousingProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
-  const { data, status } = await email(req.body);
-  res.status(status).json(data);
 };
 
 export const getHousingProjectActivityIdsController = async (req: Request, res: Response) => {
@@ -426,31 +449,6 @@ export const submitHousingProjectDraftController = async (
   res.status(201).json({ ...result, contact: result.contact });
 };
 
-async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const body = confirmationTemplateHousingSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.HOUSING),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.housingProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Project Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
-
 export const upsertHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
   const update = req.body.draftId && req.body.activityId;
 
@@ -486,7 +484,7 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
     }
   });
 
-  res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
+  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {

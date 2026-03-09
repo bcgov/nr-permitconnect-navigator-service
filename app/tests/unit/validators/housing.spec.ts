@@ -14,8 +14,6 @@ describe('housingSchema', () => {
       otherSelected: true,
       otherUnits: NumResidentialUnits.ONE_TO_NINE,
       otherUnitsDescription: 'test description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -38,8 +36,6 @@ describe('housingSchema', () => {
       otherSelected: false,
       otherUnits: '',
       otherUnitsDescription: '',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE,
       singleFamilySelected: false,
       singleFamilyUnits: ''
@@ -67,8 +63,6 @@ describe('housingSchema', () => {
       otherSelected: true,
       otherUnits: NumResidentialUnits.ONE_TO_NINE,
       otherUnitsDescription: 'a'.repeat(256),
-      projectName: 'a'.repeat(256),
-      projectDescription: 'a'.repeat(256),
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -89,8 +83,6 @@ describe('housingSchema', () => {
       otherSelected: true,
       otherUnits: NumResidentialUnits.ONE_TO_NINE,
       otherUnitsDescription: 'test description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -109,8 +101,6 @@ describe('housingSchema', () => {
       otherSelected: false,
       otherUnits: NumResidentialUnits.ONE_TO_NINE,
       otherUnitsDescription: 'test description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -128,8 +118,6 @@ describe('housingSchema', () => {
       housingCoopDescription: 'Housing Coop Description',
       otherUnits: NumResidentialUnits.ONE_TO_NINE,
       otherUnitsDescription: 'test description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -148,8 +136,6 @@ describe('housingSchema', () => {
       otherSelected: true,
       otherUnits: 'not-a-valid-value',
       otherUnitsDescription: 'test description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
@@ -165,8 +151,6 @@ describe('housingSchema', () => {
       financiallySupportedHousingCoop: BasicResponse.YES,
       hasRentalUnits: BasicResponse.YES,
       housingCoopDescription: 'Housing Coop Description',
-      projectName: 'Project Name',
-      projectDescription: 'Project Description',
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 

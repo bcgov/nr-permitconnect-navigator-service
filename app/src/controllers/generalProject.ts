@@ -1,3 +1,4 @@
+import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -28,7 +29,8 @@ import { upsertPermitTracking } from '../services/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
 import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
-import { isTruthy, omit } from '../utils/utils.ts';
+import { confirmationTemplateGeneralSubmission } from '../utils/templates.ts';
+import { isTruthy, omit, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -36,7 +38,6 @@ import type {
   Contact,
   CurrentContext,
   Draft,
-  Email,
   GeneralProject,
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
@@ -45,6 +46,42 @@ import type {
   StatisticsFilters
 } from '../types/index.ts';
 
+/**
+ * Generates and sends a templated email with the given data
+ * @param projectWithContact Email data
+ */
+async function emailProjectConfirmation(projectWithContact: GeneralProject & { contact: Contact }) {
+  const configCC = config.get<string>('server.ches.submission.cc');
+
+  const body = confirmationTemplateGeneralSubmission({
+    contactName:
+      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
+        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
+        : '',
+    initiative: toTitleCase(Initiative.GENERAL),
+    activityId: projectWithContact.activityId,
+    projectId: projectWithContact.generalProjectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [projectWithContact.contact.email!],
+    cc: [configCC],
+    subject: 'Confirmation of Project Submission',
+    bodyType: 'html',
+    body: body
+  };
+
+  await email(emailData);
+}
+
+/**
+ * Transforms intake data to match DB schema
+ * @param tx Prismas transaction client
+ * @param data Intake data
+ * @param currentContext The current context of the Express request
+ * @returns Transformed project and permit data
+ */
 const generateGeneralProjectData = async (
   tx: PrismaTransactionClient,
   data: GeneralProjectIntake,
@@ -59,29 +96,24 @@ const generateGeneralProjectData = async (
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
-  let basic, general, location, permits;
+  let basic, location, permits;
   let appliedPermits: Permit[] = [],
     investigatePermits: Permit[] = [];
 
   if (data.basic) {
     basic = {
-      consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName
-    };
-  }
-
-  if (data.general) {
-    general = {
-      projectName: data.general.projectName,
-      projectDescription: data.general.projectDescription
+      companyNameRegistered: data.basic.registeredName,
+      projectName: data.basic.projectName,
+      projectNumber: data.basic.projectNumber,
+      projectDescription: data.basic.projectDescription
     };
   }
 
   if (data.location) {
     location = {
-      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES ? true : false,
+      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,
@@ -99,63 +131,62 @@ const generateGeneralProjectData = async (
     permits = {
       hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
     };
-  }
 
-  if (data.appliedPermits?.length) {
-    appliedPermits = data.appliedPermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      needed: PermitNeeded.YES,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.IN_PROGRESS,
-      submittedDate: x.submittedDate,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      permitTracking: x.permitTracking?.map((pt) => ({
-        ...pt,
-        ...generateCreateStamps(currentContext)
-      })),
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
-  }
+    if (data.permits.appliedPermits?.length) {
+      appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: x.submittedDate,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        permitTracking: x.permitTracking?.map((pt) => ({
+          ...pt,
+          ...generateCreateStamps(currentContext)
+        })),
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
 
-  if (data.investigatePermits?.length) {
-    investigatePermits = data.investigatePermits.map((x: Permit) => ({
-      permitId: x.permitId ?? uuidv4(),
-      permitTypeId: x.permitTypeId,
-      activityId: activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      needed: PermitNeeded.UNDER_INVESTIGATION,
-      statusLastChanged: null,
-      statusLastChangedTime: null,
-      statusLastVerified: null,
-      statusLastVerifiedTime: null,
-      issuedPermitId: null,
-      state: PermitState.NONE,
-      submittedDate: null,
-      submittedTime: x.submittedTime,
-      decisionDate: null,
-      decisionTime: null,
-      ...generateCreateStamps(currentContext),
-      ...generateUpdateStamps(currentContext),
-      ...generateNullDeleteStamps()
-    }));
+    if (data.permits.investigatePermits?.length) {
+      investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
+        permitId: x.permitId ?? uuidv4(),
+        permitTypeId: x.permitTypeId,
+        activityId: activityId,
+        stage: PermitStage.PRE_SUBMISSION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        statusLastChanged: null,
+        statusLastChangedTime: null,
+        statusLastVerified: null,
+        statusLastVerifiedTime: null,
+        issuedPermitId: null,
+        state: PermitState.NONE,
+        submittedDate: null,
+        submittedTime: x.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        ...generateCreateStamps(currentContext),
+        ...generateUpdateStamps(currentContext),
+        ...generateNullDeleteStamps()
+      }));
+    }
   }
 
   // Put new general project together
   const generalProjectData = {
     generalProject: {
       ...basic,
-      ...general,
       ...location,
       ...permits,
       generalProjectId: uuidv4(),
@@ -187,16 +218,6 @@ const generateGeneralProjectData = async (
   };
 
   return generalProjectData;
-};
-
-/**
- * Send an email with the confirmation of general project
- * @param req Express Request object
- * @param res Express Response object
- */
-export const emailGeneralProjectConfirmationController = async (req: Request<never, never, Email>, res: Response) => {
-  const { data, status } = await email(req.body);
-  res.status(status).json(data);
 };
 
 export const getGeneralProjectActivityIdsController = async (req: Request, res: Response) => {
@@ -302,13 +323,13 @@ export const getGeneralProjectsController = async (req: Request, res: Response) 
 };
 
 export const searchGeneralProjectsController = async (
-  req: Request<never, never, never, GeneralProjectSearchParameters>,
+  req: Request<never, never, GeneralProjectSearchParameters | undefined, never>,
   res: Response
 ) => {
   const response = await transactionWrapper<GeneralProject[]>(async (tx: PrismaTransactionClient) => {
     return await searchGeneralProjects(tx, {
-      ...req.query,
-      includeUser: isTruthy(req.query.includeUser)
+      ...req.body,
+      includeUser: isTruthy(req.body?.includeUser)
     });
   });
   res.status(200).json(response);
@@ -357,6 +378,7 @@ export const submitGeneralProjectDraftController = async (
     }
   );
 
+  await emailProjectConfirmation(result);
   res.status(201).json({ ...result, contact: result.contact });
 };
 
@@ -395,7 +417,7 @@ export const upsertGeneralProjectDraftController = async (req: Request<never, ne
     }
   });
 
-  res.status(update ? 200 : 201).json({ draftId: response?.draftId, activityId: response?.activityId });
+  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateGeneralProjectController = async (req: Request<never, never, GeneralProject>, res: Response) => {

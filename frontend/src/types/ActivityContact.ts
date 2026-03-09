@@ -1,5 +1,5 @@
-import type { Contact } from './Contact';
 import type { IStamps } from '@/interfaces';
+import type { Contact } from '@/types';
 import type { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 export type ActivityContact = {

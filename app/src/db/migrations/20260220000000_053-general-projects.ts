@@ -80,6 +80,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('natural_disaster').notNullable().defaultTo(false);
           table.boolean('aai_updated').notNullable().defaultTo(false);
           table.text('application_status');
+          table.text('project_number');
           table.text('project_description');
           table.text('project_applicant_type');
           table.text('project_location');
@@ -89,7 +90,6 @@ export async function up(knex: Knex): Promise<void> {
           table.text('has_applied_provincial_permits');
           table.text('check_provincial_permits');
           table.text('submission_type');
-          table.boolean('consent_to_feedback').notNullable().defaultTo(false);
           table.json('geo_json');
           table.text('geomark_url');
           table.integer('ats_enquiry_id');

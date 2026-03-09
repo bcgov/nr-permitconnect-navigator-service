@@ -20,7 +20,7 @@ vi.mock('vue-i18n', () => ({
 const useUserService = vi.spyOn(userService, 'searchUsers');
 
 const testDraft = { draftId: 'bar' };
-const testDrafts = [testDraft] as Draft[];
+const testDrafts = [testDraft] as Draft<unknown>[];
 
 useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 

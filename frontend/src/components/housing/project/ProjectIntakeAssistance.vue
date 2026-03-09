@@ -1,45 +1,76 @@
 <script setup lang="ts">
-import { Button, useConfirm } from '@/lib/primevue';
+import { useFormValues } from 'vee-validate';
 import { ref } from 'vue';
-import { object } from 'yup';
+import { useI18n } from 'vue-i18n';
+import { useRouter } from 'vue-router';
 
-import { contactValidator } from '@/validators';
-import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { Button, useConfirm } from '@/lib/primevue';
+import { enquiryService } from '@/services';
+import { RouteName } from '@/utils/enums/application';
+import { SubmissionType } from '@/utils/enums/projectCommon';
+import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
+import { contactSchema } from '@/validators';
 
 import type { Ref } from 'vue';
 
-// Props
-const { formValues } = defineProps<{
-  formValues: Record<string, string>;
-}>();
-// Emits
-const emit = defineEmits(['onSubmitAssistance']);
+// Composables
+const formValues = useFormValues();
+const { t } = useI18n();
+const router = useRouter();
 
 // State
 const showTab: Ref<boolean> = ref(true);
 
 // Actions
 const confirm = useConfirm();
-const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
-  // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.CONTACTS];
-  return contactSchema.isValidSync(applicant);
+// Check if applicant section is filled
+const checkApplicantValuesValid = (): boolean => {
+  return contactSchema.isValidSync(formValues.value.contacts);
 };
 
 const confirmSubmit = () => {
   confirm.require({
-    message: 'Are you sure you want to request assistance for this form?',
-    header: 'Please confirm assistance',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('projectIntakeAssistance.submit.message'),
+    header: t('projectIntakeAssistance.submit.header'),
+    acceptLabel: t('ui.actions.confirm'),
+    rejectLabel: t('ui.actions.cancel'),
     rejectProps: { outlined: true },
-    accept: () => {
-      emit('onSubmitAssistance');
+    accept: async () => {
+      await onAssistanceRequest();
     }
   });
 };
+
+async function onAssistanceRequest() {
+  try {
+    const enquiryData = {
+      basic: {
+        enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
+        submissionType: SubmissionType.ASSISTANCE
+      },
+      contact: setEmptyStringsToNull({
+        contactId: formValues.value.contacts.contactId,
+        firstName: formValues.value.contacts.firstName,
+        lastName: formValues.value.contacts.lastName,
+        phoneNumber: formValues.value.contacts.phoneNumber,
+        email: formValues.value.contacts.email,
+        contactApplicantRelationship: formValues.value.contacts.contactApplicantRelationship,
+        contactPreference: formValues.value.contacts.contactPreference
+      })
+    };
+
+    const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
+    router.push({
+      name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
+      params: {
+        enquiryId: enquiryResponse.enquiryId
+      }
+    });
+  } catch (e) {
+    generalErrorHandler(e, t('projectIntakeAssistance.submit.failed'));
+  }
+}
 </script>
 
 <template>
@@ -52,33 +83,40 @@ const confirmSubmit = () => {
         @keydown.enter.prevent="showTab = !showTab"
         @keydown.space.prevent="showTab = !showTab"
       >
-        <div class="tab-text">Assistance</div>
+        <div class="tab-text">{{ t('projectIntakeAssistance.assistanceHeader') }}</div>
         <font-awesome-icon
           class="-rotate-90 mt-2"
           icon="fa-solid fa-circle-question"
         />
       </div>
       <div class="assistance-modal">
-        <div class="font-bold mb-4">Need assistance with the form?</div>
+        <div class="font-bold mb-4">{{ t('projectIntakeAssistance.needAssistance') }}</div>
         <div>
-          Are you unable to complete this form and need assistance? Please follow the instructions below. You will be
-          contacted by a housing navigator.
+          {{ t('projectIntakeAssistance.needAssistanceMessage') }}
         </div>
         <ol class="pl-4">
-          <li class="mb-1">
-            Make sure the
-            <span class="font-bold">'Primary Contact'</span>
-            section under
-            <span class="font-bold">'Contact Information'</span>
-            tab is filled out.
-          </li>
-          <li class="mb-1">Try to fill out the form as much as you can.</li>
-          <li class="mb-1">Click "Get assistance" below to submit the form.</li>
+          <i18n-t
+            scope="global"
+            keypath="projectIntakeAssistance.instructions1"
+            tag="li"
+            class="mb-1"
+          >
+            <template #primary>
+              <span class="font-bold">'{{ t('projectIntakeAssistance.labels.primaryContact') }}'</span>
+            </template>
+
+            <template #basic>
+              <span class="font-bold">'{{ t('projectIntakeAssistance.labels.basicInformation') }}'</span>
+            </template>
+          </i18n-t>
+
+          <li class="mb-1">{{ t('projectIntakeAssistance.instructions2') }}</li>
+          <li class="mb-1">{{ t('projectIntakeAssistance.instructions3') }}</li>
         </ol>
         <div class="flex justify-center">
           <Button
-            label="Get assistance"
-            :disabled="!checkApplicantValuesValid(formValues)"
+            :label="t('projectIntakeAssistance.getAssistance')"
+            :disabled="!checkApplicantValuesValid()"
             @click="() => confirmSubmit()"
           />
         </div>

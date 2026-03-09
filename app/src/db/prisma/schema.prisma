@@ -812,6 +812,7 @@ model general_project {
   naturalDisaster             Boolean   @default(false) @map("natural_disaster")
   aaiUpdated                  Boolean   @default(false) @map("aai_updated")
   applicationStatus           String?   @map("application_status")
+  projectNumber               String?   @map("project_number")
   projectDescription          String?   @map("project_description")
   projectApplicantType        String?   @map("project_applicant_type")
   projectLocation             String?   @map("project_location")
@@ -821,7 +822,6 @@ model general_project {
   hasAppliedProvincialPermits String?   @map("has_applied_provincial_permits")
   checkProvincialPermits      String?   @map("check_provincial_permits")
   submissionType              String?   @map("submission_type")
-  consentToFeedback           Boolean   @default(false) @map("consent_to_feedback")
   geoJson                     Json?     @map("geo_json") @db.Json
   geomarkUrl                  String?   @map("geomark_url")
   atsEnquiryId                Int?      @map("ats_enquiry_id")
