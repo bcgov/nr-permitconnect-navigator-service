@@ -8,6 +8,7 @@ import { FloatLabel } from '@/lib/primevue';
 const {
   helpText = '',
   label = '',
+  labelUrl = undefined,
   name,
   placeholder = '',
   disabled = false,
@@ -17,6 +18,7 @@ const {
 } = defineProps<{
   helpText?: string;
   label?: string;
+  labelUrl?: string;
   name: string;
   placeholder?: string;
   disabled?: boolean;
@@ -33,7 +35,7 @@ const emit = defineEmits(['onChange', 'onClick', 'onInput']);
   <div>
     <FloatLabel v-if="floatLabel">
       <InputTextInternal
-        v-bind="{ label, name, placeholder, disabled, bold, tooltip }"
+        v-bind="{ label, labelUrl, name, placeholder, disabled, bold, tooltip }"
         @on-change="(e: Event) => emit('onChange', e)"
         @on-click="(e: Event) => emit('onClick', e)"
         @on-input="(e: Event) => emit('onInput', e)"
@@ -41,7 +43,7 @@ const emit = defineEmits(['onChange', 'onClick', 'onInput']);
     </FloatLabel>
     <InputTextInternal
       v-else
-      v-bind="{ label, name, placeholder, disabled, bold, tooltip }"
+      v-bind="{ label, labelUrl, name, placeholder, disabled, bold, tooltip }"
       @on-change="(e: Event) => emit('onChange', e)"
       @on-click="(e: Event) => emit('onClick', e)"
       @on-input="(e: Event) => emit('onInput', e)"

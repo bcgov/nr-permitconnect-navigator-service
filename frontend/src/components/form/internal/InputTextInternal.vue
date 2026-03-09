@@ -7,6 +7,7 @@ import { InputText } from '@/lib/primevue';
 // Props
 const {
   label = '',
+  labelUrl = undefined,
   name,
   placeholder = '',
   disabled = false,
@@ -14,6 +15,7 @@ const {
   tooltip = undefined
 } = defineProps<{
   label?: string;
+  labelUrl?: string;
   name: string;
   placeholder?: string;
   disabled?: boolean;
@@ -34,7 +36,17 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     :class="{ 'font-bold': bold }"
     :for="name"
   >
-    {{ label }}
+    <a
+      v-if="labelUrl"
+      :href="labelUrl"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      {{ label }}
+    </a>
+    <span v-else>
+      {{ label }}
+    </span>
   </label>
   <Tooltip
     v-if="tooltip"
@@ -44,9 +56,9 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     :text="tooltip"
   />
   <InputText
+    :id="name"
     v-model="value"
     :aria-describedby="`${name}-help`"
-    :aria-labelledby="`${name}-label`"
     :name="name"
     :placeholder="placeholder"
     class="w-full"

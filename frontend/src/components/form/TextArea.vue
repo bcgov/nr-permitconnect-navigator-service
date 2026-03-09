@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useField, ErrorMessage } from 'vee-validate';
 
+import Tooltip from '@/components/common/Tooltip.vue';
 import { Textarea } from '@/lib/primevue';
 
 // Props
@@ -11,7 +12,8 @@ const {
   placeholder = '',
   disabled = false,
   bold = true,
-  rows = 5
+  rows = 5,
+  tooltip = undefined
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -20,6 +22,7 @@ const {
   disabled?: boolean;
   bold?: boolean;
   rows?: number;
+  tooltip?: string;
 }>();
 
 const { errorMessage, handleBlur, value } = useField<string>(name);
@@ -34,6 +37,13 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     >
       {{ label }}
     </label>
+    <Tooltip
+      v-if="tooltip"
+      class="pl-2 mb-2"
+      right
+      icon="fa-solid fa-circle-question"
+      :text="tooltip"
+    />
     <Textarea
       v-model="value"
       :aria-describedby="`${name}-help`"

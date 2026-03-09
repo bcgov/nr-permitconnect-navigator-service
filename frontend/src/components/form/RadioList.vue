@@ -63,7 +63,7 @@ onBeforeMount(() => {
           <RadioButton
             v-model="value"
             :aria-describedby="`${name}-help`"
-            :aria-labelledby="`${name}-option-${option}`"
+            :aria-labelledby="`${name}-option-${getRadioListOptionValue(option)}`"
             :input-id="getRadioListOptionValue(option)"
             :name="name"
             :value="getRadioListOptionValue(option)"
