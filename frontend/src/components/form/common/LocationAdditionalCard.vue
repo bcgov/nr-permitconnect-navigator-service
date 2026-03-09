@@ -58,25 +58,15 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
             <Card class="no-shadow">
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-12">
-                    <label>
-                      <a
-                        href="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
-                        target="_blank"
-                      >
-                        {{ t('locationAdditionalCard.labels.ltsa') }}
-                      </a>
-                    </label>
-                  </div>
-                  <!-- eslint-disable max-len -->
                   <InputText
                     class="col-span-12"
                     name="location.ltsaPidLookup"
                     :bold="false"
                     :disabled="!getEditable"
                     :help-text="t('locationAdditionalCard.help')"
+                    :label="t('locationAdditionalCard.labels.ltsa')"
+                    label-url="https://ltsa.ca/property-owners/about-land-records/property-information-resources/"
                   />
-                  <!-- eslint-enable max-len -->
                 </div>
               </template>
             </Card>
@@ -95,22 +85,14 @@ useFormErrorWatcher(formRef, 'LocationAdditionalCard', tab);
             <Card class="no-shadow">
               <template #content>
                 <div class="grid grid-cols-12 gap-4">
-                  <div class="col-span-12">
-                    <label>
-                      <a
-                        href="https://apps.gov.bc.ca/pub/geomark/overview"
-                        target="_blank"
-                      >
-                        {{ t('locationAdditionalCard.labels.geomark') }}
-                      </a>
-                    </label>
-                  </div>
                   <InputText
                     class="col-span-12"
                     name="location.geomarkUrl"
                     :bold="false"
                     :disabled="!getEditable"
                     :placeholder="t('locationAdditionalCard.placeholders.geomarkUrl')"
+                    :label="t('locationAdditionalCard.labels.geomark')"
+                    label-url="https://apps.gov.bc.ca/pub/geomark/overview"
                   />
                 </div>
               </template>
