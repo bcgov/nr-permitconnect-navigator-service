@@ -67,14 +67,9 @@ export const createActivityContactController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
-    // Make any pre adjustments if the PRIMARY role is being given to another user
-    await verifyPrimaryChange(
-      tx,
-      req.currentAuthorization.attributes,
-      req.currentContext.userId,
-      req.params.activityId,
-      req.body.role
-    );
+    // If the PRIMARY role is being given to another user, make any pre adjustments
+    if (req.body.role === ActivityContactRole.PRIMARY)
+      await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
 
     const newContact = await createActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
@@ -167,14 +162,9 @@ export const updateActivityContactController = async (
     if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
       throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
 
-    // Make any pre adjustments if the PRIMARY role is being given to another user
-    await verifyPrimaryChange(
-      tx,
-      req.currentAuthorization.attributes,
-      req.currentContext.userId,
-      req.params.activityId,
-      req.body.role
-    );
+    // If the PRIMARY role is being given to another user, make any pre adjustments
+    if (req.body.role === ActivityContactRole.PRIMARY)
+      await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
 
     const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
