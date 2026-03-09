@@ -5,7 +5,13 @@
  */
 import { Prisma } from '@prisma/client';
 
-import { AuthType, BasicResponse, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
+import {
+  AuthType,
+  BasicResponse,
+  GroupName,
+  IdentityProviderKind,
+  Initiative
+} from '../../../src/utils/enums/application.ts';
 import { ProjectType } from '../../../src/utils/enums/electrification.ts';
 import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
 import {
@@ -24,6 +30,7 @@ import type {
   Activity,
   ActivityContact,
   Contact,
+  CurrentAuthorization,
   CurrentContext,
   Document,
   Draft,
@@ -32,6 +39,7 @@ import type {
   Email,
   Enquiry,
   EnquiryIntake,
+  Group,
   HousingProject,
   HousingProjectIntake,
   Initiative as InitiativeModel,
@@ -106,8 +114,14 @@ export const TEST_CONTACT_WITH_ACTIVITY_1: Contact = {
   activityContact: [TEST_ACTIVITY_CONTACT_1]
 };
 
+export const TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR: CurrentAuthorization = {
+  attributes: [],
+  groups: [{ initiativeCode: Initiative.HOUSING, name: GroupName.NAVIGATOR } as Group]
+};
+
 export const TEST_CURRENT_CONTEXT: CurrentContext = {
   authType: AuthType.BEARER,
+  initiative: Initiative.HOUSING,
   userId: '811896a0-e1fe-4c38-8cd3-86245c79e8f8'
 };
 

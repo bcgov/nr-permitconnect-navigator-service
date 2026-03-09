@@ -122,7 +122,7 @@ describe('createElectrificationProjectController', () => {
       prismaTxMock,
       TEST_ACTIVITY_ELECTRIFICATION.activityId,
       TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
+      ActivityContactRole.ADMIN
     );
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
@@ -457,7 +457,7 @@ describe('submitElectrificationProjectDraftController', () => {
       prismaTxMock,
       TEST_ACTIVITY_ELECTRIFICATION.activityId,
       TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
+      ActivityContactRole.ADMIN
     );
     expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(createElectrificationProjectSpy).toHaveBeenCalledWith(

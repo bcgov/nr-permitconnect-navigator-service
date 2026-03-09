@@ -100,7 +100,7 @@ const generateHousingProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.ADMIN);
   }
 
   let basic, housing, location, permits;
