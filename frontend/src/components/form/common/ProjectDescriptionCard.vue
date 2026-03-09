@@ -68,25 +68,14 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
       <Divider type="solid" />
     </template>
     <template #content>
-      <div
-        v-if="tooltip"
-        class="col-span-12 my-0 py-0"
-      >
-        <div class="flex items-center">
-          <label>{{ t('projectDescriptionCard.labels.projectDescription') }}</label>
-          <Tooltip
-            class="pl-2 mb-2"
-            right
-            icon="fa-solid fa-circle-question"
-            :text="t('projectIntakeForm.additionalInfoTooltip')"
-          />
-        </div>
-      </div>
       <TextArea
         class="col-span-12 mb-0 pb-0"
         name="basic.projectDescription"
         :placeholder="textAreaPlaceholder"
         :disabled="!getEditable"
+        :bold="false"
+        :label="t('projectDescriptionCard.labels.projectDescription')"
+        :tooltip="t('projectIntakeForm.additionalInfoTooltip')"
       />
       <i18n-t
         keypath="projectDescriptionCard.upload"

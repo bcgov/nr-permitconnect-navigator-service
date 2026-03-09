@@ -71,46 +71,51 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
     <template #content>
       <div>
         <div class="mb-6">
-          <div class="flex items-center">
-            <label>
-              <a
-                href="https://www.bchousing.org/projects-partners/partner-with-us"
-                target="_blank"
-              >
-                BC Housing
-              </a>
-            </label>
-            <Tooltip
-              class="pl-2 mb-2"
-              right
-              icon="fa-solid fa-circle-question"
-              :text="t('projectIntakeForm.bcHousingTooltip')"
+          <fieldset>
+            <div class="flex items-center">
+              <legend>
+                <a
+                  href="https://www.bchousing.org/projects-partners/partner-with-us"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  BC Housing
+                </a>
+              </legend>
+              <Tooltip
+                class="pl-2 mb-2"
+                right
+                icon="fa-solid fa-circle-question"
+                :text="t('projectIntakeForm.bcHousingTooltip')"
+              />
+            </div>
+            <RadioList
+              name="housing.financiallySupportedBc"
+              :bold="false"
+              :disabled="!getEditable"
+              :options="YES_NO_UNSURE_LIST"
             />
-          </div>
-
-          <RadioList
-            name="housing.financiallySupportedBc"
-            :bold="false"
-            :disabled="!getEditable"
-            :options="YES_NO_UNSURE_LIST"
-          />
+          </fieldset>
         </div>
 
         <div class="mb-6">
-          <label>
-            <a
-              href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
-              target="_blank"
-            >
-              Indigenous Housing Provider
-            </a>
-          </label>
-          <RadioList
-            name="housing.financiallySupportedIndigenous"
-            :bold="false"
-            :disabled="!getEditable"
-            :options="YES_NO_UNSURE_LIST"
-          />
+          <fieldset>
+            <legend>
+              <a
+                href="https://www.bchousing.org/housing-assistance/rental-housing/indigenous-housing-providers"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Indigenous Housing Provider
+              </a>
+            </legend>
+            <RadioList
+              name="housing.financiallySupportedIndigenous"
+              :bold="false"
+              :disabled="!getEditable"
+              :options="YES_NO_UNSURE_LIST"
+            />
+          </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedIndigenous === BasicResponse.YES"
             class="w-1/2 pl-0"
@@ -121,20 +126,23 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
         </div>
 
         <div class="mb-6">
-          <label>
-            <a
-              href="https://bcnpha.ca/member-programs-list/"
-              target="_blank"
-            >
-              Non-profit housing society
-            </a>
-          </label>
-          <RadioList
-            name="housing.financiallySupportedNonProfit"
-            :bold="false"
-            :disabled="!getEditable"
-            :options="YES_NO_UNSURE_LIST"
-          />
+          <fieldset>
+            <legend>
+              <a
+                href="https://bcnpha.ca/member-programs-list/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Non-profit housing society
+              </a>
+            </legend>
+            <RadioList
+              name="housing.financiallySupportedNonProfit"
+              :bold="false"
+              :disabled="!getEditable"
+              :options="YES_NO_UNSURE_LIST"
+            />
+          </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedNonProfit === BasicResponse.YES"
             class="w-1/2 pl-0"
@@ -145,20 +153,23 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
         </div>
 
         <div>
-          <label>
-            <a
-              href="https://www.chf.bc.ca/find-co-op/"
-              target="_blank"
-            >
-              Housing co-operative
-            </a>
-          </label>
-          <RadioList
-            name="housing.financiallySupportedHousingCoop"
-            :bold="false"
-            :disabled="!getEditable"
-            :options="YES_NO_UNSURE_LIST"
-          />
+          <fieldset>
+            <legend>
+              <a
+                href="https://www.chf.bc.ca/find-co-op/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Housing co-operative
+              </a>
+            </legend>
+            <RadioList
+              name="housing.financiallySupportedHousingCoop"
+              :bold="false"
+              :disabled="!getEditable"
+              :options="YES_NO_UNSURE_LIST"
+            />
+          </fieldset>
           <InputText
             v-if="values.housing?.financiallySupportedHousingCoop === BasicResponse.YES"
             class="w-1/2 pl-0"

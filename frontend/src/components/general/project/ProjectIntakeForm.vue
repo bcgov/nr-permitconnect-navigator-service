@@ -86,6 +86,103 @@ function confirmSubmit(data: GenericObject) {
   });
 }
 
+function loadDefaultValues() {
+  const userContact = useContactStore().getContact;
+  initialFormValues.value = {
+    contacts: {
+      contactId: userContact?.contactId,
+      firstName: userContact?.firstName,
+      lastName: userContact?.lastName,
+      email: userContact?.email,
+      phoneNumber: userContact?.phoneNumber,
+      contactApplicantRelationship: userContact?.contactApplicantRelationship,
+      contactPreference: userContact?.contactPreference
+    }
+  };
+}
+
+function loadDraftValues() {
+  if (draft.value) {
+    initialFormValues.value = {
+      ...draft.value.data,
+      permits: {
+        ...draft.value.data.permits,
+        appliedPermits:
+          draft.value.data.permits.appliedPermits?.map((x) => ({
+            permitTypeId: x.permitTypeId,
+            permitTracking: [
+              {
+                trackingId: x.permitTracking?.[0]?.trackingId
+              }
+            ],
+            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+          })) ?? []
+      }
+    };
+
+    // Load org book option if company name is already filled
+    if (draft.value.data.basic?.registeredId && draft.value.data.basic?.registeredName) {
+      orgBookOptions.value = [
+        { registeredId: draft.value.data.basic.registeredId, registeredName: draft.value.data.basic.registeredName }
+      ];
+    }
+  }
+}
+
+function loadProjectValues() {
+  if (project) {
+    const primaryContact = project
+      ? project.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+      : useContactStore().getContact;
+
+    initialFormValues.value = {
+      basic: {
+        projectApplicantType: project.projectApplicantType,
+        isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
+        registeredName: project.companyNameRegistered,
+        registeredId: project.companyIdRegistered,
+        projectName: project.projectName,
+        projectNumber: project.projectNumber,
+        projectDescription: project.projectDescription
+      },
+      contacts: {
+        firstName: primaryContact?.firstName,
+        lastName: primaryContact?.lastName,
+        phoneNumber: primaryContact?.phoneNumber,
+        email: primaryContact?.email,
+        contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
+        contactPreference: primaryContact?.contactPreference,
+        contactId: primaryContact?.contactId
+      },
+      location: {
+        naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
+        projectLocation: project.projectLocation,
+        streetAddress: project.streetAddress,
+        locality: project.locality,
+        province: project.province,
+        latitude: project.latitude,
+        longitude: project.longitude,
+        ltsaPidLookup: project.locationPids,
+        geomarkUrl: project.geomarkUrl,
+        projectLocationDescription: project?.projectLocationDescription,
+        geoJson: project.geoJson
+      },
+      permits: {
+        appliedPermits: useProjectStore()
+          .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
+          .map((x: Permit) => ({
+            ...x,
+            submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
+          })),
+        hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
+        investigatePermits: useProjectStore().getPermits.filter(
+          (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
+        )
+      }
+    };
+  }
+}
+
 async function onInvalidSubmit() {
   activeStep.value = getFirstErrorTab.value;
   await nextTick();
@@ -191,92 +288,11 @@ onBeforeMount(async () => {
     if (draft.value && project) throw new Error(t('projectIntakeForm.load.tooManyProps'));
 
     if (draft.value) {
-      initialFormValues.value = {
-        ...draft.value.data,
-        permits: {
-          ...draft.value.data.permits,
-          appliedPermits:
-            draft.value.data.permits.appliedPermits?.map((x) => ({
-              permitTypeId: x.permitTypeId,
-              permitTracking: [
-                {
-                  trackingId: x.permitTracking?.[0]?.trackingId
-                }
-              ],
-              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-            })) ?? []
-        }
-      };
-
-      // Load org book option if company name is already filled
-      if (draft.value.data.basic?.registeredId && draft.value.data.basic?.registeredName) {
-        orgBookOptions.value = [
-          { registeredId: draft.value.data.basic.registeredId, registeredName: draft.value.data.basic.registeredName }
-        ];
-      }
+      loadDraftValues();
     } else if (project) {
-      const primaryContact = project
-        ? project.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-        : useContactStore().getContact;
-
-      initialFormValues.value = {
-        basic: {
-          projectApplicantType: project.projectApplicantType,
-          isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered,
-          registeredId: project.companyIdRegistered,
-          projectName: project.projectName,
-          projectNumber: project.projectNumber,
-          projectDescription: project.projectDescription
-        },
-        contacts: {
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          contactId: primaryContact?.contactId
-        },
-        location: {
-          naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
-          projectLocation: project.projectLocation,
-          streetAddress: project.streetAddress,
-          locality: project.locality,
-          province: project.province,
-          latitude: project.latitude,
-          longitude: project.longitude,
-          ltsaPidLookup: project.locationPids,
-          geomarkUrl: project.geomarkUrl,
-          projectLocationDescription: project?.projectLocationDescription,
-          geoJson: project.geoJson
-        },
-        permits: {
-          appliedPermits: useProjectStore()
-            .getPermits.filter((x: Permit) => x.stage === PermitStage.APPLICATION_SUBMISSION)
-            .map((x: Permit) => ({
-              ...x,
-              submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
-            })),
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
-          investigatePermits: useProjectStore().getPermits.filter(
-            (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
-          )
-        }
-      };
+      loadProjectValues();
     } else {
-      const userContact = useContactStore().getContact;
-      initialFormValues.value = {
-        contacts: {
-          contactId: userContact?.contactId,
-          firstName: userContact?.firstName,
-          lastName: userContact?.lastName,
-          email: userContact?.email,
-          phoneNumber: userContact?.phoneNumber,
-          contactApplicantRelationship: userContact?.contactApplicantRelationship,
-          contactPreference: userContact?.contactPreference
-        }
-      };
+      loadDefaultValues();
     }
   } catch (e) {
     generalErrorHandler(e, t('projectIntakeForm.load.failed'));
