@@ -5,7 +5,7 @@
  */
 import { Prisma } from '@prisma/client';
 
-import { AuthType, BasicResponse, IdentityProvider, Initiative } from '../../../src/utils/enums/application.ts';
+import { AuthType, BasicResponse, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 import { ProjectType } from '../../../src/utils/enums/electrification.ts';
 import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
 import {
@@ -915,7 +915,7 @@ export const TEST_PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE_1];
 export const TEST_IDIR_USER_1: User = {
   bceidBusinessName: null,
   userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-  idp: IdentityProvider.IDIR,
+  idp: IdentityProviderKind.IDIR,
   sub: 'cd90c6bf44074872a7116f4dd4f3a45b@idir',
   email: 'John.Doe@example.com',
   firstName: 'John',

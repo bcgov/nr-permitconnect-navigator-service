@@ -1,7 +1,7 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { assignGroup, getGroups, getSubjectGroups } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
-import { GroupName, IdentityProvider, Initiative } from '../utils/enums/application.ts';
+import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -24,7 +24,7 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
 
     let groups = await getSubjectGroups(tx, sub);
 
-    if (idp !== IdentityProvider.IDIR) {
+    if (idp !== IdentityProviderKind.IDIR) {
       const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
       const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
       await Promise.all(

@@ -19,10 +19,11 @@ export enum BasicResponse {
   UNSURE = 'Unsure'
 }
 
-export enum IdentityProvider {
+export enum IdentityProviderKind {
   IDIR = 'idir',
   BCEID = 'bceidbasic',
-  BCEIDBUSINESS = 'bceidbusiness'
+  BCEIDBUSINESS = 'bceidbusiness',
+  BCSC = 'bcsc'
 }
 
 export enum Initiative {
