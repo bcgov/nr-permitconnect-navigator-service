@@ -38,9 +38,16 @@ describe('verifyPrimaryChange', () => {
   it('should pass and demote current primary if authorized via scope:all', async () => {
     const scopeAllAuth = { attributes: ['scope:all'], groups: [] };
     listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
-    updateActivityContactSpy.mockResolvedValue({ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN });
 
-    await activityContactHelpers.verifyPrimaryChange(prismaTxMock, 'activity-id', scopeAllAuth, TEST_CURRENT_CONTEXT);
+    const demotedContact = { ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      scopeAllAuth,
+      TEST_CURRENT_CONTEXT
+    );
 
     expect(searchContactsSpy).not.toHaveBeenCalled();
     expect(updateActivityContactSpy).toHaveBeenCalledWith(
@@ -49,13 +56,17 @@ describe('verifyPrimaryChange', () => {
       TEST_ACTIVITY_CONTACT_1.contactId,
       ActivityContactRole.ADMIN
     );
+    expect(result).toEqual(demotedContact);
   });
 
   it('should pass if user is a Navigator in the correct initiative', async () => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
 
-    await activityContactHelpers.verifyPrimaryChange(
+    const demotedContact = { ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
       prismaTxMock,
       'activity-id',
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -64,6 +75,7 @@ describe('verifyPrimaryChange', () => {
 
     expect(listActivityContactsSpy).toHaveBeenCalled();
     expect(updateActivityContactSpy).toHaveBeenCalled();
+    expect(result).toEqual(demotedContact);
   });
 
   it('should pass if user is the current Primary contact', async () => {
@@ -72,9 +84,22 @@ describe('verifyPrimaryChange', () => {
       { ...TEST_ACTIVITY_CONTACT_1, contactId: TEST_CONTACT_1.contactId, role: ActivityContactRole.PRIMARY }
     ]);
 
-    await activityContactHelpers.verifyPrimaryChange(prismaTxMock, 'activity-id', mockAuthBase, TEST_CURRENT_CONTEXT);
+    const demotedContact = {
+      ...TEST_ACTIVITY_CONTACT_1,
+      contactId: TEST_CONTACT_1.contactId,
+      role: ActivityContactRole.ADMIN
+    };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      mockAuthBase,
+      TEST_CURRENT_CONTEXT
+    );
 
     expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(demotedContact);
   });
 
   it('should NOT call updateActivityContact if no current primary exists', async () => {
@@ -85,7 +110,7 @@ describe('verifyPrimaryChange', () => {
       { ...TEST_ACTIVITY_CONTACT_1, contactId: 'some-other-id', role: ActivityContactRole.MEMBER }
     ]);
 
-    await activityContactHelpers.verifyPrimaryChange(
+    const result = await activityContactHelpers.verifyPrimaryChange(
       prismaTxMock,
       'activity-id',
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -94,5 +119,6 @@ describe('verifyPrimaryChange', () => {
 
     expect(listActivityContactsSpy).toHaveBeenCalled();
     expect(updateActivityContactSpy).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
   });
 });

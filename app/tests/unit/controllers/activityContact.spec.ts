@@ -54,7 +54,7 @@ beforeEach(() => {
   mockedConfig = config as jest.MockedObjectDeep<typeof config>;
   mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
 
-  verifyPrimaryChangeSpy.mockResolvedValue();
+  verifyPrimaryChangeSpy.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
@@ -246,7 +246,7 @@ describe('PUT /activity/:activityId/contact/:contactId', () => {
       FAKE_MEMBER_ACTIVITY_CONTACT.contactId,
       ActivityContactRole.ADMIN
     );
-    expect(res.body).toEqual({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN });
+    expect(res.body).toEqual({ updated: { ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN } });
   });
 
   it('should send an email for ADMIN', async () => {
@@ -289,5 +289,30 @@ describe('PUT /activity/:activityId/contact/:contactId', () => {
       FAKE_PRIMARY_ACTIVITY_CONTACT.contactId
     );
     expect(updateActivityContactSpy).not.toHaveBeenCalled();
+  });
+
+  it('should handle PRIMARY assignment, call verifyPrimaryChange, and return an array of contacts', async () => {
+    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
+
+    updateActivityContactSpy.mockResolvedValue(FAKE_PRIMARY_ACTIVITY_CONTACT);
+
+    verifyPrimaryChangeSpy.mockResolvedValue(FAKE_ADMIN_ACTIVITY_CONTACT);
+
+    const res = await request(app)
+      .put(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
+      .send({ role: ActivityContactRole.PRIMARY })
+      .expect(200);
+
+    expect(verifyPrimaryChangeSpy).toHaveBeenCalledTimes(1);
+
+    expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(updateActivityContactSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
+      FAKE_MEMBER_ACTIVITY_CONTACT.contactId,
+      ActivityContactRole.PRIMARY
+    );
+
+    expect(res.body).toEqual({ updated: FAKE_PRIMARY_ACTIVITY_CONTACT, demoted: FAKE_ADMIN_ACTIVITY_CONTACT });
   });
 });

@@ -1,8 +1,12 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Dialog, Message, Select } from '@/lib/primevue';
+import { useAppStore } from '@/store';
+import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
+import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -19,16 +23,28 @@ const emit = defineEmits(['projectTeamManageModal:manageUser']);
 // Composables
 const { t } = useI18n();
 
-// Constants
-const SELECTABLE_ROLES = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
+// Store
+const appStore = useAppStore();
+const { getZone } = storeToRefs(appStore);
 
 // State
 const selectedRole: Ref<ActivityContactRole | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
+const isInternal = computed(() => getZone.value === Zone.INTERNAL);
+const selectableRoles = computed(() => {
+  if (isInternal.value) {
+    return ACTIVITY_CONTACT_ROLE_LIST.filter((role) => role !== activityContact?.role);
+  } else {
+    return ACTIVITY_CONTACT_ROLE_LIST.filter(
+      (role) => role !== ActivityContactRole.PRIMARY && role !== activityContact?.role
+    );
+  }
+});
+
 // Actions
-watchEffect(() => {
-  selectedRole.value = activityContact?.role;
+watch(visible, () => {
+  selectedRole.value = undefined;
 });
 </script>
 
@@ -61,7 +77,7 @@ watchEffect(() => {
       v-model="selectedRole"
       class="w-full"
       name="assignRole"
-      :options="SELECTABLE_ROLES"
+      :options="selectableRoles"
       :disabled="!activityContact"
     />
     <div class="mt-6">

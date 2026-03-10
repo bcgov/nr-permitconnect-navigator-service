@@ -163,10 +163,13 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
 async function onManageUser(contact: ActivityContact, role: ActivityContactRole) {
   try {
-    const response = (await activityContactService.updateActivityContact(activityId, contact.contactId, role)).data;
+    const { updated, demoted } = (
+      await activityContactService.updateActivityContact(activityId, contact.contactId, role)
+    ).data;
 
     // Update store
-    projectStore.updateActivityContact(response);
+    projectStore.updateActivityContact(updated);
+    if (demoted) projectStore.updateActivityContact(demoted);
 
     // Close modal on success
     manageUserModalVisible.value = false;
@@ -181,7 +184,18 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
         toast.success(t('projectTeamTab.memberUpdated', firstLastNames));
         break;
       case ActivityContactRole.PRIMARY:
-        toast.success(t('projectTeamTab.primaryUpdated', firstLastNames));
+        if (demoted) {
+          toast.success(
+            t('projectTeamTab.primaryUpdatedAndDemoted', {
+              ...firstLastNames,
+              firstDemoted: demoted.contact?.firstName,
+              lastDemoted: demoted.contact?.lastName
+            })
+          );
+        } else {
+          toast.success(t('projectTeamTab.primaryUpdated', firstLastNames));
+        }
+
         break;
     }
   } catch (error) {
