@@ -17,14 +17,14 @@ const { activityContacts } = defineProps<{
 }>();
 
 // Composables
-const appStore = useAppStore();
-const contactStore = useContactStore();
 const { t } = useI18n();
 
 // Emits
 const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revokeUser']);
 
 // Store
+const appStore = useAppStore();
+const contactStore = useContactStore();
 const { getZone } = storeToRefs(appStore);
 const { getContact } = storeToRefs(contactStore);
 
@@ -48,77 +48,86 @@ watchEffect(() => {
   >
     <template #empty>
       <div class="flex justify-center">
-        <h5 class="m-0">{{ t('e.common.projectTeamTable.noUsers') }}</h5>
+        <h5 class="m-0">{{ t('projectTeamTable.noUsers') }}</h5>
       </div>
     </template>
     <Column
+      v-if="getZone === Zone.INTERNAL"
+      field="userId"
+    >
+      <template #body="{ data }">
+        <font-awesome-icon
+          v-if="data.contact.userId"
+          icon="fa-solid fa-user"
+          class="app-primary-color"
+        />
+      </template>
+    </Column>
+    <Column
       field="contact.firstName"
-      :header="t('e.common.projectTeamTable.headerFirstName')"
+      :header="t('projectTeamTable.headerFirstName')"
       sortable
     />
     <Column
       field="contact.lastName"
-      :header="t('e.common.projectTeamTable.headerLastName')"
+      :header="t('projectTeamTable.headerLastName')"
       sortable
     />
     <Column
-      v-if="getZone === Zone.INTERNAL"
       field="contact.contactApplicantRelationship"
-      :header="t('e.common.projectTeamTable.headerRelationship')"
+      :header="t('projectTeamTable.headerRelationship')"
       sortable
     />
     <Column
       field="contact.email"
-      :header="t('e.common.projectTeamTable.headerEmail')"
+      :header="t('projectTeamTable.headerEmail')"
       sortable
     />
     <Column
       field="contact.phoneNumber"
-      :header="t('e.common.projectTeamTable.headerPhone')"
+      :header="t('projectTeamTable.headerPhone')"
       sortable
     />
-    <span v-if="getZone === Zone.EXTERNAL">
-      <Column
-        field="role"
-        :header="t('e.common.projectTeamTable.headerRole')"
-        sortable
-      />
-      <Column
-        v-if="isAdmin"
-        field="manage"
-        :header="t('e.common.projectTeamTable.headerManage')"
-        header-class="header-right"
-        class="!text-right"
-      >
-        <template #body="{ data }">
-          <Button
-            class="p-button-lg p-button-text p-0"
-            :aria-label="t('e.common.projectTeamTable.headerManage')"
-            :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
-            @click="emit('projectTeamTable:manageUser', data)"
-          >
-            <font-awesome-icon icon="fa-solid fa-pen-to-square" />
-          </Button>
-        </template>
-      </Column>
-      <Column
-        v-if="isAdmin"
-        field="revoke"
-        :header="t('e.common.projectTeamTable.headerRevoke')"
-        header-class="header-right"
-        class="!text-right"
-      >
-        <template #body="{ data }">
-          <Button
-            class="p-button-lg p-button-text p-button-danger p-0"
-            :aria-label="t('e.common.projectTeamTable.headerRevoke')"
-            :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
-            @click="emit('projectTeamTable:revokeUser', data)"
-          >
-            <font-awesome-icon icon="fa-solid fa-user-xmark" />
-          </Button>
-        </template>
-      </Column>
-    </span>
+    <Column
+      field="role"
+      :header="t('projectTeamTable.headerRole')"
+      sortable
+    />
+    <Column
+      v-if="isAdmin"
+      field="manage"
+      :header="t('projectTeamTable.headerManage')"
+      header-class="header-right"
+      class="!text-right"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-0"
+          :aria-label="t('projectTeamTable.headerManage')"
+          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+          @click="emit('projectTeamTable:manageUser', data)"
+        >
+          <font-awesome-icon icon="fa-solid fa-pen-to-square" />
+        </Button>
+      </template>
+    </Column>
+    <Column
+      v-if="isAdmin"
+      field="revoke"
+      :header="t('projectTeamTable.headerRevoke')"
+      header-class="header-right"
+      class="!text-right"
+    >
+      <template #body="{ data }">
+        <Button
+          class="p-button-lg p-button-text p-button-danger p-0"
+          :aria-label="t('projectTeamTable.headerRevoke')"
+          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+          @click="emit('projectTeamTable:revokeUser', data)"
+        >
+          <font-awesome-icon icon="fa-solid fa-user-xmark" />
+        </Button>
+      </template>
+    </Column>
   </DataTable>
 </template>

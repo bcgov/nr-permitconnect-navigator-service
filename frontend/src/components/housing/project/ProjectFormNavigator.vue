@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
+import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { computed, nextTick, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormNavigatorSchema } from '../../../validators/housing/projectFormNavigatorSchema';
@@ -29,15 +30,7 @@ import {
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import {
-  activityContactService,
-  atsService,
-  contactService,
-  externalApiService,
-  housingProjectService,
-  mapService,
-  userService
-} from '@/services';
+import { atsService, externalApiService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
@@ -100,6 +93,7 @@ const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
+const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
 const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
@@ -110,10 +104,11 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const primaryContact = computed(
-  () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
 const showCancelMessage: Ref<boolean> = ref(false);
+
+const primaryContact = computed(
+  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
+);
 
 // Actions
 async function createATSClientEnquiry() {
@@ -440,22 +435,6 @@ const onSubmit = async (values: GenericObject) => {
       ['contact', 'assignedUser', 'isDevelopedInBc', 'submissionState', 'locationAddress', 'relatedEnquiries']
     );
 
-    // Deal with Nav contact change nonsense
-    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact.value?.contactId !== values.contact.contactId) {
-      const newContact = (await contactService.updateContact(values.contact)).data;
-      if (newContact.contactId) {
-        const ac = await activityContactService.createActivityContact(
-          project.activityId,
-          newContact.contactId,
-          ActivityContactRole.PRIMARY
-        );
-
-        setBasicInfo(newContact);
-        projectStore.addActivityContact(ac.data);
-      }
-    }
-
     // Update project
     const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
     projectStore.setProject(result.data);
@@ -502,6 +481,12 @@ function updateLocationAddress(values: GenericObject, setFieldValue?: Function) 
   return locationAddressStr;
 }
 
+watch(primaryContact, (newContact, oldContact) => {
+  if (newContact?.contactId !== oldContact?.contactId) {
+    setBasicInfo(newContact);
+  }
+});
+
 onBeforeMount(async () => {
   if (project.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
@@ -547,17 +532,7 @@ onBeforeMount(async () => {
         </div>
         <ContactCardNavForm
           :editable="editable"
-          :form-values="initialFormValues"
-          @contact-card-nav-form:pick="
-            (contact: Contact) => {
-              setBasicInfo(contact);
-            }
-          "
-          @contact-card-nav-form:manual-entry="
-            () => {
-              setBasicInfo();
-            }
-          "
+          :form-values="values"
         />
         <Panel toggleable>
           <template #header>

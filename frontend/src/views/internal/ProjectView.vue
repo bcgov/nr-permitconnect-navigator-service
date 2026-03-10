@@ -14,7 +14,7 @@ import FileUpload from '@/components/file/FileUpload.vue';
 import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
-import ProjectTeamTable from '@/components/projectCommon/ProjectTeamTable.vue';
+import ProjectTeamTab from '@/components/projectCommon/ProjectTeamTab.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
   Button,
@@ -130,11 +130,6 @@ const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
 
-// Providers
-const provideProjectService = computed(() => initiativeState.value.projectService);
-provide(projectServiceKey, provideProjectService);
-
-// Actions
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
   tempDocuments = tempDocuments.filter((x) => {
@@ -170,6 +165,11 @@ const isCompleted = computed(() => {
   return getProject.value?.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
+// Providers
+const provideProjectService = computed(() => initiativeState.value.projectService);
+provide(projectServiceKey, provideProjectService);
+
+// Actions
 function sortComparator(sortValue: number | undefined, a: string | number, b: string | number) {
   if (sortValue === SORT_ORDER.ASCENDING) return a > b ? 1 : -1;
   else return a < b ? 1 : -1;
@@ -741,9 +741,9 @@ onBeforeMount(async () => {
         </div>
       </TabPanel>
       <TabPanel :value="6">
-        <ProjectTeamTable
+        <ProjectTeamTab
           v-if="getProject"
-          :activity-contacts="projectStore.getActivityContacts"
+          :activity-id="getProject.activityId"
         />
       </TabPanel>
     </TabPanels>

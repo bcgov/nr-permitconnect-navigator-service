@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
+import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { computed, nextTick, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from '../../../validators/electrification/projectFormNavigatorSchema';
@@ -19,14 +20,7 @@ import {
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import {
-  activityContactService,
-  atsService,
-  contactService,
-  electrificationProjectService,
-  externalApiService,
-  userService
-} from '@/services';
+import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
@@ -86,6 +80,7 @@ const toast = useToast();
 // Store
 const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
+const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
@@ -93,10 +88,11 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const primaryContact = computed(
-  () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
 const showCancelMessage: Ref<boolean> = ref(false);
+
+const primaryContact = computed(
+  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
+);
 
 // Actions
 const projectFormSchema = computed(() => {
@@ -364,22 +360,6 @@ const onSubmit = async (values: GenericObject) => {
       ['contact', 'assignedUser', 'submissionState']
     );
 
-    // Deal with Nav contact change nonsense
-    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact.value?.contactId !== values.contact.contactId) {
-      const newContact = (await contactService.updateContact(values.contact)).data;
-      if (newContact.contactId) {
-        const ac = await activityContactService.createActivityContact(
-          project.activityId,
-          newContact.contactId,
-          ActivityContactRole.PRIMARY
-        );
-
-        setBasicInfo(newContact);
-        projectStore.addActivityContact(ac.data);
-      }
-    }
-
     // Update project
     const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
     projectStore.setProject(result.data);
@@ -399,6 +379,12 @@ const onSubmit = async (values: GenericObject) => {
     if (isAxiosError(e) || e instanceof Error) toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
+
+watch(primaryContact, (newContact, oldContact) => {
+  if (newContact?.contactId !== oldContact?.contactId) {
+    setBasicInfo(newContact);
+  }
+});
 
 onBeforeMount(async () => {
   if (project.assignedUserId) {
@@ -448,17 +434,7 @@ onBeforeMount(async () => {
 
         <ContactCardNavForm
           :editable="editable"
-          :form-values="initialFormValues"
-          @contact-card-nav-form:pick="
-            (contact: Contact) => {
-              setBasicInfo(contact);
-            }
-          "
-          @contact-card-nav-form:manual-entry="
-            () => {
-              setBasicInfo();
-            }
-          "
+          :form-values="values"
         />
         <Panel toggleable>
           <template #header>
