@@ -48,7 +48,7 @@ const initiative: Ref<Initiative | undefined> = ref(undefined);
       <Select
         v-model="initiative"
         class="w-2/12 mr-2"
-        :options="[Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS]"
+        :options="[Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING, Initiative.PCNS]"
         @change="
           (e) => {
             authzStore.setInitiativeOverride(e.value);
