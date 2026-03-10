@@ -4,13 +4,14 @@ import { ref } from 'vue';
 import { object } from 'yup';
 
 import { contactValidator } from '@/validators';
-import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
+import type { DeepPartial } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Props
 const { formValues } = defineProps<{
-  formValues: Record<string, string>;
+  formValues: DeepPartial<FormSchemaType>;
 }>();
 // Emits
 const emit = defineEmits(['onSubmitAssistance']);
@@ -22,9 +23,17 @@ const showTab: Ref<boolean> = ref(true);
 const confirm = useConfirm();
 const contactSchema = object(contactValidator);
 
-const checkApplicantValuesValid = (values: Record<string, string>): boolean => {
+const checkApplicantValuesValid = (values: DeepPartial<FormSchemaType>): boolean => {
   // Check applicant section is filled
-  let applicant = values?.[IntakeFormCategory.CONTACTS];
+  const applicant = {
+    contactId: values.contacts?.contactId,
+    firstName: values.contacts?.firstName,
+    lastName: values.contacts?.lastName,
+    phoneNumber: values.contacts?.phoneNumber,
+    email: values.contacts?.email,
+    contactApplicantRelationship: values.contacts?.contactApplicantRelationship,
+    contactPreference: values.contacts?.contactPreference
+  };
   return contactSchema.isValidSync(applicant);
 };
 
@@ -47,7 +56,6 @@ const confirmSubmit = () => {
     <div :class="{ 'teleport-container': true, '--open': showTab }">
       <div
         class="assistance-tab pb-4 pt-4 pr-1 pl-1"
-        tabindex="0"
         @click="showTab = !showTab"
         @keydown.enter.prevent="showTab = !showTab"
         @keydown.space.prevent="showTab = !showTab"
