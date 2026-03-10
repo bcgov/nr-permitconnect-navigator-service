@@ -855,6 +855,7 @@
     "onePrimaryAdded": "{first} {last} has been added as a primary project contact.",
     "primaryAdded": "Primary - {names}",
     "primaryUpdated": "{first} {last} is now the primary project contact.",
+    "primaryUpdatedAndDemoted": "{first} {last} is now the primary project contact, and {firstDemoted} {lastDemoted} has been demoted to a project admin.",
     "projectTeamDescNav": "As the Navigator, you can add users who are authorized to access and communicate on behalf of this project in the Navigator Service.",
     "projectTeamDescProp": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
     "revoke": "Revoke",
