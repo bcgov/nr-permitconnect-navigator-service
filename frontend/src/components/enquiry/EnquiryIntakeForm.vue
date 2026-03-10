@@ -1,33 +1,31 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { Form, useSetFieldValue } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object, string } from 'yup';
 
-import Divider from '@/components/common/Divider.vue';
-import Tooltip from '@/components/common/Tooltip.vue';
-import { FormNavigationGuard, InputMask, InputText, Select, TextArea } from '@/components/form';
-import { CollectionDisclaimer } from '@/components/form/common';
+import { FormNavigationGuard } from '@/components/form';
+import { CollectionDisclaimer, ContactCardIntakeForm, TextAreaCard } from '@/components/form/common';
 import { Button, Card, useConfirm, useToast } from '@/lib/primevue';
 import { enquiryService } from '@/services';
-import { useAppStore, useContactStore } from '@/store';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
-import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { useAppStore, useContactStore, useFormStore } from '@/store';
+import { Initiative, RouteName } from '@/utils/enums/application';
+import { ActivityContactRole, FormState } from '@/utils/enums/projectCommon';
 import {
   enquiryConfirmRouteNameKey,
   enquiryPermitConfirmRouteNameKey,
   enquiryProjectConfirmRouteNameKey,
   enquiryRouteNameKey
 } from '@/utils/keys';
-import { omit } from '@/utils/utils';
-import { contactSchema } from '@/validators';
+import { generalErrorHandler } from '@/utils/utils';
+import { enquirySchema } from '@/validators/enquiry';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { Enquiry, Permit, Project } from '@/types';
-import { Initiative, RouteName } from '@/utils/enums/application';
+import type { FormSchemaType } from '@/validators/enquiry';
+import type { EnquiryArgs } from '@/types/Enquiry';
 
 // Props
 const {
@@ -51,40 +49,32 @@ const { t } = useI18n();
 const confirm = useConfirm();
 const router = useRouter();
 const toast = useToast();
+const setEnquiryDescription = useSetFieldValue('basic.enquiryDescription');
 
 // Store
 const appStore = useAppStore();
 const contactStore = useContactStore();
+const formStore = useFormStore();
 const { getInitiative } = storeToRefs(appStore);
+const { getEditable } = storeToRefs(formStore);
 
 // State
-const editable: Ref<boolean> = ref(true);
-const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<undefined | GenericObject> = ref(undefined);
-const validationErrors: Ref<string[]> = ref([]);
-
 const isOnlyProjectRelated: Ref<boolean> = computed(() => Boolean(project && !permit));
 const isPermitRelated: Ref<boolean> = computed(() => Boolean(permit));
 const trackingId: Ref<string> = computed(() => {
   return permit?.permitTracking?.find((x) => x.shownToProponent)?.trackingId || t('enquiryIntakeForm.notApplicable');
 });
 
-// Form validation schema
-const formSchema = contactSchema.shape({
-  [IntakeFormCategory.BASIC]: object({
-    enquiryDescription: string().required().label('Enquiry')
-  })
-});
-
 // Actions
 function confirmSubmit(data: GenericObject) {
   confirm.require({
-    message: 'Are you sure you wish to submit this form?',
-    header: 'Please confirm submission',
-    acceptLabel: 'Confirm',
-    rejectLabel: 'Cancel',
+    message: t('enquiryIntakeForm.submit.message'),
+    header: t('enquiryIntakeForm.submit.header'),
+    acceptLabel: t('ui.actions.confirm'),
+    rejectLabel: t('ui.actions.cancel'),
     rejectProps: { outlined: true },
-    accept: () => onSubmit(data)
+    accept: () => onSubmit(data as FormSchemaType)
   });
 }
 
@@ -113,274 +103,152 @@ function getEnquiryConfirmationRoute(enquiry: Enquiry) {
   }
 }
 
-async function loadEnquiry() {
+function onInvalidSubmit() {
+  document.querySelector('.p-card.p-component:has(.p-invalid)')?.scrollIntoView({ behavior: 'smooth' });
+}
+
+async function onSubmit(values: FormSchemaType) {
+  formStore.setFormState(FormState.LOCKED);
+
   try {
-    let firstContact, response;
+    let payload: EnquiryArgs = {
+      enquiryDescription: values.basic.enquiryDescription,
+      relatedActivityId: project?.activityId ?? undefined,
+      contact: values.contacts
+    };
+
+    if (permit) {
+      const regarding = t('enquiryIntakeForm.regarding', { permitName: permit.permitType?.name });
+      const trackId = t('enquiryIntakeForm.trackingId', { trackingId: trackingId.value });
+      const authStatus = t('enquiryIntakeForm.authStatus', { authStatus: permit.state });
+      const permitDesc = `${regarding}\n${trackId}\n${authStatus}\n`;
+      payload.enquiryDescription = permitDesc + payload.enquiryDescription;
+      setEnquiryDescription(payload.enquiryDescription);
+    }
+
+    // Create enquiry
+    const response = await enquiryService.createEnquiry(payload);
+
+    // Save contact data to store
+    // TODO: Remove once user is forced to fill contact data out
+    contactStore.setContact(response.data.contact);
+
+    router.push(getEnquiryConfirmationRoute(response.data));
+  } catch (e) {
+    generalErrorHandler(e, t('enquiryIntakeForm.submit.saveFailed'), undefined, toast);
+    formStore.setFormState(FormState.UNLOCKED);
+  }
+}
+
+onBeforeMount(async () => {
+  try {
+    let primaryContact, response;
 
     if (enquiryId) {
       response = (await enquiryService.getEnquiry(enquiryId)).data;
-      firstContact = response?.activity?.activityContact?.[0]?.contact;
-      editable.value = false;
+
+      primaryContact = response
+        ? response.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+        : useContactStore().getContact;
     } else {
       // Load contact data for new enquiry
-      firstContact = contactStore.getContact;
+      primaryContact = contactStore.getContact;
     }
 
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      firstName: firstContact?.firstName,
-      lastName: firstContact?.lastName,
-      phoneNumber: firstContact?.phoneNumber,
-      email: firstContact?.email,
-      contactApplicantRelationship: firstContact?.contactApplicantRelationship,
-      contactPreference: firstContact?.contactPreference,
-      contactId: firstContact?.contactId,
+      contacts: {
+        firstName: primaryContact?.firstName,
+        lastName: primaryContact?.lastName,
+        phoneNumber: primaryContact?.phoneNumber,
+        email: primaryContact?.email,
+        contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
+        contactPreference: primaryContact?.contactPreference,
+        contactId: primaryContact?.contactId
+      },
       basic: {
         relatedActivityId: response?.relatedActivityId,
         enquiryDescription: response?.enquiryDescription
       }
     };
   } catch (e) {
-    if (getInitiative.value === Initiative.HOUSING) router.replace({ name: enquiryRouteName?.value });
+    if (getInitiative.value !== Initiative.ELECTRIFICATION) router.replace({ name: enquiryRouteName?.value });
     else router.replace({ name: RouteName.EXT_ELECTRIFICATION });
-    toast.error('Failed to load enquiry', String(e));
+    generalErrorHandler(e, t('enquiryIntakeForm.load.failed'));
   }
-}
-
-function onInvalidSubmit(e: GenericObject) {
-  validationErrors.value = Array.from(new Set(e.errors ? Object.keys(e.errors).map((x) => x.split('.')[0]!) : []));
-  document.getElementById('form')?.scrollIntoView({ behavior: 'smooth' });
-}
-
-async function onSubmit(values: GenericObject) {
-  editable.value = false;
-
-  try {
-    // Set related activity id if project activity id is passed in as a prop
-    if (project) {
-      values.basic.relatedActivityId = project.activityId;
-    }
-
-    // Grab the contact information
-    const contact = {
-      contactId: values.contactId,
-      firstName: values.firstName,
-      lastName: values.lastName,
-      phoneNumber: values.phoneNumber,
-      email: values.email,
-      contactApplicantRelationship: values.contactApplicantRelationship,
-      contactPreference: values.contactPreference
-    };
-
-    // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values }, [
-      'contactId',
-      'firstName',
-      'lastName',
-      'phoneNumber',
-      'email',
-      'contactApplicantRelationship',
-      'contactPreference'
-    ]);
-
-    if (permit) {
-      let permitDescription =
-        t('enquiryIntakeForm.re') + ': ' + permit.permitType?.name + '\n' + t('enquiryIntakeForm.trackingId') + ': ';
-      const trackingId =
-        permit.permitTracking?.find((pt) => pt.shownToProponent)?.trackingId ?? t('enquiryIntakeForm.notApplicable');
-      const authState = t('enquiryIntakeForm.authStatus') + ': ' + permit.state;
-      permitDescription = permitDescription + trackingId + '\n' + authState + '\n\n';
-      dataOmitted.basic.enquiryDescription = permitDescription + dataOmitted.basic.enquiryDescription;
-      formRef.value?.setFieldValue('basic.enquiryDescription', dataOmitted.basic.enquiryDescription);
-    }
-
-    // Create enquiry
-    const response = await enquiryService.createEnquiry({ ...dataOmitted, contact: contact });
-
-    // Save contact data to store
-    contactStore.setContact(response.data.contact);
-
-    router.push(getEnquiryConfirmationRoute(response.data));
-  } catch (e) {
-    toast.error('Failed to save intake', String(e));
-  } finally {
-    editable.value = true;
-  }
-}
-
-onBeforeMount(async () => {
-  loadEnquiry();
 });
 </script>
 
 <template>
   <div>
-    <div class="flex justify-center items-center app-primary-color mb-2 mt-4">
-      <h3
-        role="heading"
-        aria-level="1"
-      >
-        {{ t('enquiryIntakeForm.header') }}
-      </h3>
-    </div>
-
     <CollectionDisclaimer />
+
+    <Card>
+      <template #title>
+        <i18n-t
+          v-if="isOnlyProjectRelated || isPermitRelated"
+          keypath="enquiryIntakeForm.enquiryAbout"
+          tag="div"
+          class="flex flex-row mt-2 section-header"
+          scope="global"
+        >
+          <template
+            v-if="isOnlyProjectRelated"
+            #projectDetails
+          >
+            <span class="ml-1 text-primary">
+              {{
+                t('enquiryIntakeForm.projectAboutDetails', {
+                  projectName: project?.projectName,
+                  activityId: project?.activityId
+                })
+              }}
+            </span>
+          </template>
+
+          <template
+            v-if="isPermitRelated"
+            #permitDetails
+          >
+            <span class="ml-1 text-primary">
+              {{
+                t('enquiryIntakeForm.relatedPermitDetails', {
+                  permitName: permit?.permitType?.name,
+                  trackingId,
+                  authStatus: permit?.state ?? 'No authorization status.'
+                })
+              }}
+            </span>
+          </template>
+        </i18n-t>
+        <p class="mt-2 text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
+      </template>
+    </Card>
 
     <Form
       v-if="initialFormValues"
-      ref="formRef"
       keep-values
       :initial-values="initialFormValues"
-      :validation-schema="formSchema"
-      @invalid-submit="(e) => onInvalidSubmit(e)"
+      :validation-schema="enquirySchema"
+      @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
     >
-      <FormNavigationGuard v-if="editable" />
+      <FormNavigationGuard v-if="getEditable" />
 
-      <input
-        type="hidden"
-        name="activityId"
+      <ContactCardIntakeForm :initial-form-values="initialFormValues.contacts" />
+      <TextAreaCard
+        :header="t('enquiryIntakeForm.headers.textArea')"
+        field-name="basic.enquiryDescription"
+        :placeholder="t('enquiryIntakeForm.placeholders.textArea')"
       />
 
-      <input
-        type="hidden"
-        name="enquiryId"
-      />
-      <Card v-if="isOnlyProjectRelated">
-        <template #title>
-          <div class="flex flex-col justify-between gap-2 mt-2">
-            <span class="section-header">
-              {{ t('enquiryIntakeForm.about') }}
-              <span class="text-primary">
-                {{ project?.projectName }}| {{ t('enquiryIntakeForm.projectId') }}:
-                {{ project?.activityId }}
-              </span>
-            </span>
-            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
-          </div>
-        </template>
-      </Card>
-
-      <Card v-if="isPermitRelated">
-        <template #title>
-          <div class="flex flex-col justify-between gap-2 mt-2">
-            <span class="section-header">
-              {{ t('enquiryIntakeForm.about') }}
-              <span class="text-primary">
-                {{ t('enquiryIntakeForm.permit') }}: {{ permit?.permitType?.name }}|
-                {{ t('enquiryIntakeForm.trackingId') }}: {{ trackingId }}| {{ t('enquiryIntakeForm.authStatus') }}:
-                {{ permit?.state ?? 'No authorization status.' }}
-              </span>
-            </span>
-            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
-          </div>
-        </template>
-      </Card>
-
-      <Card v-if="!isPermitRelated && !isOnlyProjectRelated">
-        <template #title>
-          <div class="mt-2">
-            <p class="text-primary">{{ t('enquiryIntakeForm.expectation') }}</p>
-          </div>
-        </template>
-      </Card>
-
-      <Card>
-        <template #title>
-          <div class="flex">
-            <span
-              class="section-header"
-              role="heading"
-              aria-level="2"
-            >
-              {{ t('enquiryIntakeForm.contactInformation') }}
-            </span>
-            <Tooltip
-              right
-              :text="t('enquiryIntakeForm.contactTooltip')"
-            />
-          </div>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <div class="grid grid-cols-12 gap-4">
-            <InputText
-              class="col-span-6"
-              name="firstName"
-              label="First name"
-              :bold="false"
-              :disabled="!!initialFormValues?.firstName || !editable"
-            />
-            <InputText
-              class="col-span-6"
-              name="lastName"
-              label="Last name"
-              :bold="false"
-              :disabled="!!initialFormValues?.lastName || !editable"
-            />
-            <InputMask
-              class="col-span-6"
-              name="phoneNumber"
-              mask="(999) 999-9999"
-              label="Phone number"
-              :bold="false"
-              :disabled="!!initialFormValues?.phoneNumber || !editable"
-            />
-            <InputText
-              class="col-span-6"
-              name="email"
-              label="Email"
-              :bold="false"
-              :disabled="!!initialFormValues?.email || !editable"
-            />
-            <Select
-              class="col-span-6"
-              name="contactApplicantRelationship"
-              label="Relationship to project"
-              :bold="false"
-              :disabled="!!initialFormValues?.contactApplicantRelationship || !editable"
-              :options="PROJECT_RELATIONSHIP_LIST"
-            />
-            <Select
-              class="col-span-6"
-              :name="`contactPreference`"
-              label="Preferred contact method"
-              :bold="false"
-              :disabled="!!initialFormValues?.contactPreference || !editable"
-              :options="CONTACT_PREFERENCE_LIST"
-            />
-          </div>
-        </template>
-      </Card>
-      <Card>
-        <template #title>
-          <span
-            class="section-header"
-            role="heading"
-            aria-level="2"
-          >
-            Tell us about your enquiry
-          </span>
-          <Divider type="solid" />
-        </template>
-        <template #content>
-          <div class="grid grid-cols-12 gap-4">
-            <TextArea
-              class="col-span-12"
-              name="basic.enquiryDescription"
-              placeholder="Type here..."
-              :disabled="!editable"
-            />
-          </div>
-        </template>
-      </Card>
       <div class="flex align-center justify-center mt-4">
         <Button
-          label="Submit"
+          :label="t('ui.actions.submit')"
           type="submit"
           icon="pi pi-upload"
-          :disabled="!editable"
+          :disabled="!getEditable"
         />
       </div>
     </Form>
@@ -388,14 +256,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-.disclaimer {
-  font-weight: 500;
-}
-
-:deep(.p-message-wrapper) {
-  padding: 0.5rem;
-}
-
 :deep(.p-card.p-component:has(.p-invalid)) {
   border-color: var(--p-red-500) !important;
 }
