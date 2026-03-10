@@ -5,7 +5,7 @@ import { Problem } from '../../utils';
 import { GroupName } from '../../utils/enums/application';
 import { ActivityContactRole } from '../../utils/enums/projectCommon';
 
-import type { CurrentAuthorization, CurrentContext } from '../../types';
+import type { ActivityContact, CurrentAuthorization, CurrentContext } from '../../types';
 
 const NAVIGATOR_GROUPS = new Set([GroupName.ADMIN, GroupName.NAVIGATOR, GroupName.SUPERVISOR]);
 
@@ -18,13 +18,14 @@ const NAVIGATOR_GROUPS = new Set([GroupName.ADMIN, GroupName.NAVIGATOR, GroupNam
  * @param activityId - The activity ID given in the request
  * @param currentAuthorization - The authorization of the current authorized user
  * @param currentContext - The context of the current authorized user
+ * @returns A promise resolving to the previous PRIMARY activity contact, or undefined if none was demoted.
  */
 export const verifyPrimaryChange = async (
   tx: PrismaTransactionClient,
   activityId: string,
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
-) => {
+): Promise<ActivityContact | undefined> => {
   const activityContacts = await listActivityContacts(tx, activityId);
 
   // Current user scope check
@@ -43,8 +44,16 @@ export const verifyPrimaryChange = async (
     }
   }
 
-  // Update current PRIMARY to ADMIN if necessary
+  // If necessary, update current PRIMARY activity contact to ADMIN and return
   const currentPrimaryActivityContact = activityContacts.find((ac) => ac.role === ActivityContactRole.PRIMARY);
-  if (currentPrimaryActivityContact)
-    await updateActivityContact(tx, activityId, currentPrimaryActivityContact.contactId, ActivityContactRole.ADMIN);
+  if (currentPrimaryActivityContact) {
+    return await updateActivityContact(
+      tx,
+      activityId,
+      currentPrimaryActivityContact.contactId,
+      ActivityContactRole.ADMIN
+    );
+  }
+
+  return undefined;
 };

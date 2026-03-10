@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { ref, watchEffect } from 'vue';
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
@@ -8,8 +8,11 @@ import { useAppStore, useContactStore } from '@/store';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
-import type { Ref } from 'vue';
 import type { ActivityContact } from '@/types';
+import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
+
+// Types
+type TeamAction = 'manage' | 'revoke';
 
 // Props
 const { activityContacts } = defineProps<{
@@ -29,15 +32,31 @@ const { getZone } = storeToRefs(appStore);
 const { getContact } = storeToRefs(contactStore);
 
 // State
-const isAdmin: Ref<boolean> = ref(false);
+const currentUserActivityContact = computed(() =>
+  activityContacts.find((ac) => ac.contactId === getContact.value?.contactId)
+);
+const isAdmin = computed(() => {
+  const adminRoles: ActivityContactRole[] = ACTIVITY_CONTACT_ROLE_LIST.filter((r) => r !== ActivityContactRole.MEMBER);
+  return currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role);
+});
 
 // Actions
-watchEffect(() => {
-  // Determine if the current user has admin privileges
-  const userActivityRole = activityContacts.find((x) => x.contactId === getContact.value?.contactId)?.role;
-  if (userActivityRole)
-    isAdmin.value = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(userActivityRole);
-});
+function isManageable(activityContact: ActivityContact, action: TeamAction) {
+  const isSelf = activityContact.contactId === currentUserActivityContact.value?.contactId;
+
+  // Cannot manage or revoke a primary contact
+  if (activityContact.role === ActivityContactRole.PRIMARY) return false;
+
+  // Cannot revoke self
+  if (action === 'revoke' && isSelf) return false;
+
+  // Manual entry members (non users) are locked for manage.
+  const isManualMember = activityContact.role === ActivityContactRole.MEMBER && !activityContact.contact?.userId;
+  if (isManualMember && action === 'manage') return false;
+
+  // Manageable if internal OR not self
+  return getZone.value === Zone.INTERNAL || !isSelf;
+}
 </script>
 
 <template>
@@ -104,7 +123,7 @@ watchEffect(() => {
         <Button
           class="p-button-lg p-button-text p-0"
           :aria-label="t('projectTeamTable.headerManage')"
-          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+          :disabled="!isManageable(data, 'manage')"
           @click="emit('projectTeamTable:manageUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-pen-to-square" />
@@ -122,7 +141,7 @@ watchEffect(() => {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           :aria-label="t('projectTeamTable.headerRevoke')"
-          :disabled="data.role === ActivityContactRole.PRIMARY || data.contactId === getContact?.contactId"
+          :disabled="!isManageable(data, 'revoke')"
           @click="emit('projectTeamTable:revokeUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-user-xmark" />

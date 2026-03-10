@@ -32,7 +32,11 @@ export default {
    * @function updateActivityContact
    * @returns {Promise} An axios response
    */
-  updateActivityContact(activityId: string, contactId: string, role: string): Promise<AxiosResponse<ActivityContact>> {
+  updateActivityContact(
+    activityId: string,
+    contactId: string,
+    role: string
+  ): Promise<AxiosResponse<{ updated: ActivityContact; demoted: ActivityContact | undefined }>> {
     return appAxios().put(`activity/${activityId}/contact/${contactId}`, { role });
   }
 };
