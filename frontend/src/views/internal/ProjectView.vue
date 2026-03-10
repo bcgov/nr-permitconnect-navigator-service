@@ -34,6 +34,7 @@ import {
   documentService,
   electrificationProjectService,
   enquiryService,
+  generalProjectService,
   housingProjectService,
   noteHistoryService,
   permitService,
@@ -73,6 +74,14 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
   projectProponentName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  projectAddAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_ADD_AUTHORIZATION,
+  projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION,
+  projectNoteRouteName: RouteName.INT_GENERAL_PROJECT_NOTE,
+  projectProponentName: RouteName.INT_GENERAL_PROJECT_PROPONENT,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -204,6 +213,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

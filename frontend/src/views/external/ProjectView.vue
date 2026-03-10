@@ -19,6 +19,7 @@ import {
   contactService,
   electrificationProjectService,
   enquiryService,
+  generalProjectService,
   housingProjectService,
   noteHistoryService,
   permitService
@@ -32,7 +33,7 @@ import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 import { generalErrorHandler, isDefined } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Contact, ElectrificationProject, Enquiry, HousingProject } from '@/types';
+import type { Contact, ElectrificationProject, Enquiry, GeneralProject, HousingProject } from '@/types';
 import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Props
@@ -65,6 +66,18 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectAuthorizationRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_INTAKE,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  enquiryProjectRouteName: RouteName.EXT_GENERAL_PROJECT_ENQUIRY,
+  enquiryRouteName: RouteName.EXT_GENERAL_PROJECT_RELATED_ENQUIRY,
+  initiativeRouteName: RouteName.EXT_GENERAL,
+  internalNavigationPermission: NavigationPermission.INT_GENERAL,
+  internalProjectProponentAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_PROPONENT_PERMIT,
+  navigationPermission: NavigationPermission.EXT_GENERAL,
+  projectAuthorizationRouteName: RouteName.EXT_GENERAL_PROJECT_PERMIT,
+  projectIntakeRouteName: RouteName.EXT_GENERAL_PROJECT_INTAKE,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -141,6 +154,9 @@ onBeforeMount(async () => {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
+        break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
@@ -149,7 +165,7 @@ onBeforeMount(async () => {
     }
 
     let enquiriesValue: Enquiry[] | undefined = undefined;
-    let projectValue: HousingProject | ElectrificationProject;
+    let projectValue: HousingProject | ElectrificationProject | GeneralProject;
 
     try {
       projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
