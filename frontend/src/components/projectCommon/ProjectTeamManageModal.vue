@@ -40,14 +40,14 @@ watchEffect(() => {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">{{ t('e.common.projectTeamManageModal.header') }}</span>
+      <span class="p-dialog-title">{{ t('projectTeamManageModal.header') }}</span>
     </template>
     <Message
       v-if="selectedRole === ActivityContactRole.ADMIN"
       severity="warn"
       class="text-center mb-8"
     >
-      {{ t('e.common.projectTeamManageModal.adminSelectedWarning') }}
+      {{ t('projectTeamManageModal.adminSelectedWarning') }}
     </Message>
     <h5 class="mb-3">{{ activityContact?.contact?.firstName }} {{ activityContact?.contact?.lastName }}</h5>
     <label
@@ -55,7 +55,7 @@ watchEffect(() => {
       for="assignRole"
       class="font-bold"
     >
-      {{ t('e.common.projectTeamManageModal.role') }}
+      {{ t('projectTeamManageModal.role') }}
     </label>
     <Select
       v-model="selectedRole"
@@ -67,7 +67,7 @@ watchEffect(() => {
     <div class="mt-6">
       <Button
         class="mr-2"
-        :label="t('e.common.projectTeamManageModal.save')"
+        :label="t('projectTeamManageModal.save')"
         type="submit"
         icon="pi pi-check"
         :disabled="!activityContact || !selectedRole"
@@ -79,7 +79,7 @@ watchEffect(() => {
       />
       <Button
         class="p-button-outlined mr-2"
-        :label="t('e.common.projectTeamManageModal.cancel')"
+        :label="t('projectTeamManageModal.cancel')"
         icon="pi pi-times"
         @click="visible = false"
       />

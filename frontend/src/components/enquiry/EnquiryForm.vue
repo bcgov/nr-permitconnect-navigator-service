@@ -457,16 +457,6 @@ async function createATSClientEnquiry() {
         <ContactCardNavForm
           :editable="editable"
           :form-values="values"
-          @contact-card-nav-form:pick="
-            (contact: Contact) => {
-              setBasicInfo(contact);
-            }
-          "
-          @contact-card-nav-form:manual-entry="
-            () => {
-              setBasicInfo();
-            }
-          "
         />
         <Panel toggleable>
           <template #header>
