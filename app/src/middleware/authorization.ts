@@ -4,6 +4,7 @@ import { searchContacts } from '../services/contact.ts';
 import { getDocument } from '../services/document.ts';
 import { getDraft } from '../services/draft.ts';
 import { getElectrificationProject } from '../services/electrificationProject.ts';
+import { getGeneralProject } from '../services/generalProject.ts';
 import { getEnquiry } from '../services/enquiry.ts';
 import { getHousingProject } from '../services/housingProject.ts';
 import { getNoteHistory } from '../services/noteHistory.ts';
@@ -136,6 +137,7 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
   ['enquiryId', getEnquiry],
   ['housingProjectId', getHousingProject],
   ['electrificationProjectId', getElectrificationProject],
+  ['generalProjectId', getGeneralProject],
   ['noteHistoryId', getNoteHistory],
   ['permitId', getPermit]
 ]);
