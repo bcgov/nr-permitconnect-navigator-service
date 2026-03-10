@@ -171,13 +171,8 @@ export interface EnquiryIntake {
   enquiryStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
   submit?: boolean;
-
-  basic?: {
-    submissionType?: string;
-    relatedActivityId?: string;
-    enquiryDescription?: string;
-  };
-
+  relatedActivityId?: string;
+  enquiryDescription?: string;
   contact: Contact;
 }
 

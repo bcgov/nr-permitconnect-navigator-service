@@ -9,7 +9,7 @@ import { Initiative } from '@/utils/enums/application';
 import NoteView from '@/views/internal/NoteView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { ElectrificationProject, Enquiry, HousingProject } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -92,7 +92,9 @@ const wrapperSettings = (
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(mockAxiosResponse({ activityId: '1', enquiryId: '1' }));
+  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(
+    mockAxiosResponse({ activityId: '1', enquiryId: '1' } as Enquiry)
+  );
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
     mockAxiosResponse([{ noteHistoryId: '1', createdBy: '123' }])
   );

@@ -302,11 +302,9 @@ export const TEST_ENQUIRY_1: Enquiry = {
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
   contact: TEST_CONTACT_1,
-  basic: {
-    submissionType: SubmissionType.GENERAL_ENQUIRY,
-    relatedActivityId: 'ACTI1234',
-    enquiryDescription: 'Test enquiry description'
-  }
+  submissionType: SubmissionType.GENERAL_ENQUIRY,
+  relatedActivityId: 'ACTI1234',
+  enquiryDescription: 'Test enquiry description'
 };
 
 export const TEST_GENERAL_DRAFT: Draft = {

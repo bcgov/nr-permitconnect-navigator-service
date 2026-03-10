@@ -1,18 +1,21 @@
 import Joi from 'joi';
 
 import atsValidator from './ats.ts';
-import { basicEnquiry } from './basic.ts';
 import { uuidv4 } from './common.ts';
 import { contacts, contactSchema } from './contact.ts';
 import { validate } from '../middleware/validation.ts';
-import { ENQUIRY_SUBMITTED_METHOD } from '../utils/constants/projectCommon.ts';
+import { ENQUIRY_SUBMITTED_METHOD, ENQUIRY_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { APPLICATION_STATUS_LIST } from '../utils/constants/projectCommon.ts';
 
 const schema = {
   createEnquiry: {
     body: Joi.object({
       contact: contactSchema,
-      basic: basicEnquiry,
+      enquiryDescription: Joi.string().required(),
+      relatedActivityId: Joi.string().max(255).allow(null),
+      submissionType: Joi.string()
+        .valid(...ENQUIRY_TYPE_LIST)
+        .allow(null),
       activityId: Joi.string(),
       enquiryId: Joi.string()
     })
