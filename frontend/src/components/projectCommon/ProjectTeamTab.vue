@@ -40,9 +40,48 @@ const selectedContact: Ref<ActivityContact | undefined> = ref(undefined);
 const isInternal = computed(() => getZone.value === Zone.INTERNAL);
 
 // Actions
-async function onAddUser(contact: Contact, role: ActivityContactRole) {
-  try {
-    const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
+function handleFailureToasts(failures: { contact: Contact; errorMessage: string }[]) {
+  if (failures.length === 0) return;
+
+  const [firstFailure] = failures;
+  if (failures.length === 1 && firstFailure) {
+    const { contact, errorMessage } = firstFailure;
+    toast.error(
+      t('projectTeamTab.singleFailedToAdd', {
+        first: contact.firstName,
+        last: contact.lastName,
+        reason: errorMessage
+      })
+    );
+  } else {
+    const summary: Record<string, string[]> = {};
+
+    // Build multiple failure toast message
+    failures.forEach((f) => {
+      const reason = f.errorMessage;
+      const fullName = `${f.contact.firstName} ${f.contact.lastName}`;
+
+      if (summary[reason]) summary[reason].push(fullName);
+      else summary[reason] = [fullName];
+    });
+
+    const lines = Object.entries(summary).map(([reason, namesArray]) => {
+      const names = namesArray.join(', ');
+      return `- ${names}: ${reason}`;
+    });
+
+    toast.error([t('projectTeamTab.multipleFailedToAddHeader'), ...lines].join('\n'));
+  }
+}
+
+function handleSuccessToasts(successes: { role: ActivityContactRole; contact: Contact }[]) {
+  if (successes.length === 0) return;
+
+  const [firstSuccess] = successes;
+  if (successes.length === 1 && firstSuccess) {
+    const { role, contact } = firstSuccess;
+    const firstLastNames = { first: contact.firstName, last: contact.lastName };
+
     switch (role) {
       case ActivityContactRole.ADMIN:
         toast.success(t('projectTeamTab.oneAdminAdded', firstLastNames));
@@ -53,11 +92,49 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
       case ActivityContactRole.PRIMARY:
         toast.success(t('projectTeamTab.onePrimaryAdded', firstLastNames));
         break;
+    }
+  } else {
+    const summary: Record<ActivityContactRole, string[]> = {
+      [ActivityContactRole.PRIMARY]: [],
+      [ActivityContactRole.ADMIN]: [],
+      [ActivityContactRole.MEMBER]: []
+    };
 
-    // Update store
-    projectStore.addActivityContact(response);
+    successes.forEach((s) => {
+      summary[s.role].push(`${s.contact.firstName} ${s.contact.lastName}`);
+    });
 
-    if (role === ActivityContactRole.ADMIN)
+    const rolesWithContent = (Object.keys(summary) as ActivityContactRole[]).filter((role) => summary[role].length > 0);
+
+    const lines = rolesWithContent.map((role) => {
+      const names = summary[role].join(', ');
+      const roleLower = role.toLowerCase();
+      return t(`projectTeamTab.${roleLower}Added`, { names });
+    });
+
+    toast.success([t('projectTeamTab.usersAddedHeader'), ...lines].join('\n'));
+  }
+}
+
+async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityContactRole }[]) {
+  const successes: { role: ActivityContactRole; contact: Contact }[] = [];
+  const failures: { contact: Contact; errorMessage: string }[] = [];
+
+  for (const cr of contactsAndRoles) {
+    let contact = cr.contact;
+    const role = cr.role;
+
+    try {
+      if (!contact.contactId) {
+        contact = (await contactService.updateContact(contact)).data;
+      }
+
+      const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
+
+      // Update store
+      projectStore.addActivityContact(response);
+
+      successes.push({ role, contact });
     } catch (error) {
       let errorMessage = t('projectTeamTab.failedToAddGeneric');
 
@@ -71,15 +148,17 @@ async function onAddUser(contact: Contact, role: ActivityContactRole) {
         errorMessage = error.message;
       }
 
-
-    // Close modal on success
-    createUserModalVisible.value = false;
-  } catch (error) {
-    if (isAxiosError(error)) {
-      if (error.response?.data?.type === 'P2002') toast.error(t('e.common.projectTeamTab.userAlreadyExists'));
-      else toast.error(t('e.common.projectTeamTab.failedToAdd'), error.response?.data?.message ?? error.message);
-    } else if (error instanceof Error) toast.error(t('e.common.projectTeamTab.failedToAdd'), String(error.message));
+      failures.push({ contact, errorMessage });
+    }
   }
+
+  // Close modal any on successes
+  if (successes.length > 0) {
+    addUserModalVisible.value = false;
+  }
+
+  handleSuccessToasts(successes);
+  handleFailureToasts(failures);
 }
 
 async function onManageUser(contact: ActivityContact, role: ActivityContactRole) {
@@ -186,7 +265,7 @@ onBeforeMount(() => {
     <ProjectTeamAddModal
       v-model:visible="addUserModalVisible"
       :activity-contacts="getActivityContacts"
-      @project-team-add-modal:add-user="onAddUser"
+      @project-team-add-modal:add-users="onAddUsers"
     />
     <ProjectTeamManageModal
       v-model:visible="manageUserModalVisible"
