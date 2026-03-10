@@ -1,4 +1,5 @@
 import {
+  ActivityContactRole,
   ApplicationStatus,
   ContactPreference,
   BringForwardType,
@@ -7,6 +8,12 @@ import {
   ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
+
+export const ACTIVITY_CONTACT_ROLE_LIST = [
+  ActivityContactRole.PRIMARY,
+  ActivityContactRole.ADMIN,
+  ActivityContactRole.MEMBER
+];
 
 export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.NEW,

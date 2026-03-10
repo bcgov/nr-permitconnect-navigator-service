@@ -3,11 +3,11 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import { flushPromises, shallowMount } from '@vue/test-utils';
 
-import { default as i18n } from '@/i18n';
-import { default as ElectrificationProjectForm } from '@/components/electrification/project/ProjectFormNavigator.vue';
-import { default as HousingProjectForm } from '@/components/housing/project/ProjectFormNavigator.vue';
+import i18n from '@/i18n';
+import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
+import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import ProjectTeamTable from '@/components/projectCommon/ProjectTeamTable.vue';
+import ProjectTeamTab from '@/components/projectCommon/ProjectTeamTab.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {
   activityContactService,
@@ -232,17 +232,17 @@ describe('ProjectView.vue', () => {
     expect(cards).toHaveLength(2);
   });
 
-  it('only renders ProjectTeamTable when project is in store', async () => {
+  it('only renders ProjectTeamTab when project is in store', async () => {
     const wrapper = shallowMount(ProjectView, wrapperSettings());
     await flushPromises();
 
-    expect(wrapper.findComponent(ProjectTeamTable).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectTeamTab).exists()).toBe(true);
 
     const projectStore = useProjectStore();
     projectStore.setProject(undefined);
     await nextTick();
 
-    expect(wrapper.findComponent(ProjectTeamTable).exists()).toBe(false);
+    expect(wrapper.findComponent(ProjectTeamTab).exists()).toBe(false);
   });
 
   describe('Add authorization button', () => {
