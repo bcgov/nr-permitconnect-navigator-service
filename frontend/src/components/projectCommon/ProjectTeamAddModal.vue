@@ -36,6 +36,12 @@ import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
 
+// Types
+interface ContactAndRole {
+  contact: Contact;
+  role: ActivityContactRole | undefined;
+}
+
 // Props
 const { activityContacts } = defineProps<{
   activityContacts: ActivityContact[];
@@ -46,7 +52,7 @@ const { t } = useI18n();
 const toast = useToast();
 
 // Emits
-const emit = defineEmits(['projectTeamAddModal:addUser']);
+const emit = defineEmits(['projectTeamAddModal:addUsers']);
 
 // State
 const contactSearchResults: Ref<Contact[]> = ref([]);
@@ -55,14 +61,26 @@ const hasSearched: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(false);
 const manualEntry: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
-const selectedRole: Ref<ActivityContactRole | undefined> = ref(undefined);
 const selectedUser: Ref<Contact | undefined> = ref(undefined);
-const selectedUserExists: Ref<boolean> = ref(false);
+const selectedUsersAndRoles: Ref<ContactAndRole[]> = ref([]);
 const showHasNoPrimaryError: Ref<boolean> = ref(false);
 const visible = defineModel<boolean>('visible');
 
-const addUserButtonDisabled = computed(() => !selectedUser.value || selectedUserExists.value);
-const hasPrimaryContact = computed(() => activityContacts.some((ac) => ac.role === ActivityContactRole.PRIMARY));
+const addUserButtonDisabled = computed(
+  () =>
+    !selectedUser.value ||
+    selectedUserExists.value ||
+    selectedUsersAndRoles.value.some((sur) => sur.contact.contactId === selectedUser.value?.contactId)
+);
+const hasAllRolesAssigned = computed(() => selectedUsersAndRoles.value.every((sur) => sur.role));
+const hasPrimaryActivityContact = computed(() =>
+  activityContacts.some((ac) => ac.role === ActivityContactRole.PRIMARY)
+);
+const hasPrimaryContact = computed(
+  () =>
+    hasPrimaryActivityContact.value ||
+    selectedUsersAndRoles.value.some((sur) => sur.role === ActivityContactRole.PRIMARY)
+);
 const isInternal = computed(() => getZone.value === Zone.INTERNAL);
 const isSearchDisabled = computed(() => {
   return loading.value || searchTag.value.trim().length < MIN_SEARCH_INPUT_LENGTH;
@@ -71,7 +89,7 @@ const manualEntryButtonLabel = computed(() =>
   manualEntry.value ? t('projectTeamAddModal.search') : t('projectTeamAddModal.manualEntry')
 );
 const selectableRoles = computed(() => {
-  if (isInternal.value && !hasPrimaryContact.value) {
+  if (isInternal.value && !hasPrimaryActivityContact.value) {
     return ACTIVITY_CONTACT_ROLE_LIST;
   } else {
     return ACTIVITY_CONTACT_ROLE_LIST.filter((role) => role !== ActivityContactRole.PRIMARY);
@@ -91,11 +109,22 @@ const searchMutex = new Mutex();
 function addUser(values: GenericObject) {
   if (manualEntry.value) {
     // Add manual contact and cast values since no contactId included
-    selectedUser.value = { ...values } as Contact;
+    selectedUsersAndRoles.value.push({ contact: { ...values } as Contact, role: undefined });
     manualEntry.value = false;
+  } else if (selectedUser.value) {
+    selectedUsersAndRoles.value.push({ contact: selectedUser.value, role: undefined });
   }
 
-  emit('projectTeamAddModal:addUser', selectedUser.value, selectedRole.value);
+  selectedUser.value = undefined;
+}
+
+function onSave() {
+  if (!hasPrimaryContact.value) {
+    showHasNoPrimaryError.value = true;
+    return;
+  }
+
+  emit('projectTeamAddModal:addUsers', selectedUsersAndRoles.value);
 }
 
 function optionDisabled(option: string, data: ContactAndRole) {
@@ -115,6 +144,9 @@ function optionDisabled(option: string, data: ContactAndRole) {
   return false;
 }
 
+function removeUserFromSelectedByIndex(index: number) {
+  selectedUsersAndRoles.value.splice(index, 1);
+}
 
 async function searchContacts() {
   if (isSearchDisabled.value) return;
@@ -180,29 +212,6 @@ watch(visible, () => {
     >
       {{ t('projectTeamAddModal.contactAlreadyExists') }}
     </Message>
-    <Message
-      v-if="showHasNoPrimaryError && !hasPrimaryContact"
-      class="mt-2.5"
-      severity="error"
-      icon="pi pi-exclamation-circle"
-    >
-      <I18nT
-        scope="global"
-        keypath="projectTeamAddModal.onePrimaryRoleError"
-        tag="span"
-      >
-        <template #one>
-          <strong>{{ t('projectTeamAddModal.one') }}</strong>
-        </template>
-      </I18nT>
-    </Message>
-    <Message
-      v-if="selectedRole === ActivityContactRole.ADMIN"
-      severity="warn"
-      class="text-center mb-8"
-    >
-      {{ t('projectTeamAddModal.adminSelectedWarning') }}
-    </Message>
     <div class="mb-5 mt-2.5">
       <p>{{ t('projectTeamAddModal.instructions') }}</p>
     </div>
@@ -241,6 +250,12 @@ watch(visible, () => {
             label="Contact email"
           />
         </div>
+        <Button
+          class="my-4 w-full"
+          :label="t('projectTeamAddModal.addUser')"
+          icon="pi pi-plus"
+          type="submit"
+        />
       </Form>
     </div>
     <div v-else>
@@ -325,20 +340,106 @@ watch(visible, () => {
           sortable
         />
       </DataTable>
-      <label
-        id="assignRole-label"
-        for="assignRole"
-        class="font-bold"
-      >
-        {{ t('e.common.projectTeamAddModal.assign') }}
-      </label>
-      <Select
-        v-model="selectedRole"
-        class="w-full"
-        name="assignRole"
-        :options="selectableRoles"
-        :disabled="!selectedUser || selectedUserExists"
+      <Button
+        class="my-4 w-full"
+        :label="isInternal ? t('projectTeamAddModal.addUser') : t('projectTeamAddModal.addTeamMember')"
+        icon="pi pi-plus"
+        :disabled="addUserButtonDisabled"
+        @click="addUser"
       />
+    </div>
+    <div v-if="selectedUsersAndRoles.length > 0">
+      <h5 class="m-0">{{ t('projectTeamAddModal.selectedUsers') }}</h5>
+      <Message
+        v-if="showHasNoPrimaryError && !hasPrimaryContact"
+        class="mt-2.5"
+        severity="error"
+        icon="pi pi-exclamation-circle"
+      >
+        <I18nT
+          scope="global"
+          keypath="projectTeamAddModal.onePrimaryRoleError"
+          tag="span"
+        >
+          <template #one>
+            <strong>{{ t('projectTeamAddModal.one') }}</strong>
+          </template>
+        </I18nT>
+      </Message>
+      <DataTable
+        class="datatable mb-2 table-fixed"
+        :value="selectedUsersAndRoles"
+        size="small"
+        :rows="selectedUsersAndRoles.length"
+      >
+        <Column
+          v-if="isInternal"
+          field="userId"
+          class="w-[5%] whitespace-nowrap !pl-4 !pr-1 !py-1"
+        >
+          <template #body="{ data }">
+            <font-awesome-icon
+              v-if="data.contact.userId"
+              icon="fa-solid fa-user"
+              class="app-primary-color"
+            />
+          </template>
+        </Column>
+        <Column
+          class="whitespace-nowrap !p-1"
+          :class="isInternal ? 'w-[10%]' : 'w-[15%]'"
+        >
+          <template #body="{ data }">{{ data.contact.firstName }} {{ data.contact.lastName }}</template>
+        </Column>
+        <Column class="w-[60%] whitespace-nowrap !p-1">
+          <template #body="{ data }">
+            <div class="flex justify-center w-full">
+              <Message
+                v-if="data.role === ActivityContactRole.ADMIN"
+                class="!m-0 !py-0 !px-0"
+                severity="warn"
+                :pt="{
+                  content: { class: '!px-2.5 !py-2' }
+                }"
+              >
+                {{ t('projectTeamAddModal.adminSelectedWarning') }}
+              </Message>
+            </div>
+          </template>
+        </Column>
+        <Column
+          field="role"
+          class="w-[20%] whitespace-nowrap !p-1"
+        >
+          <template #body="{ data }">
+            <Select
+              v-model="data.role"
+              class="w-full"
+              name="assignRole"
+              :pt="{
+                label: { class: '!pl-1.5 !pr-0 !py-1.5' }
+              }"
+              :placeholder="t('projectTeamAddModal.assign')"
+              :options="selectableRoles"
+              :option-disabled="(option) => optionDisabled(option, data)"
+            />
+          </template>
+        </Column>
+        <Column
+          field="remove"
+          header-class="header-right"
+          class="w-[5%] whitespace-nowrap !pl-0 !pr-2 !py-1"
+        >
+          <template #body="{ index }">
+            <Button
+              class="p-button-text p-button-danger"
+              :aria-label="t('projectTeamAddModal.remove')"
+              icon="pi pi-times"
+              @click="() => removeUserFromSelectedByIndex(index)"
+            />
+          </template>
+        </Column>
+      </DataTable>
     </div>
     <div class="flex justify-between items-center mt-6">
       <div>
@@ -346,8 +447,8 @@ watch(visible, () => {
           class="mr-2"
           :label="t('projectTeamAddModal.save')"
           type="submit"
-          :disabled="!selectedRole"
-          @click="addUser"
+          :disabled="selectedUsersAndRoles.length === 0 || !hasAllRolesAssigned"
+          @click="onSave"
         />
         <Button
           class="p-button-outlined mr-2"
