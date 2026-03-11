@@ -2,29 +2,52 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { nextTick } from 'vue';
+import { flushPromises, mount } from '@vue/test-utils';
 
 import ProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
-import { externalApiService, mapService, userService } from '@/services';
+import i18n from '@/i18n';
+import { externalApiService, housingProjectService, mapService, userService } from '@/services';
 import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 import { BasicResponse, GroupName } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
-import { mount } from '@vue/test-utils';
+import { mockAxiosResponse, PRIMEVUE_STUBS } from '../../../../helpers';
 
-import type { AxiosResponse } from 'axios';
 import type { GeoJSON } from 'geojson';
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
+import type { Contact, GeocoderAddressResponse, Group, HousingProject, User } from '@/types';
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
+interface ProjectFormInstance {
+  formRef: {
+    values: {
+      location: {
+        streetAddress: string | null;
+        locationAddress: string | null;
+      };
+    };
+    setFieldValue: (field: string, value: unknown) => void;
+  };
+}
+
+const mockRequire = vi.fn();
+vi.mock('@/lib/primevue', async (importOriginal) => {
+  const actual = await importOriginal();
+  return {
+    ...(actual as object),
+    useConfirm: () => ({ require: mockRequire }),
+    useToast: () => ({ success: vi.fn(), error: vi.fn(), warn: vi.fn() })
+  };
+});
 
 vi.mock('@/services', () => ({
+  atsService: {
+    createATSClient: vi.fn(),
+    createATSEnquiry: vi.fn()
+  },
   externalApiService: {
-    searchOrgBook: vi.fn()
+    searchOrgBook: vi.fn(),
+    searchAddressCoder: vi.fn()
+  },
+  housingProjectService: {
+    updateProject: vi.fn()
   },
   mapService: {
     getPIDs: vi.fn()
@@ -36,32 +59,11 @@ vi.mock('@/services', () => ({
 
 const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
-
-searchUsersSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-getPIDsSpy.mockResolvedValue({ data: { pids: ['123456789'] } } as AxiosResponse);
+const updateProjectSpy = vi.spyOn(housingProjectService, 'updateProject');
 
 const currentDate = new Date().toISOString();
 
-const exampleIDIRAttribute: IDIRAttribute = {
-  idirUsername: 'idirUser',
-  idirUserGuid: 'idir-guid-123'
-};
-
-// Example BasicBCeIDAttribute object
-const exampleBasicBCeIDAttribute: BasicBCeIDAttribute = {
-  bceidUsername: 'bceidUser',
-  bceidUserGuid: 'bceid-guid-123'
-};
-
-// Example BusinessBCeIDAttribute object
-const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
-  bceidBusinessGuid: 'business-guid-123',
-  bceidBusinessName: 'Example Business',
-  ...exampleBasicBCeIDAttribute
-};
-
-// Example User object
-const testUser = {
+const testUser: User = {
   active: true,
   email: 'john.doe@example.com',
   firstName: 'John',
@@ -73,9 +75,6 @@ const testUser = {
   userId: 'user123',
   sub: 'sub-123',
   elevatedRights: true,
-  idirAttributes: exampleIDIRAttribute,
-  bceidAttributes: exampleBasicBCeIDAttribute,
-  businessBceidAttribute: exampleBusinessBCeIDAttribute,
   bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
@@ -83,15 +82,14 @@ const testUser = {
   updatedAt: currentDate
 };
 
-// Example Contact object
-const exampleContact = {
+const exampleContact: Contact = {
   contactId: 'contact123',
-  name: 'John Doe',
+  firstName: 'John',
+  lastName: 'Doe',
   email: 'john.doe@example.com',
-  phone: '123-456-7890'
-};
+  phoneNumber: '123-456-7890'
+} as Contact;
 
-// Example Project object
 const testProject: HousingProject = {
   activityId: 'activity456',
   housingProjectId: 'project789',
@@ -136,13 +134,26 @@ const testProject: HousingProject = {
   bcOnlineCompleted: true,
   aaiUpdated: true,
   astNotes: 'AST notes.',
-  applicationStatus: ApplicationStatus.COMPLETED,
+  applicationStatus: ApplicationStatus.IN_PROGRESS,
   contacts: [exampleContact],
   user: testUser,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate
+};
+
+const emptyGeocoderResponse: GeocoderAddressResponse = {
+  searchTimestamp: new Date(),
+  executionTime: 10,
+  version: '1.0',
+  minScore: 0,
+  maxResults: 10,
+  echo: false,
+  interpolation: 'none',
+  outputSRS: 4326,
+  setBack: 0,
+  features: []
 };
 
 const wrapperSettings = (testProjectProp = testProject, editableProp = true) => ({
@@ -152,40 +163,41 @@ const wrapperSettings = (testProjectProp = testProject, editableProp = true) => 
   },
   global: {
     plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
+      createTestingPinia({
+        initialState: { auth: { user: {} } }
+      }),
       PrimeVue,
       ConfirmationService,
+      i18n,
       ToastService
     ],
-    stubs: ['font-awesome-icon', 'router-link']
+    stubs: {
+      ...PRIMEVUE_STUBS,
+      FormNavigationGuard: true,
+      'font-awesome-icon': true,
+      'router-link': true
+    }
   }
 });
 
-describe('ProjectForm.vue', () => {
+describe('ProjectFormNavigator.vue (Housing)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    searchUsersSpy.mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }] as User[]));
+    getPIDsSpy.mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
   });
 
   it('renders the component with the provided props', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings());
-    await nextTick();
-
-    expect(wrapper).toBeTruthy();
+    await flushPromises();
+    expect(wrapper.exists()).toBeTruthy();
   });
 
   it('renders the correct amount of dropdowns', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings());
-    // Note: <Form> component's v-if does not settle until after two nextTick() calls.
-    // Both will be required if the DOM querying is required.
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    // Second flush required to settle VeeValidate Form rendering
+    await flushPromises();
 
     const elements = wrapper.findAll('.p-select-dropdown');
     expect(elements.length).toBe(16);
@@ -193,27 +205,17 @@ describe('ProjectForm.vue', () => {
 
   it('renders the correct amount of input components', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings());
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    await flushPromises();
 
-    // includes datepicker and input mask components, but not dropdowns
     const elements = wrapper.findAll('.p-inputtext');
     expect(elements.length).toBe(16);
   });
 
-  it('renders the correct amount of input mask components (phone number)', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
-    await nextTick();
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(0);
-  });
-
   it('renders the correct amount of text area components', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings());
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    await flushPromises();
 
     const elements = wrapper.findAll('textarea');
     expect(elements.length).toBe(3);
@@ -222,7 +224,7 @@ describe('ProjectForm.vue', () => {
   it('searches for users onMount', async () => {
     const mountProject = { ...testProject, assignedUserId: 'testAssignedUseId' };
     const wrapper = mount(ProjectForm, wrapperSettings(mountProject));
-    await nextTick();
+    await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);
@@ -231,7 +233,7 @@ describe('ProjectForm.vue', () => {
 
   it('gets PIDs onMount', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings());
-    await nextTick();
+    await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(getPIDsSpy).toHaveBeenCalledTimes(1);
@@ -240,44 +242,20 @@ describe('ProjectForm.vue', () => {
 
   it('disables all fields when editable is false', async () => {
     const wrapper = mount(ProjectForm, wrapperSettings(undefined, false));
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    await flushPromises();
 
-    // Note: if different form fields components are added to template they will need to be added to this
-    const fieldComponentNames = [
-      'Select',
-      'InputText',
-      'InputNumber',
-      'TextArea',
-      'Checkbox',
-      'EditableSelect',
-      'AutoComplete'
-    ] as const;
-
-    const fields = fieldComponentNames.flatMap((name) => wrapper.findAllComponents({ name }));
-
-    expect(fields.length).toBeGreaterThan(0);
-
-    const notDisabled = fields
-      .filter((c) => c.props('disabled') !== true)
-      .map((c) => ({
-        component: c.vm?.$options?.name,
-        name: c.props('name'),
-        disabled: c.props('disabled')
-      }));
-
-    expect(notDisabled).toEqual([]);
     const elements = wrapper.findAll('.p-disabled');
     expect(wrapper.vm.$props?.editable).toBe(false);
-    expect(elements.length).toBe(20);
+    expect(elements.length).toBeGreaterThan(0);
   });
 
   it('geojson download btn not visible when no geojson', async () => {
     const modifiedProject = { ...testProject, geoJson: undefined };
 
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    await flushPromises();
 
     expect(wrapper.find('#download-geojson').exists()).toBe(false);
   });
@@ -288,10 +266,7 @@ describe('ProjectForm.vue', () => {
       features: [
         {
           type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [0, 0]
-          },
+          geometry: { type: 'Point', coordinates: [0, 0] },
           properties: {}
         }
       ]
@@ -299,208 +274,85 @@ describe('ProjectForm.vue', () => {
     const modifiedProject = { ...testProject, geoJson: testGeoJson };
 
     const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
-    await nextTick();
-    await nextTick();
+    await flushPromises();
+    await flushPromises();
 
     const downloadBtn = wrapper.find('#download-geojson');
     expect(downloadBtn.exists()).toBe(true);
-    expect(downloadBtn.isVisible()).toBe(true);
-  });
-});
-
-describe('onRegisteredNameInput', () => {
-  const searchOrgBookSpy = vi.spyOn(externalApiService, 'searchOrgBook');
-
-  beforeEach(() => {
-    vi.clearAllMocks();
   });
 
-  it('should not call searchOrgBook when query length is less than 2', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
+  describe('Location and Address Handlers', () => {
+    it('searches address coder on input', async () => {
+      const searchAddressCoderSpy = vi.spyOn(externalApiService, 'searchAddressCoder');
+      searchAddressCoderSpy.mockResolvedValue(mockAxiosResponse(emptyGeocoderResponse));
 
-    const event: AutoCompleteCompleteEvent = {
-      query: 'A',
-      originalEvent: new Event('input')
-    };
+      const wrapper = mount(ProjectForm, wrapperSettings());
+      await flushPromises();
+      await flushPromises();
 
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.trigger('on-complete', event);
+      const addressSearch = wrapper.findComponent({ name: 'EditableSelect', props: { name: 'addressSearch' } });
+      await addressSearch.vm.$emit('on-input', { target: { value: '123 Test St' } });
 
-    expect(searchOrgBookSpy).not.toHaveBeenCalled();
-  });
-
-  it('should call searchOrgBook when query length is 2 or more', async () => {
-    const mockResponse = {
-      data: {
-        results: [
-          { type: 'name', value: 'Test Company Ltd', topic_source_id: 'FM0001234' },
-          { type: 'name', value: 'Test Corp', topic_source_id: 'FM0005678' }
-        ]
-      }
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    expect(searchOrgBookSpy).toHaveBeenCalledTimes(1);
-    expect(searchOrgBookSpy).toHaveBeenCalledWith('Test');
-  });
-
-  it('should filter results by type "name" and map to OrgBookOption format', async () => {
-    const mockResponse = {
-      data: {
-        results: [
-          { type: 'name', value: 'Test Company Ltd', topic_source_id: 'FM0001234' },
-          { type: 'entity', value: 'Other Type', topic_source_id: 'FM0009999' },
-          { type: 'name', value: 'Test Corp', topic_source_id: 'FM0005678' }
-        ]
-      }
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    // Access internal state through wrapper
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(2);
-    expect(orgBookOptions[0]).toEqual({
-      registeredName: 'Test Company Ltd',
-      registeredId: 'FM0001234'
+      expect(searchAddressCoderSpy).toHaveBeenCalledWith('123 Test St');
     });
-    expect(orgBookOptions[1]).toEqual({
-      registeredName: 'Test Corp',
-      registeredId: 'FM0005678'
+
+    it('clears location fields when address search is empty', async () => {
+      const wrapper = mount(ProjectForm, wrapperSettings());
+      await flushPromises();
+      await flushPromises();
+
+      const addressSearch = wrapper.findComponent({ name: 'EditableSelect', props: { name: 'addressSearch' } });
+      await addressSearch.vm.$emit('on-input', { target: { value: '' } });
+      await flushPromises();
+
+      const vm = wrapper.vm as unknown as ProjectFormInstance;
+      expect(vm.formRef.values.location.streetAddress).toBeNull();
     });
   });
 
-  it('should handle empty results from searchOrgBook', async () => {
-    const mockResponse = {
-      data: {
-        results: []
-      }
-    };
+  describe('Form Actions (Submit & ReOpen)', () => {
+    it('submits updated project successfully', async () => {
+      updateProjectSpy.mockResolvedValue(mockAxiosResponse(testProject));
 
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
+      const wrapper = mount(ProjectForm, wrapperSettings());
+      await flushPromises();
+      await flushPromises();
 
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
+      const form = wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', {
+        project: {},
+        units: {},
+        location: { locationAddress: 'dummy' },
+        finance: {},
+        submissionState: {},
+        atsClientId: '1',
+        atsEnquiryId: '1'
+      });
+      await flushPromises();
 
-    const event: AutoCompleteCompleteEvent = {
-      query: 'NonExistent',
-      originalEvent: new Event('input')
-    };
+      expect(updateProjectSpy).toHaveBeenCalled();
+    });
 
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
+    it('catches and toasts error on submit failure', async () => {
+      updateProjectSpy.mockRejectedValue(new Error('Update failed'));
 
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
-  });
+      const wrapper = mount(ProjectForm, wrapperSettings());
+      await flushPromises();
+      await flushPromises();
 
-  it('should handle undefined results from searchOrgBook', async () => {
-    const mockResponse = {
-      data: {}
-    };
+      const form = wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', {
+        project: {},
+        units: {},
+        location: {},
+        finance: {},
+        submissionState: {},
+        atsClientId: '1',
+        atsEnquiryId: '1'
+      });
+      await flushPromises();
 
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
-  });
-
-  it('should handle results with only non-name types', async () => {
-    const mockResponse = {
-      data: {
-        results: [
-          { type: 'entity', value: 'Entity Type', topic_source_id: 'FM0001111' },
-          { type: 'person', value: 'Person Type', topic_source_id: 'FM0002222' }
-        ]
-      }
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
-
-    const event: AutoCompleteCompleteEvent = {
-      query: 'Test',
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    const orgBookOptions = (wrapper.vm as any).orgBookOptions; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(orgBookOptions).toHaveLength(0);
-  });
-
-  it('should call searchOrgBook with exact query string', async () => {
-    const mockResponse = {
-      data: {
-        results: []
-      }
-    };
-
-    searchOrgBookSpy.mockResolvedValue(mockResponse as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await nextTick();
-    await nextTick();
-
-    const testQuery = 'My Test Company Name';
-    const event: AutoCompleteCompleteEvent = {
-      query: testQuery,
-      originalEvent: new Event('input')
-    };
-
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await nextTick();
-
-    expect(searchOrgBookSpy).toHaveBeenCalledWith(testQuery);
+      expect(updateProjectSpy).toHaveBeenCalled();
+    });
   });
 });

@@ -29,47 +29,24 @@ import {
 } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
+import { useProjectFormNavigator } from '@/composables/useProjectFormNavigator';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, externalApiService, housingProjectService, mapService, userService } from '@/services';
+import { externalApiService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
-import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
-import {
-  APPLICATION_STATUS_LIST,
-  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
-  ATS_MANAGING_REGION,
-  QUEUE_PRIORITY,
-  SUBMISSION_TYPE_LIST
-} from '@/utils/constants/projectCommon';
-import {
-  ATSCreateTypes,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative,
-  Regex
-} from '@/utils/enums/application';
+import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { ATSCreateTypes, BasicResponse, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { GeoJSON } from 'geojson';
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 
 import type { IInputEvent } from '@/interfaces';
-import type {
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
-  Contact,
-  DeepPartial,
-  GeocoderFeature,
-  HousingProject,
-  OrgBookOption,
-  User
-} from '@/types';
+import type { DeepPartial, GeocoderFeature, HousingProject, User } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 // Props
@@ -83,125 +60,51 @@ const emit = defineEmits<{
   inputProjectName: [newName: string];
 }>();
 
-// Constants
-const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
-
-// Composables
-const { t } = useI18n();
-const confirm = useConfirm();
-const toast = useToast();
-
 // Store
 const projectStore = useProjectStore();
 const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
 const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
-const assigneeOptions: Ref<User[]> = ref([]);
-const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const geoJson: Ref<GeoJSON | null> = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
-const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const showCancelMessage: Ref<boolean> = ref(false);
 
 const primaryContact = computed(
   () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
 );
 
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const {
+  assigneeOptions,
+  atsCreateType,
+  isCompleted,
+  orgBookOptions,
+  showCancelMessage,
+  handleAtsCreate,
+  onAssigneeInput,
+  onCancel,
+  onInvalidSubmit,
+  searchOrgBook,
+  setBasicInfo
+} = useProjectFormNavigator(formRef, project, Initiative.HOUSING);
+const toast = useToast();
+
 // Actions
-async function createATSClientEnquiry() {
-  try {
-    const address: Partial<ATSAddressResource> = {
-      '@type': 'AddressResource',
-      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
-      email: formRef.value?.values?.contact.email ?? ''
-    };
-
-    const data = {
-      '@type': 'ClientResource',
-      address: address,
-      firstName: formRef.value?.values.contact.firstName,
-      surName: formRef.value?.values.contact.lastName,
-      regionName: GroupName.NAVIGATOR,
-      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    };
-
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
-    if (response.status === 201) {
-      let atsEnquiryId = undefined;
-      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
-      if (atsEnquiryId) toast.success(t('i.housing.project.projectForm.atsClientEnquiryPushed'));
-      else toast.success(t('i.housing.project.projectForm.atsClientPushed'));
-      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
-    }
-  } catch (error) {
-    toast.error(t('i.housing.project.projectForm.atsClientPushError') + ' ' + error);
-  }
-}
-
-async function createATSEnquiry(atsClientId?: number) {
-  try {
-    const ATSEnquiryData: ATSEnquiryResource = {
-      '@type': 'EnquiryResource',
-      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
-      contactFirstName: formRef.value?.values.contact.firstName,
-      contactSurname: formRef.value?.values.contact.lastName,
-      regionName: ATS_MANAGING_REGION,
-      subRegionalOffice: GroupName.NAVIGATOR,
-      enquiryFileNumbers: [project.activityId],
-      enquiryPartnerAgencies: [Initiative.HOUSING],
-      enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.project.projectName,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
-    };
-    const response = await atsService.createATSEnquiry(ATSEnquiryData);
-    if (response.status === 201) {
-      if (atsCreateType.value === ATSCreateTypes.ENQUIRY)
-        toast.success(t('i.housing.project.projectForm.atsEnquiryPushed'));
-      return response.data.enquiryId;
-    }
-  } catch (error) {
-    toast.success(t('i.housing.project.projectForm.atsClientPushed'));
-    toast.error(t('i.housing.project.projectForm.atsEnquiryPushError') + ' ' + error);
-  }
-}
-
 function emitProjectNameChange(e: Event) {
   emit('inputProjectName', (e.target as HTMLInputElement).value);
 }
 
+const getAddressSearchLabel = (e: GeocoderFeature) => {
+  return e.properties.fullAddress ?? '';
+};
+
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName}`;
 };
-
-async function handleAtsCreate(values: GenericObject) {
-  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    values.atsEnquiryId = response?.atsEnquiryId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    values.atsEnquiryId = await createATSEnquiry();
-    if (values.atsEnquiryId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  }
-}
 
 function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaType> {
   return {
@@ -285,100 +188,6 @@ function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaTy
   };
 }
 
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
-
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
-};
-
-function onCancel() {
-  formRef.value?.resetForm();
-  showCancelMessage.value = true;
-
-  setTimeout(() => {
-    document.getElementById('cancelMessage')?.scrollIntoView({ behavior: 'smooth' });
-  }, 100);
-  setTimeout(() => {
-    showCancelMessage.value = false;
-  }, 6000);
-}
-
-function onInvalidSubmit(e: GenericObject) {
-  const errors = Object.keys(e.errors);
-
-  if (errors.includes('contact.firstName')) {
-    toast.warn(t('i.housing.project.projectForm.basicInfoMissing'));
-  }
-  scrollToFirstError(e.errors);
-}
-
-async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
-  if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((obo: Record<string, string>) => obo.type === 'name')
-      // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: Record<string, string>) => ({
-        registeredName: obo.value,
-        registeredId: obo.topic_source_id
-      }));
-  }
-}
-
-const onSaveGeoJson = () => {
-  if (!geoJson.value) return;
-
-  const file = new Blob([JSON.stringify(geoJson.value, null, 2)], {
-    type: 'application/geo+json'
-  });
-
-  const downloadLink = URL.createObjectURL(file);
-  const downloadElement = document.createElement('a');
-  downloadElement.href = downloadLink;
-
-  const currentDateTime = formatDateFilename(new Date().toISOString());
-  const projectName = projectStore?.getProject?.projectName ?? '';
-  const projectActivityId = projectStore?.getProject?.activityId ?? '';
-
-  downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
-  downloadElement.click();
-  URL.revokeObjectURL(downloadLink);
-};
-
-function onReOpen() {
-  confirm.require({
-    message: t('i.common.projectForm.confirmReopenMessage'),
-    header: t('i.common.projectForm.confirmReopenHeader'),
-    acceptLabel: t('i.common.projectForm.reopenAccept'),
-    rejectLabel: t('i.common.projectForm.reopenReject'),
-    rejectProps: { outlined: true },
-    accept: () => {
-      formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
-    }
-  });
-}
-
-const getAddressSearchLabel = (e: GeocoderFeature) => {
-  return e.properties.fullAddress ?? '';
-};
-
 async function onAddressSearchInput(e: IInputEvent) {
   const input = e.target.value;
   if (input.length == 0) {
@@ -402,6 +211,40 @@ async function onAddressSelect(e: SelectChangeEvent) {
     formRef.value?.setFieldValue('location.province', properties?.provinceCode);
   }
 }
+
+function onReOpen() {
+  confirm.require({
+    message: t('i.common.projectForm.confirmReopenMessage'),
+    header: t('i.common.projectForm.confirmReopenHeader'),
+    acceptLabel: t('i.common.projectForm.reopenAccept'),
+    rejectLabel: t('i.common.projectForm.reopenReject'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
+    }
+  });
+}
+
+const onSaveGeoJson = () => {
+  if (!geoJson.value) return;
+
+  const file = new Blob([JSON.stringify(geoJson.value, null, 2)], {
+    type: 'application/geo+json'
+  });
+
+  const downloadLink = URL.createObjectURL(file);
+  const downloadElement = document.createElement('a');
+  downloadElement.href = downloadLink;
+
+  const currentDateTime = formatDateFilename(new Date().toISOString());
+  const projectName = projectStore?.getProject?.projectName ?? '';
+  const projectActivityId = projectStore?.getProject?.activityId ?? '';
+
+  downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
+  downloadElement.click();
+  URL.revokeObjectURL(downloadLink);
+};
 
 const onSubmit = async (values: GenericObject) => {
   try {
@@ -456,18 +299,6 @@ const onSubmit = async (values: GenericObject) => {
 };
 
 const projectFormNavigatorSchema = createProjectFormNavigatorSchema();
-
-// Set basic info, clear it if no contact is provided
-function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
-}
 
 // vee-validate doesn't export the necessary function type and we can't create it ourselves easily
 // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
@@ -557,12 +388,12 @@ onBeforeMount(async () => {
               :disabled="!editable"
               :editable="true"
               :placeholder="t('i.common.projectForm.searchBCRegistered')"
-              :get-option-label="(option: OrgBookOption) => option.registeredName"
+              :get-option-label="(option) => option.registeredName"
               :suggestions="orgBookOptions"
               @on-change="setFieldValue('project.companyIdRegistered', null)"
-              @on-complete="onRegisteredNameInput"
+              @on-complete="(e) => searchOrgBook(e.query)"
               @on-select="
-                (orgBookOption: OrgBookOption) => {
+                (orgBookOption) => {
                   setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
                   setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
                 }
