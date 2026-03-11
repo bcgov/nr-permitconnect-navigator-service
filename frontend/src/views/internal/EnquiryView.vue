@@ -10,6 +10,7 @@ import { Button, Message, Tab, Tabs, TabList, TabPanel, TabPanels } from '@/lib/
 import {
   electrificationProjectService,
   enquiryService,
+  generalProjectService,
   housingProjectService,
   noteHistoryService,
   userService
@@ -57,6 +58,14 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  atsEnquiryPartnerAgencies: Initiative.GENERAL,
+  atsEnquiryTypeCode: toTitleCase(Initiative.GENERAL) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
+  enquiryNoteRouteName: RouteName.INT_GENERAL_ENQUIRY_NOTE,
+  projectRouteName: RouteName.INT_GENERAL_PROJECT,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -129,6 +138,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

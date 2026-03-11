@@ -12,7 +12,8 @@ import DocumentCard from '@/components/file/DocumentCard.vue';
 import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
 import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
-import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
+import { default as GeneralProjectForm } from '@/components/general/project/ProjectFormNavigator.vue';
+import { default as HousingProjectForm } from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import ProjectTeamTab from '@/components/projectCommon/ProjectTeamTab.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
@@ -50,7 +51,7 @@ import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { Document, ElectrificationProject, Enquiry, HousingProject, User } from '@/types';
+import type { Document, ElectrificationProject, Enquiry, GeneralProject, HousingProject, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -223,6 +224,7 @@ onBeforeMount(async () => {
       default:
         throw new Error(t('views.initiativeStateError'));
     }
+
     const project = (await initiativeState.value.projectService.getProject(projectId)).data;
     activityId.value = project.activityId;
     const [documents, notes, permits, relatedEnquiries, contacts] = (
@@ -367,6 +369,12 @@ onBeforeMount(async () => {
             v-if="getInitiative === Initiative.HOUSING"
             :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.HOUSING_PROJECT, Action.UPDATE)"
             :project="getProject as HousingProject"
+            @input-project-name="updateLiveName"
+          />
+          <GeneralProjectForm
+            v-if="getInitiative === Initiative.GENERAL"
+            :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.GENERAL_PROJECT, Action.UPDATE)"
+            :project="getProject as GeneralProject"
             @input-project-name="updateLiveName"
           />
           <ElectrificationProjectForm
