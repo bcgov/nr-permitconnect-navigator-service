@@ -24,7 +24,7 @@ import { Action, GroupName, Initiative, Resource, RouteName, StorageKey } from '
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, Group, HousingProject, NoteHistory } from '@/types';
+import type { ElectrificationProject, Document, Group, HousingProject, NoteHistory } from '@/types';
 
 // Mock functions we need to test
 const pushMock = vi.fn();
@@ -307,6 +307,100 @@ describe('ProjectView.vue', () => {
           projectId: '123'
         }
       });
+    });
+  });
+
+  describe('sortComparator logic', () => {
+    const mockDocs: Document[] = [
+      {
+        documentId: 'uuid-1',
+        activityId: '123',
+        filename: 'apple.pdf',
+        extension: 'pdf',
+        mimeType: 'application/pdf',
+        filesize: 1024,
+        createdByFullName: 'Alice Smith',
+        createdAt: '2026-01-01T10:00:00Z'
+      },
+      {
+        documentId: 'uuid-2',
+        activityId: '123',
+        filename: 'zebra.jpg',
+        extension: 'jpg',
+        mimeType: 'image/jpeg',
+        filesize: 5000,
+        createdByFullName: 'Zack Miller',
+        createdAt: '2026-03-01T10:00:00Z'
+      },
+      {
+        documentId: 'uuid-3',
+        activityId: '123',
+        filename: 'banana.png',
+        extension: 'png',
+        mimeType: 'image/png',
+        filesize: 2048,
+        createdByFullName: 'Bob Jones',
+        createdAt: '2026-02-01T10:00:00Z'
+      }
+    ];
+
+    it('sorts documents in ascending and descending order', async () => {
+      const wrapper = shallowMount(ProjectView, wrapperSettings());
+      const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+      await flushPromises();
+
+      const projectStore = useProjectStore();
+      projectStore.setDocuments(mockDocs);
+
+      vm.gridView = true;
+      await nextTick();
+
+      const dataTable = wrapper.findComponent({ name: 'DataTable' });
+
+      await dataTable.vm.$emit('update:sort-field', 'filename');
+      await dataTable.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      let results = vm.filteredDocuments;
+      expect(results[0].filename).toBe('apple.pdf');
+      expect(results[1].filename).toBe('banana.png');
+
+      await dataTable.vm.$emit('update:sort-order', -1);
+      await nextTick();
+
+      results = vm.filteredDocuments;
+      expect(results[0].filename).toBe('zebra.jpg');
+      expect(results[1].filename).toBe('banana.png');
+    });
+
+    it('handles different sort types to exercise various data types', async () => {
+      const wrapper = shallowMount(ProjectView, wrapperSettings());
+      const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
+
+      await flushPromises();
+
+      const projectStore = useProjectStore();
+      projectStore.setDocuments(mockDocs);
+
+      vm.gridView = true;
+      await nextTick();
+
+      const dataTable = wrapper.findComponent({ name: 'DataTable' });
+
+      await dataTable.vm.$emit('update:sort-field', 'filesize');
+      await dataTable.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      let results = vm.filteredDocuments;
+      expect(results[0].filesize).toBe(1024);
+
+      await dataTable.vm.$emit('update:sort-field', 'createdByFullName');
+      await dataTable.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      results = vm.filteredDocuments;
+      expect(results[0].createdByFullName).toBe('Alice Smith');
     });
   });
 });
