@@ -24,7 +24,7 @@ import { Action, GroupName, Initiative, Resource, RouteName, StorageKey } from '
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, Group, HousingProject, NoteHistory } from '@/types';
+import type { ElectrificationProject, Document, Group, HousingProject, NoteHistory } from '@/types';
 
 // Mock functions we need to test
 const pushMock = vi.fn();
@@ -307,6 +307,123 @@ describe('ProjectView.vue', () => {
           projectId: '123'
         }
       });
+    });
+  });
+
+  describe('sortComparator logic & View Toggles', () => {
+    const mockDocs: Document[] = [
+      {
+        documentId: 'uuid-1',
+        activityId: '123',
+        filename: 'apple.pdf',
+        extension: 'pdf',
+        mimeType: 'application/pdf',
+        filesize: 1024,
+        createdByFullName: 'Alice Smith',
+        createdAt: '2026-01-01T10:00:00Z'
+      },
+      {
+        documentId: 'uuid-2',
+        activityId: '123',
+        filename: 'zebra.jpg',
+        extension: 'jpg',
+        mimeType: 'image/jpeg',
+        filesize: 5000,
+        createdByFullName: 'Zack Miller',
+        createdAt: '2026-03-01T10:00:00Z'
+      },
+      {
+        documentId: 'uuid-3',
+        activityId: '123',
+        filename: 'banana.png',
+        extension: 'png',
+        mimeType: 'image/png',
+        filesize: 2048,
+        createdByFullName: 'Bob Jones',
+        createdAt: '2026-02-01T10:00:00Z'
+      }
+    ];
+
+    it('toggles between list and grid views via DOM buttons', async () => {
+      const wrapper = shallowMount(ProjectView, wrapperSettings());
+      await flushPromises();
+
+      const projectStore = useProjectStore();
+      projectStore.setDocuments(mockDocs);
+      await nextTick();
+
+      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(0);
+
+      const gridBtn = wrapper.find('button[aria-label="Grid"]');
+      await gridBtn.trigger('click');
+      await nextTick();
+
+      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(3);
+
+      const listBtn = wrapper.find('button[aria-label="List"]');
+      await listBtn.trigger('click');
+      await nextTick();
+
+      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(0);
+    });
+
+    it('sorts documents in ascending and descending order via DataTable emits', async () => {
+      const wrapper = shallowMount(ProjectView, wrapperSettings());
+      await flushPromises();
+
+      const projectStore = useProjectStore();
+      projectStore.setDocuments(mockDocs);
+      await nextTick();
+
+      const gridBtn = wrapper.find('button[aria-label="Grid"]');
+      await gridBtn.trigger('click');
+      await nextTick();
+
+      const dataTable = wrapper.findAllComponents({ name: 'DataTable' })[0];
+
+      await dataTable?.vm.$emit('update:sort-field', 'filename');
+      await dataTable?.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      let cards = wrapper.findAllComponents({ name: 'DocumentCard' });
+      expect((cards[0]?.props('document') as Document).filename).toBe('apple.pdf');
+      expect((cards[1]?.props('document') as Document).filename).toBe('banana.png');
+
+      await dataTable?.vm.$emit('update:sort-order', -1);
+      await nextTick();
+
+      cards = wrapper.findAllComponents({ name: 'DocumentCard' });
+      expect((cards[0]?.props('document') as Document).filename).toBe('zebra.jpg');
+      expect((cards[1]?.props('document') as Document).filename).toBe('banana.png');
+    });
+
+    it('handles different sort types to exercise various data types', async () => {
+      const wrapper = shallowMount(ProjectView, wrapperSettings());
+      await flushPromises();
+
+      const projectStore = useProjectStore();
+      projectStore.setDocuments(mockDocs);
+      await nextTick();
+
+      const gridBtn = wrapper.find('button[aria-label="Grid"]');
+      await gridBtn.trigger('click');
+      await nextTick();
+
+      const dataTable = wrapper.findAllComponents({ name: 'DataTable' })[0];
+
+      await dataTable?.vm.$emit('update:sort-field', 'filesize');
+      await dataTable?.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      let cards = wrapper.findAllComponents({ name: 'DocumentCard' });
+      expect((cards[0]?.props('document') as Document).filesize).toBe(1024);
+
+      await dataTable?.vm.$emit('update:sort-field', 'createdByFullName');
+      await dataTable?.vm.$emit('update:sort-order', 1);
+      await nextTick();
+
+      cards = wrapper.findAllComponents({ name: 'DocumentCard' });
+      expect((cards[0]?.props('document') as Document).createdByFullName).toBe('Alice Smith');
     });
   });
 });
