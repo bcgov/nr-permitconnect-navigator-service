@@ -3,7 +3,7 @@ import { computed, onBeforeMount, provide, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ContactPage from '@/components/contact/ContactPage.vue';
-import { electrificationProjectService, housingProjectService } from '@/services';
+import { electrificationProjectService, generalProjectService, housingProjectService } from '@/services';
 import { useAppStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
@@ -28,6 +28,11 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectService: electrificationProjectService
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  initiativeContactRouteName: RouteName.INT_GENERAL_CONTACT_PAGE,
+  projectService: generalProjectService
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   initiativeContactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE,
   projectService: housingProjectService
@@ -50,6 +55,9 @@ onBeforeMount(async () => {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

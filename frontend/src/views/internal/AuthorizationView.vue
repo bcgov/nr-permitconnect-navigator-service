@@ -4,7 +4,7 @@ import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
-import { electrificationProjectService, housingProjectService, permitService } from '@/services';
+import { electrificationProjectService, generalProjectService, housingProjectService, permitService } from '@/services';
 import { useAppStore, usePermitStore, useProjectStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
@@ -30,6 +30,11 @@ interface InitiativeState {
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  projectRouteName: RouteName.INT_GENERAL_PROJECT,
+  projectService: generalProjectService
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -61,6 +66,9 @@ onBeforeMount(async () => {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

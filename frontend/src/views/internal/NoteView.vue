@@ -4,7 +4,13 @@ import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import NoteForm from '@/components/note/NoteForm.vue';
-import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
+import {
+  electrificationProjectService,
+  enquiryService,
+  generalProjectService,
+  housingProjectService,
+  noteHistoryService
+} from '@/services';
 import { useAppStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
@@ -44,6 +50,18 @@ const ELECTRIFICATION_INITIATIVE_PROJECT_STATE: InitiativeState = {
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService,
   resource: Resource.ELECTRIFICATION_PROJECT
+};
+
+const GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
+  projectService: generalProjectService,
+  resource: Resource.ENQUIRY
+};
+
+const GENERAL_INITIATIVE_PROJECT_PROJECT_STATE: InitiativeState = {
+  projectRouteName: RouteName.INT_GENERAL_PROJECT,
+  projectService: generalProjectService,
+  resource: Resource.GENERAL_PROJECT
 };
 
 const HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
@@ -91,6 +109,11 @@ onBeforeMount(async () => {
         initiativeState.value = projectId
           ? ELECTRIFICATION_INITIATIVE_PROJECT_STATE
           : ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = projectId
+          ? GENERAL_INITIATIVE_PROJECT_PROJECT_STATE
+          : GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = projectId
