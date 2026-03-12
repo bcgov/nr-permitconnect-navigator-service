@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
-import { computed, onBeforeMount, ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ProjectTeamTable from './ProjectTeamTable.vue';
@@ -10,7 +10,6 @@ import ProjectTeamManageModal from './ProjectTeamManageModal.vue';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { activityContactService, contactService } from '@/services';
 import { useAppStore, useProjectStore } from '@/store';
-import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -29,15 +28,13 @@ const toast = useToast();
 // Store
 const appStore = useAppStore();
 const projectStore = useProjectStore();
-const { getZone } = storeToRefs(appStore);
+const { isInternal } = storeToRefs(appStore);
 const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
 const addUserModalVisible: Ref<boolean> = ref(false);
 const manageUserModalVisible: Ref<boolean> = ref(false);
 const selectedContact: Ref<ActivityContact | undefined> = ref(undefined);
-
-const isInternal = computed(() => getZone.value === Zone.INTERNAL);
 
 // Actions
 function handleFailureToasts(failures: { contact: Contact; errorMessage: string }[]) {

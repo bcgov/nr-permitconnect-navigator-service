@@ -5,14 +5,16 @@ import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
 import { useAppStore, useContactStore } from '@/store';
-import { Zone } from '@/utils/enums/application';
+import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { ActivityContact } from '@/types';
-import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
 
 // Types
-type TeamAction = 'manage' | 'revoke';
+enum TeamAction {
+  MANAGE = 'manage',
+  REVOKE = 'revoke'
+}
 
 // Props
 const { activityContacts } = defineProps<{
@@ -28,7 +30,7 @@ const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revok
 // Store
 const appStore = useAppStore();
 const contactStore = useContactStore();
-const { getZone } = storeToRefs(appStore);
+const { isInternal } = storeToRefs(appStore);
 const { getContact } = storeToRefs(contactStore);
 
 // State
@@ -48,14 +50,14 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
   if (activityContact.role === ActivityContactRole.PRIMARY) return false;
 
   // Cannot revoke self
-  if (action === 'revoke' && isSelf) return false;
+  if (action === TeamAction.REVOKE && isSelf) return false;
 
   // Manual entry members (non users) are locked for manage.
   const isManualMember = activityContact.role === ActivityContactRole.MEMBER && !activityContact.contact?.userId;
-  if (isManualMember && action === 'manage') return false;
+  if (isManualMember && action === TeamAction.MANAGE) return false;
 
   // Manageable if internal OR not self
-  return getZone.value === Zone.INTERNAL || !isSelf;
+  return isInternal.value || !isSelf;
 }
 </script>
 
@@ -71,7 +73,7 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
       </div>
     </template>
     <Column
-      v-if="getZone === Zone.INTERNAL"
+      v-if="isInternal"
       field="userId"
     >
       <template #body="{ data }">
@@ -123,7 +125,7 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
         <Button
           class="p-button-lg p-button-text p-0"
           :aria-label="t('projectTeamTable.headerManage')"
-          :disabled="!isManageable(data, 'manage')"
+          :disabled="!isManageable(data, TeamAction.MANAGE)"
           @click="emit('projectTeamTable:manageUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-pen-to-square" />
@@ -141,7 +143,7 @@ function isManageable(activityContact: ActivityContact, action: TeamAction) {
         <Button
           class="p-button-lg p-button-text p-button-danger p-0"
           :aria-label="t('projectTeamTable.headerRevoke')"
-          :disabled="!isManageable(data, 'revoke')"
+          :disabled="!isManageable(data, TeamAction.REVOKE)"
           @click="emit('projectTeamTable:revokeUser', data)"
         >
           <font-awesome-icon icon="fa-solid fa-user-xmark" />
