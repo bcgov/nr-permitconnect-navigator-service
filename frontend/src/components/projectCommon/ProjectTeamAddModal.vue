@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Mutex } from 'async-mutex';
 import { storeToRefs } from 'pinia';
-import { Form } from 'vee-validate';
+import { useForm } from 'vee-validate';
 import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
@@ -27,7 +27,6 @@ import {
   CONTACT_PREFERENCE_LIST,
   PROJECT_RELATIONSHIP_LIST
 } from '@/utils/constants/projectCommon';
-import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { toNumber } from '@/utils/utils';
 import { contactValidator } from '@/validators';
@@ -49,14 +48,20 @@ const { activityContacts } = defineProps<{
 
 // Composables
 const { t } = useI18n();
+const { handleSubmit, resetForm } = useForm({
+  validationSchema: contactValidator
+});
 const toast = useToast();
 
 // Emits
 const emit = defineEmits(['projectTeamAddModal:addUsers']);
 
+// Store
+const appStore = useAppStore();
+const { isInternal } = storeToRefs(appStore);
+
 // State
 const contactSearchResults: Ref<Contact[]> = ref([]);
-const formRef = ref<InstanceType<typeof Form> | null>(null);
 const hasSearched: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(false);
 const manualEntry: Ref<boolean> = ref(false);
@@ -81,7 +86,6 @@ const hasPrimaryContact = computed(
     hasPrimaryActivityContact.value ||
     selectedUsersAndRoles.value.some((sur) => sur.role === ActivityContactRole.PRIMARY)
 );
-const isInternal = computed(() => getZone.value === Zone.INTERNAL);
 const isSearchDisabled = computed(() => {
   return loading.value || searchTag.value.trim().length < MIN_SEARCH_INPUT_LENGTH;
 });
@@ -98,10 +102,6 @@ const selectableRoles = computed(() => {
 const selectedUserExists = computed(() =>
   activityContacts.some((ac) => ac.contactId === selectedUser.value?.contactId)
 );
-
-// Store
-const appStore = useAppStore();
-const { getZone } = storeToRefs(appStore);
 
 const searchMutex = new Mutex();
 
@@ -126,6 +126,10 @@ function onSave() {
 
   emit('projectTeamAddModal:addUsers', selectedUsersAndRoles.value);
 }
+
+const onSubmit = handleSubmit((values) => {
+  addUser(values);
+});
 
 function optionDisabled(option: string, data: ContactAndRole) {
   // Prevent non-users from being assigned ADMIN
@@ -179,13 +183,14 @@ async function searchContacts() {
 
 watch(visible, () => {
   contactSearchResults.value = [];
-  formRef.value?.resetForm();
   hasSearched.value = false;
   manualEntry.value = false;
   searchTag.value = '';
   selectedUser.value = undefined;
   selectedUsersAndRoles.value = [];
   showHasNoPrimaryError.value = false;
+
+  resetForm();
 });
 </script>
 
@@ -216,11 +221,7 @@ watch(visible, () => {
       <p>{{ t('projectTeamAddModal.instructions') }}</p>
     </div>
     <div v-if="manualEntry">
-      <Form
-        ref="formRef"
-        :validation-schema="contactValidator"
-        @submit="addUser"
-      >
+      <form @submit="onSubmit">
         <div class="grid grid-cols-2 gap-x-5 gap-y-3 mx-10">
           <InputTextFormItem
             name="firstName"
@@ -256,7 +257,7 @@ watch(visible, () => {
           icon="pi pi-plus"
           type="submit"
         />
-      </Form>
+      </form>
     </div>
     <div v-else>
       <div class="grid grid-cols-12 gap-4 items-center">

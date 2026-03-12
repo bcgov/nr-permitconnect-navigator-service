@@ -6,7 +6,6 @@ import { useI18n } from 'vue-i18n';
 import { Button, Dialog, Message, Select } from '@/lib/primevue';
 import { useAppStore } from '@/store';
 import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
-import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -25,13 +24,12 @@ const { t } = useI18n();
 
 // Store
 const appStore = useAppStore();
-const { getZone } = storeToRefs(appStore);
+const { isInternal } = storeToRefs(appStore);
 
 // State
 const selectedRole: Ref<ActivityContactRole | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
-const isInternal = computed(() => getZone.value === Zone.INTERNAL);
 const selectableRoles = computed(() => {
   if (isInternal.value) {
     return ACTIVITY_CONTACT_ROLE_LIST.filter((role) => role !== activityContact?.role);
