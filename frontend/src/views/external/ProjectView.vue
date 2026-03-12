@@ -33,7 +33,7 @@ import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 import { generalErrorHandler, isDefined } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Contact, ElectrificationProject, Enquiry, GeneralProject, HousingProject } from '@/types';
+import type { Contact, Enquiry, Project } from '@/types';
 import type { IProjectService } from '@/interfaces/IProjectService';
 
 // Props
@@ -165,7 +165,7 @@ onBeforeMount(async () => {
     }
 
     let enquiriesValue: Enquiry[] | undefined = undefined;
-    let projectValue: HousingProject | ElectrificationProject | GeneralProject;
+    let projectValue: Project;
 
     try {
       projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;

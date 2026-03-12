@@ -7,7 +7,7 @@ import { CopyToClipboard } from '@/components/form';
 import { Select } from '@/lib/primevue';
 import { useAuthNStore, useAuthZStore, useConfigStore } from '@/store';
 import { ButtonMode, GroupName, Initiative } from '@/utils/enums/application';
-import { GROUP_NAME_LIST } from '@/utils/constants/application';
+import { GROUP_NAME_LIST, INITIATIVE_LIST } from '@/utils/constants/application';
 
 import type { Ref } from 'vue';
 
@@ -48,7 +48,7 @@ const initiative: Ref<Initiative | undefined> = ref(undefined);
       <Select
         v-model="initiative"
         class="w-2/12 mr-2"
-        :options="[Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING, Initiative.PCNS]"
+        :options="INITIATIVE_LIST"
         @change="
           (e) => {
             authzStore.setInitiativeOverride(e.value);
