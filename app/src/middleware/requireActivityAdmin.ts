@@ -36,7 +36,7 @@ export const requireActivityAdmin = async (
             activityContact.role as ActivityContactRole
           ))
       ) {
-        throw new Error();
+        throw new Error('User lacks required role.');
       }
     });
   } catch (error) {

@@ -132,10 +132,10 @@ async function onAssistanceRequest(values: GenericObject) {
       },
       contact: setEmptyStringsToNull({
         contactId: values.contacts.contactId,
-        firstName: values.contacts.contactFirstName,
-        lastName: values.contacts.contactLastName,
-        phoneNumber: values.contacts.contactPhoneNumber,
-        email: values.contacts.contactEmail,
+        firstName: values.contacts.firstName,
+        lastName: values.contacts.lastName,
+        phoneNumber: values.contacts.phoneNumber,
+        email: values.contacts.email,
         contactApplicantRelationship: values.contacts.contactApplicantRelationship,
         contactPreference: values.contacts.contactPreference
       })
@@ -259,10 +259,10 @@ async function onSubmit(data: GenericObject) {
     // Grab the contact information
     const contact = {
       contactId: data.contacts.contactId,
-      firstName: data.contacts.contactFirstName,
-      lastName: data.contacts.contactLastName,
-      phoneNumber: data.contacts.contactPhoneNumber,
-      email: data.contacts.contactEmail,
+      firstName: data.contacts.firstName,
+      lastName: data.contacts.lastName,
+      phoneNumber: data.contacts.phoneNumber,
+      email: data.contacts.email,
       contactApplicantRelationship: data.contacts.contactApplicantRelationship,
       contactPreference: data.contacts.contactPreference
     };
@@ -320,9 +320,20 @@ onBeforeMount(async () => {
 
     if (draftId) {
       response = (await housingProjectService.getDraft(draftId)).data;
+      const { contacts, ...rest } = response.data;
+      const contact = {
+        firstName: contacts.contactFirstName,
+        lastName: contacts.contactLastName,
+        phoneNumber: contacts.contactPhoneNumber,
+        email: contacts.contactEmail,
+        contactApplicantRelationship: contacts.contactApplicantRelationship,
+        contactPreference: contacts.contactPreference,
+        contactId: contacts.contactId
+      };
 
       initialFormValues.value = {
-        ...response.data,
+        ...rest.data,
+        contacts: contact,
         draftId: response.draftId,
         activityId: response.activityId,
         appliedPermits:
@@ -374,10 +385,10 @@ onBeforeMount(async () => {
         activityId: response?.activityId,
         housingProjectId: response?.housingProjectId,
         contacts: {
-          contactFirstName: firstContact?.firstName,
-          contactLastName: firstContact?.lastName,
-          contactPhoneNumber: firstContact?.phoneNumber,
-          contactEmail: firstContact?.email,
+          firstName: firstContact?.firstName,
+          lastName: firstContact?.lastName,
+          phoneNumber: firstContact?.phoneNumber,
+          email: firstContact?.email,
           contactApplicantRelationship: firstContact?.contactApplicantRelationship,
           contactPreference: firstContact?.contactPreference,
           contactId: firstContact?.contactId

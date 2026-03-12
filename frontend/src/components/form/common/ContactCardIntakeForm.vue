@@ -43,29 +43,29 @@ const { t } = useI18n();
     <template #content>
       <div class="grid grid-cols-2 gap-4">
         <InputText
-          :name="`contacts.contactFirstName`"
+          :name="`contacts.firstName`"
           label="First name"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactFirstName || !editable"
+          :disabled="!!initialFormValues.contacts?.firstName || !editable"
         />
         <InputText
-          :name="`contacts.contactLastName`"
+          :name="`contacts.lastName`"
           label="Last name"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactLastName || !editable"
+          :disabled="!!initialFormValues.contacts?.lastName || !editable"
         />
         <InputMask
-          :name="`contacts.contactPhoneNumber`"
+          :name="`contacts.phoneNumber`"
           mask="(999) 999-9999"
           label="Phone number"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactPhoneNumber || !editable"
+          :disabled="!!initialFormValues.contacts?.phoneNumber || !editable"
         />
         <InputText
-          :name="`contacts.contactEmail`"
+          :name="`contacts.email`"
           label="Email"
           :bold="false"
-          :disabled="!!initialFormValues?.contacts?.contactEmail || !editable"
+          :disabled="!!initialFormValues.contacts?.email || !editable"
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"

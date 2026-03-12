@@ -31,7 +31,10 @@ export const useAppStore = defineStore('app', () => {
     getLoadingCalls: computed(() => state.loadingCalls.value),
     getLoadingMode: computed(() => state.loadingMode.value),
     getLoadingValue: computed(() => state.loadingValue.value),
-    getZone: computed(() => state.zone.value)
+    getZone: computed(() => state.zone.value),
+    isExternal: computed(() => state.zone.value === Zone.EXTERNAL),
+    isGlobal: computed(() => state.zone.value === Zone.GLOBAL),
+    isInternal: computed(() => state.zone.value === Zone.INTERNAL)
   };
 
   // Actions

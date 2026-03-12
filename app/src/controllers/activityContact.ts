@@ -16,7 +16,12 @@ import { verifyPrimaryChange } from '../services/helpers/activityContact.ts';
 import { getProjectByActivityId } from '../services/project.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
-import { teamAdminAddedTemplate, teamMemberAddedTemplate, teamMemberRevokedTemplate } from '../utils/templates.ts';
+import {
+  teamAdminAddedTemplate,
+  teamMemberAddedTemplate,
+  teamMemberRevokedTemplate,
+  teamPrimaryAddedTemplate
+} from '../utils/templates.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -67,14 +72,9 @@ export const createActivityContactController = async (
   res: Response
 ) => {
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
-    // Make any pre adjustments if the PRIMARY role is being given to another user
-    await verifyPrimaryChange(
-      tx,
-      req.currentAuthorization.attributes,
-      req.currentContext.userId,
-      req.params.activityId,
-      req.body.role
-    );
+    // If the PRIMARY role is being given to another user, make any pre adjustments
+    if (req.body.role === ActivityContactRole.PRIMARY)
+      await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
 
     const newContact = await createActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
@@ -160,52 +160,53 @@ export const updateActivityContactController = async (
   req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,
   res: Response
 ) => {
-  const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
-    // Disallow removing the only PRIMARY user
-    const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
+  const response = await transactionWrapper<{ updated: ActivityContact; demoted: ActivityContact | undefined }>(
+    async (tx: PrismaTransactionClient) => {
+      // Disallow removing the only PRIMARY user
+      const ac = await getActivityContact(tx, req.params.activityId, req.params.contactId);
 
-    if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
-      throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
+      if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
+        throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
 
-    // Make any pre adjustments if the PRIMARY role is being given to another user
-    await verifyPrimaryChange(
-      tx,
-      req.currentAuthorization.attributes,
-      req.currentContext.userId,
-      req.params.activityId,
-      req.body.role
-    );
-
-    const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
-
-    const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
-      tx,
-      req.currentContext.initiative!,
-      req.currentContext.userId,
-      req.params.activityId,
-      updated.contact!
-    );
-
-    if (templateParams && navEmail) {
-      let template, subject;
-      if (req.body.role === ActivityContactRole.ADMIN) {
-        template = teamAdminAddedTemplate(templateParams);
-        subject = `You are now the Admin of ${templateParams.projectName} project in the Navigator Service`;
+      // If the PRIMARY role is being given to another user, make any pre adjustments
+      let demoted: ActivityContact | undefined;
+      if (req.body.role === ActivityContactRole.PRIMARY) {
+        demoted = await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
       }
 
-      if (template && subject && updated.contact?.email) {
-        await email({
-          to: [updated.contact.email],
-          from: navEmail,
-          subject: subject,
-          bodyType: 'html',
-          body: template
-        });
+      const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
+
+      const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
+        tx,
+        req.currentContext.initiative!,
+        req.currentContext.userId,
+        req.params.activityId,
+        updated.contact!
+      );
+
+      if (templateParams && navEmail) {
+        let template, subject;
+        const isAdminChange = ActivityContactRole.ADMIN === req.body.role;
+        if (isAdminChange || ActivityContactRole.PRIMARY === req.body.role) {
+          template = isAdminChange ? teamAdminAddedTemplate(templateParams) : teamPrimaryAddedTemplate(templateParams);
+          const roleString = isAdminChange ? 'Admin' : 'Primary contact';
+          subject = `You are now the ${roleString} of ${templateParams.projectName} project in the Navigator Service`;
+        }
+
+        if (template && subject && updated.contact?.email) {
+          await email({
+            to: [updated.contact.email],
+            from: navEmail,
+            subject: subject,
+            bodyType: 'html',
+            body: template
+          });
+        }
       }
+
+      return { updated, demoted };
     }
-
-    return updated;
-  });
+  );
 
   res.status(200).json(response);
 };

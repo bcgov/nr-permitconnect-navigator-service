@@ -1,8 +1,7 @@
 {
   "common": {
     "contactCardNavForm": {
-      "header": "Basic information",
-      "searchContacts": "Search Contacts"
+      "header": "Basic information"
     },
     "contactCardIntakeForm": {
       "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “Contact profile.”",
@@ -192,58 +191,6 @@
     }
   },
   "e": {
-    "common": {
-      "projectTeamAddModal": {
-        "header": "Add user",
-        "searchPlaceholder": "Search by exact email",
-        "empty": "No users found",
-        "headerFirstName": "First name",
-        "headerLastName": "Last name",
-        "headerPhone": "Contact phone",
-        "headerEmail": "Contact email",
-        "assign": "Assign role",
-        "addUser": "Add user",
-        "cancel": "Cancel",
-        "adminSelectedWarning": "This user will also have access to Project Team Management",
-        "search": "Search",
-        "contactAlreadyExists": "This user is already a part of this project."
-      },
-      "projectTeamManageModal": {
-        "header": "Manage user",
-        "adminSelectedWarning": "This user will also have access to Project Team Management",
-        "cancel": "Cancel",
-        "role": "Role",
-        "save": "Save"
-      },
-      "projectTeamTab": {
-        "addMemberBtn": "Add team member",
-        "adminAdded": "{first} {last} has been added as a Project Admin.",
-        "adminUpdated": "{first} {last} is now a Project Admin.",
-        "failedToAdd": "Failed to add user",
-        "failedToRevoke": "Failed to update user",
-        "failedToUpdate": "Failed to revoke user",
-        "memberAdded": "{first} {last} has been added as a project member.",
-        "memberUpdated": "{first} {last} is now a Project Member.",
-        "memberRevoked": "{first} {last} has been revoked access to this project.",
-        "projectTeamDesc": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
-        "userAlreadyExists": "This user is already a part of this project.",
-        "revokeHeader": "Revoke user",
-        "revokeDesc": "{first} {last} will lose access to the project.",
-        "revoke": "Revoke",
-        "cancel": "Cancel"
-      },
-      "projectTeamTable": {
-        "headerEmail": "Email",
-        "headerFirstName": "First Name",
-        "headerLastName": "Last Name",
-        "headerManage": "Manage",
-        "headerPhone": "Phone",
-        "headerRelationship": "Relationship to project",
-        "headerRevoke": "Revoke",
-        "headerRole": "Role",
-        "noUsers": "No users found."
-      }
-    },
     "electrification": {
       "projectIntakeForm": {
         "bcHydroNumber": "What is your BC Hydro Call for Power project number? (optional)",
@@ -336,22 +283,6 @@
         "manualContactHint": "You can edit or delete manually entered contacts by going to the Contacts page.",
         "bcRegistryId": "BC Registry ID",
         "searchBCRegistered": "Type to search the B.C registered name",
-        "searchContacts": "Search Contacts"
-      }
-    },
-    "contact": {
-      "contactSearchModal": {
-        "cancel": "Cancel",
-        "header": "Search contacts",
-        "noContactsFound": "No contacts found.",
-        "manualEntry": "Manual entry",
-        "multipleContactsBannerDescrition": "If there are multiple contacts of the same proponent, select the contact with the user icon.",
-        "save": "Save",
-        "searchPlaceholder": "Search by First name, Last name, Phone, or Email",
-        "firstName": "First name",
-        "lastName": "Last name",
-        "contactPhone": "Contact phone",
-        "contactEmail": "Contact email",
         "searchContacts": "Search Contacts"
       }
     },
@@ -873,6 +804,77 @@
     "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants.",
     "singleFamilySelectedCard": "Select the types of residential units being developed",
     "validationBanner": "One or more of the required fields are missing or contains invalid data. Please check the highlighted pages and fields in red."
+  },
+  "projectTeamAddModal": {
+    "addTeamMember": "Add team member",
+    "addUser": "Add user",
+    "adminSelectedWarning": "This user will have access to Project Team Management",
+    "assign": "Assign role",
+    "cancel": "Cancel",
+    "contactAlreadyExists": "This user is already a part of this project.",
+    "empty": "No users found",
+    "headerEmail": "Contact email",
+    "headerFirstName": "First name",
+    "headerLastName": "Last name",
+    "headerNav": "Add user(s)",
+    "headerPhone": "Contact phone",
+    "headerProp": "Add team member(s)",
+    "instructions": "Please start by adding the user(s) and selecting the appropriate role(s), then hit save.",
+    "manualEntry": "Manual entry",
+    "one": "one",
+    "onePrimaryRoleError": "Please choose {one} PRIMARY user to continue the submission.",
+    "remove": "Remove",
+    "save": "Save",
+    "search": "Search",
+    "searchPlaceholderNav": "Search by First name, Last name, Phone, or Email",
+    "searchPlaceholderProp": "Search by exact email address",
+    "selectedUsers": "Selected user(s)"
+  },
+  "projectTeamManageModal": {
+    "adminSelectedWarning": "This user will also have access to Project Team Management",
+    "cancel": "Cancel",
+    "header": "Manage user",
+    "role": "Role",
+    "save": "Save"
+  },
+  "projectTeamTab": {
+    "addMemberBtn": "Add team member(s)",
+    "addUserBtn": "Add User(s)",
+    "adminAdded": "Admin - {names}",
+    "adminUpdated": "{first} {last} is now a project admin.",
+    "cancel": "Cancel",
+    "failedToAddGeneric": "An unknown error occurred.",
+    "failedToRevoke": "Failed to revoke user.",
+    "failedToUpdate": "Failed to update user.",
+    "memberAdded": "Member - {names}",
+    "memberRevoked": "{first} {last} has been revoked access to this project.",
+    "memberUpdated": "{first} {last} is now a project Member.",
+    "multipleFailedToAddHeader": "The following users could not be added:",
+    "oneAdminAdded": "{first} {last} has been added as a project admin.",
+    "oneMemberAdded": "{first} {last} has been added as a project member.",
+    "onePrimaryAdded": "{first} {last} has been added as a primary project contact.",
+    "primaryAdded": "Primary - {names}",
+    "primaryUpdated": "{first} {last} is now the primary project contact.",
+    "primaryUpdatedAndDemoted": "{first} {last} is now the primary project contact, and {firstDemoted} {lastDemoted} has been demoted to a project admin.",
+    "projectTeamDescNav": "As the Navigator, you can add users who are authorized to access and communicate on behalf of this project in the Navigator Service.",
+    "projectTeamDescProp": "As the Project Admin, you can add Consultants who are authorized to access and communicate on behalf of this project in the Navigator Service. To be added, Consultants must first log in to create their profile in the system.",
+    "revoke": "Revoke",
+    "revokeDesc": "{first} {last} will lose access to the project.",
+    "revokeHeader": "Revoke user",
+    "singleFailedToAdd": "Failed to add {first} {last}: {reason}",
+    "userAlreadyExists": "This user is already a part of this project.",
+    "usersAddedHeader": "These users have been added to your project:"
+  },
+  "projectTeamTable": {
+    "headerEmail": "Email",
+    "headerFirstName": "First Name",
+    "headerLastName": "Last Name",
+    "headerManage": "Manage",
+    "headerPhone": "Phone",
+    "headerRelationship": "Relationship to project",
+    "headerRevoke": "Revoke",
+    "headerRole": "Role",
+    "noUsers": "No users found."
   },
   "oidcLoginView": {
     "BCeIDRequirement": "Use when accessing a service in a personal capacity. You just need an email.",

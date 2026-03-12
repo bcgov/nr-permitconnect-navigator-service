@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
+import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { computed, nextTick, onBeforeMount, ref } from 'vue';
+import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormSchema } from '../../../validators/electrification/projectFormNavigatorSchema';
@@ -19,14 +20,7 @@ import {
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import {
-  activityContactService,
-  atsService,
-  contactService,
-  electrificationProjectService,
-  externalApiService,
-  userService
-} from '@/services';
+import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
@@ -49,7 +43,6 @@ import { ActivityContactRole, ApplicationStatus, SubmissionType } from '@/utils/
 import { formatDate } from '@/utils/formatters';
 import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { Ref } from 'vue';
 import type { Maybe } from 'yup';
 import type { IInputEvent } from '@/interfaces';
@@ -87,6 +80,7 @@ const toast = useToast();
 // Store
 const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
+const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
@@ -94,10 +88,11 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const primaryContact = computed(
-  () => project?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
 const showCancelMessage: Ref<boolean> = ref(false);
+
+const primaryContact = computed(
+  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
+);
 
 // Actions
 const projectFormSchema = computed(() => {
@@ -244,6 +239,31 @@ async function createATSEnquiry(atsClientId?: number) {
   }
 }
 
+async function handleAtsCreate(values: GenericObject) {
+  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
+    const response = await createATSClientEnquiry();
+    values.atsClientId = response?.atsClientId;
+    values.atsEnquiryId = response?.atsEnquiryId;
+    if (values.atsEnquiryId && values.atsClientId) {
+      values.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
+    values.atsEnquiryId = await createATSEnquiry();
+    if (values.atsEnquiryId) {
+      values.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
+    const response = await createATSClientEnquiry();
+    values.atsClientId = response?.atsClientId;
+    if (values.atsEnquiryId && values.atsClientId) {
+      values.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  }
+}
+
 function onCancel() {
   formRef.value?.resetForm();
   showCancelMessage.value = true;
@@ -303,40 +323,21 @@ function onReOpen() {
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
+  if (!formRef.value) return;
+
+  formRef.value.resetField('contact.contactId', { value: contact?.contactId });
+  formRef.value.resetField('contact.firstName', { value: contact?.firstName });
+  formRef.value.resetField('contact.lastName', { value: contact?.lastName });
+  formRef.value.resetField('contact.phoneNumber', { value: contact?.phoneNumber });
+  formRef.value.resetField('contact.email', { value: contact?.email });
+  formRef.value.resetField('contact.contactApplicantRelationship', { value: contact?.contactApplicantRelationship });
+  formRef.value.resetField('contact.contactPreference', { value: contact?.contactPreference });
+  formRef.value.resetField('contact.userId', { value: contact?.userId });
 }
 
 const onSubmit = async (values: GenericObject) => {
   try {
-    if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-      const response = await createATSClientEnquiry();
-      values.atsClientId = response?.atsClientId;
-      values.atsEnquiryId = response?.atsEnquiryId;
-      if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-      values.atsEnquiryId = await createATSEnquiry();
-      if (values.atsEnquiryId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-      const response = await createATSClientEnquiry();
-      values.atsClientId = response?.atsClientId;
-      if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    }
+    await handleAtsCreate(values);
 
     // Generate final submission object
     const dataOmitted = omit(
@@ -352,30 +353,14 @@ const onSubmit = async (values: GenericObject) => {
           submissionType: values.submissionState.submissionType,
           assignedUserId: values.submissionState.assignedUser?.userId,
           applicationStatus: values.submissionState.applicationStatus,
-          atsClientId: parseInt(values.atsClientId) || '',
-          atsEnquiryId: parseInt(values.atsEnquiryId) || '',
+          atsClientId: Number.parseInt(values.atsClientId) || '',
+          atsEnquiryId: Number.parseInt(values.atsEnquiryId) || '',
           aaiUpdated: values.aaiUpdated,
           addedToAts: values.addedToAts
         }
       }),
       ['contact', 'assignedUser', 'submissionState']
     );
-
-    // Deal with Nav contact change nonsense
-    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact.value?.contactId !== values.contact.contactId) {
-      const newContact = (await contactService.updateContact(values.contact)).data;
-      if (newContact.contactId) {
-        const ac = await activityContactService.createActivityContact(
-          project.activityId,
-          newContact.contactId,
-          ActivityContactRole.PRIMARY
-        );
-
-        setBasicInfo(newContact);
-        projectStore.addActivityContact(ac.data);
-      }
-    }
 
     // Update project
     const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
@@ -396,6 +381,12 @@ const onSubmit = async (values: GenericObject) => {
     if (isAxiosError(e) || e instanceof Error) toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
+
+watch(primaryContact, (newContact, oldContact) => {
+  if (newContact?.contactId !== oldContact?.contactId) {
+    setBasicInfo(newContact);
+  }
+});
 
 onBeforeMount(async () => {
   if (project.assignedUserId) {
@@ -445,17 +436,7 @@ onBeforeMount(async () => {
 
         <ContactCardNavForm
           :editable="editable"
-          :form-values="initialFormValues"
-          @contact-card-nav-form:pick="
-            (contact: Contact) => {
-              setBasicInfo(contact);
-            }
-          "
-          @contact-card-nav-form:manual-entry="
-            () => {
-              setBasicInfo();
-            }
-          "
+          :form-values="values"
         />
         <Panel toggleable>
           <template #header>
@@ -482,7 +463,7 @@ onBeforeMount(async () => {
               :placeholder="t('i.common.projectForm.searchBCRegistered')"
               :get-option-label="(option: OrgBookOption) => option.registeredName"
               :suggestions="orgBookOptions"
-              @on-complete="(e: AutoCompleteCompleteEvent) => getOrgBookOptions(e.query)"
+              @on-complete="(e) => getOrgBookOptions(e.query)"
               @on-select="
                 (orgBookOption: OrgBookOption) => {
                   setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);

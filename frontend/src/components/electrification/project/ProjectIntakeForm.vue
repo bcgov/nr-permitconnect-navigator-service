@@ -186,12 +186,19 @@ onBeforeMount(async () => {
 
     if (draftId) {
       response = (await electrificationProjectService.getDraft(draftId)).data;
+      const contact = {
+        firstName: response.data.contacts.contactFirstName,
+        lastName: response.data.contacts.contactLastName,
+        phoneNumber: response.data.contacts.contactPhoneNumber,
+        email: response.data.contacts.contactEmail,
+        contactApplicantRelationship: response.data.contacts.contactApplicantRelationship,
+        contactPreference: response.data.contacts.contactPreference,
+        contactId: response.data.contacts.contactId
+      };
 
       initialFormValues.value = {
         draftId: response.draftId,
-        contacts: {
-          ...response.data.contacts
-        },
+        contacts: contact,
         project: {
           ...response.data.project,
           activityId: response.activityId
@@ -233,10 +240,10 @@ onBeforeMount(async () => {
 
       initialFormValues.value = {
         contacts: {
-          contactFirstName: response?.activity?.activityContact?.[0]?.contact?.firstName,
-          contactLastName: response?.activity?.activityContact?.[0]?.contact?.lastName,
-          contactPhoneNumber: response?.activity?.activityContact?.[0]?.contact?.phoneNumber,
-          contactEmail: response?.activity?.activityContact?.[0]?.contact?.email,
+          firstName: response?.activity?.activityContact?.[0]?.contact?.firstName,
+          lastName: response?.activity?.activityContact?.[0]?.contact?.lastName,
+          phoneNumber: response?.activity?.activityContact?.[0]?.contact?.phoneNumber,
+          email: response?.activity?.activityContact?.[0]?.contact?.email,
           contactApplicantRelationship: response?.activity?.activityContact?.[0]?.contact?.contactApplicantRelationship,
           contactPreference: response?.activity?.activityContact?.[0]?.contact?.contactPreference,
           contactId: response?.activity?.activityContact?.[0]?.contact?.contactId

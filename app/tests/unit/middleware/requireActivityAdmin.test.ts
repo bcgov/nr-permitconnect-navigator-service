@@ -8,7 +8,8 @@ import * as activityContactService from '../../../src/services/activityContact.t
 import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
+import type Problem from '../../../src/utils/problem.ts';
 
 function buildApp() {
   const app = express();
@@ -20,6 +21,14 @@ function buildApp() {
   // Endpoints
   app.post('/echo/:activityId/contact/:contactId', (req: Request, res: Response) => {
     res.status(201).json(req.body);
+  });
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  app.use((err: Problem, req: Request, res: Response, next: NextFunction) => {
+    res.status(err.status || 500).json({
+      detail: err.detail,
+      instance: err.instance
+    });
   });
 
   return app;
@@ -98,7 +107,9 @@ describe('requireActivityAdmin middleware', () => {
         .send({ role: 'MEMBER' });
 
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({});
+      expect(res.body).toMatchObject({
+        detail: 'User lacks required role.'
+      });
     });
 
     it('does not allow a non contact through', async () => {
@@ -111,7 +122,9 @@ describe('requireActivityAdmin middleware', () => {
         .send({ role: 'MEMBER' });
 
       expect(res.status).toBe(403);
-      expect(res.body).toEqual({});
+      expect(res.body).toMatchObject({
+        detail: 'User lacks required role.'
+      });
     });
   });
 });
