@@ -323,14 +323,16 @@ function onReOpen() {
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
+  if (!formRef.value) return;
+
+  formRef.value.resetField('contact.contactId', { value: contact?.contactId });
+  formRef.value.resetField('contact.firstName', { value: contact?.firstName });
+  formRef.value.resetField('contact.lastName', { value: contact?.lastName });
+  formRef.value.resetField('contact.phoneNumber', { value: contact?.phoneNumber });
+  formRef.value.resetField('contact.email', { value: contact?.email });
+  formRef.value.resetField('contact.contactApplicantRelationship', { value: contact?.contactApplicantRelationship });
+  formRef.value.resetField('contact.contactPreference', { value: contact?.contactPreference });
+  formRef.value.resetField('contact.userId', { value: contact?.userId });
 }
 
 const onSubmit = async (values: GenericObject) => {

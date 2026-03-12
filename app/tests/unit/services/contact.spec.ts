@@ -98,6 +98,9 @@ describe('matchContacts', () => {
           },
           {
             phoneNumber: { contains: undefined, mode: 'insensitive' }
+          },
+          {
+            userId: { in: undefined }
           }
         ]
       }
@@ -112,7 +115,8 @@ describe('matchContacts', () => {
       email: 'email',
       firstName: 'first',
       lastName: 'last',
-      phoneNumber: '1234567890'
+      phoneNumber: '1234567890',
+      userId: ['1234']
     });
 
     expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
@@ -129,6 +133,9 @@ describe('matchContacts', () => {
           },
           {
             phoneNumber: { contains: '1234567890', mode: 'insensitive' }
+          },
+          {
+            userId: { in: ['1234'] }
           }
         ]
       }

@@ -459,14 +459,21 @@ const projectFormNavigatorSchema = createProjectFormNavigatorSchema();
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
+  if (!formRef.value) return;
+
+  const updatedContact = {
+    contactId: contact?.contactId,
+    firstName: contact?.firstName,
+    lastName: contact?.lastName,
+    phoneNumber: contact?.phoneNumber,
+    email: contact?.email,
+    contactApplicantRelationship: contact?.contactApplicantRelationship,
+    contactPreference: contact?.contactPreference,
+    userId: contact?.userId
+  };
+
+  // Reset the entire contact object path to trigger reactivity and set the new baseline
+  formRef.value.resetField('contact', { value: updatedContact });
 }
 
 // vee-validate doesn't export the necessary function type and we can't create it ourselves easily
