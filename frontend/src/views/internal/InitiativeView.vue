@@ -49,7 +49,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
 
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
-  headerText: t('views.i.initiativeView.housing.header'),
+  headerText: t('views.i.initiativeView.general.header'),
   navigationPermission: NavigationPermission.INT_GENERAL,
   projectRouteName: RouteName.INT_GENERAL_PROJECT,
   projectService: generalProjectService,
