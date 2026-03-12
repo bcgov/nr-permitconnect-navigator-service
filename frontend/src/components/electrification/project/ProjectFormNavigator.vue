@@ -19,43 +19,20 @@ import {
 } from '@/components/form';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
+import { useProjectFormNavigator } from '@/composables/useProjectFormNavigator';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
+import { electrificationProjectService, userService } from '@/services';
 import { useCodeStore, useProjectStore } from '@/store';
-import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
-import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
-import {
-  APPLICATION_STATUS_LIST,
-  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
-  ATS_MANAGING_REGION,
-  QUEUE_PRIORITY,
-  SUBMISSION_TYPE_LIST
-} from '@/utils/constants/projectCommon';
-import {
-  ATSCreateTypes,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative,
-  Regex
-} from '@/utils/enums/application';
+import { YES_NO_LIST } from '@/utils/constants/application';
+import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
+import { ATSCreateTypes, BasicResponse, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { omit, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Maybe } from 'yup';
-import type { IInputEvent } from '@/interfaces';
-import type {
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
-  Contact,
-  DeepPartial,
-  ElectrificationProject,
-  OrgBookOption,
-  User
-} from '@/types';
+import type { DeepPartial, ElectrificationProject, User } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Props
@@ -69,64 +46,47 @@ const emit = defineEmits<{
   inputProjectName: [newName: string];
 }>();
 
-// Constants
-const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
-
-// Composables
-const { t } = useI18n();
-const confirm = useConfirm();
-const toast = useToast();
-
 // Store
 const projectStore = useProjectStore();
 const { codeList, enums, options } = useCodeStore();
 const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
-const assigneeOptions: Ref<User[]> = ref([]);
-const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
-const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
-const showCancelMessage: Ref<boolean> = ref(false);
 
 const primaryContact = computed(
   () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
 );
-
-// Actions
 const projectFormSchema = computed(() => {
   return createProjectFormSchema(codeList, enums, orgBookOptions.value);
 });
 
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const {
+  assigneeOptions,
+  atsCreateType,
+  isCompleted,
+  orgBookOptions,
+  showCancelMessage,
+  handleAtsCreate,
+  onAssigneeInput,
+  onCancel,
+  onInvalidSubmit,
+  searchOrgBook,
+  setBasicInfo
+} = useProjectFormNavigator(formRef, project, Initiative.ELECTRIFICATION);
+const toast = useToast();
+
+// Actions
 function emitProjectNameChange(e: Event) {
   emit('inputProjectName', (e.target as HTMLInputElement).value);
 }
 
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName}`;
-};
-
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
-
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
 };
 
 function initilizeFormValues(project: ElectrificationProject): DeepPartial<FormSchemaType> {
@@ -180,133 +140,6 @@ function initilizeFormValues(project: ElectrificationProject): DeepPartial<FormS
   };
 }
 
-async function createATSClientEnquiry() {
-  try {
-    const address: Partial<ATSAddressResource> = {
-      '@type': 'AddressResource',
-      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
-      email: formRef.value?.values?.contact.email ?? ''
-    };
-
-    const data = {
-      '@type': 'ClientResource',
-      address: address,
-      firstName: formRef.value?.values.contact.firstName,
-      surName: formRef.value?.values.contact.lastName,
-      regionName: GroupName.NAVIGATOR,
-      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    };
-
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
-    if (response.status === 201) {
-      let atsEnquiryId = undefined;
-      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
-      if (atsEnquiryId) toast.success(t('i.electrification.projectForm.atsClientEnquiryPushed'));
-      else toast.success(t('i.electrification.projectForm.atsClientPushed'));
-      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
-    }
-  } catch (error) {
-    toast.error(t('i.electrification.projectForm.atsClientPushError') + ' ' + error);
-  }
-}
-
-async function createATSEnquiry(atsClientId?: number) {
-  try {
-    const ATSEnquiryData: ATSEnquiryResource = {
-      '@type': 'EnquiryResource',
-      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
-      contactFirstName: formRef.value?.values.contact.firstName,
-      contactSurname: formRef.value?.values.contact.lastName,
-      regionName: ATS_MANAGING_REGION,
-      subRegionalOffice: GroupName.NAVIGATOR,
-      enquiryFileNumbers: [project.activityId],
-      enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
-      enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.project.projectName,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
-    };
-    const response = await atsService.createATSEnquiry(ATSEnquiryData);
-    if (response.status === 201) {
-      if (atsCreateType.value === ATSCreateTypes.ENQUIRY)
-        toast.success(t('i.electrification.projectForm.atsEnquiryPushed'));
-      return response.data.enquiryId;
-    }
-  } catch (error) {
-    toast.success(t('i.electrification.projectForm.atsClientPushed'));
-    toast.error(t('i.electrification.projectForm.atsEnquiryPushError') + ' ' + error);
-  }
-}
-
-async function handleAtsCreate(values: GenericObject) {
-  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    values.atsEnquiryId = response?.atsEnquiryId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    values.atsEnquiryId = await createATSEnquiry();
-    if (values.atsEnquiryId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  }
-}
-
-function onCancel() {
-  formRef.value?.resetForm();
-  showCancelMessage.value = true;
-
-  setTimeout(() => {
-    document.getElementById('cancelMessage')?.scrollIntoView({ behavior: 'smooth' });
-  }, 100);
-  setTimeout(() => {
-    showCancelMessage.value = false;
-  }, 6000);
-}
-
-function onInvalidSubmit(e: GenericObject) {
-  const errors = Object.keys(e.errors);
-
-  if (errors.includes('contact.firstName')) {
-    toast.warn(t('i.electrification.projectForm.basicInfoMissing'));
-  }
-  scrollToFirstError(e.errors);
-}
-
-async function getOrgBookOptions(companyNameRegistered: string) {
-  if (companyNameRegistered.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(companyNameRegistered))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((obo: Record<string, string>) => obo.type === 'name')
-      // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: Record<string, string>) => ({
-        registeredName: obo.value,
-        registeredId: obo.topic_source_id
-      }));
-    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
-    if (BC_HYDRO_POWER_AUTHORITY.includes(companyNameRegistered.toUpperCase())) {
-      orgBookOptions.value.push({
-        registeredName: BC_HYDRO_POWER_AUTHORITY,
-        registeredId: ''
-      });
-    }
-    // sort options alphabetically
-    orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
-  }
-}
-
 function onReOpen() {
   confirm.require({
     message: t('i.common.projectForm.confirmReopenMessage'),
@@ -319,20 +152,6 @@ function onReOpen() {
       if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
-}
-
-// Set basic info, clear it if no contact is provided
-function setBasicInfo(contact?: Contact) {
-  if (!formRef.value) return;
-
-  formRef.value.resetField('contact.contactId', { value: contact?.contactId });
-  formRef.value.resetField('contact.firstName', { value: contact?.firstName });
-  formRef.value.resetField('contact.lastName', { value: contact?.lastName });
-  formRef.value.resetField('contact.phoneNumber', { value: contact?.phoneNumber });
-  formRef.value.resetField('contact.email', { value: contact?.email });
-  formRef.value.resetField('contact.contactApplicantRelationship', { value: contact?.contactApplicantRelationship });
-  formRef.value.resetField('contact.contactPreference', { value: contact?.contactPreference });
-  formRef.value.resetField('contact.userId', { value: contact?.userId });
 }
 
 const onSubmit = async (values: GenericObject) => {
@@ -394,7 +213,7 @@ onBeforeMount(async () => {
   }
 
   // Load options for org book autocomplete to prevent schema validation errors on existing values
-  if (project.companyNameRegistered) await getOrgBookOptions(project.companyNameRegistered);
+  if (project.companyNameRegistered) await searchOrgBook(project.companyNameRegistered);
 
   // Default form values
   initialFormValues.value = initilizeFormValues(project);
@@ -461,11 +280,11 @@ onBeforeMount(async () => {
               :disabled="!editable"
               :editable="true"
               :placeholder="t('i.common.projectForm.searchBCRegistered')"
-              :get-option-label="(option: OrgBookOption) => option.registeredName"
+              :get-option-label="(option) => option.registeredName"
               :suggestions="orgBookOptions"
-              @on-complete="(e) => getOrgBookOptions(e.query)"
+              @on-complete="(e) => searchOrgBook(e.query)"
               @on-select="
-                (orgBookOption: OrgBookOption) => {
+                (orgBookOption) => {
                   setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
                   setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
                 }

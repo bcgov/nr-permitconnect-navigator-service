@@ -20,7 +20,7 @@ export function mockAxiosError(message: string, code?: string) {
 }
 
 /*
- * Function to easily create an axios error with no response
+ * Function to easily create an axios error with no response object
  */
 export function mockAxiosErrorNoResponse(message: string) {
   const err = new Error(message);
@@ -42,6 +42,60 @@ export function mockAxiosResponse<T>(data: T, status = 200, statusText = 'OK'): 
     }
   };
 }
+
+/*
+ * Define stubs for form components
+ */
+export const FORM_STUBS = {
+  AutoComplete: {
+    name: 'AutoComplete',
+    props: ['name', 'disabled', 'suggestions', 'label', 'placeholder', 'getOptionLabel'],
+    template: '<div class="stub-autocomplete p-inputtext"></div>',
+    emits: ['onComplete', 'onSelect', 'onChange']
+  },
+  CancelButton: {
+    name: 'CancelButton',
+    props: ['editable'],
+    template: '<button class="stub-cancel"></button>',
+    emits: ['clicked']
+  },
+  Checkbox: {
+    name: 'Checkbox',
+    props: ['name', 'disabled', 'label'],
+    template: '<input type="checkbox" class="stub-checkbox" />',
+    emits: ['onChange']
+  },
+  EditableSelect: {
+    name: 'EditableSelect',
+    props: ['name', 'disabled', 'options', 'label', 'placeholder', 'getOptionLabel'],
+    template: '<div class="stub-editable"></div>',
+    emits: ['onInput', 'onChange']
+  },
+  InputNumber: {
+    name: 'InputNumber',
+    props: ['name', 'disabled', 'label'],
+    template: '<input class="stub-input-number" />',
+    emits: ['onInput', 'onChange']
+  },
+  InputText: {
+    name: 'InputText',
+    props: ['name', 'disabled', 'label'],
+    template: '<input class="stub-input-text" />',
+    emits: ['onInput', 'onChange']
+  },
+  Select: {
+    name: 'Select',
+    props: ['name', 'disabled', 'options', 'label', 'optionLabel', 'optionValue'],
+    template: '<select class="stub-select"></select>',
+    emits: ['onChange']
+  },
+  TextArea: {
+    name: 'TextArea',
+    props: ['name', 'disabled', 'label'],
+    template: '<textarea class="stub-textarea"></textarea>',
+    emits: ['onInput']
+  }
+};
 
 /*
  * Force PrimeVue stubs to render children
