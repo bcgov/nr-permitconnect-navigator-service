@@ -93,7 +93,23 @@ export const VEE_FORM_STUB = {
       current[lastKey] = val;
     };
 
-    return { values, setFieldValue };
+    // Add resetField to mimic vee-validate
+    const resetField = (field: string, state?: { value?: unknown }) => {
+      if (state && 'value' in state) {
+        setFieldValue(field, state.value);
+      }
+    };
+
+    // Provide a basic resetForm function
+    const resetForm = (state?: GenericObject) => {
+      if (state?.values) {
+        Object.assign(values, state.values);
+      } else if (props.initialValues) {
+        Object.assign(values, props.initialValues);
+      }
+    };
+
+    return { values, setFieldValue, resetField, resetForm };
   },
   template:
     '<form class="vee-form-stub" @submit.prevent><slot :values="values" :setFieldValue="setFieldValue" /></form>'

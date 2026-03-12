@@ -80,6 +80,9 @@ export const matchContacts = async (
         },
         {
           phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
+        },
+        {
+          userId: { in: params.userId }
         }
       ]
     }
