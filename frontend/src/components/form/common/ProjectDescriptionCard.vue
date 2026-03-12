@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import Tooltip from '@/components/common/Tooltip.vue';
 import AdvancedFileUpload from '@/components/file/AdvancedFileUpload.vue';
 import { TextArea } from '@/components/form';
 import { Card, Divider } from '@/lib/primevue';
@@ -75,7 +74,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
         :disabled="!getEditable"
         :bold="false"
         :label="t('projectDescriptionCard.labels.projectDescription')"
-        :tooltip="t('projectIntakeForm.additionalInfoTooltip')"
+        :tooltip="tooltip ? t('projectIntakeForm.additionalInfoTooltip') : undefined"
       />
       <i18n-t
         keypath="projectDescriptionCard.upload"

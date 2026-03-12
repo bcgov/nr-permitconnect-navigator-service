@@ -163,6 +163,9 @@
         "electrification": {
           "header": "Electrification"
         },
+        "general": {
+          "header": "General"
+        },
         "housing": {
           "header": "Housing"
         }

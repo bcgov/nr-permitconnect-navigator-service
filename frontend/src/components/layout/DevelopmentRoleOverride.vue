@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 
 import { Button, Select } from '@/lib/primevue';
 import { useAuthZStore } from '@/store';
-import { GROUP_NAME_LIST } from '@/utils/constants/application';
+import { GROUP_NAME_LIST, INITIATIVE_LIST } from '@/utils/constants/application';
 import { GroupName, Initiative } from '@/utils/enums/application';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -56,7 +56,7 @@ onBeforeMount(() => {
     <Select
       v-model="initiative"
       class="w-2/12 mr-2"
-      :options="[Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS]"
+      :options="INITIATIVE_LIST"
       @change="(e) => setInitiative(e)"
     />
     <Select

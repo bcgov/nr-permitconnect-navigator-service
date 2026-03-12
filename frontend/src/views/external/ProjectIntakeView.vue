@@ -95,6 +95,8 @@ async function loadProject() {
 
   project.value = (await initiativeState.value.projectService.getProject(projectId)).data;
 
+  projectStore.setProject(project.value);
+
   const documents = (await documentService.listDocuments(project.value!.activityId)).data;
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);

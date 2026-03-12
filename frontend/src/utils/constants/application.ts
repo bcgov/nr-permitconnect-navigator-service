@@ -2,7 +2,7 @@
  * Shared application wide constants
  */
 
-import { AccessRequestStatus, BasicResponse, GroupName, UserSearchParams } from '../enums/application';
+import { AccessRequestStatus, BasicResponse, GroupName, Initiative, UserSearchParams } from '../enums/application';
 
 export const ACCESS_REQUEST_STATUS = [
   AccessRequestStatus.APPROVED,
@@ -26,6 +26,8 @@ export const GROUP_NAME_LIST = [
   { id: GroupName.PROPONENT, text: 'groupName.proponent' },
   { id: GroupName.SUPERVISOR, text: 'groupName.supervisor' }
 ];
+
+export const INITIATIVE_LIST = [Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING, Initiative.PCNS];
 
 export const MANAGED_GROUP_NAME_LIST = [
   { id: GroupName.ADMIN, text: 'groupName.admin' },
