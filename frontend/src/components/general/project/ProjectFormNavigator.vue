@@ -72,8 +72,8 @@ import type {
   ATSEnquiryResource,
   Contact,
   DeepPartial,
+  GeneralProject,
   GeocoderFeature,
-  HousingProject,
   OrgBookOption,
   User
 } from '@/types';
@@ -82,7 +82,7 @@ import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSc
 // Props
 const { editable = true, project } = defineProps<{
   editable?: boolean;
-  project: HousingProject;
+  project: GeneralProject;
 }>();
 
 // Emits
@@ -183,7 +183,7 @@ const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName}`;
 };
 
-function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaType> {
+function initializeFormValues(project: GeneralProject): DeepPartial<FormSchemaType> {
   return {
     consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {
@@ -503,7 +503,7 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
   }
 
-  locationPidsAuto.value = (await mapService.getPIDs(project.housingProjectId)).data;
+  locationPidsAuto.value = (await mapService.getPIDs(project.projectId)).data;
   if (project.geoJson) geoJson.value = project.geoJson;
 
   // Default form values
@@ -594,153 +594,6 @@ onBeforeMount(async () => {
               :label="t('i.common.projectForm.bcRegistryId')"
               :disabled="true"
             />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <HousingUnits />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.housingUnits') }}
-              </h3>
-            </div>
-          </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
-            <Select
-              name="units.singleFamilyUnits"
-              :label="t('i.housing.project.projectForm.singleFamilyUnits')"
-              :disabled="!editable"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <Select
-              name="units.multiFamilyUnits"
-              :label="t('i.housing.project.projectForm.multiFamilyUnits')"
-              :disabled="!editable"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <Select
-              name="units.hasRentalUnits"
-              :label="t('i.housing.project.projectForm.rentalIncluded')"
-              :disabled="!editable"
-              :options="YES_NO_UNSURE_LIST"
-              @on-change="
-                (e: SelectChangeEvent) => {
-                  if (e.value !== BasicResponse.YES) setFieldValue('units.rentalUnits', null);
-                }
-              "
-            />
-            <Select
-              name="units.rentalUnits"
-              :label="t('i.housing.project.projectForm.rentalUnits')"
-              :disabled="!editable || values.units.hasRentalUnits !== BasicResponse.YES"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <InputText
-              name="units.otherUnitsDescription"
-              :label="t('i.housing.project.projectForm.otherType')"
-              :disabled="!editable"
-              @on-change="
-                (e) => {
-                  if (!e.target.value) {
-                    setFieldValue('units.otherUnitsDescription', null);
-                    setFieldValue('units.otherUnits', null);
-                  }
-                }
-              "
-            />
-            <Select
-              name="units.otherUnits"
-              :label="t('i.housing.project.projectForm.otherTypeUnits')"
-              :disabled="!editable || !values.units.otherUnitsDescription"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <FinanciallySupported />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.financiallySupported') }}
-              </h3>
-            </div>
-          </template>
-          <div class="col-span-1 grid grid-cols-2 gap-x-6 gap-y-6">
-            <Select
-              class="col-span-1"
-              name="finance.financiallySupportedBc"
-              :label="t('i.housing.project.projectForm.bcHousing')"
-              :disabled="!editable"
-              :options="YES_NO_UNSURE_LIST"
-            />
-
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.indigenousHousingProvider') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedIndigenous"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.indigenousDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.indigenousDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedIndigenous !== BasicResponse.YES"
-                />
-              </div>
-            </div>
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.nonProfitHousingSociety') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedNonProfit"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.nonProfitDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.nonProfitDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedNonProfit !== BasicResponse.YES"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.housingCoop') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedHousingCoop"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.housingCoopDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.housingCoopDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedHousingCoop !== BasicResponse.YES"
-                />
-              </div>
-            </div>
           </div>
         </Panel>
         <Panel toggleable>

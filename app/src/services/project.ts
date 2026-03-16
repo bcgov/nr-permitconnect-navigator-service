@@ -10,8 +10,8 @@ import type { Project } from '../types/index.ts';
  * @returns A Promise that resolves to the specific project
  */
 export const getProjectByActivityId = async (tx: PrismaTransactionClient, activityId: string): Promise<Project> => {
-  const [housingResult, electrificationResult] = await Promise.all([
-    tx.housing_project.findFirst({
+  const [electrificationResult, generalResult, housingResult] = await Promise.all([
+    tx.electrification_project.findFirst({
       where: { activityId },
       include: {
         activity: {
@@ -24,7 +24,20 @@ export const getProjectByActivityId = async (tx: PrismaTransactionClient, activi
         }
       }
     }),
-    tx.electrification_project.findFirst({
+    tx.general_project.findFirst({
+      where: { activityId },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: { contact: true }
+            },
+            initiative: true
+          }
+        }
+      }
+    }),
+    tx.housing_project.findFirst({
       where: { activityId },
       include: {
         activity: {
@@ -39,16 +52,20 @@ export const getProjectByActivityId = async (tx: PrismaTransactionClient, activi
     })
   ]);
 
-  if (electrificationResult && housingResult) {
-    throw new Problem(409, { detail: 'ActivityId exists in both housing and electrification projects.' });
-  }
-
-  if (housingResult) {
-    return housingResult;
+  if (electrificationResult && generalResult && housingResult) {
+    throw new Problem(409, { detail: 'ActivityId exists in multiple projects.' });
   }
 
   if (electrificationResult) {
     return electrificationResult;
+  }
+
+  if (generalResult) {
+    return generalResult;
+  }
+
+  if (housingResult) {
+    return housingResult;
   }
 
   throw new Problem(404, { detail: 'No project found with given activityId.' });

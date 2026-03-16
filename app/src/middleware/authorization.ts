@@ -125,7 +125,7 @@ export const hasAuthorization = (resource: string, action: string) => {
     }
 
     // Continue middleware
-    next();
+    return next();
   };
 };
 

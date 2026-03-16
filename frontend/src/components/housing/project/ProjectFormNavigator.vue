@@ -499,7 +499,7 @@ onBeforeMount(async () => {
     assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
   }
 
-  locationPidsAuto.value = (await mapService.getPIDs(project.housingProjectId)).data;
+  locationPidsAuto.value = (await mapService.getPIDs(project.projectId)).data;
   if (project.geoJson) geoJson.value = project.geoJson;
 
   // Default form values
