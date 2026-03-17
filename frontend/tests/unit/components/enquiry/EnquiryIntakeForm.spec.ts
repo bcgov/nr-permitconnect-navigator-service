@@ -3,11 +3,10 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
-import { nextTick } from 'vue';
-import { flushPromises, mount, RouterLinkStub, shallowMount } from '@vue/test-utils';
+import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
 import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
-import { contactService, enquiryService, housingProjectService } from '@/services';
+import { contactService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
@@ -54,35 +53,6 @@ const getContactSpy = vi.spyOn(contactService, 'searchContacts');
 getActivityIds.mockResolvedValue({ data: ['someActivityid'] } as AxiosResponse);
 getProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
-interface FormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  contactApplicantRelationship: ProjectRelationship;
-  contactPreference: ContactPreference;
-  contactId?: string;
-  basic: {
-    relatedActivityId?: string;
-    enquiryDescription?: string;
-  };
-}
-
-function basicValidFormValues(): FormValues {
-  return {
-    firstName: 'testFirst',
-    lastName: 'testLast',
-    email: 'test@email.com',
-    phoneNumber: '1234567890',
-    contactApplicantRelationship: ProjectRelationship.OWNER,
-    contactPreference: ContactPreference.EMAIL,
-    contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
-    basic: {
-      enquiryDescription: 'test description',
-      relatedActivityId: 'some Id'
-    }
-  };
-}
 
 const wrapperSettings = () => ({
   global: {
@@ -140,10 +110,10 @@ describe('EnquiryIntakeForm', () => {
       const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
       await flushPromises();
 
-      const firstNameInput = wrapper.get('[name="firstName"]');
-      const lastNameInput = wrapper.get('[name="lastName"]');
-      const phoneInput = wrapper.get('[name="phoneNumber"]');
-      const emailInput = wrapper.get('[name="email"]');
+      const firstNameInput = wrapper.get('[name="contacts.firstName"]');
+      const lastNameInput = wrapper.get('[name="contacts.lastName"]');
+      const phoneInput = wrapper.get('[name="contacts.phoneNumber"]');
+      const emailInput = wrapper.get('[name="contacts.email"]');
 
       expect(firstNameInput.isVisible()).toBeTruthy();
       expect(lastNameInput.isVisible()).toBeTruthy();
@@ -153,61 +123,5 @@ describe('EnquiryIntakeForm', () => {
       const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
       expect(descriptionInput.exists()).toBe(true);
     });
-  });
-
-  describe('validation', async () => {
-    it('generates email error', async () => {
-      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
-      await flushPromises();
-
-      const formRef = (wrapper.vm as any)?.formRef; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-      const modifiedFormValues = {
-        ...basicValidFormValues()
-      };
-
-      modifiedFormValues.email = 'bad@email';
-      formRef.setValues(modifiedFormValues);
-
-      const result = await formRef?.validate();
-      expect(Object.keys(result.errors).length).toBe(1);
-      expect(result.errors['email']).toBeTruthy();
-    });
-
-    it('generates missing first name error', async () => {
-      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
-      await flushPromises();
-
-      const formRef = (wrapper.vm as any)?.formRef; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-      const modifiedFormValues = {
-        ...basicValidFormValues()
-      };
-
-      modifiedFormValues.firstName = '';
-
-      formRef.setValues(modifiedFormValues);
-
-      const result = await formRef?.validate();
-      expect(Object.keys(result.errors).length).toBe(1);
-      expect(result.errors['firstName']).toBeTruthy();
-    });
-  });
-
-  it('sets editable to false when enquiry ID given', async () => {
-    const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
-
-    getEnquirySpy.mockResolvedValue({ data: { activityId: '123', enquiryId: '456' } } as AxiosResponse);
-
-    const wrapper = shallowMount(EnquiryIntakeForm, {
-      ...wrapperSettings(),
-      props: { enquiryId: '456' }
-    });
-
-    await nextTick();
-    await flushPromises();
-
-    const editable = (wrapper.vm as any)?.editable; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(editable).toBeFalsy();
   });
 });

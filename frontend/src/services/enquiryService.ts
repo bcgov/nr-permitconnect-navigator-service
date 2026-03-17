@@ -1,6 +1,7 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
+import type { AxiosResponse } from 'axios';
 import type { Enquiry, EnquirySearchParameters } from '@/types';
 import type { EnquiryArgs } from '@/types/Enquiry';
 
@@ -35,7 +36,7 @@ export default {
    * @function getEnquiry
    * @returns {Promise} An axios response
    */
-  getEnquiry(enquiryId: string) {
+  getEnquiry(enquiryId: string): Promise<AxiosResponse<Enquiry>> {
     return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
   },
 

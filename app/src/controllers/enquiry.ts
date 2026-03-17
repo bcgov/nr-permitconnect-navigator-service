@@ -50,25 +50,16 @@ const generateEnquiryData = async (
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
-  let basic;
-
-  if (data.basic) {
-    basic = {
-      submissionType: data.basic.submissionType,
-      relatedActivityId: data.basic.relatedActivityId,
-      enquiryDescription: data.basic.enquiryDescription
-    };
-  }
-
   // Put new enquiry together
   return {
-    ...basic,
     enquiryId: data.enquiryId ?? uuidv4(),
     activityId: activityId,
+    relatedActivityId: data.relatedActivityId,
+    enquiryDescription: data.enquiryDescription,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
     submittedBy: getCurrentUsername(currentContext),
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
-    submissionType: data?.basic?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
+    submissionType: data?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
   } as Enquiry;
 };
 
@@ -114,7 +105,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     return { ...data, contact: contactResponse[0] };
   });
 
-  await emailEnquiryConfirmation(result, req.currentContext.initiative!, req.body.basic?.relatedActivityId);
+  await emailEnquiryConfirmation(result, req.currentContext.initiative!, req.body.relatedActivityId);
   res.status(201).json(result);
 };
 
