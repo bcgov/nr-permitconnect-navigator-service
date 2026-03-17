@@ -18,4 +18,5 @@ export { default as RegisteredBusinessCard } from './RegisteredBusinessCard.vue'
 export { default as RentalUnitsCard } from './RentalUnitsCard.vue';
 export { default as ResidentialUnitsCard } from './ResidentialUnitsCard.vue';
 export { default as SaveDraftButton } from './SaveDraftButton.vue';
+export { default as TextAreaCard } from './TextAreaCard.vue';
 export { default as ValidationBanner } from './ValidationBanner.vue';

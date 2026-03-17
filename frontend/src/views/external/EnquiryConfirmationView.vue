@@ -27,6 +27,12 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   message: t('views.e.enquiryConfirmationView.electrification.message')
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  backTo: t('views.e.enquiryConfirmationView.general.backTo'),
+  initiativeRouteName: RouteName.EXT_GENERAL,
+  message: t('views.e.enquiryConfirmationView.general.message')
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.enquiryConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
@@ -44,6 +50,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
