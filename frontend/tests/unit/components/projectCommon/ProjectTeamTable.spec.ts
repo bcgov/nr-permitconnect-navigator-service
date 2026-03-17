@@ -11,10 +11,32 @@ import { t } from '../../../helpers';
 import type { ActivityContact, Contact } from '@/types';
 import type { DOMWrapper } from '@vue/test-utils';
 
-const mockUserContact: Contact = { contactId: 'user', userId: 'user-id-123', firstName: 'Admin', lastName: 'User' };
-const mockManualContact: Contact = { contactId: 'manual-entry', firstName: 'Manual', lastName: 'Entry' };
-const mockPrimaryContact: Contact = { contactId: 'primary', firstName: 'Primary', lastName: 'Contact' };
-const mockMemberContact: Contact = { contactId: 'member', userId: 'yes', firstName: 'Standard', lastName: 'Member' };
+const mockUserContact: Contact = {
+  contactId: 'user',
+  userId: 'user-id-123',
+  firstName: 'Admin',
+  lastName: 'User',
+  email: 'admin@test'
+};
+const mockManualContact: Contact = {
+  contactId: 'manual-entry',
+  firstName: 'Manual',
+  lastName: 'Entry',
+  email: 'Manual@test'
+};
+const mockPrimaryContact: Contact = {
+  contactId: 'primary',
+  firstName: 'Primary',
+  lastName: 'Contact',
+  email: 'primary@test'
+};
+const mockMemberContact: Contact = {
+  contactId: 'member',
+  userId: 'yes',
+  firstName: 'Standard',
+  lastName: 'Member',
+  email: 'Standard@test'
+};
 
 const activityContacts: ActivityContact[] = [
   { activityId: 'activity1', contactId: 'user', role: ActivityContactRole.ADMIN, contact: mockUserContact },
