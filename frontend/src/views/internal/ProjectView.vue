@@ -7,13 +7,13 @@ import { useRouter } from 'vue-router';
 
 import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
-import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
 import DeleteDocument from '@/components/file/DeleteDocument.vue';
 import DocumentCard from '@/components/file/DocumentCard.vue';
+import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
+import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
 import FileUpload from '@/components/file/FileUpload.vue';
 import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
-import EnquiryCard from '@/components/enquiry/EnquiryCard.vue';
 import ProjectTeamTab from '@/components/projectCommon/ProjectTeamTab.vue';
 import Roadmap from '@/components/roadmap/Roadmap.vue';
 import {

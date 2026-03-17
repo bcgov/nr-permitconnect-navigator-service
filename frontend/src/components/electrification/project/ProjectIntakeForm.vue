@@ -205,11 +205,6 @@ onBeforeMount(async () => {
         }
       };
 
-      // Load org book options if company name is already filled
-      if (response.data.project?.companyNameRegistered) {
-        orgBookOptions.value = [response.data.project.companyNameRegistered];
-      }
-
       if (response.activityId) {
         activityId.value = response.activityId;
         documents = (await documentService.listDocuments(response.activityId)).data;
@@ -258,6 +253,13 @@ onBeforeMount(async () => {
           projectDescription: response?.projectDescription
         }
       };
+    }
+
+    // Load org book options if company name is already filled
+    if (response.data.project?.companyNameRegistered) {
+      orgBookOptions.value = [
+        { registeredId: response.companyIdRegistered, registeredName: response.companyNameRegistered }
+      ];
     }
   } catch {
     router.replace({ name: RouteName.EXT_ELECTRIFICATION });
