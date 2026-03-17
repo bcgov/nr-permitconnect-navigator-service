@@ -6,16 +6,20 @@ import { nextTick } from 'vue';
 import { flushPromises, mount } from '@vue/test-utils';
 
 import ProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
-import { externalApiService, mapService, userService } from '@/services';
-import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
-import { BasicResponse } from '@/utils/enums/application';
+import i18n from '@/i18n';
+import { atsService, externalApiService, mapService, userService, housingProjectService } from '@/services';
+import { useProjectStore } from '@/store';
+import { ATSCreateTypes, BasicResponse, GroupName } from '@/utils/enums/application';
+import { ActivityContactRole, ApplicationStatus, ProjectApplicant, SubmissionType } from '@/utils/enums/projectCommon';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
 import type { AxiosResponse } from 'axios';
 import type { GeoJSON } from 'geojson';
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { HousingProject } from '@/types';
+import type { DefineComponent, ComponentPublicInstance } from 'vue';
+import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
+import type { VueWrapper } from '@vue/test-utils';
 
 vi.mock('@/services', () => ({
   atsService: {
@@ -36,13 +40,54 @@ vi.mock('@/services', () => ({
   }
 }));
 
-const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
-const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+const currentDate = new Date().toISOString();
 
-searchUsersSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
-getPIDsSpy.mockResolvedValue({ data: { pids: ['123456789'] } } as AxiosResponse);
+const exampleIDIRAttribute: IDIRAttribute = {
+  idirUsername: 'idirUser',
+  idirUserGuid: 'idir-guid-123'
+};
 
-// Example Project object
+const exampleBasicBCeIDAttribute: BasicBCeIDAttribute = {
+  bceidUsername: 'bceidUser',
+  bceidUserGuid: 'bceid-guid-123'
+};
+
+const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
+  bceidBusinessGuid: 'business-guid-123',
+  bceidBusinessName: 'Example Business',
+  ...exampleBasicBCeIDAttribute
+};
+
+const testUser = {
+  active: true,
+  email: 'john.doe@example.com',
+  firstName: 'John',
+  fullName: 'John Doe',
+  idp: 'idir',
+  lastName: 'Doe',
+  groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
+  status: 'active',
+  userId: 'user123',
+  sub: 'sub-123',
+  elevatedRights: true,
+  idirAttributes: exampleIDIRAttribute,
+  bceidAttributes: exampleBasicBCeIDAttribute,
+  businessBceidAttribute: exampleBusinessBCeIDAttribute,
+  bceidBusinessName: '',
+  createdBy: 'testCreatedBy',
+  createdAt: currentDate,
+  updatedBy: 'testUpdatedAt',
+  updatedAt: currentDate
+};
+
+const exampleContact = {
+  contactId: 'contact123',
+  firstName: 'John',
+  lastName: 'Doe',
+  email: 'john.doe@example.com',
+  phoneNmber: '123-456-7890'
+};
+
 const testProject: HousingProject = {
   activityId: 'activity456',
   housingProjectId: 'project789',
@@ -87,8 +132,17 @@ const testProject: HousingProject = {
   bcOnlineCompleted: true,
   aaiUpdated: true,
   astNotes: 'AST notes.',
-  applicationStatus: ApplicationStatus.COMPLETED
-} as HousingProject;
+  applicationStatus: ApplicationStatus.COMPLETED,
+  projectApplicantType: ProjectApplicant.INDIVIDUAL,
+  hasAppliedProvincialPermits: false,
+  projectLocation: '',
+  contacts: [exampleContact],
+  user: testUser,
+  createdBy: 'testCreatedBy',
+  createdAt: currentDate,
+  updatedBy: 'testUpdatedAt',
+  updatedAt: currentDate
+};
 
 const mockSubmitValues = {
   project: {},

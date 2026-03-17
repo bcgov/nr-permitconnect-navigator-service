@@ -12,8 +12,6 @@ import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
 import { contactSchema } from '@/validators';
 
 import type { Ref } from 'vue';
-import type { DeepPartial } from '@/types';
-import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Composables
 const formValues = useFormValues();
