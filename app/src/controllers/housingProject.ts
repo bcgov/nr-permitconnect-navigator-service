@@ -100,7 +100,7 @@ const generateHousingProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.ADMIN);
   }
 
   let basic, housing, location, permits;
@@ -138,7 +138,7 @@ const generateHousingProjectData = async (
 
   if (data.location) {
     location = {
-      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES ? true : false,
+      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
       projectLocation: data.location.projectLocation,
       projectLocationDescription: data.location.projectLocationDescription,
       geomarkUrl: data.location.geomarkUrl,

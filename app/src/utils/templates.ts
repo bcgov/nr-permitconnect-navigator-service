@@ -168,6 +168,38 @@ export const teamAdminAddedTemplate: EmailTemplate = (replaceConfig) => {
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
 
+export const teamPrimaryAddedTemplate: EmailTemplate = (replaceConfig) => {
+  const baseTemplate = `
+    <div style="width: 880px">
+      <img
+        src="${BC_EMAIL_BANNER_IMG}"
+        height="120rem" width="880px"
+        alt="B.C. Government Logo"
+      /><br><br>
+
+      <div style="margin-left: 3rem; margin-right: 3rem;">
+        Dear {{ dearName }},<br><br>
+
+        You are now the Primary contact for <a href="${PCNS_URL}/e/{{ initiative }}/project/{{ projectId }}">
+        {{ projectName }}</a> in the Navigator Service.
+        You can now add new members, manage member roles, and revoke members as needed.<br><br>
+
+        Regards,<br><br>
+
+        <a href="${PCNS_URL}">
+          Navigator Service
+        <a><br><br><br>
+      </div>
+
+      <img
+        src="${BC_EMAIL_FOOTER_IMG}"
+        width="100%"
+        alt="B.C. Government Footer"
+      /><br><br>
+    </div>`;
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
 export const teamMemberRevokedTemplate: EmailTemplate = (replaceConfig) => {
   const baseTemplate = `
     <div style="width: 880px">

@@ -8,6 +8,7 @@ import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { CurrentContext } from '../../../src/types/stuff';
+import type Problem from '../../../src/utils/problem.ts';
 
 jest.mock('node:fs', () => ({
   existsSync: jest.fn(),
@@ -58,7 +59,7 @@ function buildApp(kind: IdentityProviderKind, contextPayloadOverride?: CurrentCo
   );
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.use((err: Error & { status?: number; detail?: string }, req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: Problem, req: Request, res: Response, _next: NextFunction) => {
     res.status(err.status || 500).json({ detail: err.detail || err.message });
   });
 

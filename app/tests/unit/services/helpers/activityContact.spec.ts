@@ -1,9 +1,14 @@
-import * as contactService from '../../../../src/services/contact';
+import {
+  TEST_ACTIVITY_CONTACT_1,
+  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT
+} from '../../data';
+import { prismaTxMock } from '../../../__mocks__/prismaMock';
 import * as activityContactService from '../../../../src/services/activityContact';
+import * as contactService from '../../../../src/services/contact';
 import * as activityContactHelpers from '../../../../src/services/helpers/activityContact';
 import { ActivityContactRole } from '../../../../src/utils/enums/projectCommon';
-import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1 } from '../../data';
-import { prismaTxMock } from '../../../__mocks__/prismaMock';
 
 describe('verifyPrimaryChange', () => {
   afterEach(() => {
@@ -14,40 +19,106 @@ describe('verifyPrimaryChange', () => {
   const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
   const updateActivityContactSpy = jest.spyOn(activityContactService, 'updateActivityContact');
 
-  it('should throw Problem 403 if user lacks permissions', async () => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    listActivityContactsSpy.mockResolvedValue([{ ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN }]);
+  const mockAuthBase = { attributes: [], groups: [] };
 
-    await expect(async () =>
-      activityContactHelpers.verifyPrimaryChange(prismaTxMock, [], '', '', ActivityContactRole.PRIMARY)
+  it('should throw Problem 403 if user is neither Primary nor Navigator', async () => {
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    listActivityContactsSpy.mockResolvedValue([
+      { ...TEST_ACTIVITY_CONTACT_1, contactId: TEST_CONTACT_1.contactId, role: ActivityContactRole.ADMIN }
+    ]);
+
+    await expect(
+      activityContactHelpers.verifyPrimaryChange(prismaTxMock, 'activity-id', mockAuthBase, TEST_CURRENT_CONTEXT)
     ).rejects.toMatchObject({
       status: 403,
       detail: 'User lacks required role.'
     });
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
   });
 
-  it('should run if requestedRole === PRIMARY', async () => {
+  it('should pass and demote current primary if authorized via scope:all', async () => {
+    const scopeAllAuth = { attributes: ['scope:all'], groups: [] };
+    listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
+
+    const demotedContact = { ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      scopeAllAuth,
+      TEST_CURRENT_CONTEXT
+    );
+
+    expect(searchContactsSpy).not.toHaveBeenCalled();
+    expect(updateActivityContactSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      'activity-id',
+      TEST_ACTIVITY_CONTACT_1.contactId,
+      ActivityContactRole.ADMIN
+    );
+    expect(result).toEqual(demotedContact);
+  });
+
+  it('should pass if user is a Navigator in the correct initiative', async () => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
-    updateActivityContactSpy.mockResolvedValue(TEST_ACTIVITY_CONTACT_1);
 
-    await activityContactHelpers.verifyPrimaryChange(prismaTxMock, [], '', '', ActivityContactRole.PRIMARY);
+    const demotedContact = { ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
 
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(listActivityContactsSpy).toHaveBeenCalledTimes(1);
-    expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT
+    );
+
+    expect(listActivityContactsSpy).toHaveBeenCalled();
+    expect(updateActivityContactSpy).toHaveBeenCalled();
+    expect(result).toEqual(demotedContact);
   });
 
-  it.each([ActivityContactRole.ADMIN, ActivityContactRole.MEMBER])(
-    'should not run if requestedRole === %s',
-    async (value) => {
-      await activityContactHelpers.verifyPrimaryChange(prismaTxMock, [], '', '', value);
+  it('should pass if user is the current Primary contact', async () => {
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    listActivityContactsSpy.mockResolvedValue([
+      { ...TEST_ACTIVITY_CONTACT_1, contactId: TEST_CONTACT_1.contactId, role: ActivityContactRole.PRIMARY }
+    ]);
 
-      expect(searchContactsSpy).toHaveBeenCalledTimes(0);
-      expect(listActivityContactsSpy).toHaveBeenCalledTimes(0);
-      expect(updateActivityContactSpy).toHaveBeenCalledTimes(0);
-    }
-  );
+    const demotedContact = {
+      ...TEST_ACTIVITY_CONTACT_1,
+      contactId: TEST_CONTACT_1.contactId,
+      role: ActivityContactRole.ADMIN
+    };
+    updateActivityContactSpy.mockResolvedValue(demotedContact);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      mockAuthBase,
+      TEST_CURRENT_CONTEXT
+    );
+
+    expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
+    expect(result).toEqual(demotedContact);
+  });
+
+  it('should NOT call updateActivityContact if no current primary exists', async () => {
+    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+
+    listActivityContactsSpy.mockResolvedValue([
+      { ...TEST_ACTIVITY_CONTACT_1, role: ActivityContactRole.ADMIN },
+      { ...TEST_ACTIVITY_CONTACT_1, contactId: 'some-other-id', role: ActivityContactRole.MEMBER }
+    ]);
+
+    const result = await activityContactHelpers.verifyPrimaryChange(
+      prismaTxMock,
+      'activity-id',
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT
+    );
+
+    expect(listActivityContactsSpy).toHaveBeenCalled();
+    expect(updateActivityContactSpy).not.toHaveBeenCalled();
+    expect(result).toBeUndefined();
+  });
 });

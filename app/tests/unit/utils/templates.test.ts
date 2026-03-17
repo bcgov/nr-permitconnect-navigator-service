@@ -11,7 +11,8 @@ import {
   roadmapTemplate,
   teamAdminAddedTemplate,
   teamMemberAddedTemplate,
-  teamMemberRevokedTemplate
+  teamMemberRevokedTemplate,
+  teamPrimaryAddedTemplate
 } from '../../../src/utils/templates.ts';
 
 jest.mock('config', () => ({
@@ -185,6 +186,17 @@ describe('add team member templates', () => {
 
     expect(html).not.toContain('{{ dearName }}');
     expect(html).not.toContain('{{ adminName }}');
+    expect(html).not.toContain('{{ projectName }}');
+  });
+
+  it('teamPrimaryAddedTemplate replaces placeholders', () => {
+    const html = teamPrimaryAddedTemplate(replaceConfig);
+
+    expect(html).toContain('Dear John Doe');
+    expect(html).toContain('The Project</a>');
+    expect(html).toContain('the Primary contact for');
+
+    expect(html).not.toContain('{{ dearName }}');
     expect(html).not.toContain('{{ projectName }}');
   });
 });

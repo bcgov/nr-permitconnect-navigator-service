@@ -1,8 +1,11 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Dialog, Message, Select } from '@/lib/primevue';
+import { useAppStore } from '@/store';
+import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -19,16 +22,27 @@ const emit = defineEmits(['projectTeamManageModal:manageUser']);
 // Composables
 const { t } = useI18n();
 
-// Constants
-const SELECTABLE_ROLES = [ActivityContactRole.ADMIN, ActivityContactRole.MEMBER];
+// Store
+const appStore = useAppStore();
+const { isInternal } = storeToRefs(appStore);
 
 // State
 const selectedRole: Ref<ActivityContactRole | undefined> = ref(undefined);
 const visible = defineModel<boolean>('visible');
 
+const selectableRoles = computed(() => {
+  if (isInternal.value) {
+    return ACTIVITY_CONTACT_ROLE_LIST.filter((role) => role !== activityContact?.role);
+  } else {
+    return ACTIVITY_CONTACT_ROLE_LIST.filter(
+      (role) => role !== ActivityContactRole.PRIMARY && role !== activityContact?.role
+    );
+  }
+});
+
 // Actions
-watchEffect(() => {
-  selectedRole.value = activityContact?.role;
+watch(visible, () => {
+  selectedRole.value = undefined;
 });
 </script>
 
@@ -40,14 +54,14 @@ watchEffect(() => {
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">{{ t('e.common.projectTeamManageModal.header') }}</span>
+      <span class="p-dialog-title">{{ t('projectTeamManageModal.header') }}</span>
     </template>
     <Message
       v-if="selectedRole === ActivityContactRole.ADMIN"
       severity="warn"
       class="text-center mb-8"
     >
-      {{ t('e.common.projectTeamManageModal.adminSelectedWarning') }}
+      {{ t('projectTeamManageModal.adminSelectedWarning') }}
     </Message>
     <h5 class="mb-3">{{ activityContact?.contact?.firstName }} {{ activityContact?.contact?.lastName }}</h5>
     <label
@@ -55,19 +69,19 @@ watchEffect(() => {
       for="assignRole"
       class="font-bold"
     >
-      {{ t('e.common.projectTeamManageModal.role') }}
+      {{ t('projectTeamManageModal.role') }}
     </label>
     <Select
       v-model="selectedRole"
       class="w-full"
       name="assignRole"
-      :options="SELECTABLE_ROLES"
+      :options="selectableRoles"
       :disabled="!activityContact"
     />
     <div class="mt-6">
       <Button
         class="mr-2"
-        :label="t('e.common.projectTeamManageModal.save')"
+        :label="t('projectTeamManageModal.save')"
         type="submit"
         icon="pi pi-check"
         :disabled="!activityContact || !selectedRole"
@@ -79,7 +93,7 @@ watchEffect(() => {
       />
       <Button
         class="p-button-outlined mr-2"
-        :label="t('e.common.projectTeamManageModal.cancel')"
+        :label="t('projectTeamManageModal.cancel')"
         icon="pi pi-times"
         @click="visible = false"
       />
