@@ -42,6 +42,8 @@ interface InitiativeState {
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
+  enquiryConfirmRouteName: RouteName.EXT_GENERAL_ENQUIRY_CONFIRMATION,
+  enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
   enquiryPermitConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ENQUIRY_CONFIRMATION,
   enquiryProjectConfirmRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_ENQUIRY_CONFIRMATION,
   projectService: electrificationProjectService

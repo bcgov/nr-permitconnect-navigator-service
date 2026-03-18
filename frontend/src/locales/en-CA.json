@@ -48,16 +48,19 @@
         "confirmationIdLabel": "Enquiry ID",
         "confirmationBanner": "Your enquiry has been successfully submitted.",
         "electrification": {
-          "backTo": "Back to Electrification",
-          "message": "An Electrification Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+          "backTo": "Back to Electrification"
         },
         "general": {
-          "backTo": "Back to General",
-          "message": "A General Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+          "backTo": "Back to General"
         },
         "housing": {
-          "backTo": "Back to Housing",
-          "message": "A Housing Navigator will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference."
+          "backTo": "Back to Housing"
+        },
+        "message": "{navigator} will review your submission and contact you in 2 business days. Please check your email for the confirmation email and keep the enquiry ID for future reference.",
+        "navigator": {
+          "electrification": "An Electrification Navigator",
+          "general": "A General Navigator",
+          "housing": "A Housing Navigator"
         }
       },
       "enquiryIntakeView": {
@@ -67,43 +70,48 @@
         "confirmationId": "Project ID",
         "drafts": "Drafts",
         "electrification": {
-          "header": "Electrification",
-          "projectsTooltip": "Submit an electrification project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+          "header": "Electrification"
         },
         "enquiriesTooltip": "General enquiries are for questions that are not related to existing projects. To enquire about an existing project, select the project from “My projects” and enquire there.",
         "general": {
-          "header": "General",
-          "projectsTooltip": "Submit a general project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+          "header": "General"
         },
         "generalEnquiries": "General enquiries",
         "housing": {
-          "header": "Housing",
-          "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries."
+          "header": "Housing"
         },
         "lastUpdated": "Last updated",
         "myProjects": "My projects",
         "onThisPage": "On this page",
         "of": "of",
         "pendingAuths": "There are authorizations pending your action.",
+        "project": {
+          "electrification": "an electrification project",
+          "general": "a general project",
+          "housing": "a housing project"
+        },
         "projectState": "Project state",
         "projectsEmpty": "Submit a new project to the Navigator Service to find out what permits are required",
-        "projectsTooltip": "Submit a housing project to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
+        "projectsTooltip": "Submit {project} to the Navigator service to find out what permits are required for your projects, track permit applications, and submit related enquiries.",
         "submitNewEnquiry": "Submit a general enquiry",
         "submitNewProject": "Submit a new project"
       },
       "projectConfirmationView": {
         "header": "Confirmation of Submission",
         "electrification": {
-          "backTo": "Back to Electrification",
-          "message": "Your submission will be reviewed and you will be contacted by an Electrification Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+          "backTo": "Back to Electrification"
         },
         "general": {
-          "backTo": "Back to General",
-          "message": "Your submission will be reviewed and you will be contacted by a General Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+          "backTo": "Back to General"
         },
         "housing": {
-          "backTo": "Back to Housing",
-          "message": "Your submission will be reviewed and you will be contacted by a Housing Navigator in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference."
+          "backTo": "Back to Housing"
+        },
+        "message": "Your submission will be reviewed and you will be contacted by {navigator} in 2 business days. Please check your email for the confirmation email and keep the project ID for future reference.",
+        "navigator": {
+          "electrification": "an Electrification Navigator",
+          "general": "a General Navigator",
+          "housing": "a Housing Navigator"
         },
         "projectId": "Project ID:",
         "success": "Your application has been successfully submitted."
