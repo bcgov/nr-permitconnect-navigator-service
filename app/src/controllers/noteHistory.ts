@@ -89,7 +89,7 @@ export const listBringForwardController = async (
   const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
     const history: NoteHistory[] = await listBringForward(
       tx,
-      req.currentContext.initiative!,
+      req.currentContext.initiative,
       req.query.bringForwardState
     );
 
@@ -204,7 +204,7 @@ export const updateNoteHistoryController = async (
   });
 
   const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
-  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative!, resource);
+  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative, resource);
 
   res.status(200).json(response);
 };

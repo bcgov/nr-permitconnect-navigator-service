@@ -69,13 +69,17 @@ describe('EnquiryConfirmationView.vue', () => {
   it.each([
     {
       initiative: Initiative.ELECTRIFICATION,
-      message: t('views.e.enquiryConfirmationView.electrification.message'),
+      message: t('views.e.enquiryConfirmationView.message', {
+        navigator: t('views.e.enquiryConfirmationView.navigator.electrification')
+      }),
       backTo: t('views.e.enquiryConfirmationView.electrification.backTo'),
       routeName: RouteName.EXT_ELECTRIFICATION
     },
     {
       initiative: Initiative.HOUSING,
-      message: t('views.e.enquiryConfirmationView.housing.message'),
+      message: t('views.e.enquiryConfirmationView.message', {
+        navigator: t('views.e.enquiryConfirmationView.navigator.housing')
+      }),
       backTo: t('views.e.enquiryConfirmationView.housing.backTo'),
       routeName: RouteName.EXT_HOUSING
     }

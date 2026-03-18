@@ -90,9 +90,9 @@ export interface CurrentAuthorization {
 }
 
 export interface CurrentContext {
-  authType?: AuthType;
+  authType: AuthType;
   bearerToken?: string;
-  initiative?: Initiative;
+  initiative: Initiative;
   tokenPayload?: jwt.JwtPayload;
   userId?: string;
 }
@@ -171,13 +171,8 @@ export interface EnquiryIntake {
   enquiryStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
   submit?: boolean;
-
-  basic?: {
-    submissionType?: string;
-    relatedActivityId?: string;
-    enquiryDescription?: string;
-  };
-
+  relatedActivityId?: string;
+  enquiryDescription?: string;
   contact: Contact;
 }
 

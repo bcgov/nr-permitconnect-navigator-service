@@ -3,7 +3,7 @@ import request from 'supertest';
 import { existsSync, readFileSync } from 'node:fs';
 
 import { hasIdentity } from '../../../src/middleware/identity.ts';
-import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
+import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -76,6 +76,8 @@ describe('hasIdentity middleware', () => {
 
   it('calls next and allows the request if the user has the required identity', async () => {
     const app = buildApp(IdentityProviderKind.IDIR, {
+      authType: AuthType.BEARER,
+      initiative: Initiative.PCNS,
       tokenPayload: { identity_provider: IdentityProviderKind.IDIR }
     });
 
@@ -87,6 +89,8 @@ describe('hasIdentity middleware', () => {
 
   it('throws a 403 Problem if the user does not have the required identity', async () => {
     const app = buildApp(IdentityProviderKind.IDIR, {
+      authType: AuthType.BEARER,
+      initiative: Initiative.PCNS,
       tokenPayload: { identity_provider: IdentityProviderKind.BCEID } // Mismatch
     });
 
@@ -98,6 +102,8 @@ describe('hasIdentity middleware', () => {
 
   it('throws a 403 Problem if the token payload is missing entirely', async () => {
     const app = buildApp(IdentityProviderKind.IDIR, {
+      authType: AuthType.NONE,
+      initiative: Initiative.PCNS,
       tokenPayload: undefined
     });
 
