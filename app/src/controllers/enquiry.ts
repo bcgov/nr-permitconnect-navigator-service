@@ -44,7 +44,7 @@ const generateEnquiryData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (await createActivity(tx, currentContext.initiative!, generateCreateStamps(currentContext)))
+    activityId = (await createActivity(tx, currentContext.initiative, generateCreateStamps(currentContext)))
       ?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
@@ -105,7 +105,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     return { ...data, contact: contactResponse[0] };
   });
 
-  await emailEnquiryConfirmation(result, req.currentContext.initiative!, req.body.relatedActivityId);
+  await emailEnquiryConfirmation(result, req.currentContext.initiative, req.body.relatedActivityId);
   res.status(201).json(result);
 };
 
@@ -210,7 +210,7 @@ export const searchEnquiriesController = async (
         ...req.body,
         includeUser: isTruthy(req.body?.includeUser)
       },
-      req.currentContext.initiative!
+      req.currentContext.initiative
     );
   });
 

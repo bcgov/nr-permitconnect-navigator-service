@@ -90,9 +90,9 @@ export interface CurrentAuthorization {
 }
 
 export interface CurrentContext {
-  authType?: AuthType;
+  authType: AuthType;
   bearerToken?: string;
-  initiative?: Initiative;
+  initiative: Initiative;
   tokenPayload?: jwt.JwtPayload;
   userId?: string;
 }
