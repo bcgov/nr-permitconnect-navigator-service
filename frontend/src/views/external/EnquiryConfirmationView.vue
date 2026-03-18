@@ -24,19 +24,25 @@ const { t } = useI18n();
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.enquiryConfirmationView.electrification.backTo'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
-  message: t('views.e.enquiryConfirmationView.electrification.message')
+  message: t('views.e.enquiryConfirmationView.message', {
+    navigator: t('views.e.enquiryConfirmationView.navigator.electrification')
+  })
 };
 
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.enquiryConfirmationView.general.backTo'),
   initiativeRouteName: RouteName.EXT_GENERAL,
-  message: t('views.e.enquiryConfirmationView.general.message')
+  message: t('views.e.enquiryConfirmationView.message', {
+    navigator: t('views.e.enquiryConfirmationView.navigator.general')
+  })
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.enquiryConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
-  message: t('views.e.enquiryConfirmationView.housing.message')
+  message: t('views.e.enquiryConfirmationView.message', {
+    navigator: t('views.e.enquiryConfirmationView.navigator.housing')
+  })
 };
 
 // Store

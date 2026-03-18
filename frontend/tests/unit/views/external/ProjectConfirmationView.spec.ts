@@ -116,7 +116,9 @@ describe('EnquiryConfirmationView.vue', () => {
       initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
       projectService: electrificationProjectService,
       projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-      message: t('views.e.projectConfirmationView.electrification.message')
+      message: t('views.e.projectConfirmationView.message', {
+        navigator: t('views.e.projectConfirmationView.navigator.electrification')
+      })
     },
     {
       initiative: Initiative.HOUSING,
@@ -124,7 +126,9 @@ describe('EnquiryConfirmationView.vue', () => {
       initiativeRouteName: RouteName.EXT_HOUSING,
       projectService: housingProjectService,
       projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-      message: t('views.e.projectConfirmationView.housing.message')
+      message: t('views.e.projectConfirmationView.message', {
+        navigator: t('views.e.projectConfirmationView.navigator.housing')
+      })
     }
   ])('sets the correct content for $initiative', async (value) => {
     const wrapper = shallowMount(ProjectConfirmationView, wrapperSettings(value.initiative));

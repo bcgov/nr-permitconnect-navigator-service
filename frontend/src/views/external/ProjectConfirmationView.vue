@@ -33,7 +33,9 @@ const { t } = useI18n();
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.electrification.backTo'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
-  message: t('views.e.projectConfirmationView.electrification.message'),
+  message: t('views.e.projectConfirmationView.message', {
+    navigator: t('views.e.projectConfirmationView.navigator.electrification')
+  }),
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService
 };
@@ -41,7 +43,9 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.general.backTo'),
   initiativeRouteName: RouteName.EXT_GENERAL,
-  message: t('views.e.projectConfirmationView.general.message'),
+  message: t('views.e.projectConfirmationView.message', {
+    navigator: t('views.e.projectConfirmationView.navigator.general')
+  }),
   projectRouteName: RouteName.EXT_GENERAL_PROJECT,
   projectService: generalProjectService
 };
@@ -49,7 +53,9 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   backTo: t('views.e.projectConfirmationView.housing.backTo'),
   initiativeRouteName: RouteName.EXT_HOUSING,
-  message: t('views.e.projectConfirmationView.housing.message'),
+  message: t('views.e.projectConfirmationView.message', {
+    navigator: t('views.e.projectConfirmationView.navigator.housing')
+  }),
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
   projectService: housingProjectService
 };

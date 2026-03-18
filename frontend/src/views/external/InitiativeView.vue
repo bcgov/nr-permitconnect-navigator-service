@@ -60,7 +60,9 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE,
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-  projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip')
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.electrification')
+  })
 };
 
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
@@ -72,7 +74,9 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_GENERAL,
   projectIntakeRouteName: RouteName.EXT_GENERAL_INTAKE,
   projectRouteName: RouteName.EXT_GENERAL_PROJECT,
-  projectTooltip: t('views.e.initiativeView.general.projectsTooltip')
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.general')
+  })
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -84,7 +88,9 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_HOUSING,
   projectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-  projectTooltip: t('views.e.initiativeView.housing.projectsTooltip')
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.housing')
+  })
 };
 
 const PAGE_ROWS = 5;
