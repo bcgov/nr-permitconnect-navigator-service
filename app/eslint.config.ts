@@ -35,8 +35,6 @@ export default tseslint.config(
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       quotes: ['error', 'single'],
       semi: ['error', 'always'],
-      // TODO: Remove the following when ESLint is upgraded to 10.x
-      'no-unassigned-vars': 'error',
       'no-useless-assignment': 'error',
       'preserve-caught-error': ['error', { requireCatchParameter: true }]
     }

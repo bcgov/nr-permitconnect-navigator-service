@@ -4,7 +4,7 @@ name: Tests
 on:
   push:
     branches:
-      - '**'
+      - "**"
   pull_request:
     types:
       - opened
@@ -54,8 +54,8 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - '20.x'
-          - '22.x'
+          - "20.x"
+          - "22.x"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -90,7 +90,7 @@ jobs:
           CI: true
       - name: Save Coverage Results
         if: matrix.node-version == '22.x'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
@@ -122,8 +122,8 @@ jobs:
       fail-fast: true
       matrix:
         node-version:
-          - '20.x'
-          - '22.x'
+          - "20.x"
+          - "22.x"
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v6
@@ -156,7 +156,7 @@ jobs:
           CI: true
       - name: Save Coverage Results
         if: matrix.node-version == '22.x'
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
@@ -186,7 +186,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Restore Coverage Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
@@ -210,7 +210,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v6
       - name: Restore Coverage Results
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v8
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
