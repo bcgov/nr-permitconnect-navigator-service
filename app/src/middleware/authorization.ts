@@ -155,6 +155,9 @@ export const hasAccess = (param: string) => {
       await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
         if (req.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
+          if (Array.isArray(id)) {
+            throw new TypeError('Parameter must be a string, not an array');
+          }
 
           let data: unknown;
           if (param !== 'activityId') {
