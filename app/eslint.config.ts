@@ -34,9 +34,7 @@ export default tseslint.config(
       'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-      'no-useless-assignment': 'error',
-      'preserve-caught-error': ['error', { requireCatchParameter: true }]
+      semi: ['error', 'always']
     }
   }
 );

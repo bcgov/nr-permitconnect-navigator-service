@@ -12,6 +12,7 @@ import { formatDate } from '@/utils/formatters';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 import type { Contact, Enquiry } from '@/types';
 
 // Props
@@ -43,7 +44,7 @@ const userIdToName: Ref<Record<string, string>> = ref({});
 
 // Actions
 function getRouteToObject(data: Enquiry) {
-  let toObject = {};
+  let toObject: RouteLocationRaw;
   if (enquiries?.[0]?.relatedActivityId) {
     toObject = {
       name: enquiryRouteName?.value,
