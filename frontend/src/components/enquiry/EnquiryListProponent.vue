@@ -40,7 +40,7 @@ const selection: Ref<Enquiry | undefined> = ref(undefined);
 const { t } = useI18n();
 
 function getRouteToObject(data: Enquiry): RouteLocationRaw {
-  let toObject: RouteLocationRaw = {};
+  let toObject: RouteLocationRaw;
   if (enquiries?.[0]?.relatedActivityId) {
     toObject = {
       name: enquiryRouteName?.value,
