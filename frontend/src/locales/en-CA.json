@@ -545,8 +545,9 @@
       "areNotNeeded": "are not needed. ",
       "isNotNeeded": "is not needed. ",
       "moreInfo": "More information",
-      "notNeededDesc": "We have also investigated the ones you thought you might need. The ",
-      "requiredAuthsDesc": "We have investigated the provincial authorizations potentially required for this project based on the information you provided. Please note, this list may change as your project progresses."
+      "notNeededDesc": "We have also investigated the authorization(s) you thought you might need:",
+      "requiredAuthsDesc": "We have investigated the provincial authorization(s) potentially required for this project based on the information you provided. Please note, this list may change as your project progresses:",
+      "underInvestigation": "We are still investigating whether or not you will potentially require the following:"
     }
   },
   "basicProjectInfoCard": {
