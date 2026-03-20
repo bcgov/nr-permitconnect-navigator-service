@@ -292,7 +292,7 @@ onBeforeMount(async () => {
               {{ t('views.e.projectView.requiredAuthsEmpty') }}
             </div>
             <RequiredAuths
-              v-if="authsPotentiallyNeeded?.length"
+              v-else
               :auths-needed="getAuthsNeeded"
               :auths-not-needed="getAuthsNotNeeded"
               :auths-under-investigation="getAuthsUnderInvestigation"
