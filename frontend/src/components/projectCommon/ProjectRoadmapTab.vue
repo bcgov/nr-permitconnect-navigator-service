@@ -18,8 +18,7 @@ import type { Ref } from 'vue';
 import type { Document } from '@/types';
 
 // Props
-const { activityId, editable = true } = defineProps<{
-  activityId: string;
+const { editable = true } = defineProps<{
   editable?: boolean;
 }>();
 
@@ -79,9 +78,11 @@ const confirmSubmit = (data: GenericObject) => {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
+        if (!getProject.value?.activityId) throw new Error('No activity ID');
+
         const response = (
           await roadmapService.send(
-            activityId,
+            getProject.value?.activityId,
             selectedFiles.value.map((x: Document) => x.documentId),
             setEmptyStringsToNull(data)
           )

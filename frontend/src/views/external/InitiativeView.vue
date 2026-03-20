@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -27,12 +28,11 @@ import {
   navigationPermissionKey,
   projectIntakeRouteNameKey
 } from '@/utils/keys';
+import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import { generalErrorHandler } from '@/utils/utils';
-import { storeToRefs } from 'pinia';
 
 // Interfaces
 interface InitiativeState {

@@ -10,8 +10,7 @@ import {
   generalProjectService,
   housingProjectService,
   noteHistoryService,
-  permitService,
-  generalProjectService
+  permitService
 } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
@@ -97,9 +96,6 @@ onBeforeMount(async () => {
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
-        break;
-      case Initiative.GENERAL:
-        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       default:
         throw new Error(t('views.initiativeStateError'));
