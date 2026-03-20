@@ -26,7 +26,12 @@ import {
 } from '@/services';
 import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { projectAuthorizationRouteNameKey, projectNoteRouteNameKey, projectServiceKey } from '@/utils/keys';
+import {
+  projectAuthorizationRouteNameKey,
+  projectNoteRouteNameKey,
+  projectServiceKey,
+  updateLiveNameKey
+} from '@/utils/keys';
 import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -107,8 +112,13 @@ const provideProjectService = computed(() => initiativeState.value.projectServic
 provide(projectNoteRouteNameKey, provideProjectNoteRouteName);
 provide(projectAuthorizationRouteNameKey, provideProjectAuthorizationRouteName);
 provide(projectServiceKey, provideProjectService);
+provide(updateLiveNameKey, updateLiveName);
 
 // Actions
+function updateLiveName(name: string) {
+  liveName.value = name;
+}
+
 onBeforeMount(async () => {
   try {
     switch (getInitiative.value) {

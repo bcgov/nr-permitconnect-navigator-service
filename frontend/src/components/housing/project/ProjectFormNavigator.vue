@@ -6,69 +6,38 @@ import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { createProjectFormNavigatorSchema } from '../../../validators/housing/projectFormNavigatorSchema';
-import {
-  AddLocation,
-  AdditionalInfo,
-  AstNote,
-  AutoPids,
-  Company,
-  FinanciallySupported,
-  HousingUnits,
-  Location
-} from '@/components/common/icons';
-import {
-  AutoComplete,
-  CancelButton,
-  Checkbox,
-  EditableSelect,
-  FormNavigationGuard,
-  InputNumber,
-  InputText,
-  Select,
-  TextArea
-} from '@/components/form';
-import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
-import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, externalApiService, housingProjectService, mapService, userService } from '@/services';
+import { CancelButton, FormNavigationGuard } from '@/components/form';
+import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
+import AstNotesPanel from '@/components/form/panel/AstNotesPanel.vue';
+import CompanyProjectNamePanel from '@/components/form/panel/CompanyProjectNamePanel.vue';
+import FinanciallySupportedPanel from '@/components/form/panel/FinanciallySupportedPanel.vue';
+import LocationDescriptionPanel from '@/components/form/panel/LocationDescriptionPanel.vue';
+import LocationPanel from '@/components/form/panel/LocationPanel.vue';
+import LocationPidsPanel from '@/components/form/panel/LocationPidsPanel.vue';
+import ProjectDescriptionPanel from '@/components/form/panel/ProjectDescriptionPanel.vue';
+import ResidentialUnitsPanel from '@/components/form/panel/ResidentialUnitsPanel.vue';
+import FeedbackConsentSection from '@/components/form/section/FeedbackConsentSection.vue';
+import ProjectAreasUpdatedSection from '@/components/form/section/ProjectAreasUpdatedSection.vue';
+import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesSection.vue';
+import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
+import { atsService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
-import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
-import {
-  APPLICATION_STATUS_LIST,
-  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
-  ATS_MANAGING_REGION,
-  QUEUE_PRIORITY,
-  SUBMISSION_TYPE_LIST
-} from '@/utils/constants/projectCommon';
-import {
-  ATSCreateTypes,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative,
-  Regex
-} from '@/utils/enums/application';
+import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
+import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
-import { formatDate, formatDateFilename } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { formatDate } from '@/utils/formatters';
+import { omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
-import type { GeoJSON } from 'geojson';
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
-import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
-
-import type { IInputEvent } from '@/interfaces';
 import type {
   ATSAddressResource,
   ATSClientResource,
   ATSEnquiryResource,
   Contact,
   DeepPartial,
-  GeocoderFeature,
-  HousingProject,
-  OrgBookOption,
-  User
+  HousingProject
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
@@ -76,11 +45,6 @@ import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSc
 const { editable = true, project } = defineProps<{
   editable?: boolean;
   project: HousingProject;
-}>();
-
-// Emits
-const emit = defineEmits<{
-  inputProjectName: [newName: string];
 }>();
 
 // Constants
@@ -96,14 +60,10 @@ const projectStore = useProjectStore();
 const { getActivityContacts } = storeToRefs(projectStore);
 
 // State
-const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
-const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
-const geoJson: Ref<GeoJSON | null> = ref(null);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
-const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 const primaryContact = computed(
@@ -170,14 +130,6 @@ async function createATSEnquiry(atsClientId?: number) {
   }
 }
 
-function emitProjectNameChange(e: Event) {
-  emit('inputProjectName', (e.target as HTMLInputElement).value);
-}
-
-const getAssigneeOptionLabel = (e: User) => {
-  return `${e.fullName}`;
-};
-
 async function handleAtsCreate(values: GenericObject) {
   if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
     const response = await createATSClientEnquiry();
@@ -203,7 +155,11 @@ async function handleAtsCreate(values: GenericObject) {
   }
 }
 
-function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaType> {
+async function initializeFormValues(project: HousingProject): Promise<DeepPartial<FormSchemaType>> {
+  let assigneeOptions = [];
+  if (project.assignedUserId)
+    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
+
   return {
     consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {
@@ -258,7 +214,7 @@ function initializeFormValues(project: HousingProject): DeepPartial<FormSchemaTy
     submissionState: {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
-      assignedUser: assigneeOptions.value[0] ?? null,
+      assignedUser: assigneeOptions[0] ?? null,
       applicationStatus: project.applicationStatus
     },
 
@@ -289,24 +245,6 @@ const isCompleted = computed(() => {
   return project.applicationStatus === ApplicationStatus.COMPLETED;
 });
 
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
-};
-
 function onCancel() {
   formRef.value?.resetForm();
   showCancelMessage.value = true;
@@ -328,39 +266,6 @@ function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
-async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
-  if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((obo: Record<string, string>) => obo.type === 'name')
-      // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: Record<string, string>) => ({
-        registeredName: obo.value,
-        registeredId: obo.topic_source_id
-      }));
-  }
-}
-
-const onSaveGeoJson = () => {
-  if (!geoJson.value) return;
-
-  const file = new Blob([JSON.stringify(geoJson.value, null, 2)], {
-    type: 'application/geo+json'
-  });
-
-  const downloadLink = URL.createObjectURL(file);
-  const downloadElement = document.createElement('a');
-  downloadElement.href = downloadLink;
-
-  const currentDateTime = formatDateFilename(new Date().toISOString());
-  const projectName = projectStore?.getProject?.projectName ?? '';
-  const projectActivityId = projectStore?.getProject?.activityId ?? '';
-
-  downloadElement.download = `${currentDateTime}_${projectName}_${projectActivityId}.geojson`;
-  downloadElement.click();
-  URL.revokeObjectURL(downloadLink);
-};
-
 function onReOpen() {
   confirm.require({
     message: t('i.common.projectForm.confirmReopenMessage'),
@@ -373,34 +278,6 @@ function onReOpen() {
       if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
-}
-
-const getAddressSearchLabel = (e: GeocoderFeature) => {
-  return e.properties.fullAddress ?? '';
-};
-
-async function onAddressSearchInput(e: IInputEvent) {
-  const input = e.target.value;
-  if (input.length == 0) {
-    formRef.value?.setFieldValue('location.streetAddress', null);
-    formRef.value?.setFieldValue('location.locality', null);
-    formRef.value?.setFieldValue('location.province', null);
-  } else {
-    addressGeocoderFeatures.value = (await externalApiService.searchAddressCoder(input))?.data?.features ?? [];
-  }
-}
-
-async function onAddressSelect(e: SelectChangeEvent) {
-  if (e.originalEvent instanceof InputEvent) return;
-  if (e.value as GeocoderFeature) {
-    const properties = e.value?.properties;
-    formRef.value?.setFieldValue(
-      'location.streetAddress',
-      `${properties?.civicNumber} ${properties?.streetName} ${properties?.streetType}`
-    );
-    formRef.value?.setFieldValue('location.locality', properties?.localityName);
-    formRef.value?.setFieldValue('location.province', properties?.provinceCode);
-  }
 }
 
 const onSubmit = async (values: GenericObject) => {
@@ -476,18 +353,6 @@ function setBasicInfo(contact?: Contact) {
   formRef.value.resetField('contact', { value: updatedContact });
 }
 
-// vee-validate doesn't export the necessary function type and we can't create it ourselves easily
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-function updateLocationAddress(values: GenericObject, setFieldValue?: Function) {
-  const locationAddressStr = [values.location?.streetAddress, values.location?.locality, values.location?.province]
-    .filter((str) => str?.trim())
-    .join(', ');
-
-  if (setFieldValue) setFieldValue('location.locationAddress', locationAddressStr);
-
-  return locationAddressStr;
-}
-
 watch(primaryContact, (newContact, oldContact) => {
   if (newContact?.contactId !== oldContact?.contactId) {
     setBasicInfo(newContact);
@@ -495,15 +360,10 @@ watch(primaryContact, (newContact, oldContact) => {
 });
 
 onBeforeMount(async () => {
-  if (project.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
-  }
-
   locationPidsAuto.value = (await mapService.getPIDs(project.housingProjectId)).data;
-  if (project.geoJson) geoJson.value = project.geoJson;
 
   // Default form values
-  initialFormValues.value = initializeFormValues(project);
+  initialFormValues.value = await initializeFormValues(project);
 });
 </script>
 
@@ -541,387 +401,18 @@ onBeforeMount(async () => {
           :editable="editable"
           :form-values="values"
         />
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <Company />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.companyProject') }}
-              </h3>
-            </div>
-          </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
-            <InputText
-              name="project.projectName"
-              :label="t('i.housing.project.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
-            />
-            <AutoComplete
-              name="project.companyNameRegistered"
-              :label="t('i.housing.project.projectForm.companyLabel')"
-              :bold="true"
-              :disabled="!editable"
-              :editable="true"
-              :placeholder="t('i.common.projectForm.searchBCRegistered')"
-              :get-option-label="(option: OrgBookOption) => option.registeredName"
-              :suggestions="orgBookOptions"
-              @on-change="setFieldValue('project.companyIdRegistered', null)"
-              @on-complete="onRegisteredNameInput"
-              @on-select="
-                (orgBookOption: OrgBookOption) => {
-                  setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
-                  setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
-                }
-              "
-            />
-            <InputText
-              name="project.companyIdRegistered"
-              :label="t('i.common.projectForm.bcRegistryId')"
-              :disabled="true"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <HousingUnits />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.housingUnits') }}
-              </h3>
-            </div>
-          </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
-            <Select
-              name="units.singleFamilyUnits"
-              :label="t('i.housing.project.projectForm.singleFamilyUnits')"
-              :disabled="!editable"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <Select
-              name="units.multiFamilyUnits"
-              :label="t('i.housing.project.projectForm.multiFamilyUnits')"
-              :disabled="!editable"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <Select
-              name="units.hasRentalUnits"
-              :label="t('i.housing.project.projectForm.rentalIncluded')"
-              :disabled="!editable"
-              :options="YES_NO_UNSURE_LIST"
-              @on-change="
-                (e: SelectChangeEvent) => {
-                  if (e.value !== BasicResponse.YES) setFieldValue('units.rentalUnits', null);
-                }
-              "
-            />
-            <Select
-              name="units.rentalUnits"
-              :label="t('i.housing.project.projectForm.rentalUnits')"
-              :disabled="!editable || values.units.hasRentalUnits !== BasicResponse.YES"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-            <InputText
-              name="units.otherUnitsDescription"
-              :label="t('i.housing.project.projectForm.otherType')"
-              :disabled="!editable"
-              @on-change="
-                (e) => {
-                  if (!e.target.value) {
-                    setFieldValue('units.otherUnitsDescription', null);
-                    setFieldValue('units.otherUnits', null);
-                  }
-                }
-              "
-            />
-            <Select
-              name="units.otherUnits"
-              :label="t('i.housing.project.projectForm.otherTypeUnits')"
-              :disabled="!editable || !values.units.otherUnitsDescription"
-              :options="NUM_RESIDENTIAL_UNITS_LIST"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <FinanciallySupported />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.financiallySupported') }}
-              </h3>
-            </div>
-          </template>
-          <div class="col-span-1 grid grid-cols-2 gap-x-6 gap-y-6">
-            <Select
-              class="col-span-1"
-              name="finance.financiallySupportedBc"
-              :label="t('i.housing.project.projectForm.bcHousing')"
-              :disabled="!editable"
-              :options="YES_NO_UNSURE_LIST"
-            />
-
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.indigenousHousingProvider') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedIndigenous"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.indigenousDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.indigenousDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedIndigenous !== BasicResponse.YES"
-                />
-              </div>
-            </div>
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.nonProfitHousingSociety') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedNonProfit"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.nonProfitDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.nonProfitDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedNonProfit !== BasicResponse.YES"
-                />
-              </div>
-            </div>
-
-            <div class="col-span-1 grid grid-row">
-              <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.housingCoop') }}</h6>
-              <div class="grid grid-cols-4 gap-x-3">
-                <Select
-                  class="col-span-1"
-                  name="finance.financiallySupportedHousingCoop"
-                  :disabled="!editable"
-                  :options="YES_NO_UNSURE_LIST"
-                  @on-change="
-                    (e: SelectChangeEvent) => {
-                      if (e.value !== BasicResponse.YES) setFieldValue('finance.housingCoopDescription', null);
-                    }
-                  "
-                />
-                <InputText
-                  class="col-span-3"
-                  name="finance.housingCoopDescription"
-                  :placeholder="t('i.housing.project.projectForm.nameOfOrganization')"
-                  :disabled="!editable || values.finance.financiallySupportedHousingCoop !== BasicResponse.YES"
-                />
-              </div>
-            </div>
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <Location />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.location') }}
-              </h3>
-            </div>
-          </template>
-          <EditableSelect
-            class="mb-6"
-            name="addressSearch"
-            :get-option-label="getAddressSearchLabel"
-            :options="addressGeocoderFeatures"
-            :placeholder="t('i.housing.project.projectForm.addressSearchPlaceholder')"
-            :bold="false"
-            :disabled="!editable"
-            @on-input="onAddressSearchInput"
-            @on-change="onAddressSelect"
-          />
-          <div class="grid grid-row-3 gap-y-6">
-            <div class="grid grid-cols-4 gap-x-6 gap-y-6">
-              <InputText
-                class="col-span-2"
-                name="location.streetAddress"
-                :label="t('i.housing.project.projectForm.streetAddress')"
-                :disabled="true"
-                @on-change="updateLocationAddress(values, setFieldValue)"
-              />
-              <InputText
-                class="col-span-1"
-                name="location.locality"
-                :label="t('i.housing.project.projectForm.locality')"
-                :disabled="true"
-                @on-change="updateLocationAddress(values, setFieldValue)"
-              />
-              <InputText
-                class="col-span-1"
-                name="location.province"
-                :label="t('i.housing.project.projectForm.province')"
-                :disabled="true"
-                @on-change="updateLocationAddress(values, setFieldValue)"
-              />
-            </div>
-            <InputText
-              class="col-span-3"
-              name="location.locationPids"
-              :label="t('i.housing.project.projectForm.locationPIDs')"
-              :disabled="!editable"
-            />
-            <div class="grid grid-cols-3 gap-x-6">
-              <InputNumber
-                name="location.latitude"
-                :label="t('i.housing.project.projectForm.locationLatitude')"
-                :help-text="t('i.housing.project.projectForm.locationLatitudeHelp')"
-                :disabled="!editable"
-              />
-              <InputNumber
-                name="location.longitude"
-                :label="t('i.housing.project.projectForm.locationLongitude')"
-                :help-text="t('i.housing.project.projectForm.locationLongitudeHelp')"
-                :disabled="!editable"
-              />
-
-              <Select
-                name="location.naturalDisaster"
-                :label="t('i.housing.project.projectForm.affectedByNaturalDisaster')"
-                :disabled="!editable"
-                :options="YES_NO_LIST"
-              />
-            </div>
-            <InputText
-              class="col-span-3"
-              name="location.geomarkUrl"
-              :label="t('i.housing.project.projectForm.geomarkUrl')"
-              :disabled="!editable"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AutoPids />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.autoGenPids') }}
-              </h3>
-            </div>
-          </template>
-          <div>
-            <TextArea
-              name="locationPidsAuto"
-              :disabled="true"
-            />
-            <Button
-              v-if="geoJson"
-              id="download-geojson"
-              class="col-start-1 col-span-2 mb-2"
-              outlined
-              :aria-label="t('i.housing.project.projectForm.downloadGeoJson')"
-              @click="onSaveGeoJson"
-            >
-              {{ t('i.housing.project.projectForm.downloadGeoJson') }}
-            </Button>
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AddLocation />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.locationAdditionalInfo') }}
-              </h3>
-            </div>
-          </template>
-          <InputText
-            name="projectLocationDescription"
-            :disabled="!editable"
-          />
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AdditionalInfo />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.additionalInfoHeader') }}
-              </h3>
-            </div>
-          </template>
-          <TextArea
-            name="projectDescription"
-            :disabled="!editable"
-          />
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AstNote />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.astNotesHeader') }}
-              </h3>
-            </div>
-          </template>
-          <TextArea
-            name="astNotes"
-            :disabled="!editable"
-          />
-        </Panel>
+        <CompanyProjectNamePanel />
+        <ResidentialUnitsPanel />
+        <FinanciallySupportedPanel />
+        <LocationPanel />
+        <LocationPidsPanel />
+        <LocationDescriptionPanel />
+        <ProjectDescriptionPanel />
+        <AstNotesPanel />
       </div>
       <div class="flex flex-col gap-y-9">
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.housing.project.projectForm.submissionStateHeader') }}
-          </h4>
-          <div class="flex flex-col gap-y-4">
-            <EditableSelect
-              name="submissionState.assignedUser"
-              :label="t('i.housing.project.projectForm.assignedToLabel')"
-              :disabled="!editable"
-              :options="assigneeOptions"
-              :get-option-label="getAssigneeOptionLabel"
-              @on-input="onAssigneeInput"
-            />
-            <Select
-              name="submissionState.applicationStatus"
-              :label="t('i.housing.project.projectForm.projectStateLabel')"
-              :disabled="!editable"
-              :options="APPLICATION_STATUS_LIST"
-            />
-
-            <Select
-              name="submissionState.submissionType"
-              :label="t('i.housing.project.projectForm.submissionTypeLabel')"
-              :disabled="!editable"
-              :options="SUBMISSION_TYPE_LIST"
-            />
-            <Select
-              name="submissionState.queuePriority"
-              :label="t('i.housing.project.projectForm.priorityLabel')"
-              :disabled="!editable"
-              :options="QUEUE_PRIORITY"
-            />
-          </div>
-        </div>
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.housing.project.projectForm.relatedEnquiries') }}
-          </h4>
-          <InputText
-            name="relatedEnquiries"
-            :label="t('i.housing.project.projectForm.relatedEnquiriesLabel')"
-            :disabled="true"
-          />
-        </div>
+        <SubmissionStateSection />
+        <RelatedEnquiriesSection />
         <ATSInfo
           :ats-client-id="values.atsClientId"
           :ats-enquiry-id="values.atsEnquiryId"
@@ -934,46 +425,8 @@ onBeforeMount(async () => {
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
           @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
         />
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.housing.project.projectForm.updatesHeader') }}
-          </h4>
-          <Checkbox
-            name="addedToAts"
-            class="mb-4"
-            :label="t('i.housing.project.projectForm.atsUpdated')"
-            :disabled="!editable"
-          />
-          <Checkbox
-            class="col-span-12 mb-4"
-            name="ltsaCompleted"
-            :label="t('i.housing.project.projectForm.ltsaCompleted')"
-            :disabled="!editable"
-          />
-          <Checkbox
-            class="col-span-12 mb-4"
-            name="bcOnlineCompleted"
-            :label="t('i.housing.project.projectForm.bcOnlineCompleted')"
-            :disabled="!editable"
-          />
-          <Checkbox
-            name="aaiUpdated"
-            :label="t('i.housing.project.projectForm.aaiUpdateLabel')"
-            :disabled="!editable"
-          />
-        </div>
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.housing.project.projectForm.feedbackConsent') }}
-          </h4>
-          <Select
-            class="col-span-3"
-            name="consentToFeedback"
-            :label="t('i.housing.project.projectForm.researchOptin')"
-            :disabled="!editable"
-            :options="YES_NO_LIST"
-          />
-        </div>
+        <ProjectAreasUpdatedSection />
+        <FeedbackConsentSection />
       </div>
     </div>
     <div class="mt-16">

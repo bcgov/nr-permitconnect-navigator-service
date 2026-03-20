@@ -10,9 +10,6 @@ import { Action, Initiative, Resource } from '@/utils/enums/application';
 
 import type { ElectrificationProject, GeneralProject, HousingProject } from '@/types';
 
-// Props
-const liveName = defineModel<string>('liveName');
-
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
 const { getProject, getProjectIsCompleted } = storeToRefs(useProjectStore());
@@ -21,11 +18,6 @@ const { getProject, getProjectIsCompleted } = storeToRefs(useProjectStore());
 const electrificationProject = computed(() => getProject.value as ElectrificationProject);
 const generalProject = computed(() => getProject.value as GeneralProject);
 const housingProject = computed(() => getProject.value as HousingProject);
-
-// Actions
-function updateLiveName(name: string) {
-  liveName.value = name;
-}
 </script>
 
 <template>
@@ -36,19 +28,16 @@ function updateLiveName(name: string) {
         !getProjectIsCompleted && useAuthZStore().can(getInitiative, Resource.ELECTRIFICATION_PROJECT, Action.UPDATE)
       "
       :project="electrificationProject"
-      @input-project-name="updateLiveName"
     />
     <GeneralProjectForm
       v-if="getInitiative === Initiative.GENERAL"
       :editable="!getProjectIsCompleted && useAuthZStore().can(getInitiative, Resource.GENERAL_PROJECT, Action.UPDATE)"
       :project="generalProject"
-      @input-project-name="updateLiveName"
     />
     <HousingProjectForm
       v-if="getInitiative === Initiative.HOUSING"
       :editable="!getProjectIsCompleted && useAuthZStore().can(getInitiative, Resource.HOUSING_PROJECT, Action.UPDATE)"
       :project="housingProject"
-      @input-project-name="updateLiveName"
     />
   </span>
 </template>

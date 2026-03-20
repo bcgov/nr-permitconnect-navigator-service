@@ -5,26 +5,29 @@ import type { NavigationPermission } from '@/store/authzStore';
 import type { Resource, RouteName } from '@/utils/enums/application';
 
 // Constants
-export const atsEnquiryPartnerAgenciesKey = Symbol() as InjectionKey<Ref<string>>;
-export const atsEnquiryTypeCodeKey = Symbol() as InjectionKey<Ref<string>>;
+export const atsEnquiryPartnerAgenciesKey: InjectionKey<Ref<string>> = Symbol();
+export const atsEnquiryTypeCodeKey: InjectionKey<Ref<string>> = Symbol();
+
+// Form
+export const updateLiveNameKey: InjectionKey<(name: string) => void> = Symbol();
 
 // Permissions
-export const navigationPermissionKey = Symbol() as InjectionKey<Ref<NavigationPermission>>;
+export const navigationPermissionKey: InjectionKey<Ref<NavigationPermission>> = Symbol();
 
 // Resources
-export const resourceKey = Symbol() as InjectionKey<Ref<Resource>>;
+export const resourceKey: InjectionKey<Ref<Resource>> = Symbol();
 
 // RouteNames
-export const contactRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
-export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const enquiryRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
-export const projectAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
-export const projectIntakeRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const projectNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
-export const projectRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
+export const contactRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
+export const enquiryConfirmRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
+export const enquiryPermitConfirmRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
+export const enquiryProjectConfirmRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
+export const enquiryRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
+export const projectAuthorizationRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
+export const projectIntakeRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
+export const projectNoteRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
+export const projectRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
 
 // Services
-export const projectServiceKey = Symbol() as InjectionKey<Ref<IProjectService>>;
-export const draftableProjectServiceKey = Symbol() as InjectionKey<Ref<IDraftableProjectService>>;
+export const projectServiceKey: InjectionKey<Ref<IProjectService>> = Symbol();
+export const draftableProjectServiceKey: InjectionKey<Ref<IDraftableProjectService>> = Symbol();
