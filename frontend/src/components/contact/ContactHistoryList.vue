@@ -10,6 +10,7 @@ import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
+import type { RouteLocationRaw } from 'vue-router';
 import type { Enquiry, Pagination, Project } from '@/types';
 
 // Props
@@ -40,7 +41,7 @@ function getUsersName(userId: string) {
 }
 
 function getRouteToObject(data: Project | Enquiry) {
-  let toObject = {};
+  let toObject: RouteLocationRaw;
   if ('electrificationProjectId' in data) {
     toObject = {
       name: RouteName.INT_ELECTRIFICATION_PROJECT,

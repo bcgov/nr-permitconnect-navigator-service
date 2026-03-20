@@ -28,18 +28,13 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-require-imports': 'error',
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
       'linebreak-style': ['error', 'unix'],
       'max-len': ['warn', { code: 120, comments: 120, ignoreUrls: true }],
       'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-      // TODO: Remove the following when ESLint is upgraded to 10.x
-      'no-unassigned-vars': 'error',
-      'no-useless-assignment': 'error',
-      'preserve-caught-error': ['error', { requireCatchParameter: true }]
+      semi: ['error', 'always']
     }
   }
 );
