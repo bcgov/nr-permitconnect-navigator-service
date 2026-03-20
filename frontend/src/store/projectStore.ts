@@ -2,6 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Document, Enquiry, NoteHistory, Permit, Project } from '@/types';
@@ -107,6 +108,7 @@ export const useProjectStore = defineStore('project', () => {
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
     getProject: computed(() => state.project.value),
+    getProjectIsCompleted: computed(() => state.project.value?.applicationStatus === ApplicationStatus.COMPLETED),
     getRoadmapNote: computed(() => state.roadmapNote.value)
   };
 

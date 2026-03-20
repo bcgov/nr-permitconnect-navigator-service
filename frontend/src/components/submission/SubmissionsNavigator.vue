@@ -234,7 +234,6 @@ watch(activeTabIndex, (newIndex) => {
   // Preserve existing queries if the tab index hasn't changed
   if (route.query.tab === newIndex.toString()) {
     router.replace({
-      name: RouteName.INT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()
@@ -243,7 +242,6 @@ watch(activeTabIndex, (newIndex) => {
   } else {
     // Wipe out the query when switching to a new tab
     router.replace({
-      name: RouteName.INT_HOUSING,
       query: {
         tab: newIndex.toString()
       }

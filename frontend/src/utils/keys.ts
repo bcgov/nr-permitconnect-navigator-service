@@ -20,7 +20,9 @@ export const enquiryConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName
 export const enquiryPermitConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const enquiryProjectConfirmRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const enquiryRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
+export const projectAuthorizationRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
 export const projectIntakeRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
+export const projectNoteRouteNameKey = Symbol() as InjectionKey<Ref<RouteName>>;
 export const projectRouteNameKey = Symbol() as InjectionKey<Ref<RouteName | undefined>>;
 
 // Services

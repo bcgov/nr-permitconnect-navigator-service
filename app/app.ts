@@ -23,6 +23,7 @@ const log = getLogger(module.filename);
 const appRouter = express.Router();
 const app = express();
 app.disable('x-powered-by');
+app.set('trust proxy', 1);
 app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
