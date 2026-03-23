@@ -6,7 +6,15 @@ import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
 import { PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 
-import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
+import type {
+  AccessRequest,
+  Contact,
+  ElectrificationProject,
+  GeneralProject,
+  HousingProject,
+  Permit,
+  User
+} from './models';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { EmailTemplate } from '../utils/templates';
 
@@ -386,7 +394,7 @@ export interface PermitUpdateEmailParams {
   emailTemplate: EmailTemplate;
 }
 
-export type Project = HousingProject | ElectrificationProject;
+export type Project = ElectrificationProject | GeneralProject | HousingProject;
 
 interface SplitDatetimeBase<T> {
   date: T;
