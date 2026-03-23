@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import { Button, Card } from '@/lib/primevue';
 import { PermitState } from '@/utils/enums/permit';
 
@@ -25,7 +25,7 @@ const { t } = useI18n();
       <div class="flex justify-between items-center">
         <h6 class="mb-0 font-bold">{{ permit.permitType?.name }}</h6>
         <div class="flex items-center gap-5">
-          <AuthorizationStatusPill
+          <AuthorizationStatePill
             v-if="
               permit.state !== PermitState.NONE &&
               permit.state !== PermitState.IN_PROGRESS &&

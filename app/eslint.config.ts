@@ -28,7 +28,6 @@ export default tseslint.config(
     rules: {
       '@typescript-eslint/no-require-imports': 'error',
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
       'linebreak-style': ['error', 'unix'],
       'max-len': ['warn', { code: 120, comments: 120, ignoreUrls: true }],

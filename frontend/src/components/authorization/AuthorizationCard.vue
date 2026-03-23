@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
 import { PermitState } from '@/utils/enums/permit';
@@ -52,13 +52,13 @@ function toCopy(toCopy: string) {
     <template #content>
       <div class="flex gap-2">
         <span :class="permit.state !== PermitState.NONE ? 'pb-4' : ''">
-          <AuthorizationStatusPill
+          <AuthorizationStatePill
             v-if="permit.state !== PermitState.NONE"
             :state="permit.state"
           />
         </span>
         <StatusPill
-          :stage="permit.stage"
+          :status="permit.stage"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />

@@ -2,7 +2,7 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/permit';
 
 // Props
 const {
@@ -28,69 +28,6 @@ const enlargedDimensions = {
   lineHeight: '2rem'
 };
 
-const pillState = {
-  [PermitState.CANCELLED]: {
-    badgeClass: 'red',
-    iconClass: '',
-    iconString: 'fas fa-circle-xmark',
-    toolTip: PermitStateDescriptions.CANCELLED
-  },
-  [PermitState.DENIED]: {
-    badgeClass: 'red',
-    iconClass: '',
-    iconString: 'fas fa-circle-xmark',
-    toolTip: PermitStateDescriptions.DENIED
-  },
-  [PermitState.APPROVED]: {
-    badgeClass: 'green',
-    iconClass: '',
-    iconString: 'fas fa-circle-check',
-    toolTip: PermitStateDescriptions.APPROVED
-  },
-  [PermitState.IN_PROGRESS]: {
-    badgeClass: 'green',
-    iconClass: '',
-    iconString: '',
-    toolTip: PermitStateDescriptions.IN_PROGRESS
-  },
-  [PermitState.INITIAL_REVIEW]: {
-    badgeClass: 'green',
-    iconClass: '',
-    iconString: '',
-    toolTip: PermitStateDescriptions.INITIAL_REVIEW
-  },
-  [PermitState.ISSUED]: {
-    badgeClass: 'green',
-    iconClass: '',
-    iconString: 'fas fa-circle-check',
-    toolTip: PermitStateDescriptions.ISSUED
-  },
-  [PermitState.NONE]: {
-    badgeClass: 'grey',
-    iconClass: '',
-    iconString: '',
-    toolTip: PermitStateDescriptions.NONE
-  },
-  [PermitState.PENDING_CLIENT]: {
-    badgeClass: 'yellow',
-    iconClass: '',
-    iconString: 'fas fa-circle-exclamation',
-    toolTip: PermitStateDescriptions.PENDING_CLIENT
-  },
-  [PermitState.REJECTED]: {
-    badgeClass: 'red',
-    iconClass: '',
-    iconString: 'fas fa-circle-xmark',
-    toolTip: PermitStateDescriptions.REJECTED
-  },
-  [PermitState.WITHDRAWN]: {
-    badgeClass: 'grey',
-    iconClass: '',
-    iconString: '',
-    toolTip: PermitStateDescriptions.WITHDRAWN
-  }
-};
-
 // Composables
 const { t } = useI18n();
 
@@ -99,8 +36,71 @@ const getState = computed(() => {
   return pillState[state as keyof typeof pillState];
 });
 
+const pillState = {
+  [PermitState.APPROVED]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: 'fas fa-circle-check',
+    toolTip: t('authorization.stateDescriptions.approved')
+  },
+  [PermitState.CANCELLED]: {
+    badgeClass: 'red',
+    iconClass: '',
+    iconString: 'fas fa-circle-xmark',
+    toolTip: t('authorization.stateDescriptions.cancelled')
+  },
+  [PermitState.DENIED]: {
+    badgeClass: 'red',
+    iconClass: '',
+    iconString: 'fas fa-circle-xmark',
+    toolTip: t('authorization.stateDescriptions.denied')
+  },
+  [PermitState.IN_PROGRESS]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: '',
+    toolTip: t('authorization.stateDescriptions.inProgress')
+  },
+  [PermitState.INITIAL_REVIEW]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: '',
+    toolTip: t('authorization.stateDescriptions.initialReview')
+  },
+  [PermitState.ISSUED]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: 'fas fa-circle-check',
+    toolTip: t('authorization.stateDescriptions.issued')
+  },
+  [PermitState.NONE]: {
+    badgeClass: 'grey',
+    iconClass: '',
+    iconString: '',
+    toolTip: undefined
+  },
+  [PermitState.PENDING_CLIENT]: {
+    badgeClass: 'yellow',
+    iconClass: '',
+    iconString: 'fas fa-circle-exclamation',
+    toolTip: t('authorization.stateDescriptions.pendingClient')
+  },
+  [PermitState.REJECTED]: {
+    badgeClass: 'red',
+    iconClass: '',
+    iconString: 'fas fa-circle-xmark',
+    toolTip: t('authorization.stateDescriptions.rejected')
+  },
+  [PermitState.WITHDRAWN]: {
+    badgeClass: 'grey',
+    iconClass: '',
+    iconString: '',
+    toolTip: t('authorization.stateDescriptions.withdrawn')
+  }
+};
+
 const statePillDisplayText = {
-  [PermitState.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+  [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
 };
 </script>
 
@@ -108,7 +108,7 @@ const statePillDisplayText = {
   <div class="flex">
     <div
       v-tooltip.right="getState?.toolTip"
-      class="flex justify-center items-center auth-indicator"
+      class="flex justify-center items-center rounded auth-indicator"
       :class="[getState?.badgeClass]"
       :style="{
         '--font-size': dimensions.fontSize,
@@ -141,7 +141,6 @@ const statePillDisplayText = {
 
 <style scoped lang="scss">
 .auth-indicator {
-  border-radius: 0.125rem;
   border-style: solid;
   border-width: 0.1rem;
   font-size: var(--font-size);

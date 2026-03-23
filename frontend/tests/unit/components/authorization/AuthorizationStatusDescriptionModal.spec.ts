@@ -3,6 +3,12 @@ import { shallowMount } from '@vue/test-utils';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import PrimeVue from 'primevue/config';
 
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: vi.fn()
+  })
+}));
+
 beforeEach(() => {
   vi.clearAllMocks();
 });
