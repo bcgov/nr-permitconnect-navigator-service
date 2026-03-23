@@ -11,17 +11,17 @@ export interface IProject extends IStamps {
   assignedUserId?: string;
   applicationStatus: ApplicationStatus;
 
-  companyIdRegistered: string;
-  companyNameRegistered: string;
+  companyIdRegistered?: string | null;
+  companyNameRegistered?: string;
   hasRelatedEnquiry: boolean;
   queuePriority: number;
   submissionType: SubmissionType;
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
-  astNotes: string;
+  astNotes?: string;
   atsClientId: number | null;
-  atsEnquiryId: string | null;
+  atsEnquiryId: number | null;
   addedToAts: boolean;
   aaiUpdated: boolean;
 

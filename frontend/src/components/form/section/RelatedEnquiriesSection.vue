@@ -31,7 +31,7 @@ useFormErrorWatcher(formRef, 'RelatedEnquiriesSection', tab);
       {{ t('i.housing.project.projectForm.relatedEnquiries') }}
     </h4>
     <InputText
-      name="relatedEnquiries"
+      name="relatedEnquiries.csv"
       :label="t('i.housing.project.projectForm.relatedEnquiriesLabel')"
       :disabled="true"
     />

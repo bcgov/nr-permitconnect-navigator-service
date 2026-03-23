@@ -5,16 +5,18 @@ import { inject, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Company } from '@/components/common/icons';
-import { AutoComplete, InputText } from '@/components/form';
+import { AutoComplete, InputText, Select } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
 import { externalApiService } from '@/services';
-import { useFormStore } from '@/store';
+import { useAppStore, useFormStore } from '@/store';
 import { updateLiveNameKey } from '@/utils/keys';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import type { OrgBookOption } from '@/types';
+import { YES_NO_LIST } from '@/utils/constants/application';
+import { Initiative } from '@/utils/enums/application';
 
 // Props
 const { tab = 0 } = defineProps<{
@@ -30,12 +32,12 @@ if (!updateLiveName) {
 
 // Composables
 const { t } = useI18n();
-const setCompanyIdRegistered = useSetFieldValue('project.companyIdRegistered');
-const setCompanyNameRegistered = useSetFieldValue('project.companyNameRegistered');
+const setCompanyIdRegistered = useSetFieldValue('companyProjectName.companyIdRegistered');
+const setCompanyNameRegistered = useSetFieldValue('companyProjectName.companyNameRegistered');
 
 // Store
-const formStore = useFormStore();
-const { getEditable } = storeToRefs(formStore);
+const { getInitiative } = storeToRefs(useAppStore());
+const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
@@ -73,13 +75,13 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
     </template>
     <div class="grid grid-cols-3 gap-x-6 gap-y-6">
       <InputText
-        name="project.projectName"
+        name="companyProjectName.projectName"
         :label="t('i.housing.project.projectForm.projectNameLabel')"
         :disabled="!getEditable"
         @on-input="(e: Event) => updateLiveName((e.target as HTMLInputElement).value)"
       />
       <AutoComplete
-        name="project.companyNameRegistered"
+        name="companyProjectName.companyNameRegistered"
         :label="t('i.housing.project.projectForm.companyLabel')"
         :bold="true"
         :disabled="!getEditable"
@@ -97,9 +99,23 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
         "
       />
       <InputText
-        name="project.companyIdRegistered"
+        name="companyProjectName.companyIdRegistered"
         :label="t('i.common.projectForm.bcRegistryId')"
         :disabled="true"
+      />
+      <Select
+        v-if="getInitiative === Initiative.GENERAL"
+        name="companyProjectName.activityType"
+        :label="t('i.common.projectForm.activityType')"
+        :disabled="!getEditable"
+        :options="['Other']"
+      />
+      <Select
+        v-if="getInitiative === Initiative.GENERAL"
+        name="companyProjectName.isRegisteredInBc"
+        :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
+        :disabled="!getEditable"
+        :options="YES_NO_LIST"
       />
     </div>
   </Panel>

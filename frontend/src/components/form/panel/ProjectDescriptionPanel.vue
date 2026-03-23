@@ -43,7 +43,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionPanel', tab);
       </div>
     </template>
     <TextArea
-      name="projectDescription"
+      name="projectDescription.description"
       :disabled="!getEditable"
     />
   </Panel>

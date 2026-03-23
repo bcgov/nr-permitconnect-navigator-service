@@ -71,7 +71,7 @@ onBeforeMount(async () => {
     </template>
     <div>
       <TextArea
-        name="locationPidsAuto"
+        name="locationPids.auto"
         :disabled="true"
       />
       <Button

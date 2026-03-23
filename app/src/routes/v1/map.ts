@@ -17,7 +17,7 @@ const INITIATIVE_RESOURCE_MAP = new Map<Initiative, Resource>([
   [Initiative.HOUSING, Resource.HOUSING_PROJECT]
 ]);
 
-/** Get PIDs for a housing project */
+/** Get PIDs for a project */
 router.get(
   '/pids/:projectId',
   async (req: Request, res: Response, next: NextFunction) => {

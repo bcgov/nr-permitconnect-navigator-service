@@ -43,7 +43,7 @@ useFormErrorWatcher(formRef, 'AstNotesPanel', tab);
       </div>
     </template>
     <TextArea
-      name="astNotes"
+      name="astNotes.notes"
       :disabled="!getEditable"
     />
   </Panel>

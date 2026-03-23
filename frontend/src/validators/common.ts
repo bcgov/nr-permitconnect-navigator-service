@@ -4,21 +4,22 @@ import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { Regex } from '@/utils/enums/application';
 import { ProjectLocation } from '@/utils/enums/projectCommon';
 
-export const assignedToValidator = mixed()
-  .test('expect-user-or-empty', 'Assigned to must be empty or a selected user', (obj) => {
-    if (typeof obj === 'object') return true;
-    if (typeof obj === 'string') {
-      return obj === null || obj === undefined || obj.length === 0;
-    }
-  })
-  .nullable()
-  .label('Assigned to');
+export const assignedToValidator = (message: string, label: string) =>
+  mixed()
+    .test('expect-user-or-empty', message, (obj) => {
+      if (typeof obj === 'object') return true;
+      if (typeof obj === 'string') {
+        return obj === null || obj === undefined || obj.length === 0;
+      }
+    })
+    .nullable()
+    .label(label);
 
-export const atsClientIdValidator = number().notRequired().min(0).integer().label('ATS Client #');
+export const atsClientIdValidator = (label: string) => number().nullable().min(0).integer().label(label);
 
 export const emailValidator = (message: string) => string().matches(new RegExp(Regex.EMAIL), message);
 
-export const latitudeValidator = number().notRequired().min(48).max(60).label('Latitude');
+export const latitudeValidator = (label: string) => number().notRequired().min(48).max(60).label(label);
 
 export const locationValidator = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Natural disaster'),
@@ -54,7 +55,7 @@ export const locationValidator = object({
   projectLocationDescription: string()
 });
 
-export const longitudeValidator = number().notRequired().min(-139).max(-114).label('Longitude');
+export const longitudeValidator = (label: string) => number().notRequired().min(-139).max(-114).label(label);
 
 export const notInFutureValidator = date().test('not-in-future', 'Date cannot be in the future', (value) => {
   if (!value) return true;

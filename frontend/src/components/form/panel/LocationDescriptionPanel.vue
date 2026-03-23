@@ -43,7 +43,7 @@ useFormErrorWatcher(formRef, 'LocationDescriptionPanel', tab);
       </div>
     </template>
     <InputText
-      name="projectLocationDescription"
+      name="locationDescription.description"
       :disabled="!getEditable"
     />
   </Panel>
