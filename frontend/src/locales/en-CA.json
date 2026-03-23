@@ -31,6 +31,67 @@
       "logout": "Log out"
     }
   },
+  "validators": {
+    "astNotes": {
+      "notes": "Automated Status Tool (AST) notes"
+    },
+    "atsClientId": {
+      "label": "ATS Client #"
+    },
+    "atsInfo": {
+      "businessArea": "Business area"
+    },
+    "companyProjectName": {
+      "activityType": "Activity type",
+      "companyNameRegistered": "Company name",
+      "projectName": "Project name",
+      "isRegisteredInBc": "Is Registered in BC"
+    },
+    "contactCardNavForm": {
+      "contactApplicantRelationship": "Relationship to project",
+      "contactEmail": "Contact email",
+      "contactFirstName": "Contact first name",
+      "contactLastName": "Contact last name",
+      "contactPhoneNumber": "Contact phone number",
+      "contactPreference": "Preferred contact method",
+      "validContact": "Contact email must be valid"
+    },
+    "location": {
+      "geomarkUrl": "Geomark URL",
+      "streetAddress": "Street address",
+      "latitude": "Latitude",
+      "longitude": "Longitude",
+      "locality": "Locality",
+      "province": "Province",
+      "locationPids": "Location PID(s)",
+      "naturalDisaster": "Affected by natural disaster"
+    },
+    "locationDescription": {
+      "description": "Additional information about location"
+    },
+    "projectAreasUpdated": {
+      "aaiUpdated": "Authorization and Approvals Insight (AAI) updated",
+      "addedToAts": "Authorized Tracking System (ATS) updated",
+      "ltsaCompleted": "Land Title Survey Authority (LTSA) completed",
+      "bcOnlineCompleted": "BC Online completed"
+    },
+    "projectDescription": {
+      "description": "Additional information about project"
+    },
+    "relatedEnquiries": {
+      "csv": "Related enquiries"
+    },
+    "submissionState": {
+      "applicationStatus": "Project state",
+      "area": "Area",
+      "assignedTo": "Assigned to",
+      "assignedToMsg": "Assigned to must be empty or a selected user",
+      "queuePriority": "Priority",
+      "queuePriorityNumber": "Priority must be a number",
+      "region": "Region",
+      "submissionType": "Submission type"
+    }
+  },
   "views": {
     "homeView": {
       "cantNavigate": "Please contact and administrator to verify your permissions",
@@ -308,6 +369,7 @@
         "savedMessage": "Form saved"
       },
       "projectForm": {
+        "activityType": "Activity type",
         "failedMessage": "Failed to save project",
         "reopenReject": "Cancel",
         "reopenAccept": "Confirm",
@@ -362,6 +424,7 @@
           "additionalInfoHeader": "Additional information about project",
           "addressSearchPlaceholder": "Type to search the address of your housing project",
           "affectedByNaturalDisaster": "Affected by natural disaster?",
+          "areaLabel": "Area",
           "assignedToLabel": "Assigned to",
           "astNotesHeader": "Automated Status Tool (AST) Notes",
           "atsClientEnquiryPushed": "New client and enquiry pushed to ATS",
@@ -375,9 +438,10 @@
           "basicInfoMissing": "Basic information is required. Please scroll up and fill it out.",
           "bcHousing": "BC Housing",
           "bcOnlineCompleted": "BC Online completed",
+          "businessAreaLabel": "Business area",
           "cancel": "Cancel",
           "companyLabel": "Company",
-          "companyProject": "Company and Project name",
+          "companyProject": "Company and Project Information",
           "companyRegisteredInBC": "Company registered in B.C?",
           "confirm": "Confirm",
           "downloadGeoJson": "Download GeoJSON",
@@ -407,6 +471,7 @@
           "projectNameLabel": "Project name",
           "projectStateLabel": "Project state",
           "province": "Province",
+          "regionLabel": "Region",
           "relatedEnquiries": "Related enquiries",
           "relatedEnquiriesLabel": "Related enquiries",
           "reopenSubmission": "Re-open submission",

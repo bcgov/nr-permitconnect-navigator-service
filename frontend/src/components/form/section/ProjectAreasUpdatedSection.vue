@@ -5,9 +5,10 @@ import { useI18n } from 'vue-i18n';
 
 import { Checkbox } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
-import { useFormStore } from '@/store';
+import { useAppStore, useFormStore } from '@/store';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
+import { Initiative } from '@/utils/enums/application';
 
 // Props
 const { tab = 0 } = defineProps<{
@@ -18,6 +19,7 @@ const { tab = 0 } = defineProps<{
 const { t } = useI18n();
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const { getEditable } = storeToRefs(useFormStore());
 
 // State
@@ -36,25 +38,28 @@ useFormErrorWatcher(formRef, 'ProjectAreasUpdatedSection', tab);
       {{ t('i.housing.project.projectForm.updatesHeader') }}
     </h4>
     <Checkbox
-      name="addedToAts"
+      v-if="getInitiative !== Initiative.GENERAL"
+      name="projectAreasUpdated.addedToAts"
       class="mb-4"
       :label="t('i.housing.project.projectForm.atsUpdated')"
       :disabled="!getEditable"
     />
     <Checkbox
+      v-if="getInitiative !== Initiative.GENERAL"
       class="col-span-12 mb-4"
-      name="ltsaCompleted"
+      name="projectAreasUpdated.ltsaCompleted"
       :label="t('i.housing.project.projectForm.ltsaCompleted')"
       :disabled="!getEditable"
     />
     <Checkbox
+      v-if="getInitiative !== Initiative.GENERAL"
       class="col-span-12 mb-4"
-      name="bcOnlineCompleted"
+      name="projectAreasUpdated.bcOnlineCompleted"
       :label="t('i.housing.project.projectForm.bcOnlineCompleted')"
       :disabled="!getEditable"
     />
     <Checkbox
-      name="aaiUpdated"
+      name="projectAreasUpdated.aaiUpdated"
       :label="t('i.housing.project.projectForm.aaiUpdateLabel')"
       :disabled="!getEditable"
     />

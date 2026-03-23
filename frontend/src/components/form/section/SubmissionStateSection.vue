@@ -6,10 +6,16 @@ import { useI18n } from 'vue-i18n';
 import { EditableSelect, Select } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { userService } from '@/services';
-import { useFormStore, useProjectStore } from '@/store';
+import { useAppStore, useFormStore, useProjectStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
-import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { IdentityProviderKind, Regex } from '@/utils/enums/application';
+import {
+  APPLICATION_STATUS_LIST,
+  AREA_LIST,
+  QUEUE_PRIORITY,
+  REGION_LIST,
+  SUBMISSION_TYPE_LIST
+} from '@/utils/constants/projectCommon';
+import { IdentityProviderKind, Initiative, Regex } from '@/utils/enums/application';
 import { findIdpConfig } from '@/utils/utils';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
@@ -25,6 +31,7 @@ const { tab = 0 } = defineProps<{
 const { t } = useI18n();
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const { getEditable } = storeToRefs(useFormStore());
 const { getProject } = storeToRefs(useProjectStore());
 
@@ -82,12 +89,25 @@ onBeforeMount(async () => {
         @on-input="onAssigneeInput"
       />
       <Select
+        v-if="getInitiative === Initiative.GENERAL"
+        name="submissionState.region"
+        :label="t('i.housing.project.projectForm.regionLabel')"
+        :disabled="!getEditable"
+        :options="REGION_LIST"
+      />
+      <Select
+        v-if="getInitiative === Initiative.GENERAL"
+        name="submissionState.area"
+        :label="t('i.housing.project.projectForm.areaLabel')"
+        :disabled="!getEditable"
+        :options="AREA_LIST"
+      />
+      <Select
         name="submissionState.applicationStatus"
         :label="t('i.housing.project.projectForm.projectStateLabel')"
         :disabled="!getEditable"
         :options="APPLICATION_STATUS_LIST"
       />
-
       <Select
         name="submissionState.submissionType"
         :label="t('i.housing.project.projectForm.submissionTypeLabel')"

@@ -9,7 +9,7 @@ export type GeneralProject = {
   projectApplicantType: ProjectApplicant;
   geoJson?: GeoJSON;
   projectLocation: string;
-  projectLocationDescription: string;
+  projectLocationDescription?: string;
   locality: string;
   province: string;
   locationPids: string;
@@ -18,7 +18,5 @@ export type GeneralProject = {
   streetAddress: string;
   geomarkUrl: string;
   naturalDisaster: boolean;
-  ltsaCompleted: boolean;
-  bcOnlineCompleted: boolean;
   hasAppliedProvincialPermits: boolean;
 } & IProject;
