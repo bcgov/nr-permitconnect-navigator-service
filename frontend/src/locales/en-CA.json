@@ -481,6 +481,7 @@
       "authorizationStatus": "Authorization status",
       "authStatusConditionNewNone": "Authorization status can only be 'None' if the authorization state is 'Pre-submission'.",
       "authStatusConditionInProPre": "Authorization status cannot be 'In progress' if the authorization state is 'Post-decision'.",
+      "authStatusConditionAccepted": "Authorization status can only be 'Accepted' if the authorization state is 'Application submission'.",
       "automatePublish": "Automate and Publish",
       "businessDomain": "Business domain:",
       "cancel": "Cancel",
@@ -556,6 +557,7 @@
       "statusNotVerified": "This status has not yet been verified."
     },
     "stateDescriptions": {
+      "accepted": "The application has been accepted by the initial reviewing authority.",
       "approved": "The application review process is completed and approved.",
       "cancelled": "The application has been cancelled by the reviewing authority.",
       "denied": "The application review process is completed, however, the reviewing authority has decided to not approve the application.",

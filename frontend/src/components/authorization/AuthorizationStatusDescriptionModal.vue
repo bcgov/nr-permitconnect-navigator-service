@@ -60,6 +60,12 @@ const visible = defineModel<boolean>('visible');
     </div>
     <div class="my-6">
       <div class="flex">
+        <AuthorizationStatePill :state="PermitState.ACCEPTED" />
+      </div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.accepted') }}</div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
         <AuthorizationStatePill :state="PermitState.IN_PROGRESS" />
       </div>
       <div class="mt-2">{{ t('authorization.stateDescriptions.inProgress') }}</div>

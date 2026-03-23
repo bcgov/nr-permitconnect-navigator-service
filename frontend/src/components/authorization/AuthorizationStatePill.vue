@@ -37,6 +37,12 @@ const getState = computed(() => {
 });
 
 const pillState = {
+  [PermitState.ACCEPTED]: {
+    badgeClass: 'green',
+    iconClass: '',
+    iconString: '',
+    toolTip: t('authorization.stateDescriptions.accepted')
+  },
   [PermitState.APPROVED]: {
     badgeClass: 'green',
     iconClass: '',

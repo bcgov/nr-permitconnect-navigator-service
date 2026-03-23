@@ -54,6 +54,10 @@ const previous = (trackerStatus: string) => ({
 // State
 const descriptionModalVisible: Ref<boolean> = ref(false);
 const statusBoxStates = {
+  [PermitState.ACCEPTED]: {
+    boxClass: 'green',
+    message: t('authorization.stateDescriptions.accepted')
+  },
   [PermitState.APPROVED]: {
     boxClass: 'green',
     message: t('authorization.stateDescriptions.approved')

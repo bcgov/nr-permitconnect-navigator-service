@@ -22,6 +22,7 @@ const APPLICATION_PROCESS_ORDERING: string[] = [
   'SUBMITTED',
   'INITIAL_SUBMISSION_REVIEW',
   'SUBMISSION_REVIEW',
+  'ACCEPTED',
   'TECH_REVIEW_COMMENT',
   'TECHNICAL_REVIEW',
   'REFERRAL',
@@ -40,7 +41,7 @@ const APPLICATION_PROCESS_ORDERING: string[] = [
 ];
 
 /**
- * Inferred process ordering mapping
+ * Inferred process ordering mapping for quick ordering rank look up
  */
 const APPLICATION_PROCESS_ORDERING_MAP: Record<string, number> = APPLICATION_PROCESS_ORDERING.reduce(
   (acc, code, index) => {
@@ -66,6 +67,12 @@ const STATUS_MAPPINGS: Record<string, { stage: PermitStage; state: PermitState }
   SUBMISSION_REVIEW: {
     stage: PermitStage.APPLICATION_SUBMISSION,
     state: PermitState.INITIAL_REVIEW
+  },
+
+  // Application Submission - Accepted
+  ACCEPTED: {
+    stage: PermitStage.APPLICATION_SUBMISSION,
+    state: PermitState.ACCEPTED
   },
 
   // Technical Review - In Progress
