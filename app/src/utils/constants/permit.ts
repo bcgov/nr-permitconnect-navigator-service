@@ -12,6 +12,7 @@ export const PERMIT_STAGE_LIST = [
 
 export const PERMIT_STATE_LIST = [
   PermitState.INITIAL_REVIEW,
+  PermitState.ACCEPTED,
   PermitState.PENDING_CLIENT,
   PermitState.IN_PROGRESS,
   PermitState.APPROVED,

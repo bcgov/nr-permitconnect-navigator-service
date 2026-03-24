@@ -30,6 +30,7 @@ export enum PermitStage {
 
 export enum PermitState {
   INITIAL_REVIEW = 'Initial review',
+  ACCEPTED = 'Accepted',
   PENDING_CLIENT = 'Pending client action',
   IN_PROGRESS = 'In progress',
   APPROVED = 'Approved',

@@ -1,5 +1,12 @@
 import { PermitState, PermitNeeded, PermitStage } from '@/utils/enums/permit';
 
+export const ONGOING_PERMIT_STATES = [
+  PermitState.ACCEPTED,
+  PermitState.IN_PROGRESS,
+  PermitState.INITIAL_REVIEW,
+  PermitState.PENDING_CLIENT
+];
+
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 
 export const PERMIT_STAGE_LIST = [
@@ -12,6 +19,7 @@ export const PERMIT_STAGE_LIST = [
 
 export const PERMIT_STATE_LIST = [
   PermitState.INITIAL_REVIEW,
+  PermitState.ACCEPTED,
   PermitState.PENDING_CLIENT,
   PermitState.IN_PROGRESS,
   PermitState.APPROVED,

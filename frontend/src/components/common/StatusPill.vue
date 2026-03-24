@@ -4,14 +4,14 @@ import { computed } from 'vue';
 // Props
 const {
   enlarge = false,
-  stage = undefined,
+  status = undefined,
   bgColor = undefined,
   borderColor = undefined,
   icon = undefined,
   contentColor = 'var(--p-greyscale-900)'
 } = defineProps<{
   enlarge?: boolean;
-  stage?: string;
+  status?: string;
   bgColor?: string;
   borderColor?: string;
   icon?: string;
@@ -37,7 +37,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
 <template>
   <div class="flex">
     <div
-      class="flex justify-center items-center status-indicator rounded"
+      class="flex justify-center items-center rounded status-indicator"
       :style="{
         '--font-size': dimensions.fontSize,
         '--icon-font-size': dimensions.iconFontSize,
@@ -46,7 +46,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
         ...(bgColor ? { backgroundColor: `${bgColor}` } : {}),
         ...(borderColor ? { borderColor: `${borderColor}`, borderWidth: '0.1rem' } : { borderWidth: '0' })
       }"
-      :aria-label="stage"
+      :aria-label="status"
     >
       <font-awesome-icon
         v-if="icon"
@@ -54,7 +54,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
         :style="{ fontSize: dimensions.iconFontSize, color: `${contentColor}` }"
         class="mr-2"
       />
-      <span :style="{ color: `${contentColor}` }">{{ stage }}</span>
+      <span :style="{ color: `${contentColor}` }">{{ status }}</span>
     </div>
   </div>
 </template>

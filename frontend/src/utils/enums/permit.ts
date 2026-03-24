@@ -14,6 +14,7 @@ export enum PermitStage {
 
 export enum PermitState {
   INITIAL_REVIEW = 'Initial review',
+  ACCEPTED = 'Accepted',
   PENDING_CLIENT = 'Pending client action',
   IN_PROGRESS = 'In progress',
   APPROVED = 'Approved',
@@ -23,19 +24,4 @@ export enum PermitState {
   REJECTED = 'Rejected',
   WITHDRAWN = 'Withdrawn by client',
   NONE = 'None'
-}
-
-export enum PermitStateDescriptions {
-  INITIAL_REVIEW = 'Your application has been received and is being reviewed for completeness.',
-  // eslint-disable-next-line max-len
-  PENDING_CLIENT = 'The application is currently pending the applicant’s action in response to the reviewing authority’s request.',
-  IN_PROGRESS = 'The application is currently active.',
-  APPROVED = 'The application review process is completed and approved.',
-  ISSUED = 'Your permit has been issued.',
-  CANCELLED = 'The application has been cancelled by the reviewing authority.',
-  // eslint-disable-next-line max-len
-  DENIED = 'The application review process is completed, however, the reviewing authority has decided to not approve the application.',
-  REJECTED = 'Your application has been rejected by the reviewing authority.',
-  WITHDRAWN = 'The application has been withdrawn by the applicant.',
-  NONE = ''
 }

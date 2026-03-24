@@ -24,7 +24,7 @@ const emit = defineEmits(['update:setVerifiedDate']);
 const { t } = useI18n();
 
 const stateDisplayText = {
-  [PermitState.CANCELLED]: t('authorization.authorizationStatusPill.cancelledByReviewingAuthority')
+  [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
 };
 </script>
 

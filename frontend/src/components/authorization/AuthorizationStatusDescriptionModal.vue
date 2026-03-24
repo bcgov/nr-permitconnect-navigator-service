@@ -1,8 +1,14 @@
 <script setup lang="ts">
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
-import { Dialog } from '@/lib/primevue';
-import { PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
+import { useI18n } from 'vue-i18n';
 
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
+import { Dialog } from '@/lib/primevue';
+import { PermitState } from '@/utils/enums/permit';
+
+// Compossables
+const { t } = useI18n();
+
+// State
 const visible = defineModel<boolean>('visible');
 </script>
 
@@ -14,103 +20,106 @@ const visible = defineModel<boolean>('visible');
     class="app-info-dialog w-6/12"
   >
     <template #header>
-      <span class="p-dialog-title">What does the status mean?</span>
+      <span class="p-dialog-title">{{ t('authorization.authorizationStatusDescriptionModal.header') }}</span>
     </template>
-    <h4 class="mb-6">Application stages</h4>
-    <div>The application reviewing process includes four stages.</div>
+    <h4 class="mb-6">{{ t('authorization.authorizationStatusDescriptionModal.applicationStages') }}</h4>
+    <div>{{ t('authorization.authorizationStatusDescriptionModal.reviewProcess') }}</div>
     <div class="my-6">
-      <div class="text-lg font-bold mb-2">Application submission</div>
+      <div class="text-lg font-bold mb-2">{{ t('authorization.authorizationStatusDescriptionModal.submission') }}</div>
       <div>
-        The application submission stage begins when an application is submitted to the Province and concludes once the
-        reviewing authority has verified its completeness and deems the application complete.
+        {{ t('authorization.authorizationStatusDescriptionModal.submissionDescription') }}
       </div>
     </div>
     <div class="my-6">
-      <div class="text-lg font-bold mb-2">Technical review</div>
+      <div class="text-lg font-bold mb-2">
+        {{ t('authorization.authorizationStatusDescriptionModal.technicalReview') }}
+      </div>
       <div>
-        The technical review stage is when the reviewing authority conducts a thorough evaluation of the application and
-        prepares recommendations for making a decision. If applicable, this phase includes First Nation Consultation
-        processes.
+        {{ t('authorization.authorizationStatusDescriptionModal.technicalReviewDescription') }}
       </div>
     </div>
     <div class="my-6">
-      <div class="text-lg font-bold mb-2">Pending decision</div>
+      <div class="text-lg font-bold mb-2">{{ t('authorization.authorizationStatusDescriptionModal.pending') }}</div>
       <div>
-        The pending decision stage is when the decision-makers review the evaluation and recommendations and make their
-        final decision.
+        {{ t('authorization.authorizationStatusDescriptionModal.pendingDescription') }}
       </div>
     </div>
     <div class="my-6">
-      <div class="text-lg font-bold mb-2">Post-decision</div>
+      <div class="text-lg font-bold mb-2">{{ t('authorization.authorizationStatusDescriptionModal.post') }}</div>
       <div>
-        The post-decision stage is when a decision was made and notifications on the decision have been sent out, it
-        concludes the application.
+        {{ t('authorization.authorizationStatusDescriptionModal.postDescription') }}
       </div>
     </div>
 
-    <h4 class="mb-6">Application statuses</h4>
+    <h4 class="mb-6">{{ t('authorization.authorizationStatusDescriptionModal.appplicationStatuses') }}</h4>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.INITIAL_REVIEW" />
+        <AuthorizationStatePill :state="PermitState.INITIAL_REVIEW" />
       </div>
-      <div class="mt-2">{{ PermitStateDescriptions.INITIAL_REVIEW }}</div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.initialReview') }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.IN_PROGRESS" />
+        <AuthorizationStatePill :state="PermitState.ACCEPTED" />
       </div>
-      <div class="mt-2">{{ PermitStateDescriptions.IN_PROGRESS }}</div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.accepted') }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.PENDING_CLIENT" />
+        <AuthorizationStatePill :state="PermitState.IN_PROGRESS" />
+      </div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.inProgress') }}</div>
+    </div>
+    <div class="my-6">
+      <div class="flex">
+        <AuthorizationStatePill :state="PermitState.PENDING_CLIENT" />
       </div>
       <div class="mt-2">
-        {{ PermitStateDescriptions.PENDING_CLIENT }}
+        {{ t('authorization.stateDescriptions.pendingClient') }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.WITHDRAWN" />
+        <AuthorizationStatePill :state="PermitState.WITHDRAWN" />
       </div>
-      <div class="mt-2">{{ PermitStateDescriptions.WITHDRAWN }}</div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.withdrawn') }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.CANCELLED" />
+        <AuthorizationStatePill :state="PermitState.CANCELLED" />
       </div>
-      <div class="mt-2">{{ PermitStateDescriptions.CANCELLED }}</div>
+      <div class="mt-2">{{ t('authorization.stateDescriptions.cancelled') }}</div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.REJECTED" />
+        <AuthorizationStatePill :state="PermitState.REJECTED" />
       </div>
       <div class="mt-2">
-        {{ PermitStateDescriptions.REJECTED }}
+        {{ t('authorization.stateDescriptions.rejected') }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.DENIED" />
+        <AuthorizationStatePill :state="PermitState.DENIED" />
       </div>
       <div class="mt-2">
-        {{ PermitStateDescriptions.DENIED }}
+        {{ t('authorization.stateDescriptions.denied') }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.APPROVED" />
+        <AuthorizationStatePill :state="PermitState.APPROVED" />
       </div>
       <div class="mt-2">
-        {{ PermitStateDescriptions.APPROVED }}
+        {{ t('authorization.stateDescriptions.approved') }}
       </div>
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatusPill :state="PermitState.ISSUED" />
+        <AuthorizationStatePill :state="PermitState.ISSUED" />
       </div>
       <div class="mt-2">
-        {{ PermitStateDescriptions.ISSUED }}
+        {{ t('authorization.stateDescriptions.issued') }}
       </div>
     </div>
   </Dialog>

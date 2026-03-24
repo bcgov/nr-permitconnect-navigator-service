@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import { Button, Card } from '@/lib/primevue';
+import { ONGOING_PERMIT_STATES } from '@/utils/constants/permit';
 import { PermitState } from '@/utils/enums/permit';
 
 import type { Permit } from '@/types';
@@ -17,6 +19,11 @@ const emit = defineEmits(['authorizationCardLite:more']);
 
 // Composables
 const { t } = useI18n();
+
+// State
+const isTerminalState = computed(() => {
+  return ![PermitState.NONE, ...ONGOING_PERMIT_STATES].includes(permit.state);
+});
 </script>
 
 <template>
@@ -25,12 +32,8 @@ const { t } = useI18n();
       <div class="flex justify-between items-center">
         <h6 class="mb-0 font-bold">{{ permit.permitType?.name }}</h6>
         <div class="flex items-center gap-5">
-          <AuthorizationStatusPill
-            v-if="
-              permit.state !== PermitState.NONE &&
-              permit.state !== PermitState.IN_PROGRESS &&
-              permit.state !== PermitState.PENDING_CLIENT
-            "
+          <AuthorizationStatePill
+            v-if="isTerminalState"
             :state="permit.state"
           />
           <Button

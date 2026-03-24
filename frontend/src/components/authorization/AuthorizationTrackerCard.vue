@@ -3,10 +3,10 @@ import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Card, Timeline } from '@/lib/primevue';
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import { formatDateOnly, formatDateTime } from '@/utils/formatters';
-import { PermitStage, PermitState, PermitStateDescriptions } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/permit';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
@@ -54,45 +54,49 @@ const previous = (trackerStatus: string) => ({
 // State
 const descriptionModalVisible: Ref<boolean> = ref(false);
 const statusBoxStates = {
-  [PermitState.CANCELLED]: {
-    boxClass: 'red',
-    message: PermitStateDescriptions.CANCELLED
-  },
-  [PermitState.DENIED]: {
-    boxClass: 'red',
-    message: PermitStateDescriptions.DENIED
+  [PermitState.ACCEPTED]: {
+    boxClass: 'green',
+    message: t('authorization.stateDescriptions.accepted')
   },
   [PermitState.APPROVED]: {
     boxClass: 'green',
-    message: PermitStateDescriptions.APPROVED
+    message: t('authorization.stateDescriptions.approved')
+  },
+  [PermitState.CANCELLED]: {
+    boxClass: 'red',
+    message: t('authorization.stateDescriptions.cancelled')
+  },
+  [PermitState.DENIED]: {
+    boxClass: 'red',
+    message: t('authorization.stateDescriptions.denied')
   },
   [PermitState.IN_PROGRESS]: {
     boxClass: 'green',
-    message: PermitStateDescriptions.IN_PROGRESS
+    message: t('authorization.stateDescriptions.inProgress')
   },
   [PermitState.INITIAL_REVIEW]: {
     boxClass: 'green',
-    message: PermitStateDescriptions.IN_PROGRESS
+    message: t('authorization.stateDescriptions.initialReview')
   },
   [PermitState.ISSUED]: {
     boxClass: 'green',
-    message: PermitStateDescriptions.ISSUED
+    message: t('authorization.stateDescriptions.issued')
   },
   [PermitState.NONE]: {
     boxClass: 'grey',
-    message: PermitStateDescriptions.NONE
+    message: undefined
   },
   [PermitState.PENDING_CLIENT]: {
     boxClass: 'yellow',
-    message: PermitStateDescriptions.PENDING_CLIENT
+    message: t('authorization.stateDescriptions.pendingClient')
   },
   [PermitState.REJECTED]: {
     boxClass: 'red',
-    message: PermitStateDescriptions.REJECTED
+    message: t('authorization.stateDescriptions.rejected')
   },
   [PermitState.WITHDRAWN]: {
     boxClass: 'grey',
-    message: PermitStateDescriptions.WITHDRAWN
+    message: t('authorization.stateDescriptions.withdrawn')
   }
 };
 
@@ -229,7 +233,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
       >
         <div class="flex justify-between items-center">
           <div class="py-4 px-6 flex">
-            <AuthorizationStatusPill
+            <AuthorizationStatePill
               :state="permit?.state"
               :enlarge="true"
             />

@@ -94,6 +94,11 @@ const formSchema = object({
     .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
       const { stage } = this.parent;
       return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
+    })
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionAccepted'), function (value) {
+      const { stage } = this.parent;
+      if (value === PermitState.ACCEPTED) return stage === PermitStage.APPLICATION_SUBMISSION;
+      return true;
     }),
   submittedDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.submittedDate')),
   decisionDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.decisionDate')),

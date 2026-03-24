@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
 import { formatDateOnly, formatDateTime } from '@/utils/formatters';
@@ -30,13 +30,13 @@ const { t } = useI18n();
 
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12 flex mb-4">
-          <AuthorizationStatusPill
+          <AuthorizationStatePill
             class="mr-2"
             :state="permit.state"
           />
           <StatusPill
             class="mr-2"
-            :stage="permit.stage"
+            :status="permit.stage"
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />

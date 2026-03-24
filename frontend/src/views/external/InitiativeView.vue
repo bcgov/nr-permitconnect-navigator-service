@@ -3,7 +3,7 @@ import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
+import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
@@ -330,7 +330,7 @@ onBeforeMount(async () => {
             >
               <h5 class="font-bold mb-0">{{ project.projectName }}</h5>
             </router-link>
-            <AuthorizationStatusPill
+            <AuthorizationStatePill
               v-if="hasPendingAuth(project.activityId)"
               class="my-1"
               :state="PermitState.PENDING_CLIENT"
