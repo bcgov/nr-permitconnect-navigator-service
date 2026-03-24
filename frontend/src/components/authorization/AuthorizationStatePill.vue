@@ -122,13 +122,12 @@ const statePillDisplayText = {
         '--height': dimensions.height,
         '--line-height': dimensions.lineHeight
       }"
-      role="tooltip"
-      :aria-label="getState?.toolTip"
     >
       <div
         v-tooltip.focus.right="getState?.toolTip"
-        aria-hidden="true"
         tabindex="0"
+        :aria-label="getState?.toolTip"
+        class="focus:outline-none"
       >
         <font-awesome-icon
           v-if="getState?.iconString"
