@@ -64,8 +64,8 @@ export const useProjectStore = defineStore('project', () => {
           ![PermitState.NONE, ...ONGOING_PERMIT_STATES].includes(p.state as PermitState) &&
           ![PermitNeeded.NO, PermitNeeded.UNDER_INVESTIGATION].includes(p.needed as PermitNeeded)
       );
-      const authsIssued = authsCompleted.filter((p) => p.state === PermitState.APPROVED).sort(permitNameSortFcn);
-      const authsNotIssued = authsCompleted.filter((p) => p.state !== PermitState.APPROVED).sort(permitNameSortFcn);
+      const authsIssued = authsCompleted.filter((p) => p.state === PermitState.ISSUED).sort(permitNameSortFcn);
+      const authsNotIssued = authsCompleted.filter((p) => p.state !== PermitState.ISSUED).sort(permitNameSortFcn);
 
       return [...authsIssued, ...authsNotIssued];
     }),
