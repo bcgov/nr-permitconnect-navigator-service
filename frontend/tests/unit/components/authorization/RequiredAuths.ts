@@ -24,7 +24,8 @@ vi.mock('vue-router', () => ({
 const wrapperSettings = () => ({
   props: {
     authsNeeded: [],
-    authsNotNeeded: []
+    authsNotNeeded: [],
+    authsUnderInvestigation: []
   },
   global: {
     plugins: [

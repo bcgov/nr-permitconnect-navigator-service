@@ -94,6 +94,7 @@ const {
   getAuthsNeeded,
   getAuthsNotNeeded,
   getAuthsOnGoing,
+  getAuthsUnderInvestigation,
   getNoteHistoryShownToProponent,
   getProject,
   getRelatedEnquiries
@@ -131,6 +132,8 @@ const assigneeName: Ref<string> = computed(() => {
 const createdByName: Ref<string> = computed(() => {
   return createdBy.value?.firstName ? `${createdBy.value.firstName} ${createdBy.value?.lastName}` : '';
 });
+
+const authsPotentiallyNeeded = computed(() => [...getAuthsNeeded.value, ...getAuthsUnderInvestigation.value]);
 
 onBeforeMount(async () => {
   try {
@@ -278,18 +281,21 @@ onBeforeMount(async () => {
               {{ t('views.e.projectView.disclaimer') }}
             </div>
             <div>
-              <h3 class="mb-8 mt-16">{{ t('views.e.projectView.requiredAuths') }} ({{ getAuthsNeeded?.length }})</h3>
+              <h3 class="mb-8 mt-16">
+                {{ t('views.e.projectView.requiredAuths') }} ({{ authsPotentiallyNeeded?.length }})
+              </h3>
             </div>
             <div
-              v-if="!getAuthsNeeded?.length"
+              v-if="!authsPotentiallyNeeded?.length"
               class="empty-block p-8 mb-2"
             >
               {{ t('views.e.projectView.requiredAuthsEmpty') }}
             </div>
             <RequiredAuths
-              v-if="getAuthsNeeded?.length"
+              v-else
               :auths-needed="getAuthsNeeded"
               :auths-not-needed="getAuthsNotNeeded"
+              :auths-under-investigation="getAuthsUnderInvestigation"
             />
             <h3 class="mt-20 mb-8">{{ t('views.e.projectView.ongoingAuths') }}</h3>
 
