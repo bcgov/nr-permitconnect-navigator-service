@@ -29,6 +29,7 @@ import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 import type {
   Activity,
   ActivityContact,
+  CodingEvent,
   Contact,
   CurrentAuthorization,
   CurrentContext,
@@ -566,6 +567,24 @@ export const TEST_NOTE_HISTORY_2: NoteHistory = {
   deletedAt: null
 };
 
+export const TEST_PEACH_ON_HOLD_EVENT_1: CodingEvent = {
+  event: { start_datetime: '2024-02-15T09:07:09.123Z' },
+  coding: {
+    code: 'MISSING_INFORMATION',
+    code_set: ['MISSING_INFORMATION'],
+    code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/on_hold_process'
+  }
+};
+
+export const TEST_PEACH_ON_HOLD_EVENT_2: CodingEvent = {
+  event: { start_datetime: '2024-02-16T09:07:09.123Z' },
+  coding: {
+    code: 'CLIENT_REQUEST',
+    code_set: ['CLIENT_REQUEST'],
+    code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/on_hold_process'
+  }
+};
+
 export const TEST_PEACH_RECORD_1: PeachRecord = {
   transaction_id: '11111111-1111-4111-8111-111111111111',
   version: '0.1.0',
@@ -575,11 +594,20 @@ export const TEST_PEACH_RECORD_1: PeachRecord = {
   record_id: 'REC-SUB',
   process_event_set: [
     {
-      event: { start_date: '2024-02-01' },
+      event: { start_date: '2024-01-29' },
       process: {
         code: 'SUBMITTED',
         code_display: 'Submitted',
         code_set: ['APPLICATION', 'PRE_APPLICATION', 'SUBMITTED'],
+        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+      }
+    },
+    {
+      event: { start_date: '2024-02-01' },
+      process: {
+        code: 'REFERRAL',
+        code_display: 'Referral',
+        code_set: ['APPLICATION', 'TECH_REVIEW_COMMENT', 'REFERRAL'],
         code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
       }
     }
@@ -601,29 +629,6 @@ export const TEST_PEACH_RECORD_2: PeachRecord = {
         code: 'ALLOWED',
         code_display: 'Allowed',
         code_set: ['APPLICATION', 'DECISION', 'ALLOWED'],
-        code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
-      }
-    }
-  ],
-  on_hold_event_set: []
-};
-
-export const TEST_PEACH_RECORD_ISSUED: PeachRecord = {
-  transaction_id: '55555555-5555-4555-8555-555555555555',
-  version: '0.1.0',
-  kind: 'Record',
-  record_kind: 'Permit',
-  system_id: PeachIntegratedSystem.VFCBC,
-  record_id: 'REC-ISSUED',
-  process_event_set: [
-    {
-      // NOTE: start_date only (no start_datetime) so we hit
-      // the piesEventToDate "else" branch.
-      event: { start_date: '2024-07-01' },
-      process: {
-        code: 'ISSUED',
-        code_display: 'Issued',
-        code_set: ['APPLICATION', 'ISSUANCE', 'ISSUED'],
         code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
       }
     }
