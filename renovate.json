@@ -1,0 +1,19 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "local>bcgov/renovate-config#2026.01"
+  ],
+  "automerge": true,
+  "branchPrefix": "chore/",
+  "dependencyDashboard": true,
+  "draftPR": false,
+  "minimumReleaseAge": "3 days",
+  "mode": "silent",
+  "prConcurrentLimit": 2,
+  "pruneStaleBranches": true,
+  "rangeStrategy": "pin",
+  "schedule": [
+    "* * * * 2"
+  ],
+  "timezone": "America/Vancouver"
+}
