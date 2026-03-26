@@ -16,8 +16,7 @@ export type Code = string;
  * Represents an event concept. It allows either a date or a datetime, but not a mix of both. One of the start
  * properties is required, but the end properties are optional.
  */
-export type Event = Event1 & Event2;
-export type Event2 = Date | DateTime;
+export type Event = Date | DateTime;
 /**
  * Represents a process tracking concept.
  */
@@ -84,40 +83,38 @@ export interface Coding {
    */
   code_system: string;
 }
-export interface Event1 {
+/**
+ * This schema is used when the event starts with a date (`start_date`), and optionally, an end date (`end_date`) can be
+ * specified. Mixing a start date with a datetime is not allowed.
+ */
+export interface Date {
   /**
    * The start date of the event in RFC 3339 format (e.g., `2024-12-01`).
    */
-  start_date?: string;
-  /**
-   * The start datetime of the event in RFC 3339 format (e.g., `2024-12-01T10:00:00.0000000Z`). Only UTC time is
-   * allowed.
-   */
-  start_datetime?: string;
+  start_date: string;
+  start_datetime?: never;
   /**
    * The end date of the event in RFC 3339 format (e.g., `2024-12-01`). This is optional if `start_date` is used.
    */
   end_date?: string;
-  /**
-   * The end datetime of the event in RFC 3339 format (e.g., `2024-12-01T10:00:00.0000000Z`). Only UTC time is allowed.
-   * This is optional if `start_datetime` is used.
-   */
-  end_datetime?: string;
-}
-/**
- * This schema is used when the event starts with a date (`start_date`), and optionally, an end date (`end_date`) can
- * be specified. Mixing a start date with a datetime is not allowed.
- */
-export interface Date {
-  start_date: string;
-  end_date?: string;
+  end_datetime?: never;
 }
 /**
  * This schema is used when the event starts with a datetime (`start_datetime`), and optionally, an end datetime
  * (`end_datetime`) can be specified. Mixing a start datetime with a date is not allowed.
  */
 export interface DateTime {
+  start_date?: never;
+  /**
+   * The start datetime of the event in RFC 3339 format (e.g., `2024-12-01T10:00:00.0000000Z`). Only UTC time is
+   * allowed.
+   */
   start_datetime: string;
+  end_date?: never;
+  /**
+   * The end datetime of the event in RFC 3339 format (e.g., `2024-12-01T10:00:00.0000000Z`). Only UTC time is allowed.
+   * This is optional if `start_datetime` is used.
+   */
   end_datetime?: string;
 }
 /**
