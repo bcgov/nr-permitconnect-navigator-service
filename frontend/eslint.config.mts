@@ -64,7 +64,6 @@ export default defineConfig([
   {
     rules: {
       'eol-last': ['error', 'always'],
-      indent: ['error', 2, { SwitchCase: 1 }],
       'linebreak-style': ['error', 'unix'],
       'jsdoc/require-jsdoc': 'off', // TODO: Turn this back on later
       'max-len': ['warn', { code: 120, comments: 120, ignorePattern: '^(import\\s.+|\\} from)', ignoreUrls: true }],
@@ -73,15 +72,7 @@ export default defineConfig([
       'no-empty-function': ['error', { allow: ['arrowFunctions'] }],
       '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions'] }],
       quotes: ['error', 'single'],
-      semi: ['error', 'always'],
-      // TODO: Remove the following when ESLint is upgraded to 10.x
-      'no-unassigned-vars': 'error',
-      /**
-       * error by default: set to off because it explodes local vue state
-       * relying on @see {https://github.com/vuejs/eslint-plugin-vue} to update/handle appropriately
-       */
-      'no-useless-assignment': 'off',
-      'preserve-caught-error': ['error', { requireCatchParameter: true }]
+      semi: ['error', 'always']
     }
   }
 ]);
