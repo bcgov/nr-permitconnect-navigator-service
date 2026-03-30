@@ -6,7 +6,7 @@ import {
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED
 } from '../data/index.ts';
-import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peachParser.ts';
+import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peach.ts';
 import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
 
 import type { ProcessEvent } from '../../../src/types/index.ts';

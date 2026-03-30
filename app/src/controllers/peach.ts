@@ -1,6 +1,6 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
-import { parsePeachRecords, summarizePeachRecord } from '../parsers/peachParser.ts';
+import { parsePeachRecords, summarizePeachRecord } from '../parsers/peach.ts';
 import { getPeachRecord } from '../services/peach.ts';
 import { searchPermits, upsertPermit } from '../services/permit.ts';
 import { combineDateTime, compareDates, omit, Problem } from '../utils/index.ts';
