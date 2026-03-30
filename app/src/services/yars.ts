@@ -1,7 +1,5 @@
 /* TODO: Create group policy details type and set explicit return types */
-
-import { createBucket } from './coms.ts';
-import { Initiative, GroupName, Action } from '../utils/enums/application.ts';
+import { Initiative, GroupName } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { Group } from '../types/index.ts';
@@ -10,16 +8,14 @@ import type { Group } from '../types/index.ts';
  * Assigns an identity to the given group
  * Assigns permissions to COMS based on the given group
  * @param tx Prisma transaction client
- * @param bearerToken The bearer token of the authorized user
  * @param sub Subject of the authorized user
  * @param groupId The group ID to add the user to
  * @returns A Promise that resolve to an object with a subject and role id
  */
 export const assignGroup = async (
   tx: PrismaTransactionClient,
-  bearerToken: string | undefined,
   sub: string,
-  groupId?: number
+  groupId: number
 ): Promise<{ sub: string; roleId: number }> => {
   const groupResult = await tx.group.findFirstOrThrow({
     where: {
@@ -33,20 +29,6 @@ export const assignGroup = async (
       groupId: groupResult.groupId
     }
   });
-
-  const comsPermsMap = new Map<GroupName, Action[]>([
-    [GroupName.PROPONENT, [Action.CREATE]],
-    [GroupName.NAVIGATOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-    [GroupName.NAVIGATOR_READ_ONLY, [Action.READ]],
-    [GroupName.SUPERVISOR, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-    [GroupName.ADMIN, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]],
-    [GroupName.DEVELOPER, [Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]]
-  ]);
-
-  const comsPerms = comsPermsMap.get(groupResult.name as GroupName);
-  if (comsPerms && bearerToken) {
-    await createBucket(bearerToken, comsPerms);
-  }
 
   return { sub: result.sub, roleId: result.groupId };
 };

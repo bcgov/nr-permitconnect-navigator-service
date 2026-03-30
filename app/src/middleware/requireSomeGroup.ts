@@ -1,4 +1,5 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { assignPermissions } from '../services/coms.ts';
 import { assignGroup, getGroups, getSubjectGroups } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
@@ -17,30 +18,37 @@ import type { PrismaTransactionClient } from '../db/dataConnection.ts';
  */
 export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const idp = (req.currentContext?.tokenPayload as any).identity_provider;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const sub = (req.currentContext?.tokenPayload as any).sub;
+    const idp = req.currentContext?.tokenPayload?.identity_provider;
+    const sub = req.currentContext?.tokenPayload?.sub;
+
+    if (!sub) {
+      throw new Problem(403, {
+        detail: 'Unable to obtain token sub',
+        instance: req.originalUrl
+      });
+    }
 
     let groups = await getSubjectGroups(tx, sub);
 
     if (idp !== IdentityProviderKind.IDIR) {
       const required = [Initiative.ELECTRIFICATION, Initiative.HOUSING, Initiative.PCNS];
       const missing = required.filter((x) => !groups.some((g) => g.initiativeCode === x));
-      await Promise.all(
-        missing.map(async (x) => {
-          const g = await getGroups(tx, x);
 
-          await assignGroup(
-            tx,
-            req.currentContext.bearerToken,
-            sub,
-            g.find((x) => x.name === GroupName.PROPONENT)?.groupId
-          );
-        })
-      );
+      if (missing.length) {
+        await Promise.all(
+          missing.map(async (x) => {
+            const g = await getGroups(tx, x);
 
-      groups = await getSubjectGroups(tx, sub);
+            const groupId = g.find((x) => x.name === GroupName.PROPONENT)?.groupId;
+            if (groupId) await assignGroup(tx, sub, groupId);
+          })
+        );
+
+        groups = await getSubjectGroups(tx, sub);
+
+        // Assign COMS permissions
+        await assignPermissions(tx, req.currentContext);
+      }
     }
 
     if (groups.length === 0) {

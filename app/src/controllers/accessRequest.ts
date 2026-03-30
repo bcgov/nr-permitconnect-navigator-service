@@ -87,7 +87,7 @@ export const createUserAccessRequestController = async (
       }
 
       // Assign new group
-      await assignGroup(tx, req.currentContext.bearerToken, user.sub, accessRequest.groupId);
+      await assignGroup(tx, user.sub, accessRequest.groupId);
 
       // Mock an access request for the response
       data = {
@@ -98,7 +98,7 @@ export const createUserAccessRequestController = async (
       };
     } else if (isAdmin) {
       if (accessRequest.grant) {
-        await assignGroup(tx, req.currentContext.bearerToken, user.sub, accessRequest.groupId);
+        await assignGroup(tx, user.sub, accessRequest.groupId);
         // Mock an access request for the response
         data = {
           userId: userResponse?.userId,
@@ -157,7 +157,7 @@ export const processUserAccessRequestController = async (
               throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
             }
 
-            await assignGroup(tx, undefined, userResponse.sub, accessRequest.groupId);
+            await assignGroup(tx, userResponse.sub, accessRequest.groupId);
           } else {
             // Remove requested group if provided - otherwise remove all user groups for initiative
             const groupsToRemove = accessRequest.groupId
