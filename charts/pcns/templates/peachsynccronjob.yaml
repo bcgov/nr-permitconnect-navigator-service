@@ -52,7 +52,6 @@ spec:
                   value: production
                 - name: SERVER_LOGLEVEL
                   value: "verbose"
-                # Note: PEACH currently unauthenticated. If/when PEACH requires auth, add the required secrets here.
                 - name: SERVER_DB_DATABASE
                   valueFrom:
                     secretKeyRef:
@@ -80,6 +79,16 @@ spec:
                     secretKeyRef:
                       key: password
                       name: {{ include "pcns.configname" . }}-ches-service-account
+                - name: SERVER_PEACH_CLIENTID
+                  valueFrom:
+                  secretKeyRef:
+                    key: username
+                    name: {{ include "pcns.configname" . }}-peach
+                - name: SERVER_PEACH_CLIENTSECRET
+                  valueFrom:
+                    secretKeyRef:
+                      key: password
+                      name: {{ include "pcns.configname" . }}-peach
               envFrom:
                 - configMapRef:
                     name: {{ include "pcns.configname" . }}-config
