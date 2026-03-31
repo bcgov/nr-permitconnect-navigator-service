@@ -185,6 +185,30 @@ describe('utils', () => {
       expect(utils.formatDateOnly('2025-13-05')).toEqual('');
       expect(utils.formatDateOnly('not-a-date')).toEqual('');
     });
+
+    it('returns leap years correctly', () => {
+      expect(utils.formatDateOnly('2024-02-29')).toEqual('February 29, 2024');
+      expect(utils.formatDateOnly('2025-02-29')).toEqual(''); // Invalid date
+    });
+
+    it('returns empty string for days that do not exist in a specific month', () => {
+      expect(utils.formatDateOnly('2025-04-31')).toEqual(''); // April has 30 days
+    });
+
+    it('rejects dates with extra time information or ISO formats', () => {
+      expect(utils.formatDateOnly('2025-11-28T12:00:00')).toEqual('');
+      expect(utils.formatDateOnly('2025-11-28 ')).toEqual('');
+    });
+
+    it('handles minimum and maximum valid-ish dates', () => {
+      expect(utils.formatDateOnly('0001-01-01')).toEqual('January 1, 0001');
+      expect(utils.formatDateOnly('9999-12-31')).toEqual('December 31, 9999');
+    });
+
+    it('returns empty string for month 00 or day 00', () => {
+      expect(utils.formatDateOnly('2025-00-01')).toEqual('');
+      expect(utils.formatDateOnly('2025-01-00')).toEqual('');
+    });
   });
 
   describe('getGitRevision', () => {
