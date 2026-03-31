@@ -32,7 +32,7 @@ export function addDashesToUuid(str: string): string {
 export function camelCaseToTitleCase(input: string | null): string | null {
   if (!input) return input;
 
-  const result = input.replace(/([A-Z])/g, ' $1');
+  const result = input.replaceAll(/([A-Z])/g, ' $1');
   return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
 }
 
@@ -44,10 +44,7 @@ export function camelCaseToTitleCase(input: string | null): string | null {
  */
 export const combineDateTime = (date?: string | null, time?: string | null): Date | undefined => {
   if (!date) return undefined;
-
-  if (!time) {
-    return new Date(`${date}T00:00:00.000Z`);
-  }
+  if (!time) return new Date(`${date}T00:00:00.000Z`);
 
   return new Date(`${date}T${time}`);
 };
