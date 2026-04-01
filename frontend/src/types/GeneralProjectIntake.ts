@@ -1,3 +1,4 @@
+import type { GeoJSON } from 'geojson';
 import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
@@ -10,22 +11,23 @@ export interface GeneralProjectIntake {
     projectDescription: string;
     projectName: string;
     projectNumber?: string;
-    registeredId?: string;
-    registeredName?: string;
+    registeredId?: string | null;
+    registeredName?: string | null;
   };
   contact: Contact;
   draftId?: string;
   location: {
-    geomarkUrl?: string;
-    latitude?: number;
-    locality?: string;
-    longitude?: number;
-    ltsaPidLookup?: string;
+    geomarkUrl?: string | null;
+    geoJson?: GeoJSON;
+    latitude?: number | null;
+    locality?: string | null;
+    longitude?: number | null;
+    ltsaPidLookup?: string | null;
     naturalDisaster: BasicResponse;
     projectLocation: string;
-    projectLocationDescription?: string;
-    province?: string;
-    streetAddress?: string;
+    projectLocationDescription?: string | null;
+    province?: string | null;
+    streetAddress?: string | null;
   };
   permits: {
     appliedPermits?: Partial<Permit>[];

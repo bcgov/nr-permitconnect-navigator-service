@@ -32,6 +32,7 @@ import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
+import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type {
@@ -164,7 +165,7 @@ function loadProjectValues() {
         longitude: project.longitude,
         ltsaPidLookup: project.locationPids,
         geomarkUrl: project.geomarkUrl,
-        projectLocationDescription: project?.projectLocationDescription,
+        projectLocationDescription: project.projectLocationDescription,
         geoJson: project.geoJson
       },
       permits: {
@@ -249,7 +250,8 @@ async function onSubmit(data: FormSchemaType) {
         locality: data.location.locality,
         province: data.location.province,
         geomarkUrl: data.location.geomarkUrl,
-        streetAddress: data.location.streetAddress
+        streetAddress: data.location.streetAddress,
+        geoJson: data.location.geoJson ? (data.location.geoJson as GeoJSON) : undefined
       },
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({

@@ -12,14 +12,14 @@ export interface IProject extends IStamps {
   applicationStatus: ApplicationStatus;
 
   companyIdRegistered?: string | null;
-  companyNameRegistered?: string;
+  companyNameRegistered?: string | null;
   hasRelatedEnquiry: boolean;
   queuePriority: number;
   submissionType: SubmissionType;
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
-  astNotes?: string;
+  astNotes?: string | null;
   atsClientId: number | null;
   atsEnquiryId: number | null;
   addedToAts: boolean;

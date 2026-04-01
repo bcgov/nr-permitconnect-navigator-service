@@ -20,12 +20,20 @@ import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesS
 import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, generalProjectService, mapService, userService } from '@/services';
-import { useAppStore, useProjectStore } from '@/store';
+import { useAppStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  Area,
+  BusinessArea,
+  FormState,
+  FormType,
+  Region
+} from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type {
@@ -34,7 +42,8 @@ import type {
   ATSEnquiryResource,
   Contact,
   DeepPartial,
-  GeneralProject
+  GeneralProject,
+  User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 
@@ -154,7 +163,7 @@ async function handleAtsCreate(values: GenericObject) {
 }
 
 async function initializeFormValues(project: GeneralProject): Promise<DeepPartial<FormSchemaType>> {
-  let assigneeOptions = [];
+  let assigneeOptions: User[] = [];
   if (project.assignedUserId)
     assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
 
@@ -186,7 +195,10 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      projectName: project.projectName
+      projectName: project.projectName,
+      projectNumber: project.projectNumber,
+      activityType: project.activityType,
+      isRegisteredInBc: project.isRegisteredInBc ? BasicResponse.YES : BasicResponse.NO
     },
 
     // Additional Info
@@ -202,14 +214,17 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     submissionState: {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
-      assignedUser: assigneeOptions[0] ?? null,
-      applicationStatus: project.applicationStatus
+      assignedUser: assigneeOptions[0]?.fullName ?? null,
+      applicationStatus: project.applicationStatus,
+      region: String(project.region),
+      area: String(project.area)
     },
 
     // ATS link
     atsInfo: {
       atsClientId: project.atsClientId,
-      atsEnquiryId: project.atsEnquiryId
+      atsEnquiryId: project.atsEnquiryId,
+      businessArea: String(project.businessArea)
     },
 
     relatedEnquiries: { csv: project.relatedEnquiries },
@@ -237,7 +252,6 @@ function onCancel() {
 }
 
 function onInvalidSubmit(e: GenericObject) {
-  console.log(e);
   const errors = Object.keys(e.errors);
 
   if (errors.includes('contact.firstName')) {
@@ -262,32 +276,23 @@ function onReOpen() {
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    const values: FormSchemaType = formValues as FormSchemaType;
+    // vee-validate doesn't get transformed data from yup so
+    // manually run the form values through it here
+    const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
 
     await handleAtsCreate(values);
 
-    console.log(values);
-
-    // Generate final submission object
-    const payload: GeneralProject = {
-      ...project,
-
-      assignedUserId: values.submissionState.assignedUser?.userId ?? undefined,
-      applicationStatus: values.submissionState.applicationStatus,
-
-      companyIdRegistered: values.companyProjectName.companyIdRegistered,
-      companyNameRegistered: values.companyProjectName.companyNameRegistered,
-      queuePriority: values.submissionState.queuePriority,
-      submissionType: values.submissionState.submissionType,
+    // Generate final payload
+    // TODO: Create a type using Pick instead of Partial?
+    const payload: Partial<GeneralProject> = {
+      // Company and Project Information
       projectName: values.companyProjectName.projectName,
-      projectDescription: values.projectDescription.description,
-      astNotes: values.astNotes.notes,
-      atsClientId: values.atsInfo.atsClientId ?? null,
-      atsEnquiryId: values.atsInfo.atsEnquiryId ?? null,
-      aaiUpdated: values.projectAreasUpdated.aaiUpdated,
-      projectNumber: values.companyProjectName.projectNumber, // need to add this
-      // projectLocation: string; // was ist das
-      projectLocationDescription: values.locationDescription.description,
+      companyNameRegistered: values.companyProjectName.companyNameRegistered,
+      companyIdRegistered: values.companyProjectName.companyIdRegistered,
+      activityType: values.companyProjectName.activityType!, // Req for General but the type doesnt know until runtime
+      isRegisteredInBc: values.companyProjectName.isRegisteredInBc === BasicResponse.YES,
+
+      // Location
       locality: values.location.locality,
       province: values.location.province,
       locationPids: values.location.locationPids,
@@ -295,7 +300,32 @@ const onSubmit = async (formValues: GenericObject) => {
       longitude: values.location.longitude,
       streetAddress: values.location.streetAddress,
       geomarkUrl: values.location.geomarkUrl,
-      naturalDisaster: values.location.naturalDisaster === BasicResponse.YES
+      naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
+
+      // Additional Location Information
+      projectLocationDescription: values.locationDescription.description,
+
+      // Additional Project Information
+      projectDescription: values.projectDescription.description,
+
+      // AST Notes
+      astNotes: values.astNotes.notes,
+
+      // Submission State
+      assignedUserId: values.submissionState.assignedUser
+        ? (values.submissionState.assignedUser as User).userId
+        : undefined,
+      region: values.submissionState.region as Region,
+      area: values.submissionState.area as Area,
+      applicationStatus: values.submissionState.applicationStatus,
+      submissionType: values.submissionState.submissionType,
+      queuePriority: values.submissionState.queuePriority,
+
+      // ATS
+      businessArea: values.atsInfo.businessArea as BusinessArea,
+
+      // Updates
+      aaiUpdated: values.projectAreasUpdated.aaiUpdated
     };
 
     // Update project
@@ -307,9 +337,7 @@ const onSubmit = async (formValues: GenericObject) => {
 
     // Reinitialize the form
     formRef.value?.resetForm({
-      values: {
-        ...initializeFormValues(result.data)
-      }
+      values: await initializeFormValues(result.data)
     });
 
     toast.success(t('i.common.form.savedMessage'));
@@ -346,6 +374,8 @@ watch(primaryContact, (newContact, oldContact) => {
 });
 
 onBeforeMount(async () => {
+  useFormStore().setFormType(FormType.NAVIGATOR);
+  useFormStore().setFormState(FormState.UNLOCKED);
   locationPidsAuto.value = (await mapService.getPIDs(project.generalProjectId)).data;
 
   // Default form values

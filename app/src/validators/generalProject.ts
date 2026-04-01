@@ -6,7 +6,7 @@ import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
 import { validate } from '../middleware/validation';
-import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
+import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectApplicant } from '../utils/enums/housing.ts';
 import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
@@ -51,17 +51,6 @@ const schema = {
       })
     })
   },
-  emailConfirmation: {
-    body: Joi.object({
-      bcc: Joi.array().items(email).allow(null),
-      bodyType: Joi.string().required().allow(null),
-      body: Joi.string().required(),
-      cc: Joi.array().items(email),
-      from: email.required(),
-      subject: Joi.string().required(),
-      to: Joi.array().items(email).required()
-    })
-  },
   deleteGeneralProject: {
     params: Joi.object({
       generalProjectId: uuidv4.required()
@@ -96,17 +85,15 @@ const schema = {
   },
   updateGeneralProject: {
     body: Joi.object({
-      generalProjectId: uuidv4.required(),
-      activityId: activityId,
-      consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
       submissionType: Joi.string()
         .required()
         .valid(...SUBMISSION_TYPE_LIST),
-      submittedAt: Joi.string().required(),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
+      isRegisteredInBc: Joi.boolean().required(),
       projectName: Joi.string().required(),
+      activityType: Joi.string().required(),
       projectDescription: Joi.string().allow(null),
       streetAddress: Joi.string().allow(null).max(255),
       locality: Joi.string().allow(null).max(255),
@@ -118,12 +105,14 @@ const schema = {
       naturalDisaster: Joi.boolean().required(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
       ...atsValidator.atsEnquirySubmissionFields,
-      ltsaCompleted: Joi.boolean().required(),
-      bcOnlineCompleted: Joi.boolean().required(),
+      addedToAts: Joi.optional(),
       aaiUpdated: Joi.boolean().required(),
       astNotes: Joi.string().allow(null).max(4000),
       assignedUserId: uuidv4.allow(null),
-      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
+      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      region: Joi.string().allow(null),
+      area: Joi.string().allow(null),
+      businessArea: Joi.string() //TODO: add .valid() and make this list
     }),
     params: Joi.object({
       generalProjectId: uuidv4.required()
@@ -133,7 +122,6 @@ const schema = {
 
 export default {
   createGeneralProject: validate(schema.createGeneralProject),
-  emailConfirmation: validate(schema.emailConfirmation),
   deleteGeneralProject: validate(schema.deleteGeneralProject),
   deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),

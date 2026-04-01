@@ -119,8 +119,8 @@ const service: IGeneralProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: GeneralProject) {
-    return appAxios().put(`${Initiative.GENERAL.toLowerCase()}/${PATH}/${projectId}`, data);
+  updateProject(projectId: string, data: Partial<GeneralProject>) {
+    return appAxios().patch(`${Initiative.GENERAL.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 

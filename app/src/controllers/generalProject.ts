@@ -1,4 +1,5 @@
 import config from 'config';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -205,11 +206,7 @@ const generateGeneralProjectData = async (
       queuePriority: null,
       relatedPermits: null,
       astNotes: null,
-      astUpdated: false,
-      addedToAts: false,
       atsClientId: null,
-      ltsaCompleted: false,
-      bcOnlineCompleted: false,
       checkProvincialPermits: null,
       atsEnquiryId: null
     } as GeneralProject,
@@ -420,12 +417,19 @@ export const upsertGeneralProjectDraftController = async (req: Request<never, ne
   res.status(update ? 200 : 201).json(response);
 };
 
-export const updateGeneralProjectController = async (req: Request<never, never, GeneralProject>, res: Response) => {
+export const updateGeneralProjectController = async (
+  req: Request<{ generalProjectId: string }, never, Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>>,
+  res: Response
+) => {
   const response = await transactionWrapper<GeneralProject>(async (tx: PrismaTransactionClient) => {
-    return await updateGeneralProject(tx, {
-      ...req.body,
-      ...generateUpdateStamps(req.currentContext)
-    });
+    return await updateGeneralProject(
+      tx,
+      {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      },
+      req.params.generalProjectId
+    );
   });
 
   res.status(200).json(response);
