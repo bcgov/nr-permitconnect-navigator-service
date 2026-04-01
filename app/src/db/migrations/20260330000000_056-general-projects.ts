@@ -72,11 +72,7 @@ export async function up(knex: Knex): Promise<void> {
           table.integer('queue_priority');
           table.text('related_permits');
           table.text('ast_notes');
-          table.boolean('ast_updated').notNullable().defaultTo(false);
-          table.boolean('added_to_ats').notNullable().defaultTo(false);
           table.integer('ats_client_id');
-          table.boolean('ltsa_completed').notNullable().defaultTo(false);
-          table.boolean('bc_online_completed').notNullable().defaultTo(false);
           table.boolean('natural_disaster').notNullable().defaultTo(false);
           table.boolean('aai_updated').notNullable().defaultTo(false);
           table.text('application_status');
@@ -94,6 +90,11 @@ export async function up(knex: Knex): Promise<void> {
           table.text('geomark_url');
           table.integer('ats_enquiry_id');
           table.text('company_id_registered');
+          table.text('region');
+          table.text('area');
+          table.text('activity_type');
+          table.boolean('is_registered_in_bc');
+          table.text('business_area');
           stamps(knex, table);
         })
       )
