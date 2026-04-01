@@ -117,6 +117,12 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
         :disabled="!getEditable"
         :options="YES_NO_LIST"
       />
+      <InputText
+        v-if="getInitiative === Initiative.GENERAL"
+        name="companyProjectName.projectNumber"
+        :label="t('i.common.projectForm.projectNumber')"
+        :disabled="true"
+      />
     </div>
   </Panel>
 </template>

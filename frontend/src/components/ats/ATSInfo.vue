@@ -154,7 +154,7 @@ watch(visible, () => {
     <Select
       v-if="getInitiative === Initiative.GENERAL"
       class="w-full"
-      name="submissionState.businessArea"
+      name="atsInfo.businessArea"
       :label="t('i.housing.project.projectForm.businessAreaLabel')"
       :options="BUSINESS_AREA_LIST"
     />

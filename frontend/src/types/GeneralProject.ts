@@ -1,6 +1,6 @@
 import type { GeoJSON } from 'geojson';
 import type { IProject } from '@/interfaces/IProject';
-import type { ProjectApplicant } from '@/utils/enums/projectCommon';
+import type { Area, BusinessArea, ProjectApplicant, Region } from '@/utils/enums/projectCommon';
 
 export type GeneralProject = {
   generalProjectId: string;
@@ -9,14 +9,19 @@ export type GeneralProject = {
   projectApplicantType: ProjectApplicant;
   geoJson?: GeoJSON;
   projectLocation: string;
-  projectLocationDescription?: string;
-  locality: string;
-  province: string;
-  locationPids: string;
-  latitude: number;
-  longitude: number;
-  streetAddress: string;
-  geomarkUrl: string;
+  projectLocationDescription?: string | null;
+  locality?: string | null;
+  province?: string | null;
+  locationPids?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  streetAddress?: string | null;
+  geomarkUrl?: string | null;
   naturalDisaster: boolean;
   hasAppliedProvincialPermits: boolean;
+  activityType: string;
+  isRegisteredInBc: boolean;
+  region?: Region | null;
+  area?: Area | null;
+  businessArea?: BusinessArea | null;
 } & IProject;

@@ -113,7 +113,7 @@ router.get(
 );
 
 /** Updates a general project*/
-router.put(
+router.patch(
   '/:generalProjectId',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.UPDATE),
   hasAccess('generalProjectId'),

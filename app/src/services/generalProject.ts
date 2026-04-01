@@ -204,20 +204,19 @@ export const searchGeneralProjects = async (
 /**
  * Updates a specific general project
  * @param tx Prisma transaction client
- * @param data General project to update
+ * @param data General project data to update
+ * @param generalProjectId ID of the project to update
  * @returns A Promise that resolves to the updated general project
  */
 export const updateGeneralProject = async (
   tx: PrismaTransactionClient,
-  data: GeneralProjectBase
+  data: Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>,
+  generalProjectId: string
 ): Promise<GeneralProject> => {
   const result = await tx.general_project.update({
-    data: {
-      ...data,
-      geoJson: jsonToPrismaInputJson(data.geoJson)
-    },
+    data,
     where: {
-      generalProjectId: data.generalProjectId
+      generalProjectId
     },
     include: {
       activity: {
