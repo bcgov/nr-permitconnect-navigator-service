@@ -24,35 +24,45 @@ export const latitudeValidator = (label: string) => number().notRequired().min(4
 export const locationValidator = object({
   naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Natural disaster'),
   projectLocation: string().required().label('Location'),
-  streetAddress: string().when('projectLocation', {
-    is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-    then: () => string().required().max(255).label('Street address'),
-    otherwise: () => string().nullable()
-  }),
-  locality: string().when('projectLocation', {
-    is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-    then: () => string().required().max(255).label('Locality'),
-    otherwise: () => string().nullable()
-  }),
-  province: string().when('projectLocation', {
-    is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-    then: () => string().required().max(255).label('Province'),
-    otherwise: () => string().nullable()
-  }),
-  latitude: number().when('projectLocation', {
-    is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
-    then: () => number().required().min(48).max(60).label('Latitude'),
-    otherwise: () => number().nullable().min(48).max(60).label('Latitude')
-  }),
-  longitude: number().when('projectLocation', {
-    is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
-    then: () => number().required().min(-139).max(-114).label('Longitude'),
-    otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
-  }),
-  ltsaPidLookup: string().max(255).label('Parcel ID'),
-  geomarkUrl: string().max(255).label('Geomark web service url'),
+  streetAddress: string()
+    .nullable()
+    .when('projectLocation', {
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
+      then: () => string().required().max(255).label('Street address'),
+      otherwise: () => string().nullable()
+    }),
+  locality: string()
+    .nullable()
+    .when('projectLocation', {
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
+      then: () => string().required().max(255).label('Locality'),
+      otherwise: () => string().nullable()
+    }),
+  province: string()
+    .nullable()
+    .when('projectLocation', {
+      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
+      then: () => string().required().max(255).label('Province'),
+      otherwise: () => string().nullable()
+    }),
+  latitude: number()
+    .nullable()
+    .when('projectLocation', {
+      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
+      then: () => number().required().min(48).max(60).label('Latitude'),
+      otherwise: () => number().nullable().min(48).max(60).label('Latitude')
+    }),
+  longitude: number()
+    .nullable()
+    .when('projectLocation', {
+      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
+      then: () => number().required().min(-139).max(-114).label('Longitude'),
+      otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
+    }),
+  ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
+  geomarkUrl: string().max(255).nullable().label('Geomark web service url'),
   geoJson: mixed().nullable().label('geoJson'),
-  projectLocationDescription: string()
+  projectLocationDescription: string().nullable()
 });
 
 export const longitudeValidator = (label: string) => number().notRequired().min(-139).max(-114).label(label);
@@ -83,3 +93,17 @@ export const permitsValidator = object({
     })
   )
 });
+
+export const optionalText = (max?: number) => {
+  let schema = string().trim().emptyToNull().nullable();
+
+  if (max) {
+    schema = schema.max(max);
+  }
+
+  return schema;
+};
+
+export const requiredText = (max?: number) => {
+  return optionalText(max).required();
+};

@@ -91,14 +91,11 @@ const schema = {
   },
   updateHousingProject: {
     body: Joi.object({
-      housingProjectId: uuidv4.required(),
-      activityId: activityId.required(),
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
       submissionType: Joi.string()
         .required()
         .valid(...SUBMISSION_TYPE_LIST),
-      submittedAt: Joi.string().required(),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
       projectName: Joi.string().required(),

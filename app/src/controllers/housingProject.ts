@@ -1,4 +1,5 @@
 import config from 'config';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -487,18 +488,25 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
   res.status(update ? 200 : 201).json(response);
 };
 
-export const updateHousingProjectController = async (req: Request<never, never, HousingProject>, res: Response) => {
+export const updateHousingProjectController = async (
+  req: Request<{ housingProjectId: string }, never, Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>>,
+  res: Response
+) => {
   const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
-    return await updateHousingProject(tx, {
-      ...req.body,
-      financiallySupported: [
-        req.body.financiallySupportedBc,
-        req.body.financiallySupportedIndigenous,
-        req.body.financiallySupportedNonProfit,
-        req.body.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES),
-      ...generateUpdateStamps(req.currentContext)
-    });
+    return await updateHousingProject(
+      tx,
+      {
+        ...req.body,
+        financiallySupported: [
+          req.body.financiallySupportedBc,
+          req.body.financiallySupportedIndigenous,
+          req.body.financiallySupportedNonProfit,
+          req.body.financiallySupportedHousingCoop
+        ].includes(BasicResponse.YES),
+        ...generateUpdateStamps(req.currentContext)
+      },
+      req.params.housingProjectId
+    );
   });
 
   res.status(200).json(response);

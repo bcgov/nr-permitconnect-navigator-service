@@ -113,7 +113,7 @@ router.get(
 );
 
 /** Updates a housing project*/
-router.put(
+router.patch(
   '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE),
   hasAccess('housingProjectId'),

@@ -312,9 +312,7 @@ const onSubmit = async (formValues: GenericObject) => {
       astNotes: values.astNotes.notes,
 
       // Submission State
-      assignedUserId: values.submissionState.assignedUser
-        ? (values.submissionState.assignedUser as User).userId
-        : undefined,
+      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
       region: values.submissionState.region as Region,
       area: values.submissionState.area as Area,
       applicationStatus: values.submissionState.applicationStatus,

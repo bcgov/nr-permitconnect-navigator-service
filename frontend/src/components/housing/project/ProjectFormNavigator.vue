@@ -23,12 +23,12 @@ import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesS
 import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, housingProjectService, mapService, userService } from '@/services';
-import { useProjectStore } from '@/store';
+import { useAppStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type {
@@ -37,7 +37,8 @@ import type {
   ATSEnquiryResource,
   Contact,
   DeepPartial,
-  HousingProject
+  HousingProject,
+  User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
@@ -56,6 +57,7 @@ const confirm = useConfirm();
 const toast = useToast();
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const projectStore = useProjectStore();
 const { getActivityContacts } = storeToRefs(projectStore);
 
@@ -156,12 +158,11 @@ async function handleAtsCreate(values: GenericObject) {
 }
 
 async function initializeFormValues(project: HousingProject): Promise<DeepPartial<FormSchemaType>> {
-  let assigneeOptions = [];
+  let assigneeOptions: User[] = [];
   if (project.assignedUserId)
     assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
 
   return {
-    consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO,
     contact: {
       contactId: primaryContact.value?.contactId,
       firstName: primaryContact.value?.firstName,
@@ -194,27 +195,27 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
       geomarkUrl: project.geomarkUrl,
       naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
     },
-    locationPidsAuto: locationPidsAuto.value,
-    project: {
+    locationPids: { auto: locationPidsAuto.value },
+    companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
       projectName: project.projectName
     },
 
     // Additional Info
-    projectDescription: project.projectDescription,
+    projectDescription: { description: project.projectDescription },
 
     // Location
-    projectLocationDescription: project.projectLocationDescription,
+    locationDescription: { description: project.projectLocationDescription },
 
     // Automated Status Tool Notes
-    astNotes: project.astNotes,
+    astNotes: { notes: project.astNotes },
 
     // Submission state
     submissionState: {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
-      assignedUser: assigneeOptions[0] ?? null,
+      assignedUser: assigneeOptions[0]?.fullName ?? null,
       applicationStatus: project.applicationStatus
     },
 
@@ -228,16 +229,25 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
     },
 
     // ATS link
-    atsClientId: project.atsClientId,
-    atsEnquiryId: project.atsEnquiryId,
+    atsInfo: {
+      atsClientId: project.atsClientId,
+      atsEnquiryId: project.atsEnquiryId
+    },
+
+    // Related enquiries
+    relatedEnquiries: { csv: project.relatedEnquiries },
 
     // Updates
-    aaiUpdated: project.aaiUpdated,
-    addedToAts: project.addedToAts,
-    ltsaCompleted: project.ltsaCompleted,
-    bcOnlineCompleted: project.bcOnlineCompleted,
-    submittedAt: new Date(project.submittedAt),
-    relatedEnquiries: project.relatedEnquiries
+    projectAreasUpdated: {
+      aaiUpdated: project.aaiUpdated,
+      addedToAts: project.addedToAts,
+      ltsaCompleted: project.ltsaCompleted,
+      bcOnlineCompleted: project.bcOnlineCompleted
+    },
+
+    consent: {
+      consentToFeedback: project.consentToFeedback ? BasicResponse.YES : BasicResponse.NO
+    }
   };
 }
 
@@ -280,40 +290,80 @@ function onReOpen() {
   });
 }
 
-const onSubmit = async (values: GenericObject) => {
+const onSubmit = async (formValues: GenericObject) => {
   try {
+    // vee-validate doesn't get transformed data from yup so
+    // manually run the form values through it here
+    const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
+
     await handleAtsCreate(values);
 
-    // Generate final submission object
-    const dataOmitted = omit(
-      setEmptyStringsToNull({
-        ...values.project,
-        ...values.units,
-        ...values.location,
-        ...values.finance,
-        ...values.submissionState,
-        activityId: project.activityId,
-        housingProjectId: project.housingProjectId,
-        projectDescription: values.projectDescription,
-        projectLocationDescription: values.projectLocationDescription,
-        astNotes: values.astNotes,
-        atsClientId: Number.parseInt(values.atsClientId) || '',
-        atsEnquiryId: Number.parseInt(values.atsEnquiryId) || '',
-        aaiUpdated: values.aaiUpdated,
-        addedToAts: values.addedToAts,
-        ltsaCompleted: values.ltsaCompleted,
-        bcOnlineCompleted: values.bcOnlineCompleted,
-        companyIdRegistered: values.project?.companyIdRegistered ?? null,
-        submittedAt: values.submittedAt,
-        consentToFeedback: values.consentToFeedback === BasicResponse.YES,
-        naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
-        assignedUserId: values.submissionState.assignedUser?.userId ?? undefined
-      }),
-      ['contact', 'assignedUser', 'isDevelopedInBc', 'submissionState', 'locationAddress', 'relatedEnquiries']
-    );
+    // Generate final payload
+    // TODO: Create a type using Pick instead of Partial?
+    const payload: Partial<HousingProject> = {
+      // Company and Project Information
+      projectName: values.companyProjectName.projectName,
+      companyNameRegistered: values.companyProjectName.companyNameRegistered,
+      companyIdRegistered: values.companyProjectName.companyIdRegistered,
+
+      // Residential units
+      singleFamilyUnits: values.units.singleFamilyUnits,
+      multiFamilyUnits: values.units.multiFamilyUnits,
+      hasRentalUnits: values.units.hasRentalUnits,
+      rentalUnits: values.units.rentalUnits,
+      otherUnits: values.units.otherUnits,
+      otherUnitsDescription: values.units.otherUnitsDescription,
+
+      // Financially supported
+      financiallySupportedBc: values.finance.financiallySupportedBc,
+      financiallySupportedIndigenous: values.finance.financiallySupportedIndigenous,
+      indigenousDescription: values.finance.indigenousDescription,
+      financiallySupportedNonProfit: values.finance.financiallySupportedNonProfit,
+      nonProfitDescription: values.finance.nonProfitDescription,
+      financiallySupportedHousingCoop: values.finance.financiallySupportedHousingCoop,
+      housingCoopDescription: values.finance.housingCoopDescription,
+
+      // Location
+      locality: values.location.locality,
+      province: values.location.province,
+      locationPids: values.location.locationPids,
+      latitude: values.location.latitude,
+      longitude: values.location.longitude,
+      streetAddress: values.location.streetAddress,
+      geomarkUrl: values.location.geomarkUrl,
+      naturalDisaster: values.location.naturalDisaster === BasicResponse.YES,
+
+      // Additional Location Information
+      projectLocationDescription: values.locationDescription.description,
+
+      // Additional Project Information
+      projectDescription: values.projectDescription.description,
+
+      // AST Notes
+      astNotes: values.astNotes.notes,
+
+      // Submission State
+      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      applicationStatus: values.submissionState.applicationStatus,
+      submissionType: values.submissionState.submissionType,
+      queuePriority: values.submissionState.queuePriority,
+
+      // ATS
+      atsClientId: values.atsInfo.atsClientId,
+      atsEnquiryId: values.atsInfo.atsEnquiryId,
+
+      // Updates
+      addedToAts: values.projectAreasUpdated.addedToAts,
+      ltsaCompleted: values.projectAreasUpdated.ltsaCompleted,
+      bcOnlineCompleted: values.projectAreasUpdated.bcOnlineCompleted,
+      aaiUpdated: values.projectAreasUpdated.aaiUpdated,
+
+      // Consent
+      consentToFeedback: values.consent.consentToFeedback === BasicResponse.YES
+    };
 
     // Update project
-    const result = await housingProjectService.updateProject(project.housingProjectId, dataOmitted);
+    const result = await housingProjectService.updateProject(project.housingProjectId, payload);
     projectStore.setProject(result.data);
 
     // Wait a tick for store to propagate
@@ -321,9 +371,7 @@ const onSubmit = async (values: GenericObject) => {
 
     // Reinitialize the form
     formRef.value?.resetForm({
-      values: {
-        ...initializeFormValues(result.data)
-      }
+      values: await initializeFormValues(result.data)
     });
 
     toast.success(t('i.common.form.savedMessage'));
@@ -332,7 +380,7 @@ const onSubmit = async (values: GenericObject) => {
   }
 };
 
-const projectFormNavigatorSchema = createProjectFormNavigatorSchema();
+const projectFormNavigatorSchema = createProjectFormNavigatorSchema({ initiative: getInitiative.value, t });
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
@@ -360,6 +408,9 @@ watch(primaryContact, (newContact, oldContact) => {
 });
 
 onBeforeMount(async () => {
+  useFormStore().setFormType(FormType.NAVIGATOR);
+  useFormStore().setFormState(FormState.UNLOCKED);
+
   locationPidsAuto.value = (await mapService.getPIDs(project.housingProjectId)).data;
 
   // Default form values

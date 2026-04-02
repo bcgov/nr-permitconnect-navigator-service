@@ -100,7 +100,8 @@ export enum EnquirySubmittedMethod {
 export enum FormType {
   NEW = 0,
   DRAFT = 1,
-  SUBMISSION = 2
+  SUBMISSION = 2,
+  NAVIGATOR = 3
 }
 
 export enum FormState {

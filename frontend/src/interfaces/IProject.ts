@@ -8,7 +8,7 @@ export interface IProject extends IStamps {
   projectId: string;
   activityId: string;
   submittedAt: string;
-  assignedUserId?: string;
+  assignedUserId?: string | null;
   applicationStatus: ApplicationStatus;
 
   companyIdRegistered?: string | null;
