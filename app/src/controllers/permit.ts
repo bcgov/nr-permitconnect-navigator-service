@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { findPriorityPermitTracking } from './peach.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
-import { summarizePeachRecord } from '../parsers/peachParser.ts';
+import { summarizePeachRecord } from '../parsers/peach.ts';
 import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
 import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit.ts';

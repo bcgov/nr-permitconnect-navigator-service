@@ -35,9 +35,11 @@ spec:
         failurePolicy: {{ .Values.failurePolicy }}
         execNewPod:
           command:
-            - npm
-            - run
-            - migrate
+            - /usr/local/bin/node
+            - ./node_modules/knex/bin/cli.js
+            - migrate:latest
+            - --knexfile
+            - ./sbin/knexfile.js
           containerName: app
           env:
             - name: NODE_ENV

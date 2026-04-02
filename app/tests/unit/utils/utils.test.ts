@@ -98,7 +98,7 @@ describe('utils', () => {
 
   describe('combineDateTime', () => {
     it('returns undefined when both date and time are undefined/null', () => {
-      expect(utils.combineDateTime(undefined, undefined)).toBeUndefined();
+      expect(utils.combineDateTime()).toBeUndefined();
       expect(utils.combineDateTime(null, null)).toBeUndefined();
     });
 
@@ -121,7 +121,7 @@ describe('utils', () => {
     it('uses midnight when time is omitted', () => {
       const date = '2025-08-15';
 
-      const combined = utils.combineDateTime(date, undefined);
+      const combined = utils.combineDateTime(date);
 
       expect(combined).toBeInstanceOf(Date);
       expect(combined!.toISOString()).toBe('2025-08-15T00:00:00.000Z');
@@ -143,8 +143,8 @@ describe('utils', () => {
 
     it('treats undefined as the oldest value', () => {
       expect(utils.compareDates(undefined, newer)).toBeLessThan(0);
-      expect(utils.compareDates(newer, undefined)).toBeGreaterThan(0);
-      expect(utils.compareDates(undefined, undefined)).toBe(0);
+      expect(utils.compareDates(newer)).toBeGreaterThan(0);
+      expect(utils.compareDates()).toBe(0);
     });
 
     it('sorts descending when desc=true (newest to oldest)', () => {
@@ -185,6 +185,30 @@ describe('utils', () => {
       expect(utils.formatDateOnly('2025-13-05')).toEqual('');
       expect(utils.formatDateOnly('not-a-date')).toEqual('');
     });
+
+    it('returns leap years correctly', () => {
+      expect(utils.formatDateOnly('2024-02-29')).toEqual('February 29, 2024');
+      expect(utils.formatDateOnly('2025-02-29')).toEqual(''); // Invalid date
+    });
+
+    it('returns empty string for days that do not exist in a specific month', () => {
+      expect(utils.formatDateOnly('2025-04-31')).toEqual(''); // April has 30 days
+    });
+
+    it('rejects dates with extra time information or ISO formats', () => {
+      expect(utils.formatDateOnly('2025-11-28T12:00:00')).toEqual('');
+      expect(utils.formatDateOnly('2025-11-28 ')).toEqual('');
+    });
+
+    it('handles minimum and maximum valid-ish dates', () => {
+      expect(utils.formatDateOnly('0001-01-01')).toEqual('January 1, 0001');
+      expect(utils.formatDateOnly('9999-12-31')).toEqual('December 31, 9999');
+    });
+
+    it('returns empty string for month 00 or day 00', () => {
+      expect(utils.formatDateOnly('2025-00-01')).toEqual('');
+      expect(utils.formatDateOnly('2025-01-00')).toEqual('');
+    });
   });
 
   describe('getGitRevision', () => {
@@ -219,13 +243,13 @@ describe('utils', () => {
           path.endsWith('.git') ||
           path.endsWith('HEAD') ||
           path.endsWith('refs/heads/main') ||
-          path.endsWith('refs\\heads\\main')
+          path.endsWith(String.raw`refs\heads\main`)
         );
       });
       (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
       (readFileSync as jest.Mock).mockImplementation((path: string) => {
         if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
-        if (path.endsWith('refs/heads/main') || path.endsWith('refs\\heads\\main')) return '1234567890abcdef\n';
+        if (path.endsWith('refs/heads/main') || path.endsWith(String.raw`refs\heads\main`)) return '1234567890abcdef\n';
         return '';
       });
 
@@ -282,7 +306,7 @@ describe('utils', () => {
           path.endsWith('.git') ||
           path.endsWith('HEAD') ||
           path.endsWith('refs/heads/feature') ||
-          path.endsWith('refs\\heads\\feature')
+          path.endsWith(String.raw`refs\heads\feature`)
         );
       });
       (statSync as jest.Mock).mockImplementation((path: string) => {
@@ -292,7 +316,8 @@ describe('utils', () => {
       (readFileSync as jest.Mock).mockImplementation((path: string) => {
         if (path.endsWith('.git')) return 'gitdir: .git/worktrees/feature\n';
         if (path.endsWith('HEAD')) return 'ref: refs/heads/feature\n';
-        if (path.endsWith('refs/heads/feature') || path.endsWith('refs\\heads\\feature')) return 'cafebabe12345678\n';
+        if (path.endsWith('refs/heads/feature') || path.endsWith(String.raw`refs\heads\feature`))
+          return 'cafebabe12345678\n';
         return '';
       });
 

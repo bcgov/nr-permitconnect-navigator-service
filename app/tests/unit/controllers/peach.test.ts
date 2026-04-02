@@ -9,7 +9,7 @@ import {
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach.ts';
-import * as parser from '../../../src/parsers/peachParser.ts';
+import * as parser from '../../../src/parsers/peach.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as peachService from '../../../src/services/peach.ts';
 import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';

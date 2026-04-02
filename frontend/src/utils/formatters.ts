@@ -46,10 +46,9 @@ export function formatDateLong(value: string | undefined | null) {
 }
 
 /**
- * @function formatDateOnly
  * Formats a YYYY-MM-DD date-only string into "MMMM D, YYYY"
  * @param value A date only string
- * @returns {String} A string representation of `value`
+ * @returns A string representation of `value`
  */
 export function formatDateOnly(value: string | null | undefined): string {
   if (!value) return '';
@@ -59,14 +58,21 @@ export function formatDateOnly(value: string | null | undefined): string {
   if (!match) return '';
 
   const [, year, month, day] = match;
-  const monthNumber = Number(month) - 1;
+  const yearNum = Number(year);
+  const monthNum = Number(month) - 1;
+  const dayNum = Number(day);
 
-  if (monthNumber > 11 || monthNumber < 0) return '';
+  const dateCheck = new Date(yearNum, monthNum, dayNum);
+  dateCheck.setFullYear(yearNum);
 
-  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date().setMonth(monthNumber));
-  const dayNum = String(Number(day));
+  if (dateCheck.getFullYear() !== yearNum || dateCheck.getMonth() !== monthNum || dateCheck.getDate() !== dayNum) {
+    return '';
+  }
 
-  return `${monthName} ${dayNum}, ${year}`;
+  const safeMonthDate = new Date(2000, monthNum, 1);
+  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(safeMonthDate);
+
+  return `${monthName} ${String(dayNum)}, ${year}`;
 }
 
 /**

@@ -32,7 +32,7 @@ export function addDashesToUuid(str: string): string {
 export function camelCaseToTitleCase(input: string | null): string | null {
   if (!input) return input;
 
-  const result = input.replace(/([A-Z])/g, ' $1');
+  const result = input.replaceAll(/([A-Z])/g, ' $1');
   return (result.charAt(0).toUpperCase() + result.slice(1)).trim();
 }
 
@@ -44,10 +44,7 @@ export function camelCaseToTitleCase(input: string | null): string | null {
  */
 export const combineDateTime = (date?: string | null, time?: string | null): Date | undefined => {
   if (!date) return undefined;
-
-  if (!time) {
-    return new Date(`${date}T00:00:00.000Z`);
-  }
+  if (!time) return new Date(`${date}T00:00:00.000Z`);
 
   return new Date(`${date}T${time}`);
 };
@@ -111,14 +108,21 @@ export function formatDateOnly(value: string | null | undefined): string {
   if (!match) return '';
 
   const [, year, month, day] = match;
-  const monthNumber = Number(month) - 1;
+  const yearNum = Number(year);
+  const monthNum = Number(month) - 1;
+  const dayNum = Number(day);
 
-  if (monthNumber > 11 || monthNumber < 0) return '';
+  const dateCheck = new Date(yearNum, monthNum, dayNum);
+  dateCheck.setFullYear(yearNum);
 
-  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(new Date().setMonth(monthNumber));
-  const dayNum = String(Number(day));
+  if (dateCheck.getFullYear() !== yearNum || dateCheck.getMonth() !== monthNum || dateCheck.getDate() !== dayNum) {
+    return '';
+  }
 
-  return `${monthName} ${dayNum}, ${year}`;
+  const safeMonthDate = new Date(2000, monthNum, 1);
+  const monthName = new Intl.DateTimeFormat('en-US', { month: 'long' }).format(safeMonthDate);
+
+  return `${monthName} ${String(dayNum)}, ${year}`;
 }
 
 /**
