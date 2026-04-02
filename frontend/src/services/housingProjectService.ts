@@ -119,8 +119,8 @@ const service: IHousingProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: HousingProject) {
-    return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`, data);
+  updateProject(projectId: string, data: Partial<HousingProject>) {
+    return appAxios().patch(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 

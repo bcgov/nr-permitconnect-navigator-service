@@ -45,7 +45,11 @@
       "activityType": "Activity type",
       "companyNameRegistered": "Company name",
       "projectName": "Project name",
+      "projectNumber": "Project number",
       "isRegisteredInBc": "Is Registered in BC"
+    },
+    "consent": {
+      "consentToFeedback": "Consent to feedback"
     },
     "contactCardNavForm": {
       "contactApplicantRelationship": "Relationship to project",
@@ -498,7 +502,6 @@
           "contactPhoneNumber": "Contact phone number",
           "contactApplicantRelationship": "Relationship to project",
           "contactPreference": "Preferred contact method",
-          "consentToFeedback": "Consent to feedback",
           "financeFinanciallySupportedBc": "BC Housing",
           "financeFinanciallySupportedIndigenous": "Indigenous Housing Provider",
           "financeIndigenousDescription": "Name of Indigenous Housing Provider",

@@ -38,7 +38,7 @@ useFormErrorWatcher(formRef, 'FeedbackConsentSection', tab);
     </h4>
     <Select
       class="col-span-3"
-      name="consentToFeedback"
+      name="consent.consentToFeedback"
       :label="t('i.housing.project.projectForm.researchOptin')"
       :disabled="!getEditable"
       :options="YES_NO_LIST"

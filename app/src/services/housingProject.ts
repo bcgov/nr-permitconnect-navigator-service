@@ -205,19 +205,18 @@ export const searchHousingProjects = async (
  * Updates a specific housing project
  * @param tx Prisma transaction client
  * @param data Housing project to update
+ * @param housingProjectId ID of the project to update
  * @returns A Promise that resolves to the updated housing project
  */
 export const updateHousingProject = async (
   tx: PrismaTransactionClient,
-  data: HousingProjectBase
+  data: Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>,
+  housingProjectId: string
 ): Promise<HousingProject> => {
   const result = await tx.housing_project.update({
-    data: {
-      ...data,
-      geoJson: jsonToPrismaInputJson(data.geoJson)
-    },
+    data,
     where: {
-      housingProjectId: data.housingProjectId
+      housingProjectId
     },
     include: {
       activity: {

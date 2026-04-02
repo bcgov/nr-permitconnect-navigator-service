@@ -17,40 +17,44 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
         then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
         otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
       }),
-      registeredId: string().when('isDevelopedInBc', {
-        is: (value: string) => value === BasicResponse.YES,
-        then: (schema) =>
-          schema
-            .required()
-            .max(255)
-            .test(
-              'valid-business-id',
-              'Failed to set the business ID, try selecting the business name again',
-              (value) => {
-                if (!value) return false;
-                return orgBookOptions.some((option) => option.registeredId === value);
-              }
-            )
-            .label('Business ID'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
-      }),
-      registeredName: string().when('isDevelopedInBc', {
-        is: (value: string) => value === BasicResponse.YES,
-        then: (schema) =>
-          schema
-            .required()
-            .max(255)
-            .test(
-              'valid-business-name',
-              'Business name must be a valid value from the list of suggestions',
-              (value) => {
-                if (!value) return false;
-                return orgBookOptions.some((option) => option.registeredName === value);
-              }
-            )
-            .label('Business name'),
-        otherwise: (schema) => schema.notRequired().nullable().label('Business name')
-      }),
+      registeredId: string()
+        .nullable()
+        .when('isDevelopedInBc', {
+          is: (value: string) => value === BasicResponse.YES,
+          then: (schema) =>
+            schema
+              .required()
+              .max(255)
+              .test(
+                'valid-business-id',
+                'Failed to set the business ID, try selecting the business name again',
+                (value) => {
+                  if (!value) return false;
+                  return orgBookOptions.some((option) => option.registeredId === value);
+                }
+              )
+              .label('Business ID'),
+          otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
+        }),
+      registeredName: string()
+        .nullable()
+        .when('isDevelopedInBc', {
+          is: (value: string) => value === BasicResponse.YES,
+          then: (schema) =>
+            schema
+              .required()
+              .max(255)
+              .test(
+                'valid-business-name',
+                'Business name must be a valid value from the list of suggestions',
+                (value) => {
+                  if (!value) return false;
+                  return orgBookOptions.some((option) => option.registeredName === value);
+                }
+              )
+              .label('Business name'),
+          otherwise: (schema) => schema.notRequired().nullable().label('Business name')
+        }),
       projectName: string().required().max(255).label('Project name'),
       projectDescription: string().required().label('Project description'),
       projectNumber: string().max(255).label('Project number')
