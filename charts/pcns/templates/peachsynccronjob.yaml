@@ -42,9 +42,9 @@ spec:
             - name: peach-sync
               image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
-              command: ["sh","-lc"]
-              args:
-                - "npm run peach:sync"
+              command:
+                - /usr/local/bin/node
+                - sbin/peachSync.js
               resources:
                 {{- toYaml .Values.peachSync.resources | nindent 16 }}
               env:
