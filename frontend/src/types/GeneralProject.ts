@@ -20,7 +20,6 @@ export type GeneralProject = {
   naturalDisaster: boolean;
   hasAppliedProvincialPermits: boolean;
   activityType: string;
-  isRegisteredInBc: boolean;
   region?: Region | null;
   area?: Area | null;
   businessArea?: BusinessArea | null;

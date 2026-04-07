@@ -4,6 +4,9 @@ import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
+import elecBannerImg from '@/assets/images/elec_banner.png';
+import generalBannerImg from '@/assets/images/general_banner.png';
+import housingBannerImg from '@/assets/images/housing_banner.png';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
@@ -39,6 +42,7 @@ interface InitiativeState {
   draftableProjectService: IDraftableProjectService;
   enquiryIntakeRouteName?: RouteName;
   enquiryRouteName?: RouteName;
+  headerImg: string;
   headerText: string;
   initiativeRouteName: RouteName;
   navigationPermission: NavigationPermission;
@@ -55,6 +59,7 @@ const router = useRouter();
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: electrificationProjectService,
+  headerImg: elecBannerImg,
   headerText: t('views.e.initiativeView.electrification.header'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
@@ -69,6 +74,7 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: generalProjectService,
   enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
   enquiryRouteName: RouteName.EXT_GENERAL_ENQUIRY,
+  headerImg: generalBannerImg,
   headerText: t('views.e.initiativeView.general.header'),
   initiativeRouteName: RouteName.EXT_GENERAL,
   navigationPermission: NavigationPermission.EXT_GENERAL,
@@ -83,6 +89,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: housingProjectService,
   enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
   enquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
+  headerImg: housingBannerImg,
   headerText: t('views.e.initiativeView.housing.header'),
   initiativeRouteName: RouteName.EXT_HOUSING,
   navigationPermission: NavigationPermission.EXT_HOUSING,
@@ -225,10 +232,10 @@ onBeforeMount(async () => {
     <div class="flex flex-row items-center w-full justify-between shadow px-4">
       <h1>{{ initiativeState.headerText }}</h1>
       <img
+        v-if="initiativeState.headerImg"
         class="mr-4"
-        src="@/assets/images/housing_2.png"
-        width="120"
-        alt="Housing image"
+        :src="initiativeState.headerImg"
+        alt="Header image"
       />
     </div>
 

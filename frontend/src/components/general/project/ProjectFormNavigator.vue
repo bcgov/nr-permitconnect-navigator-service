@@ -197,8 +197,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       companyNameRegistered: project.companyNameRegistered,
       projectName: project.projectName,
       projectNumber: project.projectNumber,
-      activityType: project.activityType,
-      isRegisteredInBc: project.isRegisteredInBc ? BasicResponse.YES : BasicResponse.NO
+      activityType: project.activityType
     },
 
     // Additional Info
@@ -290,7 +289,6 @@ const onSubmit = async (formValues: GenericObject) => {
       companyNameRegistered: values.companyProjectName.companyNameRegistered,
       companyIdRegistered: values.companyProjectName.companyIdRegistered,
       activityType: values.companyProjectName.activityType!, // Req for General but the type doesnt know until runtime
-      isRegisteredInBc: values.companyProjectName.isRegisteredInBc === BasicResponse.YES,
 
       // Location
       locality: values.location.locality,
