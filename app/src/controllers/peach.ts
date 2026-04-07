@@ -115,22 +115,22 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
   );
 
   const records: PeachRecord[] = [];
-  const failures: { index: number; reason: unknown }[] = [];
+  const errors: { index: number; reason: unknown }[] = [];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') records.push(result.value);
-    else failures.push({ index: index, reason: result.reason });
+    else errors.push({ index: index, reason: result.reason });
   });
 
   log.verbose('PEACH fetch summary', {
     total: results.length,
     fetched: records.length,
-    failed: failures.length
+    errored: errors.length
   });
 
-  if (failures.length) {
-    for (const failure of failures) {
-      const { recordId, systemId } = systemRecordPermits[failure.index];
-      log.warn('PEACH fetch failed', { recordId, systemId, error: failure.reason });
+  if (errors.length) {
+    for (const error of errors) {
+      const { recordId, systemId } = systemRecordPermits[error.index];
+      log.warn('PEACH fetch call error:', { recordId, systemId, error: error.reason });
     }
   }
 
