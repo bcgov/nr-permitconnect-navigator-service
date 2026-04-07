@@ -110,13 +110,6 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
         :disabled="!getEditable"
         :options="['Other']"
       />
-      <Select
-        v-if="getInitiative === Initiative.GENERAL"
-        name="companyProjectName.isRegisteredInBc"
-        :label="t('i.housing.project.projectForm.companyRegisteredInBC')"
-        :disabled="!getEditable"
-        :options="YES_NO_LIST"
-      />
       <InputText
         v-if="getInitiative === Initiative.GENERAL"
         name="companyProjectName.projectNumber"

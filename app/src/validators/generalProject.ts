@@ -2,11 +2,11 @@ import Joi from 'joi';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
-import { activityId, email, uuidv4 } from './common.ts';
+import { uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
 import { validate } from '../middleware/validation';
-import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
+import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectApplicant } from '../utils/enums/housing.ts';
 import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
@@ -91,7 +91,6 @@ const schema = {
         .valid(...SUBMISSION_TYPE_LIST),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
-      isRegisteredInBc: Joi.boolean().required(),
       projectName: Joi.string().required(),
       activityType: Joi.string().required(),
       projectDescription: Joi.string().allow(null),

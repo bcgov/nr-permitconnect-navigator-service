@@ -58,12 +58,6 @@ export function createCompanyProjectNamePanelSchema({ initiative, t }: CreateSch
       }),
       companyIdRegistered: optionalText(),
       companyNameRegistered: optionalText(255).label(t('validators.companyProjectName.companyNameRegistered')),
-      isRegisteredInBc: string().when([], {
-        is: () => initiative === Initiative.GENERAL,
-        then: (schema) =>
-          schema.oneOf(YES_NO_LIST).required().label(t('validators.companyProjectName.isRegisteredInBc')),
-        otherwise: (schema) => schema.notRequired()
-      }),
       projectName: requiredText(255).label(t('validators.companyProjectName.projectName')),
       projectNumber: string().when([], {
         is: () => initiative === Initiative.GENERAL,
@@ -222,7 +216,8 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
         .label(t('validators.submissionState.applicationStatus')),
       area: string().when([], {
         is: () => initiative === Initiative.GENERAL,
-        then: (schema) => schema.oneOf(AREA_LIST).label(t('validators.submissionState.area')),
+        then: (schema) =>
+          schema.oneOf(AREA_LIST, 'Area is a required field').label(t('validators.submissionState.area')),
         otherwise: (schema) => schema.notRequired()
       }),
       assignedUser: assignedToValidator(
@@ -237,7 +232,8 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
         .label(t('validators.submissionState.queuePriority')),
       region: string().when([], {
         is: () => initiative === Initiative.GENERAL,
-        then: (schema) => schema.oneOf(REGION_LIST).label(t('validators.submissionState.region')),
+        then: (schema) =>
+          schema.oneOf(REGION_LIST, 'Region is a required field').label(t('validators.submissionState.region')),
         otherwise: (schema) => schema.notRequired()
       }),
       submissionType: string()
@@ -264,7 +260,9 @@ export function createAtsInfoPanelSchema({ initiative, t }: CreateSchemaOptions)
       businessArea: string().when([], {
         is: () => initiative === Initiative.GENERAL,
         then: (schema) =>
-          schema.oneOf(BUSINESS_AREA_LIST, 'Business area is required').label(t('validators.atsInfo.businessArea')),
+          schema
+            .oneOf(BUSINESS_AREA_LIST, 'Business area is a required field')
+            .label(t('validators.atsInfo.businessArea')),
         otherwise: (schema) => schema.notRequired()
       })
     })
