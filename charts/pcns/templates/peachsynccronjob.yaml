@@ -81,9 +81,9 @@ spec:
                       name: {{ include "pcns.configname" . }}-ches-service-account
                 - name: SERVER_PEACH_CLIENTID
                   valueFrom:
-                  secretKeyRef:
-                    key: username
-                    name: {{ include "pcns.configname" . }}-peach
+                    secretKeyRef:
+                      key: username
+                      name: {{ include "pcns.configname" . }}-peach
                 - name: SERVER_PEACH_CLIENTSECRET
                   valueFrom:
                     secretKeyRef:
