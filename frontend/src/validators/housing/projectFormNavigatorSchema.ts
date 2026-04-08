@@ -1,7 +1,5 @@
 import { object } from 'yup';
 
-import type { InferType } from 'yup';
-import type { Initiative } from '@/utils/enums/application';
 import {
   createAstNotesPanelSchema,
   createAtsInfoPanelSchema,
@@ -19,21 +17,28 @@ import {
   createSubmissionStatePanelSchema
 } from '@/validators/navigator';
 
+import type { InferType } from 'yup';
+import type { CodeName } from '@/store/codeStore';
+import type { OrgBookOption } from '@/types';
+import type { Initiative } from '@/utils/enums/application';
+
 interface CreateSchemaOptions {
-  initiative?: Initiative;
+  initiative: Initiative;
   t: (key: string) => string; // i18n instance
+  enums: Record<CodeName, Record<string, string>>;
+  orgBookOptions: OrgBookOption[];
 }
 
-export function createProjectFormNavigatorSchema({ initiative, t }: CreateSchemaOptions) {
+export function createProjectFormNavigatorSchema({ initiative, t, enums, orgBookOptions }: CreateSchemaOptions) {
   return object({
     ...createContactCardNavFormSchema({ t }),
-    ...createCompanyProjectNamePanelSchema({ initiative, t }),
+    ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
     ...createLocationPanelSchema({ t }),
     ...createResidentialUnitsSchema({ t }),
     ...createFinanciallySupportedPanelSchema({ t }),
     ...createLocationPidsPanelSchema(),
     ...createLocationDescriptionPanelSchema({ t }),
-    ...createProjectDescriptionPanelSchema({ t }),
+    ...createProjectDescriptionPanelSchema({ initiative, t, enums }),
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createRelatedEnquiriesPanelSchema({ t }),

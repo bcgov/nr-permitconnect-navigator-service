@@ -51,10 +51,15 @@ describe('createPermitNoteController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
+    const PROJECT_WITH_PROJECTID = {
+      ...TEST_HOUSING_PROJECT_1,
+      projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+    };
+
     getPermitSpy.mockResolvedValue({ ...TEST_PERMIT_1, createdAt: new Date() });
     searchHousingProjectsSpy.mockResolvedValue([]);
     getSourceSystemKindsSpy.mockResolvedValue([]);
-    getProjectByActivityIdSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     createPermitNoteSpy.mockResolvedValue(TEST_PERMIT_NOTE_1);
 
     await createPermitNoteController(req as unknown as Request<never, never, PermitNote>, res as unknown as Response);

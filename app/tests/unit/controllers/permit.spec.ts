@@ -410,6 +410,7 @@ describe('createNoteAndSendUpdateEmails', () => {
   it('creates notes and email jobs for HOUSING initiative', async () => {
     getProjectSpy.mockResolvedValueOnce({
       ...TEST_HOUSING_PROJECT_1,
+      projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
       assignedUserId: TEST_IDIR_USER_1.userId,
       activity: {
         ...TEST_ACTIVITY_HOUSING,

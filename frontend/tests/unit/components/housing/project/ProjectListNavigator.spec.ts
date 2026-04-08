@@ -5,7 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
-import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, ProjectApplicant, SubmissionType } from '@/utils/enums/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 
@@ -60,13 +60,17 @@ const testProject: HousingProject = {
   naturalDisaster: false,
   addedToAts: true,
   atsClientId: 654321,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
   astNotes: 'AST notes.',
-  applicationStatus: ApplicationStatus.COMPLETED
-} as HousingProject;
+  applicationStatus: ApplicationStatus.COMPLETED,
+  projectApplicantType: ProjectApplicant.INDIVIDUAL,
+  hasAppliedProvincialPermits: false,
+  projectLocation: '',
+  contacts: []
+};
 
 const testProjects = [testProject];
 

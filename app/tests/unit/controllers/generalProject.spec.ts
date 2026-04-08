@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import {
   createGeneralProjectController,
   deleteGeneralProjectController,
@@ -754,27 +756,45 @@ describe('updateGeneralProjectDraftController', () => {
 describe('updateGeneralProjectController', () => {
   const updateSpy = jest.spyOn(generalProjectService, 'updateGeneralProject');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { generalProjectId, ...rest } = TEST_GENERAL_PROJECT_1;
+
+  const UPDATED_BODY: Omit<GeneralProject, 'generalProjectId'> = {
+    ...rest,
+    projectName: 'NEW NAME'
+  };
   const UPDATED_PROJECT: GeneralProject = { ...TEST_GENERAL_PROJECT_1, projectName: 'NEW NAME' };
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: UPDATED_PROJECT,
-      currentContext: TEST_CURRENT_CONTEXT
+      body: UPDATED_BODY,
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: {
+        generalProjectId: UPDATED_PROJECT.generalProjectId
+      }
     };
 
     updateSpy.mockResolvedValue(UPDATED_PROJECT);
 
     await updateGeneralProjectController(
-      req as unknown as Request<never, never, GeneralProject>,
+      req as unknown as Request<
+        { generalProjectId: string },
+        never,
+        Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>
+      >,
       res as unknown as Response
     );
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...UPDATED_PROJECT,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(updateSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      {
+        ...UPDATED_BODY,
+        updatedAt: expect.any(Date) as Date,
+        updatedBy: TEST_CURRENT_CONTEXT.userId
+      },
+      UPDATED_PROJECT.generalProjectId
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
   });

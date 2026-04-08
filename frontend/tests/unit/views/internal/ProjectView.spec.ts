@@ -1,4 +1,3 @@
-import { nextTick } from 'vue';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import { flushPromises, shallowMount } from '@vue/test-utils';
@@ -8,23 +7,28 @@ import ElectrificationProjectForm from '@/components/electrification/project/Pro
 import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import NoteHistoryCard from '@/components/note/NoteHistoryCard.vue';
 import ProjectTeamTab from '@/components/projectCommon/ProjectTeamTab.vue';
-import Roadmap from '@/components/roadmap/Roadmap.vue';
+import ProjectRoadmapTab from '@/components/projectCommon/ProjectRoadmapTab.vue';
 import {
   activityContactService,
   documentService,
   electrificationProjectService,
   enquiryService,
+  generalProjectService,
   housingProjectService,
   noteHistoryService,
   permitService,
   roadmapService
 } from '@/services';
-import { useAuthZStore, useProjectStore } from '@/store';
-import { Action, GroupName, Initiative, Resource, RouteName, StorageKey } from '@/utils/enums/application';
+import { Initiative, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, Document, Group, HousingProject, NoteHistory } from '@/types';
+import type { ElectrificationProject, HousingProject, GeneralProject } from '@/types';
+import ProjectInformationTab from '@/components/projectCommon/ProjectInformationTab.vue';
+import ProjectFilesTab from '@/components/projectCommon/ProjectFilesTab.vue';
+import ProjectAuthorizationsTab from '@/components/projectCommon/ProjectAuthorizationsTab.vue';
+import ProjectNotesTab from '@/components/projectCommon/ProjectNotesTab.vue';
+import ProjectEnquiryTab from '@/components/projectCommon/ProjectEnquiryTab.vue';
 
 // Mock functions we need to test
 const pushMock = vi.fn();
@@ -68,6 +72,12 @@ vi.mock('@/services/permitService', () => ({
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
+  default: {
+    getProject: vi.fn()
+  }
+}));
+
+vi.mock('@/services/generalProjectService', () => ({
   default: {
     getProject: vi.fn()
   }
@@ -147,6 +157,9 @@ beforeEach(() => {
       activityId: '123'
     } as ElectrificationProject)
   );
+  vi.mocked(generalProjectService.getProject).mockResolvedValue(
+    mockAxiosResponse<GeneralProject>({ generalProjectId: '123', activityId: '123' } as GeneralProject)
+  );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
     mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
@@ -172,7 +185,7 @@ describe('ProjectView.vue', () => {
     expect(wrapper.findComponent(HousingProjectForm).exists()).toBe(false);
     expect(wrapper.findComponent(ElectrificationProjectForm).exists()).toBe(false);
     expect(wrapper.findComponent(NoteHistoryCard).exists()).toBe(false);
-    expect(wrapper.findComponent(Roadmap).exists()).toBe(false);
+    expect(wrapper.findComponent(ProjectRoadmapTab).exists()).toBe(false);
   });
 
   it('throws error if unknown initiative', async () => {
@@ -191,242 +204,16 @@ describe('ProjectView.vue', () => {
     expect(toastErrorMock).toHaveBeenCalledWith('BOOM', undefined, undefined);
   });
 
-  it('renders common components after loading', async () => {
+  it('renders tabs', async () => {
     const wrapper = shallowMount(ProjectView, wrapperSettings());
     await flushPromises();
 
-    expect(wrapper.findComponent(NoteHistoryCard).exists()).toBe(true);
-    expect(wrapper.findComponent(Roadmap).exists()).toBe(true);
-  });
-
-  it('renders ELECTRIFICATION components after loading', async () => {
-    const wrapper = shallowMount(ProjectView, wrapperSettings(Initiative.ELECTRIFICATION));
-    await flushPromises();
-
-    const projectStore = useProjectStore();
-    projectStore.setProject({ electrificationProjectId: '123' } as ElectrificationProject);
-    await nextTick();
-
-    expect(wrapper.findComponent(ElectrificationProjectForm).exists()).toBe(true);
-    expect(wrapper.findComponent(HousingProjectForm).exists()).toBe(false);
-  });
-
-  it('renders HOUSING components after loading', async () => {
-    const wrapper = shallowMount(ProjectView, wrapperSettings());
-    await flushPromises();
-
-    const projectStore = useProjectStore();
-    projectStore.setProject({ housingProjectId: '123' } as HousingProject);
-    await nextTick();
-
-    expect(wrapper.findComponent(ElectrificationProjectForm).exists()).toBe(false);
-    expect(wrapper.findComponent(HousingProjectForm).exists()).toBe(true);
-  });
-
-  it('renders correct number of NoteHistoryCards', async () => {
-    const wrapper = shallowMount(ProjectView, wrapperSettings());
-    await flushPromises();
-
-    const projectStore = useProjectStore();
-    projectStore.setNoteHistory([{ noteHistoryId: '1' } as NoteHistory, { noteHistoryId: '2' } as NoteHistory]);
-    await nextTick();
-
-    const cards = wrapper.findAllComponents(NoteHistoryCard);
-    expect(cards).toHaveLength(2);
-  });
-
-  it('only renders ProjectTeamTab when project is in store', async () => {
-    const wrapper = shallowMount(ProjectView, wrapperSettings());
-    await flushPromises();
-
+    expect(wrapper.findComponent(ProjectInformationTab).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectFilesTab).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectAuthorizationsTab).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectNotesTab).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectRoadmapTab).exists()).toBe(true);
+    expect(wrapper.findComponent(ProjectEnquiryTab).exists()).toBe(true);
     expect(wrapper.findComponent(ProjectTeamTab).exists()).toBe(true);
-
-    const projectStore = useProjectStore();
-    projectStore.setProject(undefined);
-    await nextTick();
-
-    expect(wrapper.findComponent(ProjectTeamTab).exists()).toBe(false);
-  });
-
-  describe('Add authorization button', () => {
-    it('renders', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const button = wrapper.get('[data-test-id="add-authorization-button"]');
-      expect(button).toBeTruthy();
-    });
-
-    it('displays correct text', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const button = wrapper.get('[data-test-id="add-authorization-button"]');
-      expect(button.text()).toContain(t('views.i.projectView.addAuthorization'));
-    });
-
-    it('does not fire click event if disabled', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const button = wrapper.get('[data-test-id="add-authorization-button"]');
-      await button.trigger('click');
-
-      expect(pushMock).toBeCalledTimes(0);
-    });
-
-    it('navigates to INT_HOUSING_PROJECT_ADD_AUTHORIZATION when clicked', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      // Give perms to store to enable the button
-      const authzStore = useAuthZStore();
-      authzStore.setPermissions({
-        groups: [
-          {
-            initiativeCode: 'HOUSING',
-            name: GroupName.NAVIGATOR
-          } as Group
-        ],
-        permissions: [
-          {
-            resource: Resource.PERMIT,
-            action: Action.CREATE,
-            initiative: Initiative.HOUSING,
-            group: GroupName.NAVIGATOR
-          }
-        ]
-      });
-
-      await nextTick();
-
-      const button = wrapper.get('[data-test-id="add-authorization-button"]');
-      await button.trigger('click');
-
-      expect(pushMock).toBeCalledTimes(1);
-      expect(pushMock).toHaveBeenCalledWith({
-        name: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
-        params: {
-          projectId: '123'
-        }
-      });
-    });
-  });
-
-  describe('sortComparator logic & View Toggles', () => {
-    const mockDocs: Document[] = [
-      {
-        documentId: 'uuid-1',
-        activityId: '123',
-        filename: 'apple.pdf',
-        extension: 'pdf',
-        mimeType: 'application/pdf',
-        filesize: 1024,
-        createdByFullName: 'Alice Smith',
-        createdAt: '2026-01-01T10:00:00Z'
-      },
-      {
-        documentId: 'uuid-2',
-        activityId: '123',
-        filename: 'zebra.jpg',
-        extension: 'jpg',
-        mimeType: 'image/jpeg',
-        filesize: 5000,
-        createdByFullName: 'Zack Miller',
-        createdAt: '2026-03-01T10:00:00Z'
-      },
-      {
-        documentId: 'uuid-3',
-        activityId: '123',
-        filename: 'banana.png',
-        extension: 'png',
-        mimeType: 'image/png',
-        filesize: 2048,
-        createdByFullName: 'Bob Jones',
-        createdAt: '2026-02-01T10:00:00Z'
-      }
-    ];
-
-    it('toggles between list and grid views via DOM buttons', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const projectStore = useProjectStore();
-      projectStore.setDocuments(mockDocs);
-      await nextTick();
-
-      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(0);
-
-      const gridBtn = wrapper.find('button[aria-label="Grid"]');
-      await gridBtn.trigger('click');
-      await nextTick();
-
-      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(3);
-
-      const listBtn = wrapper.find('button[aria-label="List"]');
-      await listBtn.trigger('click');
-      await nextTick();
-
-      expect(wrapper.findAllComponents({ name: 'DocumentCard' })).toHaveLength(0);
-    });
-
-    it('sorts documents in ascending and descending order via DataTable emits', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const projectStore = useProjectStore();
-      projectStore.setDocuments(mockDocs);
-      await nextTick();
-
-      const gridBtn = wrapper.find('button[aria-label="Grid"]');
-      await gridBtn.trigger('click');
-      await nextTick();
-
-      const dataTable = wrapper.findAllComponents({ name: 'DataTable' })[0];
-
-      await dataTable?.vm.$emit('update:sort-field', 'filename');
-      await dataTable?.vm.$emit('update:sort-order', 1);
-      await nextTick();
-
-      let cards = wrapper.findAllComponents({ name: 'DocumentCard' });
-      expect((cards[0]?.props('document') as Document).filename).toBe('apple.pdf');
-      expect((cards[1]?.props('document') as Document).filename).toBe('banana.png');
-
-      await dataTable?.vm.$emit('update:sort-order', -1);
-      await nextTick();
-
-      cards = wrapper.findAllComponents({ name: 'DocumentCard' });
-      expect((cards[0]?.props('document') as Document).filename).toBe('zebra.jpg');
-      expect((cards[1]?.props('document') as Document).filename).toBe('banana.png');
-    });
-
-    it('handles different sort types to exercise various data types', async () => {
-      const wrapper = shallowMount(ProjectView, wrapperSettings());
-      await flushPromises();
-
-      const projectStore = useProjectStore();
-      projectStore.setDocuments(mockDocs);
-      await nextTick();
-
-      const gridBtn = wrapper.find('button[aria-label="Grid"]');
-      await gridBtn.trigger('click');
-      await nextTick();
-
-      const dataTable = wrapper.findAllComponents({ name: 'DataTable' })[0];
-
-      await dataTable?.vm.$emit('update:sort-field', 'filesize');
-      await dataTable?.vm.$emit('update:sort-order', 1);
-      await nextTick();
-
-      let cards = wrapper.findAllComponents({ name: 'DocumentCard' });
-      expect((cards[0]?.props('document') as Document).filesize).toBe(1024);
-
-      await dataTable?.vm.$emit('update:sort-field', 'createdByFullName');
-      await dataTable?.vm.$emit('update:sort-order', 1);
-      await nextTick();
-
-      cards = wrapper.findAllComponents({ name: 'DocumentCard' });
-      expect((cards[0]?.props('document') as Document).createdByFullName).toBe('Alice Smith');
-    });
   });
 });

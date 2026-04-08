@@ -1,3 +1,5 @@
+import '@/utils/yupMethods';
+
 import { array, date, mixed, number, object, string } from 'yup';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';

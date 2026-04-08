@@ -204,8 +204,8 @@ describe('housingProjectService', () => {
       };
       housingProjectService.updateProject(testActivityId, TEST_OBJ);
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
+      expect(patchSpy).toHaveBeenCalledTimes(1);
+      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
     });
   });
 });

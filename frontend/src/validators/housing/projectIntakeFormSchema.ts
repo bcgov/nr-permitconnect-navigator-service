@@ -7,6 +7,7 @@ import { contactSchema, locationValidator, permitsValidator } from '@/validators
 import { boolean, object, string, type InferType } from 'yup';
 
 import type { OrgBookOption } from '@/types';
+import { optionalText } from '../common';
 
 const YesNoUnsureSchema = string().required().oneOf(YES_NO_UNSURE_LIST);
 
@@ -20,7 +21,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
         then: (schema) => schema.required().oneOf(YES_NO_LIST).label('Registered in BC'),
         otherwise: (schema) => schema.notRequired().nullable().label('Registered in BC')
       }),
-      registeredId: string().when('isDevelopedInBc', {
+      registeredId: optionalText().when('isDevelopedInBc', {
         is: (value: string) => value === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -37,7 +38,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
             .label('Business ID'),
         otherwise: (schema) => schema.notRequired().nullable().label('Business ID')
       }),
-      registeredName: string().when('isDevelopedInBc', {
+      registeredName: optionalText().when('isDevelopedInBc', {
         is: (value: string) => value === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -95,12 +96,14 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
           },
           otherwise: (schema) => schema.notRequired()
         }),
-        singleFamilyUnits: string().when('singleFamilySelected', {
-          is: (value: boolean) => value,
-          then: (schema) =>
-            schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of single-family units'),
-          otherwise: () => string().nullable()
-        }),
+        singleFamilyUnits: string()
+          .nullable()
+          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
+          .when('singleFamilySelected', {
+            is: (value: boolean) => value,
+            then: (schema) => schema.required().label('Expected number of single-family units'),
+            otherwise: () => string().nullable()
+          }),
         multiFamilySelected: boolean().when(['singleFamilySelected', 'otherSelected'], {
           is: (single: boolean, other: boolean) => !(single || other),
           then: (schema) => {
@@ -111,12 +114,14 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
           },
           otherwise: (schema) => schema.notRequired()
         }),
-        multiFamilyUnits: string().when('multiFamilySelected', {
-          is: (value: boolean) => value,
-          then: (schema) =>
-            schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of multi-family units'),
-          otherwise: () => string().nullable()
-        }),
+        multiFamilyUnits: string()
+          .nullable()
+          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
+          .when('multiFamilySelected', {
+            is: (value: boolean) => value,
+            then: (schema) => schema.required().label('Expected number of multi-family units'),
+            otherwise: () => string().nullable()
+          }),
         otherSelected: boolean().when(['singleFamilySelected', 'multiFamilySelected'], {
           is: (single: boolean, multi: boolean) => !(single || multi),
           then: (schema) => {
@@ -127,16 +132,19 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
           },
           otherwise: (schema) => schema.notRequired()
         }),
-        otherUnitsDescription: string().when('otherSelected', {
+        otherUnitsDescription: optionalText().when('otherSelected', {
           is: (value: boolean) => value,
           then: (schema) => schema.required().label('Description of units'),
           otherwise: () => string().nullable()
         }),
-        otherUnits: string().when('otherSelected', {
-          is: (value: boolean) => value,
-          then: (schema) => schema.required().oneOf(NUM_RESIDENTIAL_UNITS_LIST).label('Expected number of other units'),
-          otherwise: () => string().nullable()
-        })
+        otherUnits: string()
+          .nullable()
+          .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
+          .when('otherSelected', {
+            is: (value: boolean) => value,
+            then: (schema) => schema.required().label('Expected number of other units'),
+            otherwise: () => string().nullable()
+          })
       },
       [
         ['multiFamilySelected', 'otherSelected'],

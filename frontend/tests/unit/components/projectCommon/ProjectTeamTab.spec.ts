@@ -52,13 +52,12 @@ const mockActivityContact: ActivityContact = {
 };
 
 const wrapperSettings = (zone = Zone.INTERNAL) => ({
-  props: { activityId: 'activity1' },
   global: {
     plugins: [
       createTestingPinia({
         initialState: {
           app: { zone },
-          project: { activityContacts: [] }
+          project: { project: { activityId: 'activity1' }, activityContacts: [] }
         }
       }),
       ConfirmationService,

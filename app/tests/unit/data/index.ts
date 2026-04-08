@@ -35,14 +35,17 @@ import type {
   Document,
   Draft,
   ElectrificationProject,
+  ElectrificationProjectBase,
   ElectrificationProjectIntake,
   Email,
   Enquiry,
   EnquiryIntake,
   GeneralProject,
+  GeneralProjectBase,
   GeneralProjectIntake,
   Group,
   HousingProject,
+  HousingProjectBase,
   HousingProjectIntake,
   Initiative as InitiativeModel,
   Note,
@@ -180,7 +183,7 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
   contact: TEST_CONTACT_1
 };
 
-export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
+export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
@@ -347,7 +350,7 @@ export const TEST_HOUSING_DRAFT: Draft = {
   deletedAt: null
 };
 
-export const TEST_GENERAL_PROJECT_1: GeneralProject = {
+export const TEST_GENERAL_PROJECT_1: GeneralProjectBase = {
   generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
@@ -364,11 +367,7 @@ export const TEST_GENERAL_PROJECT_1: GeneralProject = {
   queuePriority: null,
   relatedPermits: null,
   astNotes: null,
-  astUpdated: false,
-  addedToAts: false,
   atsClientId: null,
-  ltsaCompleted: false,
-  bcOnlineCompleted: false,
   naturalDisaster: false,
   aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
@@ -383,6 +382,11 @@ export const TEST_GENERAL_PROJECT_1: GeneralProject = {
   projectLocationDescription: 'Location description',
   province: 'AA',
   submissionType: SubmissionType.GUIDANCE,
+  region: null,
+  area: null,
+  activityType: null,
+  businessArea: null,
+  isRegisteredInBc: true,
   createdAt: null,
   createdBy: null,
   updatedBy: null,
@@ -408,11 +412,7 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   queuePriority: null,
   relatedPermits: null,
   astNotes: null,
-  astUpdated: false,
-  addedToAts: false,
   atsClientId: null,
-  ltsaCompleted: false,
-  bcOnlineCompleted: false,
   naturalDisaster: false,
   aaiUpdated: false,
   applicationStatus: ApplicationStatus.NEW,
@@ -427,6 +427,11 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   projectLocationDescription: 'Location description',
   province: 'AA',
   submissionType: SubmissionType.GUIDANCE,
+  region: null,
+  area: null,
+  activityType: null,
+  businessArea: null,
+  isRegisteredInBc: true,
   createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
   createdAt: new Date(),
   updatedBy: null,
@@ -457,6 +462,7 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
     longitude: null,
     locality: 'Place',
     ltsaPidLookup: null,
+    locationPids: null,
     projectLocation: 'Location',
     projectLocationDescription: 'Location description',
     province: 'AA',
@@ -470,9 +476,8 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   }
 };
 
-export const TEST_HOUSING_PROJECT_1: HousingProject = {
+export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),

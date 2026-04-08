@@ -21,7 +21,6 @@ import { findIdpConfig } from '@/utils/utils';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { User } from '@/types';
-import { useSetFieldValue } from 'vee-validate';
 
 // Props
 const { tab = 0 } = defineProps<{

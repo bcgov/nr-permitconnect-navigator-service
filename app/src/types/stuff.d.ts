@@ -214,6 +214,7 @@ export interface GeneralProjectIntake {
     geomarkUrl: string | null;
     geoJson: Prisma.JsonValue;
     ltsaPidLookup: string | null;
+    locationPids: string | null;
     latitude: number | null;
     longitude: number | null;
     streetAddress: string;

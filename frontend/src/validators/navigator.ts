@@ -92,10 +92,7 @@ export function createCompanyProjectNamePanelSchema({
   };
 }
 
-export function createElectrificationPanelSchema({
-  t,
-  codeList
-}: Required<Pick<CreateSchemaOptions, 't' | 'codeList'>>) {
+export function createElectrificationPanelSchema({ codeList }: Required<Pick<CreateSchemaOptions, 'codeList'>>) {
   return {
     electrification: object({
       bcEnvironmentAssessNeeded: optionalText().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),

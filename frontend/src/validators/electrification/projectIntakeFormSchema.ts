@@ -21,6 +21,7 @@ export function createProjectIntakeSchema(
       projectName: string().required().max(255).label('Project name'),
       registeredId: string()
         .required()
+        .nullable()
         .max(255)
         .test('valid-business-id', 'Failed to set the business ID, try selecting the business name again', (value) => {
           if (!value) return false;
@@ -29,6 +30,7 @@ export function createProjectIntakeSchema(
         .label('Business ID'),
       registeredName: string()
         .required()
+        .nullable()
         .max(255)
         .test('valid-business-name', 'Business name must be a valid value from the list of suggestions', (value) => {
           if (!value) return false;

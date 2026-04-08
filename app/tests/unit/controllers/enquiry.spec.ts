@@ -65,6 +65,11 @@ describe('createEnquiryController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
+    const PROJECT_WITH_PROJECTID = {
+      ...TEST_HOUSING_PROJECT_1,
+      projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+    };
+
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createActivityContactSpy.mockResolvedValue({
@@ -79,7 +84,7 @@ describe('createEnquiryController', () => {
     ]);
     upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
-    getProjectByActivityIdSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
 
     await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);
 

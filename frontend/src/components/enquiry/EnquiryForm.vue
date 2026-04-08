@@ -67,6 +67,11 @@ const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
 
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const toast = useToast();
+
 // Form validation schema
 const intakeSchema = object({
   activityId: string(),
@@ -91,7 +96,7 @@ const intakeSchema = object({
   enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientId: atsClientIdValidator,
+  atsClientId: atsClientIdValidator(t('validators.atsClientId.label')),
   atsEnquiryId: string().notRequired()
 });
 
@@ -114,10 +119,6 @@ const projectActivityIds: Ref<string[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-const { t } = useI18n();
-const confirm = useConfirm();
-const toast = useToast();
-
 const getAssigneeOptionLabel = (e: User) => {
   return `${e.fullName} [${e.email}]`;
 };
