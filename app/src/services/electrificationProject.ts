@@ -1,3 +1,4 @@
+import { Prisma } from '@prisma/client';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type {
@@ -203,16 +204,18 @@ export const searchElectrificationProjects = async (
  * Updates a specific electrification project
  * @param tx Prisma transaction client
  * @param data Electrification project to update
+ * @param electrificationProjectId ID of the project to update
  * @returns A Promise that resolves to the updated electrification project
  */
 export const updateElectrificationProject = async (
   tx: PrismaTransactionClient,
-  data: ElectrificationProjectBase
+  data: Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>,
+  electrificationProjectId: string
 ): Promise<ElectrificationProject> => {
   const result = await tx.electrification_project.update({
     data: data,
     where: {
-      electrificationProjectId: data.electrificationProjectId
+      electrificationProjectId
     },
     include: {
       activity: {

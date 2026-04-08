@@ -22,9 +22,15 @@ import { emailValidator } from '@/validators/common';
 import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 
+import type { CodeName } from '@/store/codeStore';
+import type { OrgBookOption } from '@/types';
+
 interface CreateSchemaOptions {
   initiative?: Initiative;
   t: (key: string) => string; // i18n instance
+  codeList?: Record<CodeName, string[]>;
+  enums?: Record<CodeName, Record<string, string>>;
+  orgBookOptions?: OrgBookOption[];
 }
 
 export function createContactCardNavFormSchema({ t }: CreateSchemaOptions) {
@@ -48,7 +54,11 @@ export function createContactCardNavFormSchema({ t }: CreateSchemaOptions) {
   };
 }
 
-export function createCompanyProjectNamePanelSchema({ initiative, t }: CreateSchemaOptions) {
+export function createCompanyProjectNamePanelSchema({
+  initiative,
+  t,
+  orgBookOptions
+}: Required<Pick<CreateSchemaOptions, 'initiative' | 't' | 'orgBookOptions'>>) {
   return {
     companyProjectName: object({
       activityType: string().when([], {
@@ -57,7 +67,20 @@ export function createCompanyProjectNamePanelSchema({ initiative, t }: CreateSch
         otherwise: (schema) => schema.notRequired()
       }),
       companyIdRegistered: optionalText(),
-      companyNameRegistered: optionalText(255).label(t('validators.companyProjectName.companyNameRegistered')),
+      companyNameRegistered: optionalText().when([], {
+        is: () => initiative === Initiative.ELECTRIFICATION,
+        then: (schema) =>
+          schema
+            .required()
+            .max(255)
+            .test('valid-company-name', 'Company name must be a valid value from the list of suggestions', (value) => {
+              if (!value) return false;
+              return orgBookOptions.some((option) => option.registeredName === value);
+            })
+            .label('Company name'),
+        otherwise: (schema) =>
+          schema.trim().emptyToNull().nullable().label(t('validators.companyProjectName.companyNameRegistered'))
+      }),
       projectName: requiredText(255).label(t('validators.companyProjectName.projectName')),
       projectNumber: string().when([], {
         is: () => initiative === Initiative.GENERAL,
@@ -65,6 +88,25 @@ export function createCompanyProjectNamePanelSchema({ initiative, t }: CreateSch
           schema.trim().emptyToNull().nullable().label(t('validators.companyProjectName.projectNumber')),
         otherwise: (schema) => schema.notRequired()
       })
+    })
+  };
+}
+
+export function createElectrificationPanelSchema({
+  t,
+  codeList
+}: Required<Pick<CreateSchemaOptions, 't' | 'codeList'>>) {
+  return {
+    electrification: object({
+      bcEnvironmentAssessNeeded: optionalText().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
+      bcHydroNumber: optionalText().max(255).label('BC Hydro Call for Power project number'),
+      hasEpa: optionalText().oneOf(YES_NO_LIST).label('Do they have an EPA?'),
+      megawatts: number()
+        .notRequired()
+        .positive('Must be greater than zero')
+        .label('How many megawatts will it produce?'),
+      projectType: string().required().max(255).oneOf(codeList.ElectrificationProjectType).label('Project type'),
+      projectCategory: optionalText().oneOf(codeList.ElectrificationProjectCategory).label('Project category')
     })
   };
 }
@@ -101,10 +143,24 @@ export function createLocationDescriptionPanelSchema({ t }: CreateSchemaOptions)
   };
 }
 
-export function createProjectDescriptionPanelSchema({ t }: CreateSchemaOptions) {
+export function createProjectDescriptionPanelSchema({
+  initiative,
+  t,
+  enums
+}: Required<Pick<CreateSchemaOptions, 'initiative' | 't' | 'enums'>>) {
+  const isElectrification = initiative === Initiative.ELECTRIFICATION;
+
+  const descriptionSchema = isElectrification
+    ? string().when('project.projectType', {
+        is: enums.ElectrificationProjectType.OTHER,
+        then: (schema) => schema.required().label('Additional information about your project'),
+        otherwise: (schema) => schema.notRequired().nullable().label('Additional information about your project')
+      })
+    : requiredText().label(t('validators.projectDescription.description'));
+
   return {
     projectDescription: object({
-      description: requiredText().label(t('validators.projectDescription.description'))
+      description: descriptionSchema
     })
   };
 }
@@ -279,12 +335,12 @@ export function createProjectAreasUpdatedSchema({ initiative, t }: CreateSchemaO
         otherwise: (schema) => schema.notRequired()
       }),
       ltsaCompleted: boolean().when([], {
-        is: () => initiative !== Initiative.GENERAL,
+        is: () => initiative === Initiative.HOUSING,
         then: (schema) => schema.required().label(t('validators.projectAreasUpdated.aaiUpdated')),
         otherwise: (schema) => schema.notRequired()
       }),
       bcOnlineCompleted: boolean().when([], {
-        is: () => initiative !== Initiative.GENERAL,
+        is: () => initiative === Initiative.HOUSING,
         then: (schema) => schema.required().label(t('validators.projectAreasUpdated.bcOnlineCompleted')),
         otherwise: (schema) => schema.notRequired()
       })

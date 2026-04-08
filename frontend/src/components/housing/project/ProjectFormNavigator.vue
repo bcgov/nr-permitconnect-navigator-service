@@ -5,7 +5,6 @@ import { Form, type GenericObject } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { createProjectFormNavigatorSchema } from '../../../validators/housing/projectFormNavigatorSchema';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { CancelButton, FormNavigationGuard } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
@@ -29,6 +28,7 @@ import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/en
 import { ActivityContactRole, ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { createProjectFormNavigatorSchema } from '@/validators/housing/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
 import type {

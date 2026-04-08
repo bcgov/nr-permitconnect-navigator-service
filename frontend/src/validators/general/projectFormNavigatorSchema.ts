@@ -1,7 +1,5 @@
 import { object } from 'yup';
 
-import type { InferType } from 'yup';
-import type { Initiative } from '@/utils/enums/application';
 import {
   createAstNotesPanelSchema,
   createAtsInfoPanelSchema,
@@ -15,6 +13,10 @@ import {
   createRelatedEnquiriesPanelSchema,
   createSubmissionStatePanelSchema
 } from '@/validators/navigator';
+
+import type { InferType } from 'yup';
+import type { Initiative } from '@/utils/enums/application';
+
 interface CreateSchemaOptions {
   initiative?: Initiative;
   t: (key: string) => string; // i18n instance

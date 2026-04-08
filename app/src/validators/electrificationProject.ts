@@ -79,43 +79,38 @@ const schema = {
   },
   updateElectrificationProject: {
     body: Joi.object({
-      contact: contactSchema,
-      project: {
-        activityId: activityId.allow(null),
-        projectName: Joi.string().required().max(255).trim(),
-        companyNameRegistered: Joi.string().max(255).trim().allow(null),
-        companyIdRegistered: Joi.string().max(255).trim().allow(null),
-        projectType: Joi.string()
-          .required()
-          .valid(...electrificationProjectTypeCodes),
-        bcHydroNumber: Joi.string().max(255).trim().allow(null),
-        projectDescription: Joi.when('projectType', {
-          is: ProjectType.OTHER,
-          then: Joi.string().required().max(4000),
-          otherwise: Joi.string().max(4000).allow(null)
-        }),
-        electrificationProjectId: uuidv4.required(),
-        projectCategory: Joi.string()
-          .valid(...electrificationProjectCategoryCodes)
-          .allow(null),
-        assignedUserId: uuidv4.allow(null),
-        hasEpa: Joi.string()
-          .valid(...YES_NO_LIST)
-          .allow(null),
-        megawatts: Joi.number().positive().allow(null),
-        bcEnvironmentAssessNeeded: Joi.string()
-          .valid(...YES_NO_LIST)
-          .allow(null),
-        locationDescription: Joi.string().max(4000).allow(null),
-        astNotes: Joi.string().max(4000).allow(null),
-        queuePriority: Joi.number().integer().required().min(0).max(3),
-        submissionType: Joi.string()
-          .required()
-          .valid(...SUBMISSION_TYPE_LIST),
-        applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-        ...atsValidator.atsEnquirySubmissionFields,
-        aaiUpdated: Joi.boolean().required()
-      }
+      projectName: Joi.string().required().max(255).trim(),
+      companyNameRegistered: Joi.string().max(255).trim().allow(null),
+      companyIdRegistered: Joi.string().max(255).trim().allow(null),
+      projectType: Joi.string()
+        .required()
+        .valid(...electrificationProjectTypeCodes),
+      bcHydroNumber: Joi.string().max(255).trim().allow(null),
+      projectDescription: Joi.when('projectType', {
+        is: ProjectType.OTHER,
+        then: Joi.string().required().max(4000),
+        otherwise: Joi.string().max(4000).allow(null)
+      }),
+      projectCategory: Joi.string()
+        .valid(...electrificationProjectCategoryCodes)
+        .allow(null),
+      assignedUserId: uuidv4.allow(null),
+      hasEpa: Joi.string()
+        .valid(...YES_NO_LIST)
+        .allow(null),
+      megawatts: Joi.number().positive().allow(null),
+      bcEnvironmentAssessNeeded: Joi.string()
+        .valid(...YES_NO_LIST)
+        .allow(null),
+      locationDescription: Joi.string().max(4000).allow(null),
+      astNotes: Joi.string().max(4000).allow(null),
+      queuePriority: Joi.number().integer().required().min(0).max(3),
+      submissionType: Joi.string()
+        .required()
+        .valid(...SUBMISSION_TYPE_LIST),
+      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      ...atsValidator.atsEnquirySubmissionFields,
+      aaiUpdated: Joi.boolean().required()
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()

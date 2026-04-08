@@ -40,6 +40,7 @@ import type {
   ElectrificationProjectStatistics,
   StatisticsFilters
 } from '../types/index.ts';
+import { Prisma } from '@prisma/client';
 
 /**
  * Generates and sends a templated email with the given data
@@ -307,14 +308,22 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
 };
 
 export const updateElectrificationProjectController = async (
-  req: Request<never, never, { project: ElectrificationProject; contacts: Contact[] }>,
+  req: Request<
+    { electrificationProjectId: string },
+    never,
+    Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>
+  >,
   res: Response
 ) => {
   const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
-    return await updateElectrificationProject(tx, {
-      ...req.body.project,
-      ...generateUpdateStamps(req.currentContext)
-    });
+    return await updateElectrificationProject(
+      tx,
+      {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      },
+      req.params.electrificationProjectId
+    );
   });
 
   res.status(200).json(response);

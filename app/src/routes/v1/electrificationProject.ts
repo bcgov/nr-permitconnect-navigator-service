@@ -112,7 +112,7 @@ router.get(
 );
 
 /** Updates a electrification project*/
-router.put(
+router.patch(
   '/:electrificationProjectId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.UPDATE),
   hasAccess('electrificationProjectId'),
