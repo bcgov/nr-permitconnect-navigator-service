@@ -110,7 +110,8 @@ function handleCreateNewActivity() {
               email: userContact.email,
               contactApplicantRelationship: userContact.contactApplicantRelationship,
               contactPreference: userContact.contactPreference
-            }
+            },
+            enquiryDescription: 'Type here...'
           })
         ).data;
         if (response?.activityId) {

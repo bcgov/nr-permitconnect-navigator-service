@@ -1,7 +1,7 @@
 import icon from '@/assets/images/marker-icon-red.png';
 import iconShadow from '@/assets/images/marker-shadow.png';
 
-import type { BaseIconOptions, LatLngExpression } from 'leaflet';
+import type { BaseIconOptions, LatLngExpression, ReferrerPolicy } from 'leaflet';
 /*
  * Mapping constants
  */
@@ -28,5 +28,6 @@ export const OSM_URL_TEMPLATE = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 
 export const OSM_TILE_LAYER_OPTIONS = {
   maxZoom: 19,
-  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+  attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+  referrerPolicy: 'strict-origin-when-cross-origin' as ReferrerPolicy
 };
