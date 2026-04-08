@@ -3,20 +3,25 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { nextTick } from 'vue';
-import { flushPromises, mount } from '@vue/test-utils';
+import { flushPromises, shallowMount } from '@vue/test-utils';
 
-import ProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
+import ProjectFormNavigator from '@/components/housing/project/ProjectFormNavigator.vue';
 import i18n from '@/i18n';
-import { atsService, externalApiService, mapService, userService, housingProjectService } from '@/services';
+import { atsService, mapService, userService, housingProjectService } from '@/services';
 import { useProjectStore } from '@/store';
 import { ATSCreateTypes, BasicResponse, GroupName } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, ProjectApplicant, SubmissionType } from '@/utils/enums/projectCommon';
+import {
+  ActivityContactRole,
+  ApplicationStatus,
+  ContactPreference,
+  ProjectApplicant,
+  ProjectRelationship,
+  SubmissionType
+} from '@/utils/enums/projectCommon';
 import { NumResidentialUnits } from '@/utils/enums/housing';
+import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
-import type { AxiosResponse } from 'axios';
-import type { GeoJSON } from 'geojson';
-import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { DefineComponent, ComponentPublicInstance } from 'vue';
 import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
@@ -127,7 +132,7 @@ const testProject: HousingProject = {
   naturalDisaster: false,
   addedToAts: true,
   atsClientId: 654321,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
@@ -145,15 +150,70 @@ const testProject: HousingProject = {
 };
 
 const mockSubmitValues = {
-  project: {},
-  location: {},
-  finance: {},
-  units: {},
-  submissionState: {},
-  contact: exampleContact,
-  atsClientId: null,
-  atsEnquiryId: null,
-  addedToAts: false
+  contact: {
+    contactId: exampleContact.contactId,
+    firstName: exampleContact.firstName,
+    lastName: exampleContact.lastName,
+    phoneNumber: '1234567890',
+    email: exampleContact.email,
+    contactApplicantRelationship: ProjectRelationship.CONSULTANT,
+    contactPreference: ContactPreference.EITHER
+  },
+
+  companyProjectName: {
+    companyIdRegistered: null,
+    companyNameRegistered: null,
+    projectName: 'Test'
+  },
+
+  location: {
+    locationAddress: null,
+    streetAddress: null,
+    locality: null,
+    province: null,
+    locationPids: null,
+    latitude: null,
+    longitude: null,
+    geomarkUrl: null,
+    naturalDisaster: BasicResponse.NO
+  },
+  finance: {
+    financiallySupportedBc: BasicResponse.NO,
+    financiallySupportedIndigenous: BasicResponse.NO,
+    indigenousDescription: null,
+    financiallySupportedNonProfit: BasicResponse.NO,
+    nonProfitDescription: null,
+    financiallySupportedHousingCoop: BasicResponse.NO,
+    housingCoopDescription: null
+  },
+  units: {
+    singleFamilyUnits: null,
+    multiFamilyUnits: null,
+    otherUnitsDescription: null,
+    otherUnits: null,
+    hasRentalUnits: BasicResponse.NO,
+    rentalUnits: null
+  },
+
+  projectDescription: { description: 'Test' },
+
+  submissionState: {
+    applicationStatus: '',
+    submissionType: '',
+    queuePriority: 3
+  },
+  atsInfo: {
+    atsClientId: null,
+    atsEnquiryId: null
+  },
+  projectAreasUpdated: {
+    addedToAts: false,
+    aaiUpdated: false,
+    ltsaUpdated: false
+  },
+  consent: {
+    consentToFeedback: false
+  }
 };
 
 const wrapperSettings = (testProjectProp = testProject, editableProp = true) => ({
@@ -192,6 +252,9 @@ const wrapperSettings = (testProjectProp = testProject, editableProp = true) => 
         template: '<div class="stub-autocomplete p-inputtext"></div>'
       },
       Form: VEE_FORM_STUB
+    },
+    provide: {
+      [updateLiveNameKey]: () => {}
     }
   }
 });
@@ -204,47 +267,15 @@ describe('ProjectForm.vue', () => {
   });
 
   it('renders the component with the provided props', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await nextTick();
 
     expect(wrapper).toBeTruthy();
   });
 
-  it('renders the correct amount of dropdowns', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
-    await flushPromises();
-
-    const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(16);
-  });
-
-  it('renders the correct amount of input components', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
-    await flushPromises();
-
-    const elements = wrapper.findAll('.p-inputtext');
-    expect(elements.length).toBe(16);
-  });
-
-  it('renders the correct amount of input mask components (phone number)', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
-    await flushPromises();
-
-    const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(0);
-  });
-
-  it('renders the correct amount of text area components', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
-    await flushPromises();
-
-    const elements = wrapper.findAll('textarea');
-    expect(elements.length).toBe(3);
-  });
-
   it('searches for users onMount', async () => {
     const mountProject = { ...testProject, assignedUserId: 'testAssignedUseId' };
-    const wrapper = mount(ProjectForm, wrapperSettings(mountProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(mountProject));
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
@@ -253,173 +284,40 @@ describe('ProjectForm.vue', () => {
   });
 
   it('gets PIDs onMount', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
     expect(mapService.getPIDs).toHaveBeenCalledTimes(1);
     expect(mapService.getPIDs).toHaveBeenCalledWith(testProject.housingProjectId);
   });
-
-  it('disables all fields when editable is false', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings(undefined, false));
-    await flushPromises();
-
-    const fieldComponentNames = [
-      'Select',
-      'InputText',
-      'InputNumber',
-      'TextArea',
-      'Checkbox',
-      'EditableSelect',
-      'AutoComplete'
-    ] as const;
-
-    const fields = fieldComponentNames.flatMap((name) => wrapper.findAllComponents({ name }));
-
-    expect(fields.length).toBeGreaterThan(0);
-
-    const notDisabled = fields
-      .filter((c) => c.props('disabled') !== true)
-      .map((c) => ({
-        component: c.vm?.$options?.name,
-        name: c.props('name'),
-        disabled: c.props('disabled')
-      }));
-
-    expect(notDisabled).toEqual([]);
-    const elements = wrapper.findAll('.p-disabled');
-    expect(wrapper.props('editable')).toBe(false);
-    expect(elements.length).toBe(20);
-  });
-
-  it('geojson download btn not visible when no geojson', async () => {
-    const modifiedProject = { ...testProject, geoJson: undefined };
-
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
-    await flushPromises();
-
-    expect(wrapper.find('#download-geojson').exists()).toBe(false);
-  });
-
-  it('checks geojson download btn visible when geojson is in project', async () => {
-    const testGeoJson: GeoJSON = {
-      type: 'FeatureCollection',
-      features: [
-        {
-          type: 'Feature',
-          geometry: {
-            type: 'Point',
-            coordinates: [0, 0]
-          },
-          properties: {}
-        }
-      ]
-    };
-    const modifiedProject = { ...testProject, geoJson: testGeoJson };
-
-    const wrapper = mount(ProjectForm, wrapperSettings(modifiedProject, false));
-    await flushPromises();
-
-    const downloadBtn = wrapper.find('#download-geojson');
-    expect(downloadBtn.exists()).toBe(true);
-    expect(downloadBtn.isVisible()).toBe(true);
-  });
-});
-
-describe('onRegisteredNameInput', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
-  it('should not call searchOrgBook when query length is less than 2', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await flushPromises();
-
-    const event: AutoCompleteCompleteEvent = { query: 'A', originalEvent: new Event('input') };
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await flushPromises();
-
-    expect(externalApiService.searchOrgBook).not.toHaveBeenCalled();
-  });
-
-  it('should call searchOrgBook when query length is 2 or more', async () => {
-    vi.mocked(externalApiService.searchOrgBook).mockResolvedValue({
-      data: {
-        results: [
-          { type: 'name', value: 'Test Company Ltd', topic_source_id: 'FM0001234' },
-          { type: 'name', value: 'Test Corp', topic_source_id: 'FM0005678' }
-        ]
-      }
-    } as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await flushPromises();
-
-    const event: AutoCompleteCompleteEvent = { query: 'Test', originalEvent: new Event('input') };
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await flushPromises();
-
-    expect(externalApiService.searchOrgBook).toHaveBeenCalledTimes(1);
-    expect(externalApiService.searchOrgBook).toHaveBeenCalledWith('Test');
-  });
-
-  it('should filter results by type "name" and map to suggestions prop', async () => {
-    vi.mocked(externalApiService.searchOrgBook).mockResolvedValue({
-      data: {
-        results: [
-          { type: 'name', value: 'Test Company Ltd', topic_source_id: 'FM0001234' },
-          { type: 'entity', value: 'Other Type', topic_source_id: 'FM0009999' },
-          { type: 'name', value: 'Test Corp', topic_source_id: 'FM0005678' }
-        ]
-      }
-    } as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await flushPromises();
-
-    const event: AutoCompleteCompleteEvent = { query: 'Test', originalEvent: new Event('input') };
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await flushPromises();
-
-    const suggestions = autoComplete.props('suggestions');
-    expect(suggestions).toHaveLength(2);
-    expect(suggestions[0]).toEqual({ registeredName: 'Test Company Ltd', registeredId: 'FM0001234' });
-    expect(suggestions[1]).toEqual({ registeredName: 'Test Corp', registeredId: 'FM0005678' });
-  });
-
-  it('should handle empty results from searchOrgBook via prop check', async () => {
-    vi.mocked(externalApiService.searchOrgBook).mockResolvedValue({ data: { results: [] } } as AxiosResponse);
-
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
-    await flushPromises();
-
-    const event: AutoCompleteCompleteEvent = { query: 'NonExistent', originalEvent: new Event('input') };
-    const autoComplete = wrapper.findComponent({ name: 'AutoComplete' });
-    await autoComplete.vm.$emit('on-complete', event);
-    await flushPromises();
-
-    expect(autoComplete.props('suggestions')).toHaveLength(0);
-  });
 });
 
 describe('Form Submission & ATS Integration', () => {
+  const payload = {
+    ...mockSubmitValues,
+    atsInfo: {
+      atsClientId: 111,
+      atsEnquiryId: 222
+    },
+    projectAreasUpdated: {
+      addedToAts: true,
+      aaiUpdated: false,
+      ltsaUpdated: false
+    }
+  };
+
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(housingProjectService.updateProject).mockResolvedValue(mockAxiosResponse(testProject));
+    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
   });
 
   it('handles CLIENT_ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue({ status: 201, data: { clientId: 111 } } as AxiosResponse);
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue({
-      status: 201,
-      data: { enquiryId: 222 }
-    } as AxiosResponse);
+    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
+    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
 
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
 
     const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
@@ -428,7 +326,8 @@ describe('Form Submission & ATS Integration', () => {
     const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
       '.vee-form-stub'
     );
-    form.vm.$emit('submit', { ...mockSubmitValues });
+
+    form.vm.$emit('submit', payload);
     await flushPromises();
 
     expect(atsService.createATSClient).toHaveBeenCalled();
@@ -440,12 +339,9 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue({
-      status: 201,
-      data: { enquiryId: 333 }
-    } as AxiosResponse);
+    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
 
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
 
     const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
@@ -454,20 +350,21 @@ describe('Form Submission & ATS Integration', () => {
     const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
       '.vee-form-stub'
     );
-    form.vm.$emit('submit', { ...mockSubmitValues, atsClientId: 111 });
+
+    form.vm.$emit('submit', payload);
     await flushPromises();
 
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
     expect(housingProjectService.updateProject).toHaveBeenCalledWith(
       testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 333, addedToAts: true })
+      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
     );
   });
 
   it('handles CLIENT creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue({ status: 201, data: { clientId: 444 } } as AxiosResponse);
+    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
 
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
 
     const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
@@ -476,13 +373,13 @@ describe('Form Submission & ATS Integration', () => {
     const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
       '.vee-form-stub'
     );
-    form.vm.$emit('submit', { ...mockSubmitValues, atsEnquiryId: 555 });
+    form.vm.$emit('submit', payload);
     await flushPromises();
 
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(housingProjectService.updateProject).toHaveBeenCalledWith(
       testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 444, atsEnquiryId: 555, addedToAts: true })
+      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
     );
   });
 
@@ -490,7 +387,7 @@ describe('Form Submission & ATS Integration', () => {
     vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({}));
     vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({}));
 
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
 
     const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
@@ -499,7 +396,11 @@ describe('Form Submission & ATS Integration', () => {
     const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
       '.vee-form-stub'
     );
-    form.vm.$emit('submit', { ...mockSubmitValues, addedToAts: false });
+
+    const noAtsPayload = payload;
+    noAtsPayload.projectAreasUpdated.addedToAts = false;
+
+    form.vm.$emit('submit', noAtsPayload);
     await flushPromises();
 
     expect(housingProjectService.updateProject).toHaveBeenCalledWith(
@@ -509,13 +410,13 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('does nothing and falls through to update if atsCreateType is undefined', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings(testProject));
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
 
     const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
       '.vee-form-stub'
     );
-    form.vm.$emit('submit', { ...mockSubmitValues, addedToAts: false });
+    form.vm.$emit('submit', payload);
     await flushPromises();
 
     expect(atsService.createATSClient).not.toHaveBeenCalled();
@@ -525,9 +426,15 @@ describe('Form Submission & ATS Integration', () => {
 });
 
 describe('Watchers', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+  });
+
   it('updates form values passed to ContactCardNavForm when primaryContact changes in store', async () => {
-    const wrapper = mount(ProjectForm, wrapperSettings());
+    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
+    await nextTick();
 
     const store = useProjectStore();
 
@@ -540,8 +447,8 @@ describe('Watchers', () => {
       }
     ];
 
-    await nextTick();
     await flushPromises();
+    await nextTick();
 
     const contactCard = wrapper.findComponent({ name: 'ContactCardNavForm' });
     const passedFormValues = contactCard.props('formValues');

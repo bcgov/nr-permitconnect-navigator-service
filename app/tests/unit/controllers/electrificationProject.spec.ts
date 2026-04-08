@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE,
@@ -36,7 +38,6 @@ import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import type { Request, Response } from 'express';
 import type {
   ActivityContact,
-  Contact,
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
@@ -570,28 +571,46 @@ describe('updateElectrificationProjectDraftController', () => {
 describe('updateElectrificationProjectController', () => {
   const updateSpy = jest.spyOn(electrificationProjectService, 'updateElectrificationProject');
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { electrificationProjectId, ...rest } = TEST_ELECTRIFICATION_PROJECT_1;
+
+  const UPDATED_BODY: Omit<ElectrificationProject, 'electrificationProjectId'> = {
+    ...rest,
+    projectName: 'NEW NAME'
+  };
+  const UPDATED_PROJECT: ElectrificationProject = { ...TEST_ELECTRIFICATION_PROJECT_1, projectName: 'NEW NAME' };
+
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { project: TEST_ELECTRIFICATION_PROJECT_1 },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: UPDATED_BODY,
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: {
+        electrificationProjectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+      }
     };
 
-    const updated: ElectrificationProject = { ...TEST_ELECTRIFICATION_PROJECT_1, projectName: 'NEW NAME' };
-
-    updateSpy.mockResolvedValue(updated);
+    updateSpy.mockResolvedValue(UPDATED_PROJECT);
 
     await updateElectrificationProjectController(
-      req as unknown as Request<never, never, { project: ElectrificationProject; contacts: Contact[] }>,
+      req as unknown as Request<
+        { electrificationProjectId: string },
+        never,
+        Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>
+      >,
       res as unknown as Response
     );
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...req.body.project,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(updateSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      {
+        ...UPDATED_BODY,
+        updatedAt: expect.any(Date) as Date,
+        updatedBy: TEST_CURRENT_CONTEXT.userId
+      },
+      UPDATED_PROJECT.electrificationProjectId
+    );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(updated);
+    expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
   });
 });

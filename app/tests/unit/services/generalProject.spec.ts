@@ -2,6 +2,7 @@ import { TEST_CURRENT_CONTEXT, TEST_GENERAL_PROJECT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -212,7 +213,11 @@ describe('updateGeneralProject', () => {
   it('calls general_project.update with correct data and returns result', async () => {
     prismaTxMock.general_project.update.mockResolvedValueOnce(FAKE_PROJECT);
 
-    const response = await generalProjectService.updateGeneralProject(prismaTxMock, FAKE_PROJECT);
+    const response = await generalProjectService.updateGeneralProject(
+      prismaTxMock,
+      { ...FAKE_PROJECT, geoJson: FAKE_PROJECT.geoJson as InputJsonValue },
+      FAKE_PROJECT.generalProjectId
+    );
 
     expect(prismaTxMock.general_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.general_project.update).toHaveBeenCalledWith({

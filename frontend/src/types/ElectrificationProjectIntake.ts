@@ -6,8 +6,8 @@ export interface ElectrificationProjectIntake {
   basic: {
     projectDescription?: string;
     projectName: string;
-    registeredId?: string;
-    registeredName?: string;
+    registeredId?: string | null;
+    registeredName?: string | null;
   };
   contact: Contact;
   draftId?: string;

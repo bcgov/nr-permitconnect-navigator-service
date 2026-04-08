@@ -92,7 +92,7 @@ const generateGeneralProjectData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (await createActivity(tx, Initiative.GENERAL, generateCreateStamps(currentContext)))?.activityId;
+    activityId = (await createActivity(tx, Initiative.GENERAL, generateCreateStamps(currentContext))).activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
@@ -108,7 +108,8 @@ const generateGeneralProjectData = async (
       companyNameRegistered: data.basic.registeredName,
       projectName: data.basic.projectName,
       projectNumber: data.basic.projectNumber,
-      projectDescription: data.basic.projectDescription
+      projectDescription: data.basic.projectDescription,
+      isRegisteredInBc: data.basic.registeredId !== null
     };
   }
 
@@ -208,7 +209,11 @@ const generateGeneralProjectData = async (
       astNotes: null,
       atsClientId: null,
       checkProvincialPermits: null,
-      atsEnquiryId: null
+      atsEnquiryId: null,
+      region: null,
+      area: null,
+      activityType: null,
+      businessArea: null
     } as GeneralProject,
     appliedPermits,
     investigatePermits

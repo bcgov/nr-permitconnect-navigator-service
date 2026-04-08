@@ -39,8 +39,7 @@ import type {
 import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Props
-const { editable = true, project } = defineProps<{
-  editable?: boolean;
+const { project } = defineProps<{
   project: ElectrificationProject;
 }>();
 
@@ -57,6 +56,7 @@ const { getInitiative } = storeToRefs(useAppStore());
 const projectStore = useProjectStore();
 const { codeList, enums } = useCodeStore();
 const { getActivityContacts } = storeToRefs(projectStore);
+const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
@@ -191,7 +191,7 @@ async function createATSEnquiry(atsClientId?: number) {
       enquiryFileNumbers: [project.activityId],
       enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
       enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.project.projectName,
+      notes: formRef.value?.values.companyProjectName.projectName,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
@@ -399,10 +399,7 @@ onBeforeMount(async () => {
           </div>
         </div>
 
-        <ContactCardNavForm
-          :editable="editable"
-          :form-values="values"
-        />
+        <ContactCardNavForm :form-values="values" />
         <CompanyProjectNamePanel @org-book-options="(e) => (orgBookOptions = e)" />
         <ElectrificationPanel />
         <ProjectDescriptionPanel />
@@ -432,11 +429,11 @@ onBeforeMount(async () => {
         label="Save"
         type="submit"
         icon="pi pi-check"
-        :disabled="!editable"
+        :disabled="!getEditable"
       />
       <CancelButton
         v-if="!isCompleted"
-        :editable="editable"
+        :editable="getEditable"
         @clicked="onCancel"
       />
       <Button

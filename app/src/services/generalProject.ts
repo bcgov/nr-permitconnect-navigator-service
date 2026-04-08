@@ -1,7 +1,5 @@
 import { Prisma } from '@prisma/client';
 
-import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
-
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type {

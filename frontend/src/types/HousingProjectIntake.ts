@@ -10,8 +10,8 @@ export interface HousingProjectIntake {
     projectApplicantType: ProjectApplicant;
     projectDescription?: string;
     projectName: string;
-    registeredName?: string;
-    registeredId?: string;
+    registeredName?: string | null;
+    registeredId?: string | null;
   };
   contact: Contact;
   draftId?: string;
@@ -19,10 +19,10 @@ export interface HousingProjectIntake {
     singleFamilySelected?: boolean;
     multiFamilySelected?: boolean;
     otherSelected?: boolean;
-    singleFamilyUnits?: string;
-    multiFamilyUnits?: string;
-    otherUnitsDescription?: string;
-    otherUnits?: string;
+    singleFamilyUnits?: string | null;
+    multiFamilyUnits?: string | null;
+    otherUnitsDescription?: string | null;
+    otherUnits?: string | null;
     hasRentalUnits?: string;
     financiallySupportedBc?: string;
     financiallySupportedIndigenous?: string;
@@ -34,16 +34,16 @@ export interface HousingProjectIntake {
     housingCoopDescription?: string;
   };
   location: {
-    geomarkUrl?: string;
-    latitude?: number;
-    locality?: string;
-    longitude?: number;
-    ltsaPidLookup?: string;
+    geomarkUrl?: string | null;
+    latitude?: number | null;
+    locality?: string | null;
+    longitude?: number | null;
+    ltsaPidLookup?: string | null;
     naturalDisaster: BasicResponse;
     projectLocation: string;
-    projectLocationDescription?: string;
-    province?: string;
-    streetAddress?: string;
+    projectLocationDescription?: string | null;
+    province?: string | null;
+    streetAddress?: string | null;
   };
   permits: {
     appliedPermits?: Partial<Permit>[];

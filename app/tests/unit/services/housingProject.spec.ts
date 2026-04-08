@@ -2,6 +2,7 @@ import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { InputJsonValue } from '@prisma/client/runtime/library';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -212,7 +213,11 @@ describe('updateHousingProject', () => {
   it('calls housing_project.update with correct data and returns result', async () => {
     prismaTxMock.housing_project.update.mockResolvedValueOnce(FAKE_PROJECT);
 
-    const response = await housingProjectService.updateHousingProject(prismaTxMock, FAKE_PROJECT);
+    const response = await housingProjectService.updateHousingProject(
+      prismaTxMock,
+      { ...FAKE_PROJECT, geoJson: FAKE_PROJECT.geoJson as InputJsonValue },
+      FAKE_PROJECT.housingProjectId
+    );
 
     expect(prismaTxMock.housing_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.housing_project.update).toHaveBeenCalledWith({

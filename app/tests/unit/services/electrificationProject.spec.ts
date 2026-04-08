@@ -226,7 +226,11 @@ describe('updateElectrificationProject', () => {
   it('calls electrification_project.update with correct data and returns result', async () => {
     prismaTxMock.electrification_project.update.mockResolvedValueOnce(FAKE_PROJECT);
 
-    const response = await electrificationProjectService.updateElectrificationProject(prismaTxMock, FAKE_PROJECT);
+    const response = await electrificationProjectService.updateElectrificationProject(
+      prismaTxMock,
+      FAKE_PROJECT,
+      FAKE_PROJECT.electrificationProjectId
+    );
 
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.electrification_project.update).toHaveBeenCalledWith({

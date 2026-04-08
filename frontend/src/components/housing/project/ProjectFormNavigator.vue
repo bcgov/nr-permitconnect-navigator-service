@@ -22,7 +22,7 @@ import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesS
 import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, housingProjectService, mapService, userService } from '@/services';
-import { useAppStore, useFormStore, useProjectStore } from '@/store';
+import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
@@ -38,6 +38,7 @@ import type {
   Contact,
   DeepPartial,
   HousingProject,
+  OrgBookOption,
   User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
@@ -53,6 +54,7 @@ const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE
 
 // Composables
 const { t } = useI18n();
+const { enums } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
@@ -66,8 +68,8 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
+const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
-
 const primaryContact = computed(
   () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
 );
@@ -96,6 +98,7 @@ async function createATSClientEnquiry() {
       let atsEnquiryId = undefined;
       if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
         atsEnquiryId = await createATSEnquiry(response.data.clientId);
+
       if (atsEnquiryId) toast.success(t('i.housing.project.projectForm.atsClientEnquiryPushed'));
       else toast.success(t('i.housing.project.projectForm.atsClientPushed'));
       return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
@@ -117,7 +120,7 @@ async function createATSEnquiry(atsClientId?: number) {
       enquiryFileNumbers: [project.activityId],
       enquiryPartnerAgencies: [Initiative.HOUSING],
       enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.project.projectName,
+      notes: formRef.value?.values.companyProjectName.projectName,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
@@ -380,7 +383,12 @@ const onSubmit = async (formValues: GenericObject) => {
   }
 };
 
-const projectFormNavigatorSchema = createProjectFormNavigatorSchema({ initiative: getInitiative.value, t });
+const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
+  initiative: getInitiative.value,
+  t,
+  enums,
+  orgBookOptions: orgBookOptions.value
+});
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
@@ -452,7 +460,7 @@ onBeforeMount(async () => {
           :editable="editable"
           :form-values="values"
         />
-        <CompanyProjectNamePanel />
+        <CompanyProjectNamePanel @org-book-options="(e) => (orgBookOptions = e)" />
         <ResidentialUnitsPanel />
         <FinanciallySupportedPanel />
         <LocationPanel />

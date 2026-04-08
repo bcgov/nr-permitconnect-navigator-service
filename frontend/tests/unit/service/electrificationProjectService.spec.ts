@@ -203,8 +203,8 @@ describe('electrificationProjectService', () => {
       };
       electrificationProjectService.updateProject(testActivityId, testObj);
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(
+      expect(patchSpy).toHaveBeenCalledTimes(1);
+      expect(patchSpy).toHaveBeenCalledWith(
         `${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`,
         testObj
       );

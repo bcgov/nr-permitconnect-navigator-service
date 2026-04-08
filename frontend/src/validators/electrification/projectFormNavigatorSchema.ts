@@ -34,7 +34,7 @@ export function createProjectFormNavigatorSchema({
 }: CreateSchemaOptions) {
   return object({
     ...createContactCardNavFormSchema({ t }),
-    ...createElectrificationPanelSchema({ t, codeList }),
+    ...createElectrificationPanelSchema({ codeList }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
     ...createLocationDescriptionPanelSchema({ t }),
     ...createProjectDescriptionPanelSchema({ initiative, t, enums }),
