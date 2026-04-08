@@ -1016,7 +1016,7 @@
     },
     "placeholders": {
       "projectDescriptionShort": "Provide us with additional information - short description about the project and/or project website link.",
-      "projectDescription": "A short description about the planned activities on the project and whether the project requires any environmental or last use considerations."
+      "projectDescription": "A short description about the planned activities on the project and whether the project requires any environmental or land use considerations."
     },
     "upload": "Upload documents about your project (PDFs, maps, {shapeLink}, etc)"
   },
