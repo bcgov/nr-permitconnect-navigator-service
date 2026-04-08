@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { useSetFieldValue } from 'vee-validate';
-import { inject, ref } from 'vue';
+import { useFieldValue, useSetFieldValue } from 'vee-validate';
+import { inject, onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Company } from '@/components/common/icons';
@@ -10,13 +10,13 @@ import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
 import { externalApiService } from '@/services';
 import { useAppStore, useFormStore } from '@/store';
+import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
+import { Initiative } from '@/utils/enums/application';
 import { updateLiveNameKey } from '@/utils/keys';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import type { OrgBookOption } from '@/types';
-import { YES_NO_LIST } from '@/utils/constants/application';
-import { Initiative } from '@/utils/enums/application';
 
 // Props
 const { tab = 0 } = defineProps<{
@@ -30,8 +30,12 @@ if (!updateLiveName) {
   throw new Error('updateLiveName not provided');
 }
 
+// Emits
+const emit = defineEmits(['orgBookOptions']);
+
 // Composables
 const { t } = useI18n();
+const getCompanyNameRegistered = useFieldValue('companyProjectName.companyNameRegistered');
 const setCompanyIdRegistered = useSetFieldValue('companyProjectName.companyIdRegistered');
 const setCompanyNameRegistered = useSetFieldValue('companyProjectName.companyNameRegistered');
 
@@ -51,13 +55,31 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
     orgBookOptions.value = results
       .filter((obo: Record<string, string>) => obo.type === 'name')
-      // map value and topic_source_id for AutoComplete display and selection
+      // Map value and topic_source_id for AutoComplete display and selection
       .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
+
+    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
+    if (BC_HYDRO_POWER_AUTHORITY.includes(e.query.toUpperCase())) {
+      orgBookOptions.value.push({
+        registeredName: BC_HYDRO_POWER_AUTHORITY,
+        registeredId: ''
+      });
+    }
+
+    // Sort options alphabetically
+    orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
+
+    emit('orgBookOptions', orgBookOptions.value);
   }
 }
+
+onMounted(() => {
+  if (getCompanyNameRegistered.value)
+    onRegisteredNameInput({ originalEvent: {} as Event, query: String(getCompanyNameRegistered.value) });
+});
 </script>
 
 <template>

@@ -11,6 +11,7 @@ const {
   helpText = '',
   label = '',
   name,
+  dataKey = undefined,
   placeholder = '',
   disabled = false,
   options,
@@ -20,6 +21,7 @@ const {
   helpText?: string;
   label?: string;
   name: string;
+  dataKey?: string | undefined;
   placeholder?: string;
   disabled?: boolean;
   options: unknown[];
@@ -56,6 +58,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :disabled="disabled"
       :options="options"
       :option-label="getOptionLabel"
+      :data-key="dataKey"
       @blur="handleBlur"
       @input="(e: IInputEvent) => emit('onInput', e)"
       @change="(e: SelectChangeEvent) => emit('onChange', e)"

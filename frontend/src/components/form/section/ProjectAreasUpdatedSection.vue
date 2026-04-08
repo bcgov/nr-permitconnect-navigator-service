@@ -45,14 +45,14 @@ useFormErrorWatcher(formRef, 'ProjectAreasUpdatedSection', tab);
       :disabled="!getEditable"
     />
     <Checkbox
-      v-if="getInitiative !== Initiative.GENERAL"
+      v-if="getInitiative === Initiative.HOUSING"
       class="col-span-12 mb-4"
       name="projectAreasUpdated.ltsaCompleted"
       :label="t('i.housing.project.projectForm.ltsaCompleted')"
       :disabled="!getEditable"
     />
     <Checkbox
-      v-if="getInitiative !== Initiative.GENERAL"
+      v-if="getInitiative === Initiative.HOUSING"
       class="col-span-12 mb-4"
       name="projectAreasUpdated.bcOnlineCompleted"
       :label="t('i.housing.project.projectForm.bcOnlineCompleted')"

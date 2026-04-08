@@ -119,8 +119,8 @@ const service: IElectrificationProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: ElectrificationProject) {
-    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
+  updateProject(projectId: string, data: Partial<ElectrificationProject>) {
+    return appAxios().patch(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 

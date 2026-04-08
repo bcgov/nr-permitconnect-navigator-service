@@ -178,6 +178,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       contactPreference: primaryContact.value?.contactPreference,
       userId: primaryContact.value?.userId
     },
+
     location: {
       locationAddress: [project.streetAddress, project.locality, project.province]
         .filter((str) => str?.trim())
@@ -191,7 +192,9 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       geomarkUrl: project.geomarkUrl,
       naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO
     },
+
     locationPids: { auto: locationPidsAuto.value },
+
     companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
@@ -228,6 +231,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
 
     relatedEnquiries: { csv: project.relatedEnquiries },
 
+    // Updates
     projectAreasUpdated: {
       aaiUpdated: project.aaiUpdated
     }

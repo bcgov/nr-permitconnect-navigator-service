@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { EditableSelect, Select } from '@/components/form';
@@ -21,6 +21,7 @@ import { findIdpConfig } from '@/utils/utils';
 import type { ComponentPublicInstance, Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { User } from '@/types';
+import { useSetFieldValue } from 'vee-validate';
 
 // Props
 const { tab = 0 } = defineProps<{
@@ -64,7 +65,7 @@ const onAssigneeInput = async (e: IInputEvent) => {
   }
 };
 
-onBeforeMount(async () => {
+onMounted(async () => {
   if (getProject.value?.assignedUserId) {
     assigneeOptions.value = (await userService.searchUsers({ userId: [getProject.value?.assignedUserId] })).data;
   }
@@ -86,6 +87,7 @@ onBeforeMount(async () => {
         :disabled="!getEditable"
         :options="assigneeOptions"
         :get-option-label="getAssigneeOptionLabel"
+        data-key="userId"
         @on-input="onAssigneeInput"
       />
       <Select
