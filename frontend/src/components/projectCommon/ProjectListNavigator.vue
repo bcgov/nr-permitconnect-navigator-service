@@ -91,7 +91,7 @@ const filteredProjects = computed(() => {
         (contact) => contact.role === ActivityContactRole.PRIMARY
       );
 
-      if ('housingProjectId' in x) {
+      if ('housingProjectId' in x || 'generalProjectId' in x) {
         return {
           ...x,
           location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),

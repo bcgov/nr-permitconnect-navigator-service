@@ -3,7 +3,7 @@ import { inject } from 'vue';
 
 import { Button, Column } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
-import { Action, BasicResponse } from '@/utils/enums/application';
+import { Action } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { projectRouteNameKey, resourceKey } from '@/utils/keys';
 
@@ -116,37 +116,10 @@ const projectRoute = inject(projectRouteNameKey);
   />
   <Column
     field="user.fullName"
-    header="Assigned-to"
+    header="Assigned to"
     :sortable="true"
     style="min-width: 200px"
   />
-
-  <Column
-    field="hasRentalUnits"
-    header="Rental"
-    :sortable="true"
-    style="min-width: 125px"
-  />
-  <Column
-    field="financiallySupported"
-    header="Financially supported"
-    :sortable="true"
-    style="min-width: 225px"
-  >
-    <template #body="{ data }">
-      {{ data.financiallySupported ? BasicResponse.YES : BasicResponse.NO }}
-    </template>
-  </Column>
-  <Column
-    field="naturalDisaster"
-    header="Affected by natural disaster"
-    :sortable="true"
-    style="min-width: 275px"
-  >
-    <template #body="{ data }">
-      {{ data.naturalDisaster ? BasicResponse.YES : BasicResponse.NO }}
-    </template>
-  </Column>
   <Column
     header="Action"
     class="text-center header-center"

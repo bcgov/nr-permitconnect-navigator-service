@@ -111,7 +111,7 @@ const schema = {
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       region: Joi.string().allow(null),
       area: Joi.string().allow(null),
-      businessArea: Joi.string() //TODO: add .valid() and make this list
+      businessArea: Joi.string().allow(null) //TODO: add .valid() and make this list
     }),
     params: Joi.object({
       generalProjectId: uuidv4.required()

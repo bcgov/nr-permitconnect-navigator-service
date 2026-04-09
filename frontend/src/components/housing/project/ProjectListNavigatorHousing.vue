@@ -116,7 +116,7 @@ const projectRoute = inject(projectRouteNameKey);
   />
   <Column
     field="user.fullName"
-    header="Assigned-to"
+    header="Assigned to"
     :sortable="true"
     style="min-width: 200px"
   />

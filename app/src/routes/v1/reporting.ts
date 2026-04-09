@@ -2,6 +2,7 @@ import express from 'express';
 
 import {
   getElectrificationProjectPermitDataController,
+  getGeneralProjectPermitDataController,
   getHousingProjectPermitDataController
 } from '../../controllers/reporting.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
@@ -18,6 +19,13 @@ router.get(
   '/electrificationProject/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
   getElectrificationProjectPermitDataController
+);
+
+/** Get all electrification project and permit data for csv download */
+router.get(
+  '/generalProject/permit',
+  hasAuthorization(Resource.REPORTING, Action.READ),
+  getGeneralProjectPermitDataController
 );
 
 /** Get all housing project and permit data for csv download */

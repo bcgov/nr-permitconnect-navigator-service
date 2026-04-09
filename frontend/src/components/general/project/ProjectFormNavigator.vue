@@ -203,7 +203,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       companyNameRegistered: project.companyNameRegistered,
       projectName: project.projectName,
       projectNumber: project.projectNumber,
-      activityType: project.activityType
+      activityType: project.activityType ?? 'Other'
     },
 
     // Additional Info
@@ -229,7 +229,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     atsInfo: {
       atsClientId: project.atsClientId,
       atsEnquiryId: project.atsEnquiryId,
-      businessArea: String(project.businessArea)
+      businessArea: project.businessArea
     },
 
     relatedEnquiries: { csv: project.relatedEnquiries },

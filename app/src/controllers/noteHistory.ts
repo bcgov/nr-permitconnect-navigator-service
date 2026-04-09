@@ -12,6 +12,7 @@ import {
 import { searchElectrificationProjects } from '../services/electrificationProject.ts';
 import { email } from '../services/email.ts';
 import { searchEnquiries } from '../services/enquiry.ts';
+import { searchGeneralProjects } from '../services/generalProject.ts';
 import { searchHousingProjects } from '../services/housingProject.ts';
 import { createNote } from '../services/note.ts';
 import {
@@ -94,8 +95,11 @@ export const listBringForwardController = async (
     );
 
     if (history.length) {
-      const [elecProj, housingProj] = await Promise.all([
+      const [elecProj, generalProj, housingProj] = await Promise.all([
         searchElectrificationProjects(tx, {
+          activityId: history.map((x) => x.activityId)
+        }),
+        searchGeneralProjects(tx, {
           activityId: history.map((x) => x.activityId)
         }),
         searchHousingProjects(tx, {
@@ -124,6 +128,13 @@ export const listBringForwardController = async (
             {
               activityId: history.map((x) => x.activityId)
             },
+            Initiative.GENERAL
+          ),
+          searchEnquiries(
+            tx,
+            {
+              activityId: history.map((x) => x.activityId)
+            },
             Initiative.HOUSING
           )
         ])
@@ -133,6 +144,7 @@ export const listBringForwardController = async (
         activityId: h.activityId,
         noteId: h.noteHistoryId,
         electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
+        generalProjectId: generalProj.find((s) => s.activityId === h.activityId)?.generalProjectId,
         housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
         enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
         title: h.title,
