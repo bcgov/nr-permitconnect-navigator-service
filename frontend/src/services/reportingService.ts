@@ -12,6 +12,14 @@ export default {
   },
 
   /**
+   * @function getGeneralProjectPermitData
+   * @returns {Promise} An axios response
+   */
+  getGeneralProjectPermitData() {
+    return appAxios().get(`${PATH}/generalProject/permit`);
+  },
+
+  /**
    * @function getProjectPermitData
    * @returns {Promise} An axios response
    */

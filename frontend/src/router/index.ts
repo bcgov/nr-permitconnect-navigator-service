@@ -74,11 +74,11 @@ export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   const authzStore = useAuthZStore();
 
   // Electrification
-  if (to.name === RouteName.INT_HOUSING && !authzStore.canNavigate(NavigationPermission.INT_HOUSING)) {
-    return { name: RouteName.EXT_HOUSING };
+  if (to.name === RouteName.INT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.INT_ELECTRIFICATION)) {
+    return { name: RouteName.EXT_ELECTRIFICATION };
   }
-  if (to.name === RouteName.EXT_HOUSING && !authzStore.canNavigate(NavigationPermission.EXT_HOUSING)) {
-    return { name: RouteName.INT_HOUSING };
+  if (to.name === RouteName.EXT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.EXT_ELECTRIFICATION)) {
+    return { name: RouteName.INT_ELECTRIFICATION };
   }
 
   // General
@@ -95,12 +95,6 @@ export function entryRedirect(to: RouteLocationNormalizedGeneric) {
   }
   if (to.name === RouteName.EXT_HOUSING && !authzStore.canNavigate(NavigationPermission.EXT_HOUSING)) {
     return { name: RouteName.INT_HOUSING };
-  }
-  if (to.name === RouteName.INT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.INT_ELECTRIFICATION)) {
-    return { name: RouteName.EXT_ELECTRIFICATION };
-  }
-  if (to.name === RouteName.EXT_ELECTRIFICATION && !authzStore.canNavigate(NavigationPermission.EXT_ELECTRIFICATION)) {
-    return { name: RouteName.INT_ELECTRIFICATION };
   }
 }
 

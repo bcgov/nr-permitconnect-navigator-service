@@ -28,6 +28,7 @@ import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/s
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import {
   projectAuthorizationRouteNameKey,
+  projectEnquiryRouteNameKey,
   projectNoteRouteNameKey,
   projectServiceKey,
   updateLiveNameKey
@@ -48,6 +49,7 @@ const { initialTab = '0', projectId } = defineProps<{
 interface InitiativeState {
   projectAddAuthorizationRouteName: RouteName;
   projectAuthorizationRouteName: RouteName;
+  projectEnquiryRouteName: RouteName;
   projectNoteRouteName: RouteName;
   projectProponentName: RouteName;
   projectService: IDraftableProjectService;
@@ -57,6 +59,7 @@ interface InitiativeState {
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectAddAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
+  projectEnquiryRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
   projectProponentName: RouteName.INT_ELECTRIFICATION_PROJECT_PROPONENT,
   projectService: electrificationProjectService
@@ -65,6 +68,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
   projectAddAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION,
+  projectEnquiryRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_GENERAL_PROJECT_NOTE,
   projectProponentName: RouteName.INT_GENERAL_PROJECT_PROPONENT,
   projectService: generalProjectService
@@ -73,6 +77,7 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   projectAddAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
+  projectEnquiryRouteName: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_HOUSING_PROJECT_NOTE,
   projectProponentName: RouteName.INT_HOUSING_PROJECT_PROPONENT,
   projectService: housingProjectService
@@ -108,9 +113,11 @@ const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFulln
 // Providers
 const provideProjectNoteRouteName = computed(() => initiativeState.value.projectNoteRouteName);
 const provideProjectAuthorizationRouteName = computed(() => initiativeState.value.projectAuthorizationRouteName);
+const provideProjectEnquiryRouteName = computed(() => initiativeState.value.projectEnquiryRouteName);
 const provideProjectService = computed(() => initiativeState.value.projectService);
 provide(projectNoteRouteNameKey, provideProjectNoteRouteName);
 provide(projectAuthorizationRouteNameKey, provideProjectAuthorizationRouteName);
+provide(projectEnquiryRouteNameKey, provideProjectEnquiryRouteName);
 provide(projectServiceKey, provideProjectService);
 provide(updateLiveNameKey, updateLiveName);
 

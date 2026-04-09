@@ -310,14 +310,13 @@ export function createAtsInfoPanelSchema({ initiative, t }: CreateSchemaOptions)
     atsInfo: object({
       atsClientId: atsClientIdValidator(t('validators.atsClientId.label')),
       atsEnquiryId: number().nullable(),
-      businessArea: string().when([], {
-        is: () => initiative === Initiative.GENERAL,
-        then: (schema) =>
-          schema
-            .oneOf(BUSINESS_AREA_LIST, 'Business area is a required field')
-            .label(t('validators.atsInfo.businessArea')),
-        otherwise: (schema) => schema.notRequired()
-      })
+      businessArea: string()
+        .nullable()
+        .when([], {
+          is: () => initiative === Initiative.GENERAL,
+          then: (schema) => schema.oneOf(BUSINESS_AREA_LIST).label(t('validators.atsInfo.businessArea')),
+          otherwise: (schema) => schema.notRequired()
+        })
     })
   };
 }

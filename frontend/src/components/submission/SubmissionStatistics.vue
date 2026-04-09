@@ -52,6 +52,7 @@ async function onDownloadProjectPermitData() {
   let response;
   if (initiative === Initiative.ELECTRIFICATION)
     response = await reportingService.getElectrificationProjectPermitData();
+  else if (initiative === Initiative.GENERAL) response = await reportingService.getGeneralProjectPermitData();
   else if (initiative === Initiative.HOUSING) response = await reportingService.getHousingProjectPermitData();
 
   const data = response?.data;
