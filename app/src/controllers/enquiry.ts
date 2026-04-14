@@ -34,6 +34,7 @@ import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
+import { Prisma } from '@prisma/client';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,
@@ -217,12 +218,19 @@ export const searchEnquiriesController = async (
   res.status(200).json(response);
 };
 
-export const updateEnquiryController = async (req: Request<never, never, Enquiry>, res: Response) => {
+export const updateEnquiryController = async (
+  req: Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+  res: Response
+) => {
   const result = await transactionWrapper<Enquiry>(async (tx: PrismaTransactionClient) => {
-    return await updateEnquiry(tx, {
-      ...req.body,
-      ...generateUpdateStamps(req.currentContext)
-    });
+    return await updateEnquiry(
+      tx,
+      {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      },
+      req.params.enquiryId
+    );
   });
 
   res.status(200).json(result);

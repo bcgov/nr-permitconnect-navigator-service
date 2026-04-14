@@ -62,16 +62,30 @@ const routes: RouteRecordRaw[] = [
                 props: createProps
               },
               {
-                path: 'enquiry',
+                path: 'enquiry/:enquiryId',
                 component: () => import('@/views/GenericView.vue'),
+                meta: { dynamicBreadcrumb: 'enquiry' },
                 children: [
                   {
-                    path: ':enquiryId',
+                    path: '',
                     name: RouteName.INT_GENERAL_PROJECT_ENQUIRY,
                     component: () => import('@/views/internal/EnquiryView.vue'),
                     beforeEnter: accessHandler,
-                    props: createProps,
-                    meta: { dynamicBreadcrumb: 'enquiry' }
+                    props: createProps
+                  },
+                  {
+                    path: 'note',
+                    component: () => import('@/views/GenericView.vue'),
+                    meta: { dynamicBreadcrumb: 'note' },
+                    children: [
+                      {
+                        path: ':noteHistoryId?',
+                        name: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
+                        component: () => import('@/views/internal/NoteView.vue'),
+                        beforeEnter: accessHandler,
+                        props: createProps
+                      }
+                    ]
                   }
                 ]
               },
@@ -81,14 +95,7 @@ const routes: RouteRecordRaw[] = [
                 meta: { dynamicBreadcrumb: 'authorization' },
                 children: [
                   {
-                    path: '',
-                    name: RouteName.INT_GENERAL_PROJECT_ADD_AUTHORIZATION,
-                    component: () => import('@/views/internal/AuthorizationView.vue'),
-                    beforeEnter: accessHandler,
-                    props: createProps
-                  },
-                  {
-                    path: ':permitId',
+                    path: ':permitId?',
                     name: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION,
                     component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,

@@ -39,7 +39,8 @@ import type {
 import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
 // Props
-const { project } = defineProps<{
+const { editable = true, project } = defineProps<{
+  editable?: boolean;
   project: ElectrificationProject;
 }>();
 
@@ -56,7 +57,6 @@ const { getInitiative } = storeToRefs(useAppStore());
 const projectStore = useProjectStore();
 const { codeList, enums } = useCodeStore();
 const { getActivityContacts } = storeToRefs(projectStore);
-const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
@@ -275,7 +275,6 @@ const onSubmit = async (formValues: GenericObject) => {
     await handleAtsCreate(values);
 
     // Generate final payload
-    // TODO: Create a type using Pick instead of Partial?
     const payload: Partial<ElectrificationProject> = {
       // Company and Project Information
       projectName: values.companyProjectName.projectName,
@@ -429,11 +428,11 @@ onBeforeMount(async () => {
         label="Save"
         type="submit"
         icon="pi pi-check"
-        :disabled="!getEditable"
+        :disabled="!editable"
       />
       <CancelButton
         v-if="!isCompleted"
-        :editable="getEditable"
+        :editable="editable"
         @clicked="onCancel"
       />
       <Button

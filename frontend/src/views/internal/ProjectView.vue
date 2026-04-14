@@ -47,7 +47,6 @@ const { initialTab = '0', projectId } = defineProps<{
 
 // Interfaces
 interface InitiativeState {
-  projectAddAuthorizationRouteName: RouteName;
   projectAuthorizationRouteName: RouteName;
   projectEnquiryRouteName: RouteName;
   projectNoteRouteName: RouteName;
@@ -57,7 +56,6 @@ interface InitiativeState {
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  projectAddAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
   projectEnquiryRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
@@ -66,7 +64,6 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
 };
 
 const GENERAL_INITIATIVE_STATE: InitiativeState = {
-  projectAddAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION,
   projectEnquiryRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_GENERAL_PROJECT_NOTE,
@@ -75,7 +72,6 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  projectAddAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
   projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
   projectEnquiryRouteName: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
   projectNoteRouteName: RouteName.INT_HOUSING_PROJECT_NOTE,

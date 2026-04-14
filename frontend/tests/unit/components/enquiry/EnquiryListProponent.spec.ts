@@ -46,7 +46,7 @@ const testEnquiry: Enquiry = {
   updatedAt: currentDate,
   addedToAts: false,
   atsClientId: 123456,
-  atsEnquiryId: '654321'
+  atsEnquiryId: 654321
 };
 
 const testEnquiries = [testEnquiry];

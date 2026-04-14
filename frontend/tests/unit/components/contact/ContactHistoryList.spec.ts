@@ -31,7 +31,7 @@ const testEnquiry: Enquiry = {
   addedToAts: false,
   assignedUserId: 'user123',
   atsClientId: null,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   submissionType: SubmissionType.ASSISTANCE,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   submittedAt: '2023-01-01T12:00:00Z',

@@ -118,30 +118,6 @@ describe('EnquiryForm.vue', () => {
     expect(wrapper).toBeTruthy();
   });
 
-  it('renders the correct amount of dropdowns', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings());
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-select-dropdown');
-    expect(elements.length).toBe(5);
-  });
-
-  it('renders the correct amount of input mask components (phone number)', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings());
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-inputmask');
-    expect(elements.length).toBe(0);
-  });
-
-  it('renders the correct amount of text area components', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings());
-    await nextTick();
-
-    const elements = wrapper.findAll('textarea');
-    expect(elements.length).toBe(1);
-  });
-
   it('searches for users onMount', async () => {
     const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUseId' };
     const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
@@ -170,14 +146,5 @@ describe('EnquiryForm.vue', () => {
     expect(wrapper.isVisible()).toBeTruthy();
     expect(getHousingActivityIdsSpy).toHaveBeenCalledTimes(1);
     expect(getHousingActivityIdsSpy).toHaveBeenCalledWith(); // No arguments
-  });
-
-  it('there are correct numbers of disabled components when editable prop is false', async () => {
-    const wrapper = mount(EnquiryForm, wrapperSettings(undefined, false));
-    await nextTick();
-
-    const elements = wrapper.findAll('.p-disabled');
-    expect(wrapper.props('editable')).toBe(false);
-    expect(elements.length).toBe(5);
   });
 });

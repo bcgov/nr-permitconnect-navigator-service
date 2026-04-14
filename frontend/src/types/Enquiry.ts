@@ -6,13 +6,13 @@ import type { IStamps } from '@/interfaces';
 
 interface EnquiryBase extends IStamps {
   addedToAts: boolean;
-  assignedUserId?: string;
+  assignedUserId?: string | null;
   atsClientId: number | null;
-  atsEnquiryId: string | null;
+  atsEnquiryId: number | null;
   submissionType: SubmissionType;
   submittedAt: string;
   submittedBy: string;
-  relatedActivityId?: string;
+  relatedActivityId?: string | null;
   enquiryDescription?: string;
   enquiryStatus: ApplicationStatus;
   submittedMethod: EnquirySubmittedMethod;

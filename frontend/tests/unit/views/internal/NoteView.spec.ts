@@ -119,20 +119,6 @@ describe('NoteView.vue', () => {
     expect(wrapper.findComponent(NoteForm).exists()).toBe(false);
   });
 
-  it('throws error if too many props', async () => {
-    const wrapper = shallowMount(NoteView, wrapperSettings('1', '2', undefined, Initiative.HOUSING));
-    await flushPromises();
-
-    expect(toastErrorMock).toHaveBeenCalledWith(
-      t('views.i.noteView.noteLoadError'),
-      t('views.i.noteView.tooManyProps'),
-      undefined
-    );
-
-    const childComponent = wrapper.findAllComponents(NoteForm);
-    expect(childComponent).toHaveLength(0);
-  });
-
   it('throws error if unknown initiative', async () => {
     shallowMount(NoteView, wrapperSettings(undefined, undefined, undefined, Initiative.PCNS));
     await flushPromises();

@@ -219,7 +219,7 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     submissionState: {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
-      assignedUser: assigneeOptions[0]?.fullName ?? null,
+      assignedUser: assigneeOptions[0] ?? null,
       applicationStatus: project.applicationStatus,
       region: String(project.region),
       area: String(project.area)
@@ -289,7 +289,6 @@ const onSubmit = async (formValues: GenericObject) => {
     await handleAtsCreate(values);
 
     // Generate final payload
-    // TODO: Create a type using Pick instead of Partial?
     const payload: Partial<GeneralProject> = {
       // Company and Project Information
       projectName: values.companyProjectName.projectName,

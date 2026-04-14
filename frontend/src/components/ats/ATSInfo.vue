@@ -26,7 +26,8 @@ const {
   firstName = undefined,
   lastName = undefined,
   phoneNumber = undefined,
-  isRelatedEnquiry = false
+  isRelatedEnquiry = false,
+  isEnquiry = false
 } = defineProps<{
   atsClientId?: string | number;
   atsEnquiryId?: string | number;
@@ -36,6 +37,7 @@ const {
   lastName?: string;
   phoneNumber?: string;
   isRelatedEnquiry?: boolean;
+  isEnquiry?: boolean;
 }>();
 
 // Emits
@@ -152,7 +154,7 @@ watch(visible, () => {
     </div>
 
     <Select
-      v-if="getInitiative === Initiative.GENERAL"
+      v-if="getInitiative === Initiative.GENERAL && !isEnquiry"
       class="w-full"
       name="atsInfo.businessArea"
       :label="t('i.housing.project.projectForm.businessAreaLabel')"
