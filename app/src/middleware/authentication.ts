@@ -20,13 +20,13 @@ import type { CurrentContext } from '../types/index.ts';
 export const _spkiWrapper = (spki: string) => `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
 
 /**
- * Injects a currentContext object to the request if there exists valid authentication artifacts.
+ * Authenticates incoming request and inject the current context into request.
  * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
- * @param initiative The initiative associated with the request
- * @returns A middleware function
- * @throws {Problem} The error encountered upon failure
+ * @param initiative The initiative associated with the request.
+ * @returns A middleware function.
+ * @throws {Problem} The error encountered upon failure.
  */
-export const currentContext = (initiative: Initiative) => {
+export const hasAuthentication = (initiative: Initiative) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     const authorization = req.get('Authorization');
     const currentContext: CurrentContext = {

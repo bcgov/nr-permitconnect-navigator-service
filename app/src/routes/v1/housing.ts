@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { currentContext } from '../../middleware/authentication.ts';
+import { hasAuthentication } from '../../middleware/authentication.ts';
 import { Initiative } from '../../utils/enums/application.ts';
 
 import accessRequest from './accessRequest.ts';
@@ -13,7 +13,7 @@ import permit from './permit.ts';
 import roadmap from './roadmap.ts';
 
 const router = express.Router();
-router.use(currentContext(Initiative.HOUSING));
+router.use(hasAuthentication(Initiative.HOUSING));
 
 // Base v1 Responder
 router.get('/housing', (_req, res) => {
