@@ -308,19 +308,6 @@ export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => 
 }
 
 /**
- * Returns an array of strings representing potential identity key claims
- * Array will always end with the last value as 'sub'
- * @returns An array of string values, or `value` if it is not a string
- */
-export function parseIdentityKeyClaims(): string[] {
-  const claims: string[] = [];
-  if (config.has('server.oidc.identityKey')) {
-    claims.push(...parseCSV(config.get('server.oidc.identityKey')));
-  }
-  return claims.concat('sub');
-}
-
-/**
  * Acquires the list of feature flags to be used
  * @returns A promise resolving to an object of key values
  */

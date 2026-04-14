@@ -73,42 +73,33 @@ export const createIdp = async (tx: PrismaTransactionClient, idp: string): Promi
  * @returns A Promise that resolves into the created user
  */
 export const createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
-  // Logical function
-  const _createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
-    const exists = await tx.user.findFirst({
-      where: {
-        sub: data.sub
-      }
-    });
-
-    if (exists) {
-      return exists;
-    } else {
-      if (data.idp) {
-        const identityProvider = await readIdp(tx, data.idp);
-        if (!identityProvider) await createIdp(tx, data.idp);
-      }
-
-      const newUser = {
-        bceidBusinessName: data.bceidBusinessName,
-        userId: uuidv4(),
-        sub: data.sub,
-        fullName: data.fullName,
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        idp: data.idp,
-        active: true,
-        ...generateCreateStamps(undefined)
-      };
-
-      return await tx.user.create({
-        data: newUser
-      });
+  const exists = await tx.user.findFirst({
+    where: {
+      sub: data.sub
     }
+  });
+
+  if (exists) return exists;
+
+  if (data.idp) {
+    const identityProvider = await readIdp(tx, data.idp);
+    if (!identityProvider) await createIdp(tx, data.idp);
+  }
+
+  const newUser = {
+    bceidBusinessName: data.bceidBusinessName,
+    userId: uuidv4(),
+    sub: data.sub,
+    fullName: data.fullName,
+    email: data.email,
+    firstName: data.firstName,
+    lastName: data.lastName,
+    idp: data.idp,
+    active: true,
+    ...generateCreateStamps(undefined)
   };
 
-  return _createUser(tx, data);
+  return await tx.user.create({ data: newUser });
 };
 
 /**
@@ -162,7 +153,7 @@ export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload):
     }
   });
 
-  const response = !oldUser ? await createUser(tx, newUser) : await updateUser(tx, oldUser.userId, newUser);
+  const response = oldUser ? await updateUser(tx, oldUser.userId, newUser) : await createUser(tx, newUser);
 
   // Create initial contact entry
   if (response) {
@@ -301,37 +292,31 @@ export const updateUser = async (tx: PrismaTransactionClient, userId: string, da
   const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
 
   if (diff) {
-    const _updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
-      // Patch existing user
-      if (data.idp) {
-        const identityProvider = await readIdp(tx, data.idp);
-        if (!identityProvider) await createIdp(tx, data.idp);
-      }
+    // Patch existing user
+    if (data.idp) {
+      const identityProvider = await readIdp(tx, data.idp);
+      if (!identityProvider) await createIdp(tx, data.idp);
+    }
 
-      const obj = {
-        bceidBusinessName: data.bceidBusinessName,
-        sub: data.sub,
-        fullName: data.fullName,
-        email: data.email,
-        firstName: data.firstName,
-        lastName: data.lastName,
-        idp: data.idp,
-        active: data.active
-      };
-
-      // TODO: Add support for updating userId primary key in the event it changes
-      return await tx.user.update({
-        data: obj,
-        where: {
-          userId
-        }
-      });
+    const obj = {
+      bceidBusinessName: data.bceidBusinessName,
+      sub: data.sub,
+      fullName: data.fullName,
+      email: data.email,
+      firstName: data.firstName,
+      lastName: data.lastName,
+      idp: data.idp,
+      active: data.active
     };
 
-    return await _updateUser(tx, userId, data);
-  } else {
+    return await tx.user.update({
+      data: obj,
+      where: {
+        userId
+      }
+    });
+  } else if (oldUser) {
     // Nothing to update
-    if (oldUser) return oldUser;
-    else throw new Problem(404, { detail: 'User not found' });
-  }
+    return oldUser;
+  } else throw new Problem(404, { detail: 'User not found' });
 };
