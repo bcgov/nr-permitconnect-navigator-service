@@ -76,10 +76,8 @@
       "secretAccessKey": "SERVER_OBJECTSTORAGE_SECRETACCESSKEY"
     },
     "oidc": {
-      "authority": "SERVER_OIDC_AUTHORITY",
-      "clientId": "SERVER_OIDC_CLIENTID",
-      "clientSecret": "SERVER_OIDC_CLIENTSECRET",
-      "publicKey": "SERVER_OIDC_PUBLICKEY"
+      "audience": "SERVER_OIDC_AUDIENCE",
+      "authority": "SERVER_OIDC_AUTHORITY"
     },
     "openMaps": {
       "apiPath": "SERVER_OPENMAPS_APIPATH"
