@@ -172,16 +172,6 @@ spec:
                 secretKeyRef:
                   key: password
                   name: {{ include "pcns.configname" . }}-objectstorage
-            - name: SERVER_OIDC_CLIENTID
-              valueFrom:
-                secretKeyRef:
-                  key: username
-                  name: {{ include "pcns.configname" . }}-oidc
-            - name: SERVER_OIDC_CLIENTSECRET
-              valueFrom:
-                secretKeyRef:
-                  key: password
-                  name: {{ include "pcns.configname" . }}-oidc
             - name: SERVER_PEACH_CLIENTID
               valueFrom:
                 secretKeyRef:
