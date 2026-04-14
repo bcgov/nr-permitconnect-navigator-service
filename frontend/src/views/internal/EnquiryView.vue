@@ -47,6 +47,7 @@ interface InitiativeState {
   atsEnquiryPartnerAgencies: Initiative;
   atsEnquiryTypeCode: string;
   enquiryNoteRouteName: RouteName;
+  projectEnquiryNoteRouteName: RouteName;
   projectRouteName: RouteName;
   projectService: IDraftableProjectService;
 }
@@ -56,6 +57,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   atsEnquiryPartnerAgencies: Initiative.ELECTRIFICATION,
   atsEnquiryTypeCode: toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   enquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
+  projectEnquiryNoteRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService
 };
@@ -64,6 +66,7 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   atsEnquiryPartnerAgencies: Initiative.GENERAL,
   atsEnquiryTypeCode: toTitleCase(Initiative.GENERAL) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   enquiryNoteRouteName: RouteName.INT_GENERAL_ENQUIRY_NOTE,
+  projectEnquiryNoteRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_GENERAL_PROJECT,
   projectService: generalProjectService
 };
@@ -72,6 +75,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   atsEnquiryPartnerAgencies: Initiative.HOUSING,
   atsEnquiryTypeCode: toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   enquiryNoteRouteName: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+  projectEnquiryNoteRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_HOUSING_PROJECT,
   projectService: housingProjectService
 };
@@ -105,6 +109,10 @@ provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
 
 // Actions
+const getNoteRouteName = computed(() => {
+  return projectId ? initiativeState.value.projectEnquiryNoteRouteName : initiativeState.value.enquiryNoteRouteName;
+});
+
 const isCompleted = computed(() => {
   return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
 });
@@ -125,7 +133,7 @@ async function updateRelatedEnquiry() {
 
 function toEditNote(noteHistoryId: string) {
   router.push({
-    name: RouteName.INT_HOUSING_ENQUIRY_NOTE,
+    name: getNoteRouteName.value,
     params: {
       enquiryId: enquiryId,
       noteHistoryId: noteHistoryId
@@ -195,106 +203,108 @@ onBeforeMount(async () => {
 </script>
 
 <template>
-  <h1>
-    {{ t('views.i.enquiryView.header') }}
-    <span
-      v-if="getEnquiry?.activityId"
-      class="mr-1"
-    >
-      {{ getEnquiry.activityId }}
-    </span>
-    <span
-      v-if="isCompleted"
-      class="ml-0"
-    >
-      {{ t('views.i.enquiryView.completed') }}
-    </span>
-  </h1>
-  <Tabs :value="activeTab">
-    <TabList>
-      <Tab :value="0">Information</Tab>
-      <Tab :value="1">Notes</Tab>
-    </TabList>
-    <TabPanels>
-      <TabPanel :value="0">
-        <Message
-          v-if="relatedProject"
-          severity="info"
-          class="text-center"
-          :closable="false"
-        >
-          {{ t('views.i.enquiryView.linkedActivity') }}
-          <router-link
-            :to="{
-              name: initiativeState.projectRouteName,
-              params: { projectId: relatedProject.projectId }
-            }"
+  <div>
+    <h1>
+      {{ t('views.i.enquiryView.header') }}
+      <span
+        v-if="getEnquiry?.activityId"
+        class="mr-1"
+      >
+        {{ getEnquiry.activityId }}
+      </span>
+      <span
+        v-if="isCompleted"
+        class="ml-0"
+      >
+        {{ t('views.i.enquiryView.completed') }}
+      </span>
+    </h1>
+    <Tabs :value="activeTab">
+      <TabList>
+        <Tab :value="0">Information</Tab>
+        <Tab :value="1">Notes</Tab>
+      </TabList>
+      <TabPanels>
+        <TabPanel :value="0">
+          <Message
+            v-if="relatedProject"
+            severity="info"
+            class="text-center"
+            :closable="false"
           >
-            {{ getEnquiry?.relatedActivityId }}
-          </router-link>
-        </Message>
+            {{ t('views.i.enquiryView.linkedActivity') }}
+            <router-link
+              :to="{
+                name: initiativeState.projectRouteName,
+                params: { projectId: relatedProject.projectId }
+              }"
+            >
+              {{ getEnquiry?.relatedActivityId }}
+            </router-link>
+          </Message>
 
-        <Message
-          v-if="getEnquiry?.relatedActivityId && !relatedProject"
-          severity="error"
-          class="text-center"
-          :closable="false"
-        >
-          {{ t('views.i.enquiryView.invalidLinkedActivity') }}
-        </Message>
-        <span v-if="!loading && getEnquiry">
-          <EnquiryForm
-            :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.ENQUIRY, Action.UPDATE)"
-            :enquiry="getEnquiry"
-            @enquiry-form:saved="onEnquiryFormSaved"
-          />
-        </span>
-      </TabPanel>
-      <TabPanel :value="1">
-        <div class="flex items-center pb-2">
-          <div class="grow">
-            <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
-          </div>
-          <Button
-            aria-label="Add note"
-            :disabled="!isCompleted && !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
-            @click="
-              router.push({
-                name: initiativeState.enquiryNoteRouteName,
-                params: {
-                  enquiryId: enquiryId
-                }
-              })
-            "
+          <Message
+            v-if="getEnquiry?.relatedActivityId && !relatedProject"
+            severity="error"
+            class="text-center"
+            :closable="false"
           >
-            <font-awesome-icon
-              class="pr-2"
-              icon="fa-solid fa-plus"
+            {{ t('views.i.enquiryView.invalidLinkedActivity') }}
+          </Message>
+          <span v-if="!loading && getEnquiry">
+            <EnquiryForm
+              :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.ENQUIRY, Action.UPDATE)"
+              :enquiry="getEnquiry"
+              @enquiry-form:saved="onEnquiryFormSaved"
             />
-            Add note
-          </Button>
-        </div>
-        <div v-if="!loading">
-          <div
-            v-for="(noteHistory, index) in getNoteHistory"
-            :key="noteHistory.noteHistoryId"
-            :index="index"
-            class="col-span-12"
-          >
-            <NoteHistoryCard
-              :editable="!isCompleted"
-              :note-history="noteHistory"
-              :created-by-full-name="
-                noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
-                  ?.createdByFullname
+          </span>
+        </TabPanel>
+        <TabPanel :value="1">
+          <div class="flex items-center pb-2">
+            <div class="grow">
+              <p class="font-bold">Notes ({{ getNoteHistory.length }})</p>
+            </div>
+            <Button
+              aria-label="Add note"
+              :disabled="!isCompleted && !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
+              @click="
+                router.push({
+                  name: getNoteRouteName,
+                  params: {
+                    enquiryId: enquiryId
+                  }
+                })
               "
-              @edit-note-history="(e) => toEditNote(e)"
-              @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
-              @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
-            />
+            >
+              <font-awesome-icon
+                class="pr-2"
+                icon="fa-solid fa-plus"
+              />
+              Add note
+            </Button>
           </div>
-        </div>
-      </TabPanel>
-    </TabPanels>
-  </Tabs>
+          <div v-if="!loading">
+            <div
+              v-for="(noteHistory, index) in getNoteHistory"
+              :key="noteHistory.noteHistoryId"
+              :index="index"
+              class="col-span-12"
+            >
+              <NoteHistoryCard
+                :editable="!isCompleted"
+                :note-history="noteHistory"
+                :created-by-full-name="
+                  noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)
+                    ?.createdByFullname
+                "
+                @edit-note-history="(e) => toEditNote(e)"
+                @delete-note-history="(e) => enquiryStore.removeNoteHistory(e)"
+                @update-note-history="(e) => enquiryStore.updateNoteHistory(e)"
+              />
+            </div>
+          </div>
+        </TabPanel>
+      </TabPanels>
+    </Tabs>
+  </div>
 </template>

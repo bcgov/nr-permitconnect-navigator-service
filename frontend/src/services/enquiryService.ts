@@ -62,7 +62,7 @@ export default {
    * @function updateEnquiry
    * @returns {Promise} An axios response
    */
-  updateEnquiry(enquiryId: string, data?: Enquiry) {
-    return appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`, data);
+  updateEnquiry(enquiryId: string, data: Partial<Enquiry>) {
+    return appAxios().patch(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`, data);
   }
 };

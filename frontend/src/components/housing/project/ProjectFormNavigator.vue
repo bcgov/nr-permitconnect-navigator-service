@@ -302,7 +302,6 @@ const onSubmit = async (formValues: GenericObject) => {
     await handleAtsCreate(values);
 
     // Generate final payload
-    // TODO: Create a type using Pick instead of Partial?
     const payload: Partial<HousingProject> = {
       // Company and Project Information
       projectName: values.companyProjectName.projectName,

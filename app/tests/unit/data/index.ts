@@ -289,32 +289,7 @@ export const TEST_ENQUIRY_1: Enquiry = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null,
-  activity: {
-    activityId: 'ACTI1234',
-    initiativeId: Initiative.HOUSING,
-    createdAt: null,
-    createdBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    deletedBy: null,
-    deletedAt: null,
-    activityContact: [
-      {
-        activityId: 'ACTI1234',
-        contactId: TEST_CONTACT_1.contactId,
-        role: ActivityContactRole.PRIMARY,
-        createdAt: null,
-        createdBy: null,
-        updatedAt: null,
-        updatedBy: null,
-        deletedBy: null,
-        deletedAt: null
-      }
-    ]
-  },
-
-  user: null
+  deletedAt: null
 };
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {

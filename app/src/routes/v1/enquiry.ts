@@ -58,7 +58,7 @@ router.post(
 );
 
 /** Updates an enquiry */
-router.put(
+router.patch(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
   hasAccess('enquiryId'),

@@ -26,6 +26,7 @@ import {
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
+import { Prisma } from '@prisma/client';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -241,18 +242,26 @@ describe('updateEnquiryController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       body: { ...TEST_ENQUIRY_1 },
-      currentContext: TEST_CURRENT_CONTEXT
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: { enquiryId: TEST_ENQUIRY_1.enquiryId }
     };
 
     updateEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
-    await updateEnquiryController(req as unknown as Request<never, never, Enquiry>, res as unknown as Response);
+    await updateEnquiryController(
+      req as unknown as Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+      res as unknown as Response
+    );
 
-    expect(updateEnquirySpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_ENQUIRY_1,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(updateEnquirySpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      {
+        ...TEST_ENQUIRY_1,
+        updatedAt: expect.any(Date) as Date,
+        updatedBy: TEST_CURRENT_CONTEXT.userId
+      },
+      req.params.enquiryId
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
   });

@@ -3,6 +3,7 @@ import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data/index.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { EnquiryBase } from '../../../src/types/models.ts';
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -230,7 +231,11 @@ describe('updateEnquiry', () => {
   it('calls enquiry.update with correct data and returns result', async () => {
     prismaTxMock.enquiry.update.mockResolvedValueOnce(TEST_ENQUIRY_1);
 
-    const response = await enquiryService.updateEnquiry(prismaTxMock, TEST_ENQUIRY_1);
+    const response = await enquiryService.updateEnquiry(
+      prismaTxMock,
+      TEST_ENQUIRY_1 as EnquiryBase,
+      TEST_ENQUIRY_1.enquiryId
+    );
 
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.enquiry.update).toHaveBeenCalledWith({
