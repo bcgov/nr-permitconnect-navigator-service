@@ -15,7 +15,7 @@ describe('getLogger', () => {
   };
 
   it('should return a winston logger', () => {
-    const result = getLogger(undefined);
+    const result = getLogger();
     assertLogger(result);
   });
 
