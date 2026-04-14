@@ -58,7 +58,7 @@
     "seed": "knex seed:run",
     "serve": "tsx watch --include \"./config/*\" --include \"./src/**/*\" ./server.ts --clear-screen=false",
     "start": "tsx ./server",
-    "test": "jest --verbose --forceExit --detectOpenHandles",
+    "test": "cross-env NODE_OPTIONS=--experimental-vm-modules jest --verbose --forceExit --detectOpenHandles",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -99,6 +99,7 @@
     "@types/pg": "^8.18.0",
     "@types/qs": "^6.15.0",
     "@types/supertest": "^7.2.0",
+    "cross-env": "^10.1.0",
     "eslint": "^10.0.3",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-jsdoc": "^62.8.0",
