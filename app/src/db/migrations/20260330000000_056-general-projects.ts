@@ -93,7 +93,6 @@ export async function up(knex: Knex): Promise<void> {
           table.text('region');
           table.text('area');
           table.text('activity_type');
-          table.boolean('is_registered_in_bc');
           table.text('business_area');
           stamps(knex, table);
         })

@@ -825,7 +825,6 @@ model general_project {
   region                      String?
   area                        String?
   activityType                String?   @map("activity_type")
-  isRegisteredInBc            Boolean?  @map("is_registered_in_bc")
   businessArea                String?   @map("business_area")
   createdBy                   String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
   createdAt                   DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
