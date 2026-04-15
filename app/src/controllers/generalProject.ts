@@ -108,8 +108,7 @@ const generateGeneralProjectData = async (
       companyNameRegistered: data.basic.registeredName,
       projectName: data.basic.projectName,
       projectNumber: data.basic.projectNumber,
-      projectDescription: data.basic.projectDescription,
-      isRegisteredInBc: data.basic.registeredId !== null
+      projectDescription: data.basic.projectDescription
     };
   }
 
