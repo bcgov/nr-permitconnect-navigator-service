@@ -2,7 +2,7 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Document, Enquiry, NoteHistory, Permit, Project } from '@/types';
@@ -107,6 +107,12 @@ export const useProjectStore = defineStore('project', () => {
     }),
     getPermits: computed(() => state.permits.value),
     getRelatedEnquiries: computed(() => state.relatedEnquiries.value),
+    getPrimaryActivityContact: computed(
+      () =>
+        // Look in activityContacts first, fall back to project state
+        state.activityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact ??
+        state.project.value?.activity?.activityContact?.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
+    ),
     getProject: computed(() => state.project.value),
     getProjectIsCompleted: computed(() => state.project.value?.applicationStatus === ApplicationStatus.COMPLETED),
     getRoadmapNote: computed(() => state.roadmapNote.value)
@@ -138,7 +144,12 @@ export const useProjectStore = defineStore('project', () => {
     const idx = state.activityContacts.value.findIndex(
       (x: ActivityContact) => x.activityId === data.activityId && x.contactId === data.contactId
     );
-    if (idx >= 0) state.activityContacts.value[idx] = data;
+
+    if (idx >= 0) {
+      const copy = [...state.activityContacts.value];
+      copy[idx] = data;
+      state.activityContacts.value = copy;
+    }
   }
 
   function setActivityContacts(data: ActivityContact[]) {

@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { ref, watch, watchEffect } from 'vue';
+import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { array, object, string, type InferType } from 'yup';
 
@@ -11,7 +11,6 @@ import { InputText, TextArea } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
-import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -56,7 +55,7 @@ export type FormSchemaType = InferType<typeof formSchema>;
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
-const { getDocuments, getProject } = storeToRefs(useProjectStore());
+const { getDocuments, getPrimaryActivityContact, getProject } = storeToRefs(useProjectStore());
 const projectStore = useProjectStore();
 
 // State
@@ -105,55 +104,52 @@ function onFileSelect(data: Document[]) {
   selectedFiles.value = data;
 }
 
-watchEffect(async () => {
-  const project = getProject.value;
-
-  // Get navigator details
-  const configBCC = getConfig.value?.ches?.roadmap?.bcc;
-  let bcc = configBCC;
-  let navigator = {
-    email: configBCC ?? '',
-    fullName: 'Permit Connect Navigator Service'
-  };
-
-  if (project?.assignedUserId) {
-    const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] })).data[0];
-
-    if (assignee) {
-      navigator = assignee;
-      navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
-      bcc = (bcc ? `${bcc}; ` : '') + assignee.email;
+watch(
+  [() => getPrimaryActivityContact.value, () => getProject.value],
+  async ([contact, project]) => {
+    if (getProject.value?.activityId) {
+      const roadMapNote = (await roadmapService.getRoadmapNote(getProject.value.activityId)).data;
+      projectStore.setRoadmapNote(roadMapNote);
     }
-  }
 
-  // Get primary contact
-  const contact = project?.activity?.activityContact?.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact;
+    // Get navigator details
+    const configBCC = getConfig.value?.ches?.roadmap?.bcc;
+    let bcc = configBCC;
+    let navigator = {
+      email: configBCC ?? '',
+      fullName: 'Permit Connect Navigator Service'
+    };
 
-  const initiative = useAppStore().getInitiative.toLowerCase();
+    if (project?.assignedUserId) {
+      const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] })).data[0];
 
-  // Initial form values
-  initialFormValues.value = {
-    from: navigator.email,
-    to: [contact?.email],
-    cc: undefined,
-    bcc: [bcc],
-    subject: `Here is your ${initiative} project's Permit Roadmap`,
-    bodyType: 'text',
-    body: projectStore.roadmapNote
-  };
+      if (assignee) {
+        navigator = assignee;
+        navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
+        bcc = (bcc ? `${bcc}; ` : '') + assignee.email;
+      }
+    }
 
-  formRef.value?.setFieldValue('from', navigator.email);
-  formRef.value?.setFieldValue('to', contact?.email);
-  formRef.value?.setFieldValue('bcc', bcc);
-  formRef.value?.setFieldValue('body', projectStore.roadmapNote);
-});
+    const initiative = useAppStore().getInitiative.toLowerCase();
 
-watch(getProject, async () => {
-  if (getProject.value?.activityId) {
-    const roadMapNote = (await roadmapService.getRoadmapNote(getProject.value.activityId)).data;
-    projectStore.setRoadmapNote(roadMapNote);
-  }
-});
+    // Initial form values
+    initialFormValues.value = {
+      from: navigator.email,
+      to: [contact?.email],
+      cc: undefined,
+      bcc: [bcc],
+      subject: `Here is your ${initiative} project's Permit Roadmap`,
+      bodyType: 'text',
+      body: projectStore.roadmapNote
+    };
+
+    formRef.value?.setFieldValue('from', navigator.email);
+    formRef.value?.setFieldValue('to', contact?.email);
+    formRef.value?.setFieldValue('bcc', bcc);
+    formRef.value?.setFieldValue('body', projectStore.roadmapNote);
+  },
+  { immediate: true }
+);
 </script>
 
 <template>

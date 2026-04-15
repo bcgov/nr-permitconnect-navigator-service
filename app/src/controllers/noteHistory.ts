@@ -150,6 +150,7 @@ export const listBringForwardController = async (
         title: h.title,
         projectName:
           elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
+          generalProj.find((s) => s.activityId === h.activityId)?.projectName ??
           housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
           null,
         createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
