@@ -1,17 +1,17 @@
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
-import { RouteName } from '@/utils/enums/application';
 import { formatDate } from '@/utils/formatters';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { RouteLocationRaw } from 'vue-router';
 import type { Enquiry, Pagination, Project } from '@/types';
+import { enquiryRouteNameKey, projectRouteNameKey } from '@/utils/keys';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{
@@ -19,6 +19,10 @@ const { assignedUsers, contactsHistory, loading } = defineProps<{
   contactsHistory: (Project | Enquiry)[];
   loading: boolean;
 }>();
+
+// Injections
+const enquiryRouteName = inject(enquiryRouteNameKey);
+const projectRouteName = inject(projectRouteNameKey);
 
 // Composables
 const { t } = useI18n();
@@ -42,19 +46,14 @@ function getUsersName(userId: string) {
 
 function getRouteToObject(data: Project | Enquiry) {
   let toObject: RouteLocationRaw;
-  if ('electrificationProjectId' in data) {
+  if ('projectId' in data) {
     toObject = {
-      name: RouteName.INT_ELECTRIFICATION_PROJECT,
-      params: { projectId: data.electrificationProjectId }
-    };
-  } else if ('housingProjectId' in data) {
-    toObject = {
-      name: RouteName.INT_HOUSING_PROJECT,
-      params: { projectId: data.housingProjectId }
+      name: projectRouteName?.value,
+      params: { projectId: data.projectId }
     };
   } else if ('enquiryId' in data) {
     toObject = {
-      name: RouteName.INT_HOUSING_ENQUIRY,
+      name: enquiryRouteName?.value,
       params: { enquiryId: data.enquiryId }
     };
   }
