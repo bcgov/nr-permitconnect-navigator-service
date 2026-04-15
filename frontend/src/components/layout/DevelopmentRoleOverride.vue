@@ -84,6 +84,6 @@ p {
 }
 
 .role-override {
-  background-color: #38598a;
+  background-color: var(--p-primary-color);
 }
 </style>

@@ -45,8 +45,7 @@
       "activityType": "Activity type",
       "companyNameRegistered": "Company name",
       "projectName": "Project name",
-      "projectNumber": "Project number",
-      "isRegisteredInBc": "Is Registered in BC"
+      "projectNumber": "Project number"
     },
     "consent": {
       "consentToFeedback": "Consent to feedback"

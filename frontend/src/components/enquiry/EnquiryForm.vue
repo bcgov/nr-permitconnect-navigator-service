@@ -177,7 +177,7 @@ function onReOpen() {
     rejectLabel: t('enquiryForm.reopenReject'),
     rejectProps: { outlined: true },
     accept: () => {
-      formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
+      formRef.value?.setFieldValue('submissionState.enquiryStatus', ApplicationStatus.IN_PROGRESS);
       if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });

@@ -3,8 +3,8 @@ import { storeToRefs } from 'pinia';
 import { computed } from 'vue';
 
 import ElectrificationProjectForm from '@/components/electrification/project/ProjectFormNavigator.vue';
-import { default as GeneralProjectForm } from '@/components/general/project/ProjectFormNavigator.vue';
-import { default as HousingProjectForm } from '@/components/housing/project/ProjectFormNavigator.vue';
+import GeneralProjectForm from '@/components/general/project/ProjectFormNavigator.vue';
+import HousingProjectForm from '@/components/housing/project/ProjectFormNavigator.vue';
 import { useAppStore, useAuthZStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource } from '@/utils/enums/application';
 

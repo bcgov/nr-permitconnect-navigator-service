@@ -196,7 +196,7 @@ watch(
         :rows="10"
         :disabled="!editable"
       />
-      <div class="col-span-12"><label class="font-bold">Add attachments</label></div>
+      <div class="col-span-12"><span class="text-[var(--p-bcblue-900)] font-bold">Add attachments</span></div>
       <div class="col-span-12 pt-2">
         <Button
           :disabled="!editable"

@@ -138,32 +138,40 @@ provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectEnquiryRouteNameKey, provideProjectEnquiryRouteName);
 provide(projectServiceKey, provideProjectService);
 
+// Actions
+const getState = (
+  projectState: InitiativeState,
+  enquiryState: InitiativeState,
+  projectEnquiryState: InitiativeState
+): InitiativeState => {
+  if (projectId && enquiryId) return projectEnquiryState;
+  if (enquiryId) return enquiryState;
+  return projectState;
+};
+
 onBeforeMount(async () => {
   try {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value =
-          projectId && enquiryId
-            ? ELECTRIFICATION_INITIATIVE_PROJECT_ENQUIRY_STATE
-            : enquiryId
-              ? ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE
-              : ELECTRIFICATION_INITIATIVE_PROJECT_STATE;
+        initiativeState.value = getState(
+          ELECTRIFICATION_INITIATIVE_PROJECT_STATE,
+          ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE,
+          ELECTRIFICATION_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
         break;
       case Initiative.GENERAL:
-        initiativeState.value =
-          projectId && enquiryId
-            ? GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE
-            : enquiryId
-              ? GENERAL_INITIATIVE_ENQUIRY_STATE
-              : GENERAL_INITIATIVE_PROJECT_STATE;
+        initiativeState.value = getState(
+          GENERAL_INITIATIVE_PROJECT_STATE,
+          GENERAL_INITIATIVE_ENQUIRY_STATE,
+          GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
         break;
       case Initiative.HOUSING:
-        initiativeState.value =
-          projectId && enquiryId
-            ? HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE
-            : enquiryId
-              ? HOUSING_INITIATIVE_ENQUIRY_STATE
-              : HOUSING_INITIATIVE_PROJECT_STATE;
+        initiativeState.value = getState(
+          HOUSING_INITIATIVE_PROJECT_STATE,
+          HOUSING_INITIATIVE_ENQUIRY_STATE,
+          HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
         break;
       default:
         throw new Error(t('views.initiativeStateError'));

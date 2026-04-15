@@ -13,7 +13,6 @@ import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { BasicResponse } from '@/utils/enums/application';
 
-import type { SelectChangeEvent } from 'primevue/select';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 // Props
@@ -71,7 +70,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsPanel', tab);
         :disabled="!getEditable"
         :options="YES_NO_UNSURE_LIST"
         @on-change="
-          (e: SelectChangeEvent) => {
+          (e) => {
             if (e.value !== BasicResponse.YES) setRentalUnits(null);
           }
         "

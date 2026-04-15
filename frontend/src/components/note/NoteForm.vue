@@ -291,7 +291,7 @@ onBeforeMount(async () => {
               />
             </div>
             <div class="flex items-center">
-              <h6 class="font-bold text-[var(--p-bcblue-850)]">{{ t('note.noteForm.note') }}</h6>
+              <h6 class="font-bold app-label-color">{{ t('note.noteForm.note') }}</h6>
               <Tooltip
                 v-if="
                   values.type === NoteType.BRING_FORWARD && (values.escalateToDirector || values.escalateToSupervisor)
@@ -321,7 +321,7 @@ onBeforeMount(async () => {
                   v-if="values.type === NoteType.GENERAL"
                   class="flex flex-col gap-y-4"
                 >
-                  <span class="font-bold">{{ t('note.noteForm.showProponent') }}</span>
+                  <span class="font-bold app-label-color">{{ t('note.noteForm.showProponent') }}</span>
                   <ToggleSwitch
                     v-model="shownToProponent"
                     class="mr-1"

@@ -36,7 +36,7 @@ const {
 }>();
 
 // Emits
-const emit = defineEmits(['onChange']);
+const emit = defineEmits<(e: 'onChange', event: SelectChangeEvent) => void>();
 </script>
 
 <template>
@@ -44,13 +44,13 @@ const emit = defineEmits(['onChange']);
     <FloatLabel v-if="floatLabel">
       <SelectInternal
         v-bind="{ label, name, placeholder, disabled, options, optionLabel, optionValue, bold, loading, floatLabel }"
-        @on-change="(e: SelectChangeEvent) => emit('onChange', e)"
+        @on-change="(e) => emit('onChange', e)"
       />
     </FloatLabel>
     <SelectInternal
       v-else
       v-bind="{ label, name, placeholder, disabled, optionLabel, options, optionValue, bold, loading, floatLabel }"
-      @on-change="(e: SelectChangeEvent) => emit('onChange', e)"
+      @on-change="(e) => emit('onChange', e)"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>
