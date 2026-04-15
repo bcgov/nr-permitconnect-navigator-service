@@ -27,7 +27,7 @@ export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.COMPLETED
 ];
 
-export const AREA_LIST = [...Object.values(Area)];
+export const AREA_LIST = Object.values(Area);
 
 export const ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX = ' - Project Intake';
 
@@ -37,7 +37,7 @@ export const ATS_MANAGING_REGION = 'Navigator Services';
 
 export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
 
-export const BUSINESS_AREA_LIST = [...Object.values(BusinessArea)];
+export const BUSINESS_AREA_LIST = Object.values(BusinessArea);
 
 export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,
@@ -77,6 +77,6 @@ export const PROJECT_RELATIONSHIP_LIST = [
 
 export const QUEUE_PRIORITY = [1, 2, 3];
 
-export const REGION_LIST = [...Object.values(Region)];
+export const REGION_LIST = Object.values(Region);
 
 export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];

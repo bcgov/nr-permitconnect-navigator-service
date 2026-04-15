@@ -6,7 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { EditableSelect, Select } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { useUserSearch } from '@/composables/useUserSearch';
-import { useAppStore, useFormStore, useProjectStore } from '@/store';
+import { useAppStore, useEnquiryStore, useFormStore, useProjectStore } from '@/store';
 import {
   APPLICATION_STATUS_LIST,
   AREA_LIST,
@@ -35,6 +35,7 @@ const assignee = useUserSearch();
 const { getInitiative } = storeToRefs(useAppStore());
 const { getEditable } = storeToRefs(useFormStore());
 const { getProject } = storeToRefs(useProjectStore());
+const { getEnquiry } = storeToRefs(useEnquiryStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
@@ -47,7 +48,7 @@ const getAssigneeOptionLabel = (e: User) => {
 };
 
 onMounted(async () => {
-  const id = getProject.value?.assignedUserId;
+  const id = isEnquiry ? getEnquiry.value?.assignedUserId : getProject.value?.assignedUserId;
   if (id) {
     await assignee.loadById(id);
   }

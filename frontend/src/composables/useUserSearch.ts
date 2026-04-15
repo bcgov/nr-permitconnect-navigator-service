@@ -26,10 +26,12 @@ export function useUserSearch() {
   const search = async (input: string) => {
     const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
 
+    const EMAILREGEX = new RegExp(Regex.EMAIL);
+
     if (idpCfg) {
       if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
         users.value = (await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })).data;
-      } else if (input.match(Regex.EMAIL)) {
+      } else if (EMAILREGEX.test(input)) {
         users.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
       } else {
         users.value = [];

@@ -56,7 +56,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Date:</span>
+              <span class="app-label-color font-bold">Date:</span>
               {{ enquiry.submittedAt ? formatDateShort(enquiry.submittedAt) : undefined }}
             </p>
           </div>
@@ -65,7 +65,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Author:</span>
+              <span class="app-label-color font-bold">Author:</span>
               {{ userName }}
             </p>
           </div>
@@ -74,7 +74,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Submission type:</span>
+              <span class="app-label-color font-bold">Submission type:</span>
               {{ enquiry.submissionType }}
             </p>
           </div>
@@ -89,10 +89,6 @@ onBeforeMount(() => {
 p {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.key {
-  color: #38598a;
 }
 
 .enquiry-content {

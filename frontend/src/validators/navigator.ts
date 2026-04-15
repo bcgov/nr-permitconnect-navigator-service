@@ -3,22 +3,24 @@ import { boolean, number, object, string } from 'yup';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
+  APPLICATION_STATUS_LIST,
   AREA_LIST,
   BUSINESS_AREA_LIST,
   CONTACT_PREFERENCE_LIST,
   PROJECT_RELATIONSHIP_LIST,
-  REGION_LIST
+  QUEUE_PRIORITY,
+  REGION_LIST,
+  SUBMISSION_TYPE_LIST
 } from '@/utils/constants/projectCommon';
-import { APPLICATION_STATUS_LIST, QUEUE_PRIORITY, SUBMISSION_TYPE_LIST } from '@/utils/constants/projectCommon';
 import {
   assignedToValidator,
   atsClientIdValidator,
+  emailValidator,
   latitudeValidator,
   longitudeValidator,
   optionalText,
   requiredText
 } from '@/validators/common';
-import { emailValidator } from '@/validators/common';
 import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 

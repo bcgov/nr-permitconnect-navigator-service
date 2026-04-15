@@ -7,9 +7,10 @@ import { contactSchema } from './contact.ts';
 
 import { validate } from '../middleware/validation';
 import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
+import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { ProjectApplicant } from '../utils/enums/housing.ts';
-import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
+import { BusinessArea } from '../utils/enums/projectCommon.ts';
 
 const schema = {
   createGeneralProject: {
@@ -111,7 +112,9 @@ const schema = {
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       region: Joi.string().allow(null),
       area: Joi.string().allow(null),
-      businessArea: Joi.string().allow(null) //TODO: add .valid() and make this list
+      businessArea: Joi.string()
+        .valid(...Object.values(BusinessArea))
+        .allow(null)
     }),
     params: Joi.object({
       generalProjectId: uuidv4.required()

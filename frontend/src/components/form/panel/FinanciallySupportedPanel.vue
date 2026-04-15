@@ -68,7 +68,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
             :disabled="!getEditable"
             :options="YES_NO_UNSURE_LIST"
             @on-change="
-              (e: SelectChangeEvent) => {
+              (e) => {
                 if (e.value !== BasicResponse.YES) setIndigenousDescription(null);
               }
             "
@@ -90,7 +90,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
             :disabled="!getEditable"
             :options="YES_NO_UNSURE_LIST"
             @on-change="
-              (e: SelectChangeEvent) => {
+              (e) => {
                 if (e.value !== BasicResponse.YES) setNonProfitDescription(null);
               }
             "
@@ -113,7 +113,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
             :disabled="!getEditable"
             :options="YES_NO_UNSURE_LIST"
             @on-change="
-              (e: SelectChangeEvent) => {
+              (e) => {
                 if (e.value !== BasicResponse.YES) setHousingCoopDescription(null);
               }
             "
