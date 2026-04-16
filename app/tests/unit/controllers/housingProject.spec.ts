@@ -49,7 +49,8 @@ import {
   TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_3
+  TEST_PERMIT_3,
+  TEST_HOUSING_PROJECT_UPDATE
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import * as utils from '../../../src/utils/utils';
@@ -913,21 +914,16 @@ describe('updateHousingProjectDraftController', () => {
 describe('updateHousingProjectController', () => {
   const updateSpy = jest.spyOn(housingProjectService, 'updateHousingProject');
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { housingProjectId, ...rest } = PROJECT_WITH_PROJECTID;
+  const { housingProjectId } = TEST_HOUSING_PROJECT_1;
 
-  const UPDATED_BODY: Omit<HousingProject, 'housingProjectId'> = {
-    ...rest,
-    projectName: 'NEW NAME'
-  };
-  const UPDATED_PROJECT: HousingProject = { ...PROJECT_WITH_PROJECTID, projectName: 'NEW NAME' };
+  const UPDATED_PROJECT: HousingProject = { ...TEST_HOUSING_PROJECT_1, ...TEST_HOUSING_PROJECT_UPDATE };
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: UPDATED_BODY,
+      body: TEST_HOUSING_PROJECT_UPDATE,
       currentContext: TEST_CURRENT_CONTEXT,
       params: {
-        housingProjectId: UPDATED_PROJECT.housingProjectId
+        housingProjectId
       }
     };
 
@@ -946,11 +942,12 @@ describe('updateHousingProjectController', () => {
     expect(updateSpy).toHaveBeenCalledWith(
       prismaTxMock,
       {
-        ...UPDATED_BODY,
+        ...TEST_HOUSING_PROJECT_UPDATE,
+        financiallySupported: expect.any(Boolean),
         updatedAt: expect.any(Date) as Date,
         updatedBy: TEST_CURRENT_CONTEXT.userId
       },
-      UPDATED_PROJECT.housingProjectId
+      housingProjectId
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);

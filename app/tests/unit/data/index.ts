@@ -247,6 +247,10 @@ export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   deletedAt: null
 };
 
+export const TEST_ELECTRIFICATION_PROJECT_UPDATE: Partial<Omit<ElectrificationProject, 'electrificationProjectId'>> = {
+  projectName: 'NEW NAME'
+};
+
 export const TEST_EMAIL: Email = {
   to: ['nav@example.com'],
   from: 'noreply@example.com',
@@ -449,6 +453,10 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
   }
 };
 
+export const TEST_GENERAL_PROJECT_UPDATE: Partial<Omit<GeneralProject, 'generalProjectId'>> = {
+  projectName: 'NEW NAME'
+};
+
 export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
@@ -612,6 +620,10 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     hasAppliedProvincialPermits: null,
     investigatePermits: []
   }
+};
+
+export const TEST_HOUSING_PROJECT_UPDATE: Partial<Omit<HousingProjectBase, 'housingProjectId'>> = {
+  projectName: 'NEW NAME'
 };
 
 export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {

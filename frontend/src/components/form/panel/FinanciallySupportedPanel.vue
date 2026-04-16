@@ -12,7 +12,6 @@ import { useFormStore } from '@/store';
 import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { BasicResponse } from '@/utils/enums/application';
 
-import type { SelectChangeEvent } from 'primevue/select';
 import type { ComponentPublicInstance, Ref } from 'vue';
 
 // Props
