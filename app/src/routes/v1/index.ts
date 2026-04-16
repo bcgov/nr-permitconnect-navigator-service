@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { currentContext } from '../../middleware/authentication.ts';
+import { hasAuthentication } from '../../middleware/authentication.ts';
 import { Initiative } from '../../utils/enums/application.ts';
 
 import activityContact from './activityContact.ts';
@@ -18,7 +18,7 @@ import user from './user.ts';
 import yars from './yars.ts';
 
 const router = express.Router();
-router.use(currentContext(Initiative.PCNS));
+router.use(hasAuthentication(Initiative.PCNS));
 
 // Base v1 Responder
 router.get('/', (_req, res) => {

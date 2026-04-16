@@ -1,84 +1,123 @@
 import config from 'config';
 import jwt from 'jsonwebtoken';
+import { LRUCache } from 'lru-cache';
 
+import { getAuthHeader, getBearerToken, getJwksClient, setAuthHeader } from './providers/oidc.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { login } from '../services/user.ts';
-import { Problem } from '../utils/index.ts';
 import { AuthType, Initiative } from '../utils/enums/application.ts';
+import { Problem } from '../utils/index.ts';
+import { getLogger } from '../utils/log.ts';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { JwtPayload } from 'jsonwebtoken';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type { CurrentContext } from '../types/index.ts';
 
-// TODO: Implement a 401 for unrecognized users.
+const log = getLogger(module.filename);
 
-/**
- * Wraps an SPKI key with PEM header and footer
- * @param spki The PEM-encoded Simple public-key infrastructure string
- * @returns The PEM-encoded SPKI with PEM header and footer
- */
-export const _spkiWrapper = (spki: string) => `-----BEGIN PUBLIC KEY-----\n${spki}\n-----END PUBLIC KEY-----`;
+export const jwtPayloadCache = new LRUCache<string, jwt.JwtPayload>({
+  allowStale: false,
+  max: 100,
+  ttl: 1000 * 60 * 5
+});
 
 /**
- * Injects a currentContext object to the request if there exists valid authentication artifacts.
+ * Authenticates incoming request and injects the current context into request.
  * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
- * @param initiative The initiative associated with the request
- * @returns A middleware function
- * @throws {Problem} The error encountered upon failure
+ * @param initiative The initiative associated with the request.
+ * @returns A middleware function.
+ * @throws {Problem} The error encountered upon failure.
  */
-export const currentContext = (initiative: Initiative) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const authorization = req.get('Authorization');
-    const currentContext: CurrentContext = {
-      authType: AuthType.NONE,
-      initiative: initiative
-    };
+export const hasAuthentication = (initiative: Initiative) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+    try {
+      const authHeader = getAuthHeader(req, res);
 
-    if (authorization) {
-      // OIDC JWT Authorization
-      if (authorization.toLowerCase().startsWith('bearer ')) {
-        currentContext.authType = AuthType.BEARER;
+      if (authHeader === undefined) {
+        req.currentContext = Object.freeze({
+          authType: AuthType.NONE,
+          initiative
+        });
+      } else {
+        const token = getBearerToken(authHeader, req, res);
+        const payload = await getVerifiedPayload(token, req, res);
+        const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+          return await login(tx, payload);
+        });
 
-        try {
-          const bearerToken = authorization.substring(7);
-          let isValid: string | jwt.JwtPayload;
+        if (!user?.userId) throw new Problem(500, { detail: 'Failed to log user in', instance: req.originalUrl });
 
-          if (config.has('server.oidc.authority') && config.has('server.oidc.publicKey')) {
-            const publicKey: string = config.get('server.oidc.publicKey');
-            const pemKey = publicKey.startsWith('-----BEGIN') ? publicKey : _spkiWrapper(publicKey);
-            isValid = jwt.verify(bearerToken, pemKey, { issuer: config.get('server.oidc.authority') });
-          } else {
-            throw new Error(
-              'OIDC environment variables `SERVER_OIDC_AUTHORITY` and `SERVER_OIDC_PUBLICKEY` must be defined'
-            );
-          }
-
-          if (isValid) {
-            currentContext.bearerToken = bearerToken;
-            currentContext.tokenPayload = isValid as jwt.JwtPayload;
-            const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-              return await login(tx, currentContext.tokenPayload!);
-            });
-
-            if (user && user.userId) currentContext.userId = user.userId;
-            else throw new Error('Failed to log user in');
-          } else {
-            throw new Error('Invalid authorization token');
-          }
-        } catch (error) {
-          if (error instanceof Error) {
-            return next(new Problem(403, { detail: error.message, instance: req.originalUrl }));
-          } else if (typeof error === 'string') {
-            return next(new Problem(403, { detail: error, instance: req.originalUrl }));
-          } else return next(new Problem(403, { instance: req.originalUrl }));
-        }
+        req.currentContext = Object.freeze({
+          authType: AuthType.BEARER,
+          initiative,
+          bearerToken: token,
+          tokenPayload: payload,
+          userId: user.userId
+        });
       }
+
+      next();
+    } catch (error) {
+      if (error instanceof Problem) return next(error);
+
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log.error(`Unexpected authentication error: ${errorMessage}`);
+
+      next(
+        new Problem(500, {
+          detail: 'An unexpected internal server error occurred during authentication',
+          instance: req.originalUrl
+        })
+      );
     }
-
-    // Inject currentContext data into request
-    req.currentContext = Object.freeze(currentContext);
-
-    // Continue middleware
-    next();
   };
 };
+
+/**
+ * Verifies a JWT bearer token and retrieves the verified payload, utilizing an LRU cache for performance.
+ * @param token The raw JWT bearer token string to verify.
+ * @param req The Express request object used for error context.
+ * @param res The Express response object used to set authentication error headers.
+ * @returns A promise that resolves to the verified and frozen JWT payload.
+ * @throws {Problem} 401 if the token is malformed, invalid, expired, or has an invalid payload.
+ */
+export async function getVerifiedPayload(token: string, req: Request, res: Response): Promise<JwtPayload> {
+  if (jwtPayloadCache.has(token)) return jwtPayloadCache.get(token)!;
+
+  const audience: string = config.get('server.oidc.audience');
+  const decoded = jwt.decode(token, { complete: true });
+
+  if (!decoded || typeof decoded === 'string' || !decoded.header.kid) {
+    setAuthHeader(res, { realm: audience, error: 'invalid_token' });
+    throw new Problem(401, { detail: 'Malformed authentication token' });
+  }
+
+  const jwksClient = await getJwksClient();
+
+  let payload: string | jwt.JwtPayload;
+
+  try {
+    const kid = await jwksClient.getSigningKey(decoded.header.kid);
+
+    payload = jwt.verify(token, kid.getPublicKey(), {
+      algorithms: ['RS256'],
+      audience: audience,
+      issuer: config.get('server.oidc.authority')
+    });
+  } catch {
+    setAuthHeader(res, { realm: audience, error: 'invalid_token' });
+    throw new Problem(401, { detail: 'Invalid or expired authentication token', instance: req.originalUrl });
+  }
+
+  if (typeof payload === 'string') {
+    setAuthHeader(res, { realm: audience, error: 'invalid_token' });
+    throw new Problem(401, { detail: 'Authentication token payload is not a valid JSON object' });
+  }
+
+  const frozenPayload = Object.freeze(payload);
+
+  const remainingMs = payload.exp ? (payload.exp - Math.floor(Date.now() / 1000)) * 1000 - 5000 : 0;
+  if (remainingMs > 0) jwtPayloadCache.set(token, frozenPayload, { ttl: remainingMs });
+
+  return payload;
+}

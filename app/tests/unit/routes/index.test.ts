@@ -12,6 +12,12 @@ jest.mock('config', () => ({
   get: jest.fn()
 }));
 
+jest.mock('jwks-rsa', () => {
+  return jest.fn().mockReturnValue({
+    getSigningKey: jest.fn()
+  });
+});
+
 describe('GET /', () => {
   it('should return the root endpoints', async () => {
     const response = await request(app).get('/');

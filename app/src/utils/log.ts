@@ -1,7 +1,6 @@
 import config from 'config';
 import { logger } from 'express-winston';
-// const jwt = require('jsonwebtoken');
-import { parse } from 'path';
+import { parse } from 'node:path';
 import { createLogger, format, transports } from 'winston';
 import Transport from 'winston-transport';
 
@@ -45,10 +44,10 @@ const log = createLogger({
   level: config.get('server.logLevel')
 });
 
-if (process.env.NODE_ENV !== 'test') {
-  log.add(new transports.Console({ handleExceptions: true }));
-} else {
+if (process.env.NODE_ENV === 'test') {
   log.add(new NullTransport({}));
+} else {
+  log.add(new transports.Console({ handleExceptions: true }));
 }
 
 if (config.has('server.logFile')) {
@@ -78,9 +77,7 @@ export const httpLogger = logger({
   colorize: false,
   // Parses express information to insert into log output
   dynamicMeta: (req: Request, res: Response & { responseTime?: number }) => {
-    // const token = jwt.decode((req.get('authorization') || '').slice(7));
     return {
-      // azp: token && token.azp || undefined,
       contentLength: res.get('content-length'),
       httpVersion: req.httpVersion,
       ip: req.ip,

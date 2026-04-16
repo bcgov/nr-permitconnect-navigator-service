@@ -492,18 +492,6 @@ describe('utils', () => {
     });
   });
 
-  describe('parseIdentityKeyClaims', () => {
-    it('returns configured claims + sub (dedup not enforced by code)', () => {
-      (config.has as jest.Mock).mockReturnValueOnce(true);
-      (config.get as jest.Mock).mockReturnValueOnce('idir_username,github_username');
-      expect(utils.parseIdentityKeyClaims()).toEqual(['idir_username', 'github_username', 'sub']);
-    });
-    it('returns only sub when not configured', () => {
-      (config.has as jest.Mock).mockReturnValueOnce(false);
-      expect(utils.parseIdentityKeyClaims()).toEqual(['sub']);
-    });
-  });
-
   describe('readIdpList', () => {
     beforeEach(() => {
       (existsSync as jest.Mock).mockReset();

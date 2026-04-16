@@ -1,19 +1,19 @@
-import { stripNullCharactersFromString, sanitize } from '../../../src/middleware/utils.ts'; // ⬅️ adjust path if needed
+import { stripNullCharactersFromString, sanitize } from '../../../src/middleware/utils.ts';
 
 describe('stripNullCharactersFromString', () => {
-  it('removes NUL (\\u0000) characters from a string', () => {
+  it(String.raw`removes NUL (\\u0000) characters from a string`, () => {
     expect(stripNullCharactersFromString('a\u0000b\u0000c')).toBe('abc');
   });
 
-  it('removes NUL written as \\0 (octal) in a literal', () => {
+  it(String.raw`removes NUL written as \\0 (octal) in a literal`, () => {
     expect(stripNullCharactersFromString('x\0y')).toBe('xy');
   });
 
-  it('removes NUL written as \\x00 (hex) in a literal', () => {
+  it(String.raw`removes NUL written as \\x00 (hex) in a literal`, () => {
     expect(stripNullCharactersFromString('x\x00y')).toBe('xy');
   });
 
-  it('removes NUL written as \\u{0} (code point) in a literal', () => {
+  it(String.raw`removes NUL written as \\u{0} (code point) in a literal`, () => {
     expect(stripNullCharactersFromString('x\u{0}y')).toBe('xy');
   });
 
@@ -70,24 +70,23 @@ describe('sanitize', () => {
     const arr = ['a\u0000', 'b', 'c\u0000'];
     const originalRef = arr;
     const out = sanitize(arr);
-    expect(out).toBe(originalRef); // same reference
-    expect(arr).toEqual(['a', 'b', 'c']); // values sanitized
+    expect(out).toBe(originalRef);
+    expect(arr).toEqual(['a', 'b', 'c']);
   });
 
   it('mutates objects in place (same reference), but with values sanitized', () => {
     const obj = { a: 'a\u0000', b: 'b', nested: { c: 'c\u0000' } };
     const originalRef = obj;
     const out = sanitize(obj);
-    expect(out).toBe(originalRef); // same reference
+    expect(out).toBe(originalRef);
     expect(obj).toEqual({ a: 'a', b: 'b', nested: { c: 'c' } });
   });
 
   it('does not change object keys (only values)', () => {
     const obj: Record<string, string> = { 'ke\u0000y': 'va\u0000l' };
-    // Note: your implementation does not sanitize keys; only values are changed.
     const out = sanitize(obj) as typeof obj;
-    expect(Object.keys(out)).toEqual(['ke\u0000y']); // key unchanged
-    expect(out['ke\u0000y']).toBe('val'); // value sanitized
+    expect(Object.keys(out)).toEqual(['ke\u0000y']);
+    expect(out['ke\u0000y']).toBe('val');
   });
 
   it('handles empty array/object', () => {
@@ -102,7 +101,6 @@ describe('sanitize', () => {
   it('leaves non-plain objects effectively unchanged (e.g., Date)', () => {
     const d = new Date('2020-01-01T00:00:00Z');
     const out = sanitize(d);
-    // Object.entries(date) is empty; your code returns the same ref
     expect(out).toBe(d);
     expect((out as Date).toISOString()).toBe('2020-01-01T00:00:00.000Z');
   });
