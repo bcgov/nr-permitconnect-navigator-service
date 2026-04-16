@@ -124,7 +124,7 @@ function toCopy(toCopy: string) {
             </span>
           </div>
           <div class="my-2">
-            <span class="font-bold">{{ t('authorization.authorizationCard.statusChangeDate') }}:</span>
+            <span class="font-bold">{{ t('authorization.common.statusChangeDate') }}:</span>
             <span
               v-if="permit.statusLastChanged"
               class="ml-1"
@@ -133,7 +133,7 @@ function toCopy(toCopy: string) {
             </span>
           </div>
           <div class="my-2">
-            <span class="font-bold">{{ t('authorization.authorizationCard.submittedDate') }}:</span>
+            <span class="font-bold">{{ t('authorization.common.submittedDate') }}:</span>
             <span
               v-if="permit.submittedDate"
               class="ml-1"
@@ -142,7 +142,7 @@ function toCopy(toCopy: string) {
             </span>
           </div>
           <div class="my-2">
-            <span class="font-bold">{{ t('authorization.authorizationCard.decisionDate') }}:</span>
+            <span class="font-bold">{{ t('authorization.common.decisionDate') }}:</span>
             <span
               v-if="permit.decisionDate"
               class="ml-1"

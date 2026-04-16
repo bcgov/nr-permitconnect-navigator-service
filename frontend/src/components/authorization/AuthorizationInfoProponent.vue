@@ -32,7 +32,7 @@ const { t } = useI18n();
     </div>
     <div class="border-color px-4 py-5 border border-[0.063rem]">
       <div>
-        <b>{{ t('authorization.authorizationInfoProponent.submittedDate') }}:</b>
+        <b>{{ t('authorization.common.submittedDate') }}:</b>
         <span class="ml-1">
           {{ formatDateOnly(permit?.submittedDate) }}
         </span>
@@ -48,7 +48,7 @@ const { t } = useI18n();
     </div>
     <div class="border-color px-4 py-5 border border-[0.063rem]">
       <div>
-        <b>{{ t('authorization.authorizationInfoProponent.decisionDate') }}:</b>
+        <b>{{ t('authorization.common.decisionDate') }}:</b>
         <span class="ml-1">
           <span v-if="permit.decisionDate">
             {{ formatDateOnly(permit.decisionDate) }}

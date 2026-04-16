@@ -66,7 +66,7 @@ const stateDisplayText = {
         <div>
           <Select
             name="stage"
-            :label="t('authorization.authorizationStatusUpdatesCard.applicationStage')"
+            :label="t('authorization.common.applicationStage')"
             :options="PERMIT_STAGE_LIST"
             :disabled="peachIntegratedAuthType || !editable"
           />
@@ -84,7 +84,7 @@ const stateDisplayText = {
         <div>
           <DatePicker
             name="submittedDate"
-            :label="t('authorization.authorizationStatusUpdatesCard.submittedDate')"
+            :label="t('authorization.common.submittedDate')"
             :max-date="new Date()"
             :disabled="peachIntegratedAuthType || !editable"
           />
@@ -92,7 +92,7 @@ const stateDisplayText = {
         <div>
           <DatePicker
             name="statusLastChanged"
-            :label="t('authorization.authorizationStatusUpdatesCard.statusChangeDate')"
+            :label="t('authorization.common.statusChangeDate')"
             :max-date="new Date()"
             :disabled="peachIntegratedAuthType || !editable"
           />
@@ -100,7 +100,7 @@ const stateDisplayText = {
         <div>
           <DatePicker
             name="decisionDate"
-            :label="t('authorization.authorizationStatusUpdatesCard.decisionDate')"
+            :label="t('authorization.common.decisionDate')"
             :max-date="new Date()"
             :disabled="peachIntegratedAuthType || !editable"
           />
