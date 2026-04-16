@@ -6,6 +6,7 @@ import {
   getPermitController,
   getPermitTypesController,
   listPermitsController,
+  searchPermitsController,
   upsertPermitController
 } from '../../controllers/permit.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
@@ -36,6 +37,14 @@ router.delete(
 
 /** Get a list of permit types */
 router.get('/types', hasAuthorization(Resource.PERMIT, Action.READ), getPermitTypesController);
+
+/** Get a list of permits based on search criteria */
+router.get(
+  '/search',
+  hasAuthorization(Resource.PERMIT, Action.READ),
+  permitValidator.searchPermits,
+  searchPermitsController
+);
 
 /** Get a permit */
 router.get(

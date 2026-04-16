@@ -1,7 +1,14 @@
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type { ListPermitsOptions, Permit, PermitBase, PermitSearchParams, PermitType } from '../types/index.ts';
+import type {
+  ListPermitsOptions,
+  Permit,
+  PermitBase,
+  PermitSearchParams,
+  PermitType,
+  SearchPermitsOptions
+} from '../types/index.ts';
 
 /**
  * Delete a specific permit
@@ -164,6 +171,147 @@ export const searchPermits = async (tx: PrismaTransactionClient, params: PermitS
     }
   });
   return response;
+};
+
+/**
+ * Search and retrieve permits with pagination, filtering, and sorting
+ * @param tx Prisma transaction client
+ * @param initiative Initiative code (excludes PCNS)
+ * @param options Search and filter options
+ * @returns A Promise that resolves to an object with permits array and total count
+ */
+export const searchPermitsPaginated = async (
+  tx: PrismaTransactionClient,
+  initiative: Exclude<Initiative, Initiative.PCNS>,
+  options: SearchPermitsOptions
+): Promise<{ permits: Permit[]; totalRecords: number }> => {
+  // Determine project table based on initiative, exclude PCNS
+  const projectTableMap: Record<Exclude<Initiative, Initiative.PCNS>, string> = {
+    [Initiative.HOUSING]: 'housingProject',
+    [Initiative.ELECTRIFICATION]: 'electrificationProject'
+  };
+
+  const projectTable = projectTableMap[initiative];
+
+  const sortDirection = options?.sortOrder === '1' ? 'asc' : 'desc';
+  const validSortFields = ['decisionDate', 'stage', 'state', 'statusLastChanged', 'submittedDate'];
+
+  // Default sorting
+  let orderBy: Record<string, 'asc' | 'desc'> = { submittedDate: 'desc' };
+
+  if (options?.sortField && validSortFields.includes(options.sortField)) {
+    orderBy = { [options.sortField]: sortDirection };
+  }
+
+  const whereClause = {
+    AND: [
+      {
+        activity: {
+          [projectTable]: {
+            some: {}
+          }
+        }
+      },
+      options.dateRange
+        ? {
+            OR: [
+              { submittedDate: { gte: options.dateRange[0], lte: options.dateRange[1] } },
+              { decisionDate: { gte: options.dateRange[0], lte: options.dateRange[1] } },
+              { statusLastChanged: { gte: options.dateRange[0], lte: options.dateRange[1] } }
+            ]
+          }
+        : {},
+      options?.permitTypeId ? { permitTypeId: parseInt(options.permitTypeId) } : {},
+      options?.sourceSystemKindId
+        ? {
+            permitTracking: {
+              some: {
+                sourceSystemKindId: parseInt(options.sourceSystemKindId)
+              }
+            }
+          }
+        : {},
+      options?.searchTag
+        ? {
+            OR: [
+              { activityId: { contains: options.searchTag, mode: 'insensitive' as const } },
+              { stage: { contains: options.searchTag, mode: 'insensitive' as const } },
+              { state: { contains: options.searchTag, mode: 'insensitive' as const } },
+              { permitType: { name: { contains: options.searchTag, mode: 'insensitive' as const } } },
+              { permitType: { businessDomain: { contains: options.searchTag, mode: 'insensitive' as const } } },
+              {
+                activity: {
+                  [projectTable]: {
+                    some: {
+                      OR: [
+                        { projectName: { contains: options.searchTag, mode: 'insensitive' as const } },
+                        { companyNameRegistered: { contains: options.searchTag, mode: 'insensitive' as const } },
+                        // Only include location fields for initiatives that have them (not ELECTRIFICATION)
+                        ...(initiative !== Initiative.ELECTRIFICATION
+                          ? [
+                              { streetAddress: { contains: options.searchTag, mode: 'insensitive' as const } },
+                              { locality: { contains: options.searchTag, mode: 'insensitive' as const } },
+                              { province: { contains: options.searchTag, mode: 'insensitive' as const } }
+                            ]
+                          : [])
+                      ]
+                    }
+                  }
+                }
+              },
+              {
+                permitTracking: {
+                  some: {
+                    trackingId: { contains: options.searchTag, mode: 'insensitive' as const }
+                  }
+                }
+              }
+            ]
+          }
+        : {}
+    ]
+  };
+
+  // Get total count (without pagination)
+  const totalRecords = await tx.permit.count({
+    where: whereClause
+  });
+
+  // Get paginated data
+  const permits = await tx.permit.findMany({
+    skip: options?.skip ? parseInt(options.skip) : 0,
+    take: options?.take ? parseInt(options.take) : 10,
+    where: whereClause,
+    orderBy: orderBy,
+    include: {
+      permitType: true,
+      permitTracking: {
+        include: {
+          sourceSystemKind: true
+        }
+      },
+      activity: {
+        include: {
+          [projectTable]: true
+        }
+      }
+    }
+  });
+
+  // Map the results to alias the project table as 'project'
+  const permitsWithProjectAlias = permits.map((permit) => {
+    const { [projectTable]: projectData, ...activityData } = permit.activity;
+
+    return {
+      ...permit,
+      activity: {
+        ...activityData,
+        project: projectData
+      }
+    };
+  });
+
+  return { permits: permitsWithProjectAlias, totalRecords };
 };
 
 /**

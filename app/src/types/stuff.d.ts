@@ -406,6 +406,17 @@ export type DateTimeStrings = SplitDatetimeBase<string>;
 
 export type NullableDateTimeStrings = SplitDatetimeBase<string | null>;
 
+export interface SearchPermitsOptions extends Partial<IStamps> {
+  dateRange?: [Date, Date];
+  permitTypeId?: string;
+  searchTag?: string;
+  skip?: string;
+  sortField?: string;
+  sortOrder?: string;
+  sourceSystemKindId?: string;
+  take?: string;
+}
+
 export interface StatisticsFilters extends ParsedQs {
   dateFrom: string;
   dateTo: string;

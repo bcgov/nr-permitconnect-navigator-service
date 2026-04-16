@@ -50,7 +50,22 @@ const schema = {
   listPermits: {
     query: Joi.object({
       activityId: Joi.string().min(8).max(8).allow(null),
-      includeNotes: Joi.boolean().allow(null)
+      includeNotes: Joi.boolean().allow(null),
+      pageNo: Joi.number().integer().min(1).allow(null),
+      permitTracking: permitTrackingSchema.allow(null),
+      permitType: permitTypeSchema.allow(null)
+    })
+  },
+  searchPermits: {
+    query: Joi.object({
+      dateRange: Joi.array().items(Joi.string()).length(2).allow(null),
+      permitTypeId: Joi.string().allow(null),
+      searchTag: Joi.string().allow(null),
+      skip: Joi.string().allow(null),
+      sortField: Joi.string().allow(null),
+      sortOrder: Joi.string().allow(null),
+      sourceSystemKindId: Joi.string().allow(null),
+      take: Joi.string().allow(null)
     })
   },
   upsertPermit: {
@@ -64,5 +79,6 @@ export default {
   deletePermit: validate(schema.deletePermit),
   getPermit: validate(schema.getPermit),
   listPermits: validate(schema.listPermits),
+  searchPermits: validate(schema.searchPermits),
   upsertPermit: validate(schema.upsertPermit)
 };
