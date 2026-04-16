@@ -21,11 +21,11 @@ const INITIATIVE_RESOURCE_MAP = new Map<Initiative, Resource>([
 router.get(
   '/pids/:projectId',
   async (req: Request, res: Response, next: NextFunction) => {
-    const r = INITIATIVE_RESOURCE_MAP.get(req.currentContext.initiative);
-    if (!r) {
+    const resource = INITIATIVE_RESOURCE_MAP.get(req.currentContext.initiative);
+    if (!resource) {
       throw new Error('No resource');
     }
-    return hasAuthorization(r, Action.READ)(req, res, next);
+    return hasAuthorization(resource, Action.READ)(req, res, next);
   },
   getPIDsController
 );

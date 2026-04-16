@@ -8,7 +8,7 @@ import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 export const getPIDsController = async (req: Request<{ projectId: string }>, res: Response) => {
   const response = await transactionWrapper<string | void>(async (tx: PrismaTransactionClient) => {
     const project = await getProjectByProjectId(tx, req.params.projectId);
-    if (project && 'geoJson' in project && project.geoJson) return await getPIDs(project.geoJson);
+    if (project && 'geoJson' in project) return await getPIDs(project.geoJson);
   });
 
   res.status(response ? 200 : 204).json(response);

@@ -30,20 +30,13 @@ const SORT_TYPES = {
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
-const projectStore = useProjectStore();
-const { getDocuments, getProject, getProjectIsCompleted } = storeToRefs(projectStore);
+const { getDocuments, getProject, getProjectIsCompleted } = storeToRefs(useProjectStore());
 
 // State
 const gridView: Ref<boolean> = ref(false);
 const searchTag: Ref<string> = ref('');
 const sortOrder: Ref<number | undefined> = ref(Number(SORT_ORDER.DESCENDING));
 const sortType: Ref<string> = ref(SORT_TYPES.CREATED_AT);
-
-// Actions
-function sortComparator(sortValue: number | undefined, a: string | number, b: string | number) {
-  if (sortValue === SORT_ORDER.ASCENDING) return a > b ? 1 : -1;
-  else return a < b ? 1 : -1;
-}
 
 const filteredDocuments = computed(() => {
   let tempDocuments = getDocuments.value;
@@ -75,6 +68,12 @@ const filteredDocuments = computed(() => {
   }
   return tempDocuments;
 });
+
+// Actions
+function sortComparator(sortValue: number | undefined, a: string | number, b: string | number) {
+  if (sortValue === SORT_ORDER.ASCENDING) return a > b ? 1 : -1;
+  else return a < b ? 1 : -1;
+}
 </script>
 
 <template>

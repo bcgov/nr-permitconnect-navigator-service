@@ -38,6 +38,8 @@ function getPolygonArray(geoJson: any) {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const getPIDs = async (geoJson: any): Promise<string> => {
+  if (!geoJson) return '';
+
   const polygon = getPolygonArray(geoJson);
 
   // close polygon by re-adding first point to end of array

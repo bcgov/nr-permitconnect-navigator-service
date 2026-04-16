@@ -15,18 +15,14 @@ import {
 } from '@/validators/navigator';
 
 import type { InferType } from 'yup';
-import type { CodeName } from '@/store/codeStore';
-import type { OrgBookOption } from '@/types';
-import type { Initiative } from '@/utils/enums/application';
+import type { CreateSchemaOptions } from '@/types';
 
-interface CreateSchemaOptions {
-  initiative: Initiative;
-  t: (key: string) => string; // i18n instance
-  enums: Record<CodeName, Record<string, string>>;
-  orgBookOptions: OrgBookOption[];
-}
-
-export function createProjectFormNavigatorSchema({ initiative, t, enums, orgBookOptions }: CreateSchemaOptions) {
+export function createProjectFormNavigatorSchema({
+  initiative,
+  t,
+  enums,
+  orgBookOptions
+}: Required<Omit<CreateSchemaOptions, 'codeList'>>) {
   return object({
     ...createContactCardNavFormSchema({ t }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),

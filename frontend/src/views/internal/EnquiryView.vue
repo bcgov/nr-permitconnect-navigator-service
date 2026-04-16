@@ -18,7 +18,6 @@ import {
 import { useAppStore, useAuthZStore, useEnquiryStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX } from '@/utils/constants/projectCommon';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
-import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import {
   atsEnquiryPartnerAgenciesKey,
   atsEnquiryTypeCodeKey,
@@ -88,7 +87,7 @@ const router = useRouter();
 const { getInitiative } = storeToRefs(useAppStore());
 const enquiryStore = useEnquiryStore();
 const projectStore = useProjectStore();
-const { getEnquiry, getNoteHistory } = storeToRefs(enquiryStore);
+const { getEnquiry, getEnquiryIsCompleted, getNoteHistory } = storeToRefs(enquiryStore);
 
 // State
 const activeTab: Ref<number> = ref(Number(initialTab));
@@ -97,6 +96,10 @@ const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const relatedProject: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
+
+const getNoteRouteName = computed(() => {
+  return projectId ? initiativeState.value.projectEnquiryNoteRouteName : initiativeState.value.enquiryNoteRouteName;
+});
 
 // Providers
 const provideAtsEnquiryPartnerAgencies = computed(() => initiativeState.value.atsEnquiryPartnerAgencies);
@@ -109,14 +112,6 @@ provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
 
 // Actions
-const getNoteRouteName = computed(() => {
-  return projectId ? initiativeState.value.projectEnquiryNoteRouteName : initiativeState.value.enquiryNoteRouteName;
-});
-
-const isCompleted = computed(() => {
-  return getEnquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED;
-});
-
 function onEnquiryFormSaved() {
   updateRelatedEnquiry();
 }
@@ -213,7 +208,7 @@ onBeforeMount(async () => {
         {{ getEnquiry.activityId }}
       </span>
       <span
-        v-if="isCompleted"
+        v-if="getEnquiryIsCompleted"
         class="ml-0"
       >
         {{ t('views.i.enquiryView.completed') }}
@@ -253,7 +248,7 @@ onBeforeMount(async () => {
           </Message>
           <span v-if="!loading && getEnquiry">
             <EnquiryForm
-              :editable="!isCompleted && useAuthZStore().can(getInitiative, Resource.ENQUIRY, Action.UPDATE)"
+              :editable="!getEnquiryIsCompleted && useAuthZStore().can(getInitiative, Resource.ENQUIRY, Action.UPDATE)"
               :enquiry="getEnquiry"
               @enquiry-form:saved="onEnquiryFormSaved"
             />
@@ -266,7 +261,7 @@ onBeforeMount(async () => {
             </div>
             <Button
               aria-label="Add note"
-              :disabled="!isCompleted && !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
+              :disabled="!getEnquiryIsCompleted && !useAuthZStore().can(getInitiative, Resource.NOTE, Action.CREATE)"
               @click="
                 router.push({
                   name: getNoteRouteName,
@@ -291,7 +286,7 @@ onBeforeMount(async () => {
               class="col-span-12"
             >
               <NoteHistoryCard
-                :editable="!isCompleted"
+                :editable="!getEnquiryIsCompleted"
                 :note-history="noteHistory"
                 :created-by-full-name="
                   noteHistoryCreatedByFullnames.find((x) => x.noteHistoryId === noteHistory.noteHistoryId)

@@ -24,16 +24,7 @@ import {
 import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 
-import type { CodeName } from '@/store/codeStore';
-import type { OrgBookOption } from '@/types';
-
-interface CreateSchemaOptions {
-  initiative?: Initiative;
-  t: (key: string) => string; // i18n instance
-  codeList?: Record<CodeName, string[]>;
-  enums?: Record<CodeName, Record<string, string>>;
-  orgBookOptions?: OrgBookOption[];
-}
+import type { CreateSchemaOptions } from '@/types';
 
 export function createContactCardNavFormSchema({ t }: CreateSchemaOptions) {
   return {

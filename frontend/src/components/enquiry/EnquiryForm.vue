@@ -92,17 +92,16 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const filteredProjectActivityIds: Ref<string[]> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
-const primaryContact = computed(
-  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
 const projectActivityIds: Ref<string[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
-// Actions
 const isCompleted = computed(() => {
   return enquiry.enquiryStatus === ApplicationStatus.COMPLETED;
 });
-
+const primaryContact = computed(
+  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
+// Actions
 async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
@@ -203,6 +202,36 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
   }
 }
 
+async function setAtsSubmitData(values: FormSchemaType) {
+  const updated = { ...values };
+
+  // Create ATS data as necessary
+  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
+    const response = await createATSClientEnquiry();
+    updated.atsInfo.atsClientId = response?.atsClientId;
+    updated.atsInfo.atsEnquiryId = response?.atsEnquiryId;
+    if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
+    updated.atsInfo.atsEnquiryId = await createATSEnquiry();
+    if (updated.atsInfo.atsEnquiryId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
+    const response = await createATSClientEnquiry();
+    updated.atsInfo.atsClientId = response?.atsClientId;
+    if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  }
+
+  return updated;
+}
+
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {
   if (!formRef.value) return;
@@ -226,31 +255,9 @@ const onSubmit = async (formValues: GenericObject) => {
   try {
     // vee-validate doesn't get transformed data from yup so
     // manually run the form values through it here
-    const values: FormSchemaType = enquiryFormSchema.cast(formValues);
+    const transformed: FormSchemaType = enquiryFormSchema.cast(formValues);
 
-    // Create ATS data as necessary
-    if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-      const response = await createATSClientEnquiry();
-      values.atsInfo.atsClientId = response?.atsClientId;
-      values.atsInfo.atsEnquiryId = response?.atsEnquiryId;
-      if (values.atsInfo.atsEnquiryId && values.atsInfo.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-      values.atsInfo.atsEnquiryId = await createATSEnquiry();
-      if (values.atsInfo.atsEnquiryId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-      const response = await createATSClientEnquiry();
-      values.atsInfo.atsClientId = response?.atsClientId;
-      if (values.atsInfo.atsEnquiryId && values.atsInfo.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    }
+    const values: FormSchemaType = await setAtsSubmitData(transformed);
 
     // Generate final payload
     const payload: Partial<Enquiry> = {
