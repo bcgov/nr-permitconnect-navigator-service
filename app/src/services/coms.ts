@@ -34,7 +34,7 @@ function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
     const sak = config.get<string>('server.objectStorage.secretAccessKey');
     const b64 = Buffer.from(ak + ':' + sak).toString('base64');
 
-    if (!options.headers) options.headers = {};
+    options.headers ??= {};
     options.headers.Authorization = `Basic ${b64}`;
     options.headers['x-amz-bucket'] = config.get('server.objectStorage.bucket');
     options.headers['x-amz-endpoint'] = config.get('server.objectStorage.endpoint');
@@ -92,8 +92,7 @@ export const getObject = async (bearerToken: string, objectId: string) => {
 export const searchUser = async (currentContext: CurrentContext) => {
   const { status, headers, data } = await comsAxios({
     headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
-    // Update to use username (sub) if COMS ever opens that up
-  }).get('/user', { params: { identityId: getCurrentSubject(currentContext).split('@')[0].toUpperCase() } });
+  }).get('/user', { params: { username: getCurrentSubject(currentContext) } });
   return { status, headers, data };
 };
 
@@ -120,8 +119,8 @@ export const assignPermissions = async (tx: PrismaTransactionClient, currentCont
     try {
       const [user, bucket] = await Promise.all([searchUser(currentContext), getBucket()]);
 
-      const { userId } = user.data[0];
-      const { bucketId } = bucket.data;
+      const userId = user.data?.[0]?.userId;
+      const bucketId = bucket.data?.bucketId;
 
       if (!userId || !bucketId) {
         throw new Error('Unable to obtain userId or bucketId');
