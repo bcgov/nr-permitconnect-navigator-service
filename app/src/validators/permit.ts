@@ -74,6 +74,7 @@ const schema = {
 };
 
 export const upsertPermitBodySchema = schema.upsertPermit.body;
+export const searchPermitsQuerySchema = schema.searchPermits.query;
 
 export default {
   deletePermit: validate(schema.deletePermit),
