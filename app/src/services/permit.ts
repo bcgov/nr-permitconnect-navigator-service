@@ -221,12 +221,12 @@ export const searchPermitsPaginated = async (
             ]
           }
         : {},
-      options?.permitTypeId ? { permitTypeId: parseInt(options.permitTypeId) } : {},
+      options?.permitTypeId ? { permitTypeId: Number.parseInt(options.permitTypeId) } : {},
       options?.sourceSystemKindId
         ? {
             permitTracking: {
               some: {
-                sourceSystemKindId: parseInt(options.sourceSystemKindId)
+                sourceSystemKindId: Number.parseInt(options.sourceSystemKindId)
               }
             }
           }
@@ -279,8 +279,8 @@ export const searchPermitsPaginated = async (
 
   // Get paginated data
   const permits = await tx.permit.findMany({
-    skip: options?.skip ? parseInt(options.skip) : 0,
-    take: options?.take ? parseInt(options.take) : 10,
+    skip: options?.skip ? Number.parseInt(options.skip) : 0,
+    take: options?.take ? Number.parseInt(options.take) : 10,
     where: whereClause,
     orderBy: orderBy,
     include: {
