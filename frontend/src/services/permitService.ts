@@ -1,7 +1,7 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { ListPermitsOptions, Permit } from '@/types';
+import type { ListPermitsOptions, Permit, SearchPermitsOptions } from '@/types';
 import type { Initiative } from '@/utils/enums/application';
 
 const PATH = 'permit';
@@ -38,6 +38,14 @@ export default {
    */
   async listPermits(options?: ListPermitsOptions) {
     return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, { params: options });
+  },
+
+  /**
+   * @function searchPermits
+   * @returns {Promise} An axios response
+   */
+  async searchPermits(options?: SearchPermitsOptions) {
+    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: options });
   },
 
   /**

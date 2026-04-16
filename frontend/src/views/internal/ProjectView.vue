@@ -298,7 +298,10 @@ onBeforeMount(async () => {
         <ProjectEnquiryTab />
       </TabPanel>
       <TabPanel :value="6">
-        <ProjectTeamTab v-if="getProject" />
+        <ProjectTeamTab
+          v-if="getProject && !loading"
+          :activity-id="getProject.activityId"
+        />
       </TabPanel>
     </TabPanels>
   </Tabs>

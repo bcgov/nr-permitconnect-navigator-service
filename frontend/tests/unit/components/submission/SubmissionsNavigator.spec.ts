@@ -3,7 +3,13 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import { enquiryService, permitService, noteHistoryService, housingProjectService } from '@/services';
+import {
+  enquiryService,
+  permitService,
+  noteHistoryService,
+  housingProjectService,
+  sourceSystemKindService
+} from '@/services';
 import { StorageKey, Resource } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
 import type { AxiosResponse } from 'axios';
@@ -28,6 +34,9 @@ const listPermits = vi.spyOn(permitService, 'listPermits');
 const listBringForward = vi.spyOn(noteHistoryService, 'listBringForward');
 const searchProjects = vi.spyOn(housingProjectService, 'searchProjects');
 const getStatistics = vi.spyOn(housingProjectService, 'getStatistics');
+const searchPermitsSpy = vi.spyOn(permitService, 'searchPermits');
+const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
 getProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getEnquiries.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
@@ -35,6 +44,9 @@ listPermits.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as Ax
 listBringForward.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 searchProjects.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
 getStatistics.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+searchPermitsSpy.mockResolvedValue({ data: { permits: [], totalRecords: 0 } } as AxiosResponse);
+getPermitTypesSpy.mockResolvedValue({ data: [] } as AxiosResponse);
+getSourceSystemKindsSpy.mockResolvedValue({ data: [] } as AxiosResponse);
 
 const wrapperSettings = () => ({
   props: {

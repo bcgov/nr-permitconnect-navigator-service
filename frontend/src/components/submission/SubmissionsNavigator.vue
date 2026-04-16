@@ -2,9 +2,9 @@
 import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-fns';
 import { storeToRefs } from 'pinia';
 import { inject, onBeforeMount, ref, watch, watchEffect } from 'vue';
-import { useRoute, useRouter } from 'vue-router';
 
 import { Escalation } from '@/components/common/icons';
+import AuthorizationListNavigator from '../authorization/AuthorizationListNavigator.vue';
 import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
 import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
@@ -50,8 +50,6 @@ const projectService = inject(projectServiceKey);
 
 // Composables
 const toast = useToast();
-const route = useRoute();
-const router = useRouter();
 
 // Store
 const authnStore = useAuthNStore();
@@ -61,7 +59,7 @@ const { getProfile } = storeToRefs(authnStore);
 
 // State
 const accordionIndex: Ref<string | null> = ref(null);
-const activeTabIndex: Ref<number> = ref(route.query.tab ? Number(route.query.tab) : 0);
+const activeTab: Ref<number> = ref(0);
 const relevantBringForwards: Ref<BringForward[]> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 
@@ -238,26 +236,6 @@ watch(accordionIndex, () => {
   }
 });
 
-// Watch for changes in the active tab index
-watch(activeTabIndex, (newIndex) => {
-  // Preserve existing queries if the tab index hasn't changed
-  if (route.query.tab === newIndex.toString()) {
-    router.replace({
-      query: {
-        ...route.query,
-        tab: newIndex.toString()
-      }
-    });
-  } else {
-    // Wipe out the query when switching to a new tab
-    router.replace({
-      query: {
-        tab: newIndex.toString()
-      }
-    });
-  }
-});
-
 watchEffect(() => {
   const filteredBringForwards = bringForward.value.filter((x) => {
     const { pastOrToday, withinMonth } = getBringForwardInterval(x);
@@ -274,14 +252,15 @@ watchEffect(() => {
 </script>
 
 <template>
-  <Tabs :value="activeTabIndex">
+  <Tabs :value="activeTab">
     <TabList>
       <Tab :value="0">Projects</Tab>
-      <Tab :value="1">Enquiries</Tab>
-      <Tab :value="2">Statistics</Tab>
+      <Tab :value="1">Authorizations</Tab>
+      <Tab :value="2">Enquiries</Tab>
+      <Tab :value="3">Statistics</Tab>
       <Tab
         v-if="authzStore.can(useAppStore().getInitiative, Resource.NOTE, Action.READ)"
-        :value="3"
+        :value="4"
       >
         Bring Forward Calendar
       </Tab>
@@ -330,19 +309,22 @@ watchEffect(() => {
         />
       </TabPanel>
       <TabPanel :value="1">
+        <AuthorizationListNavigator />
+      </TabPanel>
+      <TabPanel :value="2">
         <EnquiryListNavigator
           :enquiries="enquiries"
           @enquiry:delete="onEnquiryDelete"
         />
       </TabPanel>
-      <TabPanel :value="2">
+      <TabPanel :value="3">
         <SubmissionStatistics
           v-if="statistics"
           v-model:statistics="statistics"
         />
         <div v-else>Failed to load statistics.</div>
       </TabPanel>
-      <TabPanel :value="3">
+      <TabPanel :value="4">
         <SubmissionBringForwardCalendar
           :bring-forward="bringForward"
           :my-assigned-to="myAssignedTo"
