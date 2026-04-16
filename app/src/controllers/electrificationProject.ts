@@ -1,4 +1,5 @@
 import config from 'config';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -40,7 +41,6 @@ import type {
   ElectrificationProjectStatistics,
   StatisticsFilters
 } from '../types/index.ts';
-import { Prisma } from '@prisma/client';
 
 /**
  * Generates and sends a templated email with the given data

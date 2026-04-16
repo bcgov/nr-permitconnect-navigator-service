@@ -1,4 +1,5 @@
 import config from 'config';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -34,7 +35,6 @@ import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
-import { Prisma } from '@prisma/client';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,

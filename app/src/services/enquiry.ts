@@ -1,9 +1,10 @@
+import { Prisma } from '@prisma/client';
+
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types/index.ts';
-import { Prisma } from '@prisma/client';
 
 /**
  * Creates a new enquiry
@@ -199,7 +200,7 @@ export const updateEnquiry = async (
   const result = await tx.enquiry.update({
     data: data,
     where: {
-      enquiryId: enquiryId
+      enquiryId
     },
     include: {
       activity: {

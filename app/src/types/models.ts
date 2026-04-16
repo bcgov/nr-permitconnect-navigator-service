@@ -66,7 +66,7 @@ const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
 export type HousingProject = HousingProjectBase & {
   activity?: Activity;
-  projectId: string;
+  projectId?: string;
   user?: User | null;
 };
 

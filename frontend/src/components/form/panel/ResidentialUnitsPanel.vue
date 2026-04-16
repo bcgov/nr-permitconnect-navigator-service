@@ -9,8 +9,8 @@ import { InputText, Select } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
 import { useFormStore } from '@/store';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse } from '@/utils/enums/application';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
@@ -28,8 +28,7 @@ const setOtherUnitsDescription = useSetFieldValue('units.otherUnitsDescription')
 const setRentalUnits = useSetFieldValue('units.rentalUnits');
 
 // Store
-const formStore = useFormStore();
-const { getEditable } = storeToRefs(formStore);
+const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);

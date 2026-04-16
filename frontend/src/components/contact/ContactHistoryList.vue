@@ -6,11 +6,11 @@ import { useRoute, useRouter } from 'vue-router';
 import { Spinner } from '@/components/layout';
 import { Column, DataTable } from '@/lib/primevue';
 import { formatDate } from '@/utils/formatters';
+import { enquiryRouteNameKey, projectRouteNameKey } from '@/utils/keys';
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Enquiry, Pagination, Project } from '@/types';
-import { enquiryRouteNameKey, projectRouteNameKey } from '@/utils/keys';
 
 // Props
 const { assignedUsers, contactsHistory, loading } = defineProps<{

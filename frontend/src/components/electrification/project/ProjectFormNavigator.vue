@@ -20,7 +20,7 @@ import { atsService, electrificationProjectService, userService } from '@/servic
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import { createProjectFormNavigatorSchema } from '@/validators/electrification/projectFormNavigatorSchema';
@@ -53,10 +53,10 @@ const confirm = useConfirm();
 const toast = useToast();
 
 // Store
-const { getInitiative } = storeToRefs(useAppStore());
 const projectStore = useProjectStore();
 const { codeList, enums } = useCodeStore();
-const { getActivityContacts } = storeToRefs(projectStore);
+const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
+const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
@@ -65,11 +65,6 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(unde
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
-const primaryContact = computed(
-  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
-);
-
-// Actions
 const projectFormNavigatorSchema = computed(() => {
   return createProjectFormNavigatorSchema({
     initiative: getInitiative.value,
@@ -80,10 +75,7 @@ const projectFormNavigatorSchema = computed(() => {
   });
 });
 
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
-
+// Actions
 async function initializeFormValues(project: ElectrificationProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
   if (project.assignedUserId)
@@ -91,14 +83,14 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
 
   return {
     contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
+      contactId: getPrimaryActivityContact.value?.contactId,
+      firstName: getPrimaryActivityContact.value?.firstName,
+      lastName: getPrimaryActivityContact.value?.lastName,
+      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
+      email: getPrimaryActivityContact.value?.email,
+      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
+      contactPreference: getPrimaryActivityContact.value?.contactPreference,
+      userId: getPrimaryActivityContact.value?.userId
     },
 
     companyProjectName: {
@@ -350,7 +342,7 @@ function setBasicInfo(contact?: Contact) {
   formRef.value.resetField('contact', { value: updatedContact });
 }
 
-watch(primaryContact, (newContact, oldContact) => {
+watch(getPrimaryActivityContact, (newContact, oldContact) => {
   if (newContact?.contactId !== oldContact?.contactId) {
     setBasicInfo(newContact);
   }
@@ -384,7 +376,7 @@ onBeforeMount(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard v-if="!isCompleted" />
+    <FormNavigationGuard v-if="!getProjectIsCompleted" />
 
     <div class="grid grid-cols-[4fr_1fr] gap-x-9 mt-4">
       <div class="flex flex-col gap-y-9">
@@ -424,19 +416,19 @@ onBeforeMount(async () => {
     </div>
     <div class="mt-16">
       <Button
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         label="Save"
         type="submit"
         icon="pi pi-check"
         :disabled="!editable"
       />
       <CancelButton
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         :editable="editable"
         @clicked="onCancel"
       />
       <Button
-        v-if="isCompleted"
+        v-if="getProjectIsCompleted"
         label="Re-open submission"
         icon="pi pi-check"
         @click="onReOpen()"

@@ -2,10 +2,9 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
+import { nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { CancelButton, FormNavigationGuard } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
@@ -23,17 +22,10 @@ import { atsService, generalProjectService, mapService, userService } from '@/se
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import {
-  ActivityContactRole,
-  ApplicationStatus,
-  Area,
-  BusinessArea,
-  FormState,
-  FormType,
-  Region
-} from '@/utils/enums/projectCommon';
+import { ApplicationStatus, Area, BusinessArea, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
 import type {
@@ -66,7 +58,7 @@ const toast = useToast();
 // Store
 const projectStore = useProjectStore();
 const { getInitiative } = storeToRefs(useAppStore());
-const { getActivityContacts } = storeToRefs(projectStore);
+const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
 
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
@@ -75,10 +67,6 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(unde
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
-
-const primaryContact = computed(
-  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
-);
 
 // Actions
 async function createATSClientEnquiry() {
@@ -172,14 +160,14 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
 
   return {
     contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
+      contactId: getPrimaryActivityContact.value?.contactId,
+      firstName: getPrimaryActivityContact.value?.firstName,
+      lastName: getPrimaryActivityContact.value?.lastName,
+      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
+      email: getPrimaryActivityContact.value?.email,
+      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
+      contactPreference: getPrimaryActivityContact.value?.contactPreference,
+      userId: getPrimaryActivityContact.value?.userId
     },
 
     location: {
@@ -240,10 +228,6 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
     }
   };
 }
-
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
 
 function onCancel() {
   formRef.value?.resetForm();
@@ -374,7 +358,7 @@ function setBasicInfo(contact?: Contact) {
   formRef.value.resetField('contact', { value: updatedContact });
 }
 
-watch(primaryContact, (newContact, oldContact) => {
+watch(getPrimaryActivityContact, (newContact, oldContact) => {
   if (newContact?.contactId !== oldContact?.contactId) {
     setBasicInfo(newContact);
   }
@@ -409,7 +393,7 @@ onBeforeMount(async () => {
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard v-if="!isCompleted" />
+    <FormNavigationGuard v-if="!getProjectIsCompleted" />
 
     <div class="grid grid-cols-[4fr_1fr] gap-x-9 mt-4">
       <div class="flex flex-col gap-y-9">
@@ -451,19 +435,19 @@ onBeforeMount(async () => {
     </div>
     <div class="mt-16">
       <Button
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         label="Save"
         type="submit"
         icon="pi pi-check"
         :disabled="!editable"
       />
       <CancelButton
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         :editable="editable"
         @clicked="onCancel"
       />
       <Button
-        v-if="isCompleted"
+        v-if="getProjectIsCompleted"
         :label="t('i.housing.project.projectForm.reopenSubmission')"
         icon="pi pi-check"
         @click="onReOpen()"

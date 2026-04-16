@@ -6,9 +6,9 @@ import { useI18n } from 'vue-i18n';
 import { Checkbox } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { useAppStore, useFormStore } from '@/store';
+import { Initiative } from '@/utils/enums/application';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
-import { Initiative } from '@/utils/enums/application';
 
 // Props
 const { tab = 0 } = defineProps<{

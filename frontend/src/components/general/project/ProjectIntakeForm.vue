@@ -251,7 +251,7 @@ async function onSubmit(data: FormSchemaType) {
         province: data.location.province,
         geomarkUrl: data.location.geomarkUrl,
         streetAddress: data.location.streetAddress,
-        geoJson: data.location.geoJson ? (data.location.geoJson as GeoJSON) : undefined
+        geoJson: data.location.geoJson as GeoJSON | undefined
       },
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({

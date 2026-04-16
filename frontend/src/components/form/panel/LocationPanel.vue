@@ -9,7 +9,6 @@ import { EditableSelect, InputText, InputNumber, Select } from '@/components/for
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
 import { externalApiService } from '@/services';
-
 import { useFormStore } from '@/store';
 import { YES_NO_LIST } from '@/utils/constants/application';
 
@@ -149,7 +148,6 @@ function updateLocationAddress() {
           :help-text="t('i.housing.project.projectForm.locationLongitudeHelp')"
           :disabled="!getEditable"
         />
-
         <Select
           name="location.naturalDisaster"
           :label="t('i.housing.project.projectForm.affectedByNaturalDisaster')"
