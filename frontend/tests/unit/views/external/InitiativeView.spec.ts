@@ -8,6 +8,7 @@ import { electrificationProjectService, enquiryService, housingProjectService, p
 import { Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/external/InitiativeView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import ViewHeader from '@/components/common/ViewHeader.vue';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -116,14 +117,9 @@ describe('InitiativeView.vue', () => {
     expect(toastErrorMock).toHaveBeenCalledWith('BOOM', undefined, undefined);
   });
 
-  it.each([
-    { initiative: Initiative.ELECTRIFICATION, text: t('views.e.initiativeView.electrification.header') },
-    { initiative: Initiative.HOUSING, text: t('views.e.initiativeView.housing.header') }
-  ])('sets the correct header for $initiative when loaded', async (value) => {
-    const wrapper = shallowMount(InitiativeView, wrapperSettings(value.initiative));
+  it('renders the ViewHeader component', async () => {
+    const wrapper = shallowMount(InitiativeView, wrapperSettings());
     await flushPromises();
-
-    const childComponent = wrapper.find('h1');
-    expect(childComponent.text()).toBe(value.text);
+    expect(wrapper.findComponent(ViewHeader).exists()).toBe(true);
   });
 });

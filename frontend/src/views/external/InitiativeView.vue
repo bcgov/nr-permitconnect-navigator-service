@@ -4,9 +4,6 @@ import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
-import elecBannerImg from '@/assets/images/elec_banner.png';
-import generalBannerImg from '@/assets/images/general_banner.png';
-import housingBannerImg from '@/assets/images/housing_banner.png';
 import AuthorizationStatusPill from '@/components/authorization/AuthorizationStatusPill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
@@ -36,13 +33,13 @@ import { generalErrorHandler } from '@/utils/utils';
 import type { Ref } from 'vue';
 import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import ViewHeader from '@/components/common/ViewHeader.vue';
 
 // Interfaces
 interface InitiativeState {
   draftableProjectService: IDraftableProjectService;
   enquiryIntakeRouteName?: RouteName;
   enquiryRouteName?: RouteName;
-  headerImg: string;
   headerText: string;
   initiativeRouteName: RouteName;
   navigationPermission: NavigationPermission;
@@ -59,7 +56,6 @@ const router = useRouter();
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: electrificationProjectService,
-  headerImg: elecBannerImg,
   headerText: t('views.e.initiativeView.electrification.header'),
   initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
   navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
@@ -74,7 +70,6 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: generalProjectService,
   enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
   enquiryRouteName: RouteName.EXT_GENERAL_ENQUIRY,
-  headerImg: generalBannerImg,
   headerText: t('views.e.initiativeView.general.header'),
   initiativeRouteName: RouteName.EXT_GENERAL,
   navigationPermission: NavigationPermission.EXT_GENERAL,
@@ -89,7 +84,6 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   draftableProjectService: housingProjectService,
   enquiryIntakeRouteName: RouteName.EXT_HOUSING_ENQUIRY_INTAKE,
   enquiryRouteName: RouteName.EXT_HOUSING_ENQUIRY,
-  headerImg: housingBannerImg,
   headerText: t('views.e.initiativeView.housing.header'),
   initiativeRouteName: RouteName.EXT_HOUSING,
   navigationPermission: NavigationPermission.EXT_HOUSING,
@@ -228,21 +222,13 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <ViewHeader
+    class="shadow px-4"
+    :header="initiativeState.headerText"
+  />
   <div class="flex flex-col items-center justify-start h-full">
-    <div class="flex flex-row items-center w-full justify-between shadow px-4">
-      <h1>{{ initiativeState.headerText }}</h1>
-      <img
-        v-if="initiativeState.headerImg"
-        class="mr-4"
-        :src="initiativeState.headerImg"
-        alt="Header image"
-      />
-    </div>
-
     <div class="flex flex-row items-center w-full mt-4 mb-9">
       <div class="font-bold mr-2">{{ t('views.e.initiativeView.onThisPage') }}</div>
-      <!-- eslint-disable vue/multiline-html-element-content-newline -->
-      <!-- prettier-ignore -->
       <div>
         <router-link
           :to="{
@@ -252,7 +238,8 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#projects' })"
         >
-        {{ t('views.e.initiativeView.myProjects') }}</router-link>
+          {{ t('views.e.initiativeView.myProjects') }}
+        </router-link>
         |
         <router-link
           :to="{
@@ -262,7 +249,8 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#drafts' })"
         >
-        {{ t('views.e.initiativeView.drafts') }}</router-link>
+          {{ t('views.e.initiativeView.drafts') }}
+        </router-link>
         <span v-if="getInitiative !== Initiative.ELECTRIFICATION">
           |
           <router-link
@@ -273,7 +261,8 @@ onBeforeMount(async () => {
             class="no-underline"
             @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#enquiries' })"
           >
-          {{ t('views.e.initiativeView.generalEnquiries') }}</router-link>
+            {{ t('views.e.initiativeView.generalEnquiries') }}
+          </router-link>
         </span>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
