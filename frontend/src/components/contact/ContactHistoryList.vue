@@ -45,7 +45,7 @@ function getUsersName(userId: string) {
 }
 
 function getRouteToObject(data: Project | Enquiry) {
-  let toObject: RouteLocationRaw;
+  let toObject: RouteLocationRaw = {};
   if ('projectId' in data) {
     toObject = {
       name: projectRouteName?.value,
