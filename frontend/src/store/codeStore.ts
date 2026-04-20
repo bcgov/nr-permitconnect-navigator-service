@@ -8,6 +8,7 @@ import type { Code } from '@/types';
 
 // Add new code tables here, name refers to returns from service call
 const codeNames = [
+  'BusinessArea',
   'ElectrificationProjectCategory',
   'ElectrificationProjectType',
   'EscalationType',

@@ -52,6 +52,16 @@ export async function up(knex: Knex): Promise<void> {
 
       // Create public schema tables
       .then(() =>
+        knex.schema.createTable('business_area_code', (table) => {
+          table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to SCREAMING_SNAKE w/ no double or trailing underscores
+          table.text('display').unique().notNullable();
+          table.text('definition');
+          table.boolean('active').notNullable().defaultTo(true);
+          stamps(knex, table);
+        })
+      )
+
+      .then(() =>
         knex.schema.createTable('general_project', (table) => {
           table.uuid('general_project_id').primary();
           table
@@ -93,15 +103,87 @@ export async function up(knex: Knex): Promise<void> {
           table.text('region');
           table.text('area');
           table.text('activity_type');
-          table.text('business_area');
+          table
+            .text('business_area')
+            .references('code')
+            .inTable('business_area_code')
+            .onUpdate('CASCADE')
+            .onDelete('SET NULL');
           stamps(knex, table);
         })
       )
+
       // Create before update triggers
+      .then(async () => await createUpdatedAtTrigger(knex, 'public', 'business_area_code'))
       .then(async () => await createUpdatedAtTrigger(knex, 'public', 'general_project'))
 
       // Create audit triggers
+      .then(async () => await createAuditLogTrigger(knex, 'public', 'business_area_code'))
       .then(async () => await createAuditLogTrigger(knex, 'public', 'general_project'))
+
+      // Seeding code tables
+      .then(() => {
+        const types = [
+          { code: 'FISH_AND_WILDLIFE', display: 'Fish and Wildlife' },
+          { code: 'WATER', display: 'Water' },
+          { code: 'LANDS', display: 'Lands' },
+          { code: 'FORESTS', display: 'Forests' },
+          { code: 'SYSTEMS', display: 'Systems' },
+          { code: 'MINES', display: 'Mines' },
+          { code: 'PARKS', display: 'Parks' },
+          { code: 'NON_LISTED_PARTNER_AGENCY_OR_OTHER', display: 'Non-listed Partner Agency / Other' },
+          // prettier-ignore
+          { code: 'LABOUR_AND_CITIZENS_SERVICES', display: 'Labour and Citizens\' Services' },
+          { code: 'ENVIRONMENT', display: 'Environment' },
+          { code: 'ABORIGINAL_RELATIONS', display: 'Aboriginal Relations' },
+          { code: 'ADVANCED_EDUCATION', display: 'Advanced Education' },
+          { code: 'AGRICULTURAL_LAND_COMMISSION', display: 'Agricultural Land Commission' },
+          { code: 'AGRICULTURE', display: 'Agriculture' },
+          { code: 'ARCHAEOLOGY', display: 'Archaeology' },
+          { code: 'BC_ASSESSMENT_AUTHORITY', display: 'BC Assessment Authority' },
+          { code: 'BC_ENERGY_REGULATOR', display: 'BC Energy Regulator' },
+          { code: 'COMMUNITY_DEVELOPMENT', display: 'Community Development' },
+          { code: 'COMMUNITY_SPORT_AND_CULTURE', display: 'Community Sport and Culture' },
+          { code: 'DEPARTMENT_OF_FISHERIES_AND_OCEANS_CANADA', display: 'Department of Fisheries and Oceans Canada' },
+          { code: 'ECONOMIC_DEVELOPMENT', display: 'Economic Development' },
+          { code: 'EDUCATION', display: 'Education' },
+          { code: 'ELECTRIFICATION', display: 'Electrification' },
+          { code: 'ENERGY', display: 'Energy' },
+          { code: 'ENVIRONMENTAL_PROTECTION', display: 'Environmental Protection' },
+          { code: 'FEDERAL_GOVERNMENT', display: 'Federal Government' },
+          { code: 'FINANCE', display: 'Finance' },
+          { code: 'FRASER_HEALTH_AUTHORITY', display: 'Fraser Health Authority' },
+          { code: 'HEALTH_SERVICES', display: 'Health Services' },
+          { code: 'INTERIOR_HEALTH_AUTHORITY', display: 'Interior Health Authority' },
+          { code: 'LAND_TITLE_AUTHORITY', display: 'Land Title Authority' },
+          {
+            code: 'LOCAL_GOVERNMENT_MUNICIPALITIES_AND_CITIES',
+            display: 'Local Government (Municipalities and Cities)'
+          },
+          { code: 'MINISTRY_OF_ATTORNEY_GENERAL', display: 'Ministry of Attorney General' },
+          { code: 'MINISTRY_OF_SMALL_BUSINESS_AND_REVENUE', display: 'Ministry of Small Business and Revenue' },
+          { code: 'MOUNTAIN_RESORTS_BRANCH', display: 'Mountain Resorts Branch' },
+          { code: 'NORTHERN_HEALTH_AUTHORITY', display: 'Northern Health Authority' },
+          { code: 'OFFICE_OF_THE_PREMIER', display: 'Office of the Premier' },
+          { code: 'PROVINCIAL_EMERGENCY_PROGRAM', display: 'Provincial Emergency Program' },
+          { code: 'PUBLIC_SERVICE_AGENCY', display: 'Public Service Agency' },
+          { code: 'RANGE', display: 'Range' },
+          { code: 'RECREATION_SITES_AND_TRAILS', display: 'Recreation Sites and Trails' },
+          { code: 'REGIONAL_DISTRICTS', display: 'Regional Districts' },
+          { code: 'RIPARIAN', display: 'Riparian' },
+          { code: 'RURAL_DEVELOPMENT', display: 'Rural Development' },
+          { code: 'SMALL_BUSINESS_BC', display: 'Small Business BC' },
+          { code: 'SOLICITOR_GENERAL', display: 'Solicitor General' },
+          {
+            code: 'SURVEYOR_GENERAL_LAND_TITLE_AND_SURVEY_AUTHORITIES',
+            display: 'Surveyor General - Land Title & Survey Authorities'
+          },
+          { code: 'TRANSPORTATION', display: 'Transportation' },
+          { code: 'VANCOUVER_COAST_HEALTH_AUTHORITY', display: 'Vancouver Coast Health Authority' },
+          { code: 'VANCOUVER_ISLAND_HEALTH_AUTHORITY', display: 'Vancouver Island Health Authority' }
+        ];
+        return knex('business_area_code').insert(types);
+      })
 
       // Add all permit types to xref table for general initiative
       .then(async () => {
@@ -400,12 +482,15 @@ export async function down(knex: Knex): Promise<void> {
 
       // Drop audit triggers
       .then(async () => await dropAuditLogTrigger(knex, 'public', 'general_project'))
+      .then(async () => await dropAuditLogTrigger(knex, 'public', 'business_area_code'))
 
       // Drop public schema table triggers
       .then(async () => await dropUpdatedAtTrigger(knex, 'public', 'general_project'))
+      .then(async () => await dropUpdatedAtTrigger(knex, 'public', 'business_area_code'))
 
       // Drop public schema tables
       .then(() => knex.schema.dropTableIfExists('general_project'))
+      .then(() => knex.schema.dropTableIfExists('business_area_code'))
 
       // Delete data
       .then(async () => {

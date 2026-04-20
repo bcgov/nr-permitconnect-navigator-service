@@ -22,7 +22,7 @@ import { atsService, generalProjectService, mapService, userService } from '@/se
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ApplicationStatus, Area, BusinessArea, FormState, FormType, Region } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
@@ -51,7 +51,7 @@ const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.GENERAL) + ATS_ENQUIRY_TYPE
 
 // Composables
 const { t } = useI18n();
-const { enums } = useCodeStore();
+const { codeList, enums } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
@@ -308,7 +308,7 @@ const onSubmit = async (formValues: GenericObject) => {
       queuePriority: values.submissionState.queuePriority,
 
       // ATS
-      businessArea: values.atsInfo.businessArea as BusinessArea,
+      businessArea: values.atsInfo.businessArea,
 
       // Updates
       aaiUpdated: values.projectAreasUpdated.aaiUpdated
@@ -336,6 +336,7 @@ const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
   initiative: getInitiative.value,
   t,
   enums,
+  codeList,
   orgBookOptions: orgBookOptions.value
 });
 
