@@ -5,7 +5,6 @@ import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
   AREA_LIST,
-  BUSINESS_AREA_LIST,
   CONTACT_PREFERENCE_LIST,
   PROJECT_RELATIONSHIP_LIST,
   QUEUE_PRIORITY,
@@ -298,7 +297,11 @@ export function createRelatedEnquiriesPanelSchema({ t }: CreateSchemaOptions) {
   };
 }
 
-export function createAtsInfoPanelSchema({ initiative, t }: CreateSchemaOptions) {
+export function createAtsInfoPanelSchema({
+  initiative,
+  t,
+  codeList
+}: Required<Pick<CreateSchemaOptions, 'initiative' | 't' | 'codeList'>>) {
   return {
     atsInfo: object({
       atsClientId: atsClientIdValidator(t('validators.atsClientId.label')),
@@ -307,7 +310,7 @@ export function createAtsInfoPanelSchema({ initiative, t }: CreateSchemaOptions)
         .nullable()
         .when([], {
           is: () => initiative === Initiative.GENERAL,
-          then: (schema) => schema.oneOf(BUSINESS_AREA_LIST).label(t('validators.atsInfo.businessArea')),
+          then: (schema) => schema.oneOf(codeList?.BusinessArea).label(t('validators.atsInfo.businessArea')),
           otherwise: (schema) => schema.notRequired()
         })
     })

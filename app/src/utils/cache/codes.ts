@@ -4,12 +4,14 @@ import { getLogger } from '../../utils/log.ts';
 
 import type { PrismaTransactionClient } from '../../db/dataConnection.ts';
 import type {
+  BusinessAreaCode,
   ElectrificationProjectCategoryCode,
   ElectrificationProjectTypeCode,
   EscalationTypeCode,
   SourceSystemCode
 } from '../../types/index.ts';
 
+export let businessAreaCodes: string[] = [];
 export let electrificationProjectTypeCodes: string[] = [];
 export let electrificationProjectCategoryCodes: string[] = [];
 export let escalationTypeCodes: string[] = [];
@@ -25,6 +27,7 @@ const log = getLogger(module.filename);
 export async function refreshCodeCaches(): Promise<boolean> {
   try {
     const codeTables = await transactionWrapper<{
+      BusinessArea: BusinessAreaCode[];
       ElectrificationProjectType: ElectrificationProjectTypeCode[];
       ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
       EscalationType: EscalationTypeCode[];
@@ -33,6 +36,7 @@ export async function refreshCodeCaches(): Promise<boolean> {
       return await listAllCodeTables(tx);
     });
 
+    businessAreaCodes = codeTables.BusinessArea.map((r) => r.code);
     electrificationProjectTypeCodes = codeTables.ElectrificationProjectType.map((r) => r.code);
     electrificationProjectCategoryCodes = codeTables.ElectrificationProjectCategory.map((r) => r.code);
     escalationTypeCodes = codeTables.EscalationType.map((r) => r.code);

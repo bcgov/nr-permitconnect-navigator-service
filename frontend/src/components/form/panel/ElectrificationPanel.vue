@@ -8,9 +8,9 @@ import { InputText, Select } from '@/components/form';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Panel } from '@/lib/primevue';
 import { useCodeStore, useFormStore } from '@/store';
+import { YES_NO_LIST } from '@/utils/constants/application';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
-import { YES_NO_LIST } from '@/utils/constants/application';
 
 // Props
 const { tab = 0 } = defineProps<{

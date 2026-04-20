@@ -10,8 +10,7 @@ import {
   ProjectRelationship,
   SubmissionType,
   Area,
-  Region,
-  BusinessArea
+  Region
 } from '@/utils/enums/projectCommon';
 
 export const ACTIVITY_CONTACT_ROLE_LIST = [
@@ -36,8 +35,6 @@ export const ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX = ' - Enquiry Only';
 export const ATS_MANAGING_REGION = 'Navigator Services';
 
 export const BRING_FORWARD_TYPE_LIST = [BringForwardType.UNRESOLVED, BringForwardType.RESOLVED];
-
-export const BUSINESS_AREA_LIST = Object.values(BusinessArea);
 
 export const CONTACT_PREFERENCE_LIST = [
   ContactPreference.PHONE_CALL,

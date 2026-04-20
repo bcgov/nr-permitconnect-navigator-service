@@ -10,8 +10,7 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import { Select } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue/index.ts';
 import { atsService } from '@/services/index.ts';
-import { useAppStore } from '@/store';
-import { BUSINESS_AREA_LIST } from '@/utils/constants/projectCommon';
+import { useAppStore, useCodeStore } from '@/store';
 import { ATSCreateTypes, Initiative } from '@/utils/enums/application.ts';
 
 import type { Ref } from 'vue';
@@ -50,6 +49,7 @@ const toast = useToast();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
+const { options } = useCodeStore();
 
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
@@ -157,8 +157,10 @@ watch(visible, () => {
       v-if="getInitiative === Initiative.GENERAL && !isEnquiry"
       class="w-full"
       name="atsInfo.businessArea"
+      option-label="label"
+      option-value="value"
       :label="t('i.housing.project.projectForm.businessAreaLabel')"
-      :options="BUSINESS_AREA_LIST"
+      :options="options.BusinessArea"
     />
 
     <Button

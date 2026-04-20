@@ -13,6 +13,10 @@ const activityContactBase = Prisma.validator<Prisma.activity_contactDefaultArgs>
 export type ActivityContactBase = Prisma.activity_contactGetPayload<typeof activityContactBase>;
 export type ActivityContact = ActivityContactBase & { contact?: Contact };
 
+const businessAreaCodeBase = Prisma.validator<Prisma.business_area_codeDefaultArgs>()({});
+export type BusinessAreaCodBase = Prisma.business_area_codeGetPayload<typeof businessAreaCodeBase>;
+export type BusinessAreaCode = BusinessAreaCodBase;
+
 const contactBase = Prisma.validator<Prisma.contactDefaultArgs>()({});
 export type ContactBase = Prisma.contactGetPayload<typeof contactBase>;
 export type Contact = ContactBase & { activityContact?: ActivityContact[]; user?: User | null };

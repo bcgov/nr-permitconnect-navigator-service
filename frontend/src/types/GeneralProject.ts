@@ -1,6 +1,6 @@
 import type { GeoJSON } from 'geojson';
 import type { IProject } from '@/interfaces/IProject';
-import type { Area, BusinessArea, ProjectApplicant, Region } from '@/utils/enums/projectCommon';
+import type { Area, ProjectApplicant, Region } from '@/utils/enums/projectCommon';
 
 export type GeneralProject = {
   generalProjectId: string;
@@ -22,5 +22,5 @@ export type GeneralProject = {
   activityType: string;
   region?: Region | null;
   area?: Area | null;
-  businessArea?: BusinessArea | null;
+  businessArea?: string | null;
 } & IProject;

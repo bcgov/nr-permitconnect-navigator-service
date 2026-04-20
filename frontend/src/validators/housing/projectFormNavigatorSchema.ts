@@ -24,8 +24,9 @@ export function createProjectFormNavigatorSchema({
   initiative,
   t,
   enums,
+  codeList,
   orgBookOptions
-}: Required<Omit<CreateSchemaOptions, 'codeList'>>) {
+}: Required<CreateSchemaOptions>) {
   return object({
     ...createContactCardNavFormSchema({ t }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
@@ -38,7 +39,7 @@ export function createProjectFormNavigatorSchema({
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createRelatedEnquiriesPanelSchema({ t }),
-    ...createAtsInfoPanelSchema({ initiative, t }),
+    ...createAtsInfoPanelSchema({ initiative, t, codeList }),
     ...createProjectAreasUpdatedSchema({ initiative, t }),
     ...createConsentPanelSchema({ t })
   });

@@ -30,7 +30,7 @@ export function createProjectFormNavigatorSchema({
     ...createProjectDescriptionPanelSchema({ initiative, t, enums }),
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
-    ...createAtsInfoPanelSchema({ initiative, t }),
+    ...createAtsInfoPanelSchema({ initiative, t, codeList }),
     ...createProjectAreasUpdatedSchema({ initiative, t })
   });
 }
