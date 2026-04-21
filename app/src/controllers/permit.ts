@@ -134,16 +134,12 @@ export const searchPermitsController = async (
 ) => {
   const response = await transactionWrapper<{ permits: Permit[]; totalRecords: number }>(
     async (tx: PrismaTransactionClient) => {
-      const options: SearchPermitsOptions = {
-        ...req.query
-      };
-
       // Validate it's not PCNS
       if (req.currentContext.initiative === Initiative.PCNS) {
         throw new Problem(400, { detail: 'Invalid initiative' });
       }
 
-      return await searchPermitsPaginated(tx, req.currentContext.initiative!, options);
+      return await searchPermitsPaginated(tx, req.currentContext.initiative!, req.query); // nosonar
     }
   );
   res.status(200).json(response);

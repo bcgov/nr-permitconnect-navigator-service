@@ -193,13 +193,12 @@ export const searchPermitsPaginated = async (
 
   const projectTable = projectTableMap[initiative];
 
-  const sortDirection = options?.sortOrder === '1' ? 'asc' : 'desc';
   const validSortFields = ['decisionDate', 'stage', 'state', 'statusLastChanged', 'submittedDate'];
 
-  // Default sorting
-  let orderBy: Record<string, 'asc' | 'desc'> = { submittedDate: 'desc' };
+  let orderBy: Record<string, 'asc' | 'desc'> | undefined;
 
-  if (options?.sortField && validSortFields.includes(options.sortField)) {
+  if (options?.sortOrder !== '0' && options?.sortField && validSortFields.includes(options.sortField)) {
+    const sortDirection = options.sortOrder === '1' ? 'asc' : 'desc';
     orderBy = { [options.sortField]: sortDirection };
   }
 
@@ -247,13 +246,13 @@ export const searchPermitsPaginated = async (
                         { projectName: { contains: options.searchTag, mode: 'insensitive' as const } },
                         { companyNameRegistered: { contains: options.searchTag, mode: 'insensitive' as const } },
                         // Only include location fields for initiatives that have them (not ELECTRIFICATION)
-                        ...(initiative !== Initiative.ELECTRIFICATION
-                          ? [
+                        ...(initiative === Initiative.ELECTRIFICATION
+                          ? []
+                          : [
                               { streetAddress: { contains: options.searchTag, mode: 'insensitive' as const } },
                               { locality: { contains: options.searchTag, mode: 'insensitive' as const } },
                               { province: { contains: options.searchTag, mode: 'insensitive' as const } }
-                            ]
-                          : [])
+                            ])
                       ]
                     }
                   }

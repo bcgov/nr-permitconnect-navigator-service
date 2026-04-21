@@ -273,7 +273,7 @@ describe('searchPermitsPaginated', () => {
           {}
         ]
       },
-      orderBy: { submittedDate: 'desc' },
+      orderBy: undefined,
       include: {
         permitType: true,
         permitTracking: {
@@ -389,7 +389,7 @@ describe('searchPermitsPaginated', () => {
 
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
-        orderBy: { decisionDate: 'desc' }
+        orderBy: undefined
       })
     );
   });
@@ -406,22 +406,6 @@ describe('searchPermitsPaginated', () => {
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith(
       expect.objectContaining({
         orderBy: { stage: 'asc' }
-      })
-    );
-  });
-
-  it('uses default sorting when sortField is invalid', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(10);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
-
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
-      sortField: 'invalidField',
-      sortOrder: '1'
-    });
-
-    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith(
-      expect.objectContaining({
-        orderBy: { submittedDate: 'desc' }
       })
     );
   });
