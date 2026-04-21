@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 
 import Divider from '@/components/common/Divider.vue';
 import { Card } from '@/lib/primevue';
 import { userService } from '@/services';
-import { useAppStore } from '@/store';
 import { formatDateShort } from '@/utils/formatters';
-import { Initiative, RouteName } from '@/utils/enums/application';
+import { projectEnquiryRouteNameKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { Enquiry } from '@/types';
@@ -17,9 +15,8 @@ const { enquiry } = defineProps<{
   enquiry: Enquiry;
 }>();
 
-// Store
-const appStore = useAppStore();
-const { getInitiative } = storeToRefs(appStore);
+// Injections
+const projectEnquiryRouteName = inject(projectEnquiryRouteNameKey);
 
 // State
 const userName: Ref<string> = ref('');
@@ -42,10 +39,7 @@ onBeforeMount(() => {
           <h3 class="mb-0">
             <router-link
               :to="{
-                name:
-                  getInitiative === Initiative.ELECTRIFICATION
-                    ? RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY
-                    : RouteName.INT_HOUSING_PROJECT_ENQUIRY,
+                name: projectEnquiryRouteName,
                 params: { enquiryId: enquiry.enquiryId }
               }"
             >
@@ -62,7 +56,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Date:</span>
+              <span class="app-label-color font-bold">Date:</span>
               {{ enquiry.submittedAt ? formatDateShort(enquiry.submittedAt) : undefined }}
             </p>
           </div>
@@ -71,7 +65,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Author:</span>
+              <span class="app-label-color font-bold">Author:</span>
               {{ userName }}
             </p>
           </div>
@@ -80,7 +74,7 @@ onBeforeMount(() => {
         <div class="col-span-12 md:col-span-6 lg:col-span-3">
           <div class="grid grid-cols-12 gap-4">
             <p class="col-span-12">
-              <span class="key font-bold">Submission type:</span>
+              <span class="app-label-color font-bold">Submission type:</span>
               {{ enquiry.submissionType }}
             </p>
           </div>
@@ -95,10 +89,6 @@ onBeforeMount(() => {
 p {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.key {
-  color: #38598a;
 }
 
 .enquiry-content {

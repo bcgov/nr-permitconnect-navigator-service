@@ -31,11 +31,14 @@ watchEffect(() => {
 
 function getNameObject(bf: BringForward) {
   if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
+  if (bf.generalProjectId) return RouteName.INT_GENERAL_PROJECT_NOTE;
   if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
   if (bf.enquiryId) {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
+      case Initiative.GENERAL:
+        return RouteName.INT_GENERAL_ENQUIRY_NOTE;
       case Initiative.HOUSING:
         return RouteName.INT_HOUSING_ENQUIRY_NOTE;
     }
@@ -46,6 +49,12 @@ function getParamObject(bf: BringForward) {
   if (bf.electrificationProjectId) {
     return {
       projectId: bf.electrificationProjectId,
+      noteHistoryId: bf.noteId
+    };
+  }
+  if (bf.generalProjectId) {
+    return {
+      projectId: bf.generalProjectId,
       noteHistoryId: bf.noteId
     };
   }

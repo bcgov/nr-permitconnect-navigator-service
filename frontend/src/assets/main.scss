@@ -5,6 +5,7 @@
 /* -------- text and fonts -------- */
 :root {
   font-size: 16px;
+  --app-label-color: #38598a;
 }
 
 html {
@@ -90,7 +91,7 @@ a {
 }
 
 label {
-  color: #38598a;
+  color: var(--app-label-color);
   display: inline-block;
   margin-bottom: 0.5rem;
 }
@@ -112,11 +113,11 @@ label {
 }
 
 .app-error-background {
-  background-color: var(--p-red-1000) !important;
+  background-color: var(--p-red-950) !important;
 }
 
 .app-error-border {
-  border-color: var(--p-red-1000)!important;
+  border-color: var(--p-red-950)!important;
 }
 
 .app-error-color {
@@ -126,6 +127,10 @@ label {
 .app-error-message {
   color: var(--p-error-color);
   font-size: 0.8rem;
+}
+
+.app-label-color {
+  color: var(--app-label-color);
 }
 
 /* ---------- primevue overrides ------------ */
@@ -164,6 +169,7 @@ label {
   }
 
   .section-header {
+    color: var(--p-card-color);
     font-weight: bold;
     padding-right: 0.5rem;
   }

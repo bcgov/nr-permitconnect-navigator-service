@@ -1,19 +1,22 @@
 import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
-import { delimitEmails } from '@/utils/utils';
 
+import type { AxiosResponse } from 'axios';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type {
-  Email,
-  ElectrificationProjectSearchParameters,
-  Draft,
-  ElectrificationProject,
-  StatisticFilters
-} from '@/types';
+import type { ElectrificationProjectSearchParameters, Draft, ElectrificationProject, StatisticFilters } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 const PATH = 'project';
 
-const service: IDraftableProjectService = {
+export interface IElectrificationProjectService extends IDraftableProjectService {
+  getProject(projectId: string): Promise<AxiosResponse<ElectrificationProject>>;
+  deleteDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+  getDrafts(): Promise<AxiosResponse<Draft<FormSchemaType>[]>>;
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+}
+
+const service: IElectrificationProjectService = {
   /**
    * @function createProject
    * @returns {Promise} An axios response
@@ -36,21 +39,6 @@ const service: IDraftableProjectService = {
    */
   deleteDraft(draftId: string) {
     return appAxios().delete(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${draftId}`);
-  },
-
-  /**
-   * @function emailConfirmation
-   * Send an email with the electrification project/enquiry/permit confirmation data
-   * @returns {Promise} An axios response
-   */
-  emailConfirmation(emailData: Email) {
-    if (emailData.to && !Array.isArray(emailData.to)) {
-      emailData.to = delimitEmails(emailData.to);
-    }
-    if (emailData.cc && !Array.isArray(emailData.cc)) {
-      emailData.cc = delimitEmails(emailData.cc);
-    }
-    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, emailData);
   },
 
   /**
@@ -123,7 +111,7 @@ const service: IDraftableProjectService = {
    * @function updateDraft
    * @returns {Promise} An axios response
    */
-  updateDraft(data?: Partial<Draft>) {
+  upsertDraft(data?: Partial<Draft<FormSchemaType>>) {
     return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, data);
   },
 
@@ -131,8 +119,8 @@ const service: IDraftableProjectService = {
    * @function updateProject
    * @returns {Promise} An axios response
    */
-  updateProject(projectId: string, data: ElectrificationProject) {
-    return appAxios().put(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
+  updateProject(projectId: string, data: Partial<ElectrificationProject>) {
+    return appAxios().patch(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${projectId}`, data);
   }
 };
 

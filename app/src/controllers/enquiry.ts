@@ -1,4 +1,5 @@
 import config from 'config';
+import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -44,31 +45,22 @@ const generateEnquiryData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (await createActivity(tx, currentContext.initiative!, generateCreateStamps(currentContext)))
+    activityId = (await createActivity(tx, currentContext.initiative, generateCreateStamps(currentContext)))
       ?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
-  let basic;
-
-  if (data.basic) {
-    basic = {
-      submissionType: data.basic.submissionType,
-      relatedActivityId: data.basic.relatedActivityId,
-      enquiryDescription: data.basic.enquiryDescription
-    };
-  }
-
   // Put new enquiry together
   return {
-    ...basic,
     enquiryId: data.enquiryId ?? uuidv4(),
     activityId: activityId,
+    relatedActivityId: data.relatedActivityId,
+    enquiryDescription: data.enquiryDescription,
     submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
     submittedBy: getCurrentUsername(currentContext),
     enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
-    submissionType: data?.basic?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
+    submissionType: data?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
   } as Enquiry;
 };
 
@@ -114,7 +106,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     return { ...data, contact: contactResponse[0] };
   });
 
-  await emailEnquiryConfirmation(result, req.currentContext.initiative!, req.body.basic?.relatedActivityId);
+  await emailEnquiryConfirmation(result, req.currentContext.initiative, req.body.relatedActivityId);
   res.status(201).json(result);
 };
 
@@ -219,19 +211,26 @@ export const searchEnquiriesController = async (
         ...req.body,
         includeUser: isTruthy(req.body?.includeUser)
       },
-      req.currentContext.initiative!
+      req.currentContext.initiative
     );
   });
 
   res.status(200).json(response);
 };
 
-export const updateEnquiryController = async (req: Request<never, never, Enquiry>, res: Response) => {
+export const updateEnquiryController = async (
+  req: Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+  res: Response
+) => {
   const result = await transactionWrapper<Enquiry>(async (tx: PrismaTransactionClient) => {
-    return await updateEnquiry(tx, {
-      ...req.body,
-      ...generateUpdateStamps(req.currentContext)
-    });
+    return await updateEnquiry(
+      tx,
+      {
+        ...req.body,
+        ...generateUpdateStamps(req.currentContext)
+      },
+      req.params.enquiryId
+    );
   });
 
   res.status(200).json(result);

@@ -1,9 +1,10 @@
+import { Prisma } from '@prisma/client';
+
 import {
   assignPriority,
   createHousingProjectController,
   deleteHousingProjectController,
   deleteHousingProjectDraftController,
-  emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
   getHousingProjectController,
   getHousingProjectDraftController,
@@ -19,7 +20,6 @@ import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as emailService from '../../../src/services/email.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -32,7 +32,6 @@ import type { Request, Response } from 'express';
 import type {
   ActivityContact,
   Draft,
-  Email,
   HousingProject,
   HousingProjectIntake,
   HousingProjectSearchParameters,
@@ -51,13 +50,18 @@ import {
   TEST_PERMIT_1,
   TEST_PERMIT_2,
   TEST_PERMIT_3,
-  TEST_EMAIL_RESPONSE
+  TEST_HOUSING_PROJECT_UPDATE
 } from '../data';
 import { prismaTxMock } from '../../__mocks__/prismaMock';
 import * as utils from '../../../src/utils/utils';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
+
+const PROJECT_WITH_PROJECTID = {
+  ...TEST_HOUSING_PROJECT_1,
+  projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+};
 
 const mockResponse = () => {
   const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
@@ -293,8 +297,10 @@ describe('createHousingProjectController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
@@ -382,7 +388,7 @@ describe('deleteHousingProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    getHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    getHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     deleteActivitySpy.mockResolvedValue();
 
     await deleteHousingProjectController(
@@ -434,33 +440,6 @@ describe('deleteHousingProjectDraftController', () => {
   });
 });
 
-describe('emailHousingProjectConfirmationController', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-
-  it('should call services and respond with status and result', async () => {
-    const req = {
-      body: {
-        to: 'test@test.com',
-        subject: 'Subject',
-        body: 'Some body text'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
-
-    await emailHousingProjectConfirmationController(
-      req as unknown as Request<never, never, Email>,
-      res as unknown as Response
-    );
-
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledWith(req.body);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_EMAIL_RESPONSE.data);
-  });
-});
-
 describe('getHousingProjectActivityIdsController', () => {
   const getHousingProjectsSpy = jest.spyOn(housingProjectService, 'getHousingProjects');
 
@@ -469,7 +448,7 @@ describe('getHousingProjectActivityIdsController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    getHousingProjectsSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1]);
+    getHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
     await getHousingProjectActivityIdsController(req as unknown as Request, res as unknown as Response);
 
@@ -539,9 +518,6 @@ describe('getHousingProjectStatisticsController', () => {
         total_submissions_between: 0,
         total_submissions_monthyear: 0,
         total_submissions_assignedto: 0,
-        intake_submitted: 0,
-        intake_assigned: 0,
-        intake_completed: 0,
         state_new: 0,
         state_inprogress: 0,
         state_delayed: 0,
@@ -586,7 +562,7 @@ describe('getHousingProjectController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    housingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    housingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     getRelatedEnquiriesSpy.mockResolvedValue([]);
 
     await getHousingProjectController(
@@ -597,7 +573,7 @@ describe('getHousingProjectController', () => {
     expect(housingProjectSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1);
+    expect(res.json).toHaveBeenCalledWith(PROJECT_WITH_PROJECTID);
   });
 });
 
@@ -610,14 +586,14 @@ describe('getHousingProjectsController', () => {
       query: {}
     };
 
-    housingProjectsSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1]);
+    housingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
     await getHousingProjectsController(req as unknown as Request, res as unknown as Response);
 
     expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith([PROJECT_WITH_PROJECTID]);
   });
 });
 
@@ -630,7 +606,7 @@ describe('searchHousingProjectsController', () => {
       currentContext: TEST_CURRENT_CONTEXT
     };
 
-    searchHousingProjectsSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1]);
+    searchHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
     await searchHousingProjectsController(
       req as unknown as Request<never, never, HousingProjectSearchParameters, never>,
@@ -643,7 +619,7 @@ describe('searchHousingProjectsController', () => {
       includeUser: false
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith([PROJECT_WITH_PROJECTID]);
   });
 });
 
@@ -669,7 +645,7 @@ describe('submitHousingProjectDraftController', () => {
       activityId: TEST_ACTIVITY_HOUSING.activityId,
       contactId: TEST_CONTACT_1.contactId
     } as ActivityContact);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
     await submitHousingProjectDraftController(
@@ -709,7 +685,7 @@ describe('submitHousingProjectDraftController', () => {
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith({
-      ...TEST_HOUSING_PROJECT_1,
+      ...PROJECT_WITH_PROJECTID,
       contact: TEST_CONTACT_1
     });
   });
@@ -721,7 +697,7 @@ describe('submitHousingProjectDraftController', () => {
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     deleteDraftSpy.mockResolvedValue();
 
     await submitHousingProjectDraftController(
@@ -743,14 +719,16 @@ describe('submitHousingProjectDraftController', () => {
 
     const req = {
       body: {
-        appliedPermits: [permit1NoTracking, permit2NoTracking],
-        investigatePermits: [TEST_PERMIT_3]
+        permits: {
+          appliedPermits: [permit1NoTracking, permit2NoTracking],
+          investigatePermits: [TEST_PERMIT_3]
+        }
       },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
+    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
     upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
@@ -831,12 +809,12 @@ describe('updateHousingProjectDraftController', () => {
     const req = {
       body: {
         data: {
-          contactFirstName: 'test',
-          contactLastName: 'person',
-          basic: {
-            projectApplicantType: 'Business'
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
           },
-          housing: {
+          basic: {
+            projectApplicantType: 'Business',
             projectName: 'TheProject'
           },
           location: {
@@ -873,10 +851,14 @@ describe('updateHousingProjectDraftController', () => {
       deletedBy: null
     });
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.HOUSING_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 
   it('updates draft with the given draftId and activityId', async () => {
@@ -884,19 +866,21 @@ describe('updateHousingProjectDraftController', () => {
       body: {
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
         activityId: 'ACTI1234',
-        contactFirstName: 'test',
-        contactLastName: 'person',
-        basic: {
-          projectApplicantType: 'Business'
-        },
-        housing: {
-          projectName: 'TheProject'
-        },
-        location: {
-          projectLocation: 'Some place'
-        },
-        permits: {
-          hasAppliedProvincialPermits: true
+        data: {
+          contact: {
+            firstName: 'test',
+            lastName: 'person'
+          },
+          basic: {
+            projectApplicantType: 'Business',
+            projectName: 'TheProject'
+          },
+          location: {
+            projectLocation: 'Some place'
+          },
+          permits: {
+            hasAppliedProvincialPermits: true
+          }
         }
       },
       currentContext: TEST_CURRENT_CONTEXT
@@ -916,37 +900,55 @@ describe('updateHousingProjectDraftController', () => {
       updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-      activityId: 'ACTI1234'
-    });
+    expect(res.json).toHaveBeenCalledWith(
+      expect.objectContaining({
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+        activityId: 'ACTI1234',
+        draftCode: DraftCode.HOUSING_PROJECT,
+        data: expect.any(Object)
+      })
+    );
   });
 });
 
 describe('updateHousingProjectController', () => {
   const updateSpy = jest.spyOn(housingProjectService, 'updateHousingProject');
 
-  const UPDATED_PROJECT: HousingProject = { ...TEST_HOUSING_PROJECT_1, projectName: 'NEW NAME' };
+  const { housingProjectId } = TEST_HOUSING_PROJECT_1;
+
+  const UPDATED_PROJECT: HousingProject = { ...TEST_HOUSING_PROJECT_1, ...TEST_HOUSING_PROJECT_UPDATE };
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: UPDATED_PROJECT,
-      currentContext: TEST_CURRENT_CONTEXT
+      body: TEST_HOUSING_PROJECT_UPDATE,
+      currentContext: TEST_CURRENT_CONTEXT,
+      params: {
+        housingProjectId
+      }
     };
 
     updateSpy.mockResolvedValue(UPDATED_PROJECT);
 
     await updateHousingProjectController(
-      req as unknown as Request<never, never, HousingProject>,
+      req as unknown as Request<
+        { housingProjectId: string },
+        never,
+        Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>
+      >,
       res as unknown as Response
     );
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...UPDATED_PROJECT,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(updateSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      {
+        ...TEST_HOUSING_PROJECT_UPDATE,
+        financiallySupported: expect.any(Boolean),
+        updatedAt: expect.any(Date) as Date,
+        updatedBy: TEST_CURRENT_CONTEXT.userId
+      },
+      housingProjectId
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
   });

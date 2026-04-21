@@ -4,6 +4,7 @@ import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
 import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue';
+import ProjectListNavigatorGeneral from '@/components/general/project/ProjectListNavigatorGeneral.vue';
 import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
 import { Spinner } from '@/components/layout';
 import {
@@ -90,7 +91,7 @@ const filteredProjects = computed(() => {
         (contact) => contact.role === ActivityContactRole.PRIMARY
       );
 
-      if ('housingProjectId' in x) {
+      if ('housingProjectId' in x || 'generalProjectId' in x) {
         return {
           ...x,
           location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),
@@ -272,6 +273,11 @@ onBeforeMount(() => {
 
     <ProjectListNavigatorHousing
       v-if="useAppStore().getInitiative === Initiative.HOUSING"
+      :on-delete-callback="onDelete"
+      :selection="selection"
+    />
+    <ProjectListNavigatorGeneral
+      v-if="useAppStore().getInitiative === Initiative.GENERAL"
       :on-delete-callback="onDelete"
       :selection="selection"
     />

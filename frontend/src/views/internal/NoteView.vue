@@ -4,11 +4,23 @@ import { computed, onBeforeMount, provide, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import NoteForm from '@/components/note/NoteForm.vue';
-import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
+import {
+  electrificationProjectService,
+  enquiryService,
+  generalProjectService,
+  housingProjectService,
+  noteHistoryService
+} from '@/services';
 import { useAppStore, useEnquiryStore, useProjectStore } from '@/store';
 import { Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
-import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
+import {
+  enquiryRouteNameKey,
+  projectEnquiryRouteNameKey,
+  projectRouteNameKey,
+  projectServiceKey,
+  resourceKey
+} from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -29,11 +41,20 @@ const {
 interface InitiativeState {
   enquiryRouteName?: RouteName;
   projectRouteName?: RouteName;
+  projectEnquiryRouteName?: RouteName;
   projectService: IDraftableProjectService;
   resource: Resource;
 }
 
 // Constants
+
+/**
+ * Notes are slightly complicated. There are possible 3 entry points (in order of code priority)
+ *  - Enquiries related to a project
+ *  - Enquiries
+ *  - Projects
+ * Each entry point must be taken into account in order to do correct return navigation and keep the breadcrumb intact
+ */
 const ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
   projectService: electrificationProjectService,
@@ -46,22 +67,55 @@ const ELECTRIFICATION_INITIATIVE_PROJECT_STATE: InitiativeState = {
   resource: Resource.ELECTRIFICATION_PROJECT
 };
 
-const HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
+const ELECTRIFICATION_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
+  projectService: electrificationProjectService,
+  projectEnquiryRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY,
+  resource: Resource.ENQUIRY
+};
+
+const GENERAL_INITIATIVE_ENQUIRY_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
+  projectService: generalProjectService,
+  resource: Resource.ENQUIRY
+};
+
+const GENERAL_INITIATIVE_PROJECT_STATE: InitiativeState = {
+  projectRouteName: RouteName.INT_GENERAL_PROJECT,
+  projectService: generalProjectService,
+  resource: Resource.GENERAL_PROJECT
+};
+
+const GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
+  projectService: generalProjectService,
+  projectEnquiryRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY,
+  resource: Resource.ENQUIRY
+};
+
+const HOUSING_INITIATIVE_ENQUIRY_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
   projectService: housingProjectService,
   resource: Resource.ENQUIRY
 };
 
-const HOUSING_INITIATIVE_PROJECT_PROJECT_STATE: InitiativeState = {
+const HOUSING_INITIATIVE_PROJECT_STATE: InitiativeState = {
   projectRouteName: RouteName.INT_HOUSING_PROJECT,
   projectService: housingProjectService,
   resource: Resource.HOUSING_PROJECT
 };
 
+const HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
+  projectService: housingProjectService,
+  projectEnquiryRouteName: RouteName.INT_HOUSING_PROJECT_ENQUIRY,
+  resource: Resource.ENQUIRY
+};
+
 // State
 const activityId: Ref<string | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_PROJECT_PROJECT_STATE);
+const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_PROJECT_STATE);
 
 // Composables
 const { t } = useI18n();
@@ -75,27 +129,49 @@ const { getProject } = storeToRefs(projectStore);
 // Providers
 const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
 const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
+const provideProjectEnquiryRouteName = computed(() => initiativeState.value.projectEnquiryRouteName);
 const provideProjectService = computed(() => initiativeState.value.projectService);
 const provideResource = computed(() => initiativeState.value.resource);
 provide(resourceKey, provideResource);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
+provide(projectEnquiryRouteNameKey, provideProjectEnquiryRouteName);
 provide(projectServiceKey, provideProjectService);
+
+// Actions
+const getState = (
+  projectState: InitiativeState,
+  enquiryState: InitiativeState,
+  projectEnquiryState: InitiativeState
+): InitiativeState => {
+  if (projectId && enquiryId) return projectEnquiryState;
+  if (enquiryId) return enquiryState;
+  return projectState;
+};
 
 onBeforeMount(async () => {
   try {
-    if (projectId && enquiryId) throw new Error(t('views.i.noteView.tooManyProps'));
-
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
-        initiativeState.value = projectId
-          ? ELECTRIFICATION_INITIATIVE_PROJECT_STATE
-          : ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE;
+        initiativeState.value = getState(
+          ELECTRIFICATION_INITIATIVE_PROJECT_STATE,
+          ELECTRIFICATION_INITIATIVE_ENQUIRY_STATE,
+          ELECTRIFICATION_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = getState(
+          GENERAL_INITIATIVE_PROJECT_STATE,
+          GENERAL_INITIATIVE_ENQUIRY_STATE,
+          GENERAL_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
         break;
       case Initiative.HOUSING:
-        initiativeState.value = projectId
-          ? HOUSING_INITIATIVE_PROJECT_PROJECT_STATE
-          : HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE;
+        initiativeState.value = getState(
+          HOUSING_INITIATIVE_PROJECT_STATE,
+          HOUSING_INITIATIVE_ENQUIRY_STATE,
+          HOUSING_INITIATIVE_PROJECT_ENQUIRY_STATE
+        );
         break;
       default:
         throw new Error(t('views.initiativeStateError'));
@@ -110,13 +186,13 @@ onBeforeMount(async () => {
       enquiryStore.setEnquiry(enquiry);
     }
 
-    activityId.value = getProject.value?.activityId || getEnquiry.value?.activityId;
+    activityId.value = getEnquiry.value?.activityId || getProject.value?.activityId;
 
     if (noteHistoryId && activityId.value) {
       const noteHistory = (await noteHistoryService.listNoteHistories(activityId.value)).data;
 
-      if (projectId) projectStore.setNoteHistory(noteHistory);
       if (enquiryId) enquiryStore.setNoteHistory(noteHistory);
+      else if (projectId) projectStore.setNoteHistory(noteHistory);
     }
 
     loading.value = false;
@@ -129,14 +205,14 @@ onBeforeMount(async () => {
 <template>
   <div v-if="!loading">
     <NoteForm
-      v-if="projectId"
-      :note-history="projectStore.getNoteHistoryById(noteHistoryId)"
-      :editable="getProject?.applicationStatus !== ApplicationStatus.COMPLETED"
-    />
-    <NoteForm
-      v-if="enquiryId"
+      v-if="(projectId && enquiryId) || enquiryId"
       :note-history="enquiryStore.getNoteHistoryById(noteHistoryId)"
       :editable="getEnquiry?.enquiryStatus !== ApplicationStatus.COMPLETED"
+    />
+    <NoteForm
+      v-else-if="projectId"
+      :note-history="projectStore.getNoteHistoryById(noteHistoryId)"
+      :editable="getProject?.applicationStatus !== ApplicationStatus.COMPLETED"
     />
   </div>
 </template>

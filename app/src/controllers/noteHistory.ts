@@ -12,6 +12,7 @@ import {
 import { searchElectrificationProjects } from '../services/electrificationProject.ts';
 import { email } from '../services/email.ts';
 import { searchEnquiries } from '../services/enquiry.ts';
+import { searchGeneralProjects } from '../services/generalProject.ts';
 import { searchHousingProjects } from '../services/housingProject.ts';
 import { createNote } from '../services/note.ts';
 import {
@@ -89,13 +90,16 @@ export const listBringForwardController = async (
   const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
     const history: NoteHistory[] = await listBringForward(
       tx,
-      req.currentContext.initiative!,
+      req.currentContext.initiative,
       req.query.bringForwardState
     );
 
     if (history.length) {
-      const [elecProj, housingProj] = await Promise.all([
+      const [elecProj, generalProj, housingProj] = await Promise.all([
         searchElectrificationProjects(tx, {
+          activityId: history.map((x) => x.activityId)
+        }),
+        searchGeneralProjects(tx, {
           activityId: history.map((x) => x.activityId)
         }),
         searchHousingProjects(tx, {
@@ -124,6 +128,13 @@ export const listBringForwardController = async (
             {
               activityId: history.map((x) => x.activityId)
             },
+            Initiative.GENERAL
+          ),
+          searchEnquiries(
+            tx,
+            {
+              activityId: history.map((x) => x.activityId)
+            },
             Initiative.HOUSING
           )
         ])
@@ -133,11 +144,13 @@ export const listBringForwardController = async (
         activityId: h.activityId,
         noteId: h.noteHistoryId,
         electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
+        generalProjectId: generalProj.find((s) => s.activityId === h.activityId)?.generalProjectId,
         housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
         enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
         title: h.title,
         projectName:
           elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
+          generalProj.find((s) => s.activityId === h.activityId)?.projectName ??
           housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
           null,
         createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
@@ -204,7 +217,7 @@ export const updateNoteHistoryController = async (
   });
 
   const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
-  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative!, resource);
+  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative, resource);
 
   res.status(200).json(response);
 };
@@ -230,7 +243,11 @@ async function emailBringForwardNotification(noteHistory: NoteHistory, initiativ
       body = bringForwardEnquiryNotificationTemplate({
         activityId: noteHistory.activityId
       });
-    } else if (resource === Resource.ELECTRIFICATION_PROJECT || resource === Resource.HOUSING_PROJECT) {
+    } else if (
+      [Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, resource === Resource.HOUSING_PROJECT].includes(
+        resource
+      )
+    ) {
       const project = await getProjectByActivityId(tx, noteHistory.activityId);
 
       if (!project) return;

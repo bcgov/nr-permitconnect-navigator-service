@@ -7,6 +7,7 @@ import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.v
 import {
   enquiryService,
   electrificationProjectService,
+  generalProjectService,
   housingProjectService,
   noteHistoryService,
   permitService
@@ -46,6 +47,15 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   resource: Resource.ELECTRIFICATION_PROJECT
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
+  headerText: t('views.i.initiativeView.general.header'),
+  navigationPermission: NavigationPermission.INT_GENERAL,
+  projectRouteName: RouteName.INT_GENERAL_PROJECT,
+  projectService: generalProjectService,
+  resource: Resource.GENERAL_PROJECT
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
   headerText: t('views.i.initiativeView.housing.header'),
@@ -80,6 +90,9 @@ onBeforeMount(async () => {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

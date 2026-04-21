@@ -1,3 +1,5 @@
+import { Prisma } from '@prisma/client';
+
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
@@ -187,13 +189,18 @@ export const getRelatedEnquiries = async (tx: PrismaTransactionClient, activityI
  * Updates a specific enquiry
  * @param tx Prisma transaction client
  * @param data Enquiry to update
+ * @param enquiryId ID of the enquiry to update
  * @returns A Promise that resolves to the updated enquiry
  */
-export const updateEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBase): Promise<Enquiry> => {
+export const updateEnquiry = async (
+  tx: PrismaTransactionClient,
+  data: Omit<Prisma.enquiryUpdateInput, 'enquiryId'>,
+  enquiryId: string
+): Promise<Enquiry> => {
   const result = await tx.enquiry.update({
     data: data,
     where: {
-      enquiryId: data.enquiryId
+      enquiryId
     },
     include: {
       activity: {

@@ -5,6 +5,7 @@ export interface BringForward {
   electrificationProjectId?: string;
   escalateToDirector?: boolean;
   escalateToSupervisor?: boolean;
+  generalProjectId?: string;
   housingProjectId?: string;
   title: string;
   projectName?: string;

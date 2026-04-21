@@ -16,6 +16,7 @@ import {
 } from '../../../src/controllers/noteHistory.ts';
 import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as noteService from '../../../src/services/note.ts';
@@ -26,7 +27,13 @@ import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
-import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '../../../src/types/index.ts';
+import type {
+  ElectrificationProject,
+  Enquiry,
+  GeneralProject,
+  HousingProject,
+  NoteHistory
+} from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -120,6 +127,7 @@ describe('deleteNoteHistoryController', () => {
 describe('listBringForwardController', () => {
   const listSpy = jest.spyOn(noteHistoryService, 'listBringForward');
   const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+  const searchGeneralProjectsSpy = jest.spyOn(generalProjectService, 'searchGeneralProjects');
   const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
   const searchEnquiries = jest.spyOn(enquiryService, 'searchEnquiries');
   const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
@@ -138,11 +146,13 @@ describe('listBringForwardController', () => {
 
     const ENQUIRY_LIST: Enquiry[] = [];
     const ELECTRIFICATION_PROJECT_LIST: ElectrificationProject[] = [TEST_ELECTRIFICATION_PROJECT_1];
+    const GENERAL_PROJECT_LIST: GeneralProject[] = [];
     const HOUSING_PROJECT_LIST: HousingProject[] = [];
     const USER_LIST = [TEST_IDIR_USER_1];
 
     listSpy.mockResolvedValue(NOTE_HISTORY_LIST);
     searchElectrificationProjectsSpy.mockResolvedValue(ELECTRIFICATION_PROJECT_LIST);
+    searchGeneralProjectsSpy.mockResolvedValue(GENERAL_PROJECT_LIST);
     searchHousingProjectsSpy.mockResolvedValue(HOUSING_PROJECT_LIST);
     searchEnquiries.mockResolvedValue(ENQUIRY_LIST);
     searchUsersSpy.mockResolvedValue(USER_LIST);
@@ -156,6 +166,8 @@ describe('listBringForwardController', () => {
     expect(listSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, BringForwardType.UNRESOLVED);
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
+    expect(searchGeneralProjectsSpy).toHaveBeenCalledTimes(1);
+    expect(searchGeneralProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(searchHousingProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
     expect(searchUsersSpy).toHaveBeenCalledTimes(1);

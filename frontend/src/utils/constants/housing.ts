@@ -1,7 +1,7 @@
 /*
  * Housing initiative constants
  */
-import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '@/utils/enums/housing';
+import { NumResidentialUnits } from '@/utils/enums/housing';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,
@@ -35,11 +35,3 @@ export const ORG_BOOK_QUERY_PARAMS = {
   inactive: false,
   revoked: false
 };
-
-export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
-
-export const PROJECT_LOCATION_LIST = [
-  ProjectLocation.LOCATION_COORDINATES,
-  ProjectLocation.STREET_ADDRESS,
-  ProjectLocation.PIN_OR_DRAW
-];

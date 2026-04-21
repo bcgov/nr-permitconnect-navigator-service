@@ -13,6 +13,10 @@ const activityContactBase = Prisma.validator<Prisma.activity_contactDefaultArgs>
 export type ActivityContactBase = Prisma.activity_contactGetPayload<typeof activityContactBase>;
 export type ActivityContact = ActivityContactBase & { contact?: Contact };
 
+const businessAreaCodeBase = Prisma.validator<Prisma.business_area_codeDefaultArgs>()({});
+export type BusinessAreaCodBase = Prisma.business_area_codeGetPayload<typeof businessAreaCodeBase>;
+export type BusinessAreaCode = BusinessAreaCodBase;
+
 const contactBase = Prisma.validator<Prisma.contactDefaultArgs>()({});
 export type ContactBase = Prisma.contactGetPayload<typeof contactBase>;
 export type Contact = ContactBase & { activityContact?: ActivityContact[]; user?: User | null };
@@ -58,11 +62,15 @@ const escalationTypeCodeBase = Prisma.validator<Prisma.escalation_type_codeDefau
 export type EscalationTypeCodeBase = Prisma.escalation_type_codeGetPayload<typeof escalationTypeCodeBase>;
 export type EscalationTypeCode = EscalationTypeCodeBase;
 
+const generalProjectBase = Prisma.validator<Prisma.general_projectDefaultArgs>()({});
+export type GeneralProjectBase = Prisma.general_projectGetPayload<typeof generalProjectBase>;
+export type GeneralProject = GeneralProjectBase & { activity?: Activity; projectId?: string; user?: User | null };
+
 const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
 export type HousingProject = HousingProjectBase & {
   activity?: Activity;
-  projectId: string;
+  projectId?: string;
   user?: User | null;
 };
 

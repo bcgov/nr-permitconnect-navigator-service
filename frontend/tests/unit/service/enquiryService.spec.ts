@@ -35,7 +35,7 @@ const testCreateEnquiry: EnquiryArgs = {
   updatedAt: currentDate,
   addedToAts: false,
   atsClientId: 123456,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   contact: {
     contactId: '123',
     firstName: 'enquiryDraft1',
@@ -61,7 +61,7 @@ const testEnquiry: Enquiry = {
   updatedAt: currentDate,
   addedToAts: false,
   atsClientId: 123456,
-  atsEnquiryId: '654321'
+  atsEnquiryId: 654321
 };
 
 // Mocks
@@ -152,8 +152,8 @@ describe('enquiryService', () => {
       it('calls updateEnquiry with correct data', () => {
         enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
 
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(
+        expect(patchSpy).toHaveBeenCalledTimes(1);
+        expect(patchSpy).toHaveBeenCalledWith(
           `${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`,
           testEnquiry
         );

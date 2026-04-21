@@ -9,6 +9,8 @@ import { Initiative } from '@/utils/enums/application';
 import NoteView from '@/views/internal/NoteView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
+import type { ElectrificationProject, Enquiry, HousingProject } from '@/types';
+
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
 
@@ -90,15 +92,20 @@ const wrapperSettings = (
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(mockAxiosResponse({ activityId: '1', enquiryId: '1' }));
+  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(
+    mockAxiosResponse({ activityId: '1', enquiryId: '1' } as Enquiry)
+  );
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
     mockAxiosResponse([{ noteHistoryId: '1', createdBy: '123' }])
   );
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ activityId: '2', electrificationProjectId: '2' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ activityId: '3', housingProjectId: '3' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
 });
 
@@ -110,20 +117,6 @@ describe('NoteView.vue', () => {
   it('does not render while loading', async () => {
     const wrapper = shallowMount(NoteView, wrapperSettings());
     expect(wrapper.findComponent(NoteForm).exists()).toBe(false);
-  });
-
-  it('throws error if too many props', async () => {
-    const wrapper = shallowMount(NoteView, wrapperSettings('1', '2', undefined, Initiative.HOUSING));
-    await flushPromises();
-
-    expect(toastErrorMock).toHaveBeenCalledWith(
-      t('views.i.noteView.noteLoadError'),
-      t('views.i.noteView.tooManyProps'),
-      undefined
-    );
-
-    const childComponent = wrapper.findAllComponents(NoteForm);
-    expect(childComponent).toHaveLength(0);
   });
 
   it('throws error if unknown initiative', async () => {

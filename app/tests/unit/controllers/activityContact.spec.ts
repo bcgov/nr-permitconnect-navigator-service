@@ -37,6 +37,11 @@ const FAKE_MEMBER_ACTIVITY_CONTACT = {
 };
 const FAKE_PRIMARY_ACTIVITY_CONTACT = { ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 };
 
+const PROJECT_WITH_PROJECTID = {
+  ...TEST_HOUSING_PROJECT_1,
+  projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+};
+
 const verifyPrimaryChangeSpy = jest.spyOn(activityContactHelpers, 'verifyPrimaryChange');
 
 let app: express.Express;
@@ -83,9 +88,7 @@ describe('DELETE /activity/:activityId/contact/:contactId', () => {
   const emailSpy = jest.spyOn(emailService, 'email');
 
   beforeEach(() => {
-    getProjectByActivityIdSpy.mockResolvedValue({
-      ...TEST_HOUSING_PROJECT_1
-    });
+    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
   });
 
   it('should call services and respond with 204', async () => {
@@ -149,9 +152,7 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
 
   beforeEach(() => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    getProjectByActivityIdSpy.mockResolvedValue({
-      ...TEST_HOUSING_PROJECT_1
-    });
+    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
   });
 
   it('should call services and respond with 201 and result', async () => {
@@ -219,9 +220,7 @@ describe('PUT /activity/:activityId/contact/:contactId', () => {
 
   beforeEach(() => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    getProjectByActivityIdSpy.mockResolvedValue({
-      ...TEST_HOUSING_PROJECT_1
-    });
+    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
   });
 
   it('should call services and respond with 200', async () => {

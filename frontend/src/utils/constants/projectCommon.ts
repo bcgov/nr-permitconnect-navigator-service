@@ -5,8 +5,12 @@ import {
   BringForwardType,
   EnquirySubmittedMethod,
   NoteType,
+  ProjectApplicant,
+  ProjectLocation,
   ProjectRelationship,
-  SubmissionType
+  SubmissionType,
+  Area,
+  Region
 } from '@/utils/enums/projectCommon';
 
 export const ACTIVITY_CONTACT_ROLE_LIST = [
@@ -21,6 +25,8 @@ export const APPLICATION_STATUS_LIST = [
   ApplicationStatus.DELAYED,
   ApplicationStatus.COMPLETED
 ];
+
+export const AREA_LIST = Object.values(Area);
 
 export const ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX = ' - Project Intake';
 
@@ -52,6 +58,14 @@ export const ENQUIRY_TYPE_LIST = [
 
 export const NOTE_TYPE_LIST = [NoteType.GENERAL, NoteType.BRING_FORWARD, NoteType.ROADMAP];
 
+export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
+
+export const PROJECT_LOCATION_LIST = [
+  ProjectLocation.LOCATION_COORDINATES,
+  ProjectLocation.STREET_ADDRESS,
+  ProjectLocation.PIN_OR_DRAW
+];
+
 export const PROJECT_RELATIONSHIP_LIST = [
   ProjectRelationship.OWNER,
   ProjectRelationship.CONSULTANT,
@@ -59,5 +73,7 @@ export const PROJECT_RELATIONSHIP_LIST = [
 ];
 
 export const QUEUE_PRIORITY = [1, 2, 3];
+
+export const REGION_LIST = Object.values(Region);
 
 export const SUBMISSION_TYPE_LIST = [SubmissionType.GUIDANCE, SubmissionType.INAPPLICABLE];

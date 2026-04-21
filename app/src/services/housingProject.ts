@@ -1,7 +1,5 @@
 import { Prisma } from '@prisma/client';
 
-import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
-
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type {
@@ -205,19 +203,18 @@ export const searchHousingProjects = async (
  * Updates a specific housing project
  * @param tx Prisma transaction client
  * @param data Housing project to update
+ * @param housingProjectId ID of the project to update
  * @returns A Promise that resolves to the updated housing project
  */
 export const updateHousingProject = async (
   tx: PrismaTransactionClient,
-  data: HousingProjectBase
+  data: Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>,
+  housingProjectId: string
 ): Promise<HousingProject> => {
   const result = await tx.housing_project.update({
-    data: {
-      ...data,
-      geoJson: jsonToPrismaInputJson(data.geoJson)
-    },
+    data,
     where: {
-      housingProjectId: data.housingProjectId
+      housingProjectId
     },
     include: {
       activity: {

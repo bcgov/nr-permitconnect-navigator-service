@@ -5,13 +5,12 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
-import { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
-import { BasicResponse, GroupName } from '@/utils/enums/application';
+import { ApplicationStatus, ProjectApplicant, SubmissionType } from '@/utils/enums/projectCommon';
+import { BasicResponse } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 
-import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
+import type { HousingProject } from '@/types';
 
-const currentDate = new Date().toISOString();
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     query: {}
@@ -20,56 +19,6 @@ vi.mock('vue-router', () => ({
     push: vi.fn()
   }))
 }));
-
-// Example IDIRAttribute object
-const exampleIDIRAttribute: IDIRAttribute = {
-  idirUsername: 'idirUser',
-  idirUserGuid: 'idir-guid-123'
-};
-
-// Example BasicBCeIDAttribute object
-const exampleBasicBCeIDAttribute: BasicBCeIDAttribute = {
-  bceidUsername: 'bceidUser',
-  bceidUserGuid: 'bceid-guid-123'
-};
-
-// Example BusinessBCeIDAttribute object
-const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
-  bceidBusinessGuid: 'business-guid-123',
-  bceidBusinessName: 'Example Business',
-  ...exampleBasicBCeIDAttribute
-};
-
-// Example User object
-const testUser = {
-  active: true,
-  email: 'john.doe@example.com',
-  firstName: 'John',
-  fullName: 'John Doe',
-  idp: 'idir',
-  lastName: 'Doe',
-  groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
-  status: 'active',
-  userId: 'user123',
-  sub: 'sub-123',
-  elevatedRights: true,
-  idirAttributes: exampleIDIRAttribute,
-  bceidAttributes: exampleBasicBCeIDAttribute,
-  businessBceidAttribute: exampleBusinessBCeIDAttribute,
-  bceidBusinessName: '',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
-};
-
-// Example Contact object
-const exampleContact = {
-  contactId: 'contact123',
-  name: 'John Doe',
-  email: 'john.doe@example.com',
-  phone: '123-456-7890'
-};
 
 // Example Project object
 const testProject: HousingProject = {
@@ -111,18 +60,16 @@ const testProject: HousingProject = {
   naturalDisaster: false,
   addedToAts: true,
   atsClientId: 654321,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   ltsaCompleted: true,
   bcOnlineCompleted: true,
   aaiUpdated: true,
   astNotes: 'AST notes.',
   applicationStatus: ApplicationStatus.COMPLETED,
-  contacts: [exampleContact],
-  user: testUser,
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  projectApplicantType: ProjectApplicant.INDIVIDUAL,
+  hasAppliedProvincialPermits: false,
+  projectLocation: '',
+  contacts: []
 };
 
 const testProjects = [testProject];

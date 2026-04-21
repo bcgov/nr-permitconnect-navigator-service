@@ -1,5 +1,6 @@
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type {
+  BusinessAreaCode,
   ElectrificationProjectCategoryCode,
   ElectrificationProjectTypeCode,
   EscalationTypeCode,
@@ -14,11 +15,18 @@ import type {
 export const listAllCodeTables = async (
   tx: PrismaTransactionClient
 ): Promise<{
+  BusinessArea: BusinessAreaCode[];
   ElectrificationProjectType: ElectrificationProjectTypeCode[];
   ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
   EscalationType: EscalationTypeCode[];
   SourceSystem: SourceSystemCode[];
 }> => {
+  const BusinessArea = await tx.business_area_code.findMany({
+    where: {
+      active: true
+    }
+  });
+
   const ElectrificationProjectType = await tx.electrification_project_type_code.findMany({
     where: {
       active: true
@@ -43,5 +51,5 @@ export const listAllCodeTables = async (
     }
   });
 
-  return { ElectrificationProjectType, ElectrificationProjectCategory, EscalationType, SourceSystem };
+  return { BusinessArea, ElectrificationProjectType, ElectrificationProjectCategory, EscalationType, SourceSystem };
 };

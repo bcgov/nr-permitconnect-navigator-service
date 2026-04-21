@@ -5,47 +5,27 @@ import { Form, type GenericObject } from 'vee-validate';
 import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { createProjectFormSchema } from '../../../validators/electrification/projectFormNavigatorSchema';
-import { AdditionalInfo, AstNote, Company, Electrification, Location } from '@/components/common/icons';
-import {
-  AutoComplete,
-  CancelButton,
-  Checkbox,
-  EditableSelect,
-  FormNavigationGuard,
-  InputText,
-  Select,
-  TextArea
-} from '@/components/form';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
+import { CancelButton, FormNavigationGuard } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
-import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, electrificationProjectService, externalApiService, userService } from '@/services';
-import { useCodeStore, useProjectStore } from '@/store';
-import { MIN_SEARCH_INPUT_LENGTH, YES_NO_LIST } from '@/utils/constants/application';
-import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
-import {
-  APPLICATION_STATUS_LIST,
-  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
-  ATS_MANAGING_REGION,
-  QUEUE_PRIORITY,
-  SUBMISSION_TYPE_LIST
-} from '@/utils/constants/projectCommon';
-import {
-  ATSCreateTypes,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative,
-  Regex
-} from '@/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
+import AstNotesPanel from '@/components/form/panel/AstNotesPanel.vue';
+import CompanyProjectNamePanel from '@/components/form/panel/CompanyProjectNamePanel.vue';
+import ElectrificationPanel from '@/components/form/panel/ElectrificationPanel.vue';
+import LocationDescriptionPanel from '@/components/form/panel/LocationDescriptionPanel.vue';
+import ProjectDescriptionPanel from '@/components/form/panel/ProjectDescriptionPanel.vue';
+import ProjectAreasUpdatedSection from '@/components/form/section/ProjectAreasUpdatedSection.vue';
+import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
+import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
+import { atsService, electrificationProjectService, userService } from '@/services';
+import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
+import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
+import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
+import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { createProjectFormNavigatorSchema } from '@/validators/electrification/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
-import type { Maybe } from 'yup';
-import type { IInputEvent } from '@/interfaces';
 import type {
   ATSAddressResource,
   ATSClientResource,
@@ -64,11 +44,6 @@ const { editable = true, project } = defineProps<{
   project: ElectrificationProject;
 }>();
 
-// Emits
-const emit = defineEmits<{
-  inputProjectName: [newName: string];
-}>();
-
 // Constants
 const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
@@ -79,104 +54,88 @@ const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
-const { codeList, enums, options } = useCodeStore();
-const { getActivityContacts } = storeToRefs(projectStore);
+const { codeList, enums } = useCodeStore();
+const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
+const { getInitiative } = storeToRefs(useAppStore());
 
 // State
-const assigneeOptions: Ref<User[]> = ref([]);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
-const primaryContact = computed(
-  () => getActivityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
-);
+const projectFormNavigatorSchema = computed(() => {
+  return createProjectFormNavigatorSchema({
+    initiative: getInitiative.value,
+    t,
+    codeList,
+    enums,
+    orgBookOptions: orgBookOptions.value
+  });
+});
 
 // Actions
-const projectFormSchema = computed(() => {
-  return createProjectFormSchema(codeList, enums, orgBookOptions.value);
-});
+async function initializeFormValues(project: ElectrificationProject): Promise<DeepPartial<FormSchemaType>> {
+  let assigneeOptions: User[] = [];
+  if (project.assignedUserId)
+    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
 
-function emitProjectNameChange(e: Event) {
-  emit('inputProjectName', (e.target as HTMLInputElement).value);
-}
-
-const getAssigneeOptionLabel = (e: User) => {
-  return `${e.fullName}`;
-};
-
-const isCompleted = computed(() => {
-  return project.applicationStatus === ApplicationStatus.COMPLETED;
-});
-
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
-};
-
-function initilizeFormValues(project: ElectrificationProject): DeepPartial<FormSchemaType> {
   return {
     contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
+      contactId: getPrimaryActivityContact.value?.contactId,
+      firstName: getPrimaryActivityContact.value?.firstName,
+      lastName: getPrimaryActivityContact.value?.lastName,
+      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
+      email: getPrimaryActivityContact.value?.email,
+      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
+      contactPreference: getPrimaryActivityContact.value?.contactPreference,
+      userId: getPrimaryActivityContact.value?.userId
     },
-    project: {
+
+    companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      projectName: project.projectName,
+      projectName: project.projectName
+    },
+
+    electrification: {
       bcHydroNumber: project.bcHydroNumber,
       projectType: project.projectType,
-      hasEpa: project.hasEpa as BasicResponse | null | undefined,
-      megawatts: project.megawatts as Maybe<number | undefined>,
+      hasEpa: project.hasEpa ? BasicResponse.YES : BasicResponse.NO,
+      megawatts: project.megawatts,
       projectCategory: project.projectCategory,
-      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded as BasicResponse | null | undefined
+      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded ? BasicResponse.YES : BasicResponse.NO
     },
 
     // Additional Info
-    projectDescription: project.projectDescription,
+    projectDescription: { description: project.projectDescription },
 
     // Location
-    locationDescription: project.locationDescription,
+    locationDescription: { description: project.locationDescription },
 
     // Automated Status Tool Notes
-    astNotes: project.astNotes,
+    astNotes: { notes: project.astNotes },
 
     // Submission state
     submissionState: {
       queuePriority: project.queuePriority,
-      submissionType: project.submissionType as SubmissionType | undefined,
-      assignedUser: assigneeOptions.value[0] ?? null,
+      submissionType: project.submissionType,
+      assignedUser: assigneeOptions[0] ?? null,
       applicationStatus: project.applicationStatus
     },
 
     // ATS link
-    atsClientId: project.atsClientId,
-    atsEnquiryId: project.atsEnquiryId,
+    atsInfo: {
+      atsClientId: project.atsClientId,
+      atsEnquiryId: project.atsEnquiryId
+    },
 
     // Updates
-    aaiUpdated: project.aaiUpdated,
-    addedToAts: project.addedToAts
+    projectAreasUpdated: {
+      aaiUpdated: project.aaiUpdated,
+      addedToAts: project.addedToAts
+    }
   };
 }
 
@@ -224,7 +183,7 @@ async function createATSEnquiry(atsClientId?: number) {
       enquiryFileNumbers: [project.activityId],
       enquiryPartnerAgencies: [Initiative.ELECTRIFICATION],
       enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.project.projectName,
+      notes: formRef.value?.values.companyProjectName.projectName,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
     const response = await atsService.createATSEnquiry(ATSEnquiryData);
@@ -285,28 +244,6 @@ function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
-async function getOrgBookOptions(companyNameRegistered: string) {
-  if (companyNameRegistered.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(companyNameRegistered))?.data?.results ?? [];
-    orgBookOptions.value = results
-      .filter((obo: Record<string, string>) => obo.type === 'name')
-      // map value and topic_source_id for AutoComplete display and selection
-      .map((obo: Record<string, string>) => ({
-        registeredName: obo.value,
-        registeredId: obo.topic_source_id
-      }));
-    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
-    if (BC_HYDRO_POWER_AUTHORITY.includes(companyNameRegistered.toUpperCase())) {
-      orgBookOptions.value.push({
-        registeredName: BC_HYDRO_POWER_AUTHORITY,
-        registeredId: ''
-      });
-    }
-    // sort options alphabetically
-    orgBookOptions.value.sort((a, b) => a.registeredName.localeCompare(b.registeredName));
-  }
-}
-
 function onReOpen() {
   confirm.require({
     message: t('i.common.projectForm.confirmReopenMessage'),
@@ -321,49 +258,55 @@ function onReOpen() {
   });
 }
 
-// Set basic info, clear it if no contact is provided
-function setBasicInfo(contact?: Contact) {
-  if (!formRef.value) return;
-
-  formRef.value.resetField('contact.contactId', { value: contact?.contactId });
-  formRef.value.resetField('contact.firstName', { value: contact?.firstName });
-  formRef.value.resetField('contact.lastName', { value: contact?.lastName });
-  formRef.value.resetField('contact.phoneNumber', { value: contact?.phoneNumber });
-  formRef.value.resetField('contact.email', { value: contact?.email });
-  formRef.value.resetField('contact.contactApplicantRelationship', { value: contact?.contactApplicantRelationship });
-  formRef.value.resetField('contact.contactPreference', { value: contact?.contactPreference });
-  formRef.value.resetField('contact.userId', { value: contact?.userId });
-}
-
-const onSubmit = async (values: GenericObject) => {
+const onSubmit = async (formValues: GenericObject) => {
   try {
+    // vee-validate doesn't get transformed data from yup so
+    // manually run the form values through it here
+    const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
+
     await handleAtsCreate(values);
 
-    // Generate final submission object
-    const dataOmitted = omit(
-      setEmptyStringsToNull({
-        project: {
-          ...values.project,
-          activityId: project.activityId,
-          electrificationProjectId: project.electrificationProjectId,
-          projectDescription: values.projectDescription,
-          locationDescription: values.locationDescription,
-          astNotes: values.astNotes,
-          queuePriority: values.submissionState.queuePriority,
-          submissionType: values.submissionState.submissionType,
-          assignedUserId: values.submissionState.assignedUser?.userId,
-          applicationStatus: values.submissionState.applicationStatus,
-          atsClientId: Number.parseInt(values.atsClientId) || '',
-          atsEnquiryId: Number.parseInt(values.atsEnquiryId) || '',
-          aaiUpdated: values.aaiUpdated,
-          addedToAts: values.addedToAts
-        }
-      }),
-      ['contact', 'assignedUser', 'submissionState']
-    );
+    // Generate final payload
+    const payload: Partial<ElectrificationProject> = {
+      // Company and Project Information
+      projectName: values.companyProjectName.projectName,
+      companyNameRegistered: values.companyProjectName.companyNameRegistered,
+      companyIdRegistered: values.companyProjectName.companyIdRegistered,
+
+      // Electrification
+      projectType: values.electrification.projectType,
+      bcHydroNumber: values.electrification.bcHydroNumber,
+      hasEpa: values.electrification.hasEpa,
+      megawatts: values.electrification.megawatts,
+      bcEnvironmentAssessNeeded: values.electrification.bcEnvironmentAssessNeeded,
+      projectCategory: values.electrification.projectCategory,
+
+      // Additional Project Information
+      projectDescription: values.projectDescription.description,
+
+      // Additional Location Information
+      locationDescription: values.locationDescription.description,
+
+      // AST Notes
+      astNotes: values.astNotes.notes,
+
+      // Submission State
+      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      applicationStatus: values.submissionState.applicationStatus,
+      submissionType: values.submissionState.submissionType,
+      queuePriority: values.submissionState.queuePriority,
+
+      // ATS
+      atsClientId: values.atsInfo.atsClientId,
+      atsEnquiryId: values.atsInfo.atsEnquiryId,
+
+      // Updates
+      aaiUpdated: values.projectAreasUpdated.aaiUpdated,
+      addedToAts: values.projectAreasUpdated.addedToAts
+    };
 
     // Update project
-    const result = await electrificationProjectService.updateProject(project.electrificationProjectId, dataOmitted);
+    const result = await electrificationProjectService.updateProject(project.electrificationProjectId, payload);
     projectStore.setProject(result.data);
 
     // Wait a tick for store to propagate
@@ -371,9 +314,7 @@ const onSubmit = async (values: GenericObject) => {
 
     // Reinitialize the form
     formRef.value?.resetForm({
-      values: {
-        ...initilizeFormValues(result.data)
-      }
+      values: await initializeFormValues(result.data)
     });
 
     toast.success(t('i.common.form.savedMessage'));
@@ -382,22 +323,37 @@ const onSubmit = async (values: GenericObject) => {
   }
 };
 
-watch(primaryContact, (newContact, oldContact) => {
+// Set basic info, clear it if no contact is provided
+function setBasicInfo(contact?: Contact) {
+  if (!formRef.value) return;
+
+  const updatedContact = {
+    contactId: contact?.contactId,
+    firstName: contact?.firstName,
+    lastName: contact?.lastName,
+    phoneNumber: contact?.phoneNumber,
+    email: contact?.email,
+    contactApplicantRelationship: contact?.contactApplicantRelationship,
+    contactPreference: contact?.contactPreference,
+    userId: contact?.userId
+  };
+
+  // Reset the entire contact object path to trigger reactivity and set the new baseline
+  formRef.value.resetField('contact', { value: updatedContact });
+}
+
+watch(getPrimaryActivityContact, (newContact, oldContact) => {
   if (newContact?.contactId !== oldContact?.contactId) {
     setBasicInfo(newContact);
   }
 });
 
 onBeforeMount(async () => {
-  if (project.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
-  }
-
-  // Load options for org book autocomplete to prevent schema validation errors on existing values
-  if (project.companyNameRegistered) await getOrgBookOptions(project.companyNameRegistered);
+  useFormStore().setFormType(FormType.NAVIGATOR);
+  useFormStore().setFormState(FormState.UNLOCKED);
 
   // Default form values
-  initialFormValues.value = initilizeFormValues(project);
+  initialFormValues.value = await initializeFormValues(project);
 });
 </script>
 
@@ -416,17 +372,17 @@ onBeforeMount(async () => {
     v-slot="{ setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="projectFormSchema"
+    :validation-schema="projectFormNavigatorSchema"
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
-    <FormNavigationGuard v-if="!isCompleted" />
+    <FormNavigationGuard v-if="!getProjectIsCompleted" />
 
     <div class="grid grid-cols-[4fr_1fr] gap-x-9 mt-4">
       <div class="flex flex-col gap-y-9">
         <div class="p-panel flex justify-between items-start px-6 py-4">
           <h2 class="section-header my-0">
-            {{ values.project.companyNameRegistered }}
+            {{ values.companyProjectName.companyNameRegistered }}
           </h2>
           <div class="flex flex-col">
             <span>{{ t('i.electrification.projectForm.submissionDate') }}</span>
@@ -434,177 +390,15 @@ onBeforeMount(async () => {
           </div>
         </div>
 
-        <ContactCardNavForm
-          :editable="editable"
-          :form-values="values"
-        />
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <Company />
-              <h3 class="section-header m-0">
-                {{ t('i.housing.project.projectForm.companyProject') }}
-              </h3>
-            </div>
-          </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
-            <InputText
-              name="project.projectName"
-              :label="t('i.electrification.projectForm.projectNameLabel')"
-              :disabled="!editable"
-              @on-input="emitProjectNameChange"
-            />
-            <AutoComplete
-              name="project.companyNameRegistered"
-              :label="t('i.electrification.projectForm.companyLabel')"
-              :bold="true"
-              :disabled="!editable"
-              :editable="true"
-              :placeholder="t('i.common.projectForm.searchBCRegistered')"
-              :get-option-label="(option: OrgBookOption) => option.registeredName"
-              :suggestions="orgBookOptions"
-              @on-complete="(e) => getOrgBookOptions(e.query)"
-              @on-select="
-                (orgBookOption: OrgBookOption) => {
-                  setFieldValue('project.companyIdRegistered', orgBookOption.registeredId);
-                  setFieldValue('project.companyNameRegistered', orgBookOption.registeredName);
-                }
-              "
-            />
-            <InputText
-              name="project.companyIdRegistered"
-              :label="t('i.common.projectForm.bcRegistryId')"
-              :disabled="true"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <Electrification />
-              <h3 class="section-header m-0">
-                {{ t('i.electrification.projectForm.projectHeader') }}
-              </h3>
-            </div>
-          </template>
-          <div class="grid grid-cols-3 gap-x-6 gap-y-6">
-            <Select
-              name="project.projectType"
-              option-label="label"
-              option-value="value"
-              :label="t('i.electrification.projectForm.projectTypeLabel')"
-              :disabled="!editable"
-              :options="options.ElectrificationProjectType"
-            />
-            <InputText
-              name="project.bcHydroNumber"
-              :label="t('i.electrification.projectForm.bcHydroNumberLabel')"
-              :disabled="!editable"
-            />
-            <Select
-              name="project.hasEpa"
-              :label="t('i.electrification.projectForm.hasEpaLabel')"
-              :disabled="!editable"
-              :options="YES_NO_LIST"
-            />
-            <InputText
-              name="project.megawatts"
-              :label="t('i.electrification.projectForm.megawattsLabel')"
-              :disabled="!editable"
-            />
-            <Select
-              name="project.bcEnvironmentAssessNeeded"
-              :label="t('i.electrification.projectForm.bcEnvironmentAssessNeededLabel')"
-              :disabled="!editable"
-              :options="YES_NO_LIST"
-            />
-            <Select
-              name="project.projectCategory"
-              option-label="label"
-              option-value="value"
-              :label="t('i.electrification.projectForm.projectCategoryLabel')"
-              :disabled="!editable"
-              :options="options.ElectrificationProjectCategory"
-            />
-          </div>
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AdditionalInfo />
-              <h3 class="section-header m-0">
-                {{ t('i.electrification.projectForm.additionalInfoHeader') }}
-              </h3>
-            </div>
-          </template>
-          <TextArea
-            name="projectDescription"
-            :disabled="!editable"
-          />
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <Location />
-              <h3 class="section-header m-0">
-                {{ t('i.electrification.projectForm.locationHeader') }}
-              </h3>
-            </div>
-          </template>
-          <InputText
-            name="locationDescription"
-            :disabled="!editable"
-          />
-        </Panel>
-        <Panel toggleable>
-          <template #header>
-            <div class="flex items-center gap-x-2.5">
-              <AstNote />
-              <h3 class="section-header m-0">
-                {{ t('i.electrification.projectForm.astNotesHeader') }}
-              </h3>
-            </div>
-          </template>
-          <TextArea
-            name="astNotes"
-            :disabled="!editable"
-          />
-        </Panel>
+        <ContactCardNavForm :form-values="values" />
+        <CompanyProjectNamePanel @org-book-options="(e) => (orgBookOptions = e)" />
+        <ElectrificationPanel />
+        <ProjectDescriptionPanel />
+        <LocationDescriptionPanel />
+        <AstNotesPanel />
       </div>
       <div class="flex flex-col gap-y-9">
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.electrification.projectForm.submissionStateHeader') }}
-          </h4>
-          <div class="flex flex-col gap-y-4">
-            <EditableSelect
-              name="submissionState.assignedUser"
-              :label="t('i.electrification.projectForm.assignedToLabel')"
-              :disabled="!editable"
-              :options="assigneeOptions"
-              :get-option-label="getAssigneeOptionLabel"
-              @on-input="onAssigneeInput"
-            />
-            <Select
-              name="submissionState.applicationStatus"
-              :label="t('i.electrification.projectForm.projectStateLabel')"
-              :disabled="!editable"
-              :options="APPLICATION_STATUS_LIST"
-            />
-            <Select
-              name="submissionState.submissionType"
-              :label="t('i.electrification.projectForm.submissionTypeLabel')"
-              :disabled="!editable"
-              :options="SUBMISSION_TYPE_LIST"
-            />
-            <Select
-              name="submissionState.queuePriority"
-              :label="t('i.electrification.projectForm.priorityLabel')"
-              :disabled="!editable"
-              :options="QUEUE_PRIORITY"
-            />
-          </div>
-        </div>
+        <SubmissionStateSection />
         <ATSInfo
           :ats-client-id="values.atsClientId"
           :ats-enquiry-id="values.atsEnquiryId"
@@ -617,39 +411,24 @@ onBeforeMount(async () => {
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
           @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
         />
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('i.electrification.projectForm.updatesHeader') }}
-          </h4>
-          <Checkbox
-            name="addedToAts"
-            class="mb-4"
-            :label="t('i.electrification.projectForm.atsUpdated')"
-            :disabled="!editable"
-          />
-          <Checkbox
-            name="aaiUpdated"
-            :label="t('i.electrification.projectForm.aaiUpdateLabel')"
-            :disabled="!editable"
-          />
-        </div>
+        <ProjectAreasUpdatedSection />
       </div>
     </div>
     <div class="mt-16">
       <Button
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         label="Save"
         type="submit"
         icon="pi pi-check"
         :disabled="!editable"
       />
       <CancelButton
-        v-if="!isCompleted"
+        v-if="!getProjectIsCompleted"
         :editable="editable"
         @clicked="onCancel"
       />
       <Button
-        v-if="isCompleted"
+        v-if="getProjectIsCompleted"
         label="Re-open submission"
         icon="pi pi-check"
         @click="onReOpen()"

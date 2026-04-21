@@ -4,7 +4,12 @@ import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
 
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
-import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
+import {
+  ApplicationStatus,
+  EnquirySubmittedMethod,
+  ProjectApplicant,
+  SubmissionType
+} from '@/utils/enums/projectCommon';
 import type { Enquiry, HousingProject } from '@/types';
 import { BasicResponse } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
@@ -26,7 +31,7 @@ const testEnquiry: Enquiry = {
   addedToAts: false,
   assignedUserId: 'user123',
   atsClientId: null,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   submissionType: SubmissionType.ASSISTANCE,
   submittedMethod: EnquirySubmittedMethod.EMAIL,
   submittedAt: '2023-01-01T12:00:00Z',
@@ -76,18 +81,17 @@ const testSubmission: HousingProject = {
   naturalDisaster: false,
   addedToAts: false,
   atsClientId: null,
-  atsEnquiryId: '654321',
+  atsEnquiryId: 654321,
   ltsaCompleted: false,
   bcOnlineCompleted: false,
   aaiUpdated: false,
   astNotes: '',
   assignedUserId: 'user123',
   applicationStatus: ApplicationStatus.NEW,
-  contacts: [],
-  createdAt: undefined,
-  createdBy: undefined,
-  updatedAt: undefined,
-  updatedBy: undefined
+  projectApplicantType: ProjectApplicant.INDIVIDUAL,
+  projectLocation: '',
+  hasAppliedProvincialPermits: false,
+  contacts: []
 };
 
 const testHistory = [testEnquiry, testSubmission];

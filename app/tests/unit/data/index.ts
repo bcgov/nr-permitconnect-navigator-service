@@ -36,12 +36,17 @@ import type {
   Document,
   Draft,
   ElectrificationProject,
+  ElectrificationProjectBase,
   ElectrificationProjectIntake,
   Email,
   Enquiry,
   EnquiryIntake,
+  GeneralProject,
+  GeneralProjectBase,
+  GeneralProjectIntake,
   Group,
   HousingProject,
+  HousingProjectBase,
   HousingProjectIntake,
   Initiative as InitiativeModel,
   Note,
@@ -69,6 +74,17 @@ export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
 export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_ACTIVITY_GENERAL: Activity = {
+  activityId: 'ACTI1234',
+  initiativeId: Initiative.GENERAL,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
@@ -155,19 +171,20 @@ export const TEST_ELECTRIFICATION_DRAFT: Draft = {
 };
 
 export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
-  project: {
+  basic: {
     projectName: 'NAME',
     projectDescription: 'DESCRIPTION',
-    companyIdRegistered: 'FM0281610',
-    companyNameRegistered: 'COMPANY',
+    registeredId: 'FM0281610',
+    registeredName: 'COMPANY'
+  },
+  project: {
     projectType: ProjectType.IPP_WIND,
-    bcHydroNumber: '12345',
-    submissionType: SubmissionType.GUIDANCE
+    bcHydroNumber: '12345'
   },
   contact: TEST_CONTACT_1
 };
 
-export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProject = {
+export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
@@ -231,6 +248,10 @@ export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   deletedAt: null
 };
 
+export const TEST_ELECTRIFICATION_PROJECT_UPDATE: Partial<Omit<ElectrificationProject, 'electrificationProjectId'>> = {
+  projectName: 'NEW NAME'
+};
+
 export const TEST_EMAIL: Email = {
   to: ['nav@example.com'],
   from: 'noreply@example.com',
@@ -273,41 +294,27 @@ export const TEST_ENQUIRY_1: Enquiry = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null,
-  activity: {
-    activityId: 'ACTI1234',
-    initiativeId: Initiative.HOUSING,
-    createdAt: null,
-    createdBy: null,
-    updatedAt: null,
-    updatedBy: null,
-    deletedBy: null,
-    deletedAt: null,
-    activityContact: [
-      {
-        activityId: 'ACTI1234',
-        contactId: TEST_CONTACT_1.contactId,
-        role: ActivityContactRole.PRIMARY,
-        createdAt: null,
-        createdBy: null,
-        updatedAt: null,
-        updatedBy: null,
-        deletedBy: null,
-        deletedAt: null
-      }
-    ]
-  },
-
-  user: null
+  deletedAt: null
 };
 
 export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
   contact: TEST_CONTACT_1,
-  basic: {
-    submissionType: SubmissionType.GENERAL_ENQUIRY,
-    relatedActivityId: 'ACTI1234',
-    enquiryDescription: 'Test enquiry description'
-  }
+  submissionType: SubmissionType.GENERAL_ENQUIRY,
+  relatedActivityId: 'ACTI1234',
+  enquiryDescription: 'Test enquiry description'
+};
+
+export const TEST_GENERAL_DRAFT: Draft = {
+  draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+  activityId: 'ACTI1234',
+  data: {} as Prisma.JsonValue,
+  draftCode: DraftCode.GENERAL_PROJECT,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_HOUSING_DRAFT: Draft = {
@@ -323,9 +330,136 @@ export const TEST_HOUSING_DRAFT: Draft = {
   deletedAt: null
 };
 
-export const TEST_HOUSING_PROJECT_1: HousingProject = {
+export const TEST_GENERAL_PROJECT_1: GeneralProjectBase = {
+  generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  locationPids: null,
+  companyIdRegistered: 'FM0281610',
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectNumber: null,
+  projectDescription: 'DESCRIPTION',
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: null,
+  relatedPermits: null,
+  astNotes: null,
+  atsClientId: null,
+  naturalDisaster: false,
+  aaiUpdated: false,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  locality: 'Place',
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  submissionType: SubmissionType.GUIDANCE,
+  region: null,
+  area: null,
+  activityType: null,
+  businessArea: null,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
+  generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  activityId: 'ACTI1234',
+  assignedUserId: null,
+  submittedAt: new Date(),
+  locationPids: null,
+  companyIdRegistered: 'FM0281610',
+  companyNameRegistered: 'COMPANY',
+  projectName: 'NAME',
+  projectNumber: null,
+  projectDescription: 'DESCRIPTION',
+  streetAddress: '123 Street',
+  latitude: null,
+  longitude: null,
+  queuePriority: null,
+  relatedPermits: null,
+  astNotes: null,
+  atsClientId: null,
+  naturalDisaster: false,
+  aaiUpdated: false,
+  applicationStatus: ApplicationStatus.NEW,
+  atsEnquiryId: null,
+  checkProvincialPermits: null,
+  geoJson: null,
+  geomarkUrl: null,
+  hasAppliedProvincialPermits: null,
+  locality: 'Place',
+  projectApplicantType: null,
+  projectLocation: 'Location',
+  projectLocationDescription: 'Location description',
+  province: 'AA',
+  submissionType: SubmissionType.GUIDANCE,
+  region: null,
+  area: null,
+  activityType: null,
+  businessArea: null,
+  createdBy: '811896a0-e1fe-4c38-8cd3-86245c79e8f8',
+  createdAt: new Date(),
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
+  activityId: null,
+  submittedAt: new Date().toISOString(),
+  applicationStatus: ApplicationStatus.NEW,
+  basic: {
+    projectName: 'NAME',
+    projectNumber: null,
+    projectDescription: 'DESCRIPTION',
+    projectApplicantType: null,
+    registeredId: 'FM0281610',
+    registeredName: 'COMPANY'
+  },
+  contact: TEST_CONTACT_1,
+  draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
+  location: {
+    geoJson: null,
+    naturalDisaster: BasicResponse.NO,
+    geomarkUrl: null,
+    latitude: null,
+    longitude: null,
+    locality: 'Place',
+    ltsaPidLookup: null,
+    locationPids: null,
+    projectLocation: 'Location',
+    projectLocationDescription: 'Location description',
+    province: 'AA',
+    streetAddress: '123 Street'
+  },
+  submissionType: SubmissionType.GUIDANCE,
+  permits: {
+    appliedPermits: [],
+    hasAppliedProvincialPermits: null,
+    investigatePermits: []
+  }
+};
+
+export const TEST_GENERAL_PROJECT_UPDATE: Partial<Omit<GeneralProject, 'generalProjectId'>> = {
+  projectName: 'NEW NAME'
+};
+
+export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
   housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
@@ -445,12 +579,11 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
 
 export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   activityId: null,
-  submittedAt: new Date().toISOString(),
-  applicationStatus: ApplicationStatus.NEW,
-  appliedPermits: [],
   basic: {
     consentToFeedback: false,
     projectApplicantType: null,
+    projectName: 'NAME',
+    projectDescription: 'DESCRIPTION',
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
   },
@@ -464,8 +597,6 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     hasRentalUnits: BasicResponse.NO,
     multiFamilyUnits: BasicResponse.NO,
     otherUnits: BasicResponse.NO,
-    projectName: 'NAME',
-    projectDescription: 'DESCRIPTION',
     housingCoopDescription: null,
     indigenousDescription: null,
     nonProfitDescription: null,
@@ -473,9 +604,7 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     rentalUnits: BasicResponse.NO,
     singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE
   },
-  investigatePermits: [],
   location: {
-    geoJson: null,
     naturalDisaster: BasicResponse.NO,
     geomarkUrl: null,
     latitude: null,
@@ -487,10 +616,15 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     province: 'AA',
     streetAddress: '123 Street'
   },
-  submissionType: SubmissionType.GUIDANCE,
   permits: {
-    hasAppliedProvincialPermits: null
+    appliedPermits: [],
+    hasAppliedProvincialPermits: null,
+    investigatePermits: []
   }
+};
+
+export const TEST_HOUSING_PROJECT_UPDATE: Partial<Omit<HousingProjectBase, 'housingProjectId'>> = {
+  projectName: 'NEW NAME'
 };
 
 export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {

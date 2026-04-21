@@ -1,10 +1,11 @@
+import { defineConfig } from 'eslint/config';
 import eslint from '@eslint/js';
 import eslintConfigPrettier from 'eslint-config-prettier';
 import eslintPluginPrettierRecommended from 'eslint-plugin-prettier/recommended';
 import jsdoc from 'eslint-plugin-jsdoc';
 import tseslint from 'typescript-eslint';
 
-export default tseslint.config(
+export default defineConfig([
   {
     ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**', 'sbin/**']
   },
@@ -37,4 +38,4 @@ export default tseslint.config(
       semi: ['error', 'always']
     }
   }
-);
+]);

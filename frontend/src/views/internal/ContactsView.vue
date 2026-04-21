@@ -25,6 +25,10 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   contactRouteName: RouteName.INT_ELECTRIFICATION_CONTACT_PAGE
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  contactRouteName: RouteName.INT_GENERAL_CONTACT_PAGE
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   contactRouteName: RouteName.INT_HOUSING_CONTACT_PAGE
 };
@@ -55,6 +59,9 @@ onBeforeMount(async () => {
     switch (getInitiative.value) {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+        break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
         break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;

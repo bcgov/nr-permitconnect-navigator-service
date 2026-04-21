@@ -2,32 +2,48 @@ import Joi from 'joi';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
-import { basicIntake } from './basic.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
 import { housing } from './housing';
-import { permits } from './permits';
 import { validate } from '../middleware/validation';
 import { YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing';
+import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
 import { BasicResponse } from '../utils/enums/application';
+import { ProjectApplicant } from '../utils/enums/housing.ts';
 
 const schema = {
   createHousingProject: {
     body: Joi.object({
       draftId: uuidv4.allow(null),
-      activityId: Joi.string().min(8).max(8).allow(null),
+      activityId: activityId.allow(null),
       contact: contactSchema,
-      appliedPermits: Joi.array().items(appliedPermit).allow(null),
-      basic: basicIntake,
+      basic: Joi.object({
+        consentToFeedback: Joi.boolean(),
+        projectApplicantType: Joi.string()
+          .required()
+          .valid(...PROJECT_APPLICANT_LIST),
+        projectName: Joi.string().required().max(255).trim(),
+        projectDescription: Joi.string().max(4000).allow(null),
+        registeredId: Joi.string().allow(null),
+        registeredName: Joi.when('projectApplicantType', {
+          is: ProjectApplicant.BUSINESS,
+          then: Joi.string().required().max(255).trim(),
+          otherwise: Joi.string().allow(null)
+        })
+      }),
       housing: housing,
       location: Joi.any(),
-      investigatePermits: Joi.array()
-        .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
-        .allow(null),
-      permits: permits
+      permits: Joi.object({
+        appliedPermits: Joi.array().items(appliedPermit).allow(null),
+        hasAppliedProvincialPermits: Joi.string()
+          .required()
+          .valid(...YES_NO_UNSURE_LIST),
+        investigatePermits: Joi.array()
+          .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+          .allow(null)
+      })
     })
   },
   emailConfirmation: {
@@ -66,7 +82,7 @@ const schema = {
   },
   searchHousingProjects: {
     body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
+      activityId: Joi.array().items(activityId),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),
@@ -75,14 +91,11 @@ const schema = {
   },
   updateHousingProject: {
     body: Joi.object({
-      housingProjectId: uuidv4.required(),
-      activityId: activityId,
       consentToFeedback: Joi.boolean(),
       queuePriority: Joi.number().required().integer().min(0).max(3),
       submissionType: Joi.string()
         .required()
         .valid(...SUBMISSION_TYPE_LIST),
-      submittedAt: Joi.string().required(),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
       projectName: Joi.string().required(),
@@ -168,6 +181,6 @@ export default {
   deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),
-  searcHousingProjects: validate(schema.searchHousingProjects),
+  searchHousingProjects: validate(schema.searchHousingProjects),
   updateHousingProject: validate(schema.updateHousingProject)
 };

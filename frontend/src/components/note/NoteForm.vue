@@ -17,7 +17,7 @@ import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/proje
 import { GroupName, Resource } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
-import { enquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
+import { enquiryRouteNameKey, projectEnquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
 
 import type { SelectChangeEvent } from 'primevue/select';
@@ -33,6 +33,7 @@ const { editable, noteHistory = undefined } = defineProps<{
 // Injections
 const enquiryRouteName = inject(enquiryRouteNameKey);
 const projectRouteName = inject(projectRouteNameKey);
+const projectEnquiryRouteName = inject(projectEnquiryRouteNameKey);
 const resource = inject(resourceKey);
 
 // Constants
@@ -168,7 +169,7 @@ async function onSubmit(data: GenericObject) {
       body.shownToProponent = shownToProponent.value;
     }
 
-    const activityId = getProject.value?.activityId || getEnquiry.value?.activityId;
+    const activityId = getEnquiry.value?.activityId || getProject.value?.activityId;
     if (!activityId) throw new Error('No activity ID');
 
     if (!noteHistory) {
@@ -212,7 +213,7 @@ function navigateToOrigin() {
   if (!resource?.value) throw new Error('Resource not defined');
   if (resource.value === Resource.ENQUIRY) {
     router.push({
-      name: enquiryRouteName?.value,
+      name: projectEnquiryRouteName?.value ?? enquiryRouteName?.value,
       params: { enquiryId: getEnquiry.value?.enquiryId },
       query: {
         initialTab: NOTES_TAB_INDEX.ENQUIRY
@@ -290,7 +291,7 @@ onBeforeMount(async () => {
               />
             </div>
             <div class="flex items-center">
-              <h6 class="font-bold text-[var(--p-bcblue-850)]">{{ t('note.noteForm.note') }}</h6>
+              <h6 class="font-bold app-label-color">{{ t('note.noteForm.note') }}</h6>
               <Tooltip
                 v-if="
                   values.type === NoteType.BRING_FORWARD && (values.escalateToDirector || values.escalateToSupervisor)
@@ -320,7 +321,7 @@ onBeforeMount(async () => {
                   v-if="values.type === NoteType.GENERAL"
                   class="flex flex-col gap-y-4"
                 >
-                  <span class="font-bold">{{ t('note.noteForm.showProponent') }}</span>
+                  <span class="font-bold app-label-color">{{ t('note.noteForm.showProponent') }}</span>
                   <ToggleSwitch
                     v-model="shownToProponent"
                     class="mr-1"

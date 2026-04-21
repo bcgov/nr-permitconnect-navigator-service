@@ -65,10 +65,10 @@ export const deleteActivityHard = async (tx: PrismaTransactionClient, activityId
  * Get an activity
  * @param tx Prisma transaction client
  * @param activityId Unique activity ID
- * @returns A Promise that resolves to the specific activity
+ * @returns A Promise that resolves to the specific activity or null if not found
  */
-export const getActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<Activity> => {
-  const response = await tx.activity.findFirstOrThrow({ where: { activityId } });
+export const getActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<Activity | null> => {
+  const response = await tx.activity.findFirst({ where: { activityId } });
   return response;
 };
 

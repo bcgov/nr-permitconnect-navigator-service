@@ -110,12 +110,12 @@ onBeforeMount(() => {
     <template #content>
       <div class="flex flex-row">
         <p>
-          <span class="key">{{ t('note.noteHistoryCard.created') }}:</span>
+          <span class="app-label-color">{{ t('note.noteHistoryCard.created') }}:</span>
           {{ formatDate(noteHistory.createdAt) }}
         </p>
         <Divider layout="vertical" />
         <p>
-          <span class="key">{{ t('note.noteHistoryCard.lastUpdated') }}:</span>
+          <span class="app-label-color">{{ t('note.noteHistoryCard.lastUpdated') }}:</span>
           {{ noteHistory.updatedAt ? formatDate(noteHistory.updatedAt) : formatDate(noteHistory.createdAt) }}
         </p>
         <Divider
@@ -123,14 +123,14 @@ onBeforeMount(() => {
           layout="vertical"
         />
         <p v-if="noteHistory.bringForwardDate">
-          <span class="key">{{ t('note.noteHistoryCard.bringForward') }}:</span>
+          <span class="app-label-color">{{ t('note.noteHistoryCard.bringForward') }}:</span>
           {{
             noteHistory.updatedAt ? formatDate(noteHistory.bringForwardDate) : formatDate(noteHistory.bringForwardDate)
           }}
         </p>
         <Divider layout="vertical" />
         <p>
-          <span class="key">{{ t('note.noteHistoryCard.author') }}:</span>
+          <span class="app-label-color">{{ t('note.noteHistoryCard.author') }}:</span>
           {{ userName }}
         </p>
       </div>
@@ -157,9 +157,5 @@ onBeforeMount(() => {
 p {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.key {
-  color: #38598a;
 }
 </style>

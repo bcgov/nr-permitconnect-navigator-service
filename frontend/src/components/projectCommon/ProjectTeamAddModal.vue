@@ -29,7 +29,7 @@ import {
 } from '@/utils/constants/projectCommon';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { toNumber } from '@/utils/utils';
-import { contactValidator } from '@/validators';
+import { createContactSchema } from '@/validators';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -49,7 +49,7 @@ const { activityContacts } = defineProps<{
 // Composables
 const { t } = useI18n();
 const { handleSubmit, resetForm } = useForm({
-  validationSchema: contactValidator
+  validationSchema: createContactSchema
 });
 const toast = useToast();
 

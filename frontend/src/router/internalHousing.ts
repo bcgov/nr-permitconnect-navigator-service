@@ -81,14 +81,7 @@ const routes: RouteRecordRaw[] = [
                 meta: { dynamicBreadcrumb: 'authorization' },
                 children: [
                   {
-                    path: '',
-                    name: RouteName.INT_HOUSING_PROJECT_ADD_AUTHORIZATION,
-                    component: () => import('@/views/internal/AuthorizationView.vue'),
-                    beforeEnter: accessHandler,
-                    props: createProps
-                  },
-                  {
-                    path: ':permitId',
+                    path: ':permitId?',
                     name: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
                     component: () => import('@/views/internal/AuthorizationView.vue'),
                     beforeEnter: accessHandler,

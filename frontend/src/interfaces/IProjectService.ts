@@ -1,10 +1,9 @@
-import type { Draft, ElectrificationProjectSearchParameters, Email, HousingProjectSearchParameters } from '@/types';
+import type { Draft, ElectrificationProjectSearchParameters, HousingProjectSearchParameters } from '@/types';
 import type { AxiosResponse } from 'axios';
 
 export interface IProjectService {
   createProject(data?: unknown): Promise<AxiosResponse>;
   deleteProject(projectId: string): Promise<AxiosResponse>;
-  emailConfirmation(emailData: Email): Promise<AxiosResponse>;
   getActivityIds(): Promise<AxiosResponse>;
   getProjects(): Promise<AxiosResponse>;
   getStatistics(filters?: unknown): Promise<AxiosResponse>;
@@ -18,7 +17,7 @@ export interface IProjectService {
 
 export interface IDraftableProjectService extends IProjectService {
   deleteDraft(draftId: string): Promise<AxiosResponse>;
-  getDraft(draftId: string): Promise<AxiosResponse>;
+  getDraft(draftId: string): Promise<AxiosResponse<Draft<unknown>>>;
   getDrafts(): Promise<AxiosResponse>;
-  updateDraft(data?: Partial<Draft>): Promise<AxiosResponse>;
+  upsertDraft(data?: Partial<Draft<unknown>>): Promise<AxiosResponse>;
 }

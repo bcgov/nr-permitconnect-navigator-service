@@ -1,0 +1,133 @@
+import Joi from 'joi';
+
+import { appliedPermit } from './appliedPermit.ts';
+import atsValidator from './ats.ts';
+import { uuidv4 } from './common.ts';
+import { contactSchema } from './contact.ts';
+
+import { validate } from '../middleware/validation';
+import { businessAreaCodes } from '../utils/cache/codes.ts';
+import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
+import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
+import { ProjectApplicant } from '../utils/enums/housing.ts';
+
+const schema = {
+  createGeneralProject: {
+    body: Joi.object({
+      draftId: uuidv4.allow(null),
+      activityId: Joi.string().min(8).max(8).allow(null),
+      contact: contactSchema,
+      appliedPermits: Joi.array().items(appliedPermit).allow(null),
+      basic: Joi.object({
+        projectApplicantType: Joi.string()
+          .required()
+          .valid(...PROJECT_APPLICANT_LIST),
+        projectName: Joi.string().required().max(255).trim(),
+        projectNumber: Joi.string().max(255).trim(),
+        projectDescription: Joi.string().max(4000).allow(null),
+        registeredId: Joi.string().allow(null),
+        registeredName: Joi.when('projectApplicantType', {
+          is: ProjectApplicant.BUSINESS,
+          then: Joi.string().required().max(255).trim(),
+          otherwise: Joi.string().allow(null)
+        })
+      }),
+      general: Joi.object({
+        projectName: Joi.string().required().max(255).trim(),
+        projectDescription: Joi.string().max(4000).allow(null)
+      }),
+      location: Joi.any(),
+      investigatePermits: Joi.array()
+        .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+        .allow(null),
+      permits: Joi.object({
+        appliedPermits: Joi.array().items(appliedPermit).allow(null),
+        hasAppliedProvincialPermits: Joi.string()
+          .required()
+          .valid(...YES_NO_UNSURE_LIST),
+        investigatePermits: Joi.array()
+          .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
+          .allow(null)
+      })
+    })
+  },
+  deleteGeneralProject: {
+    params: Joi.object({
+      generalProjectId: uuidv4.required()
+    })
+  },
+  deleteDraft: {
+    params: Joi.object({
+      draftId: uuidv4.required()
+    })
+  },
+  getStatistics: {
+    query: Joi.object({
+      dateFrom: Joi.date().allow(null),
+      dateTo: Joi.date().allow(null),
+      monthYear: Joi.date().allow(null),
+      userId: uuidv4.allow(null)
+    })
+  },
+  getGeneralProject: {
+    params: Joi.object({
+      generalProjectId: uuidv4.required()
+    })
+  },
+  searchGeneralProjects: {
+    body: Joi.object({
+      activityId: Joi.array().items(Joi.string()),
+      createdBy: Joi.array().items(Joi.string()),
+      includeUser: Joi.boolean(),
+      generalProjectId: Joi.array().items(uuidv4),
+      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
+    })
+  },
+  updateGeneralProject: {
+    body: Joi.object({
+      queuePriority: Joi.number().required().integer().min(0).max(3),
+      submissionType: Joi.string()
+        .required()
+        .valid(...SUBMISSION_TYPE_LIST),
+      companyNameRegistered: Joi.string().allow(null),
+      companyIdRegistered: Joi.string().allow(null),
+      projectName: Joi.string().required(),
+      activityType: Joi.string().required(),
+      projectDescription: Joi.string().allow(null),
+      streetAddress: Joi.string().allow(null).max(255),
+      locality: Joi.string().allow(null).max(255),
+      province: Joi.string().allow(null).max(255),
+      locationPids: Joi.string().allow(null).max(255),
+      latitude: Joi.number().allow(null).max(255),
+      longitude: Joi.number().allow(null).max(255),
+      geomarkUrl: Joi.string().allow(null).max(255),
+      naturalDisaster: Joi.boolean().required(),
+      projectLocationDescription: Joi.string().allow(null).max(4000),
+      ...atsValidator.atsEnquirySubmissionFields,
+      addedToAts: Joi.optional(),
+      aaiUpdated: Joi.boolean().required(),
+      astNotes: Joi.string().allow(null).max(4000),
+      assignedUserId: uuidv4.allow(null),
+      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      region: Joi.string().allow(null),
+      area: Joi.string().allow(null),
+      businessArea: Joi.string()
+        .valid(...businessAreaCodes)
+        .allow(null)
+    }),
+    params: Joi.object({
+      generalProjectId: uuidv4.required()
+    })
+  }
+};
+
+export default {
+  createGeneralProject: validate(schema.createGeneralProject),
+  deleteGeneralProject: validate(schema.deleteGeneralProject),
+  deleteDraft: validate(schema.deleteDraft),
+  getStatistics: validate(schema.getStatistics),
+  getGeneralProject: validate(schema.getGeneralProject),
+  searchGeneralProjects: validate(schema.searchGeneralProjects),
+  updateGeneralProject: validate(schema.updateGeneralProject)
+};

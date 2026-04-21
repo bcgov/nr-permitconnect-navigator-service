@@ -1,21 +1,28 @@
+import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 import type { Contact } from './Contact';
 import type { Permit } from './Permit';
+import type { BasicResponse } from '@/utils/enums/application';
 
 export interface HousingProjectIntake {
-  basic?: {
-    consentToFeedback?: boolean;
-    projectApplicantType?: string;
-    registeredId?: string;
-    registeredName?: string;
-  };
-
-  housing?: {
-    projectName?: string;
+  activityId?: string;
+  basic: {
+    consentToFeedback: boolean;
+    projectApplicantType: ProjectApplicant;
     projectDescription?: string;
-    singleFamilyUnits?: string;
-    multiFamilyUnits?: string;
-    otherUnitsDescription?: string;
-    otherUnits?: string;
+    projectName: string;
+    registeredName?: string | null;
+    registeredId?: string | null;
+  };
+  contact: Contact;
+  draftId?: string;
+  housing: {
+    singleFamilySelected?: boolean;
+    multiFamilySelected?: boolean;
+    otherSelected?: boolean;
+    singleFamilyUnits?: string | null;
+    multiFamilyUnits?: string | null;
+    otherUnitsDescription?: string | null;
+    otherUnits?: string | null;
     hasRentalUnits?: string;
     financiallySupportedBc?: string;
     financiallySupportedIndigenous?: string;
@@ -26,27 +33,21 @@ export interface HousingProjectIntake {
     nonProfitDescription?: string;
     housingCoopDescription?: string;
   };
-
-  location?: {
-    naturalDisaster?: string;
-    projectLocation?: string;
-    projectLocationDescription?: string;
-    ltsaPidLookup?: string;
-    latitude?: number;
-    longitude?: number;
-    streetAddress?: string;
-    locality?: string;
-    province?: string;
-    geomarkUrl: string;
+  location: {
+    geomarkUrl?: string | null;
+    latitude?: number | null;
+    locality?: string | null;
+    longitude?: number | null;
+    ltsaPidLookup?: string | null;
+    naturalDisaster: BasicResponse;
+    projectLocation: string;
+    projectLocationDescription?: string | null;
+    province?: string | null;
+    streetAddress?: string | null;
   };
-
-  permits?: {
-    hasAppliedProvincialPermits?: string;
+  permits: {
+    appliedPermits?: Partial<Permit>[];
+    hasAppliedProvincialPermits: BasicResponse;
+    investigatePermits?: Partial<Permit>[];
   };
-
-  appliedPermits?: Permit[];
-
-  investigatePermits?: Permit[];
-
-  contacts: Contact[];
 }

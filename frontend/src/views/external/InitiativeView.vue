@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
 import { computed, nextTick, onBeforeMount, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
@@ -8,8 +9,14 @@ import Tooltip from '@/components/common/Tooltip.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
-import { electrificationProjectService, enquiryService, housingProjectService, permitService } from '@/services';
-import { useAppStore, useContactStore } from '@/store';
+import {
+  electrificationProjectService,
+  enquiryService,
+  generalProjectService,
+  housingProjectService,
+  permitService
+} from '@/services';
+import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { PermitState } from '@/utils/enums/permit';
@@ -21,12 +28,12 @@ import {
   navigationPermissionKey,
   projectIntakeRouteNameKey
 } from '@/utils/keys';
+import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
 import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import { generalErrorHandler } from '@/utils/utils';
-import { storeToRefs } from 'pinia';
+import ViewHeader from '@/components/common/ViewHeader.vue';
 
 // Interfaces
 interface InitiativeState {
@@ -54,7 +61,23 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_INTAKE,
   projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-  projectTooltip: t('views.e.initiativeView.electrification.projectsTooltip')
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.electrification')
+  })
+};
+
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  draftableProjectService: generalProjectService,
+  enquiryIntakeRouteName: RouteName.EXT_GENERAL_ENQUIRY_INTAKE,
+  enquiryRouteName: RouteName.EXT_GENERAL_ENQUIRY,
+  headerText: t('views.e.initiativeView.general.header'),
+  initiativeRouteName: RouteName.EXT_GENERAL,
+  navigationPermission: NavigationPermission.EXT_GENERAL,
+  projectIntakeRouteName: RouteName.EXT_GENERAL_INTAKE,
+  projectRouteName: RouteName.EXT_GENERAL_PROJECT,
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.general')
+  })
 };
 
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
@@ -66,7 +89,9 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_HOUSING,
   projectIntakeRouteName: RouteName.EXT_HOUSING_INTAKE,
   projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-  projectTooltip: t('views.e.initiativeView.housing.projectsTooltip')
+  projectTooltip: t('views.e.initiativeView.projectsTooltip', {
+    project: t('views.e.initiativeView.project.housing')
+  })
 };
 
 const PAGE_ROWS = 5;
@@ -76,7 +101,7 @@ const { getInitiative } = storeToRefs(useAppStore());
 
 // State
 const authorizations: Ref<Permit[]> = ref([]);
-const drafts: Ref<Draft[]> = ref([]);
+const drafts: Ref<Draft<unknown>[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
@@ -95,27 +120,8 @@ provide(projectIntakeRouteNameKey, provideProjectIntakeRouteName);
 
 // Actions
 async function createIntake() {
-  const contact = useContactStore().getContact;
-  const response = await provideDraftableProjectService.value.updateDraft({
-    data: {
-      contacts: {
-        contactId: contact?.contactId,
-        userId: contact?.userId,
-        contactFirstName: contact?.firstName,
-        contactLastName: contact?.lastName,
-        contactEmail: contact?.email,
-        contactPhoneNumber: contact?.phoneNumber,
-        contactApplicantRelationship: contact?.contactApplicantRelationship,
-        contactPreference: contact?.contactPreference
-      }
-    }
-  });
-
   router.push({
-    name: provideProjectIntakeRouteName.value,
-    params: {
-      draftId: response.data.draftId
-    }
+    name: provideProjectIntakeRouteName.value
   });
 }
 
@@ -181,6 +187,9 @@ onBeforeMount(async () => {
       case Initiative.ELECTRIFICATION:
         initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
         break;
+      case Initiative.GENERAL:
+        initiativeState.value = GENERAL_INITIATIVE_STATE;
+        break;
       case Initiative.HOUSING:
         initiativeState.value = HOUSING_INITIATIVE_STATE;
         break;
@@ -213,21 +222,13 @@ onBeforeMount(async () => {
 </script>
 
 <template>
+  <ViewHeader
+    class="shadow px-4"
+    :header="initiativeState.headerText"
+  />
   <div class="flex flex-col items-center justify-start h-full">
-    <div class="flex flex-row items-center w-full justify-between shadow px-4">
-      <h1>{{ initiativeState.headerText }}</h1>
-      <img
-        class="mr-4"
-        src="@/assets/images/housing_2.png"
-        width="120"
-        alt="Housing image"
-      />
-    </div>
-
     <div class="flex flex-row items-center w-full mt-4 mb-9">
       <div class="font-bold mr-2">{{ t('views.e.initiativeView.onThisPage') }}</div>
-      <!-- eslint-disable vue/multiline-html-element-content-newline -->
-      <!-- prettier-ignore -->
       <div>
         <router-link
           :to="{
@@ -237,7 +238,8 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#projects' })"
         >
-        {{ t('views.e.initiativeView.myProjects') }}</router-link>
+          {{ t('views.e.initiativeView.myProjects') }}
+        </router-link>
         |
         <router-link
           :to="{
@@ -247,8 +249,9 @@ onBeforeMount(async () => {
           class="no-underline"
           @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#drafts' })"
         >
-        {{ t('views.e.initiativeView.drafts') }}</router-link>
-        <span v-if="getInitiative === Initiative.HOUSING">
+          {{ t('views.e.initiativeView.drafts') }}
+        </router-link>
+        <span v-if="getInitiative !== Initiative.ELECTRIFICATION">
           |
           <router-link
             :to="{
@@ -258,7 +261,8 @@ onBeforeMount(async () => {
             class="no-underline"
             @keydown.space.prevent="router.push({ name: initiativeState.initiativeRouteName, hash: '#enquiries' })"
           >
-          {{ t('views.e.initiativeView.generalEnquiries') }}</router-link>
+            {{ t('views.e.initiativeView.generalEnquiries') }}
+          </router-link>
         </span>
       </div>
       <!-- eslint-enable vue/multiline-html-element-content-newline -->
@@ -393,7 +397,7 @@ onBeforeMount(async () => {
       Enquiries
     -->
     <div
-      v-if="getInitiative === Initiative.HOUSING"
+      v-if="getInitiative !== Initiative.ELECTRIFICATION"
       class="w-full"
     >
       <div class="flex flex-row items-center w-full justify-between">

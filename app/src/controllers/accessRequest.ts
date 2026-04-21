@@ -24,7 +24,7 @@ export const createUserAccessRequestController = async (
     const { accessRequest, user } = req.body;
 
     // Check if the requestee is an admin
-    const initiative = await getInitiative(tx, req.currentContext.initiative!);
+    const initiative = await getInitiative(tx, req.currentContext.initiative);
     const isAdmin =
       req.currentAuthorization?.groups.some(
         (group: Group) =>
@@ -133,7 +133,7 @@ export const processUserAccessRequestController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative!, req.params.accessRequestId);
+    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative, req.params.accessRequestId);
 
     if (accessRequest) {
       const userResponse = await readUser(tx, accessRequest.userId);
@@ -186,7 +186,7 @@ export const processUserAccessRequestController = async (
 
 export const getAccessRequestsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<AccessRequest[]>(async (tx: PrismaTransactionClient) => {
-    return await getAccessRequests(tx, req.currentContext.initiative!);
+    return await getAccessRequests(tx, req.currentContext.initiative);
   });
   res.status(200).json(response);
 };

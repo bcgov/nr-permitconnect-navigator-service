@@ -8,20 +8,20 @@ export interface IProject extends IStamps {
   projectId: string;
   activityId: string;
   submittedAt: string;
-  assignedUserId?: string;
+  assignedUserId?: string | null;
   applicationStatus: ApplicationStatus;
 
-  companyIdRegistered: string;
-  companyNameRegistered: string;
+  companyIdRegistered?: string | null;
+  companyNameRegistered?: string | null;
   hasRelatedEnquiry: boolean;
   queuePriority: number;
   submissionType: SubmissionType;
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
-  astNotes: string;
+  astNotes?: string | null;
   atsClientId: number | null;
-  atsEnquiryId: string | null;
+  atsEnquiryId: number | null;
   addedToAts: boolean;
   aaiUpdated: boolean;
 

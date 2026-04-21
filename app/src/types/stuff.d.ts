@@ -6,7 +6,15 @@ import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
 import { PermitStage, PermitState } from '../utils/enums/permit.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 
-import type { AccessRequest, Contact, ElectrificationProject, HousingProject, Permit, User } from './models';
+import type {
+  AccessRequest,
+  Contact,
+  ElectrificationProject,
+  GeneralProject,
+  HousingProject,
+  Permit,
+  User
+} from './models';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { EmailTemplate } from '../utils/templates';
 
@@ -90,25 +98,26 @@ export interface CurrentAuthorization {
 }
 
 export interface CurrentContext {
-  authType?: AuthType;
+  authType: AuthType;
   bearerToken?: string;
-  initiative?: Initiative;
+  initiative: Initiative;
   tokenPayload?: jwt.JwtPayload;
   userId?: string;
 }
 
 export interface ElectrificationProjectIntake {
+  activityId?: string;
+  basic: {
+    projectDescription: string | null;
+    projectName: string;
+    registeredId?: string;
+    registeredName?: string;
+  };
   contact: Contact;
   draftId?: string;
   project: {
-    activityId?: string;
-    projectName: string | null;
-    projectDescription: string | null;
-    companyNameRegistered: string | null;
-    companyIdRegistered: string | null;
-    projectType: string | null;
-    bcHydroNumber: string | null;
-    submissionType?: string;
+    bcHydroNumber?: string;
+    projectType?: string;
   };
 }
 
@@ -170,13 +179,8 @@ export interface EnquiryIntake {
   enquiryStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
   submit?: boolean;
-
-  basic?: {
-    submissionType?: string;
-    relatedActivityId?: string;
-    enquiryDescription?: string;
-  };
-
+  relatedActivityId?: string;
+  enquiryDescription?: string;
   contact: Contact;
 }
 
@@ -185,6 +189,74 @@ export interface EnquirySearchParameters {
   createdBy?: string[];
   enquiryId?: string[];
   includeUser?: boolean;
+}
+
+export interface GeneralProjectIntake {
+  activityId: string | null;
+  draftId: string | null;
+  submittedAt: string | null;
+  applicationStatus?: ApplicationStatus;
+  submissionType?: SubmissionType;
+
+  basic: {
+    projectApplicantType: string | null;
+    projectName: string | null;
+    projectNumber: string | null;
+    projectDescription: string;
+    registeredId: string | null;
+    registeredName: string | null;
+  };
+
+  location: {
+    naturalDisaster: string;
+    projectLocation: string;
+    projectLocationDescription: string;
+    geomarkUrl: string | null;
+    geoJson: Prisma.JsonValue;
+    ltsaPidLookup: string | null;
+    locationPids: string | null;
+    latitude: number | null;
+    longitude: number | null;
+    streetAddress: string;
+    locality: string;
+    province: string;
+  };
+
+  permits: {
+    appliedPermits: Permit[];
+    hasAppliedProvincialPermits?: string | null;
+    investigatePermits: Permit[];
+  };
+
+  contact: Contact;
+}
+
+export interface GeneralProjectSearchParameters {
+  activityId?: string[];
+  createdBy?: string[];
+  generalProjectId?: string[];
+  submissionType?: string[];
+  includeUser?: boolean;
+}
+
+export interface GeneralProjectStatistics {
+  total_submissions: number;
+  total_submissions_between: number;
+  total_submissions_monthyear: number;
+  total_submissions_assignedto: number;
+  state_new: number;
+  state_inprogress: number;
+  state_delayed: number;
+  state_completed: number;
+  queue_1: number;
+  queue_2: number;
+  queue_3: number;
+  escalation: number;
+  general_enquiry: number;
+  guidance: number;
+  inapplicable: number;
+  status_request: number;
+  multi_permits_needed: number;
 }
 
 export interface Group extends Partial<IStamps> {
@@ -197,21 +269,17 @@ export interface Group extends Partial<IStamps> {
 
 export interface HousingProjectIntake {
   activityId: string | null;
-  draftId: string | null;
-  submittedAt: string | null;
-  applicationStatus?: ApplicationStatus;
-  submissionType?: SubmissionType;
-
   basic: {
     consentToFeedback: boolean;
     projectApplicantType: string | null;
+    projectName: string;
+    projectDescription: string;
     registeredId: string | null;
     registeredName: string | null;
   };
-
+  contact: Contact;
+  draftId: string | null;
   housing: {
-    projectName: string;
-    projectDescription: string;
     singleFamilyUnits: string;
     multiFamilyUnits: string;
     otherUnitsDescription: string | null;
@@ -226,28 +294,23 @@ export interface HousingProjectIntake {
     nonProfitDescription: string | null;
     housingCoopDescription: string | null;
   };
-
   location: {
+    geomarkUrl: string | null;
+    latitude: number | null;
+    locality: string;
+    longitude: number | null;
+    ltsaPidLookup: string | null;
     naturalDisaster: string;
     projectLocation: string;
     projectLocationDescription: string;
-    geomarkUrl: string | null;
-    geoJson: Prisma.JsonValue;
-    ltsaPidLookup: string | null;
-    latitude: number | null;
-    longitude: number | null;
-    streetAddress: string;
-    locality: string;
     province: string;
+    streetAddress: string | null;
   };
-
   permits: {
+    appliedPermits: Permit[];
     hasAppliedProvincialPermits?: string | null;
+    investigatePermits: Permit[];
   };
-
-  appliedPermits: Permit[];
-  investigatePermits: Permit[];
-  contact: Contact;
 }
 
 export interface HousingProjectSearchParameters {
@@ -263,9 +326,6 @@ export interface HousingProjectStatistics {
   total_submissions_between: number;
   total_submissions_monthyear: number;
   total_submissions_assignedto: number;
-  intake_submitted: number;
-  intake_assigned: number;
-  intake_completed: number;
   state_new: number;
   state_inprogress: number;
   state_delayed: number;
@@ -335,7 +395,7 @@ export interface PermitUpdateEmailParams {
   emailTemplate: EmailTemplate;
 }
 
-export type Project = HousingProject | ElectrificationProject;
+export type Project = ElectrificationProject | GeneralProject | HousingProject;
 
 interface SplitDatetimeBase<T> {
   date: T;

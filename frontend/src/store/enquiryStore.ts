@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
+import { ApplicationStatus } from '@/utils/enums/projectCommon';
+
 import type { Ref } from 'vue';
 import type { Enquiry, NoteHistory } from '@/types';
 
@@ -23,7 +25,8 @@ export const useEnquiryStore = defineStore('enquiry', () => {
       () => (noteHistoryId: string | undefined) =>
         state.noteHistory.value.find((x) => x.noteHistoryId === noteHistoryId)
     ),
-    getEnquiry: computed(() => state.enquiry.value)
+    getEnquiry: computed(() => state.enquiry.value),
+    getEnquiryIsCompleted: computed(() => state.enquiry.value?.enquiryStatus === ApplicationStatus.COMPLETED)
   };
 
   // Actions

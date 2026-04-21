@@ -1,14 +1,17 @@
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { storeToRefs } from 'pinia';
+import { computed, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ATSUserCreateModal from '@/components/ats/ATSUserCreateModal.vue';
 import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
 import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
+import { Select } from '@/components/form';
 import { Button, useConfirm, useToast } from '@/lib/primevue/index.ts';
 import { atsService } from '@/services/index.ts';
-import { ATSCreateTypes } from '@/utils/enums/application.ts';
+import { useAppStore, useCodeStore } from '@/store';
+import { ATSCreateTypes, Initiative } from '@/utils/enums/application.ts';
 
 import type { Ref } from 'vue';
 import type { ATSClientResource } from '@/types/index.ts';
@@ -22,7 +25,8 @@ const {
   firstName = undefined,
   lastName = undefined,
   phoneNumber = undefined,
-  isRelatedEnquiry = false
+  isRelatedEnquiry = false,
+  isEnquiry = false
 } = defineProps<{
   atsClientId?: string | number;
   atsEnquiryId?: string | number;
@@ -32,6 +36,7 @@ const {
   lastName?: string;
   phoneNumber?: string;
   isRelatedEnquiry?: boolean;
+  isEnquiry?: boolean;
 }>();
 
 // Emits
@@ -42,6 +47,10 @@ const { t } = useI18n();
 const confirm = useConfirm();
 const toast = useToast();
 
+// Store
+const { getInitiative } = storeToRefs(useAppStore());
+const { options } = useCodeStore();
+
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
@@ -50,6 +59,14 @@ const atsUserLinkModalVisible: Ref<boolean> = ref(false);
 const loading: Ref<boolean> = ref(false);
 const users: Ref<ATSClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
+
+const showAtsClientInfo = computed(
+  () =>
+    atsClientId ||
+    atsCreateType.value === ATSCreateTypes.CLIENT ||
+    atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY ||
+    isRelatedEnquiry
+);
 
 // Actions
 async function getATSClientInformation() {
@@ -116,12 +133,7 @@ watch(visible, () => {
 
     <div class="flex items-center">
       <div
-        v-if="
-          atsClientId ||
-          atsCreateType === ATSCreateTypes.CLIENT ||
-          atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY ||
-          isRelatedEnquiry
-        "
+        v-if="showAtsClientInfo"
         class="flex items-center mb-4"
       >
         <p class="text-[var(--p-primary-900)] mr-3">
@@ -139,16 +151,27 @@ watch(visible, () => {
         </span>
         <span v-else>{{ t('i.ats.atsInfo.pendingSave') }}</span>
       </div>
-      <Button
-        v-else
-        class="ats-button w-full mb-4"
-        :aria-label="t('i.ats.atsInfo.atsSearchButton')"
-        outlined
-        :label="t('i.ats.atsInfo.atsSearchButton')"
-        :disabled="!editable"
-        @click="atsUserLinkModalVisible = true"
-      />
     </div>
+
+    <Select
+      v-if="getInitiative === Initiative.GENERAL && !isEnquiry"
+      class="w-full"
+      name="atsInfo.businessArea"
+      option-label="label"
+      option-value="value"
+      :label="t('i.housing.project.projectForm.businessAreaLabel')"
+      :options="options.BusinessArea"
+    />
+
+    <Button
+      v-if="!showAtsClientInfo"
+      class="ats-button w-full mb-4"
+      :aria-label="t('i.ats.atsInfo.atsSearchButton')"
+      outlined
+      :label="t('i.ats.atsInfo.atsSearchButton')"
+      :disabled="!editable || getInitiative === Initiative.GENERAL"
+      @click="atsUserLinkModalVisible = true"
+    />
 
     <div
       v-if="atsEnquiryId || atsCreateType === ATSCreateTypes.ENQUIRY || atsCreateType === ATSCreateTypes.CLIENT_ENQUIRY"

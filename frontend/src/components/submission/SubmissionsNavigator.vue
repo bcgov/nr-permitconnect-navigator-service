@@ -130,11 +130,14 @@ function getBringForwardStyling(bf: BringForward) {
 
 function getNameObject(bf: BringForward) {
   if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
+  if (bf.generalProjectId) return RouteName.INT_GENERAL_PROJECT_NOTE;
   if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
   if (bf.enquiryId) {
     switch (useAppStore().getInitiative) {
       case Initiative.ELECTRIFICATION:
         return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
+      case Initiative.GENERAL:
+        return RouteName.INT_GENERAL_ENQUIRY_NOTE;
       case Initiative.HOUSING:
         return RouteName.INT_HOUSING_ENQUIRY_NOTE;
     }
@@ -145,6 +148,12 @@ function getParamObject(bf: BringForward) {
   if (bf.electrificationProjectId) {
     return {
       projectId: bf.electrificationProjectId,
+      noteHistoryId: bf.noteId
+    };
+  }
+  if (bf.generalProjectId) {
+    return {
+      projectId: bf.generalProjectId,
       noteHistoryId: bf.noteId
     };
   }
@@ -234,7 +243,6 @@ watch(activeTabIndex, (newIndex) => {
   // Preserve existing queries if the tab index hasn't changed
   if (route.query.tab === newIndex.toString()) {
     router.replace({
-      name: RouteName.INT_HOUSING,
       query: {
         ...route.query,
         tab: newIndex.toString()
@@ -243,7 +251,6 @@ watch(activeTabIndex, (newIndex) => {
   } else {
     // Wipe out the query when switching to a new tab
     router.replace({
-      name: RouteName.INT_HOUSING,
       query: {
         tab: newIndex.toString()
       }

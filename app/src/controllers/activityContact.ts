@@ -80,7 +80,7 @@ export const createActivityContactController = async (
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
-      req.currentContext.initiative!,
+      req.currentContext.initiative,
       req.currentContext.userId,
       req.params.activityId,
       newContact.contact!
@@ -126,7 +126,7 @@ export const deleteActivityContactController = async (
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
-      req.currentContext.initiative!,
+      req.currentContext.initiative,
       req.currentContext.userId,
       req.params.activityId,
       ac.contact!
@@ -178,7 +178,7 @@ export const updateActivityContactController = async (
 
       const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
         tx,
-        req.currentContext.initiative!,
+        req.currentContext.initiative,
         req.currentContext.userId,
         req.params.activityId,
         updated.contact!

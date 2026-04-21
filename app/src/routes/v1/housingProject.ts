@@ -4,7 +4,6 @@ import {
   createHousingProjectController,
   deleteHousingProjectController,
   deleteHousingProjectDraftController,
-  emailHousingProjectConfirmationController,
   getHousingProjectActivityIdsController,
   getHousingProjectController,
   getHousingProjectsController,
@@ -47,7 +46,7 @@ router.get(
 router.post(
   '/search',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  housingProjectValidator.searcHousingProjects,
+  housingProjectValidator.searchHousingProjects,
   filterActivityResponseByScope,
   searchHousingProjectsController
 );
@@ -87,14 +86,6 @@ router.put(
   submitHousingProjectDraftController
 );
 
-/** Send an email with the confirmation of housing project */
-router.put(
-  '/email',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.emailConfirmation,
-  emailHousingProjectConfirmationController
-);
-
 /** Creates a blank housing project */
 router.post(
   '/',
@@ -122,7 +113,7 @@ router.get(
 );
 
 /** Updates a housing project*/
-router.put(
+router.patch(
   '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE),
   hasAccess('housingProjectId'),

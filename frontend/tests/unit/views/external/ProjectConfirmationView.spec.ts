@@ -8,9 +8,10 @@ import { default as i18n } from '@/i18n';
 import { Message } from '@/lib/primevue';
 import ProjectConfirmationView from '@/views/external/ProjectConfirmationView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
-
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { electrificationProjectService, housingProjectService } from '@/services';
+
+import type { ElectrificationProject, HousingProject } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -71,10 +72,13 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<ElectrificationProject>({
+      electrificationProjectId: '123',
+      activityId: '123'
+    } as ElectrificationProject)
   );
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse({ housingProjectId: '123', activityId: '123' })
+    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
 });
 
@@ -112,7 +116,9 @@ describe('EnquiryConfirmationView.vue', () => {
       initiativeRouteName: RouteName.EXT_ELECTRIFICATION,
       projectService: electrificationProjectService,
       projectRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT,
-      message: t('views.e.projectConfirmationView.electrification.message')
+      message: t('views.e.projectConfirmationView.message', {
+        navigator: t('views.e.projectConfirmationView.navigator.electrification')
+      })
     },
     {
       initiative: Initiative.HOUSING,
@@ -120,7 +126,9 @@ describe('EnquiryConfirmationView.vue', () => {
       initiativeRouteName: RouteName.EXT_HOUSING,
       projectService: housingProjectService,
       projectRouteName: RouteName.EXT_HOUSING_PROJECT,
-      message: t('views.e.projectConfirmationView.housing.message')
+      message: t('views.e.projectConfirmationView.message', {
+        navigator: t('views.e.projectConfirmationView.navigator.housing')
+      })
     }
   ])('sets the correct content for $initiative', async (value) => {
     const wrapper = shallowMount(ProjectConfirmationView, wrapperSettings(value.initiative));

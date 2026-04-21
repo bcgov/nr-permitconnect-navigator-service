@@ -15,11 +15,6 @@ import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact } from '@/types';
 
-// Props
-const { activityId } = defineProps<{
-  activityId: string;
-}>();
-
 // Composables
 const confirm = useConfirm();
 const { t } = useI18n();
@@ -29,7 +24,7 @@ const toast = useToast();
 const appStore = useAppStore();
 const projectStore = useProjectStore();
 const { isInternal } = storeToRefs(appStore);
-const { getActivityContacts } = storeToRefs(projectStore);
+const { getActivityContacts, getProject } = storeToRefs(projectStore);
 
 // State
 const addUserModalVisible: Ref<boolean> = ref(false);
@@ -126,7 +121,11 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
         contact = (await contactService.updateContact(contact)).data;
       }
 
-      const response = (await activityContactService.createActivityContact(activityId, contact.contactId, role)).data;
+      if (!getProject.value?.activityId) throw new Error('No activity ID');
+
+      const response = (
+        await activityContactService.createActivityContact(getProject.value.activityId, contact.contactId, role)
+      ).data;
 
       // Update store
       projectStore.addActivityContact(response);
@@ -160,8 +159,10 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
 async function onManageUser(contact: ActivityContact, role: ActivityContactRole) {
   try {
+    if (!getProject.value?.activityId) throw new Error('No activity ID');
+
     const { updated, demoted } = (
-      await activityContactService.updateActivityContact(activityId, contact.contactId, role)
+      await activityContactService.updateActivityContact(getProject.value.activityId, contact.contactId, role)
     ).data;
 
     // Update store
@@ -209,7 +210,9 @@ function onManageUserClick(contact: ActivityContact) {
 
 async function onRevokeUser(contact: ActivityContact) {
   try {
-    await activityContactService.deleteActivityContact(activityId, contact.contactId);
+    if (!getProject.value?.activityId) throw new Error('No activity ID');
+
+    await activityContactService.deleteActivityContact(getProject.value.activityId, contact.contactId);
 
     // Update store
     projectStore.removeActivityContact(contact);

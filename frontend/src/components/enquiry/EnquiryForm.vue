@@ -1,41 +1,33 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
-import { Form, type GenericObject } from 'vee-validate';
+import { Form } from 'vee-validate';
 import { computed, inject, nextTick, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { boolean, date, mixed, object, string, type InferType } from 'yup';
+import { boolean, number, object, string, type InferType } from 'yup';
 
-import { CancelButton, EditableSelect, FormNavigationGuard, Select, TextArea } from '@/components/form';
+import { CancelButton, EditableSelect, FormNavigationGuard, TextArea } from '@/components/form';
 import ContactCardNavForm from '@/components/form/common/ContactCardNavForm.vue';
+import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
-import { activityContactService, atsService, contactService, enquiryService, userService } from '@/services';
+import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import {
   APPLICATION_STATUS_LIST,
   ATS_MANAGING_REGION,
-  CONTACT_PREFERENCE_LIST,
   ENQUIRY_SUBMITTED_METHOD,
-  ENQUIRY_TYPE_LIST,
-  PROJECT_RELATIONSHIP_LIST
+  ENQUIRY_TYPE_LIST
 } from '@/utils/constants/projectCommon';
-import {
-  ATSCreateTypes,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative,
-  Regex
-} from '@/utils/enums/application';
+import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { findIdpConfig, omit, scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
 import { atsClientIdValidator } from '@/validators';
-import { emailValidator } from '@/validators/common';
+import { assignedToValidator } from '@/validators/common';
 
 import type { SelectChangeEvent } from 'primevue/select';
+import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type {
@@ -47,11 +39,7 @@ import type {
   Enquiry,
   User
 } from '@/types';
-
-// Interfaces
-interface EnquiryForm extends Enquiry {
-  user?: User;
-}
+import { createContactCardNavFormSchema } from '@/validators/navigator';
 
 // Props
 const { editable = true, enquiry } = defineProps<{
@@ -67,83 +55,53 @@ const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 // Emit
 const emit = defineEmits(['enquiryForm:saved']);
 
+// Composables
+const { t } = useI18n();
+const confirm = useConfirm();
+const toast = useToast();
+
 // Form validation schema
-const intakeSchema = object({
-  activityId: string(),
-  enquiryId: string(),
-  submittedBy: string(),
-  submittedAt: date(),
-  submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
+const enquiryFormSchema = object({
+  ...createContactCardNavFormSchema({ t }),
   relatedActivityId: string().nullable().min(0).max(255).label('Related submission'),
-  submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
-  contact: object({
-    contactId: string(),
-    email: emailValidator('Contact email must be valid').required().label('Contact email'),
-    firstName: string().required().max(255).label('Contact first name'),
-    lastName: string().max(255).label('Contact last name').nullable(),
-    phoneNumber: string().required().label('Contact phone number'),
-    contactApplicantRelationship: string().required().oneOf(PROJECT_RELATIONSHIP_LIST).label('Relationship to project'),
-    contactPreference: string().required().oneOf(CONTACT_PREFERENCE_LIST).label('Preferred contact method'),
-    userId: string()
-  }),
   enquiryDescription: string().required().label('Enquiry detail'),
-  user: mixed().nullable().label('Assigned to'),
-  enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state'),
   addedToAts: boolean().required().label('Authorized Tracking System (ATS) updated'),
-  // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientId: atsClientIdValidator,
-  atsEnquiryId: string().notRequired()
+  atsInfo: object({
+    atsClientId: atsClientIdValidator(t('validators.atsClientId.label')),
+    atsEnquiryId: number().nullable()
+  }),
+  submissionState: object({
+    submittedMethod: string().oneOf(ENQUIRY_SUBMITTED_METHOD).label('Submitted method'),
+    submissionType: string().oneOf(ENQUIRY_TYPE_LIST).label('Submission type'),
+    assignedUser: assignedToValidator(
+      t('validators.submissionState.assignedToMsg'),
+      t('validators.submissionState.assignedTo')
+    ),
+    enquiryStatus: string().oneOf(APPLICATION_STATUS_LIST).label('Activity state')
+  })
 });
 
-export type FormSchemaType = InferType<typeof intakeSchema>;
+export type FormSchemaType = InferType<typeof enquiryFormSchema>;
 
 // Store
 const enquiryStore = useEnquiryStore();
 
 // State
-const assigneeOptions: Ref<User[]> = ref([]);
 const basicInfoManualEntry: Ref<boolean> = ref(false);
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const filteredProjectActivityIds: Ref<string[]> = ref([]);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
-const primaryContact = computed(
-  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
-);
 const projectActivityIds: Ref<string[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
-
-// Actions
-const { t } = useI18n();
-const confirm = useConfirm();
-const toast = useToast();
-
-const getAssigneeOptionLabel = (e: User) => {
-  return `${e.fullName} [${e.email}]`;
-};
 
 const isCompleted = computed(() => {
   return enquiry.enquiryStatus === ApplicationStatus.COMPLETED;
 });
-
-const onAssigneeInput = async (e: IInputEvent) => {
-  const input = e.target.value;
-
-  const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
-
-  if (idpCfg) {
-    if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-      assigneeOptions.value = (
-        await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] })
-      ).data;
-    } else if (input.match(Regex.EMAIL)) {
-      assigneeOptions.value = (await userService.searchUsers({ email: input, idp: [idpCfg.idp] })).data;
-    } else {
-      assigneeOptions.value = [];
-    }
-  }
-};
-
+const primaryContact = computed(
+  () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
+);
+// Actions
 async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
@@ -218,7 +176,7 @@ function onReOpen() {
     rejectLabel: t('enquiryForm.reopenReject'),
     rejectProps: { outlined: true },
     accept: () => {
-      formRef.value?.setFieldValue('enquiryStatus', ApplicationStatus.IN_PROGRESS);
+      formRef.value?.setFieldValue('submissionState.enquiryStatus', ApplicationStatus.IN_PROGRESS);
       if (formRef.value?.values) onSubmit(formRef.value?.values);
     }
   });
@@ -244,101 +202,93 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
   }
 }
 
-// Set basic info, clear it if no contact is provided
-function setBasicInfo(contact?: Contact) {
-  formRef.value?.setFieldValue('contact.contactId', contact?.contactId);
-  formRef.value?.setFieldValue('contact.firstName', contact?.firstName);
-  formRef.value?.setFieldValue('contact.lastName', contact?.lastName);
-  formRef.value?.setFieldValue('contact.phoneNumber', contact?.phoneNumber);
-  formRef.value?.setFieldValue('contact.email', contact?.email);
-  formRef.value?.setFieldValue('contact.contactApplicantRelationship', contact?.contactApplicantRelationship);
-  formRef.value?.setFieldValue('contact.contactPreference', contact?.contactPreference);
-  formRef.value?.setFieldValue('contact.userId', contact?.userId);
-  basicInfoManualEntry.value = false;
+async function setAtsSubmitData(values: FormSchemaType) {
+  const updated = { ...values };
+
+  // Create ATS data as necessary
+  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
+    const response = await createATSClientEnquiry();
+    updated.atsInfo.atsClientId = response?.atsClientId;
+    updated.atsInfo.atsEnquiryId = response?.atsEnquiryId;
+    if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
+    updated.atsInfo.atsEnquiryId = await createATSEnquiry();
+    if (updated.atsInfo.atsEnquiryId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
+    const response = await createATSClientEnquiry();
+    updated.atsInfo.atsClientId = response?.atsClientId;
+    if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
+      updated.addedToAts = true;
+    }
+    atsCreateType.value = undefined;
+  }
+
+  return updated;
 }
 
-const onSubmit = async (values: GenericObject) => {
+// Set basic info, clear it if no contact is provided
+function setBasicInfo(contact?: Contact) {
+  if (!formRef.value) return;
+
+  const updatedContact = {
+    contactId: contact?.contactId,
+    firstName: contact?.firstName,
+    lastName: contact?.lastName,
+    phoneNumber: contact?.phoneNumber,
+    email: contact?.email,
+    contactApplicantRelationship: contact?.contactApplicantRelationship,
+    contactPreference: contact?.contactPreference,
+    userId: contact?.userId
+  };
+
+  // Reset the entire contact object path to trigger reactivity and set the new baseline
+  formRef.value.resetField('contact', { value: updatedContact });
+}
+
+const onSubmit = async (formValues: GenericObject) => {
   try {
-    // Create ATS data as necessary
-    if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-      const response = await createATSClientEnquiry();
-      values.atsClientId = response?.atsClientId;
-      values.atsEnquiryId = response?.atsEnquiryId;
-      if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-      values.atsEnquiryId = await createATSEnquiry();
-      if (values.atsEnquiryId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-      const response = await createATSClientEnquiry();
-      values.atsClientId = response?.atsClientId;
-      if (values.atsEnquiryId && values.atsClientId) {
-        values.addedToAts = true;
-      }
-      atsCreateType.value = undefined;
-    }
+    // vee-validate doesn't get transformed data from yup so
+    // manually run the form values through it here
+    const transformed: FormSchemaType = enquiryFormSchema.cast(formValues);
 
-    // Omit all the fields we dont want to send
-    const dataOmitted = omit({ ...values }, ['contact']);
+    const values: FormSchemaType = await setAtsSubmitData(transformed);
 
-    // Remove ATS client number from enquiry if submitted with linked activity
-    if (dataOmitted.relatedActivityId) {
-      dataOmitted.atsClientId = '';
-      formRef?.value?.setFieldValue('atsClientId', null);
-    }
+    // Generate final payload
+    const payload: Partial<Enquiry> = {
+      // Enquiry description
+      enquiryDescription: values.enquiryDescription,
 
-    // Generate final enquiry object
-    const submitData: Enquiry = omit(setEmptyStringsToNull(dataOmitted) as EnquiryForm, ['user']);
-    submitData.assignedUserId = values.user?.userId ?? undefined;
+      // Related Activity
+      relatedActivityId: values.relatedActivityId,
 
-    // Deal with Nav contact change nonsense
-    // If the Nav adds a new contact then it is to be flagged as the new PRIMARY
-    if (primaryContact.value?.contactId !== values.contact.contactId) {
-      const newContact = (await contactService.updateContact(values.contact)).data;
-      if (newContact.contactId) {
-        await activityContactService.createActivityContact(
-          enquiry.activityId,
-          newContact.contactId,
-          ActivityContactRole.PRIMARY
-        );
+      // Submission State
+      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      enquiryStatus: values.submissionState.enquiryStatus,
+      submissionType: values.submissionState.submissionType,
+      submittedMethod: values.submissionState.submittedMethod,
 
-        setBasicInfo(newContact);
-      }
-    }
+      // ATS
+      // Remove ATS client number from enquiry if submitted with linked activity
+      atsClientId: values.relatedActivityId ? null : values.atsInfo.atsClientId,
+      atsEnquiryId: values.atsInfo.atsEnquiryId,
+      addedToAts: !!(values.atsInfo.atsClientId || values.atsInfo.atsEnquiryId)
+    };
 
     // Update enquiry
-    const result = await enquiryService.updateEnquiry(values.enquiryId, submitData);
+    const result = await enquiryService.updateEnquiry(enquiry.enquiryId, payload);
     enquiryStore.setEnquiry(result.data);
 
     // Wait a tick for store to propagate
     await nextTick();
 
-    let atsClientId;
-    if (submitData?.relatedActivityId) atsClientId = await getRelatedATSClientID(submitData?.relatedActivityId);
-
     formRef.value?.resetForm({
-      values: {
-        ...submitData,
-        contact: {
-          contactId: primaryContact.value?.contactId,
-          firstName: primaryContact.value?.firstName,
-          lastName: primaryContact.value?.lastName,
-          phoneNumber: primaryContact.value?.phoneNumber,
-          email: primaryContact.value?.email,
-          contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-          contactPreference: primaryContact.value?.contactPreference,
-          userId: primaryContact.value?.userId
-        },
-        atsClientId: values.atsClientId || atsClientId,
-        atsEnquiryId: values.atsEnquiryId,
-        submittedAt: new Date(submitData.submittedAt),
-        user: values.user
-      }
+      values: await initializeFormValues()
     });
 
     basicInfoManualEntry.value = false;
@@ -351,23 +301,17 @@ const onSubmit = async (values: GenericObject) => {
   }
 };
 
-onBeforeMount(async () => {
+async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
+  let assigneeOptions: User[] = [];
   if (enquiry?.assignedUserId) {
-    assigneeOptions.value = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
+    assigneeOptions = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
   }
 
   let atsClientId;
   if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
 
-  initialFormValues.value = {
-    activityId: enquiry?.activityId,
-    enquiryId: enquiry?.enquiryId,
-    submittedBy: enquiry?.submittedBy,
-
-    submissionType: enquiry?.submissionType,
-    submittedAt: new Date(enquiry?.submittedAt),
+  return {
     relatedActivityId: enquiry?.relatedActivityId,
-    submittedMethod: enquiry?.submittedMethod,
     enquiryDescription: enquiry?.enquiryDescription,
     contact: {
       contactId: primaryContact.value?.contactId,
@@ -380,16 +324,27 @@ onBeforeMount(async () => {
       userId: primaryContact.value?.userId
     },
 
-    addedToAts: enquiry?.addedToAts,
-    atsClientId: enquiry?.atsClientId || atsClientId,
-    atsEnquiryId: enquiry?.atsEnquiryId,
+    submissionState: {
+      assignedUser: assigneeOptions[0] ?? null,
+      enquiryStatus: enquiry?.enquiryStatus,
+      submittedMethod: enquiry?.submittedMethod,
+      submissionType: enquiry?.submissionType
+    },
 
-    user: assigneeOptions.value[0] ?? null,
-    enquiryStatus: enquiry?.enquiryStatus
+    atsInfo: {
+      atsClientId: enquiry?.atsClientId || atsClientId,
+      atsEnquiryId: enquiry?.atsEnquiryId
+    },
+
+    addedToAts: enquiry?.addedToAts
   };
+}
 
+onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
   projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
+
+  initialFormValues.value = await initializeFormValues();
 });
 
 async function createATSClientEnquiry() {
@@ -439,7 +394,7 @@ async function createATSClientEnquiry() {
     v-slot="{ setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"
-    :validation-schema="intakeSchema"
+    :validation-schema="enquiryFormSchema"
     @invalid-submit="(e) => onInvalidSubmit(e)"
     @submit="onSubmit"
   >
@@ -507,41 +462,7 @@ async function createATSClientEnquiry() {
             @on-change="onRelatedActivityChange"
           />
         </div>
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
-          <h4 class="section-header mb-4 mt-0">
-            {{ t('enquiryForm.submissionStateHeader') }}
-          </h4>
-          <div class="flex flex-col gap-y-4">
-            <EditableSelect
-              name="user"
-              :label="t('enquiryForm.assignedTo')"
-              :disabled="!editable"
-              :options="assigneeOptions"
-              :get-option-label="getAssigneeOptionLabel"
-              @on-input="onAssigneeInput"
-            />
-            <EditableSelect
-              name="submittedMethod"
-              :label="t('enquiryForm.submittedMethod')"
-              :disabled="!editable"
-              :options="ENQUIRY_SUBMITTED_METHOD"
-              :get-option-label="(e: string) => e"
-            />
-
-            <Select
-              name="enquiryStatus"
-              :label="t('enquiryForm.enquiryState')"
-              :disabled="!editable"
-              :options="APPLICATION_STATUS_LIST"
-            />
-            <Select
-              name="submissionType"
-              :label="t('enquiryForm.submissionType')"
-              :disabled="!editable"
-              :options="ENQUIRY_TYPE_LIST"
-            />
-          </div>
-        </div>
+        <SubmissionStateSection :is-enquiry="true" />
         <ATSInfo
           :ats-client-id="values.atsClientId"
           :ats-enquiry-id="values.atsEnquiryId"
@@ -550,6 +471,7 @@ async function createATSClientEnquiry() {
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
           :is-related-enquiry="!!values.relatedActivityId"
+          :is-enquiry="true"
           @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsClientId', atsClientId)"
           @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('addedToAts', addedToATS)"
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"

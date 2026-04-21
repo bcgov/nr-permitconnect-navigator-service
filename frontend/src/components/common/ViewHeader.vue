@@ -2,6 +2,7 @@
 import { ref, watchEffect } from 'vue';
 
 import elecBannerImg from '@/assets/images/elec_banner.png';
+import generalBannerImg from '@/assets/images/general_banner.png';
 import housingBannerImg from '@/assets/images/housing_banner.png';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
@@ -19,6 +20,9 @@ watchEffect(() => {
   switch (useAppStore().getInitiative) {
     case Initiative.ELECTRIFICATION:
       headerImg.value = elecBannerImg;
+      break;
+    case Initiative.GENERAL:
+      headerImg.value = generalBannerImg;
       break;
     case Initiative.HOUSING:
       headerImg.value = housingBannerImg;

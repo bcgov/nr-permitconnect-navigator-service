@@ -6,6 +6,8 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
+import type { Draft } from '@/types';
+import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Constants
 const PATH = 'project';
@@ -17,28 +19,15 @@ const testObj = {
   field2: 'testField2'
 };
 
-const testDraft = {
+const testDraft: Partial<Draft<FormSchemaType>> = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
-  data: { key: 'value' },
+  data: {} as FormSchemaType,
   createdBy: 'testCreatedBy',
   createdAt: new Date().toISOString(),
   updatedBy: 'testUpdatedAt',
   updatedAt: new Date().toISOString()
-};
-
-const testEmail = {
-  bodyType: 'text/plain',
-  body: 'This is a test email body.',
-  from: 'sender@example.com',
-  subject: 'Test Email Subject',
-  to: ['recipient1@example.com', 'recipient2@example.com'],
-  cc: ['cc1@example.com'],
-  bcc: ['bcc1@example.com'],
-  encoding: 'UTF-8',
-  priority: 'high',
-  tag: 'test'
 };
 
 // Mocks
@@ -197,7 +186,7 @@ describe('electrificationProjectService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.updateDraft(testDraft);
+      electrificationProjectService.upsertDraft(testDraft);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);
@@ -214,20 +203,11 @@ describe('electrificationProjectService', () => {
       };
       electrificationProjectService.updateProject(testActivityId, testObj);
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(
+      expect(patchSpy).toHaveBeenCalledTimes(1);
+      expect(patchSpy).toHaveBeenCalledWith(
         `${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`,
         testObj
       );
-    });
-  });
-
-  describe('emailConfirmation', () => {
-    it('calls correct endpoint', () => {
-      electrificationProjectService.emailConfirmation(testEmail);
-
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/email`, testEmail);
     });
   });
 });

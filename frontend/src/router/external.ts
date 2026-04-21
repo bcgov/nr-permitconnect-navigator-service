@@ -1,4 +1,5 @@
 import externalElectrificationRoutes from '@/router/externalElectrification';
+import externalGeneralRoutes from '@/router/externalGeneral';
 import externalHousingRoutes from '@/router/externalHousing';
 import { useAppStore, useContactStore } from '@/store';
 import { RouteName, StorageKey, Zone } from '@/utils/enums/application';
@@ -16,7 +17,7 @@ const routes: RouteRecordRaw[] = [
   {
     path: '/e',
     beforeEnter: [newContactRedirect, () => useAppStore().setZone(Zone.EXTERNAL)],
-    children: [...externalElectrificationRoutes, ...externalHousingRoutes]
+    children: [...externalElectrificationRoutes, ...externalGeneralRoutes, ...externalHousingRoutes]
   }
 ];
 

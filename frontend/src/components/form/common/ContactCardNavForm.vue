@@ -10,11 +10,15 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/cons
 import type { Ref } from 'vue';
 import type { DeepPartial } from '@/types';
 import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
+import type { FormSchemaType as GeneralFormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 import type { FormSchemaType as HousingFormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 // Props
 const { formValues } = defineProps<{
-  formValues: DeepPartial<ElectrificationFormSchemaType> | DeepPartial<HousingFormSchemaType>;
+  formValues:
+    | DeepPartial<ElectrificationFormSchemaType>
+    | DeepPartial<GeneralFormSchemaType>
+    | DeepPartial<HousingFormSchemaType>;
 }>();
 
 // Composables

@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import atsValidator from './ats.ts';
-import { email, uuidv4 } from './common.ts';
+import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { validate } from '../middleware/validation.ts';
 import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes.ts';
@@ -9,29 +9,27 @@ import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constant
 import { ProjectType } from '../utils/enums/electrification.ts';
 import { YES_NO_LIST } from '../utils/constants/application.ts';
 
-const electrificationIntake = {
-  activityId: Joi.string().min(8).max(8).allow(null),
-  projectName: Joi.string().required().max(255).trim(),
-  companyNameRegistered: Joi.string().max(255).trim().allow(null),
-  companyIdRegistered: Joi.string().max(255).trim().allow(null),
-  projectType: Joi.string()
-    .required()
-    .valid(...electrificationProjectTypeCodes),
-  bcHydroNumber: Joi.string().max(255).trim().allow(null),
-  projectDescription: Joi.when('project.projectType', {
-    is: ProjectType.OTHER,
-    then: Joi.string().required().max(4000),
-    otherwise: Joi.string().max(4000).allow(null)
-  })
-};
-
 const schema = {
   createElectrificationProject: {
     body: Joi.object({
-      draftId: uuidv4.allow(null),
+      activityId: activityId.allow(null),
+      basic: {
+        projectDescription: Joi.when('project.projectType', {
+          is: ProjectType.OTHER,
+          then: Joi.string().required().max(4000),
+          otherwise: Joi.string().max(4000).allow(null)
+        }),
+        projectName: Joi.string().required().max(255).trim(),
+        registeredId: Joi.string().max(255).trim().allow(null),
+        registeredName: Joi.string().max(255).trim().allow(null)
+      },
       contact: contactSchema,
+      draftId: uuidv4.allow(null),
       project: {
-        ...electrificationIntake
+        bcHydroNumber: Joi.string().max(255).trim().allow(null),
+        projectType: Joi.string()
+          .required()
+          .valid(...electrificationProjectTypeCodes)
       }
     })
   },
@@ -71,7 +69,7 @@ const schema = {
   },
   searchElectrificationProjects: {
     body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
+      activityId: Joi.array().items(activityId),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
@@ -81,31 +79,38 @@ const schema = {
   },
   updateElectrificationProject: {
     body: Joi.object({
-      contact: contactSchema,
-      project: {
-        ...electrificationIntake,
-        electrificationProjectId: uuidv4.required(),
-        projectCategory: Joi.string()
-          .valid(...electrificationProjectCategoryCodes)
-          .allow(null),
-        assignedUserId: uuidv4.allow(null),
-        hasEpa: Joi.string()
-          .valid(...YES_NO_LIST)
-          .allow(null),
-        megawatts: Joi.number().positive().allow(null),
-        bcEnvironmentAssessNeeded: Joi.string()
-          .valid(...YES_NO_LIST)
-          .allow(null),
-        locationDescription: Joi.string().max(4000).allow(null),
-        astNotes: Joi.string().max(4000).allow(null),
-        queuePriority: Joi.number().integer().required().min(0).max(3),
-        submissionType: Joi.string()
-          .required()
-          .valid(...SUBMISSION_TYPE_LIST),
-        applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-        ...atsValidator.atsEnquirySubmissionFields,
-        aaiUpdated: Joi.boolean().required()
-      }
+      projectName: Joi.string().required().max(255).trim(),
+      companyNameRegistered: Joi.string().max(255).trim().allow(null),
+      companyIdRegistered: Joi.string().max(255).trim().allow(null),
+      projectType: Joi.string()
+        .required()
+        .valid(...electrificationProjectTypeCodes),
+      bcHydroNumber: Joi.string().max(255).trim().allow(null),
+      projectDescription: Joi.when('projectType', {
+        is: ProjectType.OTHER,
+        then: Joi.string().required().max(4000),
+        otherwise: Joi.string().max(4000).allow(null)
+      }),
+      projectCategory: Joi.string()
+        .valid(...electrificationProjectCategoryCodes)
+        .allow(null),
+      assignedUserId: uuidv4.allow(null),
+      hasEpa: Joi.string()
+        .valid(...YES_NO_LIST)
+        .allow(null),
+      megawatts: Joi.number().positive().allow(null),
+      bcEnvironmentAssessNeeded: Joi.string()
+        .valid(...YES_NO_LIST)
+        .allow(null),
+      locationDescription: Joi.string().max(4000).allow(null),
+      astNotes: Joi.string().max(4000).allow(null),
+      queuePriority: Joi.number().integer().required().min(0).max(3),
+      submissionType: Joi.string()
+        .required()
+        .valid(...SUBMISSION_TYPE_LIST),
+      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
+      ...atsValidator.atsEnquirySubmissionFields,
+      aaiUpdated: Joi.boolean().required()
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()

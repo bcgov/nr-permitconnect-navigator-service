@@ -1,20 +1,23 @@
 <script setup lang="ts">
-import type { SelectChangeEvent } from 'primevue/select';
+import { storeToRefs } from 'pinia';
 import { useFormValues, useSetFieldValue, useValidateField } from 'vee-validate';
-import { ref } from 'vue';
+import { nextTick, onBeforeMount, onMounted, ref, watchEffect } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { EditableSelect, InputNumber, InputText, RadioList } from '@/components/form';
-import Map from '@/components/housing/maps/Map.vue';
+import Map from '@/components/maps/Map.vue';
+import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Button, Card } from '@/lib/primevue';
 import { externalApiService } from '@/services';
-import { PROJECT_LOCATION_LIST } from '@/utils/constants/housing';
-import { ProjectLocation } from '@/utils/enums/housing';
+import { useFormStore } from '@/store';
+import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
+import { ProjectLocation } from '@/utils/enums/projectCommon';
 
+import type { SelectChangeEvent } from 'primevue/select';
 import type { GeoJSON } from 'geojson';
-import type { Ref } from 'vue';
+import type { ComponentPublicInstance, Ref } from 'vue';
 import type { IInputEvent } from '@/interfaces';
 import type { GeocoderFeature } from '@/types';
 
@@ -26,13 +29,15 @@ interface PinUpdateEvent {
 }
 
 // Props
-const { editable = true } = defineProps<{
-  editable?: boolean;
+const { activeStep, tab = 0 } = defineProps<{
+  activeStep: number;
+  tab?: number;
 }>();
 
 // Composables
 const { t } = useI18n();
 const values = useFormValues();
+const setAddressSearch = useSetFieldValue('location.addressSearch');
 const setLatitude = useSetFieldValue('location.latitude');
 const setLongitude = useSetFieldValue('location.longitude');
 const setStreetAddress = useSetFieldValue('location.streetAddress');
@@ -42,7 +47,12 @@ const setGeoJson = useSetFieldValue('location.geoJson');
 const validateLatitude = useValidateField('location.latitude');
 const validateLongitude = useValidateField('location.longitude');
 
+// Store
+const formStore = useFormStore();
+const { getEditable } = storeToRefs(formStore);
+
 // State
+const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 const addressGeocoderFeatures: Ref<GeocoderFeature[]> = ref([]);
 const mapLatitude: Ref<number | undefined> = ref(undefined);
 const mapLongitude: Ref<number | undefined> = ref(undefined);
@@ -132,21 +142,39 @@ function resizeMap() {
   mapRef.value?.resizeMap();
 }
 
-defineExpose({ resizeMap, onLatLongInput });
+useFormErrorWatcher(formRef, 'LocationCard', tab);
+
+onBeforeMount(async () => {
+  // Force the search bar to load & display the last set text when loading a draft
+  if (values.value.location?.addressSearch?.properties?.fullAddress) {
+    await onAddressSearchInput({
+      target: { value: values.value.location.addressSearch.properties.fullAddress }
+    } as IInputEvent);
+    setAddressSearch(values.value.location.addressSearch.properties.fullAddress);
+  }
+});
+
+onMounted(() => {
+  onLatLongInput();
+});
+
+watchEffect(() => {
+  // Map component misaligned if mounted while not visible. Trigger resize to fix on show
+  if (activeStep === tab) nextTick().then(() => resizeMap());
+});
 </script>
 
 <template>
-  <Card>
+  <Card ref="formRef">
     <template #title>
       <div class="flex align-items-center">
         <div class="flex flex-grow-1">
-          <span
+          <h6
             class="section-header"
-            role="heading"
             aria-level="2"
           >
             {{ t('locationCard.header') }}
-          </span>
+          </h6>
           <Tooltip
             class="mb-2"
             right
@@ -163,7 +191,7 @@ defineExpose({ resizeMap, onLatLongInput });
           class="col-span-12"
           name="location.projectLocation"
           :bold="false"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :options="PROJECT_LOCATION_LIST"
           @on-click="handleProjectLocationClick"
         />
@@ -176,12 +204,12 @@ defineExpose({ resizeMap, onLatLongInput });
               <div class="grid grid-cols-12 gap-4 nested-grid">
                 <EditableSelect
                   class="col-span-12"
-                  name="addressSearch"
+                  name="location.addressSearch"
                   :get-option-label="getAddressSearchLabel"
                   :options="addressGeocoderFeatures"
-                  :placeholder="t('locationCard.addressSearchPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.addressSearch')"
                   :bold="false"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   @on-input="onAddressSearchInput"
                   @on-change="onAddressSelect"
                 />
@@ -189,19 +217,19 @@ defineExpose({ resizeMap, onLatLongInput });
                   class="col-span-4"
                   name="location.streetAddress"
                   disabled
-                  :placeholder="t('locationCard.streetAddressPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.streetAddress')"
                 />
                 <InputText
                   class="col-span-4"
                   name="location.locality"
                   disabled
-                  :placeholder="t('locationCard.localityPlaceholder')"
+                  :placeholder="t('locationCard.placeholders.locality')"
                 />
                 <InputText
                   class="col-span-4"
                   name="location.province"
                   disabled
-                  :placeholder="t('locationCard.provincePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.province')"
                 />
                 <InputNumber
                   class="col-span-4"
@@ -212,7 +240,7 @@ defineExpose({ resizeMap, onLatLongInput });
                       ? t('locationCard.provideLatitude')
                       : ''
                   "
-                  :placeholder="t('locationCard.latitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.latitude')"
                 />
                 <InputNumber
                   class="col-span-4"
@@ -223,7 +251,7 @@ defineExpose({ resizeMap, onLatLongInput });
                       ? t('locationCard.provideLongitude')
                       : ''
                   "
-                  :placeholder="t('locationCard.longitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.longitude')"
                 />
                 <div
                   v-if="values.location?.projectLocation === ProjectLocation.LOCATION_COORDINATES"
@@ -245,24 +273,24 @@ defineExpose({ resizeMap, onLatLongInput });
                 <InputNumber
                   class="col-span-4"
                   name="location.latitude"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   :help-text="t('locationCard.provideLatitude')"
-                  :placeholder="t('locationCard.latitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.latitude')"
                   @keyup.enter="onLatLongInput"
                 />
                 <InputNumber
                   class="col-span-4"
                   name="location.longitude"
-                  :disabled="!editable"
+                  :disabled="!getEditable"
                   :help-text="t('locationCard.provideLongitude')"
-                  :placeholder="t('locationCard.longitudePlaceholder')"
+                  :placeholder="t('locationCard.placeholders.longitude')"
                   @keyup.enter="onLatLongInput"
                 />
                 <div class="col-span-4">
                   <Button
                     class="lat-long-btn"
-                    :label="t('locationCard.showOnMap')"
-                    :disabled="!editable"
+                    :label="t('locationCard.labels.showOnMap')"
+                    :disabled="!getEditable"
                     @click="onLatLongInput"
                   />
                 </div>
@@ -279,7 +307,7 @@ defineExpose({ resizeMap, onLatLongInput });
       <div v-if="values.location?.projectLocation !== ProjectLocation.PIN_OR_DRAW">
         <Map
           ref="mapRef"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :latitude="mapLatitude"
           :longitude="mapLongitude"
         />
@@ -288,7 +316,7 @@ defineExpose({ resizeMap, onLatLongInput });
         <Map
           ref="mapRef"
           :pin-or-draw="true"
-          :disabled="!editable"
+          :disabled="!getEditable"
           :geo-json-data="values.location.geoJson"
           :latitude="mapLatitude"
           :longitude="mapLongitude"
@@ -306,19 +334,19 @@ defineExpose({ resizeMap, onLatLongInput });
                 class="col-span-4"
                 name="location.streetAddress"
                 disabled
-                :placeholder="t('locationCard.streetAddressPlaceholder')"
+                :placeholder="t('locationCard.placeholders.streetAddress')"
               />
               <InputText
                 class="col-span-4"
                 name="location.locality"
                 disabled
-                :placeholder="t('locationCard.localityPlaceholder')"
+                :placeholder="t('locationCard.placeholders.locality')"
               />
               <InputText
                 class="col-span-4"
                 name="location.province"
                 disabled
-                :placeholder="t('locationCard.provincePlaceholder')"
+                :placeholder="t('locationCard.placeholders.province')"
               />
               <InputNumber
                 class="col-span-4"
@@ -329,7 +357,7 @@ defineExpose({ resizeMap, onLatLongInput });
                     ? t('locationCard.provideLatitude')
                     : ''
                 "
-                :placeholder="t('locationCard.latitudePlaceholder')"
+                :placeholder="t('locationCard.placeholders.latitude')"
               />
               <InputNumber
                 class="col-span-4"
@@ -340,7 +368,7 @@ defineExpose({ resizeMap, onLatLongInput });
                     ? t('locationCard.provideLongitude')
                     : ''
                 "
-                :placeholder="t('locationCard.longitudePlaceholder')"
+                :placeholder="t('locationCard.placeholders.longitude')"
               />
             </div>
           </template>
