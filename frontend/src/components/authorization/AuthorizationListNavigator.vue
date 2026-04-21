@@ -6,15 +6,20 @@ import { useI18n } from 'vue-i18n';
 import { useRoute } from 'vue-router';
 
 import { Column, DataTable, DatePicker, IconField, InputIcon, InputText, Select } from '@/lib/primevue';
-import { useAppStore, useCodeStore } from '@/store';
 import { permitService, sourceSystemKindService } from '@/services';
+import { useAppStore, useCodeStore } from '@/store';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { formatDateOnly } from '@/utils/formatters';
 import { generalErrorHandler, toNumber } from '@/utils/utils';
 
-import type { Ref } from 'vue';
-import type { Permit, Pagination, PermitType, PermitTracking, SourceSystemKind } from '@/types';
 import type { DataTableSortEvent } from 'primevue/datatable';
+import type { Ref } from 'vue';
+import type { Pagination, Permit, PermitTracking, PermitType, SourceSystemKind } from '@/types';
+
+// Interfaces
+interface InitiativeState {
+  projectAuthorizationRouteName: RouteName;
+}
 
 // Composables
 const { t } = useI18n();
@@ -43,10 +48,6 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 
-// Interfaces
-interface InitiativeState {
-  projectAuthorizationRouteName: RouteName;
-}
 const loading: Ref<boolean> = ref(true);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
@@ -135,33 +136,6 @@ async function searchPermits() {
     });
   }, 500);
 }
-
-// async function searchPermits() {
-//   try {
-//     // updateQueryParams();
-//     loading.value = true;
-//     permitService
-//       .searchPermits({
-//         dateRange: dateRange.value,
-//         permitTypeId: authorizationType.value?.permitTypeId,
-//         sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId,
-//         searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
-//         skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,
-//         take: pagination.value.rows,
-//         sortField: pagination.value.field,
-//         sortOrder: pagination.value.order
-//       })
-//       .then((res) => {
-//         permits.value = res.data.permits;
-//         totalRecords.value = res.data.totalRecords;
-//       })
-//       .finally(() => {
-//         loading.value = false;
-//       });
-//   } catch (e) {
-//     generalErrorHandler(e);
-//   }
-// }
 
 function shouldDisplayLocation() {
   return getInitiative.value !== Initiative.ELECTRIFICATION;

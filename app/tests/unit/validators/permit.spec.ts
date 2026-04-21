@@ -59,7 +59,7 @@ describe('permit searchPermitsQuerySchema', () => {
       searchTag: 'test',
       skip: '0',
       sortField: 'submittedDate',
-      sortOrder: 'asc',
+      sortOrder: '1',
       sourceSystemKindId: '456',
       take: '10'
     };

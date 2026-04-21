@@ -2,6 +2,7 @@ import Joi from 'joi';
 
 import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
 import { validate } from '../middleware/validation.ts';
+import { paginationOptions } from './paginationOptions.ts';
 import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
@@ -50,10 +51,7 @@ const schema = {
   listPermits: {
     query: Joi.object({
       activityId: Joi.string().min(8).max(8).allow(null),
-      includeNotes: Joi.boolean().allow(null),
-      pageNo: Joi.number().integer().min(1).allow(null),
-      permitTracking: permitTrackingSchema.allow(null),
-      permitType: permitTypeSchema.allow(null)
+      includeNotes: Joi.boolean().allow(null)
     })
   },
   searchPermits: {
@@ -61,11 +59,8 @@ const schema = {
       dateRange: Joi.array().items(Joi.string()).length(2).allow(null),
       permitTypeId: Joi.string().allow(null),
       searchTag: Joi.string().allow(null),
-      skip: Joi.string().allow(null),
-      sortField: Joi.string().allow(null),
-      sortOrder: Joi.string().allow(null),
       sourceSystemKindId: Joi.string().allow(null),
-      take: Joi.string().allow(null)
+      ...paginationOptions
     })
   },
   upsertPermit: {

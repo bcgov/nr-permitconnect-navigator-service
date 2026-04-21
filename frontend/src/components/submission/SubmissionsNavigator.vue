@@ -3,8 +3,8 @@ import { addDays, isPast, isToday, isWithinInterval, startOfToday } from 'date-f
 import { storeToRefs } from 'pinia';
 import { inject, onBeforeMount, ref, watch, watchEffect } from 'vue';
 
-import { Escalation } from '@/components/common/icons';
 import AuthorizationListNavigator from '../authorization/AuthorizationListNavigator.vue';
+import { Escalation } from '@/components/common/icons';
 import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBringForwardCalendar.vue';
 import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';

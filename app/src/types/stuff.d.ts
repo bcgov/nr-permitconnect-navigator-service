@@ -15,6 +15,7 @@ import type {
   Permit,
   User
 } from './models';
+import type { IPaginationOptions } from '../interfaces/IPaginationOptions.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { EmailTemplate } from '../utils/templates';
 
@@ -406,15 +407,11 @@ export type DateTimeStrings = SplitDatetimeBase<string>;
 
 export type NullableDateTimeStrings = SplitDatetimeBase<string | null>;
 
-export interface SearchPermitsOptions extends Partial<IStamps> {
+export interface SearchPermitsOptions extends IPaginationOptions {
   dateRange?: [Date, Date];
   permitTypeId?: string;
   searchTag?: string;
-  skip?: string;
-  sortField?: string;
-  sortOrder?: string;
   sourceSystemKindId?: string;
-  take?: string;
 }
 
 export interface StatisticsFilters extends ParsedQs {
