@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AccessRequestStatus, Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type { AccessRequest, AccessRequestBase } from '../types/index.ts';
+import type { AccessRequest, AccessRequestBase, AccessRequestPatch } from '../types/index.ts';
 
 /**
  * Create an access request record
@@ -92,16 +92,18 @@ export const getAccessRequests = async (
  * Update an access request
  * @param tx Prisma transaction client
  * @param data - The access request object to update
+ * @param accessRequestId ID of the access request to update
  * @returns A Promise that resolves to the updated resource
  */
 export const updateAccessRequest = async (
   tx: PrismaTransactionClient,
-  data: AccessRequestBase
+  data: AccessRequestPatch,
+  accessRequestId: string
 ): Promise<AccessRequest> => {
   const result = await tx.access_request.update({
     data: { ...data, updatedAt: data.updatedAt, updatedBy: data.updatedBy },
     where: {
-      accessRequestId: data.accessRequestId
+      accessRequestId
     },
     include: {
       group: true

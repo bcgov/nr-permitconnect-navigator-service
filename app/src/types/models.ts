@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 const accessRequestBase = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
 export type AccessRequestBase = Prisma.access_requestGetPayload<typeof accessRequestBase>;
 export type AccessRequest = AccessRequestBase;
+export type AccessRequestPatch = Omit<Prisma.access_requestUpdateInput, 'accessRequestId'>;
 
 const activityBase = Prisma.validator<Prisma.activityDefaultArgs>()({});
 export type ActivityBase = Prisma.activityGetPayload<typeof activityBase>;

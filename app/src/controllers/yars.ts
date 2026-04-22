@@ -1,5 +1,11 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { getGroupPermissions, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
+import {
+  getCorrespondingGlobalGroup,
+  getGroupPermissions,
+  getGroups,
+  getSubjectGroups,
+  removeGroup
+} from '../services/yars.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
@@ -22,7 +28,6 @@ export const getPermissionsController = async (req: Request, res: Response) => {
 
     const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload.sub);
     const permissions = await Promise.all(groups.map((x) => getGroupPermissions(tx, x.groupId))).then((x) => x.flat());
-
     return { groups, permissions };
   });
   res.status(200).json({ groups: response.groups, permissions: response.permissions });
@@ -33,7 +38,9 @@ export const deleteSubjectGroupController = async (
   res: Response
 ) => {
   await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, req.body.groupId);
     await removeGroup(tx, req.body.sub, req.body.groupId);
+    await removeGroup(tx, req.body.sub, correspondingGlobalGroup.groupId);
   });
   res.status(204).end();
 };

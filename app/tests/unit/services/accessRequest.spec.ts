@@ -43,12 +43,15 @@ describe('getAccessRequests', () => {
 describe('updateAccessRequest', () => {
   it('calls access_request.update and returns result', async () => {
     prismaTxMock.access_request.update.mockResolvedValueOnce(ACCESS_REQUEST);
-    const response = await accessRequestService.updateAccessRequest(prismaTxMock, {
-      ...ACCESS_REQUEST,
-      accessRequestId: '123',
-      updatedAt: new Date(),
-      updatedBy: 'USER123'
-    } as AccessRequest);
+    const response = await accessRequestService.updateAccessRequest(
+      prismaTxMock,
+      {
+        ...ACCESS_REQUEST,
+        updatedAt: new Date(),
+        updatedBy: 'USER123'
+      } as AccessRequest,
+      '123'
+    );
 
     expect(prismaTxMock.access_request.update).toHaveBeenCalledTimes(1);
     expect(response).toStrictEqual(ACCESS_REQUEST);

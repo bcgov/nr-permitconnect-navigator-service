@@ -100,7 +100,7 @@
   },
   "views": {
     "homeView": {
-      "cantNavigate": "Please contact and administrator to verify your permissions",
+      "cantNavigate": "Please contact an administrator to verify your permissions",
       "chooseProject": "Choose your project type",
       "electrification": "Electrification",
       "housing": "Housing",

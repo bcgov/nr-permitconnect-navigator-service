@@ -23,6 +23,9 @@ export const assignGroup = async (
     }
   });
 
+  const exists = await subjectHasGroup(tx, sub, groupId);
+  if (exists) return { sub, roleId: groupId };
+
   const result = await tx.subject_group.create({
     data: {
       sub: sub,
@@ -31,6 +34,41 @@ export const assignGroup = async (
   });
 
   return { sub: result.sub, roleId: result.groupId };
+};
+
+/**
+ * Get the corresponding global permission for a group ID
+ * @param tx Prisma transaction client
+ * @param groupId Group ID to find corresponding global permission ID for
+ * @returns A Promise that resolves to a group
+ */
+export const getCorrespondingGlobalGroup = async (tx: PrismaTransactionClient, groupId: number): Promise<Group> => {
+  const group = await tx.group.findFirstOrThrow({
+    where: {
+      groupId
+    }
+  });
+
+  const globalInitiative = await tx.initiative.findFirstOrThrow({
+    where: {
+      code: Initiative.PCNS
+    }
+  });
+
+  const result = await tx.group.findFirstOrThrow({
+    where: {
+      initiativeId: globalInitiative.initiativeId,
+      name: group.name
+    }
+  });
+
+  return {
+    initiativeCode: globalInitiative.code,
+    initiativeId: globalInitiative.initiativeId,
+    groupId: result.groupId,
+    name: result.name as GroupName,
+    label: result.label
+  } satisfies Group;
 };
 
 /**
@@ -60,6 +98,41 @@ export const getSubjectGroups = async (tx: PrismaTransactionClient, sub: string)
     name: x.group.name as GroupName,
     label: x.group.label
   })) as Group[];
+};
+
+export const getSubjectInitiatives = async (
+  tx: PrismaTransactionClient,
+  sub: string
+): Promise<{ code: string; initiativeId: string }[]> => {
+  const result = await tx.subject_group.findMany({
+    select: {
+      group: {
+        select: {
+          initiativeId: true,
+          initiative: {
+            select: {
+              code: true
+            }
+          }
+        }
+      }
+    },
+    where: {
+      sub: sub,
+      NOT: {
+        group: {
+          initiative: {
+            code: Initiative.PCNS
+          }
+        }
+      }
+    }
+  });
+
+  return result.map((x) => ({
+    code: x.group.initiative.code,
+    initiativeId: x.group.initiativeId
+  }));
 };
 
 /**
@@ -226,4 +299,15 @@ export const removeGroup = async (tx: PrismaTransactionClient, sub: string, grou
   });
 
   return { sub: result.sub, roleId: result.groupId };
+};
+
+export const subjectHasGroup = async (tx: PrismaTransactionClient, sub: string, groupId: number) => {
+  const count = await tx.subject_group.count({
+    where: {
+      sub,
+      groupId
+    }
+  });
+
+  return count > 0;
 };
