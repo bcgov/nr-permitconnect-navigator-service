@@ -110,7 +110,9 @@ export const useProjectStore = defineStore('project', () => {
       () =>
         // Look in activityContacts first, fall back to project state
         state.activityContacts.value.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact ??
-        state.project.value?.activity?.activityContact?.find((ac) => ac.role === ActivityContactRole.PRIMARY)?.contact
+        state.project.value?.activity?.activityContact?.find(
+          (ac: ActivityContact) => ac.role === ActivityContactRole.PRIMARY
+        )?.contact
     ),
     getProject: computed(() => state.project.value),
     getProjectIsCompleted: computed(() => state.project.value?.applicationStatus === ApplicationStatus.COMPLETED),

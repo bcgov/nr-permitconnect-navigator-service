@@ -31,6 +31,10 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION
 };
 
+const GENERAL_INITIATIVE_STATE: InitiativeState = {
+  projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION
+};
+
 const HOUSING_INITIATIVE_STATE: InitiativeState = {
   projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION
 };
@@ -73,6 +77,9 @@ onBeforeMount(async () => {
   switch (getInitiative.value) {
     case Initiative.ELECTRIFICATION:
       initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
+      break;
+    case Initiative.GENERAL:
+      initiativeState.value = GENERAL_INITIATIVE_STATE;
       break;
     case Initiative.HOUSING:
       initiativeState.value = HOUSING_INITIATIVE_STATE;

@@ -26,7 +26,7 @@ import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/key
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Pagination, Project } from '@/types';
+import type { ActivityContact, Pagination, Project } from '@/types';
 
 // Types
 interface FilterOption {
@@ -88,7 +88,7 @@ const filteredProjects = computed(() => {
     })
     .map((x) => {
       const primaryContact = x.activity?.activityContact?.find(
-        (contact) => contact.role === ActivityContactRole.PRIMARY
+        (contact: ActivityContact) => contact.role === ActivityContactRole.PRIMARY
       );
 
       if ('housingProjectId' in x || 'generalProjectId' in x) {

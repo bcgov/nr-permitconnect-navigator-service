@@ -187,8 +187,9 @@ export const searchPermitsPaginated = async (
 ): Promise<{ permits: Permit[]; totalRecords: number }> => {
   // Determine project table based on initiative, exclude PCNS
   const projectTableMap: Record<Exclude<Initiative, Initiative.PCNS>, string> = {
-    [Initiative.HOUSING]: 'housingProject',
-    [Initiative.ELECTRIFICATION]: 'electrificationProject'
+    [Initiative.ELECTRIFICATION]: 'electrificationProject',
+    [Initiative.GENERAL]: 'generalProject',
+    [Initiative.HOUSING]: 'housingProject'
   };
 
   const projectTable = projectTableMap[initiative];
