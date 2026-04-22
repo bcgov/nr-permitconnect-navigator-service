@@ -1,43 +1,26 @@
 <script setup lang="ts">
 import { Mutex } from 'async-mutex';
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { useRoute } from 'vue-router';
 
 import { Column, DataTable, DatePicker, IconField, InputIcon, InputText, Select } from '@/lib/primevue';
 import { permitService, sourceSystemKindService } from '@/services';
 import { useAppStore, useCodeStore } from '@/store';
-import { Initiative, RouteName } from '@/utils/enums/application';
+import { Initiative } from '@/utils/enums/application';
 import { formatDateOnly } from '@/utils/formatters';
-import { generalErrorHandler, toNumber } from '@/utils/utils';
+import { projectAuthorizationRouteNameKey } from '@/utils/keys';
+import { generalErrorHandler } from '@/utils/utils';
 
 import type { DataTableSortEvent } from 'primevue/datatable';
 import type { Ref } from 'vue';
 import type { Pagination, Permit, PermitTracking, PermitType, SourceSystemKind } from '@/types';
 
-// Interfaces
-interface InitiativeState {
-  projectAuthorizationRouteName: RouteName;
-}
+// Injections
+const projectAuthorizationRouteName = inject(projectAuthorizationRouteNameKey);
 
 // Composables
 const { t } = useI18n();
-const route = useRoute();
-
-// Constants
-const AUTHORIZATION_TAB_INDEX = 1;
-const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
-  projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION
-};
-
-const GENERAL_INITIATIVE_STATE: InitiativeState = {
-  projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION
-};
-
-const HOUSING_INITIATIVE_STATE: InitiativeState = {
-  projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION
-};
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
@@ -45,57 +28,24 @@ const codeStore = useCodeStore();
 const { codeDisplay } = codeStore;
 
 // State
+const authorizationTracking: Ref<PermitTracking | undefined> = ref(undefined);
+const authorizationType: Ref<PermitType | undefined> = ref(undefined);
+const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
+const loading: Ref<boolean> = ref(true);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
   field: 'submittedDate',
   page: 0
 });
-
-const loading: Ref<boolean> = ref(true);
-const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
-const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
-const selection: Ref<Permit | undefined> = ref(undefined);
 const permits: Ref<Permit[]> = ref([]);
 const permitTypes: Ref<PermitType[]> = ref([]);
-const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
-const authorizationType: Ref<PermitType | undefined> = ref(undefined);
-const authorizationTracking: Ref<PermitTracking | undefined> = ref(undefined);
 const searchTag: Ref<string | undefined> = ref(undefined);
+const selection: Ref<Permit | undefined> = ref(undefined);
+const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const totalRecords: Ref<number> = ref(0);
 
-// read from query params if tab is set to enquiry otherwise use default values
-if (route.query.tab === AUTHORIZATION_TAB_INDEX.toString()) {
-  pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
-  pagination.value.order = toNumber(route.query.order as string) ?? -1;
-  pagination.value.field = (route.query.field as string) ?? 'submittedAt';
-  pagination.value.page = toNumber(route.query.page as string) ?? 0;
-}
-
 // Actions
-onBeforeMount(async () => {
-  switch (getInitiative.value) {
-    case Initiative.ELECTRIFICATION:
-      initiativeState.value = ELECTRIFICATION_INITIATIVE_STATE;
-      break;
-    case Initiative.GENERAL:
-      initiativeState.value = GENERAL_INITIATIVE_STATE;
-      break;
-    case Initiative.HOUSING:
-      initiativeState.value = HOUSING_INITIATIVE_STATE;
-      break;
-    default:
-      generalErrorHandler(t('views.initiativeStateError'));
-  }
-  searchPermits();
-  permitTypes.value = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
-  const kinds = (await sourceSystemKindService.getSourceSystemKinds()).data;
-  sourceSystemKinds.value = kinds.sort((a: SourceSystemKind, b: SourceSystemKind) =>
-    (codeDisplay.SourceSystem[a.sourceSystem] || '').localeCompare(codeDisplay.SourceSystem[b.sourceSystem] || '')
-  );
-  loading.value = false;
-});
-
 function getLocation(streetAddress: string | undefined, locality: string | undefined, province: string | undefined) {
   return [streetAddress, locality, province].filter((str) => str?.trim()).join(', ');
 }
@@ -110,7 +60,6 @@ function onSort(event: DataTableSortEvent) {
 const searchMutex = new Mutex();
 let timeoutId: ReturnType<typeof setTimeout>;
 
-// Actions
 async function searchPermits() {
   if (!authorizationType.value) authorizationTracking.value = undefined;
   searchTag.value = searchTag?.value?.trim();
@@ -147,6 +96,16 @@ async function searchPermits() {
 function shouldDisplayLocation() {
   return getInitiative.value !== Initiative.ELECTRIFICATION;
 }
+
+onBeforeMount(async () => {
+  searchPermits();
+  permitTypes.value = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
+  const kinds = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  sourceSystemKinds.value = kinds.sort((a: SourceSystemKind, b: SourceSystemKind) =>
+    (codeDisplay.SourceSystem[a.sourceSystem] || '').localeCompare(codeDisplay.SourceSystem[b.sourceSystem] || '')
+  );
+  loading.value = false;
+});
 </script>
 
 <template>
@@ -182,7 +141,7 @@ function shouldDisplayLocation() {
     >
       <template #empty>
         <div class="flex justify-center">
-          <h3>No items found.</h3>
+          <h3>{{ t('common.dataTable.noItems') }}</h3>
         </div>
       </template>
       <template #header>
@@ -192,7 +151,7 @@ function shouldDisplayLocation() {
               v-model="authorizationType"
               name="authorizationType"
               :label="t('authorization.common.authorization')"
-              placeholder="Authorization type"
+              :placeholder="t('authorization.common.authorizationType')"
               :options="permitTypes"
               :option-label="(e) => `${e.businessDomain}: ${e.name}`"
               show-clear
@@ -240,7 +199,7 @@ function shouldDisplayLocation() {
       </template>
       <Column
         field="authorizationType"
-        header="Authorization Type"
+        :header="t('authorization.common.authorizationType')"
         style="min-width: 240px"
         frozen
       >
@@ -248,7 +207,7 @@ function shouldDisplayLocation() {
           <div :data-activityId="data.activityId">
             <router-link
               :to="{
-                name: initiativeState.projectAuthorizationRouteName,
+                name: projectAuthorizationRouteName,
                 params: { permitId: data.permitId, projectId: data.activity.project?.[0]?.projectId }
               }"
             >
@@ -354,9 +313,5 @@ function shouldDisplayLocation() {
 :deep(.p-datatable-header) {
   padding-right: 0;
   padding-left: 0;
-}
-
-:deep(.p-datatable-loading-icon) {
-  color: var(--p-bcblue-800);
 }
 </style>

@@ -16,7 +16,13 @@ import { useAppStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, Resource, RouteName } from '@/utils/enums/application';
 import { BringForwardType } from '@/utils/enums/projectCommon';
-import { enquiryRouteNameKey, projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
+import {
+  enquiryRouteNameKey,
+  projectAuthorizationRouteNameKey,
+  projectRouteNameKey,
+  projectServiceKey,
+  resourceKey
+} from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
@@ -28,6 +34,7 @@ interface InitiativeState {
   enquiryRouteName: RouteName;
   headerText: string;
   navigationPermission: NavigationPermission;
+  projectAuthorizationRouteName: RouteName;
   projectRouteName: RouteName;
   projectService: IDraftableProjectService;
   resource: Resource;
@@ -42,6 +49,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY,
   headerText: t('views.i.initiativeView.electrification.header'),
   navigationPermission: NavigationPermission.INT_ELECTRIFICATION,
+  projectAuthorizationRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_AUTHORIZATION,
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService,
   resource: Resource.ELECTRIFICATION_PROJECT
@@ -51,6 +59,7 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_GENERAL_ENQUIRY,
   headerText: t('views.i.initiativeView.general.header'),
   navigationPermission: NavigationPermission.INT_GENERAL,
+  projectAuthorizationRouteName: RouteName.INT_GENERAL_PROJECT_AUTHORIZATION,
   projectRouteName: RouteName.INT_GENERAL_PROJECT,
   projectService: generalProjectService,
   resource: Resource.GENERAL_PROJECT
@@ -60,6 +69,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   enquiryRouteName: RouteName.INT_HOUSING_ENQUIRY,
   headerText: t('views.i.initiativeView.housing.header'),
   navigationPermission: NavigationPermission.INT_HOUSING,
+  projectAuthorizationRouteName: RouteName.INT_HOUSING_PROJECT_AUTHORIZATION,
   projectRouteName: RouteName.INT_HOUSING_PROJECT,
   projectService: housingProjectService,
   resource: Resource.HOUSING_PROJECT
@@ -76,10 +86,12 @@ const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
 const provideEnquiryRouteName = computed(() => initiativeState.value.enquiryRouteName);
+const provideProjectAuthorizationRouteName = computed(() => initiativeState.value.projectAuthorizationRouteName);
 const provideProjectRouteName = computed(() => initiativeState.value.projectRouteName);
 const provideProjectService = computed(() => initiativeState.value.projectService);
 const provideResource = computed(() => initiativeState.value.resource);
 provide(enquiryRouteNameKey, provideEnquiryRouteName);
+provide(projectAuthorizationRouteNameKey, provideProjectAuthorizationRouteName);
 provide(projectRouteNameKey, provideProjectRouteName);
 provide(projectServiceKey, provideProjectService);
 provide(resourceKey, provideResource);

@@ -1,6 +1,7 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
+import type { AxiosResponse } from 'axios';
 import type { ListPermitsOptions, Permit, SearchPermitsOptions } from '@/types';
 import type { Initiative } from '@/utils/enums/application';
 
@@ -44,7 +45,9 @@ export default {
    * @function searchPermits
    * @returns {Promise} An axios response
    */
-  async searchPermits(options?: SearchPermitsOptions) {
+  async searchPermits(
+    options?: SearchPermitsOptions
+  ): Promise<AxiosResponse<{ permits: Permit[]; totalRecords: number }>> {
     return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, { params: options });
   },
 

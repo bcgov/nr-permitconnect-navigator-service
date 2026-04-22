@@ -7,6 +7,9 @@
       "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “Contact profile.”",
       "header": "Who is the primary contact regarding this project?"
     },
+    "dataTable": {
+      "noItems": "No items found."
+    },
     "footer": {
       "about": "About gov.bc.ca",
       "accessibility": "Accessibility",
@@ -650,6 +653,7 @@
     },
     "common": {
       "authorization": "Authorization",
+      "authorizationType": "Authorization type",
       "applicationStage": "Application stage",
       "company": "Company",
       "decisionDate": "Decision date",

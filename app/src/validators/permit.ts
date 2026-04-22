@@ -59,9 +59,8 @@ const schema = {
       dateRange: Joi.array().items(Joi.string()).length(2).allow(null),
       permitTypeId: Joi.string().allow(null),
       searchTag: Joi.string().allow(null),
-      sourceSystemKindId: Joi.string().allow(null),
-      ...paginationOptions
-    })
+      sourceSystemKindId: Joi.string().allow(null)
+    }).concat(paginationOptions)
   },
   upsertPermit: {
     body: Joi.object(sharedPermitSchema)

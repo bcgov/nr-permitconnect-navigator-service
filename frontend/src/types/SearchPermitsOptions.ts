@@ -5,4 +5,4 @@ export type SearchPermitsOptions = {
   permitTypeId?: number;
   searchTag?: string;
   sourceSystemKindId?: number;
-} & Partial<IPaginationOptions>;
+} & IPaginationOptions;
