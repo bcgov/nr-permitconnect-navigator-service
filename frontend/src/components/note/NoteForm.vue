@@ -321,14 +321,16 @@ onBeforeMount(async () => {
                   v-if="values.type === NoteType.GENERAL"
                   class="flex flex-col gap-y-4"
                 >
-                  <span class="font-bold app-label-color">{{ t('note.noteForm.showProponent') }}</span>
-                  <ToggleSwitch
-                    v-model="shownToProponent"
-                    class="mr-1"
-                    name="shownToProponent"
-                    :label="t('note.noteForm.showProponent')"
-                    :disabled="!editable"
-                  />
+                  <div v-if="resource !== Resource.ENQUIRY">
+                    <span class="font-bold">{{ t('note.noteForm.showProponent') }}</span>
+                    <ToggleSwitch
+                      v-model="shownToProponent"
+                      class="mr-1"
+                      name="shownToProponent"
+                      :label="t('note.noteForm.showProponent')"
+                      :disabled="!editable"
+                    />
+                  </div>
                 </div>
 
                 <div
