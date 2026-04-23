@@ -7,6 +7,9 @@
       "contactTooltip": "To update your contact details, click on your username in the top right corner of the page and select “Contact profile.”",
       "header": "Who is the primary contact regarding this project?"
     },
+    "dataTable": {
+      "noItems": "No items found."
+    },
     "footer": {
       "about": "About gov.bc.ca",
       "accessibility": "Accessibility",
@@ -542,23 +545,18 @@
       "clickToCopy": "Click to copy",
       "copiedToClipboard": "Copied to clipboard",
       "dates": "Dates",
-      "decisionDate": "Decision date",
       "ids": "IDs",
       "issuedPermitId": "Issued Permit ID",
       "more": "More",
-      "statusChangeDate": "Status change date",
-      "statusVerified": "Status verified date",
-      "submittedDate": "Submitted date"
+      "statusVerified": "Status verified date"
     },
     "authorizationCardIntake": {
       "addId": "Add an ID",
-      "authorization": "Authorization",
       "authorizationTypeID": "Authorization type and IDs",
       "deleteTrackingId": "Delete tracking ID",
       "trackingIds": "Tracking IDs",
       "issuedPermitId": "Issued Permit ID",
       "selectAuthorization": "Select an authorization",
-      "selectId": "Select an ID",
       "shownToProponent": "Show to Proponent",
       "typeNumber": "Type the number"
     },
@@ -575,7 +573,6 @@
     "authorizationForm": {
       "addAuthorization": "Add authorization",
       "agency": "Agency",
-      "applicationStage": "Application stage",
       "authDeleted": "Authorization deleted",
       "authDeletionError": "Error deleting authorization",
       "authorizationType": "Authorization type",
@@ -587,7 +584,6 @@
       "businessDomain": "Business domain:",
       "cancel": "Cancel",
       "confirm": "Confirm",
-      "decisionDate": "Decision date",
       "delete": "Delete",
       "deleteAuth": "Delete authorization?",
       "deleteAuthMessage": "Deleting this permit will remove it on the Proponent’s side as well. Please confirm that you want to delete this permit.",
@@ -606,7 +602,6 @@
       "shownToProponent": "Shown to proponent",
       "statusLastChanged": "Status last changed",
       "statusLastVerified": "Status last verified",
-      "submittedDate": "Submitted date",
       "submittedDateFutureError": "Submitted date cannot be in the future",
       "trackingId": "Tracking ID",
       "trackingIdType": "Tracking ID type",
@@ -617,10 +612,13 @@
       "agency": "Agency",
       "applicationId": "Application ID",
       "avgProcessingTime": "Average processing time",
-      "decisionDate": "Decision date",
       "learnMore": "Learn more about this authorization type",
-      "submittedDate": "Submitted date",
       "uponDecision": "Upon decision"
+    },
+    "authorizationListNavigator": {
+      "applicationStatus": "Application status",
+      "clearFilters": "Clear all filters",
+      "dateRange": "Date range"
     },
     "authorizationStatePill": {
       "cancelledByReviewingAuthority": "Cancelled by reviewing authority"
@@ -640,15 +638,11 @@
       "technicalReviewDescription": "The technical review stage is when the reviewing authority conducts a thorough evaluation of the application and prepares recommendations for making a decision. If applicable, this phase includes First Nation Consultation processes."
     },
     "authorizationStatusUpdatesCard": {
-      "applicationStage": "Application stage",
       "authorizationStatus": "Authorization status",
-      "decisionDate": "Decision date",
       "cancelledByReviewingAuthority": "Cancelled by reviewing authority",
       "needed": "Needed",
       "statusUpdates": "Status updates",
-      "statusChangeDate": "Status change date",
       "statusVerifiedDate": "Status verified date",
-      "submittedDate": "Submitted date",
       "updateNoteForProponent": "Update note for Proponent",
       "updateToToday": "Update to today"
     },
@@ -656,6 +650,20 @@
       "byYourNavigator": "by your Navigator",
       "statusLastVerified": "Status last verified on",
       "statusNotVerified": "This status has not yet been verified."
+    },
+    "common": {
+      "authorization": "Authorization",
+      "authorizationType": "Authorization type",
+      "applicationStage": "Application stage",
+      "company": "Company",
+      "decisionDate": "Decision date",
+      "location": "Location",
+      "projectId": "Project ID",
+      "projectName": "Project Name",
+      "search": "Search",
+      "selectId": "Select an ID",
+      "statusChangeDate": "Status change date",
+      "submittedDate": "Submitted date"
     },
     "stateDescriptions": {
       "accepted": "The application has been accepted by the initial reviewing authority.",

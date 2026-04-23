@@ -7,7 +7,14 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
-import { deletePermit, getPermit, getPermitTypes, listPermits, upsertPermit } from '../services/permit.ts';
+import {
+  deletePermit,
+  getPermit,
+  getPermitTypes,
+  listPermits,
+  searchPermitsPaginated,
+  upsertPermit
+} from '../services/permit.ts';
 import { createPermitNote } from '../services/permitNote.ts';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
@@ -33,6 +40,7 @@ import type {
   PermitTracking,
   PermitType,
   PermitUpdateEmailParams,
+  SearchPermitsOptions,
   SourceSystemKind
 } from '../types/index.ts';
 
@@ -111,6 +119,30 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   };
 
   await email(emailData);
+};
+
+/**
+ * Searches for permits based on provided query parameters
+ * @param req - Express request containing search options in query parameters
+ * @param res - Express response object
+ * @returns Promise resolving to permits array and total record count
+ * @throws {Problem} 400 error if initiative is PCNS (invalid for this search)
+ */
+export const searchPermitsController = async (
+  req: Request<never, never, never, SearchPermitsOptions>,
+  res: Response
+) => {
+  const response = await transactionWrapper<{ permits: Permit[]; totalRecords: number }>(
+    async (tx: PrismaTransactionClient) => {
+      // Validate it's not PCNS
+      if (req.currentContext.initiative === Initiative.PCNS) {
+        throw new Problem(400, { detail: 'Invalid initiative' });
+      }
+
+      return await searchPermitsPaginated(tx, req.currentContext.initiative!, req.query); // nosonar
+    }
+  );
+  res.status(200).json(response);
 };
 
 /**

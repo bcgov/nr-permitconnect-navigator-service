@@ -67,7 +67,7 @@ const formSchema = object({
         value !== PermitNeeded.UNDER_INVESTIGATION
       );
     }),
-  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.authorizationForm.applicationStage')),
+  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.common.applicationStage')),
   issuedPermitId: string().nullable(),
   permitId: string(),
   permitTracking: array().of(
@@ -100,8 +100,8 @@ const formSchema = object({
       if (value === PermitState.ACCEPTED) return stage === PermitStage.APPLICATION_SUBMISSION;
       return true;
     }),
-  submittedDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.submittedDate')),
-  decisionDate: notInFutureValidator.nullable().label(t('authorization.authorizationForm.decisionDate')),
+  submittedDate: notInFutureValidator.nullable().label(t('authorization.common.submittedDate')),
+  decisionDate: notInFutureValidator.nullable().label(t('authorization.common.decisionDate')),
   statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
   statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
 });

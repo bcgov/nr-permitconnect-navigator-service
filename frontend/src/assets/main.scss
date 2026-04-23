@@ -191,6 +191,10 @@ label {
 
 /* datatable */
 .p-datatable {
+  .p-datatable-loading-icon {
+    color: var(--p-bcblue-800);
+  }
+
   .p-paginator {
     justify-content: right;
   }

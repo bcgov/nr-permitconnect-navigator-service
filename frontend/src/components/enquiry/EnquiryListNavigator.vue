@@ -51,6 +51,7 @@ const router = useRouter();
 const toast = useToast();
 
 // Constants
+const ENQUIRY_TAB_INDEX = 2;
 const FILTER_OPTIONS: readonly FilterOption[] = [
   {
     label: 'Active enquiries',
@@ -84,7 +85,7 @@ const filteredEnquiries = computed(() => {
 });
 
 // read from query params if tab is set to enquiry otherwise use default values
-if (route.query.tab === '1') {
+if (route.query.tab === ENQUIRY_TAB_INDEX.toString()) {
   pagination.value.rows = toNumber(route.query.rows as string) ?? 10;
   pagination.value.order = toNumber(route.query.order as string) ?? -1;
   pagination.value.field = (route.query.field as string) ?? 'submittedAt';
@@ -165,7 +166,7 @@ function updateQueryParams() {
       order: pagination.value.order ?? undefined,
       field: pagination.value.field ?? undefined,
       page: pagination.value.page ?? undefined,
-      tab: route.query.tab ?? 1
+      tab: route.query.tab ?? ENQUIRY_TAB_INDEX
     }
   });
 }

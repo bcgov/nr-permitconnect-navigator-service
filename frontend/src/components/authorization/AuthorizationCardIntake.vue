@@ -46,7 +46,7 @@ onBeforeMount(async () => {
     <div>
       <Select
         name="authorizationType"
-        :label="t('authorization.authorizationCardIntake.authorization')"
+        :label="t('authorization.common.authorization')"
         :placeholder="t('authorization.authorizationCardIntake.selectAuthorization')"
         :options="getPermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
@@ -72,7 +72,7 @@ onBeforeMount(async () => {
             <div class="grid grid-cols-3 gap-x-6 gap-y-6 mt-2">
               <Select
                 :name="`permitTracking[${idx}].sourceSystemKindId`"
-                :placeholder="t('authorization.authorizationCardIntake.selectId')"
+                :placeholder="t('authorization.common.selectId')"
                 :options="sourceSystemKinds"
                 :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
                 option-value="sourceSystemKindId"

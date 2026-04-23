@@ -890,6 +890,94 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
+  /electrification/permit/search:
+    get:
+      summary: Search permits
+      description: Returns a paginated list of permits based on the given filters and search criteria
+      operationId: searchElectrificationPermitsPaginated
+      tags:
+        - Electrification Permit
+      parameters:
+        - in: query
+          name: dateRange
+          required: false
+          schema:
+            type: array
+            description: Date range filter for submitted, decision, or status last changed dates
+            items:
+              type: string
+              format: date
+            minItems: 2
+            maxItems: 2
+        - in: query
+          name: permitTypeId
+          required: false
+          schema:
+            type: string
+            description: The permit type ID to filter on
+        - in: query
+          name: searchTag
+          required: false
+          schema:
+            type: string
+            description: Search term to filter on activity ID, stage, state, permit type, project details, or tracking IDs
+        - in: query
+          name: skip
+          required: false
+          schema:
+            type: string
+            description: Number of records to skip for pagination
+        - in: query
+          name: sortField
+          required: false
+          schema:
+            type: string
+            description: Field to sort by (decisionDate, stage, state, statusLastChanged, submittedDate)
+            enum: [decisionDate, stage, state, statusLastChanged, submittedDate]
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            type: string
+            description: Sort order (1 for ascending, -1 for descending)
+            enum: ['1', '-1']
+        - in: query
+          name: sourceSystemKindId
+          required: false
+          schema:
+            type: string
+            description: The source system kind ID to filter on
+        - in: query
+          name: take
+          required: false
+          schema:
+            type: string
+            description: Number of records to return (default 10)
+      responses:
+        '200':
+          description: A paginated list of permits with total count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DB-Permit'
+                  totalRecords:
+                    type: number
+                    description: Total number of permits matching the search criteria
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /electrification/permit/note:
     post:
       summary: Create a permit note
@@ -2769,6 +2857,94 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /housing/permit/search:
+    get:
+      summary: Search permits
+      description: Returns a paginated list of permits based on the given filters and search criteria
+      operationId: searchHousingPermitsPaginated
+      tags:
+        - Housing Permit
+      parameters:
+        - in: query
+          name: dateRange
+          required: false
+          schema:
+            type: array
+            description: Date range filter for submitted, decision, or status last changed dates
+            items:
+              type: string
+              format: date
+            minItems: 2
+            maxItems: 2
+        - in: query
+          name: permitTypeId
+          required: false
+          schema:
+            type: string
+            description: The permit type ID to filter on
+        - in: query
+          name: searchTag
+          required: false
+          schema:
+            type: string
+            description: Search term to filter on activity ID, stage, state, permit type, project details, or tracking IDs
+        - in: query
+          name: skip
+          required: false
+          schema:
+            type: string
+            description: Number of records to skip for pagination
+        - in: query
+          name: sortField
+          required: false
+          schema:
+            type: string
+            description: Field to sort by (decisionDate, stage, state, statusLastChanged, submittedDate)
+            enum: [decisionDate, stage, state, statusLastChanged, submittedDate]
+        - in: query
+          name: sortOrder
+          required: false
+          schema:
+            type: string
+            description: Sort order (1 for ascending, -1 for descending)
+            enum: ['1', '-1']
+        - in: query
+          name: sourceSystemKindId
+          required: false
+          schema:
+            type: string
+            description: The source system kind ID to filter on
+        - in: query
+          name: take
+          required: false
+          schema:
+            type: string
+            description: Number of records to return (default 10)
+      responses:
+        '200':
+          description: A paginated list of permits with total count
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  permits:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/DB-Permit'
+                  totalRecords:
+                    type: number
+                    description: Total number of permits matching the search criteria
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
   /housing/permit/note:

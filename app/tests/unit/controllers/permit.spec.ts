@@ -23,6 +23,7 @@ import {
   getPermitController,
   getPermitTypesController,
   listPermitsController,
+  searchPermitsController,
   upsertPermitController,
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
@@ -41,7 +42,12 @@ import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums
 import { permitNoteUpdateTemplate, navPermitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
 
 import type { Request, Response } from 'express';
-import type { ListPermitsOptions, Permit, PermitUpdateEmailParams } from '../../../src/types/index.ts';
+import type {
+  ListPermitsOptions,
+  Permit,
+  PermitUpdateEmailParams,
+  SearchPermitsOptions
+} from '../../../src/types/index.ts';
 
 // Mock config library - @see {@link https://stackoverflow.com/a/64819698}
 jest.mock('config');
@@ -188,6 +194,124 @@ describe('listPermitsController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(permitList);
+  });
+});
+
+describe('searchPermitsController', () => {
+  const searchSpy = jest.spyOn(permitService, 'searchPermitsPaginated');
+
+  it('should call services and respond with 200 and paginated results', async () => {
+    const req = {
+      query: {
+        dateRange: ['2024-01-01', '2024-12-31'],
+        permitTypeId: '123',
+        searchTag: 'test',
+        skip: '0',
+        take: '10',
+        sortField: 'submittedDate',
+        sortOrder: 'asc'
+      },
+      currentContext: {
+        ...TEST_CURRENT_CONTEXT,
+        initiative: Initiative.HOUSING
+      }
+    };
+
+    const mockResponse = {
+      permits: TEST_PERMIT_LIST,
+      totalRecords: 25
+    };
+
+    searchSpy.mockResolvedValue(mockResponse);
+
+    await searchPermitsController(
+      req as unknown as Request<never, never, never, SearchPermitsOptions>,
+      res as unknown as Response
+    );
+
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, req.query);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockResponse);
+  });
+
+  it('should handle empty query parameters', async () => {
+    const req = {
+      query: {},
+      currentContext: {
+        ...TEST_CURRENT_CONTEXT,
+        initiative: Initiative.ELECTRIFICATION
+      }
+    };
+
+    const mockResponse = {
+      permits: [],
+      totalRecords: 0
+    };
+
+    searchSpy.mockResolvedValue(mockResponse);
+
+    await searchPermitsController(
+      req as unknown as Request<never, never, never, SearchPermitsOptions>,
+      res as unknown as Response
+    );
+
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {});
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockResponse);
+  });
+
+  it('should handle partial query parameters', async () => {
+    const req = {
+      query: {
+        permitTypeId: '456',
+        skip: '10',
+        take: '20'
+      },
+      currentContext: {
+        ...TEST_CURRENT_CONTEXT,
+        initiative: Initiative.HOUSING
+      }
+    };
+
+    const mockResponse = {
+      permits: [TEST_PERMIT_1],
+      totalRecords: 1
+    };
+
+    searchSpy.mockResolvedValue(mockResponse);
+
+    await searchPermitsController(
+      req as unknown as Request<never, never, never, SearchPermitsOptions>,
+      res as unknown as Response
+    );
+
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, req.query);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockResponse);
+  });
+
+  it('should throw 400 error when initiative is PCNS', async () => {
+    const req = {
+      query: {
+        permitTypeId: '123'
+      },
+      currentContext: {
+        ...TEST_CURRENT_CONTEXT,
+        initiative: Initiative.PCNS
+      }
+    };
+
+    await expect(
+      searchPermitsController(
+        req as unknown as Request<never, never, never, SearchPermitsOptions>,
+        res as unknown as Response
+      )
+    ).rejects.toThrow();
+
+    expect(searchSpy).not.toHaveBeenCalled();
   });
 });
 
