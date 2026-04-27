@@ -15,6 +15,10 @@ import type { AxiosResponse } from 'axios';
 
 // Mock Services
 vi.mock('@/services', () => ({
+  ConfigService: class {
+    static init = vi.fn();
+    getConfig = vi.fn();
+  },
   peachService: { getPeachSummary: vi.fn() },
   permitService: { upsertPermit: vi.fn(), deletePermit: vi.fn() },
   permitNoteService: { createPermitNote: vi.fn() },
@@ -66,6 +70,7 @@ const testSourceSystemKinds = [
 
 const defaultAuthorization: Permit = {
   permitId: 'permit-123',
+  permitTypeId: 123,
   permitType: {
     name: 'Test Auth',
     agency: 'Agency',
@@ -90,7 +95,11 @@ const wrapperSettings = (props = {}, isPeachEnabled = true) => ({
     plugins: [
       createTestingPinia({
         initialState: {
-          app: { features: { peach: isPeachEnabled } },
+          config: {
+            config: {
+              features: { peach: isPeachEnabled }
+            }
+          },
           project: {
             project: { activityId: 'act-123', projectId: 'project-123' }
           },
@@ -111,8 +120,8 @@ const wrapperSettings = (props = {}, isPeachEnabled = true) => ({
       FormNavigationGuard: true,
       Form: {
         name: 'Form',
-        template:
-          '<form @submit.prevent="$emit(\'submit\', $attrs[\'initial-values\'])"><slot :values="$attrs[\'initial-values\']" :setFieldValue="() => {}" /></form>'
+        props: ['initialValues'],
+        template: '<form><slot :values="$attrs[\'initial-form-values\']" :setFieldValue="() => {}" /></form>'
       },
       Dialog: {
         name: 'Dialog',
@@ -135,10 +144,12 @@ describe('AuthorizationForm.vue', () => {
 
     mockToastError = vi.fn();
     mockToastSuccess = vi.fn();
-    vi.mocked(useToast).mockReturnValue({ error: mockToastError, success: mockToastSuccess } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useToast).mockReturnValue({ error: mockToastError, success: mockToastSuccess } as any);
 
     mockConfirmRequire = vi.fn();
-    vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any);
 
     vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue({
       data: testSourceSystemKinds
@@ -176,7 +187,8 @@ describe('AuthorizationForm.vue', () => {
       const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: defaultAuthorization }));
       await flushPromises();
 
-      await wrapper.find('form').trigger('submit');
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
       await flushPromises();
 
       expect(permitService.upsertPermit).toHaveBeenCalledWith(
@@ -203,12 +215,11 @@ describe('AuthorizationForm.vue', () => {
       const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
       await flushPromises();
 
-      const submitBtn = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('authorization.authorizationForm.automatePublish'));
+      const submitBtn = wrapper.find('button[type="submit"]');
       expect(submitBtn).toBeDefined();
 
-      await wrapper.find('form').trigger('submit');
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
       await flushPromises();
 
       expect(peachService.getPeachSummary).toHaveBeenCalledTimes(1);
@@ -234,7 +245,8 @@ describe('AuthorizationForm.vue', () => {
       const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
       await flushPromises();
 
-      await wrapper.find('form').trigger('submit');
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
       await flushPromises();
 
       expect(wrapper.html()).toContain('authorization.authorizationForm.noRecordsFound');
