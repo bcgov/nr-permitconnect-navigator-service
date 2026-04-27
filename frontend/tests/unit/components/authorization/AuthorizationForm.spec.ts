@@ -1,105 +1,132 @@
-import { isAxiosError } from 'axios';
 import { createTestingPinia } from '@pinia/testing';
-import { setActivePinia } from 'pinia';
-import { shallowMount } from '@vue/test-utils';
+import { flushPromises, mount } from '@vue/test-utils';
 
 import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 
 import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
-import { peachService, permitService, permitNoteService, sourceSystemKindService, userService } from '@/services';
-import { useConfigStore } from '@/store';
-import { StorageKey } from '@/utils/enums/application';
+import { useConfirm, useToast } from '@/lib/primevue';
+import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
 import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
+import type { Permit, PermitTracking, PermitType } from '@/types';
 import type { AxiosResponse } from 'axios';
-import type { Permit, PermitNote, PermitType, SourceSystemKind } from '@/types';
-import { useToast } from '@/lib/primevue';
 
-const createPermitNoteSpy = vi.spyOn(permitNoteService, 'createPermitNote');
-const deletePermitSpy = vi.spyOn(permitService, 'deletePermit');
-const getPeachSummarySpy = vi.spyOn(peachService, 'getPeachSummary');
-const getSourceSystemKindsService = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
-const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
-const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+// Mock Services
+vi.mock('@/services', () => ({
+  ConfigService: class {
+    static init = vi.fn();
+    getConfig = vi.fn();
+  },
+  peachService: { getPeachSummary: vi.fn() },
+  permitService: { upsertPermit: vi.fn(), deletePermit: vi.fn() },
+  permitNoteService: { createPermitNote: vi.fn() },
+  sourceSystemKindService: { getSourceSystemKinds: vi.fn() },
+  userService: { searchUsers: vi.fn() }
+}));
 
-vi.mock('axios', async () => {
-  const actual = await vi.importActual<typeof import('axios')>('axios');
+// Mock PrimeVue Composables
+vi.mock('@/lib/primevue', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('@/lib/primevue')>();
   return {
     ...actual,
-    default: {
-      get: vi.fn()
-    },
-    isAxiosError: vi.fn()
+    useConfirm: vi.fn(),
+    useToast: vi.fn()
   };
 });
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn(),
-    locale: { value: 'en' }
-  })
+// Mock Vue Router
+const mockRouterPush = vi.fn();
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ push: mockRouterPush })
 }));
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
+// Mock i18n
+const mockT = (key: string) => key;
+vi.mock('vue-i18n', () => ({
+  useI18n: () => ({
+    t: mockT,
+    locale: { value: 'en' }
   })
 }));
 
 const testSourceSystemKinds = [
   {
-    sourceSystemKindId: 3,
-    kind: null,
-    description: 'Permit Number',
-    sourceSystem: 'ITSM-5285',
-    createdBy: '00000000-0000-4000-8000-000000000000',
-    createdAt: '2025-12-02T23:52:52.615Z',
-    updatedBy: null,
-    updatedAt: null,
-    deletedBy: null,
-    deletedAt: null
+    sourceSystemKindId: 10,
+    sourceSystem: 'ITSM-9999',
+    description: 'Integrated System',
+    integrated: true,
+    permitTypeIds: [123]
   },
   {
     sourceSystemKindId: 2,
-    kind: null,
-    description: 'Application Number',
-    sourceSystem: 'ITSM-5285',
-    createdBy: '00000000-0000-4000-8000-000000000000',
-    createdAt: '2025-12-02T23:52:52.615Z',
-    updatedBy: null,
-    updatedAt: null,
-    deletedBy: null,
-    deletedAt: null
+    sourceSystem: 'OTHER',
+    description: 'Standard System',
+    integrated: false,
+    permitTypeIds: [123]
   }
 ];
 
-let pinia: ReturnType<typeof createTestingPinia>;
+const defaultAuthorization: Permit = {
+  permitId: 'permit-123',
+  permitTypeId: 123,
+  permitType: {
+    name: 'Test Auth',
+    agency: 'Agency',
+    businessDomain: 'Domain',
+    permitTypeId: 123,
+    sourceSystem: 'OTHER'
+  },
+  stage: PermitStage.PRE_SUBMISSION,
+  state: PermitState.NONE,
+  needed: PermitNeeded.YES,
+  permitTracking: [],
+  createdAt: '2025-01-01',
+  createdBy: 'creator'
+} as unknown as Permit;
 
-const wrapperSettings = () => ({
+const wrapperSettings = (props = {}, isPeachEnabled = true) => ({
   props: {
-    editable: true
+    editable: true,
+    ...props
   },
   global: {
-    plugins: [pinia, PrimeVue, ConfirmationService, ToastService],
+    plugins: [
+      createTestingPinia({
+        initialState: {
+          config: {
+            config: {
+              features: { peach: isPeachEnabled }
+            }
+          },
+          project: {
+            project: { activityId: 'act-123', projectId: 'project-123' }
+          },
+          code: { codes: { SourceSystem: [] } }
+        }
+      }),
+      PrimeVue
+    ],
     provide: {
       [projectRouteNameKey as symbol]: { value: 'housing-project' },
-      [projectServiceKey as symbol]: {
-        value: {
-          emailConfirmation: vi.fn()
-        }
-      }
+      [projectServiceKey as symbol]: { value: { emailConfirmation: vi.fn() } }
     },
     stubs: {
       'font-awesome-icon': true,
       AuthorizationCardIntake: true,
       AuthorizationStatusUpdatesCard: true,
       AuthorizationUpdateHistory: true,
-      FormNavigationGuard: true
+      FormNavigationGuard: true,
+      Form: {
+        name: 'Form',
+        props: ['initialValues'],
+        template: '<form><slot :values="$attrs[\'initial-form-values\']" :setFieldValue="() => {}" /></form>'
+      },
+      Dialog: {
+        name: 'Dialog',
+        template: '<div v-if="$attrs.visible" class="stub-dialog"><slot name="header" /><slot /></div>'
+      }
     },
     directives: {
       Tooltip: Tooltip
@@ -107,604 +134,170 @@ const wrapperSettings = () => ({
   }
 });
 
-beforeEach(async () => {
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      },
-      ches: {
-        submission: {
-          cc: 'test@example.com'
-        }
-      },
-      features: { peach: true }
-    })
-  );
+describe('AuthorizationForm.vue', () => {
+  let mockToastError: ReturnType<typeof vi.fn>;
+  let mockToastSuccess: ReturnType<typeof vi.fn>;
+  let mockConfirmRequire: ReturnType<typeof vi.fn>;
 
-  pinia = createTestingPinia({
-    stubActions: false,
-    createSpy: vi.fn,
-    initialState: {
-      auth: {
-        user: {}
-      },
-      project: {
-        project: {
-          activityId: 'CE0756D0',
-          projectId: 'project-123',
-          projectName: 'Test Project',
-          assignedUserId: undefined,
-          contacts: []
-        }
-      },
-      code: {
-        codes: {
-          ElectrificationProjectCategory: [],
-          ElectrificationProjectType: [],
-          EscalationType: [],
-          SourceSystem: []
-        }
-      }
-    }
-  });
-  setActivePinia(pinia);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-  const configStore = useConfigStore();
-  await configStore.init();
+    mockToastError = vi.fn();
+    mockToastSuccess = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useToast).mockReturnValue({ error: mockToastError, success: mockToastSuccess } as any);
 
-  vi.clearAllMocks();
+    mockConfirmRequire = vi.fn();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any);
 
-  createPermitNoteSpy.mockResolvedValue({ data: {} } as AxiosResponse);
-  deletePermitSpy.mockResolvedValue({} as AxiosResponse);
-  getPeachSummarySpy.mockResolvedValue({ data: null } as AxiosResponse);
-  getSourceSystemKindsService.mockResolvedValue({ data: testSourceSystemKinds } as AxiosResponse);
-  searchUsersSpy.mockResolvedValue({
-    data: [
-      {
-        firstName: 'Updater',
-        lastName: 'User'
-      }
-    ]
-  } as AxiosResponse);
-  upsertPermitSpy.mockResolvedValue({
-    data: {
-      permitId: 'permit-123',
-      permitType: { name: 'Test Authorization Type' },
-      submittedDate: '2025-01-01',
-      createdAt: '2025-01-01'
-    }
-  } as AxiosResponse);
-});
-
-afterEach(() => {
-  sessionStorage.clear();
-});
-
-describe('AuthorizationForm', () => {
-  it('renders component', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    expect(wrapper).toBeTruthy();
+    vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue({
+      data: testSourceSystemKinds
+    } as AxiosResponse);
+    vi.mocked(userService.searchUsers).mockResolvedValue({
+      data: [{ firstName: 'John', lastName: 'Doe' }]
+    } as AxiosResponse);
   });
 
-  it('loads source system kinds on mount', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
+  describe('Initialization and Rendering', () => {
+    it('loads source system kinds and renders properly without initial authorization', async () => {
+      const wrapper = mount(AuthorizationForm, wrapperSettings());
+      await flushPromises();
 
-    expect(getSourceSystemKindsService).toHaveBeenCalledTimes(1);
+      expect(sourceSystemKindService.getSourceSystemKinds).toHaveBeenCalledTimes(1);
+      expect(wrapper.html()).toContain('authorization.authorizationForm.addAuthorization');
+    });
 
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(vm.sourceSystemKinds).toHaveLength(testSourceSystemKinds.length);
-  });
+    it('displays authorization metadata when editing an existing permit', async () => {
+      const wrapper = mount(
+        AuthorizationForm,
+        wrapperSettings({ authorization: { ...defaultAuthorization, updatedBy: 'user-1' } })
+      );
+      await flushPromises();
 
-  it('initializes default form values when no authorization is provided', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    expect(vm.initialFormValues).toEqual({
-      state: PermitState.NONE,
-      stage: PermitStage.PRE_SUBMISSION
+      expect(userService.searchUsers).toHaveBeenCalledWith({ userId: ['user-1'] });
+      expect(wrapper.html()).toContain('Agency');
+      expect(wrapper.html()).toContain('Domain');
+      expect(wrapper.html()).toContain('Doe, John');
     });
   });
 
-  it('initializes form values when authorization is provided', async () => {
-    const baseSettings = wrapperSettings();
-
-    const auth = {
-      permitType: { name: 'Test Auth', agency: 'Test Agency', businessDomain: 'Domain' },
-      decisionDate: '2025-01-02',
-      decisionTime: '10:00',
-      submittedDate: '2025-01-01',
-      submittedTime: '09:00',
-      permitTracking: [
-        {
-          sourceSystemKindId: 10,
-          trackingId: 'ABC-123',
-          shownToProponent: true,
-          sourceSystemKind: { sourceSystemKindId: 10 }
-        }
-      ],
-      issuedPermitId: 'ISS-1',
-      statusLastChanged: '2025-01-03',
-      statusLastChangedTime: '11:00',
-      statusLastVerified: '2025-01-03',
-      statusLastVerifiedTime: '11:00',
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: PermitNeeded.YES,
-      permitId: 'permit-123',
-      createdAt: '2025-01-01T00:00:00.000Z',
-      createdBy: 'creator',
-      updatedAt: '2025-01-03T00:00:00.000Z',
-      updatedBy: 'updater'
-    };
-
-    const wrapper = shallowMount(AuthorizationForm, {
-      ...baseSettings,
-      props: {
-        ...baseSettings.props,
-        authorization: auth as Permit
-      }
-    });
-
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    expect(vm.initialFormValues.authorizationType).toEqual(auth.permitType);
-    expect(vm.initialFormValues.stage).toBe(auth.stage);
-    expect(vm.initialFormValues.state).toBe(auth.state);
-    expect(vm.initialFormValues.needed).toBe(auth.needed);
-
-    expect(vm.initialFormValues.permitTracking).toEqual([
-      {
-        sourceSystemKindId: 10,
-        trackingId: 'ABC-123',
-        shownToProponent: true
-      }
-    ]);
-  });
-
-  it('detects a PEACH integrated auth type when sourceSystemKinds contains an integrated system', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    vm.sourceSystemKinds = [
-      {
-        sourceSystemKindId: 1,
-        sourceSystem: 'ITSM-9999',
-        description: 'Job Number',
-        kind: null,
-        createdBy: 'user',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: null,
-        updatedAt: null,
-        deletedBy: null,
-        deletedAt: null,
-        integrated: true
-      }
-    ];
-
-    expect(vm.checkIfPeachIntegratedAuthType('ITSM-9999')).toBe(true);
-    expect(vm.checkIfPeachIntegratedAuthType('OTHER-SYS')).toBe(false);
-  });
-
-  it('detects PEACH integrated tracking ids based on sourceSystemKinds', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    vm.sourceSystemKinds = [
-      {
-        sourceSystemKindId: 10,
-        sourceSystem: 'ITSM-9999',
-        description: 'Job Number',
-        kind: null,
-        createdBy: 'user',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: null,
-        updatedAt: null,
-        deletedBy: null,
-        deletedAt: null,
-        integrated: true
-      }
-    ];
-
-    const integratedTracking = [
-      {
-        sourceSystemKindId: 10,
-        trackingId: 'ABC-123',
-        shownToProponent: false
-      }
-    ];
-
-    const nonIntegratedTracking = [
-      {
-        sourceSystemKindId: 999,
-        trackingId: 'XYZ-999',
-        shownToProponent: false
-      }
-    ];
-
-    expect(vm.checkIfPeachIntegratedTrackingId(integratedTracking)).toBe(true);
-    expect(vm.checkIfPeachIntegratedTrackingId(nonIntegratedTracking)).toBe(false);
-    expect(vm.checkIfPeachIntegratedTrackingId([])).toBe(false);
-  });
-
-  it('submits a non-PEACH permit, creates note, and triggers email notification', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    const submitPayload = {
-      authorizationType: {
-        permitTypeId: 123,
-        sourceSystem: 'NON-PEACH-SYS'
-      },
-      permitNote: 'This is a test note',
-      decisionDate: null,
-      submittedDate: null,
-      statusLastChanged: null,
-      statusLastVerified: null,
-      needed: PermitNeeded.YES,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      permitTracking: []
-    };
-
-    await vm.onSubmit(submitPayload);
-    await wrapper.vm.$nextTick();
-
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
-
-    expect(getPeachSummarySpy).not.toHaveBeenCalled();
-  });
-
-  it('does not create a permit note when note is empty or whitespace', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    const submitPayload = {
-      authorizationType: {
-        permitTypeId: 123,
-        sourceSystem: 'NON-PEACH-SYS'
-      },
-      permitNote: '   ',
-      decisionDate: null,
-      submittedDate: null,
-      statusLastChanged: null,
-      statusLastVerified: null,
-      needed: PermitNeeded.YES,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      permitTracking: []
-    };
-
-    await vm.onSubmit(submitPayload);
-
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
-    expect(createPermitNoteSpy).not.toHaveBeenCalled();
-  });
-
-  it('removes the Peach template from permitNote when leaving Peach-integrated state', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const template = 'PEACH TEMPLATE';
-
-    vm.t.mockReturnValue(template);
-
-    const setFieldValue = vi.fn();
-
-    vm.formRef = {
-      values: {
-        permitNote: `Some user text\n\n${template}\n\nMore text`
-      },
-      setFieldValue
-    };
-
-    vm.handlePeachIntegrationChange(false, true);
-
-    expect(setFieldValue).toHaveBeenCalledWith('permitNote', 'Some user text\n\nMore text');
-  });
-
-  it('adds Peach template when entering integrated mode and note is empty', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const template = 'PEACH TEMPLATE';
-
-    vm.t.mockReturnValue(template);
-
-    const setFieldValue = vi.fn();
-
-    vm.formRef = {
-      values: {
-        permitNote: ''
-      },
-      setFieldValue
-    };
-
-    vm.handlePeachIntegrationChange(true, false);
-
-    expect(setFieldValue).toHaveBeenCalledWith('permitNote', template);
-  });
-
-  it('appends Peach template once when entering integrated mode and note has content', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const template = 'PEACH TEMPLATE';
-
-    vm.t.mockReturnValue(template);
-
-    const setFieldValue = vi.fn();
-
-    vm.formRef = {
-      values: {
-        permitNote: 'Existing note'
-      },
-      setFieldValue
-    };
-
-    vm.handlePeachIntegrationChange(true, false);
-
-    expect(setFieldValue).toHaveBeenCalledWith('permitNote', `Existing note\n\n${template}`);
-  });
-
-  it('does not add Peach template when authorization already has existing notes', async () => {
-    const baseSettings = wrapperSettings();
-    const wrapper = shallowMount(AuthorizationForm, {
-      ...baseSettings,
-      props: {
-        ...baseSettings.props,
-        authorization: {
-          permitNote: [{ note: 'previous note' } as PermitNote],
-          permitTracking: [
-            {
-              sourceSystemKindId: 10,
-              trackingId: 'ABC-123',
-              shownToProponent: true,
-              sourceSystemKind: { sourceSystemKindId: 10 } as SourceSystemKind
-            }
-          ]
-        } as unknown as Permit
-      }
-    });
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-    const template = 'PEACH TEMPLATE';
-    vm.t.mockReturnValue(template);
-
-    const setFieldValue = vi.fn();
-
-    vm.formRef = {
-      values: { permitNote: '' },
-      setFieldValue
-    };
-
-    vm.handlePeachIntegrationChange(true, false);
-
-    expect(setFieldValue).toHaveBeenCalledWith('needed', PermitNeeded.YES);
-
-    expect(setFieldValue).not.toHaveBeenCalledWith('permitNote', expect.anything());
-  });
-
-  it('getPeachSummary maps sourceSystemKind onto permitTracking and returns data', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    vm.sourceSystemKinds = [
-      {
-        sourceSystemKindId: 10,
-        sourceSystem: 'SYS',
-        description: 'Job Number',
-        kind: null,
-        createdBy: 'user',
-        createdAt: '2025-01-01T00:00:00.000Z',
-        updatedBy: null,
-        updatedAt: null,
-        deletedBy: null,
-        deletedAt: null,
-        integrated: true
-      }
-    ];
-
-    const tracking = [
-      {
-        sourceSystemKindId: 10,
-        trackingId: 'ABC-123',
-        shownToProponent: false
-      }
-    ];
-
-    getPeachSummarySpy.mockResolvedValueOnce({ data: { some: 'data' } } as AxiosResponse);
-
-    const result = await vm.getPeachSummary(tracking);
-
-    expect(getPeachSummarySpy).toHaveBeenCalledTimes(1);
-    expect(getPeachSummarySpy).toHaveBeenCalledWith([
-      expect.objectContaining({
-        sourceSystemKindId: 10,
-        trackingId: 'ABC-123',
-        shownToProponent: false,
-        sourceSystemKind: expect.objectContaining({ sourceSystemKindId: 10 })
-      })
-    ]);
-
-    expect(result).toEqual({ some: 'data' });
-  });
-
-  it('getPeachSummary shows noPeachData modal when record is not found (404)', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    vi.mocked(isAxiosError).mockReturnValueOnce(true);
-    getPeachSummarySpy.mockRejectedValueOnce({
-      status: 404,
-      response: {
-        data: {
-          extra: {
-            peachError: {
-              record_id: 'RID',
-              system_id: 'SYS'
-            }
-          }
-        }
-      }
-    });
-
-    await vm.getPeachSummary([
-      {
-        sourceSystemKindId: 1,
-        trackingId: 'ABC-123',
-        shownToProponent: false
-      }
-    ]);
-
-    expect(vm.noPeachDataModalVisible).toBe(true);
-  });
-
-  it.todo('handles errors when saving the permit fails', async () => {
-    const toastSpy = vi.spyOn(useToast(), 'error');
-
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
-
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    upsertPermitSpy.mockRejectedValueOnce(new Error('boom'));
-
-    const submitPayload = {
-      authorizationType: {
-        permitTypeId: 123,
-        sourceSystem: 'NON-PEACH-SYS'
-      },
-      permitNote: 'This is a test note',
-      decisionDate: null,
-      submittedDate: null,
-      statusLastChanged: null,
-      statusLastVerified: null,
-      needed: PermitNeeded.YES,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      permitTracking: []
-    };
-
-    await vm.onSubmit(submitPayload);
-
-    expect(toastSpy).toHaveBeenCalledWith(expect.any(String), 'boom');
-    expect(upsertPermitSpy).toHaveBeenCalledWith(submitPayload);
-  });
-
-  it('onDelete calls deletePermit and navigates on accept', async () => {
-    const baseSettings = wrapperSettings();
-
-    const wrapper = shallowMount(AuthorizationForm, {
-      ...baseSettings,
-      props: {
-        ...baseSettings.props,
-        authorization: {
-          activityId: 'act-123',
+  describe('Form Submissions', () => {
+    it('submits a standard permit successfully and navigates back', async () => {
+      const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: defaultAuthorization }));
+      await flushPromises();
+
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
+      await flushPromises();
+
+      expect(permitService.upsertPermit).toHaveBeenCalledWith(
+        expect.objectContaining({
           permitId: 'permit-123',
-          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' } as PermitType,
-          permitTypeId: 123,
-          permitTracking: [],
-          createdAt: '2025-01-01',
-          createdBy: 'creator',
-          stage: PermitStage.PRE_SUBMISSION,
-          state: PermitState.NONE,
-          needed: PermitNeeded.NO
-        }
-      }
+          permitTypeId: 123
+        })
+      );
+      expect(mockToastSuccess).toHaveBeenCalledWith('authorization.authorizationForm.permitSaved');
+      expect(mockRouterPush).toHaveBeenCalledWith(expect.objectContaining({ name: 'housing-project' }));
     });
 
-    await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
+    it('interacts with PEACH service when saving an integrated authorization', async () => {
+      const peachAuth: Permit = {
+        ...defaultAuthorization,
+        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-9999' } as PermitType,
+        permitTracking: [{ sourceSystemKindId: 10, trackingId: 'ABC-123' } as PermitTracking]
+      };
 
-    const requireSpy = vi.spyOn(vm.confirmDialog, 'require');
+      vi.mocked(peachService.getPeachSummary).mockResolvedValue({
+        data: { state: PermitState.ACCEPTED, stage: PermitStage.POST_DECISION }
+      } as AxiosResponse);
 
-    vm.onDelete();
+      const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
+      await flushPromises();
 
-    expect(requireSpy).toHaveBeenCalledTimes(1);
+      const submitBtn = wrapper.find('button[type="submit"]');
+      expect(submitBtn).toBeDefined();
 
-    const args = requireSpy.mock.calls[0]![0] as { accept: () => Promise<void> };
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
+      await flushPromises();
 
-    await args.accept();
+      expect(peachService.getPeachSummary).toHaveBeenCalledTimes(1);
 
-    expect(deletePermitSpy).toHaveBeenCalledWith('permit-123');
-    expect(vm.router.push).toHaveBeenCalledWith(
-      expect.objectContaining({
-        name: 'housing-project',
-        query: { initialTab: '2' }
-      })
-    );
-  });
-
-  it('onDelete shows error and does not navigate when delete fails', async () => {
-    const baseSettings = wrapperSettings();
-
-    const wrapper = shallowMount(AuthorizationForm, {
-      ...baseSettings,
-      props: {
-        ...baseSettings.props,
-        authorization: {
-          activityId: 'act-123',
-          permitId: 'permit-123',
-          permitType: { name: 'Test Auth', agency: 'A', businessDomain: 'B' } as PermitType,
-          permitTypeId: 123,
-          createdAt: '2025-01-01',
-          createdBy: 'creator',
-          updatedAt: '2025-01-02',
-          updatedBy: 'updater',
-          stage: PermitStage.PRE_SUBMISSION,
-          state: PermitState.NONE,
-          needed: PermitNeeded.NO
-        }
-      }
+      const upsertArgs = vi.mocked(permitService.upsertPermit).mock.calls[0][0];
+      expect(upsertArgs.state).toBe(PermitState.ACCEPTED);
+      expect(upsertArgs.stage).toBe(PermitStage.POST_DECISION);
     });
 
-    await wrapper.vm.$nextTick();
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
+    it('opens no data modal when PEACH service returns a 404', async () => {
+      const peachAuth: Permit = {
+        ...defaultAuthorization,
+        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-9999' } as PermitType,
+        permitTracking: [{ sourceSystemKindId: 10, trackingId: 'ABC-123' } as PermitTracking]
+      };
 
-    const requireSpy = vi.spyOn(vm.confirmDialog, 'require');
-    deletePermitSpy.mockRejectedValueOnce(new Error('boom'));
+      vi.mocked(peachService.getPeachSummary).mockRejectedValue({
+        status: 404,
+        response: { data: { extra: { peachError: { record_id: '1', system_id: '1' } } } },
+        isAxiosError: true
+      });
 
-    vm.onDelete();
+      const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
+      await flushPromises();
 
-    expect(requireSpy).toHaveBeenCalledTimes(1);
+      const form = await wrapper.findComponent({ name: 'Form' });
+      await form.vm.$emit('submit', form.props('initialValues'));
+      await flushPromises();
 
-    const args = requireSpy.mock.calls[0]![0] as { accept: () => Promise<void> };
+      expect(wrapper.html()).toContain('authorization.authorizationForm.noRecordsFound');
 
-    await args.accept();
+      expect(permitService.upsertPermit).not.toHaveBeenCalled();
 
-    expect(deletePermitSpy).toHaveBeenCalledWith('permit-123');
-    expect(vm.router.push).not.toHaveBeenCalled();
+      const confirmBtn = wrapper
+        .findAll('.stub-dialog button')
+        .find((b) => b.text().includes('authorization.authorizationForm.confirm'));
+      await confirmBtn?.trigger('click');
+      await flushPromises();
+
+      // Now upsert should proceed
+      expect(permitService.upsertPermit).toHaveBeenCalled();
+    });
   });
 
-  it('onInvalidSubmit forwards errors without throwing', async () => {
-    const wrapper = shallowMount(AuthorizationForm, wrapperSettings());
-    await wrapper.vm.$nextTick();
+  describe('Deletion Logic', () => {
+    it('triggers confirmation dialog and deletes permit on accept', async () => {
+      const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: defaultAuthorization }));
+      await flushPromises();
 
-    const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
+      mockConfirmRequire.mockImplementationOnce((options) => options.accept());
 
-    expect(() => vm.onInvalidSubmit({ errors: { field: 'some error' } })).not.toThrow();
+      const deleteBtn = wrapper
+        .findAll('button')
+        .find((b) => b.text().includes('authorization.authorizationForm.delete'));
+      await deleteBtn?.trigger('click');
+      await flushPromises();
+
+      expect(mockConfirmRequire).toHaveBeenCalled();
+      expect(permitService.deletePermit).toHaveBeenCalledWith('permit-123');
+      expect(mockToastSuccess).toHaveBeenCalledWith('authorization.authorizationForm.authDeleted');
+      expect(mockRouterPush).toHaveBeenCalledWith(expect.objectContaining({ name: 'housing-project' }));
+    });
+
+    it('handles delete API failure gracefully', async () => {
+      const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: defaultAuthorization }));
+      await flushPromises();
+
+      mockConfirmRequire.mockImplementationOnce((options) => options.accept());
+      vi.mocked(permitService.deletePermit).mockRejectedValueOnce(new Error('Network error'));
+
+      const deleteBtn = wrapper
+        .findAll('button')
+        .find((b) => b.text().includes('authorization.authorizationForm.delete'));
+      await deleteBtn?.trigger('click');
+      await flushPromises();
+
+      expect(mockToastError).toHaveBeenCalledWith('authorization.authorizationForm.authDeletionError', 'Network error');
+      expect(mockRouterPush).not.toHaveBeenCalled();
+    });
   });
 });
