@@ -315,23 +315,7 @@ async function onSubmit(data: GenericObject) {
     const statusLastChanged = splitDateTime(data.statusLastChanged);
     const statusLastVerified = splitDateTime(data.statusLastVerified);
 
-  const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-  const permitData: PermitArgs = {
-    ...rest,
-    activityId: getProject.value!.activityId,
-    permitTypeId: authorizationType.permitTypeId,
-    submittedDate: submitted.date,
-    submittedTime: submitted.time,
-    decisionDate: decision.date,
-    decisionTime: decision.time,
-    statusLastVerified: statusLastVerified.date,
-    statusLastVerifiedTime: statusLastVerified.time,
-    statusLastChanged: statusLastChanged.date,
-    statusLastChangedTime: statusLastChanged.time,
-    targetDate: data.targetDate ? data.targetDate.toISOString() : null,
-    targetDateDescription: data.targetDateDescription ?? null
-  };
-
+    const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
     const permitData: PermitArgs = {
       ...rest,
       activityId: getProject.value!.activityId,
@@ -343,7 +327,9 @@ async function onSubmit(data: GenericObject) {
       statusLastVerified: statusLastVerified.date,
       statusLastVerifiedTime: statusLastVerified.time,
       statusLastChanged: statusLastChanged.date,
-      statusLastChangedTime: statusLastChanged.time
+      statusLastChangedTime: statusLastChanged.time,
+      targetDate: data.targetDate ? data.targetDate.toISOString() : null,
+      targetDateDescription: data.targetDateDescription ?? null
     };
 
     if (
@@ -458,10 +444,10 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       :editable="editable"
       :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
-      :show-target-date-description="!!values.targetDate"
+      :show-target-date-description="!!values?.targetDate"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
-      @update:target-date-changed="if (!!values.targetDate) setFieldValue('targetDateDescription', undefined);"
+      @update:target-date-changed="if (!!values?.targetDate) setFieldValue('targetDateDescription', undefined);"
     />
     <div class="mt-8 flex justify-between">
       <div>
