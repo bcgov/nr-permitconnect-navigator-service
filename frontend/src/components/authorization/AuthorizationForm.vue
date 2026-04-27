@@ -304,28 +304,29 @@ function onInvalidSubmit({ errors }: GenericObject) {
 }
 
 async function onSubmit(data: GenericObject) {
-  disableFormNavigationGuard.value = true;
-  const decision = splitDateTime(data.decisionDate);
-  const submitted = splitDateTime(data.submittedDate);
-  const statusLastChanged = splitDateTime(data.statusLastChanged);
-  const statusLastVerified = splitDateTime(data.statusLastVerified);
-
-  const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-  const permitData: PermitArgs = {
-    ...rest,
-    activityId: getProject.value!.activityId,
-    permitTypeId: authorizationType.permitTypeId,
-    submittedDate: submitted.date,
-    submittedTime: submitted.time,
-    decisionDate: decision.date,
-    decisionTime: decision.time,
-    statusLastVerified: statusLastVerified.date,
-    statusLastVerifiedTime: statusLastVerified.time,
-    statusLastChanged: statusLastChanged.date,
-    statusLastChangedTime: statusLastChanged.time
-  };
-
   try {
+    disableFormNavigationGuard.value = true;
+    const decision = splitDateTime(data.decisionDate);
+    const submitted = splitDateTime(data.submittedDate);
+    const statusLastChanged = splitDateTime(data.statusLastChanged);
+    const statusLastVerified = splitDateTime(data.statusLastVerified);
+
+    const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
+
+    const permitData: PermitArgs = {
+      ...rest,
+      activityId: getProject.value!.activityId,
+      permitTypeId: authorizationType.permitTypeId,
+      submittedDate: submitted.date,
+      submittedTime: submitted.time,
+      decisionDate: decision.date,
+      decisionTime: decision.time,
+      statusLastVerified: statusLastVerified.date,
+      statusLastVerifiedTime: statusLastVerified.time,
+      statusLastChanged: statusLastChanged.date,
+      statusLastChangedTime: statusLastChanged.time
+    };
+
     if (
       isPeachEnabled.value &&
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
