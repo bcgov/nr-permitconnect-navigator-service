@@ -34,6 +34,8 @@ const sharedPermitSchema = {
   statusLastChangedTime: timeTzString.allow(null),
   statusLastVerified: dateOnlyString.allow(null),
   statusLastVerifiedTime: timeTzString.allow(null),
+  targetDate: Joi.date().iso().allow(null),
+  targetDateDescription: Joi.string().allow(null).max(255),
   ...createStamps
 };
 

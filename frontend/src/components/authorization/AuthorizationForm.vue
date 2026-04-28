@@ -5,7 +5,7 @@ import { Form, type GenericObject } from 'vee-validate';
 import { computed, inject, onBeforeMount, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { array, boolean, number, object, string, type InferType } from 'yup';
+import { array, boolean, date, number, object, string, type InferType } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
@@ -103,7 +103,9 @@ const formSchema = object({
   submittedDate: notInFutureValidator.nullable().label(t('authorization.common.submittedDate')),
   decisionDate: notInFutureValidator.nullable().label(t('authorization.common.decisionDate')),
   statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
-  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged'))
+  statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged')),
+  targetDate: date().nullable(),
+  targetDateDescription: string().nullable()
 });
 
 type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & IStamps;
@@ -248,6 +250,8 @@ function initializeFormValues() {
       state: authorization.state,
       needed: authorization.needed as PermitNeeded,
       permitId: authorization?.permitId,
+      targetDate: authorization?.targetDate ? new Date(authorization?.targetDate) : undefined,
+      targetDateDescription: authorization?.targetDateDescription,
       createdAt: authorization.createdAt,
       createdBy: authorization.createdBy,
       updatedAt: authorization.updatedAt,
@@ -316,7 +320,9 @@ async function onSubmit(data: GenericObject) {
     statusLastVerified: statusLastVerified.date,
     statusLastVerifiedTime: statusLastVerified.time,
     statusLastChanged: statusLastChanged.date,
-    statusLastChangedTime: statusLastChanged.time
+    statusLastChangedTime: statusLastChanged.time,
+    targetDate: data.targetDate ? data.targetDate.toISOString() : null,
+    targetDateDescription: data.targetDateDescription ?? null
   };
 
   try {
@@ -421,8 +427,10 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       :editable="editable"
       :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
+      :show-target-date-description="!!values.targetDate"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
+      @update:target-date-changed="if (!!values.targetDate) setFieldValue('targetDateDescription', undefined);"
     />
     <div class="mt-8 flex justify-between">
       <div>

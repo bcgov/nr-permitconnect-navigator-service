@@ -643,6 +643,9 @@
       "needed": "Needed",
       "statusUpdates": "Status updates",
       "statusVerifiedDate": "Status verified date",
+      "targetDateTooltip": "Target dates are used to track authorizations that need to meet specific timelines.",
+      "targetDateDescription": "Target date description",
+      "targetDateDescriptionTooltip": "Please provide the reason for the target date.",
       "updateNoteForProponent": "Update note for Proponent",
       "updateToToday": "Update to today"
     },
@@ -663,7 +666,8 @@
       "search": "Search",
       "selectId": "Select an ID",
       "statusChangeDate": "Status change date",
-      "submittedDate": "Submitted date"
+      "submittedDate": "Submitted date",
+      "targetDate": "Target date"
     },
     "stateDescriptions": {
       "accepted": "The application has been accepted by the initial reviewing authority.",
