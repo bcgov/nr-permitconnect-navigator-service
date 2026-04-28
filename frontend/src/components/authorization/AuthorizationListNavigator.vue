@@ -51,7 +51,7 @@ function getLocation(streetAddress: string | undefined, locality: string | undef
 }
 
 function onSort(event: DataTableSortEvent) {
-  pagination.value.field = typeof event.sortField === 'string' ? event.sortField : '';
+  pagination.value.field = typeof event.sortField === 'string' ? event.sortField : undefined;
   pagination.value.order = event.sortOrder ?? 1;
   pagination.value.page = 0;
   searchPermits();

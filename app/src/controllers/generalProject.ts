@@ -150,6 +150,8 @@ const generateGeneralProjectData = async (
         submittedTime: x.submittedTime,
         decisionDate: null,
         decisionTime: null,
+        targetDate: null,
+        targetDateDescription: null,
         permitTracking: x.permitTracking?.map((pt) => ({
           ...pt,
           ...generateCreateStamps(currentContext)
@@ -177,6 +179,8 @@ const generateGeneralProjectData = async (
         submittedTime: x.submittedTime,
         decisionDate: null,
         decisionTime: null,
+        targetDate: null,
+        targetDateDescription: null,
         ...generateCreateStamps(currentContext),
         ...generateUpdateStamps(currentContext),
         ...generateNullDeleteStamps()
