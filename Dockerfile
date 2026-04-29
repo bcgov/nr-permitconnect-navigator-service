@@ -7,7 +7,7 @@ ARG GIT_COMMIT
 #
 # Stage 1: Build the backend app
 #
-FROM docker.io/node:24.14.0-alpine AS app-build
+FROM docker.io/node:24.15.0-alpine AS app-build
 
 ARG APP_ROOT
 ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
@@ -19,7 +19,7 @@ RUN npm ci && npm run build
 #
 # Stage 2: Build the frontend
 #
-FROM docker.io/node:24.14.0-alpine AS frontend-build
+FROM docker.io/node:24.15.0-alpine AS frontend-build
 
 ARG APP_ROOT
 ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
@@ -31,7 +31,7 @@ RUN npm ci && npm run build
 #
 # Stage 3: Production Dependencies & Minimal Identity
 #
-FROM docker.io/node:24.14.0-alpine AS prod-deps
+FROM docker.io/node:24.15.0-alpine AS prod-deps
 
 ARG APP_ROOT APP_UID
 ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
