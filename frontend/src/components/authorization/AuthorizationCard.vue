@@ -6,7 +6,7 @@ import AuthorizationStatePill from '@/components/authorization/AuthorizationStat
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
 import { PermitState } from '@/utils/enums/permit';
-import { formatDateOnly, formatDateTime } from '@/utils/formatters';
+import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
 
@@ -148,6 +148,15 @@ function toCopy(toCopy: string) {
               class="ml-1"
             >
               {{ formatDateOnly(permit.decisionDate) }}
+            </span>
+          </div>
+          <div class="my-2">
+            <span class="font-bold">{{ t('authorization.common.targetDate') }}:</span>
+            <span
+              v-if="permit.targetDate"
+              class="ml-1"
+            >
+              {{ formatDate(permit.targetDate) }}
             </span>
           </div>
         </div>

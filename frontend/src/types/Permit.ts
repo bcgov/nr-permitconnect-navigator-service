@@ -20,6 +20,8 @@ interface PermitBase extends IStamps {
   statusLastChangedTime?: string | null;
   statusLastVerified?: string | null;
   statusLastVerifiedTime?: string | null;
+  targetDate?: string | null;
+  targetDateDescription?: string | null;
   decisionDate?: string | null;
   decisionTime?: string | null;
 }
