@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-import { AuthService, ConfigService } from './index';
+import AuthService from './authService';
+import ConfigService from './configService';
 
 import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 
