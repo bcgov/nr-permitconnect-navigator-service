@@ -119,7 +119,7 @@ const { getProject } = storeToRefs(projectStore);
 const disableFormNavigationGuard: Ref<boolean> = ref(false);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<Partial<FormSchemaType> | undefined> = ref(undefined);
-const isValidPeachPermit: Ref<boolean> = ref(false);
+const peachDialogResolver: Ref<((value: boolean) => void) | null> = ref(null);
 const noPeachDataModalVisible = defineModel<boolean>('visible');
 const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const updatedBy: Ref<User | undefined> = ref(undefined);
@@ -191,6 +191,14 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
   }
 }
 
+function handlePeachDialogClose(shouldContinue: boolean) {
+  noPeachDataModalVisible.value = false;
+  if (peachDialogResolver.value) {
+    peachDialogResolver.value(shouldContinue);
+    peachDialogResolver.value = null; // reset
+  }
+}
+
 function handlePeachIntegrationChange(now: boolean, prev?: boolean) {
   if (!isPeachEnabled.value) return;
   if (!formRef.value?.values) return;
@@ -219,12 +227,10 @@ function handlePeachIntegrationChange(now: boolean, prev?: boolean) {
 
   // Leaving a PEACH-integrated state, remove template from note
   if (!now && wasPeachIntegrated) {
-    if (!currentNote) return;
-
-    if (currentNote.includes(peachUpdateNotePlaceholder)) {
+    if (currentNote && currentNote.includes(peachUpdateNotePlaceholder)) {
       const cleanedNote = currentNote
         .replaceAll(peachUpdateNotePlaceholder, '')
-        .replace(/\n{2,}/g, '\n\n') // normalize excess newlines
+        .replaceAll(/\n{2,}/g, '\n\n') // normalize excess newlines
         .trim();
 
       formRef.value.setFieldValue('permitNote', cleanedNote);
@@ -302,30 +308,30 @@ function onInvalidSubmit({ errors }: GenericObject) {
 }
 
 async function onSubmit(data: GenericObject) {
-  disableFormNavigationGuard.value = true;
-  const decision = splitDateTime(data.decisionDate);
-  const submitted = splitDateTime(data.submittedDate);
-  const statusLastChanged = splitDateTime(data.statusLastChanged);
-  const statusLastVerified = splitDateTime(data.statusLastVerified);
-
-  const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-  const permitData: PermitArgs = {
-    ...rest,
-    activityId: getProject.value!.activityId,
-    permitTypeId: authorizationType.permitTypeId,
-    submittedDate: submitted.date,
-    submittedTime: submitted.time,
-    decisionDate: decision.date,
-    decisionTime: decision.time,
-    statusLastVerified: statusLastVerified.date,
-    statusLastVerifiedTime: statusLastVerified.time,
-    statusLastChanged: statusLastChanged.date,
-    statusLastChangedTime: statusLastChanged.time,
-    targetDate: data.targetDate ? data.targetDate.toISOString() : null,
-    targetDateDescription: data.targetDateDescription ?? null
-  };
-
   try {
+    disableFormNavigationGuard.value = true;
+    const decision = splitDateTime(data.decisionDate);
+    const submitted = splitDateTime(data.submittedDate);
+    const statusLastChanged = splitDateTime(data.statusLastChanged);
+    const statusLastVerified = splitDateTime(data.statusLastVerified);
+
+    const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
+    const permitData: PermitArgs = {
+      ...rest,
+      activityId: getProject.value!.activityId,
+      permitTypeId: authorizationType.permitTypeId,
+      submittedDate: submitted.date,
+      submittedTime: submitted.time,
+      decisionDate: decision.date,
+      decisionTime: decision.time,
+      statusLastVerified: statusLastVerified.date,
+      statusLastVerifiedTime: statusLastVerified.time,
+      statusLastChanged: statusLastChanged.date,
+      statusLastChangedTime: statusLastChanged.time,
+      targetDate: data.targetDate ? data.targetDate.toISOString() : null,
+      targetDateDescription: data.targetDateDescription ?? null
+    };
+
     if (
       isPeachEnabled.value &&
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
@@ -333,7 +339,6 @@ async function onSubmit(data: GenericObject) {
     ) {
       const response = await getPeachSummary(permitData?.permitTracking ?? []);
       if (response) {
-        isValidPeachPermit.value = true;
         permitData.decisionDate = response.decisionDate;
         permitData.state = response.state;
         permitData.stage = response.stage;
@@ -344,8 +349,20 @@ async function onSubmit(data: GenericObject) {
           !permitData.statusLastVerified || response.statusLastChanged > permitData.statusLastVerified
             ? response.statusLastChanged
             : permitData.statusLastVerified;
-      } else return;
+      }
     }
+
+    if (noPeachDataModalVisible.value) {
+      const shouldContinue = await new Promise<boolean>((resolve) => {
+        peachDialogResolver.value = resolve;
+      });
+
+      if (!shouldContinue) {
+        disableFormNavigationGuard.value = false;
+        return;
+      }
+    }
+
     const permitSubmitData = setEmptyStringsToNull(permitData);
 
     await permitService.upsertPermit({
@@ -427,10 +444,10 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       :editable="editable"
       :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
-      :show-target-date-description="!!values.targetDate"
+      :show-target-date-description="!!values?.targetDate"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
-      @update:target-date-changed="if (!!values.targetDate) setFieldValue('targetDateDescription', undefined);"
+      @update:target-date-changed="if (!!values?.targetDate) setFieldValue('targetDateDescription', undefined);"
     />
     <div class="mt-8 flex justify-between">
       <div>
@@ -506,6 +523,11 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     :draggable="false"
     :modal="true"
     class="app-info-dialog w-max"
+    @update:visible="
+      (val) => {
+        if (!val) handlePeachDialogClose(false);
+      }
+    "
   >
     <template #header>
       <span class="p-dialog-title app-primary-color">{{ t('authorization.authorizationForm.noRecordsFound') }}</span>
@@ -522,9 +544,14 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       </ul>
       <div class="flex justify-end mt-6">
         <Button
-          class="p-button-solid mr-4"
+          class="p-button-outlined mr-4"
+          :label="t('authorization.authorizationForm.cancel')"
+          @click="handlePeachDialogClose(false)"
+        />
+        <Button
+          class="p-button-solid"
           :label="t('authorization.authorizationForm.confirm')"
-          @click="noPeachDataModalVisible = false"
+          @click="handlePeachDialogClose(true)"
         />
       </div>
     </div>
