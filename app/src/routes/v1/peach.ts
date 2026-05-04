@@ -14,7 +14,7 @@ router.use(requireSomeGroup);
 /** Fetch PEACH Record from PEACH */
 router.post(
   '/record',
-  hasAuthorization(Resource.PERMIT, Action.READ),
+  hasAuthorization(Resource.PEACH, Action.READ),
   peachValidator.permitTrackings,
   getPeachSummaryController
 );
