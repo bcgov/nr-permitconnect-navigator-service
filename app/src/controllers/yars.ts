@@ -41,6 +41,8 @@ export const deleteSubjectGroupController = async (
   await transactionWrapper(async (tx: PrismaTransactionClient) => {
     const groups = await getSubjectGroups(tx, req.body.sub);
     const group = groups.find((x) => x.groupId === req.body.groupId);
+    if (group?.initiativeCode === Initiative.PCNS)
+      throw new Problem(422, { detail: 'Cannot delete a global group directly' });
 
     await removeGroup(tx, req.body.sub, req.body.groupId);
 

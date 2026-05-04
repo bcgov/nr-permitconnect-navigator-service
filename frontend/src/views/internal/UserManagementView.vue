@@ -291,6 +291,8 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
     // Update main data table
     if (response.status !== AccessRequestStatus.APPROVED) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;
+      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = [];
+      userAccessRequest.user.groups.push(group);
       usersAndAccessRequests.value.push(assignUserStatus(userAccessRequest));
     } else {
       userAccessRequest.accessRequest = undefined;
@@ -366,6 +368,9 @@ onBeforeMount(async () => {
 
     newRequestingUsers.forEach((user) => {
       const accessRequest = currentAccessRequests.get(user.userId);
+
+      if (!user.groups) user.groups = [];
+      user.groups.push(accessRequest.group);
       usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
     });
   } catch (error) {

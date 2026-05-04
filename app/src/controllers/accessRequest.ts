@@ -63,7 +63,7 @@ export const createUserAccessRequestController = async (
     const { accessRequest, user } = req.body;
 
     // Check if the requestee is an admin
-    const isAdmin = await isUserAdmin(tx, req.currentContext.initiative!, req.currentAuthorization.groups);
+    const isAdmin = await isUserAdmin(tx, req.currentContext.initiative, req.currentAuthorization.groups);
 
     // Get all the groups for the current initiative
     const groups = await getGroups(tx, req.currentContext.initiative);
@@ -167,7 +167,7 @@ export const processUserAccessRequestController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative!, req.params.accessRequestId);
+    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative, req.params.accessRequestId);
 
     if (accessRequest) {
       const userResponse = await readUser(tx, accessRequest.userId);
@@ -179,7 +179,7 @@ export const processUserAccessRequestController = async (
         if (req.body.approve) {
           if (accessRequest.grant) {
             if (!accessRequest.groupId) {
-              throw new Problem(422, { detail: 'Must provided a role to grant' });
+              throw new Problem(422, { detail: 'Must provide a group to grant' });
             }
             if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
               throw new Problem(409, { detail: 'User is already assigned this role' });
@@ -194,12 +194,10 @@ export const processUserAccessRequestController = async (
             await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
           } else {
             // Get the current initiative
-            const group = userGroups.find((x) => x.groupId === accessRequest.groupId);
-            const initiative = group?.initiativeId;
-            if (!initiative) throw new Problem(404, { detail: 'Can\x27t determine initiative' });
+            const currentInitiativeId = (await getInitiative(tx, req.currentContext.initiative)).initiativeId;
 
             // Remove all user groups for the initiative
-            await removeUserGroups(tx, userResponse.sub, group?.initiativeId, userGroups);
+            await removeUserGroups(tx, userResponse.sub, currentInitiativeId, userGroups);
           }
 
           // Update access request status
@@ -218,7 +216,7 @@ export const processUserAccessRequestController = async (
 
 export const getAccessRequestsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<AccessRequest[]>(async (tx: PrismaTransactionClient) => {
-    return await getAccessRequests(tx, req.currentContext.initiative!);
+    return await getAccessRequests(tx, req.currentContext.initiative);
   });
   res.status(200).json(response);
 };
