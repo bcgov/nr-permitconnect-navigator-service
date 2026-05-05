@@ -291,7 +291,7 @@ const onSubmit = async (formValues: GenericObject) => {
       astNotes: values.astNotes.notes,
 
       // Submission State
-      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      assignedUserId: (values.submissionState.assignedUser as User)?.userId ?? null,
       applicationStatus: values.submissionState.applicationStatus,
       submissionType: values.submissionState.submissionType,
       queuePriority: values.submissionState.queuePriority,

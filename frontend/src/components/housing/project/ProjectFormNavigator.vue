@@ -215,7 +215,7 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
     submissionState: {
       queuePriority: project.queuePriority,
       submissionType: project.submissionType,
-      assignedUser: assigneeOptions[0]?.fullName ?? null,
+      assignedUser: assigneeOptions[0] ?? null,
       applicationStatus: project.applicationStatus
     },
 
@@ -338,7 +338,7 @@ const onSubmit = async (formValues: GenericObject) => {
       astNotes: values.astNotes.notes,
 
       // Submission State
-      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      assignedUserId: (values.submissionState.assignedUser as User)?.userId ?? null,
       applicationStatus: values.submissionState.applicationStatus,
       submissionType: values.submissionState.submissionType,
       queuePriority: values.submissionState.queuePriority,
