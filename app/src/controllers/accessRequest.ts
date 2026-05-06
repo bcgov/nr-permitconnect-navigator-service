@@ -102,7 +102,7 @@ export const createUserAccessRequestController = async (
     ) {
       throw new Problem(409, { detail: 'User is already assigned this group' });
     }
-    if (userResponse.idp !== IdentityProviderKind.IDIR) {
+    if (userResponse.idp !== IdentityProviderKind.AZUREIDIR) {
       throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
     }
     if (accessRequest.grant && !accessRequest.groupId) {

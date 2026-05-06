@@ -111,7 +111,7 @@ describe('createUserAccessRequestController', () => {
     mockReadUser.mockResolvedValue({
       userId: 'u1',
       sub: 'sub-123',
-      idp: IdentityProviderKind.IDIR
+      idp: IdentityProviderKind.AZUREIDIR
     });
     mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g-old', initiativeId: 'i1', name: GroupName.ADMIN }]);
     mockSubjectHasGroupName.mockResolvedValue(false);
@@ -164,7 +164,7 @@ describe('createUserAccessRequestController', () => {
       mockReadUser.mockResolvedValue({
         userId: 'u1',
         sub: 'sub-123',
-        idp: IdentityProviderKind.IDIR
+        idp: IdentityProviderKind.AZUREIDIR
       });
       mockGetSubjectGroups.mockResolvedValue([]);
       mockGetCorrespondingGlobalGroup.mockResolvedValue({
@@ -211,7 +211,7 @@ describe('createUserAccessRequestController', () => {
       mockReadUser.mockResolvedValue({
         userId: 'u1',
         sub: 'sub-123',
-        idp: IdentityProviderKind.IDIR
+        idp: IdentityProviderKind.AZUREIDIR
       });
       mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g1', initiativeId: 'i1', name: GroupName.ADMIN }]);
       mockSubjectHasGroupName.mockResolvedValue(false);
@@ -241,7 +241,7 @@ describe('createUserAccessRequestController', () => {
           },
           user: {
             sub: 'sub-123',
-            idp: IdentityProviderKind.IDIR
+            idp: IdentityProviderKind.AZUREIDIR
           }
         },
         currentContext: TEST_CURRENT_CONTEXT,
@@ -255,7 +255,7 @@ describe('createUserAccessRequestController', () => {
       mockCreateUser.mockResolvedValue({
         userId: 'u1',
         sub: 'sub-123',
-        idp: IdentityProviderKind.IDIR
+        idp: IdentityProviderKind.AZUREIDIR
       });
       mockGetSubjectGroups.mockResolvedValue([]);
       mockCreateUserAccessRequest.mockResolvedValue({
@@ -305,7 +305,7 @@ describe('processUserAccessRequestController', () => {
     mockReadUser.mockResolvedValue({
       userId: 'u1',
       sub: 'sub-123',
-      idp: IdentityProviderKind.IDIR
+      idp: IdentityProviderKind.AZUREIDIR
     });
     mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g-other', initiativeId: 'i1' }]);
     mockGetCorrespondingGlobalGroup.mockResolvedValue({
@@ -345,7 +345,7 @@ describe('processUserAccessRequestController', () => {
     mockReadUser.mockResolvedValue({
       userId: 'u1',
       sub: 'sub-123',
-      idp: IdentityProviderKind.IDIR
+      idp: IdentityProviderKind.AZUREIDIR
     });
     mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g1', initiativeId: 'i1', name: 'ADMIN' }]);
     mockSubjectHasGroupName.mockResolvedValue(false);
@@ -385,7 +385,7 @@ describe('processUserAccessRequestController', () => {
     mockReadUser.mockResolvedValue({
       userId: 'u1',
       sub: 'sub-123',
-      idp: IdentityProviderKind.IDIR
+      idp: IdentityProviderKind.AZUREIDIR
     });
 
     await processUserAccessRequestController(

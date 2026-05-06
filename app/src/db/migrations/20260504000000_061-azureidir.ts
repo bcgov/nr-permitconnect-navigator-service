@@ -3,11 +3,14 @@ import type { Knex } from 'knex';
 export async function up(knex: Knex): Promise<void> {
   return Promise.resolve()
     .then(() => {
-      return knex('identity_provider').insert([
-        {
-          idp: 'azureidir'
-        }
-      ]);
+      return knex('identity_provider')
+        .insert([
+          {
+            idp: 'azureidir'
+          }
+        ])
+        .onConflict('idp')
+        .ignore();
     })
     .then(() =>
       knex.raw(`UPDATE public.user
