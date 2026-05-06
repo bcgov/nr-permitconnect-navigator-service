@@ -86,13 +86,13 @@ You can quickly run this application in development mode after cloning by openin
 cd app
 npm i
 npm run prisma:migrate
-npm run serve
+npm run dev
 ```
 
 ```sh
 cd frontend
 npm i
-npm run serve
+npm run dev
 ```
 
 ## Getting Help or Reporting an Issue
