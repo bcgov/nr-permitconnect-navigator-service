@@ -164,7 +164,17 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        const omittedUser = omit(userAccessRequest.user, ['groups', 'status']);
+        const omittedUser = omit(userAccessRequest.user, [
+          'bceidBusinessName',
+          'groups',
+          'status',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'deletedAt',
+          'deletedBy'
+        ]);
         let response;
 
         if (admin) {
@@ -253,6 +263,18 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
 
     user.idp = idpCfg.idp;
 
+    const omittedUser = omit(user, [
+      'bceidBusinessName',
+      'groups',
+      'status',
+      'createdAt',
+      'createdBy',
+      'updatedAt',
+      'updatedBy',
+      'deletedAt',
+      'deletedBy'
+    ]);
+
     const userAccessRequest: UserAccessRequest = {
       user,
       accessRequest: {
@@ -263,11 +285,14 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       }
     };
 
-    const response = (await accessRequestService.createUserAccessRequest(userAccessRequest)).data;
+    const response = (await accessRequestService.createUserAccessRequest({ ...userAccessRequest, user: omittedUser }))
+      .data;
 
     // Update main data table
     if (response.status !== AccessRequestStatus.APPROVED) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;
+      if (!userAccessRequest.user.groups) userAccessRequest.user.groups = [];
+      userAccessRequest.user.groups.push(group);
       usersAndAccessRequests.value.push(assignUserStatus(userAccessRequest));
     } else {
       userAccessRequest.accessRequest = undefined;
@@ -343,6 +368,9 @@ onBeforeMount(async () => {
 
     newRequestingUsers.forEach((user) => {
       const accessRequest = currentAccessRequests.get(user.userId);
+
+      if (!user.groups) user.groups = [];
+      user.groups.push(accessRequest.group);
       usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
     });
   } catch (error) {

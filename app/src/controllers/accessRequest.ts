@@ -7,13 +7,52 @@ import {
 } from '../services/accessRequest.ts';
 import { getInitiative } from '../services/initiative.ts';
 import { createUser, readUser } from '../services/user.ts';
-import { assignGroup, getGroups, getSubjectGroups, removeGroup } from '../services/yars.ts';
+import {
+  assignGroup,
+  getCorrespondingGlobalGroup,
+  getGroups,
+  getSubjectGroups,
+  removeGroup,
+  subjectHasGroupName
+} from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
-import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../utils/enums/application.ts';
+import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
 import type { AccessRequest, Group, User } from '../types/index.ts';
+
+const isUserAdmin = async (
+  tx: PrismaTransactionClient,
+  currentInitiative: Initiative,
+  userGroups: Group[]
+): Promise<boolean> => {
+  const initiative = await getInitiative(tx, currentInitiative);
+  return userGroups.some(
+    (group: Group) =>
+      group.name === GroupName.DEVELOPER ||
+      (group.name === GroupName.ADMIN && group.initiativeId === initiative.initiativeId)
+  );
+};
+
+const removeUserGroups = async (
+  tx: PrismaTransactionClient,
+  sub: string,
+  currentInitiativeId: string,
+  userGroups: Group[]
+) => {
+  // Remove current initiative groups
+  const currentInitiativeGroups = userGroups.filter((x) => x.initiativeId === currentInitiativeId);
+  await Promise.all(currentInitiativeGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
+
+  // Only remove global perm if user has no groups of the same type assigned in other initiatives
+  if (!(await subjectHasGroupName(tx, sub, currentInitiativeGroups[0]?.name))) {
+    const correspondingGlobalGroups = await Promise.all(
+      currentInitiativeGroups.map(async (x) => await getCorrespondingGlobalGroup(tx, x.groupId))
+    );
+    await Promise.all(correspondingGlobalGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
+  }
+};
 
 // Request to create user & access
 export const createUserAccessRequestController = async (
@@ -24,70 +63,66 @@ export const createUserAccessRequestController = async (
     const { accessRequest, user } = req.body;
 
     // Check if the requestee is an admin
-    const initiative = await getInitiative(tx, req.currentContext.initiative);
-    const isAdmin =
-      req.currentAuthorization?.groups.some(
-        (group: Group) =>
-          group.name === GroupName.DEVELOPER ||
-          (group.name === GroupName.ADMIN && group.initiativeId === initiative.initiativeId)
-      ) ?? false;
+    const isAdmin = await isUserAdmin(tx, req.currentContext.initiative, req.currentAuthorization.groups);
+
+    // Get all the groups for the current initiative
+    const groups = await getGroups(tx, req.currentContext.initiative);
 
     // Groups the current user can modify
-    const groups = await getGroups(tx, req.currentContext.initiative);
-    const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
     const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
     if (isAdmin) {
       userAllowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
     }
     const modifiableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
 
+    if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
+      throw new Problem(403, { detail: 'Cannot modify requested group' });
+    }
+
+    // Create or get the user that access is being requested for
     let userResponse;
     const existingUser = !!user.userId;
-
     if (!existingUser) userResponse = await createUser(tx, user);
     else userResponse = await readUser(tx, user.userId);
 
-    let accessUserGroups: Group[];
+    if (!userResponse) throw new Problem(404, { detail: 'User not found' });
 
-    if (!userResponse) {
-      throw new Problem(404, { detail: 'User not found' });
-    } else {
-      accessUserGroups = await getSubjectGroups(tx, userResponse.sub);
-      const userInitiativeGroups = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
+    const accessUserGroups = await getSubjectGroups(tx, userResponse.sub);
 
-      if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
-        throw new Problem(403, { detail: 'Cannot modify requested group' });
-      }
-      if (!accessRequest.update && userInitiativeGroups.length) {
-        throw new Problem(409, { detail: 'User already exists' });
-      }
-      if (
-        accessRequest.grant &&
-        accessRequest.groupId &&
-        accessUserGroups.map((x) => x.groupId).includes(accessRequest.groupId)
-      ) {
-        throw new Problem(409, { detail: 'User is already assigned this group' });
-      }
-      if (userResponse.idp !== IdentityProviderKind.IDIR) {
-        throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
-      }
-      if (accessRequest.grant && !accessRequest.groupId) {
-        throw new Problem(422, { detail: 'Must provide a group to grant' });
-      }
+    const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
+    const userAlreadyInInitiative = accessUserGroups.some((x) => x.initiativeId === requestedGroup?.initiativeId);
+
+    if (accessRequest.grant && !accessRequest.update && userAlreadyInInitiative) {
+      throw new Problem(409, { detail: 'User already exists' });
+    }
+    if (
+      accessRequest.grant &&
+      accessRequest.groupId &&
+      accessUserGroups.some((x) => x.groupId === accessRequest.groupId)
+    ) {
+      throw new Problem(409, { detail: 'User is already assigned this group' });
+    }
+    if (userResponse.idp !== IdentityProviderKind.IDIR) {
+      throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
+    }
+    if (accessRequest.grant && !accessRequest.groupId) {
+      throw new Problem(422, { detail: 'Must provide a group to grant' });
     }
 
-    const isGroupUpdate = existingUser && accessRequest.grant;
+    const isGroupUpdate = existingUser && accessRequest.grant && userAlreadyInInitiative;
     let data;
 
-    if (isGroupUpdate) {
-      // Remove all user groups for initiative
-      const groupsToRemove = accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId);
-      for (const g of groupsToRemove) {
-        await removeGroup(tx, userResponse?.sub, g.groupId);
-      }
+    // Store the current initiative ID to reference
+    const currentInitiativeId = (await getInitiative(tx, req.currentContext.initiative)).initiativeId;
 
-      // Assign new group
-      await assignGroup(tx, user.sub, accessRequest.groupId);
+    if (isGroupUpdate) {
+      // Remove current initiative groups
+      await removeUserGroups(tx, userResponse.sub, currentInitiativeId, accessUserGroups);
+
+      // Assign new groups
+      await assignGroup(tx, userResponse.sub, accessRequest.groupId);
+      const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
+      await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
 
       // Mock an access request for the response
       data = {
@@ -98,7 +133,11 @@ export const createUserAccessRequestController = async (
       };
     } else if (isAdmin) {
       if (accessRequest.grant) {
-        await assignGroup(tx, user.sub, accessRequest.groupId);
+        // Assign new groups
+        await assignGroup(tx, userResponse.sub, accessRequest.groupId);
+        const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
+        await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
+
         // Mock an access request for the response
         data = {
           userId: userResponse?.userId,
@@ -107,13 +146,8 @@ export const createUserAccessRequestController = async (
           status: AccessRequestStatus.APPROVED
         };
       } else {
-        // Remove requested group if provided - otherwise remove all user groups for initiative
-        const groupsToRemove = accessRequest.groupId
-          ? [accessRequest.groupId]
-          : accessUserGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId).map((x) => x.groupId);
-        for (const groupId of groupsToRemove) {
-          data = await removeGroup(tx, userResponse?.sub, groupId);
-        }
+        // Remove current initiative groups
+        await removeUserGroups(tx, userResponse.sub, currentInitiativeId, accessUserGroups);
       }
     } else {
       data = await createUserAccessRequest(tx, {
@@ -139,16 +173,13 @@ export const processUserAccessRequestController = async (
       const userResponse = await readUser(tx, accessRequest.userId);
 
       if (userResponse) {
-        const groups = await getGroups(tx, req.currentContext.initiative);
-        const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
-
         const userGroups: Group[] = await getSubjectGroups(tx, userResponse.sub);
 
         // If request is approved then grant or remove access
         if (req.body.approve) {
           if (accessRequest.grant) {
             if (!accessRequest.groupId) {
-              throw new Problem(422, { detail: 'Must provided a role to grant' });
+              throw new Problem(422, { detail: 'Must provide a group to grant' });
             }
             if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
               throw new Problem(409, { detail: 'User is already assigned this role' });
@@ -157,23 +188,22 @@ export const processUserAccessRequestController = async (
               throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
             }
 
+            // Assign groups
+            const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
             await assignGroup(tx, userResponse.sub, accessRequest.groupId);
+            await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
           } else {
-            // Remove requested group if provided - otherwise remove all user groups for initiative
-            const groupsToRemove = accessRequest.groupId
-              ? [accessRequest.groupId]
-              : userGroups.filter((x) => x.initiativeId === requestedGroup?.initiativeId).map((x) => x.groupId);
-            for (const groupId of groupsToRemove) {
-              await removeGroup(tx, userResponse.sub, groupId);
-            }
+            // Get the current initiative
+            const currentInitiativeId = (await getInitiative(tx, req.currentContext.initiative)).initiativeId;
+
+            // Remove all user groups for the initiative
+            await removeUserGroups(tx, userResponse.sub, currentInitiativeId, userGroups);
           }
 
           // Update access request status
-          accessRequest.status = AccessRequestStatus.APPROVED;
-          await updateAccessRequest(tx, accessRequest);
+          await updateAccessRequest(tx, { status: AccessRequestStatus.APPROVED }, accessRequest.accessRequestId);
         } else {
-          accessRequest.status = AccessRequestStatus.REJECTED;
-          await updateAccessRequest(tx, accessRequest);
+          await updateAccessRequest(tx, { status: AccessRequestStatus.REJECTED }, accessRequest.accessRequestId);
         }
       } else {
         throw new Problem(404, { detail: 'User does not exist' });
