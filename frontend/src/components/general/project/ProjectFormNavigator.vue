@@ -427,7 +427,9 @@ onBeforeMount(async () => {
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
           @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsInfo.atsClientId', atsClientId)"
-          @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('atsInfo.addedToAts', addedToATS)"
+          @ats-info:set-added-to-ats="
+            (addedToATS: boolean) => setFieldValue('projectAreasUpdated.addedToAts', addedToATS)
+          "
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
           @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
         />

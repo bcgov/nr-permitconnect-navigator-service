@@ -466,14 +466,16 @@ onBeforeMount(async () => {
         <SubmissionStateSection />
         <RelatedEnquiriesSection />
         <ATSInfo
-          :ats-client-id="values.atsClientId"
-          :ats-enquiry-id="values.atsEnquiryId"
+          :ats-client-id="values.atsInfo.atsClientId"
+          :ats-enquiry-id="values.atsInfo.atsEnquiryId"
           :first-name="values.contact.firstName"
           :last-name="values.contact.lastName"
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
-          @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsClientId', atsClientId)"
-          @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('addedToAts', addedToATS)"
+          @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsInfo.atsClientId', atsClientId)"
+          @ats-info:set-added-to-ats="
+            (addedToATS: boolean) => setFieldValue('projectAreasUpdated.addedToAts', addedToATS)
+          "
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
           @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
         />
