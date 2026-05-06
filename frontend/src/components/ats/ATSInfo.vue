@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed, ref, watch } from 'vue';
+import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ATSUserCreateModal from '@/components/ats/ATSUserCreateModal.vue';
@@ -8,8 +8,7 @@ import ATSUserDetailsModal from '@/components/ats/ATSUserDetailsModal.vue';
 import ATSUserLinkModal from '@/components/ats/ATSUserLinkModal.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { Select } from '@/components/form';
-import { Button, useConfirm, useToast } from '@/lib/primevue/index.ts';
-import { atsService } from '@/services/index.ts';
+import { Button, useConfirm } from '@/lib/primevue/index.ts';
 import { useAppStore, useCodeStore } from '@/store';
 import { ATSCreateTypes, Initiative } from '@/utils/enums/application.ts';
 
@@ -45,7 +44,6 @@ const emit = defineEmits(['atsInfo:setClientId', 'atsInfo:setAddedToAts', 'atsIn
 // Composables
 const { t } = useI18n();
 const confirm = useConfirm();
-const toast = useToast();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
@@ -56,9 +54,6 @@ const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const atsUserCreateModalVisible: Ref<boolean> = ref(false);
 const atsUserDetailsModalVisible: Ref<boolean> = ref(false);
 const atsUserLinkModalVisible: Ref<boolean> = ref(false);
-const loading: Ref<boolean> = ref(false);
-const users: Ref<ATSClientResource[]> = ref([]);
-const visible = defineModel<boolean>('visible');
 
 const showAtsClientInfo = computed(
   () =>
@@ -69,28 +64,6 @@ const showAtsClientInfo = computed(
 );
 
 // Actions
-async function getATSClientInformation() {
-  try {
-    loading.value = true;
-
-    const response = await atsService.searchATSUsers({
-      clientId: atsClientId
-    });
-
-    users.value = response.data.clients;
-
-    users.value.forEach((client: ATSClientResource) => {
-      // Combine address lines and filter out empty lines
-      const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
-      client.formattedAddress = address;
-    });
-  } catch (error) {
-    toast.error(t('i.ats.common.errorSearchingUsers') + error);
-  } finally {
-    loading.value = false;
-  }
-}
-
 function onNewATSEnquiry() {
   confirm.require({
     message: t('i.ats.atsInfo.atsEnquiryConfirmMsg'),
@@ -104,10 +77,6 @@ function onNewATSEnquiry() {
     }
   });
 }
-
-watch(visible, () => {
-  if (atsClientId) getATSClientInformation();
-});
 </script>
 
 <template>

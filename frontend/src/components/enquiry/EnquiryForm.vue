@@ -464,15 +464,15 @@ async function createATSClientEnquiry() {
         </div>
         <SubmissionStateSection :is-enquiry="true" />
         <ATSInfo
-          :ats-client-id="values.atsClientId"
-          :ats-enquiry-id="values.atsEnquiryId"
+          :ats-client-id="values.atsInfo.atsClientId"
+          :ats-enquiry-id="values.atsInfo.atsEnquiryId"
           :first-name="values.contact.firstName"
           :last-name="values.contact.lastName"
           :phone-number="values.contact.phoneNumber"
           :email="values.contact.email"
           :is-related-enquiry="!!values.relatedActivityId"
           :is-enquiry="true"
-          @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsClientId', atsClientId)"
+          @ats-info:set-client-id="(atsClientId: number | null) => setFieldValue('atsInfo.atsClientId', atsClientId)"
           @ats-info:set-added-to-ats="(addedToATS: boolean) => setFieldValue('addedToAts', addedToATS)"
           @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
           @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
