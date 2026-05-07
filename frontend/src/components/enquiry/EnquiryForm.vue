@@ -101,6 +101,7 @@ const isCompleted = computed(() => {
 const primaryContact = computed(
   () => enquiry?.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
 );
+
 // Actions
 async function createATSEnquiry(atsClientId?: number) {
   try {

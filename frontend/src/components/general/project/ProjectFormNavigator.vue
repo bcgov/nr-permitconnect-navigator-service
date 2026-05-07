@@ -18,26 +18,16 @@ import ProjectAreasUpdatedSection from '@/components/form/section/ProjectAreasUp
 import RelatedEnquiriesSection from '@/components/form/section/RelatedEnquiriesSection.vue';
 import SubmissionStateSection from '@/components/form/section/SubmissionStateSection.vue';
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
-import { atsService, generalProjectService, mapService, userService } from '@/services';
+import { generalProjectService, mapService, userService } from '@/services';
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
-import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
-import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
+import { BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
-import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { scrollToFirstError } from '@/utils/utils';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
-import type {
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
-  Contact,
-  DeepPartial,
-  GeneralProject,
-  OrgBookOption,
-  User
-} from '@/types';
+import type { Contact, DeepPartial, GeneralProject, OrgBookOption, User } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 
 // Props
@@ -45,9 +35,6 @@ const { editable = true, project } = defineProps<{
   editable?: boolean;
   project: GeneralProject;
 }>();
-
-// Constants
-const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.GENERAL) + ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX;
 
 // Composables
 const { t } = useI18n();
@@ -61,7 +48,6 @@ const { getInitiative } = storeToRefs(useAppStore());
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
 
 // State
-const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const locationPidsAuto: Ref<string> = ref('');
@@ -69,90 +55,6 @@ const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 // Actions
-async function createATSClientEnquiry() {
-  try {
-    const address: Partial<ATSAddressResource> = {
-      '@type': 'AddressResource',
-      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
-      email: formRef.value?.values?.contact.email ?? ''
-    };
-
-    const data = {
-      '@type': 'ClientResource',
-      address: address,
-      firstName: formRef.value?.values.contact.firstName,
-      surName: formRef.value?.values.contact.lastName,
-      regionName: GroupName.NAVIGATOR,
-      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    };
-
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
-    if (response.status === 201) {
-      let atsEnquiryId = undefined;
-      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
-      if (atsEnquiryId) toast.success(t('i.housing.project.projectForm.atsClientEnquiryPushed'));
-      else toast.success(t('i.housing.project.projectForm.atsClientPushed'));
-      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
-    }
-  } catch (error) {
-    toast.error(t('i.housing.project.projectForm.atsClientPushError') + ' ' + error);
-  }
-}
-
-async function createATSEnquiry(atsClientId?: number) {
-  try {
-    const ATSEnquiryData: ATSEnquiryResource = {
-      '@type': 'EnquiryResource',
-      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
-      contactFirstName: formRef.value?.values.contact.firstName,
-      contactSurname: formRef.value?.values.contact.lastName,
-      regionName: ATS_MANAGING_REGION,
-      subRegionalOffice: GroupName.NAVIGATOR,
-      enquiryFileNumbers: [project.activityId],
-      enquiryPartnerAgencies: [Initiative.HOUSING],
-      enquiryMethodCodes: [Initiative.PCNS],
-      notes: formRef.value?.values.companyProjectName.projectName,
-      enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
-    };
-    const response = await atsService.createATSEnquiry(ATSEnquiryData);
-    if (response.status === 201) {
-      if (atsCreateType.value === ATSCreateTypes.ENQUIRY)
-        toast.success(t('i.housing.project.projectForm.atsEnquiryPushed'));
-      return response.data.enquiryId;
-    }
-  } catch (error) {
-    toast.success(t('i.housing.project.projectForm.atsClientPushed'));
-    toast.error(t('i.housing.project.projectForm.atsEnquiryPushError') + ' ' + error);
-  }
-}
-
-async function handleAtsCreate(values: GenericObject) {
-  if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    values.atsEnquiryId = response?.atsEnquiryId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    values.atsEnquiryId = await createATSEnquiry();
-    if (values.atsEnquiryId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-    const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
-    }
-    atsCreateType.value = undefined;
-  }
-}
-
 async function initializeFormValues(project: GeneralProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
   if (project.assignedUserId)
@@ -269,8 +171,6 @@ const onSubmit = async (formValues: GenericObject) => {
     // vee-validate doesn't get transformed data from yup so
     // manually run the form values through it here
     const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
-
-    await handleAtsCreate(values);
 
     // Generate final payload
     const payload: Partial<GeneralProject> = {
@@ -430,8 +330,6 @@ onBeforeMount(async () => {
           @ats-info:set-added-to-ats="
             (addedToATS: boolean) => setFieldValue('projectAreasUpdated.addedToAts', addedToATS)
           "
-          @ats-info:create="(value: ATSCreateTypes) => (atsCreateType = value)"
-          @ats-info:create-enquiry="atsCreateType = ATSCreateTypes.ENQUIRY"
         />
         <ProjectAreasUpdatedSection />
       </div>

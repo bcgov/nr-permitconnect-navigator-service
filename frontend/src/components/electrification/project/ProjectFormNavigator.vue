@@ -38,6 +38,13 @@ import type {
 } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
 
+// Interfaces
+interface AtsCreateResponse {
+  atsClientId: number | null | undefined;
+  atsEnquiryId: number | null | undefined;
+  addedToAts: boolean | undefined;
+}
+
 // Props
 const { editable = true, project } = defineProps<{
   editable?: boolean;
@@ -139,7 +146,9 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
   };
 }
 
-async function createATSClientEnquiry() {
+async function createATSClientEnquiry(): Promise<
+  { atsClientId: number; atsEnquiryId: number | undefined } | undefined
+> {
   try {
     const address: Partial<ATSAddressResource> = {
       '@type': 'AddressResource',
@@ -162,6 +171,7 @@ async function createATSClientEnquiry() {
       let atsEnquiryId = undefined;
       if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
         atsEnquiryId = await createATSEnquiry(response.data.clientId);
+
       if (atsEnquiryId) toast.success(t('i.electrification.projectForm.atsClientEnquiryPushed'));
       else toast.success(t('i.electrification.projectForm.atsClientPushed'));
       return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
@@ -171,11 +181,11 @@ async function createATSClientEnquiry() {
   }
 }
 
-async function createATSEnquiry(atsClientId?: number) {
+async function createATSEnquiry(atsClientId: number | null | undefined): Promise<number | undefined> {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
-      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      clientId: atsClientId as number,
       contactFirstName: formRef.value?.values.contact.firstName,
       contactSurname: formRef.value?.values.contact.lastName,
       regionName: ATS_MANAGING_REGION,
@@ -198,29 +208,37 @@ async function createATSEnquiry(atsClientId?: number) {
   }
 }
 
-async function handleAtsCreate(values: GenericObject) {
+async function handleAtsCreate(formValues: AtsCreateResponse) {
+  let atsCreateResponse: AtsCreateResponse = {
+    atsClientId: formValues.atsClientId,
+    atsEnquiryId: formValues.atsEnquiryId,
+    addedToAts: formValues.addedToAts
+  };
+
   if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
     const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    values.atsEnquiryId = response?.atsEnquiryId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
+    atsCreateResponse.atsClientId = response?.atsClientId;
+    atsCreateResponse.atsEnquiryId = response?.atsEnquiryId;
+    if (atsCreateResponse.atsEnquiryId && atsCreateResponse.atsClientId) {
+      atsCreateResponse.addedToAts = true;
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    values.atsEnquiryId = await createATSEnquiry();
-    if (values.atsEnquiryId) {
-      values.addedToAts = true;
+    atsCreateResponse.atsEnquiryId = await createATSEnquiry(atsCreateResponse.atsClientId);
+    if (atsCreateResponse.atsEnquiryId) {
+      atsCreateResponse.addedToAts = true;
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
     const response = await createATSClientEnquiry();
-    values.atsClientId = response?.atsClientId;
-    if (values.atsEnquiryId && values.atsClientId) {
-      values.addedToAts = true;
+    atsCreateResponse.atsClientId = response?.atsClientId;
+    if (atsCreateResponse.atsEnquiryId && atsCreateResponse.atsClientId) {
+      atsCreateResponse.addedToAts = true;
     }
     atsCreateType.value = undefined;
   }
+
+  return atsCreateResponse;
 }
 
 function onCancel() {
@@ -264,7 +282,13 @@ const onSubmit = async (formValues: GenericObject) => {
     // manually run the form values through it here
     const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
 
-    await handleAtsCreate(values);
+    // Check for any ATS changes
+    // Returns form values if no updates happen
+    const atsCreate = await handleAtsCreate({
+      atsClientId: values.atsInfo.atsClientId,
+      atsEnquiryId: values.atsInfo.atsEnquiryId,
+      addedToAts: values.projectAreasUpdated.addedToAts
+    });
 
     // Generate final payload
     const payload: Partial<ElectrificationProject> = {
@@ -297,12 +321,12 @@ const onSubmit = async (formValues: GenericObject) => {
       queuePriority: values.submissionState.queuePriority,
 
       // ATS
-      atsClientId: values.atsInfo.atsClientId,
-      atsEnquiryId: values.atsInfo.atsEnquiryId,
+      atsClientId: atsCreate.atsClientId,
+      atsEnquiryId: atsCreate.atsEnquiryId,
 
       // Updates
       aaiUpdated: values.projectAreasUpdated.aaiUpdated,
-      addedToAts: values.projectAreasUpdated.addedToAts
+      addedToAts: atsCreate.addedToAts
     };
 
     // Update project
