@@ -4,11 +4,11 @@ import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import { useAppStore, useContactStore } from '@/store';
-import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
+import { useAppStore, useAuthZStore, useContactStore } from '@/store';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { ActivityContact } from '@/types';
+import { GroupName } from '@/utils/enums/application';
 
 // Types
 enum TeamAction {
@@ -38,8 +38,16 @@ const currentUserActivityContact = computed(() =>
   activityContacts.find((ac) => ac.contactId === getContact.value?.contactId)
 );
 const isAdmin = computed(() => {
-  const adminRoles: ActivityContactRole[] = ACTIVITY_CONTACT_ROLE_LIST.filter((r) => r !== ActivityContactRole.MEMBER);
-  return currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role);
+  // Proponent roles
+  const adminRoles: ActivityContactRole[] = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN];
+
+  // Navigator groups
+  const adminGroups: GroupName[] = [GroupName.SUPERVISOR, GroupName.NAVIGATOR];
+
+  return (
+    (currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role)) ||
+    useAuthZStore().isInGroup(adminGroups)
+  );
 });
 
 // Actions
