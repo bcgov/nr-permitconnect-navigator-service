@@ -36,7 +36,7 @@ afterEach(() => {
 });
 
 describe('searchIdirUsers', () => {
-  it('calls GET /${env}/idir/users with correct params and returns result', async () => {
+  it('calls GET /${env}/azure-idir/users with correct params and returns result', async () => {
     mockedConfig.get.mockReturnValue('TEST');
 
     mockedAxios.get.mockResolvedValueOnce({
@@ -46,7 +46,7 @@ describe('searchIdirUsers', () => {
 
     const response = await ssoService.searchIdirUsers(FAKE_PERSON);
 
-    expect(mockedAxios.get).toHaveBeenCalledWith('/TEST/idir/users', {
+    expect(mockedAxios.get).toHaveBeenCalledWith('/TEST/azure-idir/users', {
       params: FAKE_PERSON
     });
     expect(response).toStrictEqual({
