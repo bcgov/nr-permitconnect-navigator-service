@@ -13,7 +13,7 @@ export function useUserSearch() {
   const users: Ref<User[]> = ref([]);
 
   const loadById = async (userId: string | string[]) => {
-    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) return;
 
     users.value = (
@@ -24,7 +24,7 @@ export function useUserSearch() {
   };
 
   const search = async (input: string) => {
-    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
 
     const EMAILREGEX = new RegExp(Regex.EMAIL);
 

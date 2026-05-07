@@ -175,7 +175,7 @@ export enum RouteName {
 }
 
 export enum IdentityProviderKind {
-  IDIR = 'idir',
+  AZUREIDIR = 'azureidir',
   BCEID = 'bceidbasic',
   BCEIDBUSINESS = 'bceidbusiness',
   BCSC = 'bcsc'

@@ -104,7 +104,7 @@ onBeforeMount(async () => {
   });
 
   if (userIds) {
-    const idpCfg = findIdpConfig(IdentityProviderKind.IDIR);
+    const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (idpCfg) {
       const users = (await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] })).data;
       users.forEach((u: User) => {

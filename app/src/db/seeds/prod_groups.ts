@@ -27,15 +27,15 @@ export async function seed(knex: Knex): Promise<void> {
     .select('group_id');
 
   const identities = [
-    { sub: '3dcfc748ac7a45bfa98630e44710653c@idir', group_id: admin_group_id[0].group_id },
+    { sub: '3dcfc748ac7a45bfa98630e44710653c@azureidir', group_id: admin_group_id[0].group_id },
 
-    { sub: '8895e3992ee9455b8eef3ab435dd5486@idir', group_id: developer_group_id[0].group_id },
-    { sub: 'e7d30762682b437cb8d60502c956a516@idir', group_id: developer_group_id[0].group_id },
+    { sub: '8895e3992ee9455b8eef3ab435dd5486@azureidir', group_id: developer_group_id[0].group_id },
+    { sub: 'e7d30762682b437cb8d60502c956a516@azureidir', group_id: developer_group_id[0].group_id },
 
-    { sub: '067f5f2385cd43fda8c3cb55b04e992e@idir', group_id: navigator_group_id[0].group_id },
-    { sub: '8bca8dc363494d8383ca5091e6712fdb@idir', group_id: navigator_group_id[0].group_id },
-    { sub: '9ab23d31af1440a0920e69aabba45e22@idir', group_id: navigator_group_id[0].group_id },
-    { sub: 'f3237101e6034ac1bd247342f6d4eb86@idir', group_id: navigator_group_id[0].group_id }
+    { sub: '067f5f2385cd43fda8c3cb55b04e992e@azureidir', group_id: navigator_group_id[0].group_id },
+    { sub: '8bca8dc363494d8383ca5091e6712fdb@azureidir', group_id: navigator_group_id[0].group_id },
+    { sub: '9ab23d31af1440a0920e69aabba45e22@azureidir', group_id: navigator_group_id[0].group_id },
+    { sub: 'f3237101e6034ac1bd247342f6d4eb86@azureidir', group_id: navigator_group_id[0].group_id }
   ];
 
   const exists = await knex('yars.subject_group').whereIn(

@@ -87,7 +87,7 @@ describe('authentication middleware', () => {
 
     it('sets currentContext to BEARER, performs login, and calls next if token is valid', async () => {
       const token = 'valid.token.here';
-      const payload = { sub: 'user123', exp: 9999999999, identity_provider: IdentityProviderKind.IDIR };
+      const payload = { sub: 'user123', exp: 9999999999, identity_provider: IdentityProviderKind.AZUREIDIR };
       const user = { userId: 'db-user-id' };
 
       mockedGetAuthHeader.mockReturnValue(`Bearer ${token}`);
@@ -116,7 +116,7 @@ describe('authentication middleware', () => {
 
       mockedGetAuthHeader.mockReturnValue(`Bearer ${token}`);
       mockedGetBearerToken.mockReturnValue(token);
-      jwtPayloadCache.set(token, { sub: 'user123', identity_provider: IdentityProviderKind.IDIR });
+      jwtPayloadCache.set(token, { sub: 'user123', identity_provider: IdentityProviderKind.AZUREIDIR });
       mockedLogin.mockResolvedValue(null);
 
       const middleware = hasAuthentication(INITIATIVE);
@@ -186,7 +186,7 @@ describe('authentication middleware', () => {
 
     it('returns the cached payload directly and skips verification if token is in cache', async () => {
       const token = 'cached-token';
-      const cachedPayload = { sub: 'user-123', identity_provider: IdentityProviderKind.IDIR };
+      const cachedPayload = { sub: 'user-123', identity_provider: IdentityProviderKind.AZUREIDIR };
 
       jwtPayloadCache.set(token, cachedPayload);
 
