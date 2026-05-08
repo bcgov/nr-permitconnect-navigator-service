@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.35](https://img.shields.io/badge/Version-0.0.35-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 0.0.36](https://img.shields.io/badge/Version-0.0.36-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -68,7 +68,7 @@ Kubernetes: `>= 1.13.0`
 | peachSync.failedJobsHistoryLimit | int | `3` |  |
 | peachSync.resources.requests.cpu | string | `"10m"` |  |
 | peachSync.resources.requests.memory | string | `"128Mi"` |  |
-| peachSync.schedule | string | `"5 11 * * *"` | Cron schedule for PEACH sync |
+| peachSync.schedule | string | `"15 14 * * *"` | Cron schedule for PEACH sync |
 | peachSync.startingDeadlineSeconds | int | `600` | How long the controller can miss the schedule before it gives up starting the job |
 | peachSync.successfulJobsHistoryLimit | int | `5` |  |
 | peachSync.suspend | bool | `false` | Suspend subsequent runs of the CronJob without deleting it |

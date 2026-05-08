@@ -228,7 +228,7 @@ peachSync:
   enabled: true
 
   # -- Cron schedule for PEACH sync
-  schedule: "5 11 * * *"
+  schedule: "15 14 * * *"
 
   # -- Suspend subsequent runs of the CronJob without deleting it
   suspend: false
