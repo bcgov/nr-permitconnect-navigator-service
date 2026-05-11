@@ -28,7 +28,8 @@ import { Button, Step, StepList, Stepper, StepPanel, StepPanels, useConfirm, use
 import { generalProjectService } from '@/services';
 import { useContactStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
-import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
+import { PermitStage } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 

@@ -19,7 +19,7 @@ import {
 import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
-import { PermitState } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/codeEnums';
 import { ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import {
@@ -150,7 +150,7 @@ const displayedProjectsInOrder = computed(() => {
 
 const hasPendingAuth = computed(() => (activityId: string) => {
   return authorizations.value.some(
-    (auth) => auth.activityId === activityId && auth.state === PermitState.PENDING_CLIENT
+    (auth) => auth.activityId === activityId && auth.state === PermitState.PENDING_APPLICANT_ACTION
   );
 });
 
@@ -337,7 +337,7 @@ onBeforeMount(async () => {
             <AuthorizationStatePill
               v-if="hasPendingAuth(project.activityId)"
               class="my-1"
-              :state="PermitState.PENDING_CLIENT"
+              :state="PermitState.PENDING_APPLICANT_ACTION"
               :display-text="t('views.e.initiativeView.pendingAuths')"
             />
           </div>

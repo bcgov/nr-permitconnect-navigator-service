@@ -9,6 +9,7 @@ import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
 import { Card, Divider } from '@/lib/primevue';
 import { useAppStore, useCodeStore, useFormStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
+import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 
 import type { ComponentPublicInstance, Ref } from 'vue';
 
@@ -24,7 +25,7 @@ const setBcHydroNumber = useSetFieldValue('project.bcHydroNumber');
 // Store
 const formStore = useFormStore();
 const { getInitiative } = storeToRefs(useAppStore());
-const { enums, options } = useCodeStore();
+const { options } = useCodeStore();
 const { getEditable } = storeToRefs(formStore);
 
 // State
@@ -56,7 +57,7 @@ useFormErrorWatcher(formRef, 'ProjectTypeCard', tab);
         :options="listOptions"
         @on-change="
           (e: string) => {
-            if (e === enums.ElectrificationProjectType.OTHER) setBcHydroNumber(null);
+            if (e === ElectrificationProjectType.OTHER) setBcHydroNumber(null);
           }
         "
       />

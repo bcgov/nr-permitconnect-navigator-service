@@ -12,6 +12,8 @@ const codeNames = [
   'ElectrificationProjectCategory',
   'ElectrificationProjectType',
   'EscalationType',
+  'PermitStage',
+  'PermitState',
   'SourceSystem'
 ] as const;
 

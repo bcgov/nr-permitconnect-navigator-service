@@ -45,7 +45,7 @@ const toast = useToast();
 // Store
 const contactStore = useContactStore();
 const formStore = useFormStore();
-const { codeList, enums } = useCodeStore();
+const { codeList } = useCodeStore();
 const { getEditable } = storeToRefs(formStore);
 
 // State
@@ -54,7 +54,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(codeList, enums, orgBookOptions.value);
+  return createProjectIntakeSchema(codeList, orgBookOptions.value);
 });
 
 // Actions

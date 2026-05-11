@@ -5,7 +5,8 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
-import { PermitState } from '@/utils/enums/permit';
+import { useCodeStore } from '@/store';
+import { PermitState } from '@/utils/enums/codeEnums';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
@@ -20,6 +21,7 @@ const emit = defineEmits(['authorizationCard:more']);
 
 // Composables
 const { t } = useI18n();
+const { codeDisplay } = useCodeStore();
 
 // State
 const trackingNotShownToProponent = computed(() => permit.permitTracking?.filter((pt) => !pt.shownToProponent));
@@ -58,7 +60,7 @@ function toCopy(toCopy: string) {
           />
         </span>
         <StatusPill
-          :status="permit.stage"
+          :status="codeDisplay.PermitStage?.[permit.stage as string]"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />

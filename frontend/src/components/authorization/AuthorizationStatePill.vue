@@ -2,7 +2,8 @@
 import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { PermitState } from '@/utils/enums/permit';
+import { useCodeStore } from '@/store';
+import { PermitState } from '@/utils/enums/codeEnums';
 
 // Props
 const {
@@ -29,6 +30,7 @@ const enlargedDimensions = {
 };
 
 // Composables
+const { codeDisplay } = useCodeStore();
 const { t } = useI18n();
 
 const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensions));
@@ -85,7 +87,7 @@ const pillState = {
     iconString: '',
     toolTip: undefined
   },
-  [PermitState.PENDING_CLIENT]: {
+  [PermitState.PENDING_APPLICANT_ACTION]: {
     badgeClass: 'yellow',
     iconClass: '',
     iconString: 'fas fa-circle-exclamation',
@@ -105,9 +107,9 @@ const pillState = {
   }
 };
 
-const statePillDisplayText = {
-  [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
-};
+// const statePillDisplayText = {
+//   [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
+// };
 </script>
 
 <template>
@@ -137,7 +139,7 @@ const statePillDisplayText = {
           :icon="getState?.iconString"
         />
         <span class="text-color">
-          {{ displayText ?? statePillDisplayText[state as keyof typeof statePillDisplayText] ?? state }}
+          {{ displayText ?? codeDisplay.PermitState?.[state as string] }}
         </span>
       </div>
     </div>

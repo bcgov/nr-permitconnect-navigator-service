@@ -23,7 +23,6 @@ import type { CreateSchemaOptions } from '@/types';
 export function createProjectFormNavigatorSchema({
   initiative,
   t,
-  enums,
   codeList,
   orgBookOptions
 }: Required<CreateSchemaOptions>) {
@@ -35,7 +34,7 @@ export function createProjectFormNavigatorSchema({
     ...createFinanciallySupportedPanelSchema({ t }),
     ...createLocationPidsPanelSchema(),
     ...createLocationDescriptionPanelSchema({ t }),
-    ...createProjectDescriptionPanelSchema({ initiative, t, enums }),
+    ...createProjectDescriptionPanelSchema({ initiative, t }),
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createRelatedEnquiriesPanelSchema({ t }),

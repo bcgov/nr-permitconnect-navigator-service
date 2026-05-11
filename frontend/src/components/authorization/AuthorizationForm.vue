@@ -14,8 +14,9 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
 import { useCodeStore, useFeatureStore, useProjectStore } from '@/store';
-import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
-import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
+import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import { formatDateTime } from '@/utils/formatters';
 import { projectRouteNameKey } from '@/utils/keys';
 import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, splitDateTime } from '@/utils/utils';
@@ -36,13 +37,17 @@ const { authorization = undefined, editable } = defineProps<{
 const AUTHORIZATION_TAB = '2';
 
 // Composables
-const codeStore = useCodeStore();
+const { codeDisplay, codeList } = useCodeStore();
 const confirmDialog = useConfirm();
 const featureStore = useFeatureStore();
 const { locale, t } = useI18n();
 const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
+
+// Store
+const { isPeachEnabled } = storeToRefs(featureStore);
+const { getProject } = storeToRefs(projectStore);
 
 // Types
 const formSchema = object({
@@ -67,7 +72,8 @@ const formSchema = object({
         value !== PermitNeeded.UNDER_INVESTIGATION
       );
     }),
-  stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.common.applicationStage')),
+  // stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.common.applicationStage')),
+  stage: string().required().oneOf(codeList.PermitStage).label(t('authorization.common.applicationStage')),
   issuedPermitId: string().nullable(),
   permitId: string(),
   permitTracking: array().of(
@@ -82,7 +88,7 @@ const formSchema = object({
   ),
   state: string()
     .required()
-    .oneOf(PERMIT_STATE_LIST)
+    .oneOf(codeList.PermitState)
     .label(t('authorization.authorizationForm.authorizationStatus'))
     .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
       const { stage } = this.parent;
@@ -109,11 +115,6 @@ const formSchema = object({
 });
 
 type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & IStamps;
-
-// Store
-const { codeDisplay } = codeStore;
-const { isPeachEnabled } = storeToRefs(featureStore);
-const { getProject } = storeToRefs(projectStore);
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);

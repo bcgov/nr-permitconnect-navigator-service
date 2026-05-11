@@ -2,7 +2,8 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { ONGOING_PERMIT_STATES } from '@/utils/constants/permit';
-import { PermitNeeded, PermitState, PermitStage } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';

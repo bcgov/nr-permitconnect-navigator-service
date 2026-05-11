@@ -6,9 +6,10 @@ import { TextArea } from '@/components/form';
 import { Card, Divider } from '@/lib/primevue';
 import { computed, ref, type ComponentPublicInstance, type Ref } from 'vue';
 import { useFormErrorWatcher } from '@/composables/useFormErrorWatcher';
-import { useAppStore, useCodeStore, useFormStore } from '@/store';
+import { useAppStore, useFormStore } from '@/store';
 import { storeToRefs } from 'pinia';
 import { Initiative } from '@/utils/enums/application';
+import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { useFormValues } from 'vee-validate';
 
 // Props
@@ -28,14 +29,13 @@ const values = useFormValues();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
-const { enums } = useCodeStore();
 const { getEditable } = storeToRefs(useFormStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
 const header = computed(() => {
   if (getInitiative.value === Initiative.ELECTRIFICATION) {
-    if (values.value.project.projectType === enums.ElectrificationProjectType.OTHER)
+    if (values.value.project.projectType === ElectrificationProjectType.OTHER)
       return t('projectDescriptionCard.headers.required');
     else return t('projectDescriptionCard.headers.optional');
   } else {

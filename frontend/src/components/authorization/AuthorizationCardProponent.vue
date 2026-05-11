@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card } from '@/lib/primevue';
+import { useCodeStore } from '@/store';
 import { formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
@@ -15,6 +16,7 @@ const { permit } = defineProps<{
 
 // Composables
 const { t } = useI18n();
+const { codeDisplay } = useCodeStore();
 </script>
 
 <template>
@@ -36,7 +38,7 @@ const { t } = useI18n();
           />
           <StatusPill
             class="mr-2"
-            :status="permit.stage"
+            :status="codeDisplay.PermitStage?.[permit.stage as string]"
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />

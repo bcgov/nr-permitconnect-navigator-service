@@ -5,7 +5,7 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import { Button, Card } from '@/lib/primevue';
 import { ONGOING_PERMIT_STATES } from '@/utils/constants/permit';
-import { PermitState } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/codeEnums';
 
 import type { Permit } from '@/types';
 
@@ -22,7 +22,8 @@ const { t } = useI18n();
 
 // State
 const isTerminalState = computed(() => {
-  return ![PermitState.NONE, ...ONGOING_PERMIT_STATES].includes(permit.state);
+  const excludedStates = [PermitState.NONE, ...ONGOING_PERMIT_STATES] as PermitState[];
+  return !excludedStates.includes(permit.state as PermitState);
 });
 </script>
 

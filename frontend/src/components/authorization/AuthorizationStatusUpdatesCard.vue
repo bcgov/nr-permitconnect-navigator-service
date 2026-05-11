@@ -4,8 +4,8 @@ import { useI18n } from 'vue-i18n';
 import Tooltip from '@/components/common/Tooltip.vue';
 import { DatePicker, Select, TextArea } from '@/components/form';
 import { Panel } from '@/lib/primevue';
-import { PERMIT_NEEDED_LIST, PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '@/utils/constants/permit';
-import { PermitState } from '@/utils/enums/permit';
+import { useCodeStore } from '@/store';
+import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
 
 // Props
 const {
@@ -26,9 +26,12 @@ const emit = defineEmits(['update:setVerifiedDate', 'update:targetDateChanged'])
 // Composables
 const { t } = useI18n();
 
-const stateDisplayText = {
-  [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
-};
+// const stateDisplayText = {
+//   [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
+// };
+
+// Store
+const { options } = useCodeStore();
 </script>
 
 <template>
@@ -61,8 +64,9 @@ const stateDisplayText = {
           <Select
             name="state"
             :label="t('authorization.authorizationStatusUpdatesCard.authorizationStatus')"
-            :options="PERMIT_STATE_LIST"
-            :option-label="(option) => stateDisplayText[option as keyof typeof stateDisplayText] ?? option"
+            :options="options.PermitState"
+            option-label="label"
+            option-value="value"
             :disabled="peachIntegratedAuthType || !editable"
           />
         </div>
@@ -70,7 +74,9 @@ const stateDisplayText = {
           <Select
             name="stage"
             :label="t('authorization.common.applicationStage')"
-            :options="PERMIT_STAGE_LIST"
+            :options="options.PermitStage"
+            option-label="label"
+            option-value="value"
             :disabled="peachIntegratedAuthType || !editable"
           />
         </div>

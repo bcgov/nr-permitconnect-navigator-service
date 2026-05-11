@@ -61,7 +61,7 @@ const toast = useToast();
 
 // Store
 const projectStore = useProjectStore();
-const { codeList, enums } = useCodeStore();
+const { codeList } = useCodeStore();
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
 const { getInitiative } = storeToRefs(useAppStore());
 
@@ -77,7 +77,6 @@ const projectFormNavigatorSchema = computed(() => {
     initiative: getInitiative.value,
     t,
     codeList,
-    enums,
     orgBookOptions: orgBookOptions.value
   });
 });

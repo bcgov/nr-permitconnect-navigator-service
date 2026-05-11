@@ -6,7 +6,7 @@ import { Card, Timeline } from '@/lib/primevue';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import { formatDateOnly, formatDateTime } from '@/utils/formatters';
-import { PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
@@ -86,7 +86,7 @@ const statusBoxStates = {
     boxClass: 'grey',
     message: undefined
   },
-  [PermitState.PENDING_CLIENT]: {
+  [PermitState.PENDING_APPLICANT_ACTION]: {
     boxClass: 'yellow',
     message: t('authorization.stateDescriptions.pendingClient')
   },

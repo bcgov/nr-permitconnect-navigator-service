@@ -21,6 +21,7 @@ import {
   requiredText
 } from '@/validators/common';
 import { BasicResponse, Initiative } from '@/utils/enums/application';
+import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 
 import type { CreateSchemaOptions } from '@/types';
@@ -134,14 +135,13 @@ export function createLocationDescriptionPanelSchema({ t }: CreateSchemaOptions)
 
 export function createProjectDescriptionPanelSchema({
   initiative,
-  t,
-  enums
-}: Required<Pick<CreateSchemaOptions, 'initiative' | 't' | 'enums'>>) {
+  t
+}: Required<Pick<CreateSchemaOptions, 'initiative' | 't'>>) {
   const isElectrification = initiative === Initiative.ELECTRIFICATION;
 
   const descriptionSchema = isElectrification
     ? string().when('project.projectType', {
-        is: enums.ElectrificationProjectType.OTHER,
+        is: ElectrificationProjectType.OTHER,
         then: (schema) => schema.required().label('Additional information about your project'),
         otherwise: (schema) => schema.notRequired().nullable().label('Additional information about your project')
       })
