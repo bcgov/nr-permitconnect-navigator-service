@@ -4,6 +4,8 @@ import type {
   ElectrificationProjectCategoryCode,
   ElectrificationProjectTypeCode,
   EscalationTypeCode,
+  PermitStageCode,
+  PermitStateCode,
   SourceSystemCode
 } from '../types/index.ts';
 
@@ -19,6 +21,8 @@ export const listAllCodeTables = async (
   ElectrificationProjectType: ElectrificationProjectTypeCode[];
   ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
   EscalationType: EscalationTypeCode[];
+  PermitStage: PermitStageCode[];
+  PermitState: PermitStateCode[];
   SourceSystem: SourceSystemCode[];
 }> => {
   const BusinessArea = await tx.business_area_code.findMany({
@@ -45,11 +49,31 @@ export const listAllCodeTables = async (
     }
   });
 
+  const PermitStage = await tx.permit_stage_code.findMany({
+    where: {
+      active: true
+    }
+  });
+
+  const PermitState = await tx.permit_state_code.findMany({
+    where: {
+      active: true
+    }
+  });
+
   const SourceSystem = await tx.source_system_code.findMany({
     where: {
       active: true
     }
   });
 
-  return { BusinessArea, ElectrificationProjectType, ElectrificationProjectCategory, EscalationType, SourceSystem };
+  return {
+    BusinessArea,
+    ElectrificationProjectType,
+    ElectrificationProjectCategory,
+    EscalationType,
+    PermitStage,
+    PermitState,
+    SourceSystem
+  };
 };

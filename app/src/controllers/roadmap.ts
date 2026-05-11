@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { PermitStage } from '../db/utils/codeEnums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject } from '../services/coms';
@@ -9,7 +10,7 @@ import { createNoteHistory } from '../services/noteHistory';
 import { listPermits } from '../services/permit';
 import { getProjectByActivityId } from '../services/project.ts';
 import { Problem } from '../utils';
-import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
+import { PermitNeeded } from '../utils/enums/permit.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { roadmapTemplate } from '../utils/templates';
 import { description } from '../../package.json';

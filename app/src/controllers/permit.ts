@@ -2,6 +2,7 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { findPriorityPermitTracking } from './peach.ts';
+import { PermitStage } from '../db/utils/codeEnums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
@@ -21,7 +22,7 @@ import { getProjectByActivityId } from '../services/project.ts';
 import { getSourceSystemKinds } from '../services/sourceSystemKind.ts';
 import { readUser } from '../services/user.ts';
 import { Initiative } from '../utils/enums/application.ts';
-import { PermitNeeded, PermitStage } from '../utils/enums/permit.ts';
+import { PermitNeeded } from '../utils/enums/permit.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import {
   initialPeachPermitUpdateTemplate,

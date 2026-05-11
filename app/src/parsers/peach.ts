@@ -1,5 +1,6 @@
+import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
 import { compareDates, splitDateTime } from '../utils/index.ts';
-import { PeachTerminatedStage, PermitPhase, PermitStage, PermitState } from '../utils/enums/permit.ts';
+import { PeachTerminatedStage, PermitPhase } from '../utils/enums/permit.ts';
 
 import type {
   CodingEvent,
@@ -72,23 +73,23 @@ const CODING_STATUS_MAPPINGS: Record<string, { stage: PermitStage; state: Permit
   // On hold mappings
   'MISSING_INFORMATION:PRE_APPLICATION': {
     stage: PermitStage.PRE_SUBMISSION,
-    state: PermitState.PENDING_CLIENT
+    state: PermitState.PENDING_APPLICANT_ACTION
   },
   'MISSING_INFORMATION:INITIAL_SUBMISSION_REVIEW': {
     stage: PermitStage.APPLICATION_SUBMISSION,
-    state: PermitState.PENDING_CLIENT
+    state: PermitState.PENDING_APPLICANT_ACTION
   },
   'MISSING_INFORMATION:TECH_REVIEW_COMMENT': {
     stage: PermitStage.TECHNICAL_REVIEW,
-    state: PermitState.PENDING_CLIENT
+    state: PermitState.PENDING_APPLICANT_ACTION
   },
   'MISSING_INFORMATION:DECISION': {
     stage: PermitStage.PENDING_DECISION,
-    state: PermitState.PENDING_CLIENT
+    state: PermitState.PENDING_APPLICANT_ACTION
   },
   'MISSING_INFORMATION:ISSUANCE': {
     stage: PermitStage.POST_DECISION,
-    state: PermitState.PENDING_CLIENT
+    state: PermitState.PENDING_APPLICANT_ACTION
   }
 };
 

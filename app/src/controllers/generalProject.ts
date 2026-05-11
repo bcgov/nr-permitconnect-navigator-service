@@ -2,6 +2,7 @@ import config from 'config';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
+import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
@@ -28,7 +29,7 @@ import {
 import { upsertPermit } from '../services/permit.ts';
 import { upsertPermitTracking } from '../services/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
-import { PermitNeeded, PermitStage, PermitState } from '../utils/enums/permit.ts';
+import { PermitNeeded } from '../utils/enums/permit.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
 import { confirmationTemplateGeneralSubmission } from '../utils/templates.ts';
 import { isTruthy, omit, toTitleCase } from '../utils/utils.ts';
