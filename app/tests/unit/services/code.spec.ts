@@ -8,6 +8,8 @@ describe('listAllCodeTables', () => {
     prismaTxMock.electrification_project_category_code.findMany.mockResolvedValueOnce([]);
     prismaTxMock.escalation_type_code.findMany.mockResolvedValueOnce([]);
     prismaTxMock.source_system_code.findMany.mockResolvedValueOnce([]);
+    prismaTxMock.permit_stage_code.findMany.mockResolvedValueOnce([]);
+    prismaTxMock.permit_state_code.findMany.mockResolvedValueOnce([]);
 
     const response = await codeService.listAllCodeTables(prismaTxMock);
 
@@ -16,12 +18,16 @@ describe('listAllCodeTables', () => {
     expect(prismaTxMock.electrification_project_category_code.findMany).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.escalation_type_code.findMany).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.source_system_code.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit_stage_code.findMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit_state_code.findMany).toHaveBeenCalledTimes(1);
     expect(response).toStrictEqual({
       BusinessArea: [],
       ElectrificationProjectType: [],
       ElectrificationProjectCategory: [],
       EscalationType: [],
-      SourceSystem: []
+      SourceSystem: [],
+      PermitStage: [],
+      PermitState: []
     });
   });
 });

@@ -35,10 +35,11 @@ import * as userService from '../../../src/services/user.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
 import * as emailService from '../../../src/services/email.ts';
 import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
+import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
 import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
-import { PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import { permitNoteUpdateTemplate, navPermitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
 
 import type { Request, Response } from 'express';
