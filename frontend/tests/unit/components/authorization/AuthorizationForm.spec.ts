@@ -7,7 +7,8 @@ import Tooltip from 'primevue/tooltip';
 import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue';
 import { useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
-import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { Permit, PermitTracking, PermitType } from '@/types';

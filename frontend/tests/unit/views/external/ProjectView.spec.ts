@@ -8,7 +8,8 @@ import BasicProjectInfoCard from '@/components/projectCommon/BasicProjectInfoCar
 import NoteBanner from '@/components/note/NoteBanner.vue';
 import RequiredAuths from '@/components/authorization/RequiredAuths.vue';
 import RelatedEnquiryListProponent from '@/components/enquiry/RelatedEnquiryListProponent.vue';
-import { PermitNeeded, PermitStage } from '@/utils/enums/permit';
+import { PermitStage } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 import {
   activityContactService,
   contactService,

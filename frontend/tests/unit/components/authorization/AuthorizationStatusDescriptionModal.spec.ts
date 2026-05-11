@@ -1,4 +1,5 @@
 import { shallowMount } from '@vue/test-utils';
+import { createPinia } from 'pinia';
 
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
 import PrimeVue from 'primevue/config';
@@ -21,7 +22,7 @@ describe('AuthorizationStatusDescriptionModal.vue', () => {
   it('renders', () => {
     const wrapper = shallowMount(AuthorizationStatusDescriptionModal, {
       global: {
-        plugins: [PrimeVue]
+        plugins: [PrimeVue, createPinia()]
       }
     });
 

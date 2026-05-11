@@ -8,8 +8,8 @@ import { useEnquiryStore } from '@/store/enquiryStore';
 import { useProjectStore } from '@/store/projectStore';
 import { usePermitStore } from '@/store/permitStore';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { NumResidentialUnits } from '@/utils/enums/housing';
-import { PermitStage, PermitState } from '@/utils/enums/permit';
 import {
   ApplicationStatus,
   ContactPreference,
