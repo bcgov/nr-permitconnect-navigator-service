@@ -328,27 +328,25 @@ export const subjectHasGroup = async (tx: PrismaTransactionClient, sub: string, 
  * @param tx Prisma transaction client
  * @param sub The subject of the current user
  * @param groupName The name of the group to check
+ * @param initiativeCode Optional Initiative to filter on
  * @returns A Promise that resolves to a boolean
  */
 export const subjectHasGroupName = async (
   tx: PrismaTransactionClient,
   sub: string,
-  groupName: GroupName | undefined
+  groupName: (GroupName | undefined)[],
+  initiativeCode: Initiative
 ) => {
   if (!groupName) return false;
+
+  const groupArray: GroupName[] = groupName.filter(Boolean) as GroupName[];
 
   const count = await tx.subject_group.count({
     where: {
       sub: sub,
       group: {
-        name: groupName
-      },
-      NOT: {
-        group: {
-          initiative: {
-            code: Initiative.PCNS
-          }
-        }
+        name: { in: groupArray },
+        initiative: { code: initiativeCode }
       }
     }
   });

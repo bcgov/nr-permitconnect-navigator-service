@@ -38,15 +38,18 @@ const isUserAdmin = async (
 const removeUserGroups = async (
   tx: PrismaTransactionClient,
   sub: string,
-  currentInitiativeId: string,
+  currentInitiative: Initiative,
   userGroups: Group[]
 ) => {
+  // Get the current initiative
+  const currentInitiativeId = (await getInitiative(tx, currentInitiative)).initiativeId;
+
   // Remove current initiative groups
   const currentInitiativeGroups = userGroups.filter((x) => x.initiativeId === currentInitiativeId);
   await Promise.all(currentInitiativeGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
 
   // Only remove global perm if user has no groups of the same type assigned in other initiatives
-  if (!(await subjectHasGroupName(tx, sub, currentInitiativeGroups[0]?.name))) {
+  if (!(await subjectHasGroupName(tx, sub, [currentInitiativeGroups[0]?.name], currentInitiative))) {
     const correspondingGlobalGroups = await Promise.all(
       currentInitiativeGroups.map(async (x) => await getCorrespondingGlobalGroup(tx, x.groupId))
     );
@@ -112,12 +115,9 @@ export const createUserAccessRequestController = async (
     const isGroupUpdate = existingUser && accessRequest.grant && userAlreadyInInitiative;
     let data;
 
-    // Store the current initiative ID to reference
-    const currentInitiativeId = (await getInitiative(tx, req.currentContext.initiative)).initiativeId;
-
     if (isGroupUpdate) {
       // Remove current initiative groups
-      await removeUserGroups(tx, userResponse.sub, currentInitiativeId, accessUserGroups);
+      await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
 
       // Assign new groups
       await assignGroup(tx, userResponse.sub, accessRequest.groupId);
@@ -147,7 +147,7 @@ export const createUserAccessRequestController = async (
         };
       } else {
         // Remove current initiative groups
-        await removeUserGroups(tx, userResponse.sub, currentInitiativeId, accessUserGroups);
+        await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
       }
     } else {
       data = await createUserAccessRequest(tx, {
@@ -193,11 +193,8 @@ export const processUserAccessRequestController = async (
             await assignGroup(tx, userResponse.sub, accessRequest.groupId);
             await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
           } else {
-            // Get the current initiative
-            const currentInitiativeId = (await getInitiative(tx, req.currentContext.initiative)).initiativeId;
-
             // Remove all user groups for the initiative
-            await removeUserGroups(tx, userResponse.sub, currentInitiativeId, userGroups);
+            await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, userGroups);
           }
 
           // Update access request status
