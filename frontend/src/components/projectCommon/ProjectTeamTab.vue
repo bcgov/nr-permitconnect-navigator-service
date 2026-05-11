@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, ref } from 'vue';
+import { computed, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ProjectTeamTable from './ProjectTeamTable.vue';
@@ -9,7 +9,8 @@ import ProjectTeamAddModal from './ProjectTeamAddModal.vue';
 import ProjectTeamManageModal from './ProjectTeamManageModal.vue';
 import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { activityContactService, contactService } from '@/services';
-import { useAppStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, useContactStore, useProjectStore } from '@/store';
+import { GroupName } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
@@ -24,12 +25,31 @@ const toast = useToast();
 const appStore = useAppStore();
 const projectStore = useProjectStore();
 const { isInternal } = storeToRefs(appStore);
+const { getContact } = storeToRefs(useContactStore());
 const { getActivityContacts, getProject } = storeToRefs(projectStore);
 
 // State
 const addUserModalVisible: Ref<boolean> = ref(false);
 const manageUserModalVisible: Ref<boolean> = ref(false);
 const selectedContact: Ref<ActivityContact | undefined> = ref(undefined);
+
+const currentUserActivityContact = computed(() =>
+  getActivityContacts.value.find((ac) => ac.contactId === getContact.value?.contactId)
+);
+const isAdmin = computed(() => {
+  // Proponent roles
+  const adminRoles: ActivityContactRole[] = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN];
+
+  // Navigator groups
+  const adminGroups: GroupName[] = [GroupName.SUPERVISOR, GroupName.NAVIGATOR];
+
+  console.log(getContact.value);
+  console.log(getActivityContacts.value);
+  return (
+    (currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role)) ||
+    useAuthZStore().isInGroup(adminGroups)
+  );
+});
 
 // Actions
 function handleFailureToasts(failures: { contact: Contact; errorMessage: string }[]) {
@@ -262,6 +282,7 @@ onBeforeMount(() => {
     <div class="basis-1/6">
       <div class="flex justify-end">
         <Button
+          v-if="isAdmin"
           :label="isInternal ? t('projectTeamTab.addUserBtn') : t('projectTeamTab.addMemberBtn')"
           icon="pi pi-plus"
           outlined

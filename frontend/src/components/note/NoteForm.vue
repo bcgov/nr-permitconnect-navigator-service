@@ -341,9 +341,7 @@ onBeforeMount(async () => {
                     name="escalateToSupervisor"
                     :label="t('note.noteForm.escalateToSupervisor')"
                     :bold="false"
-                    :disabled="
-                      !editable || authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER, GroupName.SUPERVISOR])
-                    "
+                    :disabled="!editable || authzStore.isInGroup([GroupName.ADMIN, GroupName.SUPERVISOR])"
                   />
                   <Checkbox
                     name="escalateToDirector"
