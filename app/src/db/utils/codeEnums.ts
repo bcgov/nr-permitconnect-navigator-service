@@ -1,6 +1,4 @@
 // AUTO-GENERATED FILE - DO NOT EDIT
-/* eslint-disable max-len */
-
 export const ElectrificationProjectCategory = {
   CONNECTIVITY: 'CONNECTIVITY',
   INTERCONNECTIVITY: 'INTERCONNECTIVITY',

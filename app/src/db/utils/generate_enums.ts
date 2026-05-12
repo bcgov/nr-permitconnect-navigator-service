@@ -1,14 +1,11 @@
-/* eslint-disable no-console */
-import { PrismaClient, Prisma } from '@prisma/client';
-import { writeFileSync } from 'fs';
-import { join, resolve } from 'path';
-import { config } from 'dotenv';
+import { writeFileSync } from 'node:fs';
+import { join } from 'node:path';
+import { Prisma } from '@prisma/client';
 
-// Load environment variables from app/.env
-// When run from app/src/db/utils directory, go up 3 levels to app/.env
-config({ path: resolve(process.cwd(), '../../../.env') });
+import prisma from '../dataConnection.ts';
+import { getLogger } from '../../utils/log.ts';
 
-const prisma = new PrismaClient();
+const log = getLogger(module.filename);
 
 function toPascalCase(name: string): string {
   return name
@@ -25,7 +22,7 @@ async function main() {
 
   const codeModels = models.filter((m) => m.name.endsWith('_code') && !excludeModels.includes(m.name));
 
-  let output = '// AUTO-GENERATED FILE - DO NOT EDIT\n/* eslint-disable max-len */\n';
+  let output = '// AUTO-GENERATED FILE - DO NOT EDIT\n';
 
   for (const model of codeModels) {
     const enumName = toPascalCase(model.name);
@@ -46,36 +43,30 @@ async function main() {
       })
       .join(',\n');
 
-    // Check if the type definition line would exceed 119 characters
+    // Check if the type definition line would exceed 120 characters
     const typeLine = `export type ${enumName} = (typeof ${enumName})[keyof typeof ${enumName}];`;
     const typeDefinition =
       typeLine.length > 120 ? `export type ${enumName} =\n  (typeof ${enumName})[keyof typeof ${enumName}];` : typeLine;
 
-    output += `
-export const ${enumName} = {
-${entries}
-} as const;
-
-${typeDefinition}
-`;
+    output += [`export const ${enumName} = {`, entries, '} as const;', '', typeDefinition].join('\n') + '\n\n';
   }
+  output = output.trimEnd() + '\n';
 
-  // When run from app/src/db/utils directory
-  const appOutputPath = join(process.cwd(), 'codeEnums.ts');
-  const frontendOutputPath = join(process.cwd(), '../../../../frontend/src/utils/enums/codeEnums.ts');
+  const appOutputPath = join(process.cwd(), 'src/db/utils/codeEnums.ts');
+  const frontendOutputPath = join(process.cwd(), '../frontend/src/utils/enums/codeEnums.ts');
 
-  console.log(`Writing generated enums to ${appOutputPath} ...`);
+  log.info(`Writing generated enums to ${appOutputPath} ...`);
 
   writeFileSync(appOutputPath, output);
 
   writeFileSync(frontendOutputPath, output);
 
-  console.log(`Generated ${codeModels.length} enums`);
+  log.info(`Generated ${codeModels.length} enums`);
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    log.error(e);
     process.exit(1);
   })
   .finally(async () => {

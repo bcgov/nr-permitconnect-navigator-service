@@ -38,7 +38,7 @@ Follow the outlined steps [here](https://github.com/bcgov/nr-permitconnect-navig
 
 ## Generating enums
 
-Navigate to app/src/db/utils and run npx tsx generate_enums.ts
+Run `npm run prisma:enums`
 
 ## Future Considerations
 
