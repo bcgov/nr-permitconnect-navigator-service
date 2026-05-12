@@ -41,8 +41,8 @@ const { codeDisplay } = useCodeStore();
           <StatusPill
             class="mr-2"
             :status="codeDisplay.PermitStage?.[permit.stage]"
-            :border-color="'var(--p-bcblue-900)'"
-            :bg-color="'var(--p-bcblue-50)'"
+            :border-color="'var(--p-support-info-border)'"
+            :bg-color="'var(--p-support-info-surface)'"
           />
         </div>
         <div class="col-span-6">
@@ -95,17 +95,8 @@ const { codeDisplay } = useCodeStore();
 
 .label-field {
   color: #474543;
-  font-family: 'BC Sans';
   font-size: 0.75rem;
   margin-bottom: 0.5rem;
-}
-
-.label-verified {
-  color: #474543;
-  font-family: 'BC Sans';
-  font-size: 0.75rem;
-  font-style: italic;
-  font-weight: 400;
 }
 
 :deep(.p-card-body) {

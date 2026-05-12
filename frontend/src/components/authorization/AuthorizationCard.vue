@@ -63,8 +63,8 @@ function toCopy(toCopy: string) {
         </span>
         <StatusPill
           :status="codeDisplay.PermitStage?.[permit.stage]"
-          :border-color="'var(--p-bcblue-900)'"
-          :bg-color="'var(--p-bcblue-50)'"
+          :border-color="'var(--p-support-info-border)'"
+          :bg-color="'var(--p-support-info-surface)'"
         />
       </div>
       <div class="grid grid-cols-[1fr_1fr_1fr] pt-2 pb-2 pr-2 gap-4">

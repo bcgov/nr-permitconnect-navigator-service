@@ -47,7 +47,6 @@ function initializeApp(): void {
       }
     }
   });
-  // app.use(PrimeVue, { unstyled: true });
   app.use(ToastService);
   app.use(ConfirmationService);
   app.component('FontAwesomeIcon', FontAwesomeIcon);

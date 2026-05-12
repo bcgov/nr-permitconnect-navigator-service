@@ -168,9 +168,9 @@ const { codeDisplay } = useCodeStore();
 }
 
 .green {
-  background-color: var(--p-green-75);
-  border-color: var(--p-green-500);
-  color: var(--p-green-500);
+  background-color: var(--p-support-success-surface);
+  border-color: var(--p-support-success-border);
+  color: var(--p-support-success-icon);
 }
 
 .grey {
@@ -178,24 +178,16 @@ const { codeDisplay } = useCodeStore();
   border-color: var(--p-greyscale-900);
 }
 
-.outlined-green {
-  background-color: var(--p-green-500);
-  border-color: var(--p-green-500);
-  border-style: solid;
-  border-radius: 50%;
-  color: var(--p-green-75);
-}
-
 .red {
-  background-color: var(--p-red-50);
-  border-color: var(--p-red-400);
-  color: var(--p-red-400);
+  background-color: var(--p-support-danger-surface);
+  border-color: var(--p-support-danger-border);
+  color: var(--p-support-danger-icon);
 }
 
 .yellow {
-  background-color: var(--p-gold-200);
-  border-color: var(--p-gold-900);
-  color: var(--p-gold-900);
+  background-color: var(--p-support-warning-surface);
+  border-color: var(--p-support-warning-border);
+  color: var(--p-support-warning-icon);
 }
 
 .text-color {
