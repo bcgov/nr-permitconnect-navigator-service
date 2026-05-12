@@ -16,6 +16,8 @@ const { permit } = defineProps<{
 
 // Composables
 const { t } = useI18n();
+
+// Store
 const { codeDisplay } = useCodeStore();
 </script>
 
@@ -38,7 +40,7 @@ const { codeDisplay } = useCodeStore();
           />
           <StatusPill
             class="mr-2"
-            :status="codeDisplay.PermitStage?.[permit.stage as string]"
+            :status="codeDisplay.PermitStage?.[permit.stage]"
             :border-color="'var(--p-bcblue-900)'"
             :bg-color="'var(--p-bcblue-50)'"
           />

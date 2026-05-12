@@ -7,11 +7,11 @@ import { PermitState } from '@/utils/enums/codeEnums';
 
 // Props
 const {
-  state = undefined,
+  state,
   enlarge = false,
   displayText = undefined
 } = defineProps<{
-  state?: string;
+  state: string;
   enlarge?: boolean;
   displayText?: string;
 }>();
@@ -30,9 +30,9 @@ const enlargedDimensions = {
 };
 
 // Composables
-const { codeDisplay } = useCodeStore();
 const { t } = useI18n();
 
+// State
 const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensions));
 const getState = computed(() => {
   return pillState[state as keyof typeof pillState];
@@ -107,9 +107,8 @@ const pillState = {
   }
 };
 
-// const statePillDisplayText = {
-//   [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
-// };
+// Store
+const { codeDisplay } = useCodeStore();
 </script>
 
 <template>
@@ -139,7 +138,7 @@ const pillState = {
           :icon="getState?.iconString"
         />
         <span class="text-color">
-          {{ displayText ?? codeDisplay.PermitState?.[state as string] }}
+          {{ displayText ?? codeDisplay.PermitState?.[state] ?? state }}
         </span>
       </div>
     </div>

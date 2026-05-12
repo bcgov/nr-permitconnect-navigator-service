@@ -37,15 +37,15 @@ const { authorization = undefined, editable } = defineProps<{
 const AUTHORIZATION_TAB = '2';
 
 // Composables
-const { codeDisplay, codeList } = useCodeStore();
 const confirmDialog = useConfirm();
-const featureStore = useFeatureStore();
 const { locale, t } = useI18n();
-const projectStore = useProjectStore();
 const router = useRouter();
 const toast = useToast();
 
 // Store
+const { codeDisplay } = useCodeStore();
+const featureStore = useFeatureStore();
+const projectStore = useProjectStore();
 const { isPeachEnabled } = storeToRefs(featureStore);
 const { getProject } = storeToRefs(projectStore);
 
@@ -72,8 +72,7 @@ const formSchema = object({
         value !== PermitNeeded.UNDER_INVESTIGATION
       );
     }),
-  // stage: string().required().oneOf(PERMIT_STAGE_LIST).label(t('authorization.common.applicationStage')),
-  stage: string().required().oneOf(codeList.PermitStage).label(t('authorization.common.applicationStage')),
+  stage: string().required().oneOf(Object.values(PermitStage)).label(t('authorization.common.applicationStage')),
   issuedPermitId: string().nullable(),
   permitId: string(),
   permitTracking: array().of(
@@ -88,7 +87,7 @@ const formSchema = object({
   ),
   state: string()
     .required()
-    .oneOf(codeList.PermitState)
+    .oneOf(Object.values(PermitState))
     .label(t('authorization.authorizationForm.authorizationStatus'))
     .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
       const { stage } = this.parent;

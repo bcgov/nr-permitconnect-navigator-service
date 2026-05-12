@@ -1,6 +1,13 @@
 /* eslint-disable max-len, quotes */
 import stamps from '../stamps.ts';
 
+import {
+  createAuditLogTrigger,
+  createUpdatedAtTrigger,
+  dropAuditLogTrigger,
+  dropUpdatedAtTrigger
+} from '../utils/utils.ts';
+
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
@@ -8,7 +15,7 @@ export async function up(knex: Knex): Promise<void> {
     // Create public schema tables
     knex.schema
       .createTable('permit_state_code', (table) => {
-        table.text('code').primary();
+        table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to SCREAMING_SNAKE w/ no double or trailing underscores
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
@@ -16,7 +23,7 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       .createTable('permit_stage_code', (table) => {
-        table.text('code').primary();
+        table.text('code').primary().checkRegex('^[A-Z][A-Z0-9]*(_[A-Z0-9]+)*$'); // Constrains to SCREAMING_SNAKE w/ no double or trailing underscores
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
@@ -24,30 +31,12 @@ export async function up(knex: Knex): Promise<void> {
       })
 
       // Create before update triggers
-      .then(() =>
-        knex.schema.raw(`CREATE TRIGGER before_update_permit_state_code_trigger
-          BEFORE UPDATE ON permit_state_code
-          FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`)
-      )
-
-      .then(() =>
-        knex.schema.raw(`CREATE TRIGGER before_update_permit_stage_code_trigger
-          BEFORE UPDATE ON permit_stage_code
-          FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`)
-      )
+      .then(async () => await createUpdatedAtTrigger(knex, 'public', 'permit_state_code'))
+      .then(async () => await createUpdatedAtTrigger(knex, 'public', 'permit_stage_code'))
 
       // Create audit triggers
-      .then(() =>
-        knex.schema.raw(`CREATE TRIGGER audit_permit_state_code_trigger
-          AFTER UPDATE OR DELETE ON permit_state_code
-          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
-      )
-
-      .then(() =>
-        knex.schema.raw(`CREATE TRIGGER audit_permit_stage_code_trigger
-          AFTER UPDATE OR DELETE ON permit_stage_code
-          FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`)
-      )
+      .then(async () => await createAuditLogTrigger(knex, 'public', 'permit_state_code'))
+      .then(async () => await createAuditLogTrigger(knex, 'public', 'permit_stage_code'))
 
       // Populate permit state codes
       .then(() => {
@@ -55,7 +44,8 @@ export async function up(knex: Knex): Promise<void> {
           {
             code: 'NONE',
             display: 'None',
-            definition: 'We have no information about status yet and it is presumed this submission is still in draft.'
+            definition:
+              'We have no information about the status yet, and it is presumed that this submission is still in draft form.'
           },
           {
             code: 'INITIAL_REVIEW',
@@ -205,7 +195,7 @@ export async function up(knex: Knex): Promise<void> {
             ALTER TABLE public.permit
             ADD CONSTRAINT permit_state_fkey
             FOREIGN KEY (state) REFERENCES permit_state_code(code)
-            ON UPDATE CASCADE ON DELETE CASCADE;
+            ON UPDATE CASCADE ON DELETE RESTRICT;
           `)
       )
 
@@ -214,7 +204,7 @@ export async function up(knex: Knex): Promise<void> {
             ALTER TABLE public.permit
             ADD CONSTRAINT permit_stage_fkey
             FOREIGN KEY (stage) REFERENCES permit_stage_code(code)
-            ON UPDATE CASCADE ON DELETE CASCADE;
+            ON UPDATE CASCADE ON DELETE RESTRICT;
           `)
       )
   );
@@ -246,14 +236,14 @@ export async function down(knex: Knex): Promise<void> {
             WHEN 'NONE' THEN 'None'
             WHEN 'INITIAL_REVIEW' THEN 'Initial review'
             WHEN 'ACCEPTED' THEN 'Accepted'
-            WHEN 'PENDING_APPLICANT_ACTION' THEN 'Pending applicant action'
+            WHEN 'PENDING_APPLICANT_ACTION' THEN 'Pending client action'
             WHEN 'IN_PROGRESS' THEN 'In progress'
             WHEN 'APPROVED' THEN 'Approved'
             WHEN 'ISSUED' THEN 'Issued'
             WHEN 'DENIED' THEN 'Denied'
             WHEN 'REJECTED' THEN 'Rejected'
             WHEN 'CANCELLED' THEN 'Cancelled'
-            WHEN 'WITHDRAWN' THEN 'Withdrawn by applicant'
+            WHEN 'WITHDRAWN' THEN 'Withdrawn by client'
             ELSE state
           END;
         `)
@@ -294,15 +284,13 @@ export async function down(knex: Knex): Promise<void> {
         `)
       )
 
-      // Drop triggers for code tables
-      .then(() =>
-        knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_state_code_trigger ON permit_state_code')
-      )
-      .then(() =>
-        knex.schema.raw('DROP TRIGGER IF EXISTS before_update_permit_stage_code_trigger ON permit_stage_code')
-      )
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_permit_state_code_trigger ON permit_state_code'))
-      .then(() => knex.schema.raw('DROP TRIGGER IF EXISTS audit_permit_stage_code_trigger ON permit_stage_code'))
+      // Drop audit triggers
+      .then(async () => await dropAuditLogTrigger(knex, 'public', 'permit_state_code'))
+      .then(async () => await dropAuditLogTrigger(knex, 'public', 'permit_stage_code'))
+
+      // Drop public schema table triggers
+      .then(async () => await dropUpdatedAtTrigger(knex, 'public', 'permit_state_code'))
+      .then(async () => await dropUpdatedAtTrigger(knex, 'public', 'permit_stage_code'))
 
       // Drop code tables
       .then(() => knex.schema.dropTableIfExists('permit_state_code'))

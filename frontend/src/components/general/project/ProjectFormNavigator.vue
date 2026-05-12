@@ -38,11 +38,11 @@ const { editable = true, project } = defineProps<{
 
 // Composables
 const { t } = useI18n();
-const { codeList } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
 // Store
+const { codeList } = useCodeStore();
 const projectStore = useProjectStore();
 const { getInitiative } = storeToRefs(useAppStore());
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);

@@ -21,11 +21,13 @@ const emit = defineEmits(['authorizationCard:more']);
 
 // Composables
 const { t } = useI18n();
-const { codeDisplay } = useCodeStore();
 
 // State
 const trackingNotShownToProponent = computed(() => permit.permitTracking?.filter((pt) => !pt.shownToProponent));
 const trackingShownToProponent = computed(() => permit.permitTracking?.find((pt) => pt.shownToProponent));
+
+// Store
+const { codeDisplay } = useCodeStore();
 
 // Actions
 const toast = useToast();
@@ -60,7 +62,7 @@ function toCopy(toCopy: string) {
           />
         </span>
         <StatusPill
-          :status="codeDisplay.PermitStage?.[permit.stage as string]"
+          :status="codeDisplay.PermitStage?.[permit.stage]"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />

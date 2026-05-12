@@ -56,7 +56,7 @@ export const useCodeStore = defineStore('code', () => {
               e[code] = display;
               return e;
             },
-            {} as Record<string, string>
+            {} as Record<string, string> // nosonar
           );
           return acc;
         },
@@ -72,7 +72,7 @@ export const useCodeStore = defineStore('code', () => {
               e[code] = code;
               return e;
             },
-            {} as Record<string, string>
+            {} as Record<string, string> // nosonar
           );
           return acc;
         },
@@ -100,7 +100,7 @@ export const useCodeStore = defineStore('code', () => {
   }
 
   function setCodes(data: CodeMap) {
-    Object.entries(data).forEach(([k, v]) => setCode(k as CodeName, v as Code[]));
+    Object.entries(data).forEach(([k, v]) => setCode(k as CodeName, v as Code[])); // nosonar
   }
 
   async function init(): Promise<void> {

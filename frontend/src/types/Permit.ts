@@ -2,6 +2,7 @@ import type { IStamps } from '@/interfaces';
 import type { PermitNote } from './PermitNote';
 import type { PermitTracking } from './PermitTracking';
 import type { PermitType } from './PermitType';
+import type { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
 interface PermitBase extends IStamps {
   activityId: string;
@@ -11,8 +12,8 @@ interface PermitBase extends IStamps {
   permitTracking?: PermitTracking[];
   permitType?: PermitType;
   permitTypeId: number;
-  stage: string;
-  state: string;
+  stage: PermitStage;
+  state: PermitState;
   submittedDate?: string | null;
   submittedTime?: string | null;
   statusLastChanged?: string | null;

@@ -18,11 +18,20 @@ function toPascalCase(name: string): string {
 async function main() {
   const models = Prisma.dmmf.datamodel.models;
 
-  const excludeModels = ['draft_code']; // Add any code tables that should be excluded from enum generation here
+  const excludeModels = new Set(['draft_code']); // Add any code tables that should be excluded
 
-  const codeModels = models.filter((m) => m.name.endsWith('_code') && !excludeModels.includes(m.name));
+  const codeModels = models.filter((m) => m.name.endsWith('_code') && !excludeModels.has(m.name));
 
-  let output = '// AUTO-GENERATED FILE - DO NOT EDIT\n';
+  let output =
+    [
+      '/**',
+      ' * AUTO-GENERATED FILE - DO NOT EDIT',
+      ' * @see app/src/db/utils/generate_enums.ts',
+      ' *',
+      ' * To update this file when updating or adding code tables to the db, run:',
+      ' * `npm run prisma:enums`',
+      ' */'
+    ].join('\n') + '\n\n';
 
   for (const model of codeModels) {
     const enumName = toPascalCase(model.name);
@@ -38,7 +47,7 @@ async function main() {
 
     const entries = values
       .map((v: string) => {
-        const key = v.replace(/[^a-zA-Z0-9_]/g, '_').toUpperCase();
+        const key = v.replace(/\W/g, '_').toUpperCase();
         return `  ${key}: '${v}'`;
       })
       .join(',\n');

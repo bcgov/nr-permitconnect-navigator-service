@@ -61,12 +61,12 @@ const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE
 
 // Composables
 const { t } = useI18n();
-const { codeList } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
+const { codeList } = useCodeStore();
 const projectStore = useProjectStore();
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
 

@@ -26,10 +26,6 @@ const emit = defineEmits(['update:setVerifiedDate', 'update:targetDateChanged'])
 // Composables
 const { t } = useI18n();
 
-// const stateDisplayText = {
-//   [PermitState.CANCELLED]: t('authorization.authorizationStatePill.cancelledByReviewingAuthority')
-// };
-
 // Store
 const { options } = useCodeStore();
 </script>
