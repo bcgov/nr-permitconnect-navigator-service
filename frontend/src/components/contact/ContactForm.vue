@@ -87,7 +87,7 @@ const onSubmit = async (values: GenericObject) => {
         class="mb-6"
         name="email"
         :label="t('contactForm.email')"
-        :disabled="true"
+        :disabled="!!contact.userId"
       />
       <InputMask
         class="mb-6"

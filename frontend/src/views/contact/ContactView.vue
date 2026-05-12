@@ -31,6 +31,7 @@ const handleGetStarted = () => {
 
 const onCancel = () => {
   editable.value = false;
+  if (!contactRedirect.value) router.back();
 };
 
 const setEditable = (value: boolean) => {
