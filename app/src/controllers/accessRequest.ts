@@ -49,7 +49,7 @@ const removeUserGroups = async (
   await Promise.all(currentInitiativeGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
 
   // Only remove global perm if user has no groups of the same type assigned in other initiatives
-  if (!(await subjectHasGroupName(tx, sub, [currentInitiativeGroups[0]?.name], currentInitiative))) {
+  if (!(await subjectHasGroupName(tx, sub, currentInitiativeGroups[0]?.name))) {
     const correspondingGlobalGroups = await Promise.all(
       currentInitiativeGroups.map(async (x) => await getCorrespondingGlobalGroup(tx, x.groupId))
     );

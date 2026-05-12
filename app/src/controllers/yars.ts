@@ -47,7 +47,7 @@ export const deleteSubjectGroupController = async (
     await removeGroup(tx, req.body.sub, req.body.groupId);
 
     // Only remove global perm if user has no groups of the same type assigned in other initiatives
-    if (!(await subjectHasGroupName(tx, req.body.sub, [group?.name], req.currentContext.initiative))) {
+    if (!(await subjectHasGroupName(tx, req.body.sub, group?.name))) {
       const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, req.body.groupId);
       await removeGroup(tx, req.body.sub, correspondingGlobalGroup.groupId);
     }

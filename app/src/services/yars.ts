@@ -308,6 +308,7 @@ export const removeGroup = async (tx: PrismaTransactionClient, sub: string, grou
 };
 
 /**
+ * Check if a subject belongs to a specific group ID
  * @param tx Prisma transaction client
  * @param sub The subject of the current user
  * @param groupId The ID of the group to check
@@ -325,21 +326,55 @@ export const subjectHasGroup = async (tx: PrismaTransactionClient, sub: string, 
 };
 
 /**
+ * Check if a subject belongs to a specific group name, excluding the global group
  * @param tx Prisma transaction client
  * @param sub The subject of the current user
  * @param groupName The name of the group to check
- * @param initiativeCode Optional Initiative to filter on
  * @returns A Promise that resolves to a boolean
  */
 export const subjectHasGroupName = async (
   tx: PrismaTransactionClient,
   sub: string,
-  groupName: (GroupName | undefined)[],
-  initiativeCode: Initiative
+  groupName: GroupName | undefined
 ) => {
   if (!groupName) return false;
 
-  const groupArray: GroupName[] = groupName.filter(Boolean) as GroupName[];
+  const count = await tx.subject_group.count({
+    where: {
+      sub: sub,
+      group: {
+        name: groupName
+      },
+      NOT: {
+        group: {
+          initiative: {
+            code: Initiative.PCNS
+          }
+        }
+      }
+    }
+  });
+
+  return count > 0;
+};
+
+/**
+ * Check if a subject belongs to a specific set of group names within an initiative
+ * @param tx Prisma transaction client
+ * @param sub The subject of the current user
+ * @param initiativeCode Initiative the groups belong to
+ * @param groupNames Array of group names to check
+ * @returns A Promise that resolves to a boolean
+ */
+export const subjectHasInitiativeGroupName = async (
+  tx: PrismaTransactionClient,
+  sub: string,
+  initiativeCode: Initiative,
+  groupNames: (GroupName | undefined)[]
+) => {
+  const groupArray: GroupName[] = groupNames.filter(Boolean) as GroupName[];
+
+  if (groupNames.length === 0) return false;
 
   const count = await tx.subject_group.count({
     where: {

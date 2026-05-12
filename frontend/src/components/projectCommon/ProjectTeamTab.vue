@@ -43,8 +43,6 @@ const isAdmin = computed(() => {
   // Navigator groups
   const adminGroups: GroupName[] = [GroupName.SUPERVISOR, GroupName.NAVIGATOR];
 
-  console.log(getContact.value);
-  console.log(getActivityContacts.value);
   return (
     (currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role)) ||
     useAuthZStore().isInGroup(adminGroups)
@@ -294,6 +292,8 @@ onBeforeMount(() => {
   <div v-if="getActivityContacts">
     <ProjectTeamTable
       :activity-contacts="getActivityContacts"
+      :current-user-activity-contact="currentUserActivityContact"
+      :is-admin="isAdmin"
       @project-team-table:manage-user="onManageUserClick"
       @project-team-table:revoke-user="onRevokeUserClick"
     />

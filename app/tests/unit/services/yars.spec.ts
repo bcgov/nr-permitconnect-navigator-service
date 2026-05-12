@@ -416,12 +416,59 @@ describe('subjectHasGroupName', () => {
   it('calls subject_group.count and returns true if count > 0', async () => {
     prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
 
-    const response = await yarsService.subjectHasGroupName(
-      prismaTxMock,
-      'sub',
-      [GroupName.NAVIGATOR],
-      Initiative.HOUSING
-    );
+    const response = await yarsService.subjectHasGroupName(prismaTxMock, 'sub', GroupName.NAVIGATOR);
+
+    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
+      where: {
+        sub: 'sub',
+        group: {
+          name: GroupName.NAVIGATOR
+        },
+        NOT: {
+          group: {
+            initiative: {
+              code: Initiative.PCNS
+            }
+          }
+        }
+      }
+    });
+
+    expect(response).toStrictEqual(true);
+  });
+
+  it('calls subject_group.count and returns false if count <= 0', async () => {
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
+
+    const response = await yarsService.subjectHasGroupName(prismaTxMock, 'sub', GroupName.NAVIGATOR);
+
+    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
+      where: {
+        sub: 'sub',
+        group: {
+          name: GroupName.NAVIGATOR
+        },
+        NOT: {
+          group: {
+            initiative: {
+              code: Initiative.PCNS
+            }
+          }
+        }
+      }
+    });
+
+    expect(response).toStrictEqual(false);
+  });
+});
+
+describe('subjectHasInitiativeGroupName', () => {
+  it('calls subject_group.count and returns true if count > 0', async () => {
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
+
+    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR
+    ]);
 
     expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
       where: {
@@ -439,12 +486,9 @@ describe('subjectHasGroupName', () => {
   it('calls subject_group.count and returns false if count <= 0', async () => {
     prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
 
-    const response = await yarsService.subjectHasGroupName(
-      prismaTxMock,
-      'sub',
-      [GroupName.NAVIGATOR],
-      Initiative.HOUSING
-    );
+    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR
+    ]);
 
     expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
       where: {
@@ -462,7 +506,10 @@ describe('subjectHasGroupName', () => {
   it('filters out undefined', async () => {
     prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
 
-    await yarsService.subjectHasGroupName(prismaTxMock, 'sub', [GroupName.NAVIGATOR, undefined], Initiative.HOUSING);
+    await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR,
+      undefined
+    ]);
 
     expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
       where: {

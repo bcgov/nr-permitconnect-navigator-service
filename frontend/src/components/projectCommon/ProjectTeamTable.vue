@@ -1,14 +1,12 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import { useAppStore, useAuthZStore, useContactStore } from '@/store';
+import { useAppStore } from '@/store';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { ActivityContact } from '@/types';
-import { GroupName } from '@/utils/enums/application';
 
 // Types
 enum TeamAction {
@@ -17,8 +15,14 @@ enum TeamAction {
 }
 
 // Props
-const { activityContacts } = defineProps<{
+const {
+  activityContacts,
+  currentUserActivityContact = undefined,
+  isAdmin
+} = defineProps<{
   activityContacts: ActivityContact[];
+  currentUserActivityContact?: ActivityContact;
+  isAdmin: boolean;
 }>();
 
 // Composables
@@ -29,30 +33,11 @@ const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revok
 
 // Store
 const appStore = useAppStore();
-const contactStore = useContactStore();
 const { isInternal } = storeToRefs(appStore);
-const { getContact } = storeToRefs(contactStore);
-
-// State
-const currentUserActivityContact = computed(() =>
-  activityContacts.find((ac) => ac.contactId === getContact.value?.contactId)
-);
-const isAdmin = computed(() => {
-  // Proponent roles
-  const adminRoles: ActivityContactRole[] = [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN];
-
-  // Navigator groups
-  const adminGroups: GroupName[] = [GroupName.SUPERVISOR, GroupName.NAVIGATOR];
-
-  return (
-    (currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role)) ||
-    useAuthZStore().isInGroup(adminGroups)
-  );
-});
 
 // Actions
 function isManageable(activityContact: ActivityContact, action: TeamAction) {
-  const isSelf = activityContact.contactId === currentUserActivityContact.value?.contactId;
+  const isSelf = activityContact.contactId === currentUserActivityContact?.contactId;
 
   // Cannot manage or revoke a primary contact
   if (activityContact.role === ActivityContactRole.PRIMARY) return false;

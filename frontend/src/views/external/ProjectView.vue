@@ -384,10 +384,7 @@ onBeforeMount(async () => {
             v-if="isAdmin"
             :value="2"
           >
-            <ProjectTeamTab
-              v-if="projectStore.getProject"
-              :activity-id="projectStore.getProject.activityId"
-            />
+            <ProjectTeamTab v-if="projectStore.getProject" />
           </TabPanel>
         </TabPanels>
       </Tabs>

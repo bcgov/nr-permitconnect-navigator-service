@@ -1,7 +1,7 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { listActivityContacts } from '../services/activityContact.ts';
 import { searchContacts } from '../services/contact.ts';
-import { subjectHasGroupName } from '../services/yars.ts';
+import { subjectHasInitiativeGroupName } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
@@ -28,24 +28,30 @@ export const requireActivityAdmin = async (
     if (req.currentAuthorization.attributes.includes('scope:all')) return next();
 
     await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-      // Proponent team member role check
-      const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
-      const activityContacts = await listActivityContacts(tx, req.params.activityId);
-      const activityContact = activityContacts.find((ac) => ac.contactId === contact[0].contactId);
-
-      const isActivityAdmin =
-        activityContact &&
-        [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(activityContact.role as ActivityContactRole);
+      let isActivityAdmin = false;
+      let isGroupAdmin = false;
 
       // Navigator group check
-      let isGroupAdmin = false;
       if (req.currentContext.tokenPayload?.sub)
-        isGroupAdmin = await subjectHasGroupName(
+        isGroupAdmin = await subjectHasInitiativeGroupName(
           tx,
           req.currentContext.tokenPayload?.sub,
-          [GroupName.SUPERVISOR, GroupName.NAVIGATOR],
-          req.currentContext.initiative
+          req.currentContext.initiative,
+          [GroupName.SUPERVISOR, GroupName.NAVIGATOR]
         );
+
+      if (!isGroupAdmin) {
+        // Proponent team member role check
+        const contact = await searchContacts(tx, { userId: [req.currentContext.userId as string] });
+        const activityContacts = await listActivityContacts(tx, req.params.activityId);
+        const activityContact = activityContacts.find((ac) => ac.contactId === contact[0].contactId);
+
+        isActivityAdmin =
+          !!activityContact &&
+          [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(
+            activityContact.role as ActivityContactRole
+          );
+      }
 
       if (!isActivityAdmin && !isGroupAdmin) {
         throw new Error('User lacks required role.');
