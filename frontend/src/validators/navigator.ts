@@ -85,14 +85,19 @@ export function createCompanyProjectNamePanelSchema({
   };
 }
 
-export function createElectrificationPanelSchema({ codeList }: Required<Pick<CreateSchemaOptions, 'codeList'>>) {
+export function createElectrificationPanelSchema({
+  codeList,
+  t
+}: Required<Pick<CreateSchemaOptions, 'codeList' | 't'>>) {
   return {
     electrification: object({
       bcEnvironmentAssessNeeded: optionalText().oneOf(YES_NO_LIST).label('BC Environmental Assessment needed?'),
       bcHydroNumber: optionalText().max(255).label('BC Hydro Call for Power project number'),
       hasEpa: optionalText().oneOf(YES_NO_LIST).label('Do they have an EPA?'),
       megawatts: number()
-        .notRequired()
+        .nullable()
+        .transform((value, originalValue) => (originalValue === '' ? null : value))
+        .typeError(t('i.common.form.numberError'))
         .positive('Must be greater than zero')
         .label('How many megawatts will it produce?'),
       projectType: string().required().max(255).oneOf(codeList.ElectrificationProjectType).label('Project type'),

@@ -6,6 +6,7 @@ import { useI18n } from 'vue-i18n';
 import { AutoComplete } from '@/components/form';
 import { externalApiService } from '@/services';
 import { useFormStore } from '@/store';
+import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { OrgBookOption } from '@/types';
@@ -26,13 +27,26 @@ const { getEditable } = storeToRefs(formStore);
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
     const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
-    orgBookOptions.value = results
+    let suggestions = results
       .filter((obo: Record<string, string>) => obo.type === 'name')
       // map value and topic_source_id for AutoComplete display and selection
       .map((obo: Record<string, string>) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));
+
+    // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
+    if (BC_HYDRO_POWER_AUTHORITY.includes(e.query.toUpperCase())) {
+      suggestions.push({
+        registeredName: BC_HYDRO_POWER_AUTHORITY,
+        registeredId: undefined
+      });
+    }
+
+    // Sort options alphabetically
+    suggestions.sort((a: OrgBookOption, b: OrgBookOption) => a.registeredName.localeCompare(b.registeredName));
+
+    orgBookOptions.value = suggestions;
   }
 }
 </script>
