@@ -206,6 +206,8 @@ model permit {
   targetDateDescription  String?           @map("target_date_description")
   activity               activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   permitType             permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permitStageCode        permit_stage_code @relation(fields: [stage], references: [code], onDelete: Cascade)
+  permitStateCode        permit_state_code @relation(fields: [state], references: [code], onDelete: Cascade)
   permitNote             permit_note[]
   permitTracking         permit_tracking[]
 
@@ -855,6 +857,38 @@ model general_project {
   activity                    activity            @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "general_project_activity_id_foreign")
   user                        user?               @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "general_project_assigned_user_id_foreign")
   businessAreaCode            business_area_code? @relation(fields: [businessArea], references: [code], map: "general_project_business_area_foreign")
+
+  @@schema("public")
+}
+
+model permit_stage_code {
+  code       String    @id
+  display    String    @unique(map: "permit_stage_code_display_unique")
+  definition String
+  active     Boolean   @default(true)
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy  String?   @map("updated_by")
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  permit     permit[]
+
+  @@schema("public")
+}
+
+model permit_state_code {
+  code       String    @id
+  display    String    @unique(map: "permit_state_code_display_unique")
+  definition String
+  active     Boolean   @default(true)
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy  String?   @map("updated_by")
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  permit     permit[]
 
   @@schema("public")
 }

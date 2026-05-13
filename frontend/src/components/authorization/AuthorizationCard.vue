@@ -5,7 +5,8 @@ import { useI18n } from 'vue-i18n';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import StatusPill from '@/components/common/StatusPill.vue';
 import { Button, Card, useToast } from '@/lib/primevue';
-import { PermitState } from '@/utils/enums/permit';
+import { useCodeStore } from '@/store';
+import { PermitState } from '@/utils/enums/codeEnums';
 import { formatDate, formatDateOnly, formatDateTime } from '@/utils/formatters';
 
 import type { Permit } from '@/types';
@@ -24,6 +25,9 @@ const { t } = useI18n();
 // State
 const trackingNotShownToProponent = computed(() => permit.permitTracking?.filter((pt) => !pt.shownToProponent));
 const trackingShownToProponent = computed(() => permit.permitTracking?.find((pt) => pt.shownToProponent));
+
+// Store
+const { codeDisplay } = useCodeStore();
 
 // Actions
 const toast = useToast();
@@ -58,7 +62,7 @@ function toCopy(toCopy: string) {
           />
         </span>
         <StatusPill
-          :status="permit.stage"
+          :status="codeDisplay.PermitStage?.[permit.stage]"
           :border-color="'var(--p-bcblue-900)'"
           :bg-color="'var(--p-bcblue-50)'"
         />

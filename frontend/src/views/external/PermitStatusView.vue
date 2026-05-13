@@ -20,7 +20,7 @@ import {
 import { useProjectStore, usePermitStore, useAppStore } from '@/store';
 import { NavigationPermission, useAuthZStore } from '@/store/authzStore';
 import { Initiative, RouteName } from '@/utils/enums/application';
-import { PermitState } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/codeEnums';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';

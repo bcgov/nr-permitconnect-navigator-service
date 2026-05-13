@@ -15,6 +15,7 @@ import {
   updateGeneralProjectController,
   upsertGeneralProjectDraftController
 } from '../../../src/controllers/generalProject.ts';
+import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
@@ -180,8 +181,8 @@ describe('createGeneralProjectController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
       ...permit1NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Application submission',
-      state: 'In progress',
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      state: PermitState.IN_PROGRESS,
       needed: 'Yes',
       statusLastChanged: null,
       statusLastVerified: null,
@@ -197,8 +198,8 @@ describe('createGeneralProjectController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
       ...permit2NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Application submission',
-      state: 'In progress',
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      state: PermitState.IN_PROGRESS,
       needed: 'Yes',
       statusLastChanged: null,
       statusLastVerified: null,
@@ -214,8 +215,8 @@ describe('createGeneralProjectController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
       ...permit3NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Pre-submission',
-      state: 'None',
+      stage: PermitStage.PRE_SUBMISSION,
+      state: PermitState.NONE,
       needed: 'Under investigation',
       statusLastChanged: null,
       statusLastVerified: null,
@@ -590,8 +591,8 @@ describe('submitGeneralProjectDraftController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
       ...permit1NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Application submission',
-      state: 'In progress',
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      state: PermitState.IN_PROGRESS,
       needed: 'Yes',
       statusLastChanged: null,
       statusLastVerified: null,
@@ -607,8 +608,8 @@ describe('submitGeneralProjectDraftController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
       ...permit2NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Application submission',
-      state: 'In progress',
+      stage: PermitStage.APPLICATION_SUBMISSION,
+      state: PermitState.IN_PROGRESS,
       needed: 'Yes',
       statusLastChanged: null,
       statusLastVerified: null,
@@ -624,8 +625,8 @@ describe('submitGeneralProjectDraftController', () => {
     expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
       ...permit3NoTracking,
       activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: 'Pre-submission',
-      state: 'None',
+      stage: PermitStage.PRE_SUBMISSION,
+      state: PermitState.NONE,
       needed: 'Under investigation',
       statusLastChanged: null,
       statusLastVerified: null,

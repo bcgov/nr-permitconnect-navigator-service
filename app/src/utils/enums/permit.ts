@@ -19,25 +19,3 @@ export enum PermitNeeded {
 export enum PermitPhase {
   APPLICATION = 'Application'
 }
-
-export enum PermitStage {
-  PRE_SUBMISSION = 'Pre-submission',
-  APPLICATION_SUBMISSION = 'Application submission',
-  TECHNICAL_REVIEW = 'Technical review',
-  PENDING_DECISION = 'Pending decision',
-  POST_DECISION = 'Post decision'
-}
-
-export enum PermitState {
-  INITIAL_REVIEW = 'Initial review',
-  ACCEPTED = 'Accepted',
-  PENDING_CLIENT = 'Pending client action',
-  IN_PROGRESS = 'In progress',
-  APPROVED = 'Approved',
-  ISSUED = 'Issued',
-  CANCELLED = 'Cancelled',
-  DENIED = 'Denied',
-  REJECTED = 'Rejected',
-  WITHDRAWN = 'Withdrawn by client',
-  NONE = 'None'
-}

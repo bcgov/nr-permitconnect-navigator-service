@@ -4,7 +4,7 @@ import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
 import type { AxiosInstance } from 'axios';
 import type { Permit, PermitType } from '@/types';

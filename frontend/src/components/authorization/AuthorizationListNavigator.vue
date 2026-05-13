@@ -232,13 +232,21 @@ onBeforeMount(async () => {
         :header="t('authorization.authorizationListNavigator.applicationStatus')"
         :sortable="true"
         style="min-width: 200px"
-      />
+      >
+        <template #body="{ data }">
+          {{ data?.state ? codeDisplay.PermitState[data.state] : '' }}
+        </template>
+      </Column>
       <Column
         field="stage"
         :header="t('authorization.common.applicationStage')"
         :sortable="true"
         style="min-width: 200px"
-      />
+      >
+        <template #body="{ data }">
+          {{ data?.stage ? codeDisplay.PermitStage[data.stage] : '' }}
+        </template>
+      </Column>
       <Column
         field="statusLastChanged"
         :header="t('authorization.common.statusChangeDate')"

@@ -38,11 +38,11 @@ const { editable = true, project } = defineProps<{
 
 // Composables
 const { t } = useI18n();
-const { codeList, enums } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
 // Store
+const { codeList } = useCodeStore();
 const projectStore = useProjectStore();
 const { getInitiative } = storeToRefs(useAppStore());
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
@@ -235,7 +235,6 @@ const onSubmit = async (formValues: GenericObject) => {
 const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
   initiative: getInitiative.value,
   t,
-  enums,
   codeList,
   orgBookOptions: orgBookOptions.value
 });

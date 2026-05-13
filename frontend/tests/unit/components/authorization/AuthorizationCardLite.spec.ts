@@ -7,7 +7,8 @@ import Tooltip from 'primevue/tooltip';
 
 import AuthorizationCardLite from '@/components/authorization/AuthorizationCardLite.vue';
 import { StorageKey } from '@/utils/enums/application';
-import { PermitNeeded, PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
+import { PermitNeeded } from '@/utils/enums/permit';
 
 import type { Permit, PermitType } from '@/types';
 

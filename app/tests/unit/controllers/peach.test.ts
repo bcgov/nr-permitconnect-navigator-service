@@ -9,10 +9,11 @@ import {
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach.ts';
+import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
 import * as parser from '../../../src/parsers/peach.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as peachService from '../../../src/services/peach.ts';
-import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
 import * as stamps from '../../../src/db/utils/utils.ts';
 import { splitDateTime, Problem } from '../../../src/utils/index.ts';

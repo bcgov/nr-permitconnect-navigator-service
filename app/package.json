@@ -12,6 +12,7 @@
     "clean:all": "tsx ./deploy-utils.ts clean",
     "clean": "rimraf coverage dist sbin",
     "format": "prettier ./src --write",
+    "prisma:enums": "tsx ./src/db/utils/generate_enums.ts",
     "knex:local": "tsx ./node_modules/knex/bin/cli.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",

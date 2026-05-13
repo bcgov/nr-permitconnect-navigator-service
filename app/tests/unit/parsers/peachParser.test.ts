@@ -6,8 +6,9 @@ import {
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED
 } from '../data/index.ts';
+import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
 import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peach.ts';
-import { PeachIntegratedSystem, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 
 import type { ProcessEvent } from '../../../src/types/index.ts';
 
@@ -201,7 +202,7 @@ describe('peachRecordParser', () => {
       const summary = summarizePeachRecord(record)!;
 
       expect(summary.stage).toBe(PermitStage.TECHNICAL_REVIEW);
-      expect(summary.state).toBe(PermitState.PENDING_CLIENT);
+      expect(summary.state).toBe(PermitState.PENDING_APPLICANT_ACTION);
       expect(summary.statusLastChanged).toBe('2024-02-15');
     });
 

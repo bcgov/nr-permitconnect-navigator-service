@@ -36,6 +36,10 @@ Follow the outlined steps [here](https://github.com/bcgov/nr-permitconnect-navig
 
 Follow the outlined steps [here](https://github.com/bcgov/nr-permitconnect-navigator-service/wiki/Database-Backup-and-Restore#recovery).
 
+## Generating enums
+
+Run `npm run prisma:enums`
+
 ## Future Considerations
 
 Consider the use of namespaces/modules to wrap particular sections of the application. As more initiatives are added to the system there will be naming conflicts.

@@ -1,4 +1,5 @@
-import { PermitNeeded, PermitStage, PermitState } from '../enums/permit.ts';
+import { PermitStage, PermitState } from '../../db/utils/codeEnums.ts';
+import { PermitNeeded } from '../enums/permit.ts';
 
 export const PERMIT_NEEDED_LIST = [PermitNeeded.YES, PermitNeeded.UNDER_INVESTIGATION, PermitNeeded.NO];
 
@@ -13,7 +14,7 @@ export const PERMIT_STAGE_LIST = [
 export const PERMIT_STATE_LIST = [
   PermitState.INITIAL_REVIEW,
   PermitState.ACCEPTED,
-  PermitState.PENDING_CLIENT,
+  PermitState.PENDING_APPLICANT_ACTION,
   PermitState.IN_PROGRESS,
   PermitState.APPROVED,
   PermitState.ISSUED,

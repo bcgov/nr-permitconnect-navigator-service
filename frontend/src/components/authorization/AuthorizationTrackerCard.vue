@@ -2,11 +2,12 @@
 import { computed, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
-import { Card, Timeline } from '@/lib/primevue';
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import AuthorizationStatusDescriptionModal from '@/components/authorization/AuthorizationStatusDescriptionModal.vue';
+import { Card, Timeline } from '@/lib/primevue';
+import { useCodeStore } from '@/store';
 import { formatDateOnly, formatDateTime } from '@/utils/formatters';
-import { PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
 import type { Ref } from 'vue';
 import type { Permit } from '@/types';
@@ -19,36 +20,44 @@ const { permit } = defineProps<{
 // Composables
 const { t } = useI18n();
 
+// Store
+const { codeDisplay } = useCodeStore();
+
+// State
+const timelineText = computed(() => (trackerStatus: string) => {
+  return codeDisplay.PermitStage?.[trackerStatus];
+});
+
 // Constants
 const complete = (trackerStatus: string) => ({
   class: 'stage-blue',
   iconClass: 'complete',
   iconString: 'fas fa-circle-check',
-  text: trackerStatus
+  text: timelineText.value(trackerStatus)
 });
 const crossedCircle = (trackerStatus: string) => ({
   class: 'stage-grey',
   iconClass: 'crossed-circle',
   iconString: 'fa-solid fa-ban',
-  text: trackerStatus
+  text: timelineText.value(trackerStatus)
 });
 const current = (trackerStatus: string) => ({
   class: 'stage-blue text-current',
   iconClass: 'current',
   iconString: 'fa fa-circle-dot',
-  text: trackerStatus
+  text: timelineText.value(trackerStatus)
 });
 const empty = (trackerStatus: string) => ({
   class: 'stage-grey',
   iconClass: 'empty',
   iconString: 'fa fa-circle',
-  text: trackerStatus
+  text: timelineText.value(trackerStatus)
 });
 const previous = (trackerStatus: string) => ({
   class: 'stage-blue-opaque',
   iconClass: 'previous',
   iconString: 'fas fa-circle-check',
-  text: trackerStatus
+  text: timelineText.value(trackerStatus)
 });
 
 // State
@@ -86,7 +95,7 @@ const statusBoxStates = {
     boxClass: 'grey',
     message: undefined
   },
-  [PermitState.PENDING_CLIENT]: {
+  [PermitState.PENDING_APPLICANT_ACTION]: {
     boxClass: 'yellow',
     message: t('authorization.stateDescriptions.pendingClient')
   },
@@ -234,7 +243,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
         <div class="flex justify-between items-center">
           <div class="py-4 px-6 flex">
             <AuthorizationStatePill
-              :state="permit?.state"
+              :state="permit.state"
               :enlarge="true"
             />
             <div v-if="permit?.statusLastVerified">

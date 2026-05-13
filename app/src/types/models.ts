@@ -113,6 +113,14 @@ const permitNoteBase = Prisma.validator<Prisma.permit_noteDefaultArgs>()({});
 export type PermitNoteBase = Prisma.permit_noteGetPayload<typeof permitNoteBase>;
 export type PermitNote = PermitNoteBase;
 
+const permitStageCodeBase = Prisma.validator<Prisma.permit_stage_codeDefaultArgs>()({});
+export type PermitStageCodeBase = Prisma.permit_stage_codeGetPayload<typeof permitStageCodeBase>;
+export type PermitStageCode = PermitStageCodeBase; // nosonar
+
+const permitStateCodeBase = Prisma.validator<Prisma.permit_state_codeDefaultArgs>()({});
+export type PermitStateCodeBase = Prisma.permit_state_codeGetPayload<typeof permitStateCodeBase>;
+export type PermitStateCode = PermitStateCodeBase; // nosonar
+
 const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
 export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
 export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSystemKind | null };

@@ -61,12 +61,12 @@ const ATS_ENQUIRY_TYPE_CODE = toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE
 
 // Composables
 const { t } = useI18n();
-const { codeList, enums } = useCodeStore();
 const confirm = useConfirm();
 const toast = useToast();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
+const { codeList } = useCodeStore();
 const projectStore = useProjectStore();
 const { getPrimaryActivityContact, getProjectIsCompleted } = storeToRefs(projectStore);
 
@@ -401,7 +401,6 @@ const onSubmit = async (formValues: GenericObject) => {
 const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
   initiative: getInitiative.value,
   t,
-  enums,
   codeList,
   orgBookOptions: orgBookOptions.value
 });

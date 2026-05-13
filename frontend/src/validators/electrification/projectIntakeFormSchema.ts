@@ -1,20 +1,17 @@
 import { object, string, type InferType } from 'yup';
 
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
+import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { contactSchema } from '@/validators';
 
 import type { CodeName } from '@/store/codeStore';
 import type { OrgBookOption } from '@/types';
 
-export function createProjectIntakeSchema(
-  codeList: Record<CodeName, string[]>,
-  enums: Record<CodeName, Record<string, string>>,
-  orgBookOptions: OrgBookOption[]
-) {
+export function createProjectIntakeSchema(codeList: Record<CodeName, string[]>, orgBookOptions: OrgBookOption[]) {
   return object({
     [IntakeFormCategory.BASIC]: object({
       projectDescription: string().when('$project.projectType', {
-        is: enums.ElectrificationProjectType.OTHER,
+        is: ElectrificationProjectType.OTHER,
         then: (schema) => schema.required().label('Project description'),
         otherwise: (schema) => schema.notRequired().nullable().label('Project description')
       }),

@@ -5,6 +5,7 @@
  */
 import { Prisma } from '@prisma/client';
 
+import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
 import {
   AuthType,
   BasicResponse,
@@ -13,7 +14,7 @@ import {
   Initiative
 } from '../../../src/utils/enums/application.ts';
 import { ProjectType } from '../../../src/utils/enums/electrification.ts';
-import { PeachIntegratedSystem, PermitNeeded, PermitStage, PermitState } from '../../../src/utils/enums/permit.ts';
+import { PeachIntegratedSystem, PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import {
   ActivityContactRole,
   ApplicationStatus,

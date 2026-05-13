@@ -7,7 +7,7 @@ import { mount } from '@vue/test-utils';
 
 import AuthorizationCard from '@/components/authorization/AuthorizationCard.vue';
 import { StorageKey } from '@/utils/enums/application';
-import { PermitStage, PermitState } from '@/utils/enums/permit';
+import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
 import type { Permit, PermitType } from '@/types';
 

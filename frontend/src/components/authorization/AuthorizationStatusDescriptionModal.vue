@@ -3,9 +3,9 @@ import { useI18n } from 'vue-i18n';
 
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import { Dialog } from '@/lib/primevue';
-import { PermitState } from '@/utils/enums/permit';
+import { PermitState } from '@/utils/enums/codeEnums';
 
-// Compossables
+// Composables
 const { t } = useI18n();
 
 // State
@@ -72,7 +72,7 @@ const visible = defineModel<boolean>('visible');
     </div>
     <div class="my-6">
       <div class="flex">
-        <AuthorizationStatePill :state="PermitState.PENDING_CLIENT" />
+        <AuthorizationStatePill :state="PermitState.PENDING_APPLICANT_ACTION" />
       </div>
       <div class="mt-2">
         {{ t('authorization.stateDescriptions.pendingClient') }}
