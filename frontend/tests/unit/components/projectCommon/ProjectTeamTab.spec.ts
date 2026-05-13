@@ -57,7 +57,11 @@ const wrapperSettings = (zone = Zone.INTERNAL) => ({
       createTestingPinia({
         initialState: {
           app: { zone },
-          project: { project: { activityId: 'activity1' }, activityContacts: [] }
+          contact: { contact: mockContact },
+          project: {
+            project: { activityId: 'activity1' },
+            activityContacts: [{ ...mockActivityContact, role: ActivityContactRole.ADMIN }]
+          }
         }
       }),
       ConfirmationService,

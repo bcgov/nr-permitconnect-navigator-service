@@ -148,7 +148,7 @@ async function onProcessUserAccessRequest() {
 }
 
 function onRevoke(userAccessRequest: UserAccessRequest) {
-  const admin = authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER]);
+  const admin = authzStore.isInGroup([GroupName.ADMIN]);
 
   const message = admin ? t('views.i.userManagementView.revokeAdmin1') : t('views.i.userManagementView.revokeAdmin2');
   const successMessage = admin

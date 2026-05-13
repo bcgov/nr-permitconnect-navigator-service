@@ -1,11 +1,9 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { computed } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Button, Column, DataTable } from '@/lib/primevue';
-import { useAppStore, useContactStore } from '@/store';
-import { ACTIVITY_CONTACT_ROLE_LIST } from '@/utils/constants/projectCommon';
+import { useAppStore } from '@/store';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { ActivityContact } from '@/types';
@@ -17,8 +15,14 @@ enum TeamAction {
 }
 
 // Props
-const { activityContacts } = defineProps<{
+const {
+  activityContacts,
+  currentUserActivityContact = undefined,
+  isAdmin
+} = defineProps<{
   activityContacts: ActivityContact[];
+  currentUserActivityContact?: ActivityContact;
+  isAdmin: boolean;
 }>();
 
 // Composables
@@ -29,22 +33,11 @@ const emit = defineEmits(['projectTeamTable:manageUser', 'projectTeamTable:revok
 
 // Store
 const appStore = useAppStore();
-const contactStore = useContactStore();
 const { isInternal } = storeToRefs(appStore);
-const { getContact } = storeToRefs(contactStore);
-
-// State
-const currentUserActivityContact = computed(() =>
-  activityContacts.find((ac) => ac.contactId === getContact.value?.contactId)
-);
-const isAdmin = computed(() => {
-  const adminRoles: ActivityContactRole[] = ACTIVITY_CONTACT_ROLE_LIST.filter((r) => r !== ActivityContactRole.MEMBER);
-  return currentUserActivityContact.value && adminRoles.includes(currentUserActivityContact.value.role);
-});
 
 // Actions
 function isManageable(activityContact: ActivityContact, action: TeamAction) {
-  const isSelf = activityContact.contactId === currentUserActivityContact.value?.contactId;
+  const isSelf = activityContact.contactId === currentUserActivityContact?.contactId;
 
   // Cannot manage or revoke a primary contact
   if (activityContact.role === ActivityContactRole.PRIMARY) return false;

@@ -53,7 +53,7 @@ function ssoAxios(): AxiosInstance {
 export const searchIdirUsers = async (params?: IdirSearchParameters) => {
   try {
     const env = config.get('server.env');
-    const { data, status } = await ssoAxios().get(`/${env}/idir/users`, { params: params });
+    const { data, status } = await ssoAxios().get(`/${env}/azure-idir/users`, { params: params });
     return { data: data.data, status };
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {

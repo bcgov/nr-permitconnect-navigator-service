@@ -461,3 +461,64 @@ describe('subjectHasGroupName', () => {
     expect(response).toStrictEqual(false);
   });
 });
+
+describe('subjectHasInitiativeGroupName', () => {
+  it('calls subject_group.count and returns true if count > 0', async () => {
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
+
+    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR
+    ]);
+
+    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
+      where: {
+        sub: 'sub',
+        group: {
+          name: { in: [GroupName.NAVIGATOR] },
+          initiative: { code: Initiative.HOUSING }
+        }
+      }
+    });
+
+    expect(response).toStrictEqual(true);
+  });
+
+  it('calls subject_group.count and returns false if count <= 0', async () => {
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
+
+    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR
+    ]);
+
+    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
+      where: {
+        sub: 'sub',
+        group: {
+          name: { in: [GroupName.NAVIGATOR] },
+          initiative: { code: Initiative.HOUSING }
+        }
+      }
+    });
+
+    expect(response).toStrictEqual(false);
+  });
+
+  it('filters out undefined', async () => {
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
+
+    await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
+      GroupName.NAVIGATOR,
+      undefined
+    ]);
+
+    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
+      where: {
+        sub: 'sub',
+        group: {
+          name: { in: [GroupName.NAVIGATOR] },
+          initiative: { code: Initiative.HOUSING }
+        }
+      }
+    });
+  });
+});

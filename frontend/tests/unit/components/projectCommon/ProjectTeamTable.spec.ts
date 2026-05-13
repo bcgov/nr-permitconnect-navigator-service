@@ -45,8 +45,17 @@ const activityContacts: ActivityContact[] = [
   { activityId: 'activity1', contactId: 'member', role: ActivityContactRole.MEMBER, contact: mockMemberContact }
 ];
 
-const wrapperSettings = (zone = Zone.INTERNAL, customContacts = activityContacts, currentUser = mockUserContact) => ({
-  props: { activityContacts: customContacts },
+const wrapperSettings = (
+  zone = Zone.INTERNAL,
+  customContacts = activityContacts,
+  currentUser = mockUserContact,
+  customActivityContact = activityContacts[0]
+) => ({
+  props: {
+    activityContacts: customContacts,
+    currentUserActivityContact: customActivityContact,
+    isAdmin: [ActivityContactRole.ADMIN, ActivityContactRole.PRIMARY].includes(customActivityContact.role)
+  },
   global: {
     plugins: [
       createTestingPinia({
@@ -113,7 +122,10 @@ describe('ProjectTeamTable.vue', () => {
 
   describe('Non-Admin View', () => {
     it('hides manage and revoke columns entirely if current user is not an Admin/Primary', async () => {
-      const wrapper = mount(ProjectTeamTable, wrapperSettings(Zone.INTERNAL, activityContacts, mockMemberContact));
+      const wrapper = mount(
+        ProjectTeamTable,
+        wrapperSettings(Zone.INTERNAL, activityContacts, mockMemberContact, activityContacts[3])
+      );
       await flushPromises();
 
       const manageBtns = wrapper.findAll(`button[aria-label="${t('projectTeamTable.headerManage')}"]`);

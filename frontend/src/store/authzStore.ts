@@ -202,7 +202,13 @@ export const useAuthZStore = defineStore('authz', () => {
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
     getInitiativeOverride: computed(() => state.initiativeOverride.value),
-    isInGroup: computed(() => (group: GroupName[]) => state.groups.value.some((x) => group.some((g) => g === x.name)))
+    isInGroup: computed(
+      () => (group: GroupName[]) =>
+        state.groups.value.some((g) => g.name === GroupName.DEVELOPER) ||
+        state.groups.value.some((x) =>
+          group.some((g) => x.initiativeCode === useAppStore().getInitiative && g === x.name)
+        )
+    )
   };
 
   // Actions

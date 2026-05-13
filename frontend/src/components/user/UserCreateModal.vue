@@ -103,7 +103,7 @@ watchEffect(async () => {
   const yarsGroups: Group[] = (await yarsService.getGroups(useAppStore().getInitiative)).data;
 
   const allowedGroups: GroupName[] = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
-  if (authzStore.isInGroup([GroupName.ADMIN, GroupName.DEVELOPER])) {
+  if (authzStore.isInGroup([GroupName.ADMIN])) {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
 
