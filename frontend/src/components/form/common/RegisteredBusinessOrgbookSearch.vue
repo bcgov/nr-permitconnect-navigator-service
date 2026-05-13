@@ -5,8 +5,9 @@ import { useI18n } from 'vue-i18n';
 
 import { AutoComplete } from '@/components/form';
 import { externalApiService } from '@/services';
-import { useFormStore } from '@/store';
+import { useAppStore, useFormStore } from '@/store';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
+import { Initiative } from '@/utils/enums/application';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { OrgBookOption } from '@/types';
@@ -20,6 +21,7 @@ const setRegisteredName = useSetFieldValue('basic.registeredName');
 const setRegisteredId = useSetFieldValue('basic.registeredId');
 
 // Store
+const { getInitiative } = storeToRefs(useAppStore());
 const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
 
@@ -36,7 +38,10 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
       }));
 
     // If the searched company name includes BC Hydro Power Authority, add it as an option since it is not registered
-    if (BC_HYDRO_POWER_AUTHORITY.includes(e.query.toUpperCase())) {
+    if (
+      getInitiative.value === Initiative.ELECTRIFICATION &&
+      BC_HYDRO_POWER_AUTHORITY.includes(e.query.toUpperCase())
+    ) {
       suggestions.push({
         registeredName: BC_HYDRO_POWER_AUTHORITY,
         registeredId: undefined

@@ -91,7 +91,7 @@ const generateElectrificationProjectData = async (
     activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
       ?.activityId;
     const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.ADMIN);
+    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
   // Put new electrification project together

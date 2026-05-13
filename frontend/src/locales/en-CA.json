@@ -413,7 +413,7 @@
         "bcHydroNumberLabel": "BC Hydro Call for Power number",
         "projectNameLabel": "Project name",
         "hasEpaLabel": "Do they have an EPA?",
-        "megawattsLabel": "What is the projects capacity (in megawatts)?",
+        "megawattsLabel": "What is the project's capacity (in megawatts)?",
         "companyLabel": "Company",
         "bcEnvironmentAssessNeededLabel": "BC Environmental Assessment needed?",
         "projectCategoryLabel": "Project category",
