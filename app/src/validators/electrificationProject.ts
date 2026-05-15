@@ -69,7 +69,7 @@ const schema = {
   },
   searchElectrificationProjects: {
     body: Joi.object({
-      activityId: Joi.array().items(activityId),
+      activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),

@@ -426,6 +426,7 @@ async function createATSClientEnquiry() {
             name="enquiryDescription"
             label=""
             :disabled="!editable"
+            :placeholder="t('common.form.placeholders.textArea')"
           />
         </Panel>
         <div class="flex mt-10">
