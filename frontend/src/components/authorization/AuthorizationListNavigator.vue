@@ -208,7 +208,7 @@ onBeforeMount(async () => {
             <router-link
               :to="{
                 name: projectAuthorizationRouteName,
-                params: { permitId: data.permitId, projectId: data.activity.project?.[0]?.projectId }
+                params: { permitId: data.permitId, projectId: data.activity.project?.projectId }
               }"
             >
               {{ data.permitType.businessDomain }} : {{ data.permitType.name }}
@@ -273,7 +273,7 @@ onBeforeMount(async () => {
         style="min-width: 150px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.[0]?.projectName }}
+          {{ data.activity.project?.projectName }}
         </template>
       </Column>
       <Column
@@ -282,7 +282,7 @@ onBeforeMount(async () => {
         style="min-width: 120px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.[0]?.activityId }}
+          {{ data.activity.project?.activityId }}
         </template>
       </Column>
       <Column
@@ -291,7 +291,7 @@ onBeforeMount(async () => {
         style="min-width: 200px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.[0]?.companyNameRegistered }}
+          {{ data.activity.project?.companyNameRegistered }}
         </template>
       </Column>
       <Column
@@ -303,9 +303,9 @@ onBeforeMount(async () => {
         <template #body="{ data }">
           {{
             getLocation(
-              data.activity.project?.[0]?.streetAddress,
-              data.activity.project?.[0]?.locality,
-              data.activity.project?.[0]?.province
+              data.activity.project?.streetAddress,
+              data.activity.project?.locality,
+              data.activity.project?.province
             )
           }}
         </template>

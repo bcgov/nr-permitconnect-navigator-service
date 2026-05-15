@@ -207,9 +207,7 @@ export const searchPermitsPaginated = async (
     AND: [
       {
         activity: {
-          [projectTable]: {
-            some: {}
-          }
+          [projectTable]: { isNot: null }
         }
       },
       options.dateRange
@@ -242,20 +240,18 @@ export const searchPermitsPaginated = async (
               {
                 activity: {
                   [projectTable]: {
-                    some: {
-                      OR: [
-                        { projectName: { contains: options.searchTag, mode: 'insensitive' as const } },
-                        { companyNameRegistered: { contains: options.searchTag, mode: 'insensitive' as const } },
-                        // Only include location fields for initiatives that have them (not ELECTRIFICATION)
-                        ...(initiative === Initiative.ELECTRIFICATION
-                          ? []
-                          : [
-                              { streetAddress: { contains: options.searchTag, mode: 'insensitive' as const } },
-                              { locality: { contains: options.searchTag, mode: 'insensitive' as const } },
-                              { province: { contains: options.searchTag, mode: 'insensitive' as const } }
-                            ])
-                      ]
-                    }
+                    OR: [
+                      { projectName: { contains: options.searchTag, mode: 'insensitive' as const } },
+                      { companyNameRegistered: { contains: options.searchTag, mode: 'insensitive' as const } },
+                      // Only include location fields for initiatives that have them (not ELECTRIFICATION)
+                      ...(initiative === Initiative.ELECTRIFICATION
+                        ? []
+                        : [
+                            { streetAddress: { contains: options.searchTag, mode: 'insensitive' as const } },
+                            { locality: { contains: options.searchTag, mode: 'insensitive' as const } },
+                            { province: { contains: options.searchTag, mode: 'insensitive' as const } }
+                          ])
+                    ]
                   }
                 }
               },

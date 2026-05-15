@@ -242,7 +242,7 @@ describe('searchPermitsPaginated', () => {
           {
             activity: {
               housingProject: {
-                some: {}
+                isNot: null
               }
             }
           },
@@ -263,7 +263,7 @@ describe('searchPermitsPaginated', () => {
           {
             activity: {
               housingProject: {
-                some: {}
+                isNot: null
               }
             }
           },
@@ -312,7 +312,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 electrificationProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
@@ -428,7 +428,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 housingProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
@@ -463,7 +463,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 housingProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
@@ -492,7 +492,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 housingProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
@@ -527,7 +527,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 housingProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
@@ -544,15 +544,13 @@ describe('searchPermitsPaginated', () => {
                 {
                   activity: {
                     housingProject: {
-                      some: {
-                        OR: [
-                          { projectName: { contains: 'test', mode: 'insensitive' } },
-                          { companyNameRegistered: { contains: 'test', mode: 'insensitive' } },
-                          { streetAddress: { contains: 'test', mode: 'insensitive' } },
-                          { locality: { contains: 'test', mode: 'insensitive' } },
-                          { province: { contains: 'test', mode: 'insensitive' } }
-                        ]
-                      }
+                      OR: [
+                        { projectName: { contains: 'test', mode: 'insensitive' } },
+                        { companyNameRegistered: { contains: 'test', mode: 'insensitive' } },
+                        { streetAddress: { contains: 'test', mode: 'insensitive' } },
+                        { locality: { contains: 'test', mode: 'insensitive' } },
+                        { province: { contains: 'test', mode: 'insensitive' } }
+                      ]
                     }
                   }
                 },
@@ -583,7 +581,7 @@ describe('searchPermitsPaginated', () => {
     const findManyCall: any = prismaTxMock.permit.findMany.mock.calls[0]?.[0];
     const searchTagOR = findManyCall?.where?.AND?.[4]?.OR;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const activityOR = searchTagOR?.find((clause: any) => clause.activity)?.activity.electrificationProject.some.OR;
+    const activityOR = searchTagOR?.find((clause: any) => clause.activity)?.activity.electrificationProject.OR;
 
     // Should not include location fields (streetAddress, locality, province) for ELECTRIFICATION
     expect(activityOR).toEqual([
@@ -619,7 +617,7 @@ describe('searchPermitsPaginated', () => {
             {
               activity: {
                 housingProject: {
-                  some: {}
+                  isNot: null
                 }
               }
             },
