@@ -7,7 +7,7 @@ import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
 import { createStamps } from './stamps.ts';
-import { PERMIT_STAGE_LIST, PERMIT_STATE_LIST } from '../utils/constants/permit.ts';
+import { requireValidCode } from '../db/codes/validator.ts';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,
@@ -18,14 +18,8 @@ const sharedPermitSchema = {
   permitNote: Joi.array().items(Joi.object(sharedPermitNoteSchema).allow(null)).allow(null),
   permitTracking: permitTrackingSchema,
   needed: Joi.string().max(255).required(),
-  state: Joi.string()
-    .max(255)
-    .required()
-    .valid(...PERMIT_STATE_LIST),
-  stage: Joi.string()
-    .max(255)
-    .required()
-    .valid(...PERMIT_STAGE_LIST),
+  state: Joi.string().max(255).required().custom(requireValidCode.PermitState),
+  stage: Joi.string().max(255).required().custom(requireValidCode.PermitStage),
   submittedDate: dateOnlyString.allow(null),
   submittedTime: timeTzString.allow(null),
   decisionDate: dateOnlyString.allow(null),

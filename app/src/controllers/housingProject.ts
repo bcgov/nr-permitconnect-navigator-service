@@ -2,7 +2,7 @@ import config from 'config';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,

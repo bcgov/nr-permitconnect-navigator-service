@@ -1,79 +1,20 @@
+import { CODE_TABLES } from '../db/codes/tables.ts';
+
+import type { CodeTableName, CodeRow } from '../db/codes/types.ts';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type {
-  BusinessAreaCode,
-  ElectrificationProjectCategoryCode,
-  ElectrificationProjectTypeCode,
-  EscalationTypeCode,
-  PermitStageCode,
-  PermitStateCode,
-  SourceSystemCode
-} from '../types/index.ts';
 
 /**
- * List all code tables
+ * List all active code tables
  * @param tx Prisma transaction client
- * @returns An object containing all code tables
+ * @returns An object containing all active code tables keyed by name
  */
-export const listAllCodeTables = async (
-  tx: PrismaTransactionClient
-): Promise<{
-  BusinessArea: BusinessAreaCode[];
-  ElectrificationProjectType: ElectrificationProjectTypeCode[];
-  ElectrificationProjectCategory: ElectrificationProjectCategoryCode[];
-  EscalationType: EscalationTypeCode[];
-  PermitStage: PermitStageCode[];
-  PermitState: PermitStateCode[];
-  SourceSystem: SourceSystemCode[];
-}> => {
-  const BusinessArea = await tx.business_area_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const ElectrificationProjectType = await tx.electrification_project_type_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const ElectrificationProjectCategory = await tx.electrification_project_category_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const EscalationType = await tx.escalation_type_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const PermitStage = await tx.permit_stage_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const PermitState = await tx.permit_state_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  const SourceSystem = await tx.source_system_code.findMany({
-    where: {
-      active: true
-    }
-  });
-
-  return {
-    BusinessArea,
-    ElectrificationProjectType,
-    ElectrificationProjectCategory,
-    EscalationType,
-    PermitStage,
-    PermitState,
-    SourceSystem
-  };
+export const listAllCodeTables = async (tx: PrismaTransactionClient): Promise<Record<CodeTableName, CodeRow[]>> => {
+  const entries = await Promise.all(
+    CODE_TABLES.map(async ({ name, model }) => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const rows = (await (tx as any)[model].findMany({ where: { active: true } })) as CodeRow[];
+      return [name, rows] as const;
+    })
+  );
+  return Object.fromEntries(entries) as Record<CodeTableName, CodeRow[]>;
 };

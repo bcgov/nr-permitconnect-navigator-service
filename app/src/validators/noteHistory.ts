@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common.ts';
+import { requireValidCode } from '../db/codes/validator.ts';
 import { validate } from '../middleware/validation.ts';
-import { escalationTypeCodes } from '../utils/cache/codes.ts';
 import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { Resource } from '../utils/enums/application.ts';
 
@@ -16,9 +16,7 @@ const schema = {
         .allow(null),
       escalateToSupervisor: Joi.boolean(),
       escalateToDirector: Joi.boolean(),
-      escalationType: Joi.string()
-        .valid(...escalationTypeCodes)
-        .allow(null),
+      escalationType: Joi.string().custom(requireValidCode.EscalationType).allow(null),
       note: Joi.string().required(),
       shownToProponent: Joi.boolean(),
       title: Joi.string().max(255).required(),
@@ -39,9 +37,7 @@ const schema = {
         .allow(null),
       escalateToSupervisor: Joi.boolean(),
       escalateToDirector: Joi.boolean(),
-      escalationType: Joi.string()
-        .valid(...escalationTypeCodes)
-        .allow(null),
+      escalationType: Joi.string().custom(requireValidCode.EscalationType).allow(null),
       note: Joi.string().allow(null),
       noteHistoryId: uuidv4.allow(null),
       resource: Joi.string()

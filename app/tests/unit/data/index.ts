@@ -5,7 +5,7 @@
  */
 import { Prisma } from '@prisma/client';
 
-import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import {
   AuthType,
   BasicResponse,
@@ -1047,7 +1047,7 @@ export const TEST_PERMIT_NOTE_1: PermitNote = {
 
 export const TEST_PERMIT_NOTE_UPDATE: PermitNote = {
   ...TEST_PERMIT_NOTE_1,
-  note: `This application is ${TEST_PERMIT_1.state.toLocaleLowerCase()} in the ${TEST_PERMIT_1.stage.toLocaleLowerCase()}.` // eslint-disable-line max-len
+  note: 'This application is none in the pre-submission stage.'
 };
 
 export const TEST_PERMIT_TYPE_1: PermitType = {

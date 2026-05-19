@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 import jwt from 'jsonwebtoken';
 import { ParsedQs } from 'qs';
 
-import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { AuthType, GroupName, Initiative } from '../utils/enums/application.ts';
 import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
 

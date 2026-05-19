@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { PermitStage } from '../db/utils/codeEnums.ts';
+import { PermitStage } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
 import { getObject } from '../services/coms';

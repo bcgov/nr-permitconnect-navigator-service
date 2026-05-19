@@ -3,8 +3,8 @@ import Joi from 'joi';
 import atsValidator from './ats.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
+import { requireValidCode } from '../db/codes/validator.ts';
 import { validate } from '../middleware/validation.ts';
-import { electrificationProjectCategoryCodes, electrificationProjectTypeCodes } from '../utils/cache/codes.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { ProjectType } from '../utils/enums/electrification.ts';
 import { YES_NO_LIST } from '../utils/constants/application.ts';
@@ -27,9 +27,7 @@ const schema = {
       draftId: uuidv4.allow(null),
       project: {
         bcHydroNumber: Joi.string().max(255).trim().allow(null),
-        projectType: Joi.string()
-          .required()
-          .valid(...electrificationProjectTypeCodes)
+        projectType: Joi.string().required().custom(requireValidCode.ElectrificationProjectType)
       }
     })
   },
@@ -73,8 +71,8 @@ const schema = {
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
       electrificationProjectId: Joi.array().items(uuidv4),
-      projectType: Joi.array().items(...electrificationProjectTypeCodes),
-      projectCategory: Joi.array().items(...electrificationProjectCategoryCodes)
+      projectType: Joi.array().items(Joi.string().custom(requireValidCode.ElectrificationProjectType)),
+      projectCategory: Joi.array().items(Joi.string().custom(requireValidCode.ElectrificationProjectCategory))
     })
   },
   updateElectrificationProject: {
@@ -82,18 +80,14 @@ const schema = {
       projectName: Joi.string().required().max(255).trim(),
       companyNameRegistered: Joi.string().max(255).trim().allow(null),
       companyIdRegistered: Joi.string().max(255).trim().allow(null),
-      projectType: Joi.string()
-        .required()
-        .valid(...electrificationProjectTypeCodes),
+      projectType: Joi.string().required().custom(requireValidCode.ElectrificationProjectType),
       bcHydroNumber: Joi.string().max(255).trim().allow(null),
       projectDescription: Joi.when('projectType', {
         is: ProjectType.OTHER,
         then: Joi.string().required().max(4000),
         otherwise: Joi.string().max(4000).allow(null)
       }),
-      projectCategory: Joi.string()
-        .valid(...electrificationProjectCategoryCodes)
-        .allow(null),
+      projectCategory: Joi.string().custom(requireValidCode.ElectrificationProjectCategory).allow(null),
       assignedUserId: uuidv4.allow(null),
       hasEpa: Joi.string()
         .valid(...YES_NO_LIST)

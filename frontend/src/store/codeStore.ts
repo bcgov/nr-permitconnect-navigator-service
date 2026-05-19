@@ -63,13 +63,15 @@ export const useCodeStore = defineStore('code', () => {
         {} as Record<CodeName, Record<string, string>>
       )
     ),
-    // Enum like objects for comparisons and validation
-    enums: computed<Record<CodeName, Record<string, string>>>(() =>
+    // List of objects for definition purposes, { code, definition }
+    codeDefinition: computed<Record<CodeName, Record<string, string>>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].reduce(
-            (e, { code }) => {
-              e[code] = code;
+            (e, { code, definition }) => {
+              if (definition) {
+                e[code] = definition;
+              }
               return e;
             },
             {} as Record<string, string> // nosonar
