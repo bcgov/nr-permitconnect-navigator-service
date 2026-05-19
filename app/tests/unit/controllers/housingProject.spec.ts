@@ -265,7 +265,7 @@ describe('createHousingProjectController', () => {
       prismaTxMock,
       TEST_ACTIVITY_HOUSING.activityId,
       TEST_CONTACT_1.contactId,
-      ActivityContactRole.ADMIN
+      ActivityContactRole.PRIMARY
     );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(
@@ -668,7 +668,7 @@ describe('submitHousingProjectDraftController', () => {
       prismaTxMock,
       TEST_ACTIVITY_HOUSING.activityId,
       TEST_CONTACT_1.contactId,
-      ActivityContactRole.ADMIN
+      ActivityContactRole.PRIMARY
     );
     expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(createHousingProjectSpy).toHaveBeenCalledWith(

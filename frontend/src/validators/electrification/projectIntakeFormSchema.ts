@@ -3,6 +3,7 @@ import { object, string, type InferType } from 'yup';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
 import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { contactSchema } from '@/validators';
+import { optionalText } from '@/validators/common';
 
 import type { CodeName } from '@/store/codeStore';
 import type { OrgBookOption } from '@/types';
@@ -16,15 +17,7 @@ export function createProjectIntakeSchema(codeList: Record<CodeName, string[]>, 
         otherwise: (schema) => schema.notRequired().nullable().label('Project description')
       }),
       projectName: string().required().max(255).label('Project name'),
-      registeredId: string()
-        .required()
-        .nullable()
-        .max(255)
-        .test('valid-business-id', 'Failed to set the business ID, try selecting the business name again', (value) => {
-          if (!value) return false;
-          return orgBookOptions.some((option) => option.registeredId === value);
-        })
-        .label('Business ID'),
+      registeredId: optionalText(),
       registeredName: string()
         .required()
         .nullable()

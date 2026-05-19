@@ -23,7 +23,7 @@ export function createProjectFormNavigatorSchema({
 }: Required<CreateSchemaOptions>) {
   return object({
     ...createContactCardNavFormSchema({ t }),
-    ...createElectrificationPanelSchema({ codeList }),
+    ...createElectrificationPanelSchema({ codeList, t }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
     ...createLocationDescriptionPanelSchema({ t }),
     ...createProjectDescriptionPanelSchema({ initiative, t }),
