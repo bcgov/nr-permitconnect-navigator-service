@@ -1,0 +1,143 @@
+name: Pull Request
+
+on:
+  pull_request:
+    branches:
+      - master
+      - "feature/**"
+      - "release/**"
+    types:
+      - closed
+      - labeled
+      - opened
+      - reopened
+      - synchronize
+      - unlabeled
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build & Push
+    if: github.event.pull_request.state == 'open' && contains(github.event.pull_request.labels.*.name, 'deploy')
+    uses: ./.github/workflows/builder.yaml
+    permissions:
+      contents: read
+      packages: write
+    with:
+      context: .
+      image_name: ${{ vars.APP_NAME }}
+      github_username: ${{ github.repository_owner }}
+    secrets:
+      ghcr_token: ${{ secrets.GITHUB_TOKEN }}
+
+  deploy-pr:
+    name: Deploy Instance
+    needs: build
+    permissions:
+      contents: read
+    uses: ./.github/workflows/deployer.yaml
+    with:
+      app_name: ${{ vars.APP_NAME }}
+      acronym: ${{ vars.ACRONYM }}
+      environment: pr
+      image_tag: ${{ needs.build.outputs.image_tag }}
+      job_name: pr-${{ github.event.number }}
+      namespace_prefix: ${{ vars.NAMESPACE_PREFIX }}
+      namespace_environment: dev
+    secrets:
+      openshift_server: ${{ secrets.OPENSHIFT_SERVER }}
+      openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
+
+  seed-db:
+    name: Seed database
+    needs: deploy-pr
+    environment:
+      name: pr
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login to OpenShift Cluster
+        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        with:
+          oc_server: ${{ secrets.OPENSHIFT_SERVER }}
+          oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          oc_namespace: ${{ vars.NAMESPACE_PREFIX }}-dev
+
+      - name: Run database seeds
+        shell: bash
+        run: |
+          kubectl exec $(oc get pods --selector='app.kubernetes.io/instance=pr-${{ github.event.number }},app.kubernetes.io/name=nr-permitconnect-navigator-service' -o custom-columns=POD:.metadata.name --no-headers | head -1) -- \
+            /usr/local/bin/node \
+            ./node_modules/knex/bin/cli.js \
+            seed:run \
+            --specific=dev_groups.js \
+            --knexfile=./sbin/knexfile.js
+
+  comment-pr:
+    name: Comment on PR
+    needs:
+      - deploy-pr
+      - seed-db
+    permissions:
+      pull-requests: write
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Release Comment on PR
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        if: success()
+        with:
+          header: release
+          message: |
+            Release ${{ github.sha }} deployed at <https://${{ vars.ACRONYM }}-dev-pr-${{ github.event.number }}.apps.silver.devops.gov.bc.ca>
+
+  destroy:
+    name: Destroy Instance
+    if: >
+        github.event.pull_request.state == 'closed' ||
+        (github.event.action == 'unlabeled' && github.event.label.name == 'deploy')
+    environment:
+      name: pr
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Login to OpenShift Cluster
+        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        with:
+          oc_server: ${{ secrets.OPENSHIFT_SERVER }}
+          oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          oc_namespace: ${{ vars.NAMESPACE_PREFIX }}-dev
+
+      - name: Remove PR Deployment
+        shell: bash
+        run: |
+          helm uninstall --namespace ${{ vars.NAMESPACE_PREFIX }}-dev pr-${{ github.event.number }} --timeout 10m --wait
+          oc delete --namespace ${{ vars.NAMESPACE_PREFIX }}-dev cm,secret --selector app.kubernetes.io/instance=pr-${{ github.event.number }}
+
+      - name: Remove Release Comment on PR
+        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        with:
+          header: release
+          delete: true
+
+      - name: Remove Github Deployment Environment
+        uses: strumwolf/delete-deployment-environment@v3
+        with:
+          environment: pr
+          onlyRemoveDeployments: true
+          token: ${{ secrets.GITHUB_TOKEN }}

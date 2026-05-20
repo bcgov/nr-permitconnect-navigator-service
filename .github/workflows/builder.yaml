@@ -1,0 +1,118 @@
+name: Builder
+
+on:
+  workflow_call:
+    inputs:
+      context:
+        description: 'Effective Working Directory'
+        required: true
+        type: string
+        default: "./"
+      image_name:
+        description: 'Image Name'
+        required: true
+        type: string
+      github_username:
+        description: 'Github Container Registry Username'
+        required: true
+        type: string
+      dockerhub_organization:
+        description: 'Dockerhub Container Registry Organization'
+        required: false
+        type: string
+        default: bcgovimages
+    secrets:
+      dockerhub_username:
+        description: 'Dockerhub Container Registry Username'
+        required: false
+      ghcr_token:
+        description: 'Github Container Registry Authorization Token'
+        required: true
+      dockerhub_token:
+        description: 'Dockerhub Container Registry Authorization Token'
+        required: false
+    outputs:
+      image_tag:
+        description: 'Docker image tag'
+        value: ${{ jobs.builder.outputs.image_tag }}
+
+jobs:
+  builder:
+    name: Builder
+    permissions:
+      contents: read
+      packages: write # for docker/build-push-action to push images to GitHub Container Registry
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      image_tag: ${{ steps.deploy_tag.outputs.tag }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Parse Input Values
+        id: parse
+        shell: bash
+        run: |
+          echo "GH_USERNAME=$(tr '[:upper:]' '[:lower:]' <<< '${{ inputs.github_username }}')" >> $GITHUB_ENV
+          echo "HAS_DOCKERHUB=${{ secrets.dockerhub_username != '' && secrets.dockerhub_token != '' }}" >> $GITHUB_ENV
+
+      - name: Login to Github Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ env.GH_USERNAME }}
+          password: ${{ secrets.ghcr_token }}
+
+      - name: Login to Dockerhub Container Registry
+        if: env.HAS_DOCKERHUB == 'true'
+        uses: docker/login-action@v4
+        with:
+          registry: docker.io
+          username: ${{ secrets.dockerhub_username }}
+          password: ${{ secrets.dockerhub_token }}
+
+      - name: Prepare Container Metadata tags
+        id: meta
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ghcr.io/${{ env.GH_USERNAME }}/${{ inputs.image_name }}
+            docker.io/${{ inputs.dockerhub_organization }}/${{ inputs.image_name }},enable=${{ env.HAS_DOCKERHUB }}
+          # Creates tags based off of branch names and semver tags
+          tags: |
+            type=sha,prefix=sha-,format=short,length=7
+            type=sha,prefix=sha-long-,format=long
+            type=ref,event=branch
+            type=ref,event=pr
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+
+      - name: Build and Push to Container Registry
+        id: builder
+        uses: docker/build-push-action@v7
+        with:
+          context: ${{ inputs.context }}
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha,scope=${{ github.repository }}-${{ inputs.image_name }}
+          cache-to: type=gha,mode=max,scope=${{ github.repository }}-${{ inputs.image_name }}
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+
+      - name: Extract Deploy Tag
+        id: deploy_tag
+        shell: bash
+        run: |
+          echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Inspect Remote Docker Image
+        shell: bash
+        run: |
+          docker manifest inspect ghcr.io/${{ env.GH_USERNAME }}/${{ inputs.image_name }}:${{ steps.deploy_tag.outputs.tag }}
