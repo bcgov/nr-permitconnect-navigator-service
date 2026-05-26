@@ -112,35 +112,33 @@ const { codeDisplay } = useCodeStore();
 </script>
 
 <template>
-  <div class="flex">
+  <div
+    v-tooltip.right="getState?.toolTip"
+    class="flex justify-center items-center rounded auth-indicator"
+    :class="[getState?.badgeClass]"
+    :style="{
+      '--font-size': dimensions.fontSize,
+      '--icon-font-size': dimensions.iconFontSize,
+      '--height': dimensions.height,
+      '--line-height': dimensions.lineHeight
+    }"
+  >
     <div
-      v-tooltip.right="getState?.toolTip"
-      class="flex justify-center items-center rounded auth-indicator"
-      :class="[getState?.badgeClass]"
-      :style="{
-        '--font-size': dimensions.fontSize,
-        '--icon-font-size': dimensions.iconFontSize,
-        '--height': dimensions.height,
-        '--line-height': dimensions.lineHeight
-      }"
+      v-tooltip.focus.right="getState?.toolTip"
+      tabindex="0"
+      :aria-label="getState?.toolTip"
+      class="flex items-center gap-2 focus:outline-none"
     >
-      <div
-        v-tooltip.focus.right="getState?.toolTip"
-        tabindex="0"
-        :aria-label="getState?.toolTip"
-        class="focus:outline-none"
-      >
-        <font-awesome-icon
-          v-if="getState?.iconString"
-          class="icon-detail"
-          aria-hidden="true"
-          :class="[getState?.iconClass]"
-          :icon="getState?.iconString"
-        />
-        <span class="text-color">
-          {{ displayText ?? codeDisplay.PermitState?.[state] ?? state }}
-        </span>
-      </div>
+      <font-awesome-icon
+        v-if="getState?.iconString"
+        class="icon-detail"
+        aria-hidden="true"
+        :class="[getState?.iconClass]"
+        :icon="getState?.iconString"
+      />
+      <span class="text-color">
+        {{ displayText ?? codeDisplay.PermitState?.[state] ?? state }}
+      </span>
     </div>
   </div>
 </template>
@@ -163,8 +161,7 @@ const { codeDisplay } = useCodeStore();
 }
 
 .icon-detail {
-  font-size: var(--icon-font-height);
-  margin-right: 0.5rem;
+  font-size: var(--icon-font-size);
 }
 
 .green {

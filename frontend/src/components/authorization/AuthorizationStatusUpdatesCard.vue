@@ -3,20 +3,23 @@ import { useI18n } from 'vue-i18n';
 
 import Tooltip from '@/components/common/Tooltip.vue';
 import { DatePicker, Select, TextArea } from '@/components/form';
-import { Panel } from '@/lib/primevue';
+import { Message, Panel } from '@/lib/primevue';
 import { useCodeStore } from '@/store';
 import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
+import type { PiesOnHold } from '@/utils/enums/codeEnums';
 
 // Props
 const {
   editable,
   peachIntegratedAuthType = false,
   peachIntegratedTrackingId = false,
+  onHoldCode = undefined,
   showTargetDateDescription = false
 } = defineProps<{
   editable?: boolean;
   peachIntegratedAuthType?: boolean;
   peachIntegratedTrackingId?: boolean;
+  onHoldCode?: PiesOnHold | null;
   showTargetDateDescription?: boolean;
 }>();
 
@@ -27,7 +30,7 @@ const emit = defineEmits(['update:setVerifiedDate', 'update:targetDateChanged'])
 const { t } = useI18n();
 
 // Store
-const { options } = useCodeStore();
+const { codeDefinition, codeDisplay, options } = useCodeStore();
 </script>
 
 <template>
@@ -38,6 +41,35 @@ const { options } = useCodeStore();
       </h3>
     </template>
     <div>
+      <Message
+        v-if="onHoldCode"
+        class="mb-4"
+        severity="warn"
+        :pt:content:class="['!px-2', '!py-2.5']"
+      >
+        <div class="flex items-center gap-2">
+          <font-awesome-icon
+            class="text-[color:var(--p-support-warning-icon)]"
+            icon="fas fa-circle-exclamation"
+          />
+          <div class="flex flex-col">
+            <strong class="text-xs">
+              {{
+                t('authorization.authorizationCard.onHoldReason', {
+                  reason: codeDisplay.PiesOnHold?.[onHoldCode]
+                })
+              }}
+            </strong>
+            <span class="text-xs">
+              {{
+                t('authorization.authorizationCard.onHoldDefinition', {
+                  definition: codeDefinition.PiesOnHold?.[onHoldCode]
+                })
+              }}
+            </span>
+          </div>
+        </div>
+      </Message>
       <div class="grid grid-cols-3 gap-x-6 gap-y-6 flex">
         <div>
           <div class="flex justify-between mb-2">

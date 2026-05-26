@@ -171,7 +171,7 @@ export const ThemeOverride = definePreset(Material, {
         formField: {
           hoverBorderColor: '{primary.700}',
           focusBorderColor: '{primary.300}',
-          invalidborderColor: '{support.danger.border}',
+          invalidBorderColor: '{support.danger.border}',
           floatLabelInvalidColor: '{red.500}',
           disabledBackground: '{disabledcolor}',
           disabledColor: '{surface.800}',

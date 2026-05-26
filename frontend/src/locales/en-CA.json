@@ -554,6 +554,8 @@
       "ids": "IDs",
       "issuedPermitId": "Issued Permit ID",
       "more": "More",
+      "onHoldReason": "{reason}",
+      "onHoldDefinition": "{definition}",
       "statusVerified": "Status verified date"
     },
     "authorizationCardIntake": {
