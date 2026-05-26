@@ -1,5 +1,6 @@
 import { syncPeachRecords } from './src/controllers/peach.ts';
 import { sendPermitUpdateNotifications } from './src/controllers/permit.ts';
+import { refreshCodeCaches } from './src/db/codes/cache.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 
@@ -38,4 +39,17 @@ async function syncPeachToPcns() {
   }
 }
 
-void syncPeachToPcns();
+async function main() {
+  const cacheRefreshSucceeded = await refreshCodeCaches();
+  if (!cacheRefreshSucceeded) {
+    log.error('Fatal error in PEACH sync: failed to refresh code caches');
+    process.exitCode = 1;
+    return;
+  }
+  await syncPeachToPcns();
+}
+
+void main().catch((error) => {
+  log.error('Fatal error in PEACH sync', error);
+  process.exit(1);
+});

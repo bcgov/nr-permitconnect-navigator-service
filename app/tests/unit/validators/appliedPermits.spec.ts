@@ -1,4 +1,4 @@
-import { PermitStage } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage } from '../../../src/db/codes/enums.ts';
 import { appliedPermit } from '../../../src/validators/appliedPermit.ts';
 
 describe('appliedPermitsSchema', () => {

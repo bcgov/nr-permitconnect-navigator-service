@@ -1,4 +1,4 @@
-import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { compareDates, splitDateTime } from '../utils/index.ts';
 import { PeachTerminatedStage, PermitPhase } from '../utils/enums/permit.ts';
 

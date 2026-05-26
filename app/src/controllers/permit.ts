@@ -2,7 +2,7 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { findPriorityPermitTracking } from './peach.ts';
-import { PermitStage } from '../db/utils/codeEnums.ts';
+import { PermitStage } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
@@ -44,6 +44,20 @@ import type {
   SearchPermitsOptions,
   SourceSystemKind
 } from '../types/index.ts';
+import { codeTable } from '../db/codes/cache.ts';
+
+function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
+  const sourceSystemKind = sourceSystemKinds.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
+  return !!sourceSystemKind;
+}
+
+const snapshotPermitStatus = (p: Partial<Permit>) => ({
+  state: p.state,
+  stage: p.stage,
+  decisionDate: p.decisionDate,
+  submittedDate: p.submittedDate,
+  statusLastChanged: p.statusLastChanged
+});
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
@@ -187,18 +201,26 @@ export const sendPermitUpdateNotifications = async (
         });
     }
 
+    const stateDisplay = codeTable.PermitState.displays[permit.state];
+    const stageDisplay = codeTable.PermitStage.displays[permit.stage];
+
+    if (!stateDisplay || !stageDisplay) {
+      throw new Error(`Invalid permit.state: ${permit.state} or permit.stage: ${permit.stage}`);
+    }
+
     // Create update note for status change
     const permitNote = await createPermitNote(tx, {
       permitNoteId: uuidv4(),
       permitId: permit.permitId,
       note:
-        note ?? `This application is ${permit.state.toLocaleLowerCase()} in the ${permit.stage.toLocaleLowerCase()}.`,
+        note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`,
       ...generateCreateStamps(undefined),
       updatedBy: null,
       updatedAt: null,
       deletedBy: null,
       deletedAt: null
     });
+
     // Add proponent update email to email jobs
     const primaryContact = project?.activity?.activityContact?.find(
       (ac) => ac.role === ActivityContactRole.PRIMARY
@@ -210,7 +232,7 @@ export const sendPermitUpdateNotifications = async (
     const isOnlyTemplate = permitNote.note.trim() === peachUpdateNotePlaceholder;
     const isFirstNote = !permit?.permitNote?.length;
 
-    const usePeachTemplate = isOnlyTemplate && isFirstNote && state.features.peach;
+    const useInitialPeachTemplate = isOnlyTemplate && isFirstNote && state.features.peach;
 
     if (
       project.projectId &&
@@ -223,7 +245,7 @@ export const sendPermitUpdateNotifications = async (
         dearName: primaryContact?.firstName ?? '',
         projectId: project.projectId,
         toEmails: [primaryContact.email],
-        emailTemplate: usePeachTemplate ? initialPeachPermitUpdateTemplate : permitNoteUpdateTemplate
+        emailTemplate: useInitialPeachTemplate ? initialPeachPermitUpdateTemplate : permitNoteUpdateTemplate
       });
     }
   };
@@ -239,19 +261,6 @@ export const sendPermitUpdateNotifications = async (
     await sendPermitUpdateEmail(emailJob);
   }
 };
-
-function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
-  const sourceSystemKind = sourceSystemKinds.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
-  return !!sourceSystemKind;
-}
-
-const snapshotPermitStatus = (p: Partial<Permit>) => ({
-  state: p.state,
-  stage: p.stage,
-  decisionDate: p.decisionDate,
-  submittedDate: p.submittedDate,
-  statusLastChanged: p.statusLastChanged
-});
 
 export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {
   const response = await transactionWrapper<Permit>(async (tx: PrismaTransactionClient) => {

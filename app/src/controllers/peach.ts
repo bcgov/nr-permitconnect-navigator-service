@@ -1,4 +1,4 @@
-import { PermitStage, PermitState } from '../db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { parsePeachRecords, summarizePeachRecord } from '../parsers/peach.ts';

@@ -15,7 +15,7 @@ import {
   updateGeneralProjectController,
   upsertGeneralProjectDraftController
 } from '../../../src/controllers/generalProject.ts';
-import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';

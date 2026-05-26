@@ -5,8 +5,8 @@ import config from 'config';
 import { createServer } from 'node:http';
 
 import app from './app.ts';
+import { refreshCodeCaches } from './src/db/codes/cache.ts';
 import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils.ts';
-import { refreshCodeCaches } from './src/utils/cache/codes.ts';
 import getLogger from './src/utils/log.ts';
 import { state } from './state.ts';
 

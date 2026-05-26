@@ -6,7 +6,7 @@ import {
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED
 } from '../data/index.ts';
-import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peach.ts';
 import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 

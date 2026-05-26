@@ -1,4 +1,4 @@
-import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import { upsertPermitBodySchema, searchPermitsQuerySchema } from '../../../src/validators/permit.ts';
 
 const permit = () => ({

@@ -18,6 +18,7 @@ import {
   TEST_PERMIT_NOTE_UPDATE
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { codeTable } from '../../../src/db/codes/cache';
 import {
   deletePermitController,
   getPermitController,
@@ -35,7 +36,7 @@ import * as userService from '../../../src/services/user.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
 import * as emailService from '../../../src/services/email.ts';
 import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
-import { PermitStage, PermitState } from '../../../src/db/utils/codeEnums.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
@@ -452,6 +453,8 @@ describe('createNoteAndSendUpdateEmails', () => {
       permitType: TEST_PERMIT_TYPE_1,
       submittedDate: '2024-01-01'
     };
+    const stateDisplay = codeTable.PermitState.displays[permit.state];
+    const stageDisplay = codeTable.PermitStage.displays[permit.stage];
 
     await sendPermitUpdateNotifications(permit, true);
 
@@ -462,7 +465,7 @@ describe('createNoteAndSendUpdateEmails', () => {
       prismaTxMock,
       expect.objectContaining({
         permitId: permit.permitId,
-        note: `This application is ${permit.state.toLocaleLowerCase()} in the ${permit.stage.toLocaleLowerCase()}.`
+        note: `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
       })
     );
 

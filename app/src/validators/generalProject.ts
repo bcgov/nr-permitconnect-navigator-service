@@ -5,8 +5,8 @@ import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 
+import { requireValidCode } from '../db/codes/validator.ts';
 import { validate } from '../middleware/validation';
-import { businessAreaCodes } from '../utils/cache/codes.ts';
 import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
 import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
@@ -112,9 +112,7 @@ const schema = {
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       region: Joi.string().allow(null),
       area: Joi.string().allow(null),
-      businessArea: Joi.string()
-        .valid(...businessAreaCodes)
-        .allow(null)
+      businessArea: Joi.string().custom(requireValidCode.BusinessArea).allow(null)
     }),
     params: Joi.object({
       generalProjectId: uuidv4.required()
