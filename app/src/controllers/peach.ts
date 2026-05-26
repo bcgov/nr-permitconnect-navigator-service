@@ -1,4 +1,4 @@
-import { PermitStage, PermitState } from '../db/codes/enums.ts';
+import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { parsePeachRecords, summarizePeachRecord } from '../parsers/peach.ts';
@@ -10,7 +10,13 @@ import { PeachIntegratedSystem } from '../utils/enums/permit.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/dataConnection.ts';
-import type { PeachSummary, Permit, Record as PeachRecord, PermitTracking } from '../types/index.ts';
+import type {
+  PeachSummary,
+  Permit,
+  Record as PeachRecord,
+  PermitTracking,
+  UpdatedPermitWithNote
+} from '../types/index.ts';
 
 const log = getLogger(module.filename);
 
@@ -78,7 +84,7 @@ export const getPeachSummaryController = async (req: Request<never, never, Permi
  * Syncs PEACH data for permit tracking to PCNS, returns a list of permits used for sending update notifications
  * @returns Array of updated permits
  */
-export const syncPeachRecords = async (): Promise<Permit[]> => {
+export const syncPeachRecords = async (): Promise<UpdatedPermitWithNote[]> => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     // Only fetch permits that have a peach integrated system permit type
@@ -110,7 +116,7 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
     }
   });
 
-  // TODO: May need rate limiting in the future
+  // Note: May need rate limiting in the future
   const results = await Promise.allSettled(
     systemRecordPermits.map((srp) => getPeachRecord(srp.recordId, srp.systemId))
   );
@@ -137,7 +143,7 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
 
   const parsedRecords: Record<string, PeachSummary> = parsePeachRecords(records);
 
-  const updatedPermits: Permit[] = [];
+  const updatedPermits: UpdatedPermitWithNote[] = [];
 
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     for (const systemRecordPermit of systemRecordPermits) {
@@ -167,14 +173,21 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
       const lastChangedDatesEqual = compareDates(peachStatusChangedDatetime, pcnsStatusChangedDatetime) === 0;
       const stagesEqual = peachSummary.stage === (pcnsPermit.stage as PermitStage);
       const statesEqual = peachSummary.state === (pcnsPermit.state as PermitState);
+      const onHoldCodesEqual = peachSummary.onHoldCode === pcnsPermit.onHoldCode;
 
+      const stageOrStateHasDiff = !stagesEqual || !statesEqual;
       const hasDiff =
-        !stagesEqual || !statesEqual || !submittedDatesEqual || !decisionDatesEqual || !lastChangedDatesEqual;
+        stageOrStateHasDiff ||
+        !onHoldCodesEqual ||
+        !submittedDatesEqual ||
+        !decisionDatesEqual ||
+        !lastChangedDatesEqual;
 
       if (!hasDiff) continue;
 
       pcnsPermit.stage = peachSummary.stage;
       pcnsPermit.state = peachSummary.state;
+      pcnsPermit.onHoldCode = peachSummary.onHoldCode;
 
       pcnsPermit.submittedDate = peachSummary.submittedDate;
       pcnsPermit.submittedTime = peachSummary.submittedTime;
@@ -198,11 +211,16 @@ export const syncPeachRecords = async (): Promise<Permit[]> => {
       pcnsPermit.updatedBy = updatedBy;
 
       const cleanedPermit = omit(pcnsPermit, ['permitTracking', 'permitType']);
-
       const updatedPermit = await upsertPermit(tx, cleanedPermit);
+      const applicantRequestedHold = !onHoldCodesEqual && peachSummary.onHoldCode === PiesOnHold.APPLICANT_REQUEST;
+      let note: string | undefined = undefined;
 
-      // Only return permits and notes that have had a status change for notifications
-      if (!stagesEqual || !statesEqual) updatedPermits.push(updatedPermit);
+      if (applicantRequestedHold) {
+        note = 'This application has been placed on hold at the applicant’s request';
+      }
+
+      // For notifications, only return permits that have had a status change or is now on hold by applicant's request.
+      if (stageOrStateHasDiff || applicantRequestedHold) updatedPermits.push({ permit: updatedPermit, note });
     }
   });
 

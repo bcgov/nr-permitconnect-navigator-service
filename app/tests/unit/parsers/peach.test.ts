@@ -6,7 +6,7 @@ import {
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED
 } from '../data/index.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+import { PermitStage, PermitState, PiesOnHold } from '../../../src/db/codes/enums.ts';
 import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peach.ts';
 import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 
@@ -85,7 +85,10 @@ describe('peachRecordParser', () => {
   describe('summarizePeachRecord', () => {
     it('maps TECH_REVIEW_COMMENT/REFERRAL to Technical review/In progess and sets sub/status dates', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_1);
-      const summary = summarizePeachRecord(peachRecord)!;
+      const summary = summarizePeachRecord(peachRecord);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
 
       expect(summary.statusLastChanged).toBe('2024-02-01');
       expect(summary.statusLastChangedTime).toBe(null);
@@ -102,7 +105,10 @@ describe('peachRecordParser', () => {
 
     it('maps DECISION/ALLOWED to Post Decision/Approved and sets decision/status dates', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_2);
-      const summary = summarizePeachRecord(peachRecord)!;
+      const summary = summarizePeachRecord(peachRecord);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
 
       expect(summary.statusLastChanged).toBe('2024-03-01');
       expect(summary.statusLastChangedTime).toBe('12:00:00.000Z');
@@ -119,7 +125,10 @@ describe('peachRecordParser', () => {
 
     it('uses previous stage for terminal REJECTED and maps to Technical review/Rejected', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_REJECTED);
-      const summary = summarizePeachRecord(peachRecord)!;
+      const summary = summarizePeachRecord(peachRecord);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
 
       expect(summary.statusLastChanged).toBe('2024-05-01');
       expect(summary.statusLastChangedTime).toBe('23:12:00.000Z');
@@ -165,9 +174,15 @@ describe('peachRecordParser', () => {
         ...TEST_PEACH_ON_HOLD_EVENT_1,
         event: { start_date: '2024-02-15', end_date: '2024-02-19' }
       };
-      record.on_hold_event_set = [endedOnHoldEventDate];
+      const olderEndedOnHoldEventDate = {
+        ...TEST_PEACH_ON_HOLD_EVENT_1,
+        event: { start_date: '2024-02-10', end_date: '2024-02-11' }
+      };
+      record.on_hold_event_set = [olderEndedOnHoldEventDate, endedOnHoldEventDate];
 
-      const summary1 = summarizePeachRecord(record)!;
+      const summary1 = summarizePeachRecord(record);
+      expect(summary1).not.toBeNull();
+      if (!summary1) throw new Error('Expected PEACH summary');
 
       expect(summary1.stage).toBe(PermitStage.TECHNICAL_REVIEW);
       expect(summary1.state).toBe(PermitState.IN_PROGRESS);
@@ -176,9 +191,15 @@ describe('peachRecordParser', () => {
         ...TEST_PEACH_ON_HOLD_EVENT_1,
         event: { start_datetime: '2024-01-15T00:00:00.000Z', end_datetime: '2024-02-19T00:00:00.000Z' }
       };
-      record.on_hold_event_set = [endedOnHoldEventDateTime];
+      const olderEndedOnHoldEventDateTime = {
+        ...TEST_PEACH_ON_HOLD_EVENT_1,
+        event: { start_datetime: '2024-01-10T00:00:00.000Z', end_datetime: '2024-01-12T00:00:00.000Z' }
+      };
+      record.on_hold_event_set = [olderEndedOnHoldEventDateTime, endedOnHoldEventDateTime];
 
-      const summary2 = summarizePeachRecord(record)!;
+      const summary2 = summarizePeachRecord(record);
+      expect(summary2).not.toBeNull();
+      if (!summary2) throw new Error('Expected PEACH summary');
 
       expect(summary2.stage).toBe(PermitStage.TECHNICAL_REVIEW);
       expect(summary2.state).toBe(PermitState.IN_PROGRESS);
@@ -189,7 +210,10 @@ describe('peachRecordParser', () => {
       const oldOnHoldEvent = { ...TEST_PEACH_ON_HOLD_EVENT_1, event: { start_date: '2024-01-15' } };
       record.on_hold_event_set = [oldOnHoldEvent];
 
-      const summary = summarizePeachRecord(record)!;
+      const summary = summarizePeachRecord(record);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
 
       expect(summary.stage).toBe(PermitStage.TECHNICAL_REVIEW);
       expect(summary.state).toBe(PermitState.IN_PROGRESS);
@@ -199,7 +223,10 @@ describe('peachRecordParser', () => {
       const record = structuredClone(TEST_PEACH_RECORD_1);
       record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_1];
 
-      const summary = summarizePeachRecord(record)!;
+      const summary = summarizePeachRecord(record);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
 
       expect(summary.stage).toBe(PermitStage.TECHNICAL_REVIEW);
       expect(summary.state).toBe(PermitState.PENDING_APPLICANT_ACTION);
@@ -216,24 +243,120 @@ describe('peachRecordParser', () => {
 
     it('returns null if an active MISSING_INFORMATION event is tied to an unmapped process stage', () => {
       const record = structuredClone(TEST_PEACH_RECORD_UNMAPPED);
-      record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_1];
+      record.process_event_set = [
+        {
+          event: { start_datetime: '2024-06-01T00:00:00.000Z' },
+          process: {
+            code: 'PRE_APPLICATION',
+            code_display: 'Pre-Application',
+            code_set: ['APPLICATION', 'PRE_APPLICATION'],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+          }
+        }
+      ];
+      record.on_hold_event_set = [
+        {
+          ...TEST_PEACH_ON_HOLD_EVENT_1,
+          event: { start_datetime: '2024-07-01T00:00:00.000Z' }
+        }
+      ];
 
       expect(summarizePeachRecord(record)).toBeNull();
     });
 
-    // Note: This test will need to be changed/removed once we start handling all/more on hold codes
-    it('process event sets status when only active on hold event code is not MISSING INFORMATION', () => {
+    it('maps APPLICANT_REQUEST + INITIAL_SUBMISSION_REVIEW to Application submission/Pending applicant action', () => {
       const record = structuredClone(TEST_PEACH_RECORD_1);
-      const onHoldEventMissingNotActive = {
-        ...TEST_PEACH_ON_HOLD_EVENT_1,
-        event: { start_date: '2024-01-15', end_date: '2024-02-19' }
-      };
-      record.on_hold_event_set = [onHoldEventMissingNotActive, TEST_PEACH_ON_HOLD_EVENT_2];
+      record.process_event_set = [
+        {
+          event: { start_datetime: '2024-02-01T00:00:00.000Z' },
+          process: {
+            code: 'SUBMISSION_REVIEW',
+            code_display: 'Submission Review',
+            code_set: ['APPLICATION', 'INITIAL_SUBMISSION_REVIEW', 'SUBMISSION_REVIEW'],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+          }
+        }
+      ];
+      record.on_hold_event_set = [
+        {
+          event: { start_datetime: '2024-02-02T00:00:00.000Z' },
+          coding: {
+            code: PiesOnHold.APPLICANT_REQUEST,
+            code_set: [PiesOnHold.APPLICANT_REQUEST],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/on_hold_process'
+          }
+        }
+      ];
 
-      const summary = summarizePeachRecord(record)!;
+      const summary = summarizePeachRecord(record);
 
-      expect(summary.stage).toBe(PermitStage.TECHNICAL_REVIEW);
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
+
+      expect(summary.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
+      expect(summary.state).toBe(PermitState.PENDING_APPLICANT_ACTION);
+    });
+
+    it('maps LEGAL_ACTION + DECISION to Pending decision/In progress', () => {
+      const record = structuredClone(TEST_PEACH_RECORD_2);
+      record.on_hold_event_set = [
+        {
+          event: { start_datetime: '2024-03-02T00:00:00.000Z' },
+          coding: {
+            code: PiesOnHold.LEGAL_ACTION,
+            code_set: [PiesOnHold.LEGAL_ACTION],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/on_hold_process'
+          }
+        }
+      ];
+
+      const summary = summarizePeachRecord(record);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
+
+      expect(summary.stage).toBe(PermitStage.PENDING_DECISION);
       expect(summary.state).toBe(PermitState.IN_PROGRESS);
+    });
+
+    it('maps PENDING_EXTERNAL_DECISION + ISSUANCE to Post decision/In progress', () => {
+      const record = structuredClone(TEST_PEACH_RECORD_2);
+      record.process_event_set = [
+        {
+          event: { start_datetime: '2024-03-01T12:00:00.000Z' },
+          process: {
+            code: 'ISSUED',
+            code_display: 'Issued',
+            code_set: ['APPLICATION', 'ISSUANCE', 'ISSUED'],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/application_process'
+          }
+        }
+      ];
+      record.on_hold_event_set = [
+        {
+          event: { start_datetime: '2024-03-02T00:00:00.000Z' },
+          coding: {
+            code: PiesOnHold.PENDING_EXTERNAL_DECISION,
+            code_set: [PiesOnHold.PENDING_EXTERNAL_DECISION],
+            code_system: 'https://bcgov.github.io/nr-pies/docs/spec/code_system/on_hold_process'
+          }
+        }
+      ];
+
+      const summary = summarizePeachRecord(record);
+
+      expect(summary).not.toBeNull();
+      if (!summary) throw new Error('Expected PEACH summary');
+
+      expect(summary.stage).toBe(PermitStage.POST_DECISION);
+      expect(summary.state).toBe(PermitState.IN_PROGRESS);
+    });
+
+    it('returns null for unknown on-hold coding event values', () => {
+      const record = structuredClone(TEST_PEACH_RECORD_1);
+      record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_2];
+
+      expect(summarizePeachRecord(record)).toBeNull();
     });
   });
 

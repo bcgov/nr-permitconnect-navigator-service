@@ -93,13 +93,14 @@ describe('getPeachSummaryController', () => {
     ).rejects.toBeInstanceOf(Problem);
   });
 
-  it('throws Problem(404) when summarizePeachRecord returns null-ish', async () => {
+  it('throws Problem(422) when summarizePeachRecord returns null-ish', async () => {
     const req = {
       body: [
         {
           trackingId: TEST_PEACH_RECORD_1.record_id,
           sourceSystemKind: {
-            sourceSystem: TEST_PEACH_RECORD_1.system_id
+            sourceSystem: TEST_PEACH_RECORD_1.system_id,
+            integrated: true
           }
         }
       ]
@@ -108,15 +109,17 @@ describe('getPeachSummaryController', () => {
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(null);
 
-    await expect(
-      getPeachSummaryController(
-        req as unknown as Request<never, never, PermitTracking[], never>,
-        res as unknown as Response
-      )
-    ).rejects.toBeInstanceOf(Problem);
+    const error = await getPeachSummaryController(
+      req as unknown as Request<never, never, PermitTracking[], never>,
+      res as unknown as Response
+    ).catch((e) => e);
+
+    expect(error).toBeInstanceOf(Problem);
+    expect(error.status).toBe(422);
+    expect(error.detail).toContain('No status data could be derived from the PEACH record');
   });
 
-  it('throws Problem(404) when permitTracking exists but trackingId is missing', async () => {
+  it('throws Problem(422) when permitTracking exists but trackingId is missing', async () => {
     const req = {
       body: [
         {
@@ -130,12 +133,14 @@ describe('getPeachSummaryController', () => {
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
-    await expect(
-      getPeachSummaryController(
-        req as unknown as Request<never, never, PermitTracking[], never>,
-        res as unknown as Response
-      )
-    ).rejects.toBeInstanceOf(Problem);
+    const error = await getPeachSummaryController(
+      req as unknown as Request<never, never, PermitTracking[], never>,
+      res as unknown as Response
+    ).catch((e) => e);
+
+    expect(error).toBeInstanceOf(Problem);
+    expect(error.status).toBe(422);
+    expect(error.detail).toContain('No PEACH-integrated tracking ID');
 
     expect(getPeachRecordSpy).not.toHaveBeenCalled();
     expect(summarizeSpy).not.toHaveBeenCalled();
@@ -143,7 +148,7 @@ describe('getPeachSummaryController', () => {
     expect(res.json).not.toHaveBeenCalled();
   });
 
-  it('throws Problem(404) when permitTracking exists but sourceSystemKind.sourceSystem is missing', async () => {
+  it('throws Problem(422) when permitTracking exists but sourceSystemKind.sourceSystem is missing', async () => {
     const req = {
       body: [
         {
@@ -155,12 +160,14 @@ describe('getPeachSummaryController', () => {
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
-    await expect(
-      getPeachSummaryController(
-        req as unknown as Request<never, never, PermitTracking[], never>,
-        res as unknown as Response
-      )
-    ).rejects.toBeInstanceOf(Problem);
+    const error = await getPeachSummaryController(
+      req as unknown as Request<never, never, PermitTracking[], never>,
+      res as unknown as Response
+    ).catch((e) => e);
+
+    expect(error).toBeInstanceOf(Problem);
+    expect(error.status).toBe(422);
+    expect(error.detail).toContain('No PEACH-integrated tracking ID');
 
     expect(getPeachRecordSpy).not.toHaveBeenCalled();
     expect(summarizeSpy).not.toHaveBeenCalled();
@@ -228,6 +235,7 @@ describe('syncPeachRecords', () => {
       [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
         state: TEST_PERMIT_2.state as PermitState,
         stage: TEST_PERMIT_2.stage as PermitStage,
+        onHoldCode: TEST_PERMIT_2.onHoldCode,
         submittedDate: sameDate,
         submittedTime: null,
         decisionDate: null,
@@ -241,6 +249,49 @@ describe('syncPeachRecords', () => {
 
     expect(getRecSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).not.toHaveBeenCalled();
+  });
+
+  it('generates applicant request note when on-hold code changes to APPLICANT_REQUEST', async () => {
+    const permit = { ...TEST_PERMIT_2, onHoldCode: null };
+    searchSpy.mockResolvedValueOnce([permit]);
+    getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
+
+    const fixedNow = new Date('2024-02-04T12:00:00.000Z');
+    stampsSpy.mockReturnValue({ updatedAt: fixedNow, updatedBy: 'user-abc' });
+
+    const { PiesOnHold } = await import('../../../src/db/codes/enums.ts');
+    parseSpy.mockReturnValueOnce({
+      [`${PeachIntegratedSystem.VFCBC}REC-XYZ`]: {
+        state: permit.state as PermitState,
+        stage: permit.stage as PermitStage,
+        onHoldCode: PiesOnHold.APPLICANT_REQUEST,
+        submittedDate: permit.submittedDate,
+        submittedTime: permit.submittedTime,
+        decisionDate: null,
+        decisionTime: null,
+        statusLastChanged: permit.statusLastChanged!,
+        statusLastChangedTime: null
+      }
+    });
+
+    upsertSpy.mockResolvedValue({ ...permit, onHoldCode: PiesOnHold.APPLICANT_REQUEST });
+
+    const result = await syncPeachRecords();
+
+    expect(getRecSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      prismaTxMock,
+      expect.objectContaining({
+        permitId: permit.permitId,
+        onHoldCode: PiesOnHold.APPLICANT_REQUEST,
+        updatedAt: fixedNow,
+        updatedBy: 'user-abc'
+      })
+    );
+
+    expect(result).toHaveLength(1);
+    expect(result[0].note).toBe('This application has been placed on hold at the applicant’s request');
   });
 
   it('logs failures but continues when some PEACH fetches reject', async () => {
@@ -286,7 +337,7 @@ describe('syncPeachRecords', () => {
   it('respects PEACH_TRACKING_PRIORITY and skips invalid/mismatched trackings', async () => {
     const baseTracking = TEST_PERMIT_1.permitTracking![0];
 
-    // 1) No sourceSystem
+    // No sourceSystem
     const trackingNoSource = {
       ...baseTracking,
       permitTrackingId: 11,
@@ -296,7 +347,7 @@ describe('syncPeachRecords', () => {
       }
     };
 
-    // 2) TANTALIS but wrong trackingName
+    // TANTALIS but wrong trackingName
     const trackingWrongName = {
       ...baseTracking,
       permitTrackingId: 12,
@@ -308,7 +359,7 @@ describe('syncPeachRecords', () => {
       }
     };
 
-    // 3) TANTALIS with correct name
+    // TANTALIS with correct name
     const trackingTantalis = {
       ...baseTracking,
       permitTrackingId: 13,
@@ -320,7 +371,7 @@ describe('syncPeachRecords', () => {
       }
     };
 
-    // 4) VFCBC after TANTALIS (lower priority)
+    // VFCBC after TANTALIS (lower priority)
     const trackingVfcbc = {
       ...baseTracking,
       permitTrackingId: 14,

@@ -397,6 +397,11 @@ export interface PermitUpdateEmailParams {
   emailTemplate: EmailTemplate;
 }
 
+export interface UpdatedPermitWithNote {
+  permit: Permit;
+  note: string | undefined;
+}
+
 export type Project = ElectrificationProject | GeneralProject | HousingProject;
 
 interface SplitDatetimeBase<T> {
