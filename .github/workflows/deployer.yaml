@@ -58,6 +58,15 @@ jobs:
           oc_token: ${{ secrets.openshift_token }}
           oc_namespace: ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
 
+      - name: Deploy Patroni
+        shell: bash
+        run: |
+          helm upgrade --install --atomic patroni-${{ inputs.job_name }} patroni/patroni \
+            --version 0.0.4 \
+            --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }} \
+            --wait \
+            --timeout 10m
+
       - name: Helm Deploy
         shell: bash
         run: >-
@@ -69,6 +78,7 @@ jobs:
           --set image.tag=${{ inputs.image_tag }}
           --set route.host=${{ inputs.acronym }}-${{ inputs.namespace_environment }}-${{ inputs.job_name }}.apps.silver.devops.gov.bc.ca
           --timeout 10m
+          --wait-for-jobs
           --wait
 
       - name: Wait on Deployment

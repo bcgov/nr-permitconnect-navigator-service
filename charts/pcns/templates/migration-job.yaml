@@ -1,0 +1,53 @@
+{{ $dbHostName := "patroni-navigator-deploytest" }}
+{{ $dbSecretName := "patroni-navigator-deploytest" }}
+
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pcns.fullname" . }}-db-migrate
+  annotations:
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "10"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+
+spec:
+  backoffLimit: 3
+
+  template:
+    spec:
+      restartPolicy: Never
+
+      containers:
+        - name: migrate
+
+          image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+
+          command:
+            - node
+            - ./node_modules/knex/bin/cli.js
+            - migrate:latest
+            - --knexfile
+            - ./sbin/knexfile.js
+
+          env:
+            - name: SERVER_DB_HOST
+              value: {{ $dbHostName | quote }}
+
+            - name: SERVER_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-name
+                  name: {{ $dbSecretName }}
+
+            - name: SERVER_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-username
+                  name: {{ $dbSecretName }}
+
+            - name: SERVER_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-password
+                  name: {{ $dbSecretName }}

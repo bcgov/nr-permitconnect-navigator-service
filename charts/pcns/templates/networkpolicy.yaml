@@ -22,8 +22,8 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-{{ include "pcns.fullname" . }}-app-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-{{ include "pcns.fullname" . }}-app-to-patroni-cluster
+  labels: {{ include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
@@ -33,13 +33,14 @@ spec:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      app: patroni
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-pre-hook-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-pre-hook-to-patroni-cluster
+  labels: {{ include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
@@ -50,14 +51,15 @@ spec:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      app: patroni
 {{- if .Values.peachSync.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-{{ include "pcns.fullname" . }}-peach-sync-app-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-{{ include "pcns.fullname" . }}-peach-sync-app-to-patroni-cluster
+  labels: {{ include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
@@ -67,7 +69,8 @@ spec:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      app: patroni
 {{- end }}
 {{- end }}
 {{- end }}

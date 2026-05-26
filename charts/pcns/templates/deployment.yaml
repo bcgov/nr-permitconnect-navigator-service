@@ -1,15 +1,10 @@
 {{ $dbHostName := .Values.config.configMap.SERVER_DB_HOST }}
 {{ $dbSecretName := printf "%s-%s" (include "pcns.fullname" .) "passphrase" }}
 
-{{- if .Values.patroni.enabled }}
-{{ $dbHostName = include "patroni.fullname" .Subcharts.patroni }}
-{{ $dbSecretName = include "patroni.fullname" .Subcharts.patroni }}
-{{- end }}
-
 {{- define "pcns.connectsTo" -}}
 apiVersion: apps/v1
 kind: StatefulSet
-name: {{ include "patroni.fullname" .Subcharts.patroni }}
+name: patroni
 {{- end }}
 
 ---
@@ -25,6 +20,7 @@ metadata:
   {{- end }}
 spec:
   replicas: {{ .Values.replicaCount }}
+
   revisionHistoryLimit: 10
 
   strategy:
@@ -56,47 +52,6 @@ spec:
       securityContext:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-
-      #
-      # OpenShift DeploymentConfig pre-hook replacement
-      # Runs DB migrations before app containers start
-      #
-      initContainers:
-        - name: migrate
-          image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
-
-          command:
-            - /usr/local/bin/node
-            - ./node_modules/knex/bin/cli.js
-            - migrate:latest
-            - --knexfile
-            - ./sbin/knexfile.js
-
-          env:
-            - name: NODE_ENV
-              value: production
-
-            - name: SERVER_DB_DATABASE
-              valueFrom:
-                secretKeyRef:
-                  key: app-db-name
-                  name: {{ $dbSecretName }}
-
-            - name: SERVER_DB_HOST
-              value: {{ $dbHostName | quote }}
-
-            - name: SERVER_DB_USERNAME
-              valueFrom:
-                secretKeyRef:
-                  key: app-db-username
-                  name: {{ $dbSecretName }}
-
-            - name: SERVER_DB_PASSWORD
-              valueFrom:
-                secretKeyRef:
-                  key: app-db-password
-                  name: {{ $dbSecretName }}
 
       containers:
         - name: app
