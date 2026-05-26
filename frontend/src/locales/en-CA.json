@@ -26,6 +26,11 @@
       "moreInfo": "MORE INFO",
       "privacy": "Privacy"
     },
+    "form": {
+      "placeholders": {
+        "textArea": "Type here..."
+      }
+    },
     "header": {
       "name": "Permit Connect Services"
     },
@@ -795,9 +800,6 @@
   "enquiryIntakeForm": {
     "headers": {
       "textArea": "Tell us about your enquiry"
-    },
-    "placeholders": {
-      "textArea": "Type here..."
     },
     "expectation": "Your enquiry will be sent directly to the Navigator assigned to your project. You can expect a response within 2 business days.",
     "notApplicable": "N/A",

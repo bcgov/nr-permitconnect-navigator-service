@@ -14,7 +14,7 @@ const schema = {
   createEnquiry: {
     body: Joi.object({
       contact: contactSchema,
-      enquiryDescription: Joi.string().required(),
+      enquiryDescription: Joi.string().allow(null), // allow null for creating an enquiry from the nav side
       relatedActivityId: Joi.string().max(255).allow(null),
       submissionType: Joi.string()
         .valid(...ENQUIRY_TYPE_LIST)

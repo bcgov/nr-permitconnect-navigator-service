@@ -82,7 +82,7 @@ const schema = {
   },
   searchHousingProjects: {
     body: Joi.object({
-      activityId: Joi.array().items(activityId),
+      activityId: Joi.array().items(Joi.string()),
       createdBy: Joi.array().items(Joi.string()),
       includeUser: Joi.boolean(),
       housingProjectId: Joi.array().items(uuidv4),

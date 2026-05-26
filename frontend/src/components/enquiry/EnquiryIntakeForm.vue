@@ -236,7 +236,7 @@ onBeforeMount(async () => {
       <TextAreaCard
         :header="t('enquiryIntakeForm.headers.textArea')"
         field-name="basic.enquiryDescription"
-        :placeholder="t('enquiryIntakeForm.placeholders.textArea')"
+        :placeholder="t('common.form.placeholders.textArea')"
       />
 
       <div class="flex align-center justify-center mt-4">
