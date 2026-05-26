@@ -366,6 +366,7 @@ export interface ListPermitsOptions extends Partial<IStamps> {
 export interface PeachSummary {
   stage: PermitStage;
   state: PermitState;
+  onHoldCode?: PiesOnHold;
   submittedDate: string | null;
   submittedTime: string | null;
   decisionDate: string | null;

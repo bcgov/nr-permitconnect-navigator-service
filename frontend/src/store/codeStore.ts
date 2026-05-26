@@ -14,6 +14,7 @@ const codeNames = [
   'EscalationType',
   'PermitStage',
   'PermitState',
+  'PiesOnHold',
   'SourceSystem'
 ] as const;
 

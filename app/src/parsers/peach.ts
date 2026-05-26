@@ -1,6 +1,8 @@
-import { PermitStage, PermitState } from '../db/codes/enums.ts';
+import { codeTable } from '../db/codes/cache.ts';
+import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { compareDates, splitDateTime } from '../utils/index.ts';
 import { PeachTerminatedStage, PermitPhase } from '../utils/enums/permit.ts';
+import { getLogger } from '../utils/log.ts';
 
 import type {
   CodingEvent,
@@ -12,14 +14,12 @@ import type {
   DateTimeStrings
 } from '../types/index.ts';
 
+const log = getLogger(module.filename);
+
 interface Status {
   phase: PermitPhase;
   stage: PermitStage | undefined;
   state: PermitState | undefined;
-}
-
-enum PeachOnHoldCode {
-  MISSING_INFORMATION = 'MISSING_INFORMATION'
 }
 
 const PEACH_DECISION_STATES = new Set(['ALLOWED', 'DISALLOWED', 'OFFERED', 'ISSUED', 'DECLINED']);
@@ -237,7 +237,7 @@ function generateCodingStatus(codingEvent: CodingEvent, processEvent?: ProcessEv
   let codeKey = codingEvent.coding.code;
 
   // Handle PEACH on hold codings
-  if (codeKey in PeachOnHoldCode) {
+  if (codeTable.PiesOnHold.codes.includes(codeKey)) {
     if (!processEvent) {
       return { phase, stage: undefined, state: undefined };
     }

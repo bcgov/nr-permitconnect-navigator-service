@@ -29,22 +29,22 @@ model access_request {
 }
 
 model activity {
-  activityId             String                    @id @map("activity_id")
-  initiativeId           String                    @map("initiative_id") @db.Uuid
-  createdBy              String?                   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
-  createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy              String?                   @map("updated_by")
-  updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  deletedBy              String?                   @map("deleted_by")
-  deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
-  initiative             initiative                @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  activityId             String                   @id @map("activity_id")
+  initiativeId           String                   @map("initiative_id") @db.Uuid
+  createdBy              String?                  @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt              DateTime?                @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?                  @map("updated_by")
+  updatedAt              DateTime?                @map("updated_at") @db.Timestamptz(6)
+  deletedBy              String?                  @map("deleted_by")
+  deletedAt              DateTime?                @map("deleted_at") @db.Timestamptz(6)
+  initiative             initiative               @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "activity_initiative_id_foreign")
   activityContact        activity_contact[]
   document               document[]
   draft                  draft[]
-  electrificationProject electrification_project[]
+  electrificationProject electrification_project?
   enquiry                enquiry[]
-  generalProject         general_project[]
-  housingProject         housing_project[]
+  generalProject         general_project?
+  housingProject         housing_project?
   noteHistory            note_history[]
   permit                 permit[]
 
@@ -181,33 +181,35 @@ model knex_migrations_lock {
 }
 
 model permit {
-  permitId               String            @id @map("permit_id") @db.Uuid
-  permitTypeId           Int               @map("permit_type_id")
-  activityId             String            @map("activity_id")
-  issuedPermitId         String?           @map("issued_permit_id")
+  permitId               String             @id @map("permit_id") @db.Uuid
+  permitTypeId           Int                @map("permit_type_id")
+  activityId             String             @map("activity_id")
+  issuedPermitId         String?            @map("issued_permit_id")
   state                  String
   needed                 String?
   stage                  String
-  submittedDate          DateTime?         @map("submitted_date") @db.Date
-  createdBy              String?           @default("00000000-0000-4000-8000-000000000000") @map("created_by")
-  createdAt              DateTime?         @default(now()) @map("created_at") @db.Timestamptz(6)
-  updatedBy              String?           @map("updated_by")
-  updatedAt              DateTime?         @map("updated_at") @db.Timestamptz(6)
-  deletedBy              String?           @map("deleted_by")
-  deletedAt              DateTime?         @map("deleted_at") @db.Timestamptz(6)
-  statusLastVerified     DateTime?         @map("status_last_verified") @db.Date
-  decisionDate           DateTime?         @map("decision_date") @db.Date
-  statusLastChanged      DateTime?         @map("status_last_changed") @db.Date
-  decisionTime           DateTime?         @map("decision_time") @db.Timetz(6)
-  statusLastChangedTime  DateTime?         @map("status_last_changed_time") @db.Timetz(6)
-  statusLastVerifiedTime DateTime?         @map("status_last_verified_time") @db.Timetz(6)
-  submittedTime          DateTime?         @map("submitted_time") @db.Timetz(6)
-  targetDate             DateTime?         @map("target_date") @db.Date
-  targetDateDescription  String?           @map("target_date_description")
-  activity               activity          @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
-  permitType             permit_type       @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
-  permitStageCode        permit_stage_code @relation(fields: [stage], references: [code], onDelete: Cascade)
-  permitStateCode        permit_state_code @relation(fields: [state], references: [code], onDelete: Cascade)
+  submittedDate          DateTime?          @map("submitted_date") @db.Date
+  createdBy              String?            @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt              DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy              String?            @map("updated_by")
+  updatedAt              DateTime?          @map("updated_at") @db.Timestamptz(6)
+  statusLastVerified     DateTime?          @map("status_last_verified") @db.Date
+  deletedBy              String?            @map("deleted_by")
+  deletedAt              DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  decisionDate           DateTime?          @map("decision_date") @db.Date
+  statusLastChanged      DateTime?          @map("status_last_changed") @db.Date
+  decisionTime           DateTime?          @map("decision_time") @db.Timetz(6)
+  statusLastChangedTime  DateTime?          @map("status_last_changed_time") @db.Timetz(6)
+  statusLastVerifiedTime DateTime?          @map("status_last_verified_time") @db.Timetz(6)
+  submittedTime          DateTime?          @map("submitted_time") @db.Timetz(6)
+  targetDate             DateTime?          @map("target_date") @db.Date
+  targetDateDescription  String?            @map("target_date_description")
+  onHoldCode             String?            @map("on_hold_code")
+  activity               activity           @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
+  piesOnHoldCode         pies_on_hold_code? @relation(fields: [onHoldCode], references: [code], map: "permit_on_hold_code_foreign")
+  permitType             permit_type        @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permitStageCode        permit_stage_code  @relation(fields: [stage], references: [code])
+  permitStateCode        permit_state_code  @relation(fields: [state], references: [code])
   permitNote             permit_note[]
   permitTracking         permit_tracking[]
 
@@ -272,9 +274,9 @@ model user {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
+  bceidBusinessName      String?                   @map("bceid_business_name")
   deletedBy              String?                   @map("deleted_by")
   deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
-  bceidBusinessName      String?                   @map("bceid_business_name")
   accessRequest          access_request[]
   contact                contact[]
   electrificationProject electrification_project[]
@@ -553,7 +555,7 @@ model electrification_project_type_code {
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model housing_project {
   housingProjectId                String    @id(map: "submission_pkey") @map("housing_project_id") @db.Uuid
-  activityId                      String    @map("activity_id")
+  activityId                      String    @unique(map: "housing_project_activity_id_unique") @map("activity_id")
   assignedUserId                  String?   @map("assigned_user_id") @db.Uuid
   submittedAt                     DateTime  @map("submitted_at") @db.Timestamptz(6)
   submittedBy                     String    @map("submitted_by")
@@ -631,7 +633,7 @@ model note {
 
 model electrification_project {
   electrificationProjectId           String                                 @id @map("electrification_project_id") @db.Uuid
-  activityId                         String                                 @map("activity_id")
+  activityId                         String                                 @unique(map: "electrification_project_activity_id_unique") @map("activity_id")
   assignedUserId                     String?                                @map("assigned_user_id") @db.Uuid
   submittedAt                        DateTime                               @map("submitted_at") @db.Timestamptz(6)
   applicationStatus                  String?                                @map("application_status")
@@ -814,7 +816,7 @@ model business_area_code {
 
 model general_project {
   generalProjectId            String              @id @map("general_project_id") @db.Uuid
-  activityId                  String              @map("activity_id")
+  activityId                  String              @unique(map: "general_project_activity_id_unique") @map("activity_id")
   assignedUserId              String?             @map("assigned_user_id") @db.Uuid
   submittedAt                 DateTime            @map("submitted_at") @db.Timestamptz(6)
   locationPids                String?             @map("location_pids")
@@ -880,6 +882,23 @@ model permit_stage_code {
 model permit_state_code {
   code       String    @id
   display    String    @unique(map: "permit_state_code_display_unique")
+  definition String
+  active     Boolean   @default(true)
+  createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")
+  createdAt  DateTime? @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedBy  String?   @map("updated_by")
+  updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
+  deletedBy  String?   @map("deleted_by")
+  deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
+  permit     permit[]
+
+  @@schema("public")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model pies_on_hold_code {
+  code       String    @id
+  display    String    @unique(map: "pies_on_hold_code_display_unique")
   definition String
   active     Boolean   @default(true)
   createdBy  String?   @default("00000000-0000-4000-8000-000000000000") @map("created_by")

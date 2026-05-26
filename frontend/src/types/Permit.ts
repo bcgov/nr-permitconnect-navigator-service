@@ -2,7 +2,7 @@ import type { IStamps } from '@/interfaces';
 import type { PermitNote } from './PermitNote';
 import type { PermitTracking } from './PermitTracking';
 import type { PermitType } from './PermitType';
-import type { PermitStage, PermitState } from '@/utils/enums/codeEnums';
+import type { PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 
 interface PermitBase extends IStamps {
   activityId: string;
@@ -24,6 +24,7 @@ interface PermitBase extends IStamps {
   targetDateDescription?: string | null;
   decisionDate?: string | null;
   decisionTime?: string | null;
+  onHoldCode?: PiesOnHold | null;
 }
 
 export interface Permit extends PermitBase {
