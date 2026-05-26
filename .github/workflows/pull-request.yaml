@@ -21,7 +21,7 @@ concurrency:
 jobs:
   build:
     name: Build & Push
-    if: github.event.pull_request.state == 'open' && contains(github.event.pull_request.labels.*.name, 'deploy')
+    if: github.event.pull_request.state == 'open' && !github.event.pull_request.head.repo.fork && contains(github.event.pull_request.labels.*.name, 'deploy')
     uses: ./.github/workflows/builder.yaml
     permissions:
       contents: read
@@ -102,8 +102,17 @@ jobs:
   destroy:
     name: Destroy Instance
     if: >
-        github.event.pull_request.state == 'closed' ||
-        (github.event.action == 'unlabeled' && github.event.label.name == 'deploy')
+      !github.event.pull_request.head.repo.fork &&
+      (
+        (
+          github.event.pull_request.state == 'closed' &&
+          contains(github.event.pull_request.labels.*.name, 'deploy')
+        ) ||
+        (
+          github.event.action == 'unlabeled' &&
+          github.event.label.name == 'deploy'
+        )
+      )
     environment:
       name: pr
     permissions:
