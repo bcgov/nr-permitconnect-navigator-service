@@ -1,0 +1,77 @@
+name: Deployer
+
+on:
+  workflow_call:
+    inputs:
+      app_name:
+        description: 'Application name'
+        required: true
+        type: string
+      acronym:
+        description: 'Application acronym'
+        required: true
+        type: string
+      environment:
+        description: 'Logical Github Environment'
+        required: true
+        type: string
+      image_tag:
+        description: 'Docker image tag to deploy'
+        required: true
+        type: string
+      job_name:
+        description: 'Job/Instance name'
+        required: true
+        type: string
+      namespace_prefix:
+        description: 'Openshift Namespace common prefix'
+        required: true
+        type: string
+      namespace_environment:
+        description: 'Openshift Namespace environment suffix'
+        required: true
+        type: string
+    secrets:
+      openshift_server:
+        description: 'Openshift API Endpoint'
+        required: true
+      openshift_token:
+        description: 'Openshift Service Account Token'
+        required: true
+
+jobs:
+  infra:
+    name: ${{ inputs.environment }} ${{ inputs.job_name }}
+    environment:
+      name: ${{ inputs.environment }}
+    permissions:
+      contents: read # This is required for actions/checkout
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Login to OpenShift Cluster
+        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        with:
+          oc_server: ${{ secrets.openshift_server }}
+          oc_token: ${{ secrets.openshift_token }}
+          oc_namespace: ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
+
+      - name: Helm Deploy
+        shell: bash
+        run: >-
+          helm upgrade --install --atomic ${{ inputs.job_name }} ${{ inputs.app_name }}
+          --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
+          --repo https://bcgov.github.io/nr-permitconnect-navigator-service/
+          --values ./.github/environments/values.${{ inputs.environment }}.yaml
+          --set image.repository=ghcr.io/${{ github.repository_owner }}
+          --set image.tag=${{ inputs.image_tag }}
+          --set route.host=${{ inputs.acronym }}-${{ inputs.namespace_environment }}-${{ inputs.job_name }}.apps.silver.devops.gov.bc.ca
+          --timeout 10m
+          --wait
+
+      - name: Wait on Deployment
+        shell: bash
+        run: |
+          oc rollout --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }} status deploy/${{ inputs.app_name }}-${{ inputs.job_name }} --watch=true
