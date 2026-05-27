@@ -161,7 +161,7 @@ export const TEST_DOCUMENT_1: Document = {
 export const TEST_ELECTRIFICATION_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
-  data: {} as Prisma.JsonValue,
+  data: {} as Prisma.JsonValue, // nosonar
   draftCode: DraftCode.ELECTRIFICATION_PROJECT,
   createdAt: null,
   createdBy: null,
@@ -308,7 +308,7 @@ export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
 export const TEST_GENERAL_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
-  data: {} as Prisma.JsonValue,
+  data: {} as Prisma.JsonValue, // nosonar
   draftCode: DraftCode.GENERAL_PROJECT,
   createdAt: null,
   createdBy: null,
@@ -321,7 +321,7 @@ export const TEST_GENERAL_DRAFT: Draft = {
 export const TEST_HOUSING_DRAFT: Draft = {
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   activityId: 'ACTI1234',
-  data: {} as Prisma.JsonValue,
+  data: {} as Prisma.JsonValue, // nosonar
   draftCode: DraftCode.HOUSING_PROJECT,
   createdAt: null,
   createdBy: null,
@@ -850,6 +850,7 @@ export const TEST_PERMIT_1: Permit = {
   state: PermitState.NONE,
   needed: PermitNeeded.YES,
   stage: PermitStage.PRE_SUBMISSION,
+  onHoldCode: null,
   submittedDate: null,
   submittedTime: null,
   decisionDate: null,
@@ -904,6 +905,7 @@ export const TEST_PERMIT_2: Permit = {
   state: PermitState.IN_PROGRESS,
   needed: PermitNeeded.YES,
   stage: PermitStage.APPLICATION_SUBMISSION,
+  onHoldCode: null,
   submittedDate: '2024-01-05',
   submittedTime: null,
   decisionDate: null,
@@ -958,6 +960,7 @@ export const TEST_PERMIT_3: Permit = {
   state: PermitState.NONE,
   needed: PermitNeeded.UNDER_INVESTIGATION,
   stage: PermitStage.PRE_SUBMISSION,
+  onHoldCode: null,
   submittedDate: null,
   submittedTime: null,
   decisionDate: null,
@@ -1012,6 +1015,7 @@ export const TEST_PERMIT_4: Permit = {
   state: PermitState.NONE,
   needed: PermitNeeded.YES,
   stage: PermitStage.PRE_SUBMISSION,
+  onHoldCode: null,
   submittedDate: null,
   submittedTime: null,
   decisionDate: null,

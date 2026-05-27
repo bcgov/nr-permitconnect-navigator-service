@@ -584,4 +584,30 @@ describe('createNoteAndSendUpdateEmails', () => {
       emailTemplate: permitNoteUpdateTemplate
     });
   });
+
+  it('throws an error if permit.state or permit.stage is invalid', async () => {
+    getProjectSpy.mockResolvedValueOnce({
+      ...TEST_ELECTRIFICATION_PROJECT_1,
+      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
+      assignedUserId: TEST_IDIR_USER_1.userId,
+      activity: {
+        ...TEST_ACTIVITY_ELECTRIFICATION,
+        activityContact: [{ ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 }],
+        initiative: TEST_INITIATIVE_ELECTRIFICATION
+      }
+    });
+
+    const permit: Permit = {
+      ...TEST_PERMIT_1,
+      permitType: TEST_PERMIT_TYPE_1,
+      submittedDate: '2024-01-01',
+
+      state: 'INVALID_STATE',
+      stage: 'INVALID_STAGE'
+    };
+
+    await expect(sendPermitUpdateNotifications(permit, true)).rejects.toThrow(
+      /Invalid permit\.state: INVALID_STATE or permit\.stage: INVALID_STAGE/
+    );
+  });
 });

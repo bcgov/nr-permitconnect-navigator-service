@@ -1,6 +1,8 @@
-import { PermitStage, PermitState } from '../db/codes/enums.ts';
+import { codeTable } from '../db/codes/cache.ts';
+import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { compareDates, splitDateTime } from '../utils/index.ts';
 import { PeachTerminatedStage, PermitPhase } from '../utils/enums/permit.ts';
+import { getLogger } from '../utils/log.ts';
 
 import type {
   CodingEvent,
@@ -12,14 +14,12 @@ import type {
   DateTimeStrings
 } from '../types/index.ts';
 
+const log = getLogger(module.filename);
+
 interface Status {
   phase: PermitPhase;
   stage: PermitStage | undefined;
   state: PermitState | undefined;
-}
-
-enum PeachOnHoldCode {
-  MISSING_INFORMATION = 'MISSING_INFORMATION'
 }
 
 const PEACH_DECISION_STATES = new Set(['ALLOWED', 'DISALLOWED', 'OFFERED', 'ISSUED', 'DECLINED']);
@@ -71,25 +71,69 @@ const APPLICATION_PROCESS_ORDERING_MAP: Record<string, number> = APPLICATION_PRO
  */
 const CODING_STATUS_MAPPINGS: Record<string, { stage: PermitStage; state: PermitState }> = {
   // On hold mappings
-  'MISSING_INFORMATION:PRE_APPLICATION': {
-    stage: PermitStage.PRE_SUBMISSION,
-    state: PermitState.PENDING_APPLICANT_ACTION
-  },
-  'MISSING_INFORMATION:INITIAL_SUBMISSION_REVIEW': {
+  [`${PiesOnHold.MISSING_INFORMATION}:INITIAL_SUBMISSION_REVIEW`]: {
     stage: PermitStage.APPLICATION_SUBMISSION,
     state: PermitState.PENDING_APPLICANT_ACTION
   },
-  'MISSING_INFORMATION:TECH_REVIEW_COMMENT': {
+  [`${PiesOnHold.MISSING_INFORMATION}:TECH_REVIEW_COMMENT`]: {
     stage: PermitStage.TECHNICAL_REVIEW,
     state: PermitState.PENDING_APPLICANT_ACTION
   },
-  'MISSING_INFORMATION:DECISION': {
+  [`${PiesOnHold.MISSING_INFORMATION}:DECISION`]: {
     stage: PermitStage.PENDING_DECISION,
     state: PermitState.PENDING_APPLICANT_ACTION
   },
-  'MISSING_INFORMATION:ISSUANCE': {
+  [`${PiesOnHold.MISSING_INFORMATION}:ISSUANCE`]: {
     stage: PermitStage.POST_DECISION,
     state: PermitState.PENDING_APPLICANT_ACTION
+  },
+  [`${PiesOnHold.APPLICANT_REQUEST}:INITIAL_SUBMISSION_REVIEW`]: {
+    stage: PermitStage.APPLICATION_SUBMISSION,
+    state: PermitState.PENDING_APPLICANT_ACTION
+  },
+  [`${PiesOnHold.APPLICANT_REQUEST}:TECH_REVIEW_COMMENT`]: {
+    stage: PermitStage.TECHNICAL_REVIEW,
+    state: PermitState.PENDING_APPLICANT_ACTION
+  },
+  [`${PiesOnHold.APPLICANT_REQUEST}:DECISION`]: {
+    stage: PermitStage.PENDING_DECISION,
+    state: PermitState.PENDING_APPLICANT_ACTION
+  },
+  [`${PiesOnHold.APPLICANT_REQUEST}:ISSUANCE`]: {
+    stage: PermitStage.POST_DECISION,
+    state: PermitState.PENDING_APPLICANT_ACTION
+  },
+  [`${PiesOnHold.LEGAL_ACTION}:INITIAL_SUBMISSION_REVIEW`]: {
+    stage: PermitStage.APPLICATION_SUBMISSION,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.LEGAL_ACTION}:TECH_REVIEW_COMMENT`]: {
+    stage: PermitStage.TECHNICAL_REVIEW,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.LEGAL_ACTION}:DECISION`]: {
+    stage: PermitStage.PENDING_DECISION,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.LEGAL_ACTION}:ISSUANCE`]: {
+    stage: PermitStage.POST_DECISION,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.PENDING_EXTERNAL_DECISION}:INITIAL_SUBMISSION_REVIEW`]: {
+    stage: PermitStage.APPLICATION_SUBMISSION,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.PENDING_EXTERNAL_DECISION}:TECH_REVIEW_COMMENT`]: {
+    stage: PermitStage.TECHNICAL_REVIEW,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.PENDING_EXTERNAL_DECISION}:DECISION`]: {
+    stage: PermitStage.PENDING_DECISION,
+    state: PermitState.IN_PROGRESS
+  },
+  [`${PiesOnHold.PENDING_EXTERNAL_DECISION}:ISSUANCE`]: {
+    stage: PermitStage.POST_DECISION,
+    state: PermitState.IN_PROGRESS
   }
 };
 
@@ -237,7 +281,7 @@ function generateCodingStatus(codingEvent: CodingEvent, processEvent?: ProcessEv
   let codeKey = codingEvent.coding.code;
 
   // Handle PEACH on hold codings
-  if (codeKey in PeachOnHoldCode) {
+  if (codeTable.PiesOnHold.codes.includes(codeKey)) {
     if (!processEvent) {
       return { phase, stage: undefined, state: undefined };
     }
@@ -384,6 +428,7 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
 
   let stage: PermitStage | undefined;
   let state: PermitState | undefined;
+  let onHoldCode: PiesOnHold | null = null;
   let statusEvent: PiesEvent;
 
   const latestProcessEvent = processEvents?.[0];
@@ -393,11 +438,19 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   const processStartDate = latestProcessEvent ? piesEventStartToDate(latestProcessEvent.event) : undefined;
   const useOnHoldEvent = isActiveOnHoldEvent && compareDates(onHoldStartDate, processStartDate) >= 0;
 
-  // Note: missingInfoOnHoldEvent will need to be changed/removed once we start handling all/more on hold codes
-  const isMissingInfoOnHoldEvent = latestOnHoldEvent?.coding.code === PeachOnHoldCode.MISSING_INFORMATION;
-
-  if (latestOnHoldEvent && useOnHoldEvent && isMissingInfoOnHoldEvent) {
+  if (latestOnHoldEvent && useOnHoldEvent) {
+    // We want to no-op and log any time we see one we don't have in our pies_on_hold_code table.
+    // As a way to flag us to update our code table to match PIES documentation.
+    // This will not be needed once on hold reasons have been solidified by DWG/PDT.
+    if (!codeTable.PiesOnHold.codes.includes(latestOnHoldEvent.coding.code)) {
+      log.warn(
+        `Encountered unknown PEACH on hold code ${latestOnHoldEvent.coding.code}
+        for Record ${record.system_id}:${record.record_id}.`
+      );
+      return null;
+    }
     ({ stage, state } = generateCodingStatus(latestOnHoldEvent, latestProcessEvent));
+    onHoldCode = latestOnHoldEvent.coding.code as PiesOnHold;
     statusEvent = latestOnHoldEvent.event;
   } else if (latestProcessEvent) {
     ({ stage, state } = generateProcessStatus(latestProcessEvent, processEvents[1]));
@@ -415,6 +468,7 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   return {
     stage,
     state,
+    onHoldCode,
     submittedDate,
     submittedTime,
     decisionDate,

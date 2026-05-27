@@ -349,6 +349,7 @@ async function onSubmit(data: GenericObject) {
           !permitData.statusLastVerified || response.statusLastChanged > permitData.statusLastVerified
             ? response.statusLastChanged
             : permitData.statusLastVerified;
+        permitData.onHoldCode = response.onHoldCode;
       }
     }
 
@@ -391,7 +392,8 @@ async function onSubmit(data: GenericObject) {
       }
     });
   } catch (e) {
-    if (e instanceof Error) toast.error(t('authorization.authorizationForm.permitSaveFailed'), e.message);
+    const message = e instanceof Error ? e.message : String(e);
+    toast.error(t('authorization.authorizationForm.permitSaveFailed'), message);
   }
 }
 
@@ -444,6 +446,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       :editable="editable"
       :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
+      :on-hold-code="authorization?.onHoldCode"
       :show-target-date-description="!!values?.targetDate"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"

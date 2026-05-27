@@ -136,3 +136,12 @@ export const PermitState = {
 } as const;
 
 export type PermitState = (typeof PermitState)[keyof typeof PermitState];
+
+export const PiesOnHold = {
+  APPLICANT_REQUEST: 'APPLICANT_REQUEST',
+  LEGAL_ACTION: 'LEGAL_ACTION',
+  MISSING_INFORMATION: 'MISSING_INFORMATION',
+  PENDING_EXTERNAL_DECISION: 'PENDING_EXTERNAL_DECISION'
+} as const;
+
+export type PiesOnHold = (typeof PiesOnHold)[keyof typeof PiesOnHold];

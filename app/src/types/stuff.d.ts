@@ -366,6 +366,7 @@ export interface ListPermitsOptions extends Partial<IStamps> {
 export interface PeachSummary {
   stage: PermitStage;
   state: PermitState;
+  onHoldCode?: PiesOnHold;
   submittedDate: string | null;
   submittedTime: string | null;
   decisionDate: string | null;
@@ -394,6 +395,11 @@ export interface PermitUpdateEmailParams {
   projectId: string;
   toEmails: string[];
   emailTemplate: EmailTemplate;
+}
+
+export interface UpdatedPermitWithNote {
+  permit: Permit;
+  note: string | undefined;
 }
 
 export type Project = ElectrificationProject | GeneralProject | HousingProject;

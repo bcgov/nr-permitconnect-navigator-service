@@ -82,7 +82,7 @@ export const VEE_FORM_STUB = {
       let current: GenericObject = values;
 
       for (let i = 0; i < keys.length - 1; i++) {
-        const key = keys[i]!;
+        const key = keys[i];
 
         if (typeof current[key] !== 'object' || current[key] === null) {
           current[key] = {};

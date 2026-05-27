@@ -89,7 +89,8 @@ onBeforeMount(() => {
         <StatusPill
           v-if="noteHistory.shownToProponent"
           :status="t('note.noteHistoryCard.shownToProponent')"
-          :bg-color="'var(--p-gold-600)'"
+          :border-color="'var(--p-support-warning-border)'"
+          :bg-color="'var(--p-support-warning-surface)'"
           :icon="'fa-solid fa-eye'"
         />
         <StatusPill

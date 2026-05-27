@@ -20,6 +20,7 @@ const sharedPermitSchema = {
   needed: Joi.string().max(255).required(),
   state: Joi.string().max(255).required().custom(requireValidCode.PermitState),
   stage: Joi.string().max(255).required().custom(requireValidCode.PermitStage),
+  onHoldCode: Joi.string().max(255).allow(null).custom(requireValidCode.PiesOnHold),
   submittedDate: dateOnlyString.allow(null),
   submittedTime: timeTzString.allow(null),
   decisionDate: dateOnlyString.allow(null),

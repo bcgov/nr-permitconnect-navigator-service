@@ -88,6 +88,31 @@ export const ThemeOverride = definePreset(Material, {
       900: '#A2312D',
       950: '#A2312D'
     },
+    support: {
+      border: {
+        width: '0.1rem'
+      },
+      info: {
+        border: '#053662',
+        icon: '#053662',
+        surface: '#F7F9FC'
+      },
+      danger: {
+        border: '#CE3E39',
+        icon: '#CE3E39',
+        surface: '#F4E1E2'
+      },
+      success: {
+        border: '#42814A',
+        icon: '#42814A',
+        surface: '#F6FFF8'
+      },
+      warning: {
+        border: '#F8BB47',
+        icon: '#F8BB47',
+        surface: '#FEF1D8'
+      }
+    },
     disabledcolor: '#EDEBE9',
     textsecondary: '#474543',
     white: '#FFFFFF'
@@ -116,7 +141,6 @@ export const ThemeOverride = definePreset(Material, {
         width: '2px'
       }
     },
-    errorColor: '{red.500}',
     colorScheme: {
       light: {
         surface: {
@@ -147,7 +171,7 @@ export const ThemeOverride = definePreset(Material, {
         formField: {
           hoverBorderColor: '{primary.700}',
           focusBorderColor: '{primary.300}',
-          invalidBorderColor: '{red.500}',
+          invalidBorderColor: '{support.danger.border}',
           floatLabelInvalidColor: '{red.500}',
           disabledBackground: '{disabledcolor}',
           disabledColor: '{surface.800}',
@@ -249,23 +273,40 @@ export const ThemeOverride = definePreset(Material, {
     message: {
       colorScheme: {
         light: {
-          root: {
-            error: {
-              color: '{textsecondary}'
-            },
-            info: {
-              color: '{textsecondary}'
-            },
-            success: {
-              background: '{green.100}',
-              color: '{textsecondary}'
-            },
-            warn: {
-              color: '{textsecondary}'
-            }
+          error: {
+            background: '{support.danger.surface}',
+            color: '{textsecondary}',
+            iconColor: '{red.500}'
+          },
+          info: {
+            background: '{support.info.surface}',
+            color: '{textsecondary}',
+            iconColor: '{bcblue.950}'
+          },
+          success: {
+            background: '{support.success.surface}',
+            color: '{textsecondary}',
+            iconColor: '{green.500}'
+          },
+          warn: {
+            background: '{support.warning.surface}',
+            color: '{textsecondary}',
+            iconColor: '{gold.950}'
           }
         }
-      }
+      },
+      // Setting the message.root.borderWidth token causes the border to overflow the parent, causing alignment issues.
+      // This workaround uses outline with an offset to render a border within bounds of parent.
+      css: () => `
+        .p-message {
+          outline-width: var(--p-support-border-width);
+          outline-offset: calc(-1 * var(--p-support-border-width));
+        }
+        .p-message-error { outline-color: var(--p-support-danger-border); }
+        .p-message-info { outline-color: var(--p-support-info-border); }
+        .p-message-success { outline-color: var(--p-support-success-border); }
+        .p-message-warn { outline-color: var(--p-support-warning-border); }
+      `
     },
     panel: {
       header: { padding: '1.5rem 2.25rem 1.5rem 2.25rem' },
@@ -309,22 +350,49 @@ export const ThemeOverride = definePreset(Material, {
       }
     },
     toast: {
+      root: {
+        borderWidth: '{support.border.width}'
+      },
       colorScheme: {
         light: {
           error: {
-            color: '{textsecondary}'
+            background: '{support.danger.surface}',
+            borderColor: '{support.danger.border}',
+            color: '{textsecondary}',
+            detailColor: '{textsecondary}',
+            closeButton: {
+              hoverBackground: '{red.200}',
+              focusRing: { color: '{red.600}', shadow: 'none' }
+            }
+          },
+          info: {
+            background: '{support.info.surface}',
+            borderColor: '{support.info.border}',
+            color: '{textsecondary}',
+            detailColor: '{textsecondary}',
+            closeButton: {
+              hoverBackground: '{bcblue.200}',
+              focusRing: { color: '{bcblue.600}', shadow: 'none' }
+            }
           },
           success: {
-            background: '{green.100}',
-            borderColor: '{green.500}',
+            background: '{support.success.surface}',
+            borderColor: '{support.success.border}',
             color: '{textsecondary}',
-            detailColor: '{surface.300}',
+            detailColor: '{textsecondary}',
             closeButton: {
               hoverBackground: '{green.200}',
-              focusRing: {
-                color: '{green.600}',
-                shadow: 'none'
-              }
+              focusRing: { color: '{green.600}', shadow: 'none' }
+            }
+          },
+          warn: {
+            background: '{support.warning.surface}',
+            borderColor: '{support.warning.border}',
+            color: '{textsecondary}',
+            detailColor: '{textsecondary}',
+            closeButton: {
+              hoverBackground: '{gold.300}',
+              focusRing: { color: '{gold.600}', shadow: 'none' }
             }
           }
         }
