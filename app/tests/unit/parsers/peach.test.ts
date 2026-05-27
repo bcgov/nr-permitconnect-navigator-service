@@ -119,8 +119,8 @@ describe('peachRecordParser', () => {
       expect(summary.submittedDate).toBeNull();
       expect(summary.submittedTime).toBeNull();
 
-      expect(summary.stage).toBe(PermitStage.POST_DECISION);
-      expect(summary.state).toBe(PermitState.APPROVED);
+      expect(summary.stage).toBe(PermitStage.PENDING_DECISION);
+      expect(summary.state).toBe(PermitState.IN_PROGRESS);
     });
 
     it('uses previous stage for terminal REJECTED and maps to Technical review/Rejected', () => {
@@ -389,8 +389,8 @@ describe('peachRecordParser', () => {
       expect(s2.decisionTime).toBe('12:00:00.000Z');
       expect(s2.submittedDate).toBeNull();
       expect(s2.submittedTime).toBeNull();
-      expect(s2.stage).toBe(PermitStage.POST_DECISION);
-      expect(s2.state).toBe(PermitState.APPROVED);
+      expect(s2.stage).toBe(PermitStage.PENDING_DECISION);
+      expect(s2.state).toBe(PermitState.IN_PROGRESS);
     });
 
     it('returns only the records that have mapped statuses', () => {

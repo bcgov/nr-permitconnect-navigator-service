@@ -180,13 +180,13 @@ const PROCESS_STATUS_MAPPINGS: Record<string, { stage: PermitStage; state: Permi
     stage: PermitStage.PENDING_DECISION,
     state: PermitState.IN_PROGRESS
   },
+  ALLOWED: {
+    stage: PermitStage.PENDING_DECISION,
+    state: PermitState.IN_PROGRESS
+  },
 
   // Post Decision
   // Approved
-  ALLOWED: {
-    stage: PermitStage.POST_DECISION,
-    state: PermitState.APPROVED
-  },
   OFFERED: {
     stage: PermitStage.POST_DECISION,
     state: PermitState.APPROVED
