@@ -13,7 +13,8 @@ const {
   disabled = false,
   bold = true,
   rows = 5,
-  tooltip = undefined
+  tooltip = undefined,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -23,6 +24,7 @@ const {
   bold?: boolean;
   rows?: number;
   tooltip?: string;
+  required?: boolean;
 }>();
 
 const { errorMessage, handleBlur, value } = useField<string>(name);
@@ -36,6 +38,12 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :for="name"
     >
       {{ label }}
+      <span
+        v-if="required"
+        class="text-[var(--p-red-400)]"
+      >
+        *
+      </span>
     </label>
     <Tooltip
       v-if="tooltip"
@@ -48,6 +56,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       v-model="value"
       :aria-describedby="`${name}-help`"
       :aria-labelledby="`${name}-label`"
+      :aria-required="required"
       :name="name"
       :placeholder="placeholder"
       class="w-full"

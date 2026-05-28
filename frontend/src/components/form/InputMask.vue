@@ -13,7 +13,8 @@ const {
   placeholder = '',
   disabled = false,
   bold = true,
-  floatLabel = false
+  floatLabel = false,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -23,17 +24,18 @@ const {
   disabled?: boolean;
   bold?: boolean;
   floatLabel?: boolean;
+  required?: boolean;
 }>();
 </script>
 
 <template>
   <div>
     <FloatLabel v-if="floatLabel">
-      <InputMaskInternal v-bind="{ label, name, mask, placeholder, disabled, bold }" />
+      <InputMaskInternal v-bind="{ label, name, mask, placeholder, disabled, bold, required }" />
     </FloatLabel>
     <InputMaskInternal
       v-else
-      v-bind="{ label, name, mask, placeholder, disabled, bold }"
+      v-bind="{ label, name, mask, placeholder, disabled, bold, required }"
     />
 
     <small :id="`${name}-help`">{{ helpText }}</small>

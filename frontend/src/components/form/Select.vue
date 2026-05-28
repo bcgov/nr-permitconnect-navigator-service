@@ -18,7 +18,8 @@ const {
   optionValue = undefined,
   bold = true,
   loading = undefined,
-  floatLabel = false
+  floatLabel = false,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -33,6 +34,7 @@ const {
   bold?: boolean;
   loading?: boolean;
   floatLabel?: boolean;
+  required?: boolean;
 }>();
 
 // Emits
@@ -43,13 +45,37 @@ const emit = defineEmits<(e: 'onChange', event: SelectChangeEvent) => void>();
   <div>
     <FloatLabel v-if="floatLabel">
       <SelectInternal
-        v-bind="{ label, name, placeholder, disabled, options, optionLabel, optionValue, bold, loading, floatLabel }"
+        v-bind="{
+          label,
+          name,
+          placeholder,
+          disabled,
+          options,
+          optionLabel,
+          optionValue,
+          bold,
+          loading,
+          floatLabel,
+          required
+        }"
         @on-change="(e) => emit('onChange', e)"
       />
     </FloatLabel>
     <SelectInternal
       v-else
-      v-bind="{ label, name, placeholder, disabled, optionLabel, options, optionValue, bold, loading, floatLabel }"
+      v-bind="{
+        label,
+        name,
+        placeholder,
+        disabled,
+        optionLabel,
+        options,
+        optionValue,
+        bold,
+        loading,
+        floatLabel,
+        required
+      }"
       @on-change="(e) => emit('onChange', e)"
     />
 

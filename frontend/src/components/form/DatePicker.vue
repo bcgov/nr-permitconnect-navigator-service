@@ -14,7 +14,8 @@ const {
   showTime = false,
   bold = true,
   placeholder = '',
-  maxDate = undefined
+  maxDate = undefined,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -24,6 +25,7 @@ const {
   bold?: boolean;
   placeholder?: string;
   maxDate?: Date;
+  required?: boolean;
 }>();
 
 const { errorMessage, handleBlur, value } = useField<Date>(name);
@@ -38,6 +40,12 @@ const { errorMessage, handleBlur, value } = useField<Date>(name);
       :for="name"
     >
       {{ label }}
+      <span
+        v-if="required"
+        class="text-[var(--p-red-400)]"
+      >
+        *
+      </span>
     </label>
     <DatePicker
       v-model="value"
