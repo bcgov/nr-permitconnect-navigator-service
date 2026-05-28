@@ -100,6 +100,7 @@ onMounted(() => {
         name="companyProjectName.projectName"
         :label="t('i.housing.project.projectForm.projectNameLabel')"
         :disabled="!getEditable"
+        required
         @on-input="(e: Event) => updateLiveName((e.target as HTMLInputElement).value)"
       />
       <AutoComplete
@@ -111,6 +112,7 @@ onMounted(() => {
         :placeholder="t('i.common.projectForm.searchBCRegistered')"
         :get-option-label="(option: OrgBookOption) => option.registeredName"
         :suggestions="orgBookOptions"
+        :required="getInitiative === Initiative.ELECTRIFICATION"
         @on-change="setCompanyIdRegistered(null)"
         @on-complete="onRegisteredNameInput"
         @on-select="

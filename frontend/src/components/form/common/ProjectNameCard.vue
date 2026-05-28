@@ -49,6 +49,7 @@ useFormErrorWatcher(formRef, 'ProjectNameCard', tab);
           :label="showNumber ? t('projectNameCard.labels.projectName') : t('projectNameCard.labels.projectNameLong')"
           :bold="false"
           :disabled="!getEditable"
+          required
         />
 
         <InputText

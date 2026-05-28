@@ -42,7 +42,8 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
         class="section-header"
         aria-level="2"
       >
-        {{ t('projectIntakeForm.singleFamilySelectedCard') }}
+        {{ t('projectIntakeForm.residentialUnitsCard.selectUnitTypes') }}
+        <span class="text-[var(--p-red-400)]">*</span>
       </h6>
       <Divider type="solid" />
     </template>
@@ -63,7 +64,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           name="housing.singleFamilyUnits"
           :disabled="!getEditable || !values.housing?.singleFamilySelected"
           :options="NUM_RESIDENTIAL_UNITS_LIST"
-          placeholder="How many expected units?"
+          :placeholder="t('projectIntakeForm.common.noOfExpectedUnits')"
         />
         <div class="col-span-12">
           <div class="flex">
@@ -89,7 +90,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           name="housing.multiFamilyUnits"
           :disabled="!getEditable || !values.housing?.multiFamilySelected"
           :options="NUM_RESIDENTIAL_UNITS_LIST"
-          placeholder="How many expected units?"
+          :placeholder="t('projectIntakeForm.common.noOfExpectedUnits')"
         />
         <div class="col-span-12">
           <Checkbox
@@ -105,7 +106,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           class="col-span-6"
           name="housing.otherUnitsDescription"
           :disabled="!getEditable || !values.housing?.otherSelected"
-          placeholder="Type to describe what other type of housing"
+          :placeholder="t('projectIntakeForm.residentialUnitsCard.typesOfHousing')"
         />
         <div class="col-span-6" />
         <Select
@@ -114,7 +115,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
           name="housing.otherUnits"
           :disabled="!getEditable || !values.housing?.otherSelected"
           :options="NUM_RESIDENTIAL_UNITS_LIST"
-          placeholder="How many expected units?"
+          :placeholder="t('projectIntakeForm.common.noOfExpectedUnits')"
         />
         <ErrorMessage
           v-if="touched"

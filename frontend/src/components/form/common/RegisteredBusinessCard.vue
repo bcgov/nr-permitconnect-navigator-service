@@ -56,6 +56,7 @@ useFormErrorWatcher(formRef, 'RegisteredBusinessCard', tab);
         aria-level="2"
       >
         {{ header }}
+        <span class="text-[var(--p-red-400)]">*</span>
       </h6>
       <Divider type="solid" />
     </template>

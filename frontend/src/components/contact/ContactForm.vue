@@ -76,18 +76,21 @@ const onSubmit = async (values: GenericObject) => {
         name="firstName"
         :label="t('contactForm.firstName')"
         :disabled="!editable"
+        required
       />
       <InputText
         class="mb-6"
         name="lastName"
         :label="t('contactForm.lastName')"
         :disabled="!editable"
+        required
       />
       <InputText
         class="mb-6"
         name="email"
         :label="t('contactForm.email')"
         :disabled="!!contact.userId"
+        required
       />
       <InputMask
         class="mb-6"
@@ -95,6 +98,7 @@ const onSubmit = async (values: GenericObject) => {
         mask="(999) 999-9999"
         :label="t('contactForm.phone')"
         :disabled="!editable"
+        required
       />
       <Select
         class="mb-6"
@@ -103,6 +107,7 @@ const onSubmit = async (values: GenericObject) => {
         :bold="true"
         :options="PROJECT_RELATIONSHIP_LIST"
         :disabled="!editable"
+        required
       />
       <Select
         :class="editable ? 'mb-7' : ''"
@@ -111,6 +116,7 @@ const onSubmit = async (values: GenericObject) => {
         :bold="true"
         :options="CONTACT_PREFERENCE_LIST"
         :disabled="!editable"
+        required
       />
       <div
         v-if="editable"

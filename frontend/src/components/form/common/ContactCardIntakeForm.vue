@@ -59,6 +59,7 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           :label="t('contactCardIntakeForm.labels.firstName')"
           :bold="false"
           :disabled="!!initialFormValues?.firstName || !getEditable"
+          required
         />
         <InputText
           :name="`contacts.lastName`"
@@ -72,12 +73,14 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           :label="t('contactCardIntakeForm.labels.phoneNumber')"
           :bold="false"
           :disabled="!!initialFormValues?.phoneNumber || !getEditable"
+          required
         />
         <InputText
           :name="`contacts.email`"
           :label="t('contactCardIntakeForm.labels.email')"
           :bold="false"
           :disabled="!!initialFormValues?.email || !getEditable"
+          required
         />
         <Select
           :name="`contacts.contactApplicantRelationship`"
@@ -85,6 +88,7 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           :bold="false"
           :disabled="!!initialFormValues?.contactApplicantRelationship || !getEditable"
           :options="PROJECT_RELATIONSHIP_LIST"
+          required
         />
         <Select
           :name="`contacts.contactPreference`"
@@ -92,6 +96,7 @@ useFormErrorWatcher(formRef, 'ContactCardIntakeForm', tab);
           :bold="false"
           :disabled="!!initialFormValues?.contactPreference || !getEditable"
           :options="CONTACT_PREFERENCE_LIST"
+          required
         />
       </div>
     </template>

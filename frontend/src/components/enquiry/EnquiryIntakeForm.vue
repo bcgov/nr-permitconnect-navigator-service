@@ -236,6 +236,7 @@ onBeforeMount(async () => {
         :header="t('enquiryIntakeForm.headers.textArea')"
         field-name="basic.enquiryDescription"
         :placeholder="t('common.form.placeholders.textArea')"
+        required
       />
 
       <div class="flex align-center justify-center mt-4">

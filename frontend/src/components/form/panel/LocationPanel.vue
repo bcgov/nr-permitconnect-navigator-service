@@ -90,6 +90,7 @@ function updateLocationAddress() {
         <Location />
         <h3 class="section-header m-0">
           {{ t('i.housing.project.projectForm.location') }}
+          <span class="text-[var(--p-red-400)]">*</span>
         </h3>
       </div>
     </template>

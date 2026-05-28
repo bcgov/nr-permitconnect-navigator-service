@@ -287,11 +287,15 @@ onBeforeMount(async () => {
                 class="w-1/2"
                 name="title"
                 label="Note title"
+                required
                 :disabled="!editable"
               />
             </div>
             <div class="flex items-center">
-              <h6 class="font-bold app-label-color">{{ t('note.noteForm.note') }}</h6>
+              <h6 class="font-bold app-label-color">
+                {{ t('note.noteForm.note') }}
+                <span class="text-[var(--p-red-400)]">*</span>
+              </h6>
               <Tooltip
                 v-if="
                   values.type === NoteType.BRING_FORWARD && (values.escalateToDirector || values.escalateToSupervisor)
@@ -325,7 +329,7 @@ onBeforeMount(async () => {
                     <span class="font-bold">{{ t('note.noteForm.showProponent') }}</span>
                     <ToggleSwitch
                       v-model="shownToProponent"
-                      class="mr-1"
+                      class="mr-1 ml-2"
                       name="shownToProponent"
                       :label="t('note.noteForm.showProponent')"
                       :disabled="!editable"
@@ -354,6 +358,7 @@ onBeforeMount(async () => {
                     class="my-2"
                     name="bringForwardDate"
                     label="Bring forward date"
+                    required
                     :disabled="!editable"
                   />
                   <div

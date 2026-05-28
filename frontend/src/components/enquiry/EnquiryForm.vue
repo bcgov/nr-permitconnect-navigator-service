@@ -419,6 +419,7 @@ onBeforeMount(async () => {
             <div class="flex items-center gap-x-2.5">
               <h3 class="section-header m-0">
                 {{ t('enquiryForm.enquiryDetailHeader') }}
+                <span class="text-[var(--p-red-400)]">*</span>
               </h3>
             </div>
           </template>

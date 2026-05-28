@@ -50,6 +50,7 @@ onBeforeMount(async () => {
         :placeholder="t('authorization.authorizationCardIntake.selectAuthorization')"
         :options="getPermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
+        required
         :disabled="!editable"
       />
       <div class="mt-5 mb-3 font-bold text-[var(--p-bcblue-900)]">

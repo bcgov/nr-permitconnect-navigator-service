@@ -57,9 +57,13 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
         :label="t('i.housing.project.projectForm.bcHousing')"
         :disabled="!getEditable"
         :options="YES_NO_UNSURE_LIST"
+        required
       />
       <div class="col-span-1 grid grid-row">
-        <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.indigenousHousingProvider') }}</h6>
+        <h6 class="font-bold mb-2">
+          {{ t('i.housing.project.projectForm.indigenousHousingProvider') }}
+          <span class="text-[var(--p-red-400)]">*</span>
+        </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select
             class="col-span-1"
@@ -81,7 +85,10 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
         </div>
       </div>
       <div class="col-span-1 grid grid-row">
-        <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.nonProfitHousingSociety') }}</h6>
+        <h6 class="font-bold mb-2">
+          {{ t('i.housing.project.projectForm.nonProfitHousingSociety') }}
+          <span class="text-[var(--p-red-400)]">*</span>
+        </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select
             class="col-span-1"
@@ -104,7 +111,10 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
       </div>
 
       <div class="col-span-1 grid grid-row">
-        <h6 class="font-bold mb-2">{{ t('i.housing.project.projectForm.housingCoop') }}</h6>
+        <h6 class="font-bold mb-2">
+          {{ t('i.housing.project.projectForm.housingCoop') }}
+          <span class="text-[var(--p-red-400)]">*</span>
+        </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select
             class="col-span-1"

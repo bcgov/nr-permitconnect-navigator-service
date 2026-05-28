@@ -226,29 +226,35 @@ watch(visible, () => {
           <InputTextFormItem
             name="firstName"
             label="First name"
+            required
           />
           <InputTextFormItem
             name="lastName"
             label="Last name"
+            required
           />
           <SelectFormItem
             name="contactApplicantRelationship"
             label="Relationship to project"
+            required
             :options="PROJECT_RELATIONSHIP_LIST"
           />
           <SelectFormItem
             name="contactPreference"
             label="Preferred contact method"
+            required
             :options="CONTACT_PREFERENCE_LIST"
           />
           <InputMask
             name="phoneNumber"
             mask="(999) 999-9999"
+            required
             label="Contact phone"
           />
           <InputTextFormItem
             name="email"
             label="Contact email"
+            required
           />
         </div>
         <Button

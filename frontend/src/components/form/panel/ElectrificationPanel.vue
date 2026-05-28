@@ -52,6 +52,7 @@ useFormErrorWatcher(formRef, 'ElectrificationPanel', tab);
         :label="t('i.electrification.projectForm.projectTypeLabel')"
         :disabled="!getEditable"
         :options="options.ElectrificationProjectType"
+        required
       />
       <InputText
         name="electrification.bcHydroNumber"
