@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import { Action, GroupName } from '../utils/enums/application.ts';
-import { getCurrentSubject, Problem, uuidValidateV4 } from '../utils/index.ts';
+import { Problem, uuidValidateV4 } from '../utils/index.ts';
 import { getSubjectGroups } from './yars.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
@@ -87,38 +87,44 @@ export const getObject = async (bearerToken: string, objectId: string) => {
 /**
  * Obtain the current user information in COMS
  * @param currentContext The current context of the Express request
+ * @param sub The subject to search for
  * @returns The COMS response
  */
-export const searchUser = async (currentContext: CurrentContext) => {
+export const searchUser = async (currentContext: CurrentContext, sub: string) => {
   const { status, headers, data } = await comsAxios({
     headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
     // TODO: COMS is still on idir, remove once they migrate
-  }).get('/user', { params: { username: getCurrentSubject(currentContext)?.replace('@azureidir', '@idir') } });
+  }).get('/user', { params: { username: sub.replace('@azureidir', '@idir') } });
   return { status, headers, data };
 };
 
 /**
  * Obtain the current users bucket permissions
  * @param currentContext The current context of the Express request
+ * @param sub The subject to check permissions for
  * @returns The COMS response with the data filtered to a unique Set
  */
-export const searchUserBucketPermissions = async (currentContext: CurrentContext) => {
+export const searchUserBucketPermissions = async (currentContext: CurrentContext, sub: string) => {
   try {
-    const [user, bucket] = await Promise.all([searchUser(currentContext), getBucket()]);
+    const [user, bucket] = await Promise.all([searchUser(currentContext, sub), getBucket()]);
 
     const userId = user.data?.[0]?.userId;
     const bucketId = bucket.data?.bucketId;
+
+    if (!userId || !bucketId) {
+      throw new Error('Unable to obtain userId or bucketId');
+    }
 
     const { status, headers, data } = await comsAxios({
       headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
     }).get('/permission/bucket', { params: { bucketId, userId } });
 
     // Get just the codes - never touch COMS `MANAGE` permission
-    const perms = data[0]?.permissions
+    const perms = (data[0]?.permissions ?? [])
       .map((x: { permCode: string }) => x.permCode)
       .filter((perm: string) => perm !== 'MANAGE');
 
-    return { status, headers, data: new Set<Action>(perms) };
+    return { status, headers, data: { userId, bucketId, perms: new Set<Action>(perms) } };
   } catch (e) {
     if (axios.isAxiosError(e)) {
       const detail = e.response?.data.detail;
@@ -134,13 +140,16 @@ export const searchUserBucketPermissions = async (currentContext: CurrentContext
  * Assigns COMS permissions to the current user based on their current groups
  * @param tx Prisma transaction client
  * @param currentContext The current context of the Express request
+ * @param sub The subject to be assigned permissions
  */
-export const assignPermissions = async (tx: PrismaTransactionClient, currentContext: CurrentContext) => {
-  const sub = currentContext.tokenPayload?.sub;
-
+export const assignPermissions = async (
+  tx: PrismaTransactionClient,
+  currentContext: CurrentContext,
+  sub: string
+): Promise<void> => {
   if (!sub) {
     throw new Problem(403, {
-      detail: 'Unable to obtain token sub'
+      detail: 'No sub provided'
     });
   }
 
@@ -148,17 +157,14 @@ export const assignPermissions = async (tx: PrismaTransactionClient, currentCont
   const groupNames = new Set(groups.map((x) => x.name));
 
   const required = new Set<Action>([...groupNames].flatMap((groupName) => COMS_PERM_MAP.get(groupName) ?? []));
-  const { data: current } = await searchUserBucketPermissions(currentContext);
+  const {
+    data: { userId, bucketId, perms: current }
+  } = await searchUserBucketPermissions(currentContext, sub);
 
   const areEqual = current.size === required.size && [...current].every((x) => required.has(x));
 
   if (!areEqual && currentContext) {
     try {
-      const [user, bucket] = await Promise.all([searchUser(currentContext), getBucket()]);
-
-      const userId = user.data?.[0]?.userId;
-      const bucketId = bucket.data?.bucketId;
-
       if (!userId || !bucketId) {
         throw new Error('Unable to obtain userId or bucketId');
       }

@@ -1,4 +1,5 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { assignPermissions } from '../services/coms.ts';
 import {
   getCorrespondingGlobalGroup,
   getGroupPermissions,
@@ -29,6 +30,12 @@ export const getPermissionsController = async (req: Request, res: Response) => {
 
     const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload.sub);
     const permissions = await Promise.all(groups.map((x) => getGroupPermissions(tx, x.groupId))).then((x) => x.flat());
+
+    // Double check correct COMS permissions.
+    // This endpoint is called on client bootstrap, so it's a good place to verify
+    //   COMS permissions without adding COMS calls to every API request.
+    await assignPermissions(tx, req.currentContext, req.currentContext.tokenPayload.sub);
+
     return { groups, permissions };
   });
   res.status(200).json({ groups: response.groups, permissions: response.permissions });
@@ -51,6 +58,9 @@ export const deleteSubjectGroupController = async (
       const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, req.body.groupId);
       await removeGroup(tx, req.body.sub, correspondingGlobalGroup.groupId);
     }
+
+    // Assign new COMS permissions
+    await assignPermissions(tx, req.currentContext, req.body.sub);
   });
   res.status(204).end();
 };
