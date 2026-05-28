@@ -92,8 +92,42 @@ export const getObject = async (bearerToken: string, objectId: string) => {
 export const searchUser = async (currentContext: CurrentContext) => {
   const { status, headers, data } = await comsAxios({
     headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
-  }).get('/user', { params: { username: getCurrentSubject(currentContext) } });
+    // TODO: COMS is still on idir, remove once they migrate
+  }).get('/user', { params: { username: getCurrentSubject(currentContext)?.replace('@azureidir', '@idir') } });
   return { status, headers, data };
+};
+
+/**
+ * Obtain the current users bucket permissions
+ * @param currentContext The current context of the Express request
+ * @returns The COMS response with the data filtered to a unique Set
+ */
+export const searchUserBucketPermissions = async (currentContext: CurrentContext) => {
+  try {
+    const [user, bucket] = await Promise.all([searchUser(currentContext), getBucket()]);
+
+    const userId = user.data?.[0]?.userId;
+    const bucketId = bucket.data?.bucketId;
+
+    const { status, headers, data } = await comsAxios({
+      headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
+    }).get('/permission/bucket', { params: { bucketId, userId } });
+
+    // Get just the codes - never touch COMS `MANAGE` permission
+    const perms = data[0]?.permissions
+      .map((x: { permCode: string }) => x.permCode)
+      .filter((perm: string) => perm !== 'MANAGE');
+
+    return { status, headers, data: new Set<Action>(perms) };
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      const detail = e.response?.data.detail;
+      const status = e.response ? e.response.status : 500;
+      throw new Problem(status, { detail }, { extra: { comsError: e.response?.data } });
+    } else {
+      throw new Problem(500, { detail: 'Server Error' });
+    }
+  }
 };
 
 /**
@@ -113,9 +147,12 @@ export const assignPermissions = async (tx: PrismaTransactionClient, currentCont
   const groups = await getSubjectGroups(tx, sub);
   const groupNames = new Set(groups.map((x) => x.name));
 
-  const actions = new Set<Action>([...groupNames].flatMap((groupName) => COMS_PERM_MAP.get(groupName) ?? []));
+  const required = new Set<Action>([...groupNames].flatMap((groupName) => COMS_PERM_MAP.get(groupName) ?? []));
+  const { data: current } = await searchUserBucketPermissions(currentContext);
 
-  if (actions.size > 0 && currentContext) {
+  const areEqual = current.size === required.size && [...current].every((x) => required.has(x));
+
+  if (!areEqual && currentContext) {
     try {
       const [user, bucket] = await Promise.all([searchUser(currentContext), getBucket()]);
 
@@ -126,9 +163,27 @@ export const assignPermissions = async (tx: PrismaTransactionClient, currentCont
         throw new Error('Unable to obtain userId or bucketId');
       }
 
-      const permissions = [...actions].flatMap((action) => ({ permCode: action, userId }));
+      const toRemove = [...current].filter((x) => !required.has(x));
+      const toAdd = [...required].filter((x) => !current.has(x));
 
-      await comsAxios().put(`/permission/bucket/${bucketId}`, permissions);
+      // Delete non matching permissions
+      // Length check required - providing empty array to COMS removes all permissions
+      if (toRemove.length > 0) {
+        await comsAxios().delete(`/permission/bucket/${bucketId}`, {
+          params: { permCode: toRemove, userId }
+        });
+      }
+
+      // Assign new permissions
+      if (toAdd.length > 0) {
+        await comsAxios().put(
+          `/permission/bucket/${bucketId}`,
+          toAdd.map((x) => ({
+            permCode: x,
+            userId
+          }))
+        );
+      }
     } catch (e) {
       if (axios.isAxiosError(e)) {
         const detail = e.response?.data.detail;
