@@ -2,6 +2,7 @@ import type { GeoJSON } from 'geojson';
 
 import type { Maybe, Contact, Permit } from '@/types';
 import type { BasicResponse } from '@/utils/enums/application';
+import type { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import type { ProjectApplicant } from '@/utils/enums/projectCommon';
 
 export interface ElectrificationProjectIntake {
@@ -16,7 +17,7 @@ export interface ElectrificationProjectIntake {
   draftId?: string;
   project: {
     bcHydroNumber?: Maybe<string>;
-    projectType: string; // TODO: can we get this enum type instead of string?
+    projectType: ElectrificationProjectType;
   };
 }
 

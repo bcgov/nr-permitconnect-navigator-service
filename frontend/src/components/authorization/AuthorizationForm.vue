@@ -23,9 +23,8 @@ import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, split
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
-import type { Permit, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
 import type { IStamps } from '@/interfaces';
-import type { PermitArgs } from '@/types';
+import type { Permit, PermitArgs, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
 
 // Props
 const { authorization = undefined, editable } = defineProps<{

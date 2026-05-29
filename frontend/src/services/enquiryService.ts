@@ -2,8 +2,7 @@ import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
 import type { AxiosResponse } from 'axios';
-import type { Enquiry, EnquirySearchParameters } from '@/types';
-import type { EnquiryArgs } from '@/types';
+import type { Enquiry, EnquiryArgs, EnquirySearchParameters } from '@/types';
 
 const PATH = 'enquiry';
 
