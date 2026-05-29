@@ -2,7 +2,7 @@ import { userService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 
 import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { UserSearchParameters } from '@/types/UserSearchParameters';
+import type { UserSearchParameters } from '@/types';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({

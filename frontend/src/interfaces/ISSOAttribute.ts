@@ -1,3 +1,3 @@
-export interface ISSOAttribute {
+export interface ISsoAttribute {
   displayName?: string;
 }

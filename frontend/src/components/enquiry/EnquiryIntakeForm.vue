@@ -23,7 +23,7 @@ import { enquirySchema } from '@/validators/enquiry';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { Enquiry, Permit, Project } from '@/types';
-import type { EnquiryArgs } from '@/types/Enquiry';
+import type { EnquiryArgs } from '@/types';
 import type { FormSchemaType } from '@/validators/enquiry';
 
 // Props

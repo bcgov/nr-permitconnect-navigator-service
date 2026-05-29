@@ -1,7 +1,5 @@
 import type { IStamps } from '@/interfaces';
-import type { Activity } from '@/types/Activity';
-import type { Contact } from '@/types/Contact';
-import type { User } from '@/types/User';
+import type { Activity, Contact, User } from '@/types';
 import type { ApplicationStatus, SubmissionType } from '@/utils/enums/projectCommon';
 
 export interface IProject extends IStamps {

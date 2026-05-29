@@ -3,7 +3,7 @@ import { useAppStore } from '@/store';
 
 import type { AxiosResponse } from 'axios';
 import type { Enquiry, EnquirySearchParameters } from '@/types';
-import type { EnquiryArgs } from '@/types/Enquiry';
+import type { EnquiryArgs } from '@/types';
 
 const PATH = 'enquiry';
 

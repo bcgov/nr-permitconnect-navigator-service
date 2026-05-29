@@ -1,6 +1,6 @@
 import type { CodeName } from '@/store/codeStore';
+import type { OrgBookOption } from '@/types/api/external/orgBook';
 import type { Initiative } from '@/utils/enums/application';
-import type { OrgBookOption } from './OrgBookOption';
 
 export interface CreateSchemaOptions {
   initiative?: Initiative;
