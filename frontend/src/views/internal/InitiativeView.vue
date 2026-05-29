@@ -26,7 +26,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 import type { BringForward, Enquiry, HousingProject, Permit, Statistics } from '@/types';
 
 // Interfaces

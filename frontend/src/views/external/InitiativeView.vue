@@ -32,7 +32,7 @@ import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 import ViewHeader from '@/components/common/ViewHeader.vue';
 
 // Interfaces

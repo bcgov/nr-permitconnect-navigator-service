@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue';
 
-import type { IDraftableProjectService, IProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService, IProjectService } from '@/interfaces';
 import type { NavigationPermission } from '@/store/authzStore';
 import type { Resource, RouteName } from '@/utils/enums/application';
 

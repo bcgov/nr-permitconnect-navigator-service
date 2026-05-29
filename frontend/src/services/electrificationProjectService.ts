@@ -2,7 +2,7 @@ import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 import type { ElectrificationProjectSearchParameters, Draft, ElectrificationProject, StatisticFilters } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 

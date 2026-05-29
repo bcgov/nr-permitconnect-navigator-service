@@ -19,7 +19,7 @@ import { FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 import type { Document, Draft, ElectrificationProject, GeneralProject, HousingProject, Project } from '@/types';
 import type { FormSchemaType as ElectrificationFormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 import type { FormSchemaType as GeneralFormSchemaType } from '@/validators/general/projectIntakeFormSchema';

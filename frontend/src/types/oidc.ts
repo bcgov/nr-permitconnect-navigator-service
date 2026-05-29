@@ -1,4 +1,4 @@
-import type { ISsoAttribute } from '@/interfaces/ISsoAttribute';
+import type { ISsoAttribute } from '@/interfaces';
 
 export interface BasicBceidAttribute extends ISsoAttribute {
   bceidUserGuid: string;

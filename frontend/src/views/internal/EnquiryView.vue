@@ -28,7 +28,7 @@ import { generalErrorHandler, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { ElectrificationProject, HousingProject, User } from '@/types';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 
 // Props
 const {

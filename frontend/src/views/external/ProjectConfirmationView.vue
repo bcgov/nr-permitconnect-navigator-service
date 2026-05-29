@@ -10,7 +10,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces/IProjectService';
+import type { IProjectService } from '@/interfaces';
 
 // Props
 const { projectId } = defineProps<{

@@ -9,7 +9,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import { contactRouteNameKey, enquiryRouteNameKey, projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
+import type { IDraftableProjectService } from '@/interfaces';
 
 // Props
 const { contactId } = defineProps<{

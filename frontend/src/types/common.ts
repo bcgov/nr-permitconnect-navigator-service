@@ -25,7 +25,7 @@ export type PartialFields<T, K extends keyof T> = Omit<T, K> & Partial<Pick<T, K
 export type Replace<T, R> = Omit<T, keyof R> & R;
 export type RequiredFields<T, K extends keyof T> = T & Required<Pick<T, K>>;
 export type ValueOf<T> = T[keyof T];
-export type UUID = `${string}-${string}-${string}-${string}-${string}`;
+export type UUID = string; // nosonar
 
 /**
  * PCNS Specific

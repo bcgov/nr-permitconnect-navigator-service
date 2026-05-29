@@ -1,7 +1,7 @@
 import type { GeoJSON } from 'geojson';
 
 import type { MaybeUndefined, Nullable, UUID } from './common';
-import type { IStamps } from '@/interfaces';
+import type { IProject, IStamps } from '@/interfaces';
 import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
@@ -17,7 +17,6 @@ import type {
   SubmissionType
 } from '@/utils/enums/projectCommon';
 import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
-import type { IProject } from '@/interfaces/IProject';
 import type { Group } from './api/response.types';
 
 /**
