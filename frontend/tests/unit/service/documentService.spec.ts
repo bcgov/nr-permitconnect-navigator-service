@@ -100,7 +100,11 @@ describe('documentService', () => {
             data: testFileData
           } as AxiosResponse);
 
-          await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
+          await documentService.createDocument({
+            document: testFile1 as File,
+            activityId: testActivityId,
+            bucketId: testBucketId
+          });
           expect(fileSpy).toHaveBeenCalledTimes(1);
           expect(fileSpy).toHaveBeenCalledWith([testFile1], modifiedFileName, { type: testFileData.mimeType });
         });
@@ -110,7 +114,11 @@ describe('documentService', () => {
             data: testFileData
           } as AxiosResponse);
 
-          await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
+          await documentService.createDocument({
+            document: testFile1 as File,
+            activityId: testActivityId,
+            bucketId: testBucketId
+          });
           expect(createObjectSpy).toHaveBeenCalledTimes(1);
           expect(createObjectSpy).toHaveBeenCalledWith(
             testFile1,
@@ -125,7 +133,11 @@ describe('documentService', () => {
             data: testFileData
           } as AxiosResponse);
 
-          await documentService.createDocument(testFile1 as File, testActivityId, testBucketId);
+          await documentService.createDocument({
+            document: testFile1 as File,
+            activityId: testActivityId,
+            bucketId: testBucketId
+          });
           expect(postSpy).toHaveBeenCalledTimes(1);
           expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
             activityId: testActivityId,
@@ -154,7 +166,11 @@ describe('documentService', () => {
           });
 
           await expect(
-            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+            documentService.createDocument({
+              document: testFile1 as File,
+              activityId: testActivityId,
+              bucketId: testBucketId
+            })
           ).rejects.toThrow();
         });
 
@@ -167,7 +183,11 @@ describe('documentService', () => {
           deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
 
           await expect(
-            documentService.createDocument(testFile1 as File, testActivityId, testBucketId)
+            documentService.createDocument({
+              document: testFile1 as File,
+              activityId: testActivityId,
+              bucketId: testBucketId
+            })
           ).rejects.toThrow();
         });
       });
@@ -176,7 +196,7 @@ describe('documentService', () => {
         const testId = 'testDocumentId';
         const filename = 'filename';
         getObjectSpy.mockResolvedValue();
-        await documentService.downloadDocument(testId, filename);
+        await documentService.downloadDocument({ documentId: testId, filename });
 
         expect(getObjectSpy).toHaveBeenCalledTimes(1);
         expect(getObjectSpy).toHaveBeenCalledWith(testId, filename, undefined);
@@ -187,7 +207,7 @@ describe('documentService', () => {
         const versionId = 'testVersionId';
         const filename = 'filename';
         getObjectSpy.mockResolvedValue();
-        await documentService.downloadDocument(testId, filename, versionId);
+        await documentService.downloadDocument({ documentId: testId, filename, versionId });
         expect(getObjectSpy).toHaveBeenCalledTimes(1);
         expect(getObjectSpy).toHaveBeenCalledWith(testId, filename, versionId);
       });
@@ -195,7 +215,7 @@ describe('documentService', () => {
       it('deletes a document by id with no version', async () => {
         const testId = 'testDocumentId';
         deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-        await documentService.deleteDocument(testId);
+        await documentService.deleteDocument({ documentId: testId });
         expect(deleteObjectSpy).toHaveBeenCalledTimes(1);
         expect(deleteObjectSpy).toHaveBeenCalledWith(testId, undefined);
         expect(deleteSpy).toHaveBeenCalledTimes(1);
@@ -210,7 +230,7 @@ describe('documentService', () => {
         const testId = 'testdocumentId';
         const versionId = 'testVersionId';
         deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-        await documentService.deleteDocument(testId, versionId);
+        await documentService.deleteDocument({ documentId: testId, versionId });
         expect(deleteObjectSpy).toHaveBeenCalledTimes(1);
         expect(deleteObjectSpy).toHaveBeenCalledWith(testId, versionId);
         expect(deleteSpy).toHaveBeenCalledTimes(1);
@@ -223,7 +243,7 @@ describe('documentService', () => {
 
       it('gets a list of documents by id', async () => {
         const testId = 'testActivityId';
-        await documentService.listDocuments(testId);
+        await documentService.listDocuments({ activityId: testId });
 
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${testId}`);

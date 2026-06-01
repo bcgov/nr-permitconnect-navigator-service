@@ -162,7 +162,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('handles single success toast for PRIMARY role', async () => {
       vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
-      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const addModal = wrapper.findComponent({ name: 'ProjectTeamAddModal' });
@@ -191,7 +191,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('handles multiple successes toast (groups roles)', async () => {
-      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const addModal = wrapper.findComponent({ name: 'ProjectTeamAddModal' });
@@ -252,7 +252,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('calls updateContact when contactId is missing (manual entry)', async () => {
       vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
-      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const addModal = wrapper.findComponent({ name: 'ProjectTeamAddModal' });
@@ -268,7 +268,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('covers single success toast for ADMIN role', async () => {
       vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
-      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const addModal = wrapper.findComponent({ name: 'ProjectTeamAddModal' });
@@ -283,7 +283,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('covers single success toast for MEMBER role', async () => {
       vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
-      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const addModal = wrapper.findComponent({ name: 'ProjectTeamAddModal' });
@@ -326,9 +326,10 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('updates PRIMARY role WITH demotion and toasts successfully', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockResolvedValue(
-        mockAxiosResponse({ updated: mockActivityContact, demoted: mockActivityContact })
-      );
+      vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
+        updated: mockActivityContact,
+        demoted: mockActivityContact
+      });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -341,7 +342,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('handles Manage Axios error WITH response payload', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockRejectedValue(mockAxiosError('Axios Message'));
+      vi.mocked(activityContactService.putActivityContact).mockRejectedValue(mockAxiosError('Axios Message'));
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -353,7 +354,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('handles non-Error string exceptions gracefully', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockRejectedValue('String Error');
+      vi.mocked(activityContactService.putActivityContact).mockRejectedValue('String Error');
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -361,13 +362,14 @@ describe('ProjectTeamTab.vue', () => {
       await manageModal.vm.$emit('projectTeamManageModal:manageUser', mockActivityContact, ActivityContactRole.MEMBER);
       await flushPromises();
 
-      expect(activityContactService.updateActivityContact).toHaveBeenCalled();
+      expect(activityContactService.putActivityContact).toHaveBeenCalled();
     });
 
     it('covers ADMIN role switch case in onManageUser', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockResolvedValue(
-        mockAxiosResponse({ updated: mockActivityContact, demoted: undefined })
-      );
+      vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
+        updated: mockActivityContact,
+        demoted: undefined
+      });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -379,9 +381,10 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('covers MEMBER role switch case in onManageUser', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockResolvedValue(
-        mockAxiosResponse({ updated: mockActivityContact, demoted: undefined })
-      );
+      vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
+        updated: mockActivityContact,
+        demoted: undefined
+      });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -393,9 +396,10 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('covers PRIMARY role WITH demotion in onManageUser', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockResolvedValue(
-        mockAxiosResponse({ updated: mockActivityContact, demoted: mockActivityContact })
-      );
+      vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
+        updated: mockActivityContact,
+        demoted: mockActivityContact
+      });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -407,9 +411,10 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('covers PRIMARY role WITHOUT demotion in onManageUser (the else block)', async () => {
-      vi.mocked(activityContactService.updateActivityContact).mockResolvedValue(
-        mockAxiosResponse({ updated: mockActivityContact, demoted: undefined })
-      );
+      vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
+        updated: mockActivityContact,
+        demoted: undefined
+      });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -422,7 +427,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('covers Axios Error WITH response payload in onManageUser', async () => {
       const errorMessage = 'Custom Axios Error Message';
-      vi.mocked(activityContactService.updateActivityContact).mockRejectedValue(mockAxiosError(errorMessage));
+      vi.mocked(activityContactService.putActivityContact).mockRejectedValue(mockAxiosError(errorMessage));
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -435,7 +440,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('covers Axios Error WITHOUT response payload in onManageUser', async () => {
       const errorMessage = 'Fallback Axios Message';
-      vi.mocked(activityContactService.updateActivityContact).mockRejectedValue(mockAxiosErrorNoResponse(errorMessage));
+      vi.mocked(activityContactService.putActivityContact).mockRejectedValue(mockAxiosErrorNoResponse(errorMessage));
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -448,7 +453,7 @@ describe('ProjectTeamTab.vue', () => {
 
     it('covers standard Error instance in onManageUser', async () => {
       const errorMessage = 'Standard Error Message';
-      vi.mocked(activityContactService.updateActivityContact).mockRejectedValue(new Error(errorMessage));
+      vi.mocked(activityContactService.putActivityContact).mockRejectedValue(new Error(errorMessage));
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
       const manageModal = wrapper.findComponent({ name: 'ProjectTeamManageModal' });
@@ -462,7 +467,7 @@ describe('ProjectTeamTab.vue', () => {
 
   describe('Revoke User Interactions (@project-team-table:revoke-user)', () => {
     it('triggers confirm dialog and executes accept callback successfully', async () => {
-      vi.mocked(activityContactService.deleteActivityContact).mockResolvedValue(mockAxiosResponse(mockActivityContact));
+      vi.mocked(activityContactService.deleteActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
 

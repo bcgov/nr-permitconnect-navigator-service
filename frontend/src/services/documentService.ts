@@ -5,85 +5,116 @@ import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
 
+import type {
+  CreateDocumentRequest,
+  DeleteDocumentRequest,
+  Document,
+  DownloadDocumentRequest,
+  ListDocumentsRequest
+} from '@/types';
+
 const PATH = 'document';
 const PROJECT_ID = 'Project ID';
 
-export default {
-  /**
-   * @function createDocument
-   * @returns {Promise} An axios response
-   */
-  async createDocument(document: File, activityId: string, bucketId: string) {
-    let comsResponse;
-    try {
-      // Add a unique hash to the end of the filename
-      const hash = uuidv4();
-      const fileAndExt = getFilenameAndExtension(document.name);
-      let newDocumentName = `${fileAndExt.filename}_${hash.substring(0, 8)}`;
-      if (fileAndExt.extension) {
-        newDocumentName = `${newDocumentName}.${fileAndExt.extension}`;
-      }
-      const newDocument = new File([document], newDocumentName, { type: document.type });
+/**
+ * Uploads a file to COMS and creates a document association.
+ * @param req - The request payload containing path parameters and the file.
+ * @returns A promise resolving to the created `Document` resource.
+ */
+export async function createDocument(req: CreateDocumentRequest): Promise<Document> {
+  const { activityId, bucketId, document } = req;
 
-      // The tagset is used to filter the objects in the bucket
-      const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
-
-      // Create COMS object
-      comsResponse = await comsService.createObject(
-        newDocument,
-        {},
-        { bucketId, tagset },
-        { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
-      );
-
-      // Create document link
-      return await appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
-        activityId: activityId,
-        documentId: comsResponse.data.id,
-        filename: comsResponse.data.name,
-        mimeType: comsResponse.data.mimeType,
-        filesize: comsResponse.data.length
-      });
-    } catch (e) {
-      // In event of any error try to Delete COMS object if it was created
-      if (comsResponse) {
-        comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
-      }
-      throw e;
+  let comsResponse;
+  try {
+    // Add a unique hash to the end of the filename
+    const hash = uuidv4();
+    const fileAndExt = getFilenameAndExtension(document.name);
+    let newDocumentName = `${fileAndExt.filename}_${hash.substring(0, 8)}`;
+    if (fileAndExt.extension) {
+      newDocumentName = `${newDocumentName}.${fileAndExt.extension}`;
     }
-  },
+    const newDocument = new File([document], newDocumentName, { type: document.type });
 
-  /**
-   * @function deleteDocument
-   * @returns {Promise} An axios response
-   */
-  async deleteDocument(documentId: string, versionId?: string) {
-    try {
-      await comsService.deleteObject(documentId, versionId);
-      await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
-        params: {
-          versionId: versionId
-        }
-      });
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    } catch (e) {
-      // TODO: If one fails and other doesn't then??
+    // The tagset is used to filter the objects in the bucket
+    const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
+
+    // Create COMS object
+    comsResponse = await comsService.createObject(
+      newDocument,
+      {},
+      { bucketId, tagset },
+      { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
+    );
+
+    // Create document link
+    const { data } = await appAxios().post<Document>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+      activityId: activityId,
+      documentId: comsResponse.data.id,
+      filename: comsResponse.data.name,
+      mimeType: comsResponse.data.mimeType,
+      filesize: comsResponse.data.length
+    });
+
+    return data;
+  } catch (e) {
+    // In event of any error try to Delete COMS object if it was created
+    if (comsResponse) {
+      comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
     }
-  },
-
-  /**
-   * @function downloadDocument
-   * @returns {Promise} An axios response
-   */
-  async downloadDocument(documentId: string, filename: string, versionId?: string) {
-    await comsService.getObject(documentId, filename, versionId);
-  },
-
-  /**
-   * @function listDocuments
-   * @returns {Promise} An axios response
-   */
-  async listDocuments(activityId: string) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
+    throw e;
   }
+}
+
+/**
+ * Deletes a document from COMS and removes its associated document record.
+ * @param req - The request payload containing the document identifier and version identifier.
+ * @returns A promise that resolves when the document and its association have been deleted.
+ */
+export async function deleteDocument(req: DeleteDocumentRequest) {
+  const { documentId, versionId } = req;
+
+  try {
+    await comsService.deleteObject(documentId, versionId);
+    await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
+      params: {
+        versionId: versionId
+      }
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+    // TODO: If one fails and other doesn't then??
+  }
+}
+
+/**
+ * Downloads a document from COMS.
+ * @param req - The request payload containing the document identifier, filename, and optional version identifier.
+ * @returns A promise that resolves when the document download has been initiated or completed.
+ */
+export async function downloadDocument(req: DownloadDocumentRequest) {
+  const { documentId, filename, versionId } = req;
+  await comsService.getObject(documentId, filename, versionId);
+}
+
+/**
+ * Retrieves all documents associated with a specific activity.
+ * @param req - The request payload containing the activity identifier.
+ * @returns A promise resolving to an array of `Document` resources associated with the activity.
+ */
+export async function listDocuments(req: ListDocumentsRequest): Promise<Document[]> {
+  const { activityId } = req;
+  const { data } = await appAxios().get<Document[]>(
+    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`
+  );
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+const documentService = {
+  createDocument,
+  deleteDocument,
+  downloadDocument,
+  listDocuments
 };
+
+export default documentService;

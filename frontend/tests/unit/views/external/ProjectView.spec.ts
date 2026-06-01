@@ -123,7 +123,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.listPermits).mockResolvedValue(

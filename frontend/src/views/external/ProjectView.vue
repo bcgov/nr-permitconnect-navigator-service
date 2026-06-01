@@ -206,7 +206,7 @@ onBeforeMount(async () => {
     );
     createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
 
-    const activityContacts = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+    const activityContacts = await activityContactService.listActivityContacts({ activityId: projectValue.activityId });
     projectStore.setActivityContacts(activityContacts);
 
     // Determine if the current user has admin priviledges

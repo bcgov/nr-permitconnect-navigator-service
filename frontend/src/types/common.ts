@@ -8,3 +8,4 @@ export interface PaginationOptions {
 }
 
 export type Project = ElectrificationProject | GeneralProject | HousingProject;
+export type UUID = string; // nosonar

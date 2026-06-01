@@ -84,7 +84,7 @@ async function loadDraft() {
 
   draft.value = (await initiativeState.value.projectService.getDraft(draftId)).data;
 
-  const documents = (await documentService.listDocuments(draft.value.activityId)).data;
+  const documents = await documentService.listDocuments({ activityId: draft.value.activityId });
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);
   });
@@ -104,7 +104,7 @@ async function loadProject() {
 
   projectStore.setProject(project.value);
 
-  const documents = (await documentService.listDocuments(project.value!.activityId)).data;
+  const documents = await documentService.listDocuments({ activityId: project.value!.activityId });
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);
   });

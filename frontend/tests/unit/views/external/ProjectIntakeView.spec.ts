@@ -94,7 +94,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(documentService.listDocuments).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(documentService.listDocuments).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
     mockAxiosResponse<ElectrificationProject>({ activityId: '123' } as ElectrificationProject)
   );

@@ -1,6 +1,50 @@
 import type { GroupName, Initiative } from '@/utils/enums/application';
 import type { PaginationOptions } from '../common';
+import type { CreateRequestDTO, DeleteRequestDTO, GetRequestDTO, ListRequestDTO, PutRequestDTO } from './dto';
+import type { ActivityContactBase, Document, EnquiryBase } from './resources';
+import type { UUID } from '../common';
 
+/**
+ * Activity Contact
+ */
+
+export type CreateActivityContactRequest = CreateRequestDTO<ActivityContactBase>;
+export type ListActivityContactsRequest = ListRequestDTO<ActivityContactBase, ['activityId']>;
+export type PutActivityContactRequest = PutRequestDTO<ActivityContactBase, ['activityId' | 'contactId']>;
+export type DeleteActivityContactRequest = DeleteRequestDTO<ActivityContactBase, ['activityId', 'contactId']>;
+
+/**
+ * Document
+ */
+
+export interface CreateDocumentRequest {
+  document: File;
+  activityId: string;
+  bucketId: string;
+}
+export interface DownloadDocumentRequest {
+  documentId: UUID;
+  filename: string;
+  versionId?: string;
+}
+export type ListDocumentsRequest = ListRequestDTO<Document, ['activityId']>;
+export type DeleteDocumentRequest = DeleteRequestDTO<Document, ['documentId']> & {
+  versionId?: string;
+};
+
+/**
+ * Enquiry
+ */
+
+export type CreateEnquiryRequest = CreateRequestDTO<EnquiryBase, ['enquiryId']>;
+export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, ['enquiryId']>;
+export type ListEnquiriesRequest = ListRequestDTO<EnquiryBase, ['activityId']>;
+export type PutEnquiryRequest = PutRequestDTO<EnquiryBase, ['enquiryId']>;
+export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, ['enquiryId']>;
+
+/**
+ * Other
+ */
 export interface ContactSearchParameters {
   contactApplicantRelationship?: string;
   contactPreference?: string;

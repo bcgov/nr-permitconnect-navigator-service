@@ -23,7 +23,7 @@ import { Initiative, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject, GeneralProject } from '@/types';
+import type { ElectrificationProject, HousingProject, GeneralProject, Document } from '@/types';
 import ProjectInformationTab from '@/components/projectCommon/ProjectInformationTab.vue';
 import ProjectFilesTab from '@/components/projectCommon/ProjectFilesTab.vue';
 import ProjectAuthorizationsTab from '@/components/projectCommon/ProjectAuthorizationsTab.vue';
@@ -163,10 +163,8 @@ beforeEach(() => {
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
     mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
-  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(documentService.listDocuments).mockResolvedValue(
-    mockAxiosResponse([{ documentId: '123', filename: 'foo' }])
-  );
+  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
+  vi.mocked(documentService.listDocuments).mockResolvedValue([{ documentId: '123', filename: 'foo' } as Document]);
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(mockAxiosResponse([{ noteHistoryId: '123' }]));
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([{ permitId: '123' }]));
   vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([{ permitTypeId: '123' }]));

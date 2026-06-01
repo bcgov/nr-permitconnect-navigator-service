@@ -1,6 +1,6 @@
 import type { GeoJSON } from 'geojson';
 
-import type { MaybeUndefined, Nullable, UUID } from '../util';
+import type { MaybeUndefined, Nullable } from '../util';
 import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
@@ -17,6 +17,7 @@ import type {
 } from '@/utils/enums/projectCommon';
 import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { Group } from './responses';
+import type { UUID } from '../common';
 
 /**
  * Shared interfaces
@@ -86,14 +87,17 @@ export interface Activity extends AuditFields {
  * Activity Contact
  */
 
-export interface ActivityContact extends AuditFields {
+export interface ActivityContactBase extends IStamps {
   activityId: string;
   contactId: UUID;
   role: ActivityContactRole;
-
-  // Joined
-  contact?: Contact;
 }
+
+interface ActivityContactRelations {
+  contact: Contact;
+}
+
+export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelations>;
 
 /**
  * Contact
@@ -161,7 +165,9 @@ export interface ElectrificationProject extends Project {
  * Enquiry
  */
 
-interface EnquiryBase extends AuditFields {
+export interface EnquiryBase extends IStamps {
+  enquiryId: UUID;
+  activityId: string;
   addedToAts: boolean;
   assignedUserId?: Nullable<string>;
   atsClientId: Nullable<number>;
@@ -175,15 +181,12 @@ interface EnquiryBase extends AuditFields {
   submittedMethod: EnquirySubmittedMethod;
 }
 
-export interface Enquiry extends EnquiryBase {
-  activity?: Activity;
-  activityId: string;
-  enquiryId: UUID;
-}
-
-export interface EnquiryArgs extends Partial<EnquiryBase> {
+interface EnquiryRelations {
+  activity: Activity;
   contact: Contact;
 }
+
+export type Enquiry = EnquiryBase & Partial<EnquiryRelations>;
 
 /**
  * General Project
