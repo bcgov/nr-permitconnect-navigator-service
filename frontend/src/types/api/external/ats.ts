@@ -1,4 +1,4 @@
-import type { MaybeUndefined, Nullable } from '@/types/common';
+import type { MaybeUndefined, Nullable } from '../../util';
 
 export interface RelLink {
   '@type': string;

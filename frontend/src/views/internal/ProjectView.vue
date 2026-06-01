@@ -36,8 +36,7 @@ import {
 import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces';
-import type { Document, Enquiry, User } from '@/types';
+import type { Document, DraftableProjectService, Enquiry, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -51,7 +50,7 @@ interface InitiativeState {
   projectEnquiryRouteName: RouteName;
   projectNoteRouteName: RouteName;
   projectProponentName: RouteName;
-  projectService: IDraftableProjectService;
+  projectService: DraftableProjectService;
 }
 
 // Constants

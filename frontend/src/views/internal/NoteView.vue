@@ -24,7 +24,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces';
+import type { DraftableProjectService } from '@/types';
 
 // Props
 const {
@@ -42,7 +42,7 @@ interface InitiativeState {
   enquiryRouteName?: RouteName;
   projectRouteName?: RouteName;
   projectEnquiryRouteName?: RouteName;
-  projectService: IDraftableProjectService;
+  projectService: DraftableProjectService;
   resource: Resource;
 }
 

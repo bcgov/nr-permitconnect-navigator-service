@@ -1,5 +1,5 @@
 import type { GroupName, Initiative } from '@/utils/enums/application';
-import type { IPaginationOptions } from '@/interfaces';
+import type { PaginationOptions } from '../common';
 
 export interface ContactSearchParameters {
   contactApplicantRelationship?: string;
@@ -66,7 +66,7 @@ export interface ListPermitsOptions {
   includeNotes?: boolean;
 }
 
-export interface SearchPermitsOptions extends IPaginationOptions {
+export interface SearchPermitsOptions extends PaginationOptions {
   dateRange?: [Date, Date];
   permitTypeId?: number;
   searchTag?: string;

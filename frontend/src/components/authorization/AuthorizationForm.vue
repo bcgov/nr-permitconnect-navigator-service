@@ -23,8 +23,7 @@ import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, split
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
-import type { IStamps } from '@/interfaces';
-import type { Permit, PermitArgs, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
+import type { AuditFields, Permit, PermitArgs, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
 
 // Props
 const { authorization = undefined, editable } = defineProps<{
@@ -112,7 +111,7 @@ const formSchema = object({
   targetDateDescription: string().nullable()
 });
 
-type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & IStamps;
+type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & AuditFields;
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);

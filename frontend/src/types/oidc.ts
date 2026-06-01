@@ -1,6 +1,4 @@
-import type { ISsoAttribute } from '@/interfaces';
-
-export interface BasicBceidAttribute extends ISsoAttribute {
+export interface BasicBceidAttribute extends SsoAttribute {
   bceidUserGuid: string;
   bceidUsername: string;
 }
@@ -14,7 +12,7 @@ export interface BusinessBceidAttribute extends BasicBceidAttribute {
   bceidBusinessName: string;
 }
 
-export interface IdirAttribute extends ISsoAttribute {
+export interface IdirAttribute extends SsoAttribute {
   idirUserGuid: string;
   idirUsername: string;
 }
@@ -23,4 +21,8 @@ export interface IdirSearchParameters {
   firstName?: string;
   lastName?: string;
   email?: string;
+}
+
+interface SsoAttribute {
+  displayName?: string;
 }

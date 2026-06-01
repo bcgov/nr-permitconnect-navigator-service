@@ -12,7 +12,7 @@ import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IDraftableProjectService } from '@/interfaces';
+import type { DraftableProjectService } from '@/types';
 
 // Props
 const { projectId, permitId = undefined } = defineProps<{
@@ -23,7 +23,7 @@ const { projectId, permitId = undefined } = defineProps<{
 // Interfaces
 interface InitiativeState {
   projectRouteName: RouteName;
-  projectService: IDraftableProjectService;
+  projectService: DraftableProjectService;
 }
 
 // Constants

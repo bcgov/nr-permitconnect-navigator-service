@@ -11,8 +11,7 @@ import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
-import type { StatisticFilters, Statistics, User } from '@/types';
+import type { InputEvent, StatisticFilters, Statistics, User } from '@/types';
 
 // Injections
 const projectService = inject(projectServiceKey);
@@ -34,7 +33,7 @@ const getPercentage = (input: number) =>
 const isEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
 
-async function onAssigneeInput(e: IInputEvent) {
+async function onAssigneeInput(e: InputEvent) {
   const input = e.target.value;
 
   if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
@@ -201,7 +200,7 @@ watch(
               :options="assigneeOptions"
               :option-label="getAssigneeOptionLabel"
               option-value="userId"
-              @input="(e: IInputEvent) => onAssigneeInput(e)"
+              @input="(e: InputEvent) => onAssigneeInput(e)"
             />
           </td>
           <td class="col-span-1 text-right">{{ statistics.total_submissions_assignedto }}</td>

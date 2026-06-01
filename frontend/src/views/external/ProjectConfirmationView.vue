@@ -10,7 +10,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces';
+import type { ProjectService } from '@/types';
 
 // Props
 const { projectId } = defineProps<{
@@ -23,7 +23,7 @@ interface InitiativeState {
   initiativeRouteName: RouteName;
   message: string;
   projectRouteName: RouteName;
-  projectService: IProjectService;
+  projectService: ProjectService;
 }
 
 // Composables

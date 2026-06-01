@@ -1,7 +1,6 @@
 import type { GeoJSON } from 'geojson';
 
-import type { MaybeUndefined, Nullable, UUID } from '../common';
-import type { IProject, IStamps } from '@/interfaces';
+import type { MaybeUndefined, Nullable, UUID } from '../util';
 import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
@@ -20,10 +19,48 @@ import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils
 import type { Group } from './responses';
 
 /**
+ * Shared interfaces
+ */
+export interface AuditFields {
+  createdBy?: Nullable<string>;
+  createdAt?: Nullable<string>;
+  updatedBy?: Nullable<string>;
+  updatedAt?: Nullable<string>;
+  deletedBy?: Nullable<string>;
+  deletedAt?: Nullable<string>;
+}
+
+interface Project extends AuditFields {
+  projectId: string;
+  activityId: string;
+  submittedAt: string;
+  assignedUserId?: string | null;
+  applicationStatus: ApplicationStatus;
+
+  companyIdRegistered?: string | null;
+  companyNameRegistered?: string | null;
+  hasRelatedEnquiry: boolean;
+  queuePriority: number;
+  submissionType: SubmissionType;
+  projectName: string;
+  projectDescription: string;
+  multiPermitsNeeded: string;
+  astNotes?: string | null;
+  atsClientId: number | null;
+  atsEnquiryId: number | null;
+  addedToAts: boolean;
+  aaiUpdated: boolean;
+
+  activity?: Activity;
+  contacts: Contact[];
+  user?: User;
+}
+
+/**
  * Access Request
  */
 
-export interface AccessRequest extends IStamps {
+export interface AccessRequest extends AuditFields {
   accessRequestId?: UUID;
   grant?: boolean;
   groupId: number;
@@ -37,7 +74,7 @@ export interface AccessRequest extends IStamps {
  * Activity
  */
 
-export interface Activity extends IStamps {
+export interface Activity extends AuditFields {
   activityId: string;
   initiativeId: UUID;
 
@@ -49,7 +86,7 @@ export interface Activity extends IStamps {
  * Activity Contact
  */
 
-export interface ActivityContact extends IStamps {
+export interface ActivityContact extends AuditFields {
   activityId: string;
   contactId: UUID;
   role: ActivityContactRole;
@@ -72,7 +109,7 @@ interface ContactBase {
   phoneNumber?: string;
 }
 
-export interface Contact extends ContactBase, IStamps {
+export interface Contact extends ContactBase, AuditFields {
   contactId: UUID;
   userId?: UUID;
   activityContact?: ActivityContact[];
@@ -84,7 +121,7 @@ export type CreateContactDto = ContactBase;
  * Document
  */
 
-export interface Document extends IStamps {
+export interface Document extends AuditFields {
   documentId: UUID;
   activityId: string;
   filename: string;
@@ -98,7 +135,7 @@ export interface Document extends IStamps {
  * Draft
  */
 
-export interface Draft<T> extends IStamps {
+export interface Draft<T> extends AuditFields {
   draftId: UUID;
   activityId: string;
   draftCode: string;
@@ -109,7 +146,7 @@ export interface Draft<T> extends IStamps {
  * Electrification Project
  */
 
-export interface ElectrificationProject extends IProject {
+export interface ElectrificationProject extends Project {
   electrificationProjectId: UUID;
   projectType?: string;
   projectCategory?: Nullable<string>;
@@ -124,7 +161,7 @@ export interface ElectrificationProject extends IProject {
  * Enquiry
  */
 
-interface EnquiryBase extends IStamps {
+interface EnquiryBase extends AuditFields {
   addedToAts: boolean;
   assignedUserId?: Nullable<string>;
   atsClientId: Nullable<number>;
@@ -152,7 +189,7 @@ export interface EnquiryArgs extends Partial<EnquiryBase> {
  * General Project
  */
 
-export interface GeneralProject extends IProject {
+export interface GeneralProject extends Project {
   generalProjectId: UUID;
   projectNumber?: string;
   relatedEnquiries: string;
@@ -179,7 +216,7 @@ export interface GeneralProject extends IProject {
  * Housing Project
  */
 
-export interface HousingProject extends IProject {
+export interface HousingProject extends Project {
   housingProjectId: UUID;
   relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
@@ -217,7 +254,7 @@ export interface HousingProject extends IProject {
  * Identity Provider
  */
 
-export interface IdentityProvider extends IStamps {
+export interface IdentityProvider extends AuditFields {
   idp: string;
   kind: IdentityProviderKind;
   username: string;
@@ -227,7 +264,7 @@ export interface IdentityProvider extends IStamps {
  * Note
  */
 
-export interface Note extends IStamps {
+export interface Note extends AuditFields {
   noteId?: UUID;
   noteHistoryId?: UUID;
   note: string;
@@ -237,7 +274,7 @@ export interface Note extends IStamps {
  * Note History
  */
 
-export interface NoteHistory extends IStamps {
+export interface NoteHistory extends AuditFields {
   noteHistoryId?: UUID;
   activityId: string;
   bringForwardDate: Nullable<string>;
@@ -255,7 +292,7 @@ export interface NoteHistory extends IStamps {
  * Permit
  */
 
-interface PermitBase extends IStamps {
+interface PermitBase extends AuditFields {
   activityId: string;
   issuedPermitId?: Nullable<string>;
   needed: string;
@@ -290,7 +327,7 @@ export interface PermitArgs extends PermitBase {
  * Permit Note
  */
 
-export interface PermitNote extends IStamps {
+export interface PermitNote extends AuditFields {
   permitNoteId: UUID;
   permitId: UUID;
   note: string;
@@ -300,7 +337,7 @@ export interface PermitNote extends IStamps {
  * Permit Tracking
  */
 
-export interface PermitTracking extends IStamps {
+export interface PermitTracking extends AuditFields {
   permitTrackingId?: UUID;
   permitId?: UUID;
   shownToProponent: boolean;
@@ -313,7 +350,7 @@ export interface PermitTracking extends IStamps {
  * Permit Type
  */
 
-export interface PermitType extends IStamps {
+export interface PermitType extends AuditFields {
   permitTypeId: number;
   agency: string;
   branch: string;
@@ -335,7 +372,7 @@ export interface PermitType extends IStamps {
  * Source System Kind
  */
 
-export interface SourceSystemKind extends IStamps {
+export interface SourceSystemKind extends AuditFields {
   sourceSystemKindId: number;
   description: string;
   integrated: boolean;
@@ -348,7 +385,7 @@ export interface SourceSystemKind extends IStamps {
  * User
  */
 
-export interface User extends IStamps {
+export interface User extends AuditFields {
   active: boolean;
   email: string;
   firstName: string;

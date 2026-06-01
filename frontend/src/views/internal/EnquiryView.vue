@@ -27,8 +27,7 @@ import {
 import { generalErrorHandler, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ElectrificationProject, HousingProject, User } from '@/types';
-import type { IDraftableProjectService } from '@/interfaces';
+import type { DraftableProjectService, ElectrificationProject, HousingProject, User } from '@/types';
 
 // Props
 const {
@@ -48,7 +47,7 @@ interface InitiativeState {
   enquiryNoteRouteName: RouteName;
   projectEnquiryNoteRouteName: RouteName;
   projectRouteName: RouteName;
-  projectService: IDraftableProjectService;
+  projectService: DraftableProjectService;
 }
 
 // Constants

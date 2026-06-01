@@ -14,8 +14,7 @@ import { YES_NO_LIST } from '@/utils/constants/application';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { ComponentPublicInstance, Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
-import type { GeocoderFeature } from '@/types';
+import type { GeocoderFeature, InputEvent } from '@/types';
 
 // Props
 const { tab = 0 } = defineProps<{
@@ -45,7 +44,7 @@ const getAddressSearchLabel = (e: GeocoderFeature) => {
   return e.properties.fullAddress ?? '';
 };
 
-async function onAddressSearchInput(e: IInputEvent) {
+async function onAddressSearchInput(e: InputEvent) {
   const input = e.target.value;
   if (input.length == 0) {
     setStreetAddress(null);

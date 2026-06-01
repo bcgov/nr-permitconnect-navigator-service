@@ -18,8 +18,7 @@ import { ProjectLocation } from '@/utils/enums/projectCommon';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GeoJSON } from 'geojson';
 import type { ComponentPublicInstance, Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
-import type { GeocoderFeature } from '@/types';
+import type { GeocoderFeature, InputEvent } from '@/types';
 
 // Types
 interface PinUpdateEvent {
@@ -86,7 +85,7 @@ function handleProjectLocationClick() {
   }
 }
 
-async function onAddressSearchInput(e: IInputEvent) {
+async function onAddressSearchInput(e: InputEvent) {
   const input = e.target.value;
   addressGeocoderFeatures.value = (await externalApiService.searchAddressCoder(input))?.data?.features ?? [];
 }
@@ -149,7 +148,7 @@ onBeforeMount(async () => {
   if (values.value.location?.addressSearch?.properties?.fullAddress) {
     await onAddressSearchInput({
       target: { value: values.value.location.addressSearch.properties.fullAddress }
-    } as IInputEvent);
+    } as InputEvent);
     setAddressSearch(values.value.location.addressSearch.properties.fullAddress);
   }
 });

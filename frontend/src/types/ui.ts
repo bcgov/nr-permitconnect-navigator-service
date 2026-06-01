@@ -36,6 +36,10 @@ export interface Config {
   };
 }
 
+export interface InputEvent extends Event {
+  target: HTMLInputElement;
+}
+
 export interface Pagination {
   rows?: number;
   order?: number;

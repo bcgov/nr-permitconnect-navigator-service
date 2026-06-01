@@ -29,7 +29,6 @@ import { assignedToValidator } from '@/validators/common';
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { IInputEvent } from '@/interfaces';
 import type {
   ATSAddressResource,
   ATSClientResource,
@@ -37,6 +36,7 @@ import type {
   Contact,
   DeepPartial,
   Enquiry,
+  InputEvent,
   User
 } from '@/types';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
@@ -150,7 +150,7 @@ function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
-function onRelatedActivityInput(e: IInputEvent) {
+function onRelatedActivityInput(e: InputEvent) {
   filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
     id.toUpperCase().includes(e.target.value.toUpperCase())
   );
