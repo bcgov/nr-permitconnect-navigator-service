@@ -1,8 +1,8 @@
 import { Router } from 'express';
-import { readFileSync } from 'fs';
+import { readFileSync } from 'node:fs';
 import helmet from 'helmet';
 import yaml from 'js-yaml';
-import { join } from 'path';
+import { join } from 'node:path';
 
 import docs from '../../docs/docs.ts';
 
