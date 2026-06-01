@@ -103,6 +103,37 @@ const primaryContact = computed(
 );
 
 // Actions
+async function createATSClientEnquiry() {
+  try {
+    const address: Partial<ATSAddressResource> = {
+      '@type': 'AddressResource',
+      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
+      email: formRef.value?.values?.contact.email ?? ''
+    };
+    const data = {
+      '@type': 'ClientResource',
+      address: address,
+      firstName: formRef.value?.values.contact.firstName,
+      surName: formRef.value?.values.contact.lastName,
+      regionName: GroupName.NAVIGATOR,
+      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
+    };
+
+    const submitData: ATSClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createATSClient(submitData);
+    if (response.status === 201) {
+      let atsEnquiryId = undefined;
+      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
+        atsEnquiryId = await createATSEnquiry(response.data.clientId);
+      if (atsEnquiryId) toast.success(t('enquiryForm.atsClientEnquiryPushed'));
+      else toast.success(t('enquiryForm.atsClientPushed'));
+      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
+    }
+  } catch (error) {
+    toast.error(t('enquiryForm.atsClientPushError') + ' ' + error);
+  }
+}
+
 async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
@@ -129,6 +160,56 @@ async function createATSEnquiry(atsClientId?: number) {
   }
 }
 
+async function getRelatedATSClientID(activityId: string) {
+  if (projectService?.value) {
+    const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
+    if (response.length > 0) {
+      return response[0].atsClientId;
+    }
+  } else {
+    throw new Error('No service');
+  }
+}
+
+async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
+  let assigneeOptions: User[] = [];
+  if (enquiry?.assignedUserId) {
+    assigneeOptions = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
+  }
+
+  let atsClientId;
+  if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
+
+  return {
+    relatedActivityId: enquiry?.relatedActivityId,
+    enquiryDescription: enquiry?.enquiryDescription,
+    contact: {
+      contactId: primaryContact.value?.contactId,
+      firstName: primaryContact.value?.firstName,
+      lastName: primaryContact.value?.lastName,
+      phoneNumber: primaryContact.value?.phoneNumber,
+      email: primaryContact.value?.email,
+      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
+      contactPreference: primaryContact.value?.contactPreference,
+      userId: primaryContact.value?.userId
+    },
+
+    submissionState: {
+      assignedUser: assigneeOptions[0] ?? null,
+      enquiryStatus: enquiry?.enquiryStatus,
+      submittedMethod: enquiry?.submittedMethod,
+      submissionType: enquiry?.submissionType
+    },
+
+    atsInfo: {
+      atsClientId: enquiry?.atsClientId || atsClientId,
+      atsEnquiryId: enquiry?.atsEnquiryId
+    },
+
+    addedToAts: enquiry?.addedToAts
+  };
+}
+
 function onCancel() {
   formRef.value?.resetForm();
   showCancelMessage.value = true;
@@ -150,39 +231,6 @@ function onInvalidSubmit(e: GenericObject) {
   scrollToFirstError(e.errors);
 }
 
-function onRelatedActivityInput(e: InputEvent) {
-  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
-    id.toUpperCase().includes(e.target.value.toUpperCase())
-  );
-  // Revert basic info to initial enquiry contact
-  setBasicInfo(enquiry?.activity?.activityContact?.[0]?.contact);
-}
-
-async function getRelatedATSClientID(activityId: string) {
-  if (projectService?.value) {
-    const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
-    if (response.length > 0) {
-      return response[0].atsClientId;
-    }
-  } else {
-    throw new Error('No service');
-  }
-}
-
-function onReOpen() {
-  confirm.require({
-    message: t('enquiryForm.confirmReopenMessage'),
-    header: t('enquiryForm.confirmReopenHeader'),
-    acceptLabel: t('enquiryForm.reopenAccept'),
-    rejectLabel: t('enquiryForm.reopenReject'),
-    rejectProps: { outlined: true },
-    accept: () => {
-      formRef.value?.setFieldValue('submissionState.enquiryStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
-    }
-  });
-}
-
 async function onRelatedActivityChange(e: SelectChangeEvent) {
   formRef.value?.setFieldValue('atsClientId', null);
   formRef.value?.setFieldValue('addedToAts', false);
@@ -202,6 +250,78 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
     }
   }
 }
+
+function onRelatedActivityInput(e: InputEvent) {
+  filteredProjectActivityIds.value = projectActivityIds.value.filter((id) =>
+    id.toUpperCase().includes(e.target.value.toUpperCase())
+  );
+  // Revert basic info to initial enquiry contact
+  setBasicInfo(enquiry?.activity?.activityContact?.[0]?.contact);
+}
+
+function onReOpen() {
+  confirm.require({
+    message: t('enquiryForm.confirmReopenMessage'),
+    header: t('enquiryForm.confirmReopenHeader'),
+    acceptLabel: t('enquiryForm.reopenAccept'),
+    rejectLabel: t('enquiryForm.reopenReject'),
+    rejectProps: { outlined: true },
+    accept: () => {
+      formRef.value?.setFieldValue('submissionState.enquiryStatus', ApplicationStatus.IN_PROGRESS);
+      if (formRef.value?.values) onSubmit(formRef.value?.values);
+    }
+  });
+}
+
+const onSubmit = async (formValues: GenericObject) => {
+  try {
+    // vee-validate doesn't get transformed data from yup so
+    // manually run the form values through it here
+    const transformed: FormSchemaType = enquiryFormSchema.cast(formValues);
+
+    const values: FormSchemaType = await setAtsSubmitData(transformed);
+
+    // Generate final payload
+    const payload: Partial<Enquiry> = {
+      // Enquiry description
+      enquiryDescription: values.enquiryDescription,
+
+      // Related Activity
+      relatedActivityId: values.relatedActivityId || null,
+
+      // Submission State
+      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
+      enquiryStatus: values.submissionState.enquiryStatus,
+      submissionType: values.submissionState.submissionType,
+      submittedMethod: values.submissionState.submittedMethod,
+
+      // ATS
+      // Remove ATS client number from enquiry if submitted with linked activity
+      atsClientId: values.relatedActivityId ? null : values.atsInfo.atsClientId,
+      atsEnquiryId: values.atsInfo.atsEnquiryId,
+      addedToAts: !!(values.atsInfo.atsClientId || values.atsInfo.atsEnquiryId)
+    };
+
+    // Update enquiry
+    const result = await enquiryService.updateEnquiry(enquiry.enquiryId, payload);
+    enquiryStore.setEnquiry(result.data);
+
+    // Wait a tick for store to propagate
+    await nextTick();
+
+    formRef.value?.resetForm({
+      values: await initializeFormValues()
+    });
+
+    basicInfoManualEntry.value = false;
+
+    emit('enquiryForm:saved');
+
+    toast.success(t('i.common.form.savedMessage'));
+  } catch (e) {
+    if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryForm.failedMessage'), e.message);
+  }
+};
 
 async function setAtsSubmitData(values: FormSchemaType) {
   const updated = { ...values };
@@ -252,132 +372,12 @@ function setBasicInfo(contact?: Contact) {
   formRef.value.resetField('contact', { value: updatedContact });
 }
 
-const onSubmit = async (formValues: GenericObject) => {
-  try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const transformed: FormSchemaType = enquiryFormSchema.cast(formValues);
-
-    const values: FormSchemaType = await setAtsSubmitData(transformed);
-
-    // Generate final payload
-    const payload: Partial<Enquiry> = {
-      // Enquiry description
-      enquiryDescription: values.enquiryDescription,
-
-      // Related Activity
-      relatedActivityId: values.relatedActivityId,
-
-      // Submission State
-      assignedUserId: values.submissionState.assignedUser ? (values.submissionState.assignedUser as User).userId : null,
-      enquiryStatus: values.submissionState.enquiryStatus,
-      submissionType: values.submissionState.submissionType,
-      submittedMethod: values.submissionState.submittedMethod,
-
-      // ATS
-      // Remove ATS client number from enquiry if submitted with linked activity
-      atsClientId: values.relatedActivityId ? null : values.atsInfo.atsClientId,
-      atsEnquiryId: values.atsInfo.atsEnquiryId,
-      addedToAts: !!(values.atsInfo.atsClientId || values.atsInfo.atsEnquiryId)
-    };
-
-    // Update enquiry
-    const result = await enquiryService.updateEnquiry(enquiry.enquiryId, payload);
-    enquiryStore.setEnquiry(result.data);
-
-    // Wait a tick for store to propagate
-    await nextTick();
-
-    formRef.value?.resetForm({
-      values: await initializeFormValues()
-    });
-
-    basicInfoManualEntry.value = false;
-
-    emit('enquiryForm:saved');
-
-    toast.success(t('i.common.form.savedMessage'));
-  } catch (e) {
-    if (isAxiosError(e) || e instanceof Error) toast.error(t('enquiryForm.failedMessage'), e.message);
-  }
-};
-
-async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
-  let assigneeOptions: User[] = [];
-  if (enquiry?.assignedUserId) {
-    assigneeOptions = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
-  }
-
-  let atsClientId;
-  if (enquiry?.relatedActivityId) atsClientId = await getRelatedATSClientID(enquiry?.relatedActivityId);
-
-  return {
-    relatedActivityId: enquiry?.relatedActivityId,
-    enquiryDescription: enquiry?.enquiryDescription,
-    contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
-    },
-
-    submissionState: {
-      assignedUser: assigneeOptions[0] ?? null,
-      enquiryStatus: enquiry?.enquiryStatus,
-      submittedMethod: enquiry?.submittedMethod,
-      submissionType: enquiry?.submissionType
-    },
-
-    atsInfo: {
-      atsClientId: enquiry?.atsClientId || atsClientId,
-      atsEnquiryId: enquiry?.atsEnquiryId
-    },
-
-    addedToAts: enquiry?.addedToAts
-  };
-}
-
 onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
   projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
 
   initialFormValues.value = await initializeFormValues();
 });
-
-async function createATSClientEnquiry() {
-  try {
-    const address: Partial<ATSAddressResource> = {
-      '@type': 'AddressResource',
-      primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
-      email: formRef.value?.values?.contact.email ?? ''
-    };
-    const data = {
-      '@type': 'ClientResource',
-      address: address,
-      firstName: formRef.value?.values.contact.firstName,
-      surName: formRef.value?.values.contact.lastName,
-      regionName: GroupName.NAVIGATOR,
-      optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
-    };
-
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
-    if (response.status === 201) {
-      let atsEnquiryId = undefined;
-      if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
-      if (atsEnquiryId) toast.success(t('enquiryForm.atsClientEnquiryPushed'));
-      else toast.success(t('enquiryForm.atsClientPushed'));
-      return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
-    }
-  } catch (error) {
-    toast.error(t('enquiryForm.atsClientPushError') + ' ' + error);
-  }
-}
 </script>
 
 <template>
