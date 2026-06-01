@@ -48,14 +48,14 @@ vi.mock('@/services/enquiryService', () => ({
 vi.mock('@/services/electrificationProjectService', () => ({
   default: {
     getDrafts: vi.fn(),
-    searchProjects: vi.fn()
+    getProjects: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
   default: {
     getDrafts: vi.fn(),
-    searchProjects: vi.fn()
+    getProjects: vi.fn()
   }
 }));
 
@@ -90,9 +90,9 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 beforeEach(() => {
   vi.mocked(enquiryService.getEnquiries).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(electrificationProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(electrificationProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(housingProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(housingProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
 });
 
