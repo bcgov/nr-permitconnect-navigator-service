@@ -6,13 +6,15 @@ import {
   processUserAccessRequestController
 } from '../../controllers/accessRequest.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
+import { hasIdentity } from '../../middleware/identity.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
+import { Action, IdentityProviderKind, Resource } from '../../utils/enums/application.ts';
 import { accessRequestValidator } from '../../validators/index.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Request to create/revoke a user and access request - called by supervisor(201) & admin(200) when creating a user */

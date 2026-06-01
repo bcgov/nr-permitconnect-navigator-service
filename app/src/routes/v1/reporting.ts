@@ -6,12 +6,14 @@ import {
   getHousingProjectPermitDataController
 } from '../../controllers/reporting.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
+import { hasIdentity } from '../../middleware/identity.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
+import { Action, IdentityProviderKind, Resource } from '../../utils/enums/application.ts';
 
 const router = express.Router();
 router.use(requireSomeAuth);
+router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Get all electrification project and permit data for csv download */
@@ -21,7 +23,7 @@ router.get(
   getElectrificationProjectPermitDataController
 );
 
-/** Get all electrification project and permit data for csv download */
+/** Get all general project and permit data for csv download */
 router.get(
   '/generalProject/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
