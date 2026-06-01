@@ -37,7 +37,7 @@ export async function deleteActivityContact(req: DeleteActivityContactRequest): 
  */
 export async function listActivityContacts(req: ListActivityContactsRequest): Promise<ActivityContact[]> {
   const { activityId } = req;
-  const { data } = await appAxios().get(`activity/${activityId}/contact`);
+  const { data } = await appAxios().get<ActivityContact[]>(`activity/${activityId}/contact`);
   return data;
 }
 

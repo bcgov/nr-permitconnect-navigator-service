@@ -18,9 +18,7 @@ const schema = {
       relatedActivityId: Joi.string().max(255).allow(null),
       submissionType: Joi.string()
         .valid(...ENQUIRY_TYPE_LIST)
-        .allow(null),
-      activityId: Joi.string(),
-      enquiryId: Joi.string()
+        .allow(null)
     })
   },
   deleteEnquiry: {

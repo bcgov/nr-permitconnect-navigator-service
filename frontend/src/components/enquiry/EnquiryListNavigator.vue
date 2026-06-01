@@ -101,19 +101,17 @@ function handleCreateNewActivity() {
       try {
         const userContact = useContactStore().getContact;
         if (!userContact) throw new Error('No contact');
-        const response = (
-          await enquiryService.createEnquiry({
-            contact: {
-              contactId: userContact.contactId,
-              firstName: userContact.firstName,
-              lastName: userContact.lastName,
-              phoneNumber: userContact.phoneNumber,
-              email: userContact.email,
-              contactApplicantRelationship: userContact.contactApplicantRelationship,
-              contactPreference: userContact.contactPreference
-            }
-          })
-        ).data;
+        const response = await enquiryService.createEnquiry({
+          contact: {
+            contactId: userContact.contactId,
+            firstName: userContact.firstName,
+            lastName: userContact.lastName,
+            phoneNumber: userContact.phoneNumber,
+            email: userContact.email,
+            contactApplicantRelationship: userContact.contactApplicantRelationship,
+            contactPreference: userContact.contactPreference
+          }
+        });
         if (response?.activityId) {
           router.push({
             name: enquiryRouteName?.value,
@@ -140,7 +138,7 @@ function onDelete(enquiryId: string, activityId: string) {
     rejectProps: { outlined: true },
     accept: () => {
       enquiryService
-        .deleteEnquiry(enquiryId)
+        .deleteEnquiry({ enquiryId })
         .then(() => {
           emit('enquiry:delete', enquiryId, activityId);
           selection.value = undefined;

@@ -23,7 +23,7 @@ import { Initiative, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject, GeneralProject, Document } from '@/types';
+import type { ElectrificationProject, HousingProject, GeneralProject, Document, NoteHistory, Enquiry } from '@/types';
 import ProjectInformationTab from '@/components/projectCommon/ProjectInformationTab.vue';
 import ProjectFilesTab from '@/components/projectCommon/ProjectFilesTab.vue';
 import ProjectAuthorizationsTab from '@/components/projectCommon/ProjectAuthorizationsTab.vue';
@@ -165,10 +165,10 @@ beforeEach(() => {
   );
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(documentService.listDocuments).mockResolvedValue([{ documentId: '123', filename: 'foo' } as Document]);
-  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(mockAxiosResponse([{ noteHistoryId: '123' }]));
+  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([{ noteHistoryId: '123' }] as NoteHistory[]);
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([{ permitId: '123' }]));
   vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([{ permitTypeId: '123' }]));
-  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([{ enquiryId: '123' }]));
+  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([{ enquiryId: '123' }] as Enquiry[]);
   vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue(mockAxiosResponse({ roadmapNoteId: '123' }));
 });
 

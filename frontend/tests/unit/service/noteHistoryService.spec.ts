@@ -95,7 +95,7 @@ describe('noteHistoryService', () => {
 
       describe('deleteNote', () => {
         it('calls with given data', () => {
-          noteHistoryService.deleteNoteHistory(TEST_NOTE_HISTORY.noteHistoryId as string);
+          noteHistoryService.deleteNoteHistory({ noteHistoryId: TEST_NOTE_HISTORY.noteHistoryId });
 
           expect(deleteSpy).toHaveBeenCalledTimes(1);
           expect(deleteSpy).toHaveBeenCalledWith(
@@ -105,17 +105,8 @@ describe('noteHistoryService', () => {
       });
 
       describe('listBringForward', () => {
-        it('does not include state when given no parameter', () => {
-          noteHistoryService.listBringForward();
-
-          expect(getSpy).toHaveBeenCalledTimes(1);
-          expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
-            params: { bringForwardState: undefined }
-          });
-        });
-
         it('adds Unresolved to query when given as parameter', () => {
-          noteHistoryService.listBringForward(BringForwardType.UNRESOLVED);
+          noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED });
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
@@ -124,7 +115,7 @@ describe('noteHistoryService', () => {
         });
 
         it('adds Resolved to query when given as parameter', () => {
-          noteHistoryService.listBringForward(BringForwardType.RESOLVED);
+          noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.RESOLVED });
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
@@ -135,22 +126,23 @@ describe('noteHistoryService', () => {
 
       describe('listNotes', () => {
         it('retrieves note list', () => {
-          noteHistoryService.listNoteHistories('testUUID');
+          noteHistoryService.listNoteHistories({ activityId: 'testUUID' });
 
           expect(getSpy).toHaveBeenCalledTimes(1);
           expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/testUUID`);
         });
       });
 
-      describe('updateNote', () => {
+      describe('putNoteHistory', () => {
         it('calls with given data', () => {
-          noteHistoryService.updateNoteHistory(
-            TEST_NOTE_HISTORY.noteHistoryId as string,
-            { ...TEST_NOTE_HISTORY, note: 'text', resource: Resource.ELECTRIFICATION_PROJECT } as NoteHistory & {
-              note: string;
-              resource: Resource;
-            }
-          );
+          noteHistoryService.putNoteHistory({
+            ...TEST_NOTE_HISTORY,
+            note: 'text',
+            resource: Resource.ELECTRIFICATION_PROJECT
+          } as NoteHistory & {
+            note: string;
+            resource: Resource;
+          });
 
           expect(putSpy).toHaveBeenCalledTimes(1);
           expect(putSpy).toHaveBeenCalledWith(

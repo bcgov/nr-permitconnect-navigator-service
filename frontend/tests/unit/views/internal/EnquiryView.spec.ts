@@ -93,12 +93,10 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(
-    mockAxiosResponse<Enquiry>({ activityId: '1', enquiryId: '1' } as Enquiry)
-  );
-  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
-    mockAxiosResponse([{ noteHistoryId: '1', createdBy: '123' }])
-  );
+  vi.mocked(enquiryService.getEnquiry).mockResolvedValue({ activityId: '1', enquiryId: '1' } as Enquiry);
+  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
+    { noteHistoryId: '1', createdBy: '123' }
+  ] as NoteHistory[]);
   vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ userId: '123', fullName: 'Fake User' }]));
 });
 

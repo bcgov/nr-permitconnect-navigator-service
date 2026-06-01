@@ -1,8 +1,16 @@
-import type { GroupName, Initiative } from '@/utils/enums/application';
+import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
 import type { PaginationOptions } from '../common';
-import type { CreateRequestDTO, DeleteRequestDTO, GetRequestDTO, ListRequestDTO, PutRequestDTO } from './dto';
-import type { ActivityContactBase, Document, EnquiryBase } from './resources';
+import type {
+  CreateRequestDTO,
+  DeleteRequestDTO,
+  GetRequestDTO,
+  ListRequestDTO,
+  PatchRequestDTO,
+  PutRequestDTO
+} from './dto';
+import type { ActivityContactBase, Document, Enquiry, EnquiryBase, NoteHistory } from './resources';
 import type { UUID } from '../common';
+import type { PartialFields } from '../util';
 
 /**
  * Activity Contact
@@ -36,12 +44,32 @@ export type DeleteDocumentRequest = DeleteRequestDTO<Document, ['documentId']> &
  * Enquiry
  */
 
-export type CreateEnquiryRequest = CreateRequestDTO<EnquiryBase, ['enquiryId']>;
+export type CreateEnquiryRequest = CreateRequestDTO<
+  PartialFields<
+    Pick<Enquiry, 'contact' | 'enquiryDescription' | 'relatedActivityId' | 'submissionType'>,
+    'submissionType'
+  >
+>;
 export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, ['enquiryId']>;
-export type ListEnquiriesRequest = ListRequestDTO<EnquiryBase, ['activityId']>;
-export type PutEnquiryRequest = PutRequestDTO<EnquiryBase, ['enquiryId']>;
+export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, ['activityId']>;
+export interface SearchEnquiriesRequest {
+  activityId?: string[];
+  createdBy?: string[];
+  enquiryId?: string[];
+  includeUser?: boolean;
+}
+export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, ['enquiryId']>;
 export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, ['enquiryId']>;
 
+/**
+ * Note History
+ */
+
+export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistory, ['noteHistoryId']>;
+export type ListBringForwardsRequest = ListRequestDTO<NoteHistory, ['bringForwardState']>;
+export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistory, ['activityId']>;
+export type PutNoteHistoryRequest = PutRequestDTO<NoteHistory & { resource: Resource }, ['noteHistoryId']>;
+export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistory, ['noteHistoryId']>;
 /**
  * Other
  */
@@ -80,13 +108,6 @@ export interface Email {
   subject: string;
   to: string[];
   tag?: string;
-}
-
-export interface EnquirySearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  enquiryId?: string[];
-  includeUser?: boolean;
 }
 
 export interface GeneralProjectSearchParameters {

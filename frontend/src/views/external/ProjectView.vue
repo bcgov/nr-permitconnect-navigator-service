@@ -169,7 +169,8 @@ onBeforeMount(async () => {
 
     try {
       projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
-      if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
+      if (projectValue)
+        enquiriesValue = await enquiryService.listRelatedEnquiries({ activityId: projectValue.activityId });
     } catch {
       toast.error(t('views.e.projectView.toastProjectLoadFailed'));
       router.replace({ name: initiativeState.value.initiativeRouteName });
@@ -186,7 +187,7 @@ onBeforeMount(async () => {
 
     try {
       const activityId = projectValue.activityId;
-      const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+      const noteHistory = await noteHistoryService.listNoteHistories({ activityId });
       projectStore.setNoteHistory(noteHistory);
     } catch (e) {
       throw new Error(t('views.e.projectView.toastNoteHistoryLoadFailed'), { cause: e });
@@ -289,8 +290,8 @@ onBeforeMount(async () => {
               @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
             <NoteBanner
-              v-if="getNoteHistoryShownToProponent[0]?.note[0]"
-              :note="getNoteHistoryShownToProponent[0].note[0]"
+              v-if="getNoteHistoryShownToProponent[0]?.note?.[0]"
+              :note="getNoteHistoryShownToProponent[0].note?.[0]"
               @note-banner:show-history="noteHistoryVisible = true"
             />
             <div class="disclaimer-block p-8 mt-8">

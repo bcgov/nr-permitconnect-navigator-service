@@ -182,14 +182,14 @@ onBeforeMount(async () => {
       projectStore.setProject(project);
     }
     if (!getEnquiry.value && enquiryId) {
-      const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
+      const enquiry = await enquiryService.getEnquiry({ enquiryId });
       enquiryStore.setEnquiry(enquiry);
     }
 
     activityId.value = getEnquiry.value?.activityId || getProject.value?.activityId;
 
     if (noteHistoryId && activityId.value) {
-      const noteHistory = (await noteHistoryService.listNoteHistories(activityId.value)).data;
+      const noteHistory = await noteHistoryService.listNoteHistories({ activityId: activityId.value });
 
       if (enquiryId) enquiryStore.setNoteHistory(noteHistory);
       else if (projectId) projectStore.setNoteHistory(noteHistory);

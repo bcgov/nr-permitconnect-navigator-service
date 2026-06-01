@@ -147,7 +147,7 @@ onBeforeMount(async () => {
         enquiryService.listRelatedEnquiries(project.activityId),
         activityContactService.listActivityContacts(project.activityId)
       ])
-    ).map((r) => r.data);
+    ).map((r) => r);
     const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
 
     project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');

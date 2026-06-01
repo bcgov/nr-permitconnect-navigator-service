@@ -6,7 +6,7 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
-import type { Enquiry } from '@/types';
+import type { CreateEnquiryRequest, Enquiry } from '@/types';
 import {
   ApplicationStatus,
   ContactPreference,
@@ -14,7 +14,6 @@ import {
   ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
-import type { EnquiryArgs } from '@/types';
 
 // Constants
 const PATH = 'enquiry';
@@ -23,19 +22,7 @@ const TEST_ACTIVITY_ID = '25357C4A';
 
 const currentDate = new Date().toISOString();
 
-const testCreateEnquiry: EnquiryArgs = {
-  submissionType: SubmissionType.GUIDANCE,
-  submittedAt: '2023-01-01T12:00:00Z',
-  submittedBy: 'user123',
-  enquiryStatus: ApplicationStatus.NEW,
-  submittedMethod: EnquirySubmittedMethod.EMAIL,
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  addedToAts: false,
-  atsClientId: 123456,
-  atsEnquiryId: 654321,
+const testCreateEnquiry: CreateEnquiryRequest = {
   contact: {
     contactId: '123',
     firstName: 'enquiryDraft1',
@@ -44,7 +31,8 @@ const testCreateEnquiry: EnquiryArgs = {
     email: 'test@test.weg',
     contactPreference: ContactPreference.EITHER,
     contactApplicantRelationship: ProjectRelationship.OWNER
-  }
+  },
+  enquiryDescription: 'desc'
 };
 
 const testEnquiry: Enquiry = {
@@ -106,28 +94,28 @@ describe('enquiryService', () => {
       });
 
       it('calls deleteEnquiry with correct data', () => {
-        enquiryService.deleteEnquiry(testEnquiry.enquiryId);
+        enquiryService.deleteEnquiry({ enquiryId: testEnquiry.enquiryId });
 
         expect(deleteSpy).toHaveBeenCalledTimes(1);
         expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
       });
 
-      it('calls getEnquiries', () => {
-        enquiryService.getEnquiries();
+      it('calls listEnquiries', () => {
+        enquiryService.listEnquiries();
 
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`);
       });
 
       it('calls getEnquiry with correct data', () => {
-        enquiryService.getEnquiry(testEnquiry.enquiryId);
+        enquiryService.getEnquiry({ enquiryId: testEnquiry.enquiryId });
 
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
       });
 
       it('calls listRelatedEnquiries with correct data', () => {
-        enquiryService.listRelatedEnquiries(TEST_ACTIVITY_ID);
+        enquiryService.listRelatedEnquiries({ activityId: TEST_ACTIVITY_ID });
 
         expect(getSpy).toHaveBeenCalledTimes(1);
         expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ACTIVITY_ID}`);
@@ -149,8 +137,8 @@ describe('enquiryService', () => {
         });
       });
 
-      it('calls updateEnquiry with correct data', () => {
-        enquiryService.updateEnquiry(testEnquiry.enquiryId, testEnquiry);
+      it('calls patchEnquiry with correct data', () => {
+        enquiryService.patchEnquiry(testEnquiry);
 
         expect(patchSpy).toHaveBeenCalledTimes(1);
         expect(patchSpy).toHaveBeenCalledWith(

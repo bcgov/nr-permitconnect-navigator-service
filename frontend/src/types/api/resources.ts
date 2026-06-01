@@ -87,7 +87,7 @@ export interface Activity extends AuditFields {
  * Activity Contact
  */
 
-export interface ActivityContactBase extends IStamps {
+export interface ActivityContactBase extends AuditFields {
   activityId: string;
   contactId: UUID;
   role: ActivityContactRole;
@@ -165,7 +165,7 @@ export interface ElectrificationProject extends Project {
  * Enquiry
  */
 
-export interface EnquiryBase extends IStamps {
+export interface EnquiryBase extends AuditFields {
   enquiryId: UUID;
   activityId: string;
   addedToAts: boolean;
@@ -277,19 +277,24 @@ export interface Note extends AuditFields {
  * Note History
  */
 
-export interface NoteHistory extends AuditFields {
-  noteHistoryId?: UUID;
+export interface NoteHistoryBase extends AuditFields {
+  noteHistoryId: UUID;
   activityId: string;
   bringForwardDate: Nullable<string>;
   bringForwardState: Nullable<string>;
   escalateToDirector: boolean;
   escalateToSupervisor: boolean;
   escalationType: Nullable<string>;
-  note: Note[];
   shownToProponent: boolean;
   title: string;
   type: NoteType;
 }
+
+interface NoteHistoryRelations {
+  note: Note[];
+}
+
+export type NoteHistory = NoteHistoryBase & Partial<NoteHistoryRelations>;
 
 /**
  * Permit

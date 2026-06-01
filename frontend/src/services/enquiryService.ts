@@ -1,67 +1,115 @@
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { AxiosResponse } from 'axios';
-import type { Enquiry, EnquiryArgs, EnquirySearchParameters } from '@/types';
+import type {
+  CreateEnquiryRequest,
+  DeleteEnquiryRequest,
+  Enquiry,
+  GetEnquiryRequest,
+  ListRelatedEnquiriesRequest,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '@/types';
 
 const PATH = 'enquiry';
+/**
+ * Creates a new enquiry.
+ * @param req - The request payload containing the enquiry data to create.
+ * @returns A promise resolving to the created `Enquiry` resource.
+ */
+export async function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry> {
+  const { ...body } = req;
 
-export default {
-  /**
-   * @function createEnquiry
-   * @returns {Promise} An axios response
-   */
-  createEnquiry(data: EnquiryArgs) {
-    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
-  },
+  const { data } = await appAxios().post<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, body);
 
-  /**
-   * @function deleteEnquiry
-   * @returns {Promise} An axios response
-   */
-  deleteEnquiry(enquiryId: string) {
-    return appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
-  },
+  return data;
+}
 
-  /**
-   * @function getEnquiries
-   * @returns {Promise} An axios response
-   */
-  getEnquiries() {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
-  },
+/**
+ * Deletes an enquiry.
+ * @param req - The request payload containing the enquiry ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
+  const { enquiryId } = req;
 
-  /**
-   * @function getEnquiry
-   * @returns {Promise} An axios response
-   */
-  getEnquiry(enquiryId: string): Promise<AxiosResponse<Enquiry>> {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
-  },
+  await appAxios().delete<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
+}
 
-  /**
-   * @function listRelatedEnquiries
-   * @param {string} activityId
-   * @description List all enquiries related to an activity
-   * @returns {Promise} An axios response
-   */
-  async listRelatedEnquiries(activityId: string) {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`);
-  },
+/**
+ * Retrieves a single enquiry.
+ * @param req - The request payload containing the enquiry ID.
+ * @returns A promise resolving to the requested `Enquiry` resource.
+ */
+export async function getEnquiry(req: GetEnquiryRequest): Promise<Enquiry> {
+  const { enquiryId } = req;
 
-  /**
-   * @function searchEnquiries
-   * @returns {Promise} An axios response
-   */
-  searchEnquiries(filters?: EnquirySearchParameters) {
-    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, filters);
-  },
+  const { data } = await appAxios().get<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
 
-  /**
-   * @function updateEnquiry
-   * @returns {Promise} An axios response
-   */
-  updateEnquiry(enquiryId: string, data: Partial<Enquiry>) {
-    return appAxios().patch(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`, data);
-  }
+  return data;
+}
+
+/**
+ * Retrieves all enquiries.
+ * @returns A promise resolving to an array of `Enquiry` resources.
+ */
+export async function listEnquiries(): Promise<Enquiry[]> {
+  const { data } = await appAxios().get<Enquiry[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
+
+  return data;
+}
+
+/**
+ * Retrieves all enquiries associated with an activity.
+ * @param req - The request payload containing the activity ID.
+ * @returns A promise resolving to an array of `Enquiry` resources.
+ */
+export async function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Promise<Enquiry[]> {
+  const { activityId } = req;
+
+  const { data } = await appAxios().get<Enquiry[]>(
+    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`
+  );
+
+  return data;
+}
+
+/**
+ * Searches enquiries using the supplied filters.
+ * @param req - The request payload containing optional search criteria.
+ * @returns A promise resolving to an array of `Enquiry` resources.
+ */
+export async function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enquiry[]> {
+  const { data } = await appAxios().post<Enquiry[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, req);
+
+  return data;
+}
+
+/**
+ * Updates an existing enquiry.
+ * @param req - The request payload containing the enquiry ID and updated fields.
+ * @returns A promise resolving to the updated `Enquiry` resource.
+ */
+export async function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
+  const { enquiryId, ...body } = req;
+
+  const { data } = await appAxios().patch<Enquiry>(
+    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`,
+    body
+  );
+
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+const enquiryService = {
+  createEnquiry,
+  deleteEnquiry,
+  getEnquiry,
+  listEnquiries,
+  listRelatedEnquiries,
+  searchEnquiries,
+  patchEnquiry
 };
+
+export default enquiryService;

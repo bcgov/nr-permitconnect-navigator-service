@@ -152,8 +152,8 @@ onBeforeMount(async () => {
     }
 
     if (enquiryId) {
-      const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
-      const notes = (await noteHistoryService.listNoteHistories(enquiry.activityId)).data;
+      const enquiry = await enquiryService.getEnquiry({ enquiryId });
+      const notes = await noteHistoryService.listNoteHistories({ activityId: enquiry.activityId });
 
       activityId.value = enquiry.activityId;
 

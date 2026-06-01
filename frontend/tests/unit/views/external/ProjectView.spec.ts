@@ -22,7 +22,7 @@ import {
 import ProjectView from '@/views/external/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject, Note, NoteHistory } from '@/types';
 
 // Mock functions we need to test
 const routerReplace = vi.fn();
@@ -125,7 +125,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 beforeEach(() => {
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue(
     mockAxiosResponse([{ needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }])
   );
@@ -138,9 +138,9 @@ beforeEach(() => {
   vi.mocked(housingProjectService.getProject).mockResolvedValue(
     mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
   );
-  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
-    mockAxiosResponse([{ noteHistoryId: '123', shownToProponent: true, note: [{}] }])
-  );
+  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
+    { noteHistoryId: '123', shownToProponent: true, note: [] as Note[] }
+  ] as NoteHistory[]);
 });
 
 afterEach(() => {

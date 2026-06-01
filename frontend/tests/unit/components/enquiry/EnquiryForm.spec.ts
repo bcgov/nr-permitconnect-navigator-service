@@ -23,7 +23,7 @@ import type { Ref } from 'vue';
 import type { Enquiry, ProjectService } from '@/types';
 
 const searchContactSpy = vi.spyOn(userService, 'searchUsers');
-const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
+const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
 const getHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
 const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'getActivityIds');
 const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');

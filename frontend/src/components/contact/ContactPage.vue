@@ -93,7 +93,7 @@ onBeforeMount(async () => {
         projectService?.value.searchProjects({ activityId: activityIds }),
         enquiryService.searchEnquiries({ activityId: activityIds })
       ])
-    ).map((r) => r?.data);
+    ).map((r) => r);
 
     projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
   }

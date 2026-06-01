@@ -37,6 +37,7 @@ import type {
   DeepPartial,
   Enquiry,
   InputEvent,
+  PatchEnquiryRequest,
   User
 } from '@/types';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
@@ -282,7 +283,9 @@ const onSubmit = async (formValues: GenericObject) => {
     const values: FormSchemaType = await setAtsSubmitData(transformed);
 
     // Generate final payload
-    const payload: Partial<Enquiry> = {
+    const payload: PatchEnquiryRequest = {
+      enquiryId: enquiry.enquiryId,
+
       // Enquiry description
       enquiryDescription: values.enquiryDescription,
 
@@ -303,8 +306,8 @@ const onSubmit = async (formValues: GenericObject) => {
     };
 
     // Update enquiry
-    const result = await enquiryService.updateEnquiry(enquiry.enquiryId, payload);
-    enquiryStore.setEnquiry(result.data);
+    const result = await enquiryService.patchEnquiry(payload);
+    enquiryStore.setEnquiry(result);
 
     // Wait a tick for store to propagate
     await nextTick();

@@ -199,11 +199,11 @@ onBeforeMount(async () => {
     [authorizations.value, enquiries.value, projects.value, drafts.value] = (
       await Promise.all([
         permitService.listPermits(),
-        enquiryService.getEnquiries(),
+        enquiryService.listEnquiries(),
         provideDraftableProjectService.value.getProjects(),
         provideDraftableProjectService.value.getDrafts()
       ])
-    ).map((r) => r.data);
+    ).map((r) => r);
 
     // Sort by last updated, push non-updated projects to bottom
     projects.value.sort(sortByLastUpdated);

@@ -118,9 +118,9 @@ onBeforeMount(async () => {
         permitService.listPermits(),
         initiativeState.value.projectService.getProjects(),
         initiativeState.value.projectService.getStatistics(),
-        noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)
+        noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED })
       ])
-    ).map((r) => r.data);
+    ).map((r) => r);
     loading.value = false;
   } catch (e) {
     generalErrorHandler(e);

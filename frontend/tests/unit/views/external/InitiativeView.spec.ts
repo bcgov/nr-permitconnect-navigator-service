@@ -88,7 +88,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiries).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(enquiryService.listEnquiries).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(electrificationProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(housingProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
@@ -109,7 +109,7 @@ describe('InitiativeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(enquiryService.getEnquiries).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(enquiryService.listEnquiries).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(InitiativeView, wrapperSettings());
     await flushPromises();
