@@ -23,7 +23,16 @@ import { Initiative, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject, GeneralProject, Document, NoteHistory, Enquiry } from '@/types';
+import type {
+  ElectrificationProject,
+  HousingProject,
+  GeneralProject,
+  Document,
+  NoteHistory,
+  Enquiry,
+  Permit,
+  PermitType
+} from '@/types';
 import ProjectInformationTab from '@/components/projectCommon/ProjectInformationTab.vue';
 import ProjectFilesTab from '@/components/projectCommon/ProjectFilesTab.vue';
 import ProjectAuthorizationsTab from '@/components/projectCommon/ProjectAuthorizationsTab.vue';
@@ -59,50 +68,50 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
+  enquiryService: {
     listRelatedEnquiries: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
-    getPermitTypes: vi.fn(),
+  permitService: {
+    listPermitTypes: vi.fn(),
     listPermits: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/generalProjectService', () => ({
-  default: {
+  generalProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
+  noteHistoryService: {
     listNoteHistories: vi.fn()
   }
 }));
 
 vi.mock('@/services/activityContactService', () => ({
-  default: {
+  activityContactService: {
     listActivityContacts: vi.fn()
   }
 }));
 
 vi.mock('@/services/documentService', () => ({
-  default: {
+  documentService: {
     listDocuments: vi.fn()
   }
 }));
@@ -166,8 +175,8 @@ beforeEach(() => {
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(documentService.listDocuments).mockResolvedValue([{ documentId: '123', filename: 'foo' } as Document]);
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([{ noteHistoryId: '123' }] as NoteHistory[]);
-  vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([{ permitId: '123' }]));
-  vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([{ permitTypeId: '123' }]));
+  vi.mocked(permitService.listPermits).mockResolvedValue([{ permitId: '123' }] as Permit[]);
+  vi.mocked(permitService.listPermitTypes).mockResolvedValue([{ permitTypeId: 123 }] as PermitType[]);
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([{ enquiryId: '123' }] as Enquiry[]);
   vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue(mockAxiosResponse({ roadmapNoteId: '123' }));
 });

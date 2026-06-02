@@ -103,7 +103,7 @@ export async function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
 }
 
 /** Hybrid default export object for backward compatibility */
-const enquiryService = {
+export const enquiryService = {
   createEnquiry,
   deleteEnquiry,
   getEnquiry,
@@ -112,5 +112,3 @@ const enquiryService = {
   searchEnquiries,
   patchEnquiry
 };
-
-export default enquiryService;

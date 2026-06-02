@@ -16,7 +16,7 @@ import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { AxiosResponse } from 'axios';
-import type { Contact } from '@/types';
+import type { Contact, PermitType } from '@/types';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -31,10 +31,10 @@ vi.mock('vue-router', () => ({
   onBeforeRouteUpdate: vi.fn()
 }));
 
-const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
-const testPermitData = [
+const testPermitTypeData = [
   {
     permitTypeId: 1,
     agency: 'Water, Land and Resource Stewardship',
@@ -42,9 +42,7 @@ const testPermitData = [
     branch: 'Archaeology',
     businessDomain: 'Archaeology',
     type: 'Alteration',
-    family: null,
     name: 'Site Alteration Permit',
-    nameSubtype: null,
     acronym: 'SAP',
     trackedInATS: false,
     sourceSystem: 'Archaeology Permit Tracking System',
@@ -57,9 +55,7 @@ const testPermitData = [
     branch: 'Archaeology',
     businessDomain: 'Archaeology',
     type: 'Inspection',
-    family: null,
     name: 'Heritage Inspection Permit',
-    nameSubtype: null,
     acronym: 'HIP',
     trackedInATS: false,
     sourceSystem: 'Archaeology Permit Tracking System',
@@ -72,15 +68,13 @@ const testPermitData = [
     branch: 'Archaeology',
     businessDomain: 'Archaeology',
     type: 'Investigation',
-    family: null,
     name: 'Investigation Permit',
-    nameSubtype: null,
     acronym: null,
     trackedInATS: false,
     sourceSystem: 'Archaeology Permit Tracking System',
     sourceSystemAcronym: 'APTS'
   }
-];
+] as PermitType[];
 
 const sampleContact: Contact = {
   contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
@@ -137,7 +131,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  getPermitTypesSpy.mockResolvedValue({ data: testPermitData } as AxiosResponse);
+  listPermitTypesSpy.mockResolvedValue(testPermitTypeData);
 });
 
 afterEach(() => {

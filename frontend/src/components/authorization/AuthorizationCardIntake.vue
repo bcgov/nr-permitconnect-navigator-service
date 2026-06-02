@@ -32,7 +32,7 @@ const { getPermitTypes } = storeToRefs(permitStore);
 // Actions
 onBeforeMount(async () => {
   if (getPermitTypes.value.length === 0) {
-    const permitTypes = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
+    const permitTypes = await permitService.listPermitTypes({ initiative: useAppStore().getInitiative });
     permitStore.setPermitTypes(permitTypes);
   }
 });

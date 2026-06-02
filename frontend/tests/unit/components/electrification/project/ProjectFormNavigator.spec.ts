@@ -39,7 +39,7 @@ vi.mock('@/services', () => ({
     searchUsers: vi.fn()
   },
   electrificationProjectService: {
-    updateProject: vi.fn()
+    patchProject: vi.fn()
   }
 }));
 
@@ -204,8 +204,12 @@ describe('Form Submission & ATS Integration', () => {
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.electrificationProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.electrificationProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -227,8 +231,12 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.electrificationProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.electrificationProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -249,8 +257,12 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.electrificationProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.electrificationProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -275,8 +287,7 @@ describe('Form Submission & ATS Integration', () => {
     await flushPromises();
 
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.electrificationProjectId,
-      expect.objectContaining({ addedToAts: false })
+      expect.objectContaining({ projectId: testProject.electrificationProjectId, addedToAts: false })
     );
   });
 

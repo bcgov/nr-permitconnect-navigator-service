@@ -12,6 +12,7 @@ import type {
 } from '@/types';
 
 const PATH = 'note';
+
 /**
  * Creates a note history record.
  * @param req - The request payload containing the note history data and note content.
@@ -88,12 +89,10 @@ export async function putNoteHistory(req: PutNoteHistoryRequest): Promise<NoteHi
 }
 
 /** Hybrid default export object for backward compatibility */
-const noteHistoryService = {
+export const noteHistoryService = {
   createNoteHistory,
   deleteNoteHistory,
   listBringForwards,
   listNoteHistories,
   putNoteHistory
 };
-
-export default noteHistoryService;

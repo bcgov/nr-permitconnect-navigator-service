@@ -279,7 +279,7 @@ describe('AuthorizationForm.vue', () => {
       await flushPromises();
 
       expect(mockConfirmRequire).toHaveBeenCalled();
-      expect(permitService.deletePermit).toHaveBeenCalledWith('permit-123');
+      expect(permitService.deletePermit).toHaveBeenCalledWith({ permitId: 'permit-123' });
       expect(mockToastSuccess).toHaveBeenCalledWith('authorization.authorizationForm.authDeleted');
       expect(mockRouterPush).toHaveBeenCalledWith(expect.objectContaining({ name: 'housing-project' }));
     });

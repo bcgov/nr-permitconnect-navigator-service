@@ -7,6 +7,7 @@ import { contactService, permitService, housingProjectService, electrificationPr
 import { Initiative } from '@/utils/enums/application';
 import PermitStatusView from '@/views/external/PermitStatusView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import type { Permit } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -40,19 +41,19 @@ vi.mock('@/services/contactService', () => ({
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     getPermit: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     searchProjects: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     searchProjects: vi.fn()
   }
 }));
@@ -86,7 +87,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(contactService.searchContacts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(permitService.getPermit).mockResolvedValue({ permitId: '123' } as Permit);
   vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue([]);
   vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
 });

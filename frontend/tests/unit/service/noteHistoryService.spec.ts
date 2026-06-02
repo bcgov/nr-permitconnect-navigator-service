@@ -1,156 +1,221 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+import {
+  noteHistoryService,
+  createNoteHistory,
+  deleteNoteHistory,
+  listBringForwards,
+  listNoteHistories,
+  putNoteHistory
+} from '@/services/noteHistoryService';
 
-import { noteHistoryService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
-import { Initiative, Resource } from '@/utils/enums/application';
-import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
+import { Initiative } from '@/utils/enums/application';
 
-import type { Note, NoteHistory } from '@/types';
-import type { AxiosInstance } from 'axios';
-
-// Constants
-const PATH = 'note';
-
-const TEST_NOTE: Note = {
-  noteId: '123',
-  noteHistoryId: '123',
-  note: 'some text',
-  createdBy: 'user',
-  createdAt: new Date().toISOString(),
-  updatedBy: 'user',
-  updatedAt: new Date().toISOString()
-};
-
-const TEST_NOTE_HISTORY: NoteHistory = {
-  activityId: '123',
-  bringForwardDate: null,
-  bringForwardState: null,
-  escalateToDirector: false,
-  escalateToSupervisor: false,
-  escalationType: null,
-  note: [TEST_NOTE],
-  noteHistoryId: '123',
-  type: NoteType.GENERAL,
-  title: 'Title',
-  shownToProponent: false,
-  createdBy: 'user',
-  createdAt: new Date().toISOString(),
-  updatedBy: 'user',
-  updatedAt: new Date().toISOString()
-};
-
-// Mocks
-const deleteSpy = vi.fn();
-const getSpy = vi.fn();
-const postSpy = vi.fn();
-const putSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  delete: deleteSpy,
-  get: getSpy,
-  post: postSpy,
-  put: putSpy
-} as unknown as AxiosInstance);
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
+describe('noteHistory service', () => {
+  const mockPost = vi.fn();
+  const mockGet = vi.fn();
+  const mockPut = vi.fn();
+  const mockDelete = vi.fn();
 
-  vi.clearAllMocks();
-});
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-describe('noteHistoryService', () => {
-  let appStore: StoreGeneric;
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore = useAppStore();
-        appStore.setInitiative(initiative);
+    vi.mocked(appAxios).mockReturnValue({
+      post: mockPost,
+      get: mockGet,
+      put: mockPut,
+      delete: mockDelete
+    } as never);
+  });
+
+  describe('createNoteHistory', () => {
+    it('creates a note history record and returns data', async () => {
+      const request = {
+        activityId: 'activity-1',
+        note: 'Test note'
+      };
+
+      const response = {
+        noteHistoryId: 'note-history-1'
+      };
+
+      mockPost.mockResolvedValue({
+        data: response
       });
 
-      describe('createNoteHistory', () => {
-        it('calls with given data', () => {
-          noteHistoryService.createNoteHistory({ ...TEST_NOTE_HISTORY, note: 'text' } as NoteHistory & {
-            note: string;
-          });
+      const result = await createNoteHistory(request as never);
 
-          expect(postSpy).toHaveBeenCalledTimes(1);
-          expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
-            ...TEST_NOTE_HISTORY,
-            note: 'text'
-          });
-        });
+      expect(mockPost).toHaveBeenCalledWith('housing/note', request);
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('create failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(createNoteHistory({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('deleteNoteHistory', () => {
+    it('deletes a note history record and returns data', async () => {
+      const response = {
+        noteHistoryId: 'note-history-1'
+      };
+
+      mockDelete.mockResolvedValue({
+        data: response
       });
 
-      describe('deleteNote', () => {
-        it('calls with given data', () => {
-          noteHistoryService.deleteNoteHistory({ noteHistoryId: TEST_NOTE_HISTORY.noteHistoryId });
-
-          expect(deleteSpy).toHaveBeenCalledTimes(1);
-          expect(deleteSpy).toHaveBeenCalledWith(
-            `${initiative.toLowerCase()}/${PATH}/${TEST_NOTE_HISTORY.noteHistoryId}`
-          );
-        });
+      const result = await deleteNoteHistory({
+        noteHistoryId: 'note-history-1'
       });
 
-      describe('listBringForward', () => {
-        it('adds Unresolved to query when given as parameter', () => {
-          noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED });
+      expect(mockDelete).toHaveBeenCalledWith('housing/note/note-history-1');
 
-          expect(getSpy).toHaveBeenCalledTimes(1);
-          expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
-            params: { bringForwardState: BringForwardType.UNRESOLVED }
-          });
-        });
+      expect(result).toEqual(response);
+    });
 
-        it('adds Resolved to query when given as parameter', () => {
-          noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.RESOLVED });
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
 
-          expect(getSpy).toHaveBeenCalledTimes(1);
-          expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/bringForward`, {
-            params: { bringForwardState: BringForwardType.RESOLVED }
-          });
-        });
+      mockDelete.mockRejectedValue(error);
+
+      await expect(
+        deleteNoteHistory({
+          noteHistoryId: 'note-history-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('listBringForwards', () => {
+    it('returns bring forwards with filter params', async () => {
+      const bringForwards = [{ id: '1' }, { id: '2' }];
+
+      const request = {
+        bringForwardState: 'OPEN'
+      };
+
+      mockGet.mockResolvedValue({
+        data: bringForwards
       });
 
-      describe('listNotes', () => {
-        it('retrieves note list', () => {
-          noteHistoryService.listNoteHistories({ activityId: 'testUUID' });
+      const result = await listBringForwards(request as never);
 
-          expect(getSpy).toHaveBeenCalledTimes(1);
-          expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/testUUID`);
-        });
+      expect(mockGet).toHaveBeenCalledWith('housing/note/bringForward', {
+        params: {
+          bringForwardState: 'OPEN'
+        }
       });
 
-      describe('putNoteHistory', () => {
-        it('calls with given data', () => {
-          noteHistoryService.putNoteHistory({
-            ...TEST_NOTE_HISTORY,
-            note: 'text',
-            resource: Resource.ELECTRIFICATION_PROJECT
-          } as NoteHistory & {
-            note: string;
-            resource: Resource;
-          });
+      expect(result).toEqual(bringForwards);
+    });
 
-          expect(putSpy).toHaveBeenCalledTimes(1);
-          expect(putSpy).toHaveBeenCalledWith(
-            `${initiative.toLowerCase()}/${PATH}/${TEST_NOTE_HISTORY.noteHistoryId}`,
-            { ...TEST_NOTE_HISTORY, note: 'text', resource: Resource.ELECTRIFICATION_PROJECT }
-          );
-        });
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listBringForwards({
+          bringForwardState: 'OPEN'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('listNoteHistories', () => {
+    it('returns note histories for an activity', async () => {
+      const noteHistories = [{ noteHistoryId: '1' }, { noteHistoryId: '2' }];
+
+      mockGet.mockResolvedValue({
+        data: noteHistories
       });
-    }
-  );
+
+      const result = await listNoteHistories({
+        activityId: 'activity-1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('housing/note/list/activity-1');
+
+      expect(result).toEqual(noteHistories);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listNoteHistories({
+          activityId: 'activity-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('putNoteHistory', () => {
+    it('updates a note history record and returns data', async () => {
+      const request = {
+        noteHistoryId: 'note-history-1',
+        note: 'Updated note',
+        bringForwardDate: '2026-01-01'
+      };
+
+      const response = {
+        noteHistoryId: 'note-history-1',
+        note: 'Updated note'
+      };
+
+      mockPut.mockResolvedValue({
+        data: response
+      });
+
+      const result = await putNoteHistory(request as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/note/note-history-1', {
+        note: 'Updated note',
+        bringForwardDate: '2026-01-01'
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('update failed');
+
+      mockPut.mockRejectedValue(error);
+
+      await expect(
+        putNoteHistory({
+          noteHistoryId: 'note-history-1'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(noteHistoryService).toEqual({
+      createNoteHistory,
+      deleteNoteHistory,
+      listBringForwards,
+      listNoteHistories,
+      putNoteHistory
+    });
+  });
 });

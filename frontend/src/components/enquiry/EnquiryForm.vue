@@ -165,7 +165,7 @@ async function createATSEnquiry(atsClientId?: number) {
 
 async function getRelatedATSClientID(activityId: string) {
   if (projectService?.value) {
-    const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
+    const response = await projectService.value.searchProjects({ activityId: [activityId] });
     if (response.length > 0) {
       return response[0].atsClientId;
     }
@@ -241,7 +241,7 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
 
   if (e.value) {
     if (projectService?.value) {
-      const response = (await projectService.value.searchProjects({ activityId: [e.value] })).data;
+      const response = await projectService.value.searchProjects({ activityId: [e.value] });
       if (response.length > 0) {
         // Set ATS client ID from the related project
         formRef.value?.setFieldValue('atsInfo.atsClientId', response[0].atsClientId);

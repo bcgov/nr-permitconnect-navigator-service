@@ -36,8 +36,7 @@ import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { HousingProjectService } from '@/services/housingProjectService';
-import type { BringForward, Enquiry, Permit, Project, Statistics } from '@/types';
+import type { BringForward, Enquiry, Permit, Project, ProjectService, Statistics } from '@/types';
 
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
@@ -47,7 +46,7 @@ const projects = defineModel<Project[]>('projects', { required: true });
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
-const projectService = inject<Ref<HousingProjectService>>(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 
 // Composables
 const toast = useToast();

@@ -94,7 +94,7 @@ export async function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
 }
 
 /** Hybrid default export object for backward compatibility */
-const permitService = {
+export const permitService = {
   deletePermit,
   getPermit,
   listPermits,
@@ -102,5 +102,3 @@ const permitService = {
   searchPermits,
   upsertPermit
 };
-
-export default permitService;

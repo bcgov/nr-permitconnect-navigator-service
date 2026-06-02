@@ -16,7 +16,7 @@ import {
 import { useAuthZStore } from '@/store';
 import { GroupName, Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/internal/InitiativeView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { Group, Statistics } from '@/types';
 
@@ -46,34 +46,34 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
-    searchEnquiries: vi.fn()
+  enquiryService: {
+    listEnquiries: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     listPermits: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
-    getProjects: vi.fn(),
+  electrificationProjectService: {
+    listProjects: vi.fn(),
     getStatistics: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
-    getProjects: vi.fn(),
+  housingProjectService: {
+    listProjects: vi.fn(),
     getStatistics: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
-    listBringForward: vi.fn()
+  noteHistoryService: {
+    listBringForwards: vi.fn()
   }
 }));
 
@@ -104,8 +104,8 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.searchEnquiries).mockResolvedValue([]);
-  vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(enquiryService.listEnquiries).mockResolvedValue([]);
+  vi.mocked(permitService.listPermits).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.getStatistics).mockResolvedValue({} as Statistics);
   vi.mocked(housingProjectService.listProjects).mockResolvedValue([]);
@@ -132,7 +132,7 @@ describe('InitiativeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(enquiryService.searchEnquiries).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(enquiryService.listEnquiries).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(InitiativeView, wrapperSettings());
     await flushPromises();
@@ -167,7 +167,7 @@ describe('InitiativeView.vue', () => {
     expect(childComponent.props('enquiries')).toStrictEqual([]);
     expect(childComponent.props('permits')).toStrictEqual([]);
     expect(childComponent.props('projects')).toStrictEqual([]);
-    expect(childComponent.props('statistics')).toStrictEqual([]);
+    expect(childComponent.props('statistics')).toStrictEqual({});
   });
 
   it('does not render SubmissionsNavigator without permission', async () => {

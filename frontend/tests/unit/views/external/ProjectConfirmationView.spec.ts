@@ -7,7 +7,7 @@ import { flushPromises, shallowMount, RouterLinkStub } from '@vue/test-utils';
 import { default as i18n } from '@/i18n';
 import { Message } from '@/lib/primevue';
 import ProjectConfirmationView from '@/views/external/ProjectConfirmationView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { electrificationProjectService, housingProjectService } from '@/services';
 
@@ -32,13 +32,13 @@ vi.mock('@/lib/primevue/useToast', () => ({
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));

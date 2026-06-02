@@ -36,25 +36,25 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
+  enquiryService: {
     getEnquiry: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
+  noteHistoryService: {
     listNoteHistories: vi.fn()
   }
 }));

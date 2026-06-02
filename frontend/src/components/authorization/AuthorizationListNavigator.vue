@@ -80,8 +80,8 @@ async function searchPermits() {
             sortOrder: pagination.value.order
           })
           .then((res) => {
-            permits.value = res.data.permits;
-            totalRecords.value = res.data.totalRecords;
+            permits.value = res.permits;
+            totalRecords.value = res.totalRecords;
           })
           .finally(() => {
             loading.value = false;
@@ -99,7 +99,7 @@ function shouldDisplayLocation() {
 
 onBeforeMount(async () => {
   searchPermits();
-  permitTypes.value = (await permitService.getPermitTypes(useAppStore().getInitiative)).data;
+  permitTypes.value = await permitService.listPermitTypes({ initiative: useAppStore().getInitiative });
   const kinds = (await sourceSystemKindService.getSourceSystemKinds()).data;
   sourceSystemKinds.value = kinds.sort((a: SourceSystemKind, b: SourceSystemKind) =>
     (codeDisplay.SourceSystem[a.sourceSystem] || '').localeCompare(codeDisplay.SourceSystem[b.sourceSystem] || '')

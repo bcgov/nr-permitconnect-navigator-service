@@ -12,10 +12,9 @@ import {
   housingProjectService,
   permitService
 } from '@/services';
+import { Initiative } from '@/utils/enums/application';
 import ProjectIntakeView from '@/views/external/ProjectIntakeView.vue';
 
-import { Initiative } from '@/utils/enums/application';
-import { mockAxiosResponse } from '../../../helpers';
 import type { ElectrificationProject, GeneralProject, HousingProject } from '@/types';
 
 // Mock functions we need to test
@@ -41,32 +40,32 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/documentService', () => ({
-  default: {
+  documentService: {
     listDocuments: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/generalProjectService', () => ({
-  default: {
+  generalProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
-    getPermitTypes: vi.fn(),
+  permitService: {
+    listPermitTypes: vi.fn(),
     listPermits: vi.fn()
   }
 }));
@@ -100,8 +99,8 @@ beforeEach(() => {
   } as ElectrificationProject);
   vi.mocked(generalProjectService.getProject).mockResolvedValue({ activityId: '123' } as GeneralProject);
   vi.mocked(housingProjectService.getProject).mockResolvedValue({ activityId: '123' } as HousingProject);
-  vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(permitService.listPermitTypes).mockResolvedValue([]);
+  vi.mocked(permitService.listPermits).mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -116,7 +115,7 @@ describe('ProjectIntakeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(permitService.getPermitTypes).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(permitService.listPermitTypes).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(ProjectIntakeView, wrapperSettings());
     await flushPromises();

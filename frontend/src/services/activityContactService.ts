@@ -55,11 +55,9 @@ export async function putActivityContact(
 }
 
 /** Hybrid default export object for backward compatibility */
-const activityService = {
+export const activityContactService = {
   createActivityContact,
   putActivityContact,
   deleteActivityContact,
   listActivityContacts
 };
-
-export default activityService;

@@ -26,6 +26,6 @@ export interface ProjectService<T> {
 export interface DraftableProjectService<T, U> extends ProjectService<T> {
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<U>>;
-  getDrafts(): Promise<Draft<U>[]>;
+  listDrafts(): Promise<Draft<U>[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<U>>;
 }

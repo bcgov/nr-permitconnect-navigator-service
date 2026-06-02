@@ -110,11 +110,9 @@ export async function listDocuments(req: ListDocumentsRequest): Promise<Document
 }
 
 /** Hybrid default export object for backward compatibility */
-const documentService = {
+export const documentService = {
   createDocument,
   deleteDocument,
   downloadDocument,
   listDocuments
 };
-
-export default documentService;

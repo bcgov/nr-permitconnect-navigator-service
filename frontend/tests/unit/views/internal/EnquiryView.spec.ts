@@ -42,13 +42,13 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
+  enquiryService: {
     getEnquiry: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
+  noteHistoryService: {
     listNoteHistories: vi.fn()
   }
 }));

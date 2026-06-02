@@ -1,151 +1,265 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { enquiryService } from '@/services';
+import {
+  enquiryService,
+  createEnquiry,
+  deleteEnquiry,
+  getEnquiry,
+  listEnquiries,
+  listRelatedEnquiries,
+  patchEnquiry,
+  searchEnquiries
+} from '@/services/enquiryService';
+
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosInstance } from 'axios';
-import type { CreateEnquiryRequest, Enquiry } from '@/types';
-import {
-  ApplicationStatus,
-  ContactPreference,
-  EnquirySubmittedMethod,
-  ProjectRelationship,
-  SubmissionType
-} from '@/utils/enums/projectCommon';
-
-// Constants
-const PATH = 'enquiry';
-
-const TEST_ACTIVITY_ID = '25357C4A';
-
-const currentDate = new Date().toISOString();
-
-const testCreateEnquiry: CreateEnquiryRequest = {
-  contact: {
-    contactId: '123',
-    firstName: 'enquiryDraft1',
-    lastName: 'enquiryDraft1',
-    phoneNumber: '(123) 456-7890',
-    email: 'test@test.weg',
-    contactPreference: ContactPreference.EITHER,
-    contactApplicantRelationship: ProjectRelationship.OWNER
-  },
-  enquiryDescription: 'desc'
-};
-
-const testEnquiry: Enquiry = {
-  enquiryId: 'enquiry123',
-  activityId: 'activity456',
-  submissionType: SubmissionType.GUIDANCE,
-  submittedAt: '2023-01-01T12:00:00Z',
-  submittedBy: 'user123',
-  enquiryStatus: ApplicationStatus.NEW,
-  submittedMethod: EnquirySubmittedMethod.EMAIL,
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate,
-  addedToAts: false,
-  atsClientId: 123456,
-  atsEnquiryId: 654321
-};
-
-// Mocks
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
-const patchSpy = vi.fn();
-const postSpy = vi.fn();
-const putSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  delete: deleteSpy,
-  patch: patchSpy,
-  post: postSpy,
-  put: putSpy
-} as unknown as AxiosInstance);
-
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
-
-  vi.clearAllMocks();
-});
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
 describe('enquiryService', () => {
-  let appStore: StoreGeneric;
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
+  const mockPatch = vi.fn();
+  const mockDelete = vi.fn();
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore = useAppStore();
-        appStore.setInitiative(initiative);
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
+
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost,
+      patch: mockPatch,
+      delete: mockDelete
+    } as never);
+  });
+
+  describe('createEnquiry', () => {
+    it('creates an enquiry and returns the created resource', async () => {
+      const request = {
+        activityId: 'activity-1',
+        enquiryType: 'General'
+      };
+
+      const enquiry = {
+        enquiryId: 'enquiry-1'
+      };
+
+      mockPost.mockResolvedValue({
+        data: enquiry
       });
 
-      it('calls deleteEnquiry with correct data', () => {
-        enquiryService.deleteEnquiry({ enquiryId: testEnquiry.enquiryId });
+      const result = await createEnquiry(request as never);
 
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
+      expect(mockPost).toHaveBeenCalledWith('housing/enquiry', request);
+
+      expect(result).toEqual(enquiry);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('create failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(createEnquiry({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('deleteEnquiry', () => {
+    it('deletes an enquiry', async () => {
+      mockDelete.mockResolvedValue({});
+
+      await deleteEnquiry({
+        enquiryId: 'enquiry-1'
       });
 
-      it('calls listEnquiries', () => {
-        enquiryService.listEnquiries();
+      expect(mockDelete).toHaveBeenCalledWith('housing/enquiry/enquiry-1');
+    });
 
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`);
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
+
+      mockDelete.mockRejectedValue(error);
+
+      await expect(
+        deleteEnquiry({
+          enquiryId: 'enquiry-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('getEnquiry', () => {
+    it('returns an enquiry', async () => {
+      const enquiry = {
+        enquiryId: 'enquiry-1'
+      };
+
+      mockGet.mockResolvedValue({
+        data: enquiry
       });
 
-      it('calls getEnquiry with correct data', () => {
-        enquiryService.getEnquiry({ enquiryId: testEnquiry.enquiryId });
-
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`);
+      const result = await getEnquiry({
+        enquiryId: 'enquiry-1'
       });
 
-      it('calls listRelatedEnquiries with correct data', () => {
-        enquiryService.listRelatedEnquiries({ activityId: TEST_ACTIVITY_ID });
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/enquiry-1');
 
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ACTIVITY_ID}`);
+      expect(result).toEqual(enquiry);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('get failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        getEnquiry({
+          enquiryId: 'enquiry-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('listEnquiries', () => {
+    it('returns all enquiries', async () => {
+      const enquiries = [{ enquiryId: '1' }, { enquiryId: '2' }];
+
+      mockGet.mockResolvedValue({
+        data: enquiries
       });
 
-      it('calls createEnquiry with correct data', () => {
-        enquiryService.createEnquiry(testCreateEnquiry);
+      const result = await listEnquiries();
 
-        expect(postSpy).toHaveBeenCalledTimes(1);
-        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testCreateEnquiry);
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry');
+
+      expect(result).toEqual(enquiries);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(listEnquiries()).rejects.toThrow(error);
+    });
+  });
+
+  describe('listRelatedEnquiries', () => {
+    it('returns enquiries related to an activity', async () => {
+      const enquiries = [{ enquiryId: '1' }];
+
+      mockGet.mockResolvedValue({
+        data: enquiries
       });
 
-      it('calls searchEnquiries with correct data', () => {
-        enquiryService.searchEnquiries({ activityId: [TEST_ACTIVITY_ID] });
-
-        expect(postSpy).toHaveBeenCalledTimes(1);
-        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/search`, {
-          activityId: [TEST_ACTIVITY_ID]
-        });
+      const result = await listRelatedEnquiries({
+        activityId: 'activity-1'
       });
 
-      it('calls patchEnquiry with correct data', () => {
-        enquiryService.patchEnquiry(testEnquiry);
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/list/activity-1');
 
-        expect(patchSpy).toHaveBeenCalledTimes(1);
-        expect(patchSpy).toHaveBeenCalledWith(
-          `${initiative.toLowerCase()}/${PATH}/${testEnquiry.enquiryId}`,
-          testEnquiry
-        );
+      expect(result).toEqual(enquiries);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listRelatedEnquiries({
+          activityId: 'activity-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('searchEnquiries', () => {
+    it('posts search criteria and returns enquiries', async () => {
+      const request = {
+        activityId: 'activity-1'
+      };
+
+      const enquiries = [{ enquiryId: '1' }];
+
+      mockPost.mockResolvedValue({
+        data: enquiries
       });
-    }
-  );
+
+      const result = await searchEnquiries(request as never);
+
+      expect(mockPost).toHaveBeenCalledWith('housing/enquiry/search', request);
+
+      expect(result).toEqual(enquiries);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(searchEnquiries({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('patchEnquiry', () => {
+    it('updates an enquiry and returns the updated resource', async () => {
+      const request = {
+        enquiryId: 'enquiry-1',
+        status: 'Closed'
+      };
+
+      const enquiry = {
+        enquiryId: 'enquiry-1',
+        status: 'Closed'
+      };
+
+      mockPatch.mockResolvedValue({
+        data: enquiry
+      });
+
+      const result = await patchEnquiry(request as never);
+
+      expect(mockPatch).toHaveBeenCalledWith('housing/enquiry/enquiry-1', {
+        status: 'Closed'
+      });
+
+      expect(result).toEqual(enquiry);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('patch failed');
+
+      mockPatch.mockRejectedValue(error);
+
+      await expect(
+        patchEnquiry({
+          enquiryId: 'enquiry-1'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(enquiryService).toEqual({
+      createEnquiry,
+      deleteEnquiry,
+      getEnquiry,
+      listEnquiries,
+      listRelatedEnquiries,
+      searchEnquiries,
+      patchEnquiry
+    });
+  });
 });

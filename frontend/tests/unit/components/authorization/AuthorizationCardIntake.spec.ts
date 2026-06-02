@@ -11,9 +11,9 @@ import { SYSTEM_ID } from '@/utils/constants/application';
 import { StorageKey } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
-import type { SourceSystemKind } from '@/types';
+import type { PermitType, SourceSystemKind } from '@/types';
 
-const getPermitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
+const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
 const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
 const sampleSourceSystemKind: SourceSystemKind = {
@@ -29,20 +29,9 @@ const sampleSourceSystemKind: SourceSystemKind = {
 
 const permitTypesList = [
   {
-    permitTypeId: 123,
-    agency: 'SOME_AGENCY',
-    division: 'SOME_DIVISION',
-    branch: 'SOME_BRANCH',
-    businessDomain: 'DOMAIN',
-    type: 'ABC',
-    family: null,
-    name: 'PERMIT1',
-    nameSubtype: null,
-    acronym: 'PRT1',
-    trackedInATS: true,
-    sourceSystemCode: 'CODE'
+    permitTypeId: 123
   }
-];
+] as PermitType[];
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -96,7 +85,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 
   getSourceSystemKindsSpy.mockResolvedValue({ data: [sampleSourceSystemKind] } as AxiosResponse);
-  getPermitTypesSpy.mockResolvedValue({ data: permitTypesList } as AxiosResponse);
+  listPermitTypesSpy.mockResolvedValue(permitTypesList);
 });
 
 afterEach(() => {

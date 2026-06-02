@@ -28,7 +28,7 @@ vi.mock('@/lib/primevue', async (importOriginal) => {
 vi.mock('@/services', () => ({
   activityContactService: {
     createActivityContact: vi.fn(),
-    updateActivityContact: vi.fn(),
+    putActivityContact: vi.fn(),
     deleteActivityContact: vi.fn()
   },
   contactService: {
@@ -480,7 +480,10 @@ describe('ProjectTeamTab.vue', () => {
       await confirmArgs.accept();
       await flushPromises();
 
-      expect(activityContactService.deleteActivityContact).toHaveBeenCalledWith('activity1', 'contact1');
+      expect(activityContactService.deleteActivityContact).toHaveBeenCalledWith({
+        activityId: 'activity1',
+        contactId: 'contact1'
+      });
       expect(mockToastSuccess).toHaveBeenCalled();
     });
 

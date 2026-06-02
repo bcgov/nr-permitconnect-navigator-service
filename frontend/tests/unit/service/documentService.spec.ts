@@ -1,253 +1,349 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+import { v4 } from 'uuid';
 
-import { comsService, documentService } from '@/services';
+import {
+  documentService,
+  createDocument,
+  deleteDocument,
+  downloadDocument,
+  listDocuments
+} from '@/services/documentService';
+
+import comsService from '@/services/comsService';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
+import { getFilenameAndExtension } from '@/utils/utils';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
+vi.mock('@/services/comsService', () => ({
+  default: {
+    createObject: vi.fn(),
+    deleteObject: vi.fn(),
+    getObject: vi.fn()
+  }
+}));
 
-// Constants
-const PATH = 'document';
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
+}));
 
-const mockTruncatedId = '01010101';
-const mockedUuid = `${mockTruncatedId}-0000-0000-0000-000000000000`;
-
-const testActivityId = 'testActivityId';
-const testBucketId = 'testBucketId';
-const testTagset = [{ key: 'Project ID', value: testActivityId }];
-const FILE_NAME = 'fileName';
-const testFileData = {
-  id: 'fileId',
-  name: `${FILE_NAME}.txt`,
-  mimeType: 'text/html',
-  length: 42
-};
-const testFile1 = {
-  name: testFileData.name,
-  type: testFileData.mimeType
-};
-const modifiedFileName = `${FILE_NAME}_${mockTruncatedId}.txt`;
-
-// Mocks
-const deleteSpy = vi.fn();
-const getSpy = vi.fn();
-const postSpy = vi.fn();
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
 vi.mock('uuid', () => ({
-  v4: () => mockedUuid
+  v4: vi.fn()
 }));
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+const mockV4 = v4 as unknown as ReturnType<typeof vi.fn>;
+
+vi.mock('@/utils/utils', () => ({
+  getFilenameAndExtension: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  delete: deleteSpy,
-  get: getSpy,
-  post: postSpy
-} as unknown as AxiosInstance);
+describe('document service', () => {
+  const mockPost = vi.fn();
+  const mockGet = vi.fn();
+  const mockDelete = vi.fn();
 
-// Spies
-const createObjectSpy = vi.spyOn(comsService, 'createObject');
-const deleteObjectSpy = vi.spyOn(comsService, 'deleteObject');
-const getObjectSpy = vi.spyOn(comsService, 'getObject');
-let fileSpy = vi.spyOn(global, 'File');
+  beforeEach(async () => {
+    vi.clearAllMocks();
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
-  vi.clearAllMocks();
-});
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
 
-describe('documentService', () => {
-  let appStore: StoreGeneric;
+    vi.mocked(appAxios).mockReturnValue({
+      post: mockPost,
+      get: mockGet,
+      delete: mockDelete
+    } as never);
 
-  beforeEach(() => {
-    appStore = useAppStore();
+    mockV4.mockReturnValue('12345678-abcd-efgh-ijkl-123456789012');
+
+    vi.mocked(getFilenameAndExtension).mockReturnValue({
+      filename: 'test-file',
+      extension: 'pdf'
+    });
   });
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore.setInitiative(initiative);
-
-        // Mock the global File constructor
-        const FileMock = vi.fn(
-          class {
-            name = testFile1.name;
-            type = testFile1.type;
-          }
-        );
-
-        vi.stubGlobal('File', FileMock);
-
-        fileSpy = vi.spyOn(global, 'File');
+  describe('createDocument', () => {
+    it('uploads to COMS and creates document association', async () => {
+      const file = new File(['content'], 'test.pdf', {
+        type: 'application/pdf'
       });
 
-      afterEach(() => {
-        vi.unstubAllGlobals();
+      const comsResponse = {
+        data: {
+          id: 'coms-id',
+          versionId: 'version-id',
+          name: 'test-file_12345678.pdf',
+          mimeType: 'application/pdf',
+          length: 1234
+        }
+      };
+
+      const documentResponse = {
+        id: 'document-id'
+      };
+
+      vi.mocked(comsService.createObject).mockResolvedValue(comsResponse as never);
+
+      mockPost.mockResolvedValue({
+        data: documentResponse
       });
 
-      describe('createDocument', () => {
-        it('formats document name', async () => {
-          createObjectSpy.mockResolvedValue({
-            data: testFileData
-          } as AxiosResponse);
+      const result = await createDocument({
+        activityId: 'activity-1',
+        bucketId: 'bucket-1',
+        document: file
+      });
 
-          await documentService.createDocument({
-            document: testFile1 as File,
-            activityId: testActivityId,
-            bucketId: testBucketId
-          });
-          expect(fileSpy).toHaveBeenCalledTimes(1);
-          expect(fileSpy).toHaveBeenCalledWith([testFile1], modifiedFileName, { type: testFileData.mimeType });
-        });
+      expect(comsService.createObject).toHaveBeenCalledTimes(1);
 
-        it('calls comService with right arguments', async () => {
-          createObjectSpy.mockResolvedValue({
-            data: testFileData
-          } as AxiosResponse);
+      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0];
 
-          await documentService.createDocument({
-            document: testFile1 as File,
-            activityId: testActivityId,
-            bucketId: testBucketId
-          });
-          expect(createObjectSpy).toHaveBeenCalledTimes(1);
-          expect(createObjectSpy).toHaveBeenCalledWith(
-            testFile1,
-            {},
-            { bucketId: testBucketId, tagset: testTagset },
-            { timeout: 0 }
-          );
-        });
+      expect(uploadedFile.name).toBe('test-file_12345678.pdf');
 
-        it('logs uploaded document to DB with right arguments', async () => {
-          createObjectSpy.mockResolvedValue({
-            data: testFileData
-          } as AxiosResponse);
-
-          await documentService.createDocument({
-            document: testFile1 as File,
-            activityId: testActivityId,
-            bucketId: testBucketId
-          });
-          expect(postSpy).toHaveBeenCalledTimes(1);
-          expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
-            activityId: testActivityId,
-            documentId: testFileData.id,
-            filename: testFileData.name,
-            mimeType: testFileData.mimeType,
-            filesize: testFileData.length
-          });
-        });
-
-        // TODO: How to properly get mock functions inside catch blocks to do the right thing
-        // Coverage shows they are executing but spys do not
-        it('deletes COMS object on appAxios error', async () => {
-          const testVersionId = 'testVersionId';
-          createObjectSpy.mockResolvedValue({
-            data: {
-              id: testFileData.id,
-              versionId: testVersionId
+      expect(comsService.createObject).toHaveBeenCalledWith(
+        expect.any(File),
+        {},
+        {
+          bucketId: 'bucket-1',
+          tagset: [
+            {
+              key: 'Project ID',
+              value: 'activity-1'
             }
-          } as AxiosResponse);
+          ]
+        },
+        {
+          timeout: 0
+        }
+      );
 
-          deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-
-          vi.mocked(appAxios().post).mockImplementationOnce(() => {
-            throw new Error();
-          });
-
-          await expect(
-            documentService.createDocument({
-              document: testFile1 as File,
-              activityId: testActivityId,
-              bucketId: testBucketId
-            })
-          ).rejects.toThrow();
-        });
-
-        // Useless test until above can be fixed
-        it.todo('does not delete COMS object on comsService error', async () => {
-          createObjectSpy.mockImplementation(() => {
-            throw new Error();
-          });
-
-          deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-
-          await expect(
-            documentService.createDocument({
-              document: testFile1 as File,
-              activityId: testActivityId,
-              bucketId: testBucketId
-            })
-          ).rejects.toThrow();
-        });
+      expect(mockPost).toHaveBeenCalledWith('housing/document', {
+        activityId: 'activity-1',
+        documentId: 'coms-id',
+        filename: 'test-file_12345678.pdf',
+        mimeType: 'application/pdf',
+        filesize: 1234
       });
 
-      it('downloads a document by id with no version', async () => {
-        const testId = 'testDocumentId';
-        const filename = 'filename';
-        getObjectSpy.mockResolvedValue();
-        await documentService.downloadDocument({ documentId: testId, filename });
+      expect(result).toEqual(documentResponse);
+    });
 
-        expect(getObjectSpy).toHaveBeenCalledTimes(1);
-        expect(getObjectSpy).toHaveBeenCalledWith(testId, filename, undefined);
+    it('supports files without extensions', async () => {
+      vi.mocked(getFilenameAndExtension).mockReturnValue({
+        filename: 'test-file',
+        extension: ''
       });
 
-      it('downloads a document by id with version', async () => {
-        const testId = 'testDocumentId';
-        const versionId = 'testVersionId';
-        const filename = 'filename';
-        getObjectSpy.mockResolvedValue();
-        await documentService.downloadDocument({ documentId: testId, filename, versionId });
-        expect(getObjectSpy).toHaveBeenCalledTimes(1);
-        expect(getObjectSpy).toHaveBeenCalledWith(testId, filename, versionId);
+      const file = new File(['content'], 'test', {
+        type: 'text/plain'
       });
 
-      it('deletes a document by id with no version', async () => {
-        const testId = 'testDocumentId';
-        deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-        await documentService.deleteDocument({ documentId: testId });
-        expect(deleteObjectSpy).toHaveBeenCalledTimes(1);
-        expect(deleteObjectSpy).toHaveBeenCalledWith(testId, undefined);
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testId}`, {
-          params: {
-            versionId: undefined
-          }
-        });
+      vi.mocked(comsService.createObject).mockResolvedValue({
+        data: {
+          id: 'coms-id',
+          name: 'test-file_12345678',
+          mimeType: 'text/plain',
+          length: 1
+        }
+      } as never);
+
+      mockPost.mockResolvedValue({
+        data: {}
       });
 
-      it('deletes a document by id with version', async () => {
-        const testId = 'testdocumentId';
-        const versionId = 'testVersionId';
-        deleteObjectSpy.mockResolvedValue({} as AxiosResponse);
-        await documentService.deleteDocument({ documentId: testId, versionId });
-        expect(deleteObjectSpy).toHaveBeenCalledTimes(1);
-        expect(deleteObjectSpy).toHaveBeenCalledWith(testId, versionId);
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${testId}`, {
-          params: {
-            versionId: versionId
-          }
-        });
+      await createDocument({
+        activityId: 'activity-1',
+        bucketId: 'bucket-1',
+        document: file
       });
 
-      it('gets a list of documents by id', async () => {
-        const testId = 'testActivityId';
-        await documentService.listDocuments({ activityId: testId });
+      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0];
 
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${testId}`);
+      expect(uploadedFile.name).toBe('test-file_12345678');
+    });
+
+    it('cleans up COMS object when document creation fails', async () => {
+      const file = new File(['content'], 'test.pdf', {
+        type: 'application/pdf'
       });
-    }
-  );
+
+      vi.mocked(comsService.createObject).mockResolvedValue({
+        data: {
+          id: 'coms-id',
+          versionId: 'version-id',
+          name: 'file.pdf',
+          mimeType: 'application/pdf',
+          length: 100
+        }
+      } as never);
+
+      const error = new Error('api failure');
+
+      mockPost.mockRejectedValue(error);
+
+      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
+
+      await expect(
+        createDocument({
+          activityId: 'activity-1',
+          bucketId: 'bucket-1',
+          document: file
+        })
+      ).rejects.toThrow(error);
+
+      expect(comsService.deleteObject).toHaveBeenCalledWith('coms-id', 'version-id');
+    });
+
+    it('does not attempt cleanup when COMS upload fails', async () => {
+      const file = new File(['content'], 'test.pdf', {
+        type: 'application/pdf'
+      });
+
+      const error = new Error('upload failed');
+
+      vi.mocked(comsService.createObject).mockRejectedValue(error);
+
+      await expect(
+        createDocument({
+          activityId: 'activity-1',
+          bucketId: 'bucket-1',
+          document: file
+        })
+      ).rejects.toThrow(error);
+
+      expect(comsService.deleteObject).not.toHaveBeenCalled();
+    });
+
+    it('swallows cleanup failures and rethrows original error', async () => {
+      const file = new File(['content'], 'test.pdf', {
+        type: 'application/pdf'
+      });
+
+      vi.mocked(comsService.createObject).mockResolvedValue({
+        data: {
+          id: 'coms-id',
+          versionId: 'version-id',
+          name: 'file.pdf',
+          mimeType: 'application/pdf',
+          length: 100
+        }
+      } as never);
+
+      const originalError = new Error('association failed');
+
+      mockPost.mockRejectedValue(originalError);
+
+      vi.mocked(comsService.deleteObject).mockRejectedValue(new Error('cleanup failed'));
+
+      await expect(
+        createDocument({
+          activityId: 'activity-1',
+          bucketId: 'bucket-1',
+          document: file
+        })
+      ).rejects.toThrow(originalError);
+    });
+  });
+
+  describe('deleteDocument', () => {
+    it('deletes COMS object and document association', async () => {
+      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
+
+      mockDelete.mockResolvedValue({});
+
+      await deleteDocument({
+        documentId: 'document-1',
+        versionId: 'version-1'
+      });
+
+      expect(comsService.deleteObject).toHaveBeenCalledWith('document-1', 'version-1');
+
+      expect(mockDelete).toHaveBeenCalledWith('housing/document/document-1', {
+        params: {
+          versionId: 'version-1'
+        }
+      });
+    });
+
+    it('swallows COMS deletion errors', async () => {
+      vi.mocked(comsService.deleteObject).mockRejectedValue(new Error('failed'));
+
+      await expect(
+        deleteDocument({
+          documentId: 'document-1',
+          versionId: 'version-1'
+        })
+      ).resolves.toBeUndefined();
+    });
+
+    it('swallows API deletion errors', async () => {
+      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
+
+      mockDelete.mockRejectedValue(new Error('api failed'));
+
+      await expect(
+        deleteDocument({
+          documentId: 'document-1',
+          versionId: 'version-1'
+        })
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('downloadDocument', () => {
+    it('downloads document from COMS', async () => {
+      vi.mocked(comsService.getObject).mockResolvedValue(undefined as never);
+
+      await downloadDocument({
+        documentId: 'document-1',
+        filename: 'file.pdf',
+        versionId: 'version-1'
+      });
+
+      expect(comsService.getObject).toHaveBeenCalledWith('document-1', 'file.pdf', 'version-1');
+    });
+  });
+
+  describe('listDocuments', () => {
+    it('returns activity documents', async () => {
+      const documents = [{ id: '1' }, { id: '2' }];
+
+      mockGet.mockResolvedValue({
+        data: documents
+      });
+
+      const result = await listDocuments({
+        activityId: 'activity-1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('housing/document/list/activity-1');
+
+      expect(result).toEqual(documents);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listDocuments({
+          activityId: 'activity-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(documentService).toEqual({
+      createDocument,
+      deleteDocument,
+      downloadDocument,
+      listDocuments
+    });
+  });
 });

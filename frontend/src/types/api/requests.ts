@@ -146,10 +146,13 @@ export type SubmitDraftHousingProjectRequest = CreateRequestDTO<HousingProjectIn
  * Note History
  */
 
-export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistory, ['noteHistoryId']>;
+export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistory, ['noteHistoryId', 'note']> & { note: string };
 export type ListBringForwardsRequest = ListRequestDTO<NoteHistory, ['bringForwardState']>;
 export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistory, ['activityId']>;
-export type PutNoteHistoryRequest = PutRequestDTO<NoteHistory & { resource: Resource }, ['noteHistoryId']>;
+export type PutNoteHistoryRequest = PutRequestDTO<
+  Omit<NoteHistory & { resource: Resource }, 'note'>,
+  ['noteHistoryId']
+> & { note: string };
 export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistory, ['noteHistoryId']>;
 
 /**

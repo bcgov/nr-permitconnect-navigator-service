@@ -25,14 +25,14 @@ export interface GeneralProjectService extends DraftableProjectService<GeneralPr
   getProject(req: GetProjectRequest): Promise<GeneralProject>;
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  getDrafts(): Promise<Draft<FormSchemaType>[]>;
+  listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: SearchGeneralProjectsRequest): Promise<GeneralProject[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
 }
 
 /**
- * Creates a new housing project.
+ * Creates a new general project.
  * @param req - The request payload containing the project data to create.
  * @returns A promise resolving to the created `GeneralProject` resource.
  */
@@ -45,7 +45,7 @@ export async function createProject(req: CreateGeneralProjectRequest): Promise<G
 }
 
 /**
- * Deletes a housing project.
+ * Deletes a general project.
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
  */
@@ -56,7 +56,7 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
 }
 
 /**
- * Retrieves all activity IDs associated with housing projects.
+ * Retrieves all activity IDs associated with general projects.
  * @returns A promise resolving to an array of activity IDs.
  */
 export async function getActivityIds(): Promise<string[]> {
@@ -66,7 +66,7 @@ export async function getActivityIds(): Promise<string[]> {
 }
 
 /**
- * Retrieves a single housing project.
+ * Retrieves a single general project.
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving to the requested `GeneralProject` resource.
  */
@@ -79,7 +79,7 @@ export async function getProject(req: GetProjectRequest): Promise<GeneralProject
 }
 
 /**
- * Retrieves all housing projects.
+ * Retrieves all general projects.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
 export async function listProjects(): Promise<GeneralProject[]> {
@@ -89,7 +89,7 @@ export async function listProjects(): Promise<GeneralProject[]> {
 }
 
 /**
- * Searches housing projects using the supplied filters.
+ * Searches general projects using the supplied filters.
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
@@ -100,7 +100,7 @@ export async function searchProjects(req: SearchGeneralProjectsRequest): Promise
 }
 
 /**
- * Updates an existing housing project.
+ * Updates an existing general project.
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `GeneralProject` resource.
  */
@@ -128,7 +128,7 @@ export async function getStatistics(req: GetProjectStatisticsRequest): Promise<S
 }
 
 /**
- * Submits a draft as a housing project.
+ * Submits a draft as a general project.
  * @param req - The request payload containing the project data to submit.
  * @returns A promise resolving to the submitted `GeneralProject` resource.
  */
@@ -168,7 +168,7 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
  * Retrieves all drafts.
  * @returns A promise resolving to an array of draft resources.
  */
-export async function getDrafts(): Promise<Draft<FormSchemaType>[]> {
+export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
   const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
 
   return data;
@@ -188,7 +188,7 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
 }
 
 /** Hybrid default export object for backward compatibility */
-const generalProjectService: GeneralProjectService = {
+export const generalProjectService: GeneralProjectService = {
   createProject,
   deleteProject,
   getActivityIds,
@@ -200,8 +200,6 @@ const generalProjectService: GeneralProjectService = {
   submitDraft,
   deleteDraft,
   getDraft,
-  getDrafts,
+  listDrafts,
   upsertDraft
 };
-
-export default generalProjectService;

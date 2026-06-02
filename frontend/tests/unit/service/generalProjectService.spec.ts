@@ -1,5 +1,5 @@
 import {
-  electrificationProjectService,
+  generalProjectService,
   createProject,
   deleteProject,
   getActivityIds,
@@ -13,7 +13,7 @@ import {
   getDraft,
   listDrafts,
   upsertDraft
-} from '@/services/electrificationProjectService';
+} from '@/services/generalProjectService';
 
 import { appAxios } from '@/services/interceptors';
 
@@ -21,14 +21,14 @@ vi.mock('@/services/interceptors', () => ({
   appAxios: vi.fn()
 }));
 
-describe('electrificationProject service', () => {
+describe('generalProject service', () => {
   const mockGet = vi.fn();
   const mockPost = vi.fn();
   const mockPut = vi.fn();
   const mockPatch = vi.fn();
   const mockDelete = vi.fn();
 
-  const PATH = 'electrification/project';
+  const PATH = 'general/project';
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -361,7 +361,7 @@ describe('electrificationProject service', () => {
   });
 
   it('exports all service functions', () => {
-    expect(electrificationProjectService).toEqual({
+    expect(generalProjectService).toEqual({
       createProject,
       deleteProject,
       getActivityIds,

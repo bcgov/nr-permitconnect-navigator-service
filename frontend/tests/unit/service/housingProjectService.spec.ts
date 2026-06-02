@@ -1,214 +1,362 @@
-import { createPinia, setActivePinia } from 'pinia';
-import { housingProjectService } from '@/services';
+import {
+  housingProjectService,
+  createProject,
+  deleteProject,
+  getActivityIds,
+  getProject,
+  listProjects,
+  searchProjects,
+  patchProject,
+  getStatistics,
+  submitDraft,
+  deleteDraft,
+  getDraft,
+  listDrafts,
+  upsertDraft
+} from '@/services/housingProjectService';
+
 import { appAxios } from '@/services/interceptors';
-import { useAppStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
 
-import type { StoreGeneric } from 'pinia';
-import type { AxiosInstance } from 'axios';
-import type {
-  Draft,
-  GetProjectStatisticsRequest,
-  HousingProjectIntake,
-  PatchHousingProjectRequest,
-  UpsertDraftRequest
-} from '@/types';
-import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
-
-// Constants
-const PATH = 'project';
-
-const TEST_ID = 'foobar';
-
-const TEST_OBJ = {
-  field1: 'testField1',
-  date1: new Date().toISOString(),
-  field2: 'testField2'
-};
-
-const TEST_DRAFT: Partial<Draft<FormSchemaType>> = {
-  draftId: 'draft123',
-  activityId: 'activity456',
-  draftCode: 'code789',
-  data: {} as FormSchemaType,
-  createdBy: 'testCreatedBy',
-  createdAt: new Date().toISOString(),
-  updatedBy: 'testUpdatedAt',
-  updatedAt: new Date().toISOString()
-};
-
-// Mocks
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
-const patchSpy = vi.fn();
-const postSpy = vi.fn();
-const putSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  delete: deleteSpy,
-  get: getSpy,
-  patch: patchSpy,
-  post: postSpy,
-  put: putSpy
-} as unknown as AxiosInstance);
+describe('housingProject service', () => {
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
+  const mockPut = vi.fn();
+  const mockPatch = vi.fn();
+  const mockDelete = vi.fn();
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
-
-  vi.clearAllMocks();
-});
-
-describe('housingProjectService', () => {
-  let appStore: StoreGeneric;
+  const PATH = 'housing/project';
 
   beforeEach(() => {
-    appStore = useAppStore();
-    appStore.setInitiative(Initiative.HOUSING);
-  });
+    vi.clearAllMocks();
 
-  describe('getActivityIds', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.getActivityIds();
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/activityIds`);
-    });
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost,
+      put: mockPut,
+      patch: mockPatch,
+      delete: mockDelete
+    } as never);
   });
 
   describe('createProject', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.createProject({});
+    it('creates a project and returns data', async () => {
+      const project = { projectId: 'project-1' };
 
-      expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, undefined);
+      mockPost.mockResolvedValue({ data: project });
+
+      const result = await createProject(project as never);
+
+      expect(mockPost).toHaveBeenCalledWith(PATH, project);
+      expect(result).toEqual(project);
     });
 
-    it('passes parameters', () => {
-      housingProjectService.createProject({ projectName: 'foo' });
+    it('propagates errors', async () => {
+      const error = new Error('create failed');
 
-      expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, {
-        projectName: 'foo'
-      });
-    });
-  });
+      mockPost.mockRejectedValue(error);
 
-  describe('deleteDraft', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.deleteDraft({ draftId: TEST_ID });
-
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
+      await expect(createProject({} as never)).rejects.toThrow(error);
     });
   });
 
   describe('deleteProject', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.deleteProject({ projectId: TEST_ID });
+    it('deletes the project', async () => {
+      mockDelete.mockResolvedValue({});
 
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
-    });
-  });
-
-  describe('getDraft', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.getDraft({ draftId: TEST_ID });
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
-    });
-  });
-
-  describe('getDrafts', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.getDrafts();
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`);
-    });
-  });
-
-  describe('listProjects', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.listProjects();
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`);
-    });
-  });
-
-  describe('getStatistics', () => {
-    it('calls correct endpoint', () => {
-      const testFilter: GetProjectStatisticsRequest = {
-        dateFrom: new Date(2022, 1, 2), // 02/02/2022
-        dateTo: new Date(2022, 2, 3), // 03/03/2022
-        monthYear: new Date(2022, 3, 1), // 04/2022 -> 1 Apr 2022
-        userId: 'testUserId'
-      };
-      housingProjectService.getStatistics(testFilter);
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/statistics`, {
-        params: testFilter
+      await deleteProject({
+        projectId: 'project-1'
       });
+
+      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/project-1`);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
+
+      mockDelete.mockRejectedValue(error);
+
+      await expect(deleteProject({ projectId: 'project-1' })).rejects.toThrow(error);
+    });
+  });
+
+  describe('getActivityIds', () => {
+    it('returns activity ids', async () => {
+      const activityIds = ['a1', 'a2'];
+
+      mockGet.mockResolvedValue({
+        data: activityIds
+      });
+
+      const result = await getActivityIds();
+
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/activityIds`);
+
+      expect(result).toEqual(activityIds);
     });
   });
 
   describe('getProject', () => {
-    it('calls correct endpoint', () => {
-      const testActivityId = 'testActivityId';
-      housingProjectService.getProject({ projectId: testActivityId });
+    it('returns a project', async () => {
+      const project = { projectId: 'project-1' };
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`);
+      mockGet.mockResolvedValue({
+        data: project
+      });
+
+      const result = await getProject({
+        projectId: 'project-1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/project-1`);
+
+      expect(result).toEqual(project);
+    });
+
+    it('propagates errors', async () => {
+      mockGet.mockRejectedValue(new Error('failed'));
+
+      await expect(getProject({ projectId: 'project-1' })).rejects.toThrow('failed');
+    });
+  });
+
+  describe('listProjects', () => {
+    it('returns all projects', async () => {
+      const projects = [{ projectId: '1' }];
+
+      mockGet.mockResolvedValue({
+        data: projects
+      });
+
+      const result = await listProjects();
+
+      expect(mockGet).toHaveBeenCalledWith(PATH);
+      expect(result).toEqual(projects);
     });
   });
 
   describe('searchProjects', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.searchProjects({ activityId: [TEST_ID] });
+    it('posts filters and returns projects', async () => {
+      const filters = {
+        status: 'ACTIVE'
+      };
 
-      expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, {
-        activityId: [TEST_ID]
+      const projects = [{ projectId: '1' }];
+
+      mockPost.mockResolvedValue({
+        data: projects
       });
+
+      const result = await searchProjects(filters as never);
+
+      expect(mockPost).toHaveBeenCalledWith(`${PATH}/search`, filters);
+
+      expect(result).toEqual(projects);
+    });
+
+    it('propagates errors', async () => {
+      mockPost.mockRejectedValue(new Error('failed'));
+
+      await expect(searchProjects({} as never)).rejects.toThrow('failed');
+    });
+  });
+
+  describe('patchProject', () => {
+    it('patches project and returns updated data', async () => {
+      const request = {
+        projectId: 'project-1',
+        name: 'Updated Name'
+      };
+
+      const updatedProject = {
+        projectId: 'project-1',
+        name: 'Updated Name'
+      };
+
+      mockPatch.mockResolvedValue({
+        data: updatedProject
+      });
+
+      const result = await patchProject(request as never);
+
+      expect(mockPatch).toHaveBeenCalledWith(`${PATH}/project-1`, {
+        name: 'Updated Name'
+      });
+
+      expect(result).toEqual(updatedProject);
+    });
+
+    it('propagates errors', async () => {
+      mockPatch.mockRejectedValue(new Error('failed'));
+
+      await expect(
+        patchProject({
+          projectId: 'project-1'
+        } as never)
+      ).rejects.toThrow('failed');
+    });
+  });
+
+  describe('getStatistics', () => {
+    it('passes filters as query params', async () => {
+      const filters = {
+        year: 2025
+      };
+
+      const statistics = {
+        totalProjects: 12
+      };
+
+      mockGet.mockResolvedValue({
+        data: statistics
+      });
+
+      const result = await getStatistics(filters as never);
+
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/statistics`, {
+        params: filters
+      });
+
+      expect(result).toEqual(statistics);
+    });
+
+    it('propagates errors', async () => {
+      mockGet.mockRejectedValue(new Error('failed'));
+
+      await expect(getStatistics({} as never)).rejects.toThrow('failed');
     });
   });
 
   describe('submitDraft', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.submitDraft(TEST_OBJ as unknown as HousingProjectIntake);
+    it('submits draft and returns project', async () => {
+      const request = {
+        draftId: 'draft-1'
+      };
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/submit`, TEST_OBJ);
+      const project = {
+        projectId: 'project-1'
+      };
+
+      mockPut.mockResolvedValue({
+        data: project
+      });
+
+      const result = await submitDraft(request as never);
+
+      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft/submit`, request);
+
+      expect(result).toEqual(project);
+    });
+
+    it('propagates errors', async () => {
+      mockPut.mockRejectedValue(new Error('failed'));
+
+      await expect(submitDraft({} as never)).rejects.toThrow('failed');
     });
   });
 
-  describe('updateDraft', () => {
-    it('calls correct endpoint', () => {
-      housingProjectService.upsertDraft(TEST_DRAFT as unknown as UpsertDraftRequest);
+  describe('deleteDraft', () => {
+    it('deletes draft', async () => {
+      mockDelete.mockResolvedValue({});
 
-      expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
+      await deleteDraft({
+        draftId: 'draft-1'
+      });
+
+      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/draft/draft-1`);
+    });
+
+    it('propagates errors', async () => {
+      mockDelete.mockRejectedValue(new Error('failed'));
+
+      await expect(deleteDraft({ draftId: 'draft-1' })).rejects.toThrow('failed');
     });
   });
 
-  describe('updateProject', () => {
-    it('calls correct endpoint', () => {
-      const testActivityId = 'testActivityId';
-      housingProjectService.patchProject(TEST_OBJ as unknown as PatchHousingProjectRequest);
+  describe('getDraft', () => {
+    it('returns draft', async () => {
+      const draft = {
+        draftId: 'draft-1'
+      };
 
-      expect(patchSpy).toHaveBeenCalledTimes(1);
-      expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);
+      mockGet.mockResolvedValue({
+        data: draft
+      });
+
+      const result = await getDraft({
+        draftId: 'draft-1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft/draft-1`);
+
+      expect(result).toEqual(draft);
+    });
+
+    it('propagates errors', async () => {
+      mockGet.mockRejectedValue(new Error('failed'));
+
+      await expect(getDraft({ draftId: 'draft-1' })).rejects.toThrow('failed');
+    });
+  });
+
+  describe('listDrafts', () => {
+    it('returns drafts', async () => {
+      const drafts = [{ draftId: '1' }, { draftId: '2' }];
+
+      mockGet.mockResolvedValue({
+        data: drafts
+      });
+
+      const result = await listDrafts();
+
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft`);
+
+      expect(result).toEqual(drafts);
+    });
+  });
+
+  describe('upsertDraft', () => {
+    it('creates or updates a draft', async () => {
+      const draft = {
+        draftId: 'draft-1'
+      };
+
+      mockPut.mockResolvedValue({
+        data: draft
+      });
+
+      const result = await upsertDraft(draft as never);
+
+      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft`, draft);
+
+      expect(result).toEqual(draft);
+    });
+
+    it('propagates errors', async () => {
+      mockPut.mockRejectedValue(new Error('failed'));
+
+      await expect(upsertDraft({} as never)).rejects.toThrow('failed');
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(housingProjectService).toEqual({
+      createProject,
+      deleteProject,
+      getActivityIds,
+      getProject,
+      listProjects,
+      searchProjects,
+      patchProject,
+      getStatistics,
+      submitDraft,
+      deleteDraft,
+      getDraft,
+      listDrafts,
+      upsertDraft
     });
   });
 });

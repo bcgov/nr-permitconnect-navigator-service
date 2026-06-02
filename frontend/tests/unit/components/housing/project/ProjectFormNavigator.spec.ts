@@ -41,7 +41,7 @@ vi.mock('@/services', () => ({
     searchUsers: vi.fn()
   },
   housingProjectService: {
-    updateProject: vi.fn()
+    patchProject: vi.fn()
   }
 }));
 
@@ -333,8 +333,12 @@ describe('Form Submission & ATS Integration', () => {
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -356,8 +360,12 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -378,8 +386,12 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -404,8 +416,7 @@ describe('Form Submission & ATS Integration', () => {
     await flushPromises();
 
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ addedToAts: false })
+      expect.objectContaining({ projectId: testProject.housingProjectId, addedToAts: false })
     );
   });
 

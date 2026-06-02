@@ -25,7 +25,7 @@ export interface HousingProjectService extends DraftableProjectService<HousingPr
   getProject(req: GetProjectRequest): Promise<HousingProject>;
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  getDrafts(): Promise<Draft<FormSchemaType>[]>;
+  listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: SearchHousingProjectsRequest): Promise<HousingProject[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
@@ -168,7 +168,7 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
  * Retrieves all drafts.
  * @returns A promise resolving to an array of draft resources.
  */
-export async function getDrafts(): Promise<Draft<FormSchemaType>[]> {
+export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
   const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
 
   return data;
@@ -188,7 +188,7 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
 }
 
 /** Hybrid default export object for backward compatibility */
-const housingProjectService: HousingProjectService = {
+export const housingProjectService: HousingProjectService = {
   createProject,
   deleteProject,
   getActivityIds,
@@ -200,8 +200,6 @@ const housingProjectService: HousingProjectService = {
   submitDraft,
   deleteDraft,
   getDraft,
-  getDrafts,
+  listDrafts,
   upsertDraft
 };
-
-export default housingProjectService;
