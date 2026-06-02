@@ -117,9 +117,7 @@ onBeforeMount(async () => {
       await Promise.all([
         enquiryService.searchEnquiries(),
         permitService.listPermits(),
-        initiativeState.value.projectService.searchProjects({
-          includeUser: true
-        }),
+        initiativeState.value.projectService.getProjects(),
         initiativeState.value.projectService.getStatistics(),
         noteHistoryService.listBringForward(BringForwardType.UNRESOLVED)
       ])

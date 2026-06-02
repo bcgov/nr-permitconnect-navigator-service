@@ -201,7 +201,7 @@ onBeforeMount(async () => {
       await Promise.all([
         permitService.listPermits(),
         enquiryService.getEnquiries(),
-        provideDraftableProjectService.value.searchProjects(),
+        provideDraftableProjectService.value.getProjects(),
         provideDraftableProjectService.value.getDrafts()
       ])
     ).map((r) => r.data);
