@@ -193,9 +193,9 @@ model permit {
   createdAt              DateTime?          @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?            @map("updated_by")
   updatedAt              DateTime?          @map("updated_at") @db.Timestamptz(6)
-  statusLastVerified     DateTime?          @map("status_last_verified") @db.Date
   deletedBy              String?            @map("deleted_by")
   deletedAt              DateTime?          @map("deleted_at") @db.Timestamptz(6)
+  statusLastVerified     DateTime?          @map("status_last_verified") @db.Date
   decisionDate           DateTime?          @map("decision_date") @db.Date
   statusLastChanged      DateTime?          @map("status_last_changed") @db.Date
   decisionTime           DateTime?          @map("decision_time") @db.Timetz(6)
@@ -274,9 +274,9 @@ model user {
   createdAt              DateTime?                 @default(now()) @map("created_at") @db.Timestamptz(6)
   updatedBy              String?                   @map("updated_by")
   updatedAt              DateTime?                 @map("updated_at") @db.Timestamptz(6)
-  bceidBusinessName      String?                   @map("bceid_business_name")
   deletedBy              String?                   @map("deleted_by")
   deletedAt              DateTime?                 @map("deleted_at") @db.Timestamptz(6)
+  bceidBusinessName      String?                   @map("bceid_business_name")
   accessRequest          access_request[]
   contact                contact[]
   electrificationProject electrification_project[]

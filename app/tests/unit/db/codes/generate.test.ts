@@ -1,4 +1,5 @@
 import { writeFileSync } from 'node:fs';
+import { normalize } from 'node:path';
 
 import { prismaMock } from '../../../__mocks__/prismaMock.ts';
 
@@ -52,8 +53,8 @@ describe('codes/generate script', () => {
     const [appPath, appOutput] = (writeFileSync as jest.Mock).mock.calls[0];
     const [frontendPath, frontendOutput] = (writeFileSync as jest.Mock).mock.calls[1];
 
-    expect(appPath).toContain('src/db/codes/enums.ts');
-    expect(frontendPath).toContain('frontend/src/utils/enums/codeEnums.ts');
+    expect(normalize(appPath)).toContain(normalize('src/db/codes/enums.ts'));
+    expect(normalize(frontendPath)).toContain(normalize('frontend/src/utils/enums/codeEnums.ts'));
 
     const valid = 'VALID_CODE';
     const invalid = 'INVALID-CHAR';
