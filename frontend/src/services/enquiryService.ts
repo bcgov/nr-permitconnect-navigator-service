@@ -12,6 +12,7 @@ import type {
 } from '@/types';
 
 const PATH = 'enquiry';
+
 /**
  * Creates a new enquiry.
  * @param req - The request payload containing the enquiry data to create.

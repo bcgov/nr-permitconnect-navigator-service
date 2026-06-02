@@ -18,7 +18,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ProjectService } from '@/types';
+import type { Project, ProjectService } from '@/types';
 
 // Props
 const {
@@ -37,7 +37,7 @@ interface InitiativeState {
   enquiryIntakeRouteName?: RouteName;
   enquiryPermitConfirmRouteName: RouteName;
   enquiryProjectConfirmRouteName: RouteName;
-  projectService: ProjectService;
+  projectService: ProjectService<Project>;
 }
 
 // Constants
@@ -114,7 +114,7 @@ onBeforeMount(async () => {
     formStore.setFormState(enquiryId ? FormState.LOCKED : FormState.UNLOCKED);
 
     if (projectId) {
-      const project = (await provideProjectService.value.getProject(projectId)).data;
+      const project = await provideProjectService.value.getProject({ projectId });
       projectStore.setProject(project);
     }
 

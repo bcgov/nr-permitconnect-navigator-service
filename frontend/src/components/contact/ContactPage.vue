@@ -13,7 +13,7 @@ import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { findIdpConfig } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Contact, Enquiry, Project, User } from '@/types';
+import type { ActivityContact, Contact, Enquiry, Project, ProjectService, User } from '@/types';
 
 // Props
 const { contactId } = defineProps<{
@@ -22,7 +22,7 @@ const { contactId } = defineProps<{
 
 // Injections
 const contactInitiativeRoute = inject(contactRouteNameKey);
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 
 // Composables
 const { t } = useI18n();
@@ -87,13 +87,11 @@ onBeforeMount(async () => {
 
   contact.value = contactData;
 
-  if (activityIds?.length) {
-    const [projects, enquiries] = (
-      await Promise.all([
-        projectService?.value.searchProjects({ activityId: activityIds }),
-        enquiryService.searchEnquiries({ activityId: activityIds })
-      ])
-    ).map((r) => r);
+  if (activityIds?.length && projectService?.value) {
+    const [projects, enquiries] = await Promise.all([
+      projectService.value.searchProjects({ activityId: activityIds }),
+      enquiryService.searchEnquiries({ activityId: activityIds })
+    ]);
 
     projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
   }

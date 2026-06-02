@@ -30,5 +30,5 @@ export const projectNoteRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
 export const projectRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
 
 // Services
-export const projectServiceKey: InjectionKey<Ref<ProjectService>> = Symbol();
-export const draftableProjectServiceKey: InjectionKey<Ref<DraftableProjectService>> = Symbol();
+export const projectServiceKey: InjectionKey<Ref<ProjectService<unknown>>> = Symbol();
+export const draftableProjectServiceKey: InjectionKey<Ref<DraftableProjectService<unknown, unknown>>> = Symbol();

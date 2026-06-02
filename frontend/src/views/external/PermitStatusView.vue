@@ -24,7 +24,7 @@ import { PermitState } from '@/utils/enums/codeEnums';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ProjectService } from '@/types';
+import type { Project, ProjectService } from '@/types';
 
 // Props
 const { permitId, projectId } = defineProps<{
@@ -36,7 +36,7 @@ const { permitId, projectId } = defineProps<{
 interface InitiativeState {
   enquiryPermitRouteName: RouteName;
   initiativeNavigationPermission: NavigationPermission;
-  projectService: ProjectService;
+  projectService: ProjectService<Project>;
 }
 
 // Constants
@@ -105,7 +105,7 @@ onBeforeMount(async () => {
       permitStore.setPermit(permitData);
 
       if (!getProject.value) {
-        const submission = (await initiativeState.value.projectService.getProject(projectId)).data;
+        const submission = await initiativeState.value.projectService.getProject({ projectId });
         projectStore.setProject(submission);
       }
 

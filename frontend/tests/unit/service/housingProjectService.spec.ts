@@ -6,7 +6,13 @@ import { Initiative } from '@/utils/enums/application';
 
 import type { StoreGeneric } from 'pinia';
 import type { AxiosInstance } from 'axios';
-import type { Draft } from '@/types';
+import type {
+  Draft,
+  GetProjectStatisticsRequest,
+  HousingProjectIntake,
+  PatchHousingProjectRequest,
+  UpsertDraftRequest
+} from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Constants
@@ -79,23 +85,25 @@ describe('housingProjectService', () => {
 
   describe('createProject', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.createProject();
+      housingProjectService.createProject({});
 
       expect(postSpy).toHaveBeenCalledTimes(1);
       expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, undefined);
     });
 
     it('passes parameters', () => {
-      housingProjectService.createProject({ foo: 'bar' });
+      housingProjectService.createProject({ projectName: 'foo' });
 
       expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, { foo: 'bar' });
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, {
+        projectName: 'foo'
+      });
     });
   });
 
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.deleteDraft(TEST_ID);
+      housingProjectService.deleteDraft({ draftId: TEST_ID });
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
@@ -104,7 +112,7 @@ describe('housingProjectService', () => {
 
   describe('deleteProject', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.deleteProject(TEST_ID);
+      housingProjectService.deleteProject({ projectId: TEST_ID });
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
       expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${TEST_ID}`);
@@ -113,7 +121,7 @@ describe('housingProjectService', () => {
 
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.getDraft(TEST_ID);
+      housingProjectService.getDraft({ draftId: TEST_ID });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
@@ -129,9 +137,9 @@ describe('housingProjectService', () => {
     });
   });
 
-  describe('getProjects', () => {
+  describe('listProjects', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.getProjects();
+      housingProjectService.listProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}`);
@@ -140,10 +148,10 @@ describe('housingProjectService', () => {
 
   describe('getStatistics', () => {
     it('calls correct endpoint', () => {
-      const testFilter = {
-        dateFrom: '02/02/2022',
-        dateTo: '03/03/2022',
-        monthYear: '04/2022',
+      const testFilter: GetProjectStatisticsRequest = {
+        dateFrom: new Date(2022, 1, 2), // 02/02/2022
+        dateTo: new Date(2022, 2, 3), // 03/03/2022
+        monthYear: new Date(2022, 3, 1), // 04/2022 -> 1 Apr 2022
         userId: 'testUserId'
       };
       housingProjectService.getStatistics(testFilter);
@@ -158,7 +166,7 @@ describe('housingProjectService', () => {
   describe('getProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      housingProjectService.getProject(testActivityId);
+      housingProjectService.getProject({ projectId: testActivityId });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`);
@@ -178,7 +186,7 @@ describe('housingProjectService', () => {
 
   describe('submitDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.submitDraft(TEST_OBJ);
+      housingProjectService.submitDraft(TEST_OBJ as unknown as HousingProjectIntake);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/submit`, TEST_OBJ);
@@ -187,7 +195,7 @@ describe('housingProjectService', () => {
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      housingProjectService.upsertDraft(TEST_DRAFT);
+      housingProjectService.upsertDraft(TEST_DRAFT as unknown as UpsertDraftRequest);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
       expect(putSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
@@ -197,12 +205,7 @@ describe('housingProjectService', () => {
   describe('updateProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      const TEST_OBJ = {
-        field1: 'testField1',
-        date1: new Date().toISOString(),
-        field2: 'testField2'
-      };
-      housingProjectService.updateProject(testActivityId, TEST_OBJ);
+      housingProjectService.patchProject(TEST_OBJ as unknown as PatchHousingProjectRequest);
 
       expect(patchSpy).toHaveBeenCalledTimes(1);
       expect(patchSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${testActivityId}`, TEST_OBJ);

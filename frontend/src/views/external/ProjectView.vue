@@ -52,7 +52,7 @@ interface InitiativeState {
   navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectIntakeRouteName: RouteName;
-  projectService: ProjectService;
+  projectService: ProjectService<Project>;
 }
 
 // Constants
@@ -168,7 +168,7 @@ onBeforeMount(async () => {
     let projectValue: Project;
 
     try {
-      projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
+      projectValue = await initiativeState.value.projectService.getProject({ projectId });
       if (projectValue)
         enquiriesValue = await enquiryService.listRelatedEnquiries({ activityId: projectValue.activityId });
     } catch {

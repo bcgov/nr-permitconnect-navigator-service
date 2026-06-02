@@ -41,7 +41,7 @@ const { draftId = undefined, projectId = undefined } = defineProps<{
 // Interfaces
 interface InitiativeState {
   headerText: string;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
 }
 
 // Constants
@@ -82,7 +82,7 @@ const loading: Ref<boolean> = ref(true);
 async function loadDraft() {
   if (!draftId) throw new Error('No draft ID');
 
-  draft.value = (await initiativeState.value.projectService.getDraft(draftId)).data;
+  draft.value = await initiativeState.value.projectService.getDraft({ draftId });
 
   const documents = await documentService.listDocuments({ activityId: draft.value.activityId });
   documents.forEach((d: Document) => {
@@ -100,7 +100,7 @@ async function loadDraft() {
 async function loadProject() {
   if (!projectId) throw new Error('No project ID');
 
-  project.value = (await initiativeState.value.projectService.getProject(projectId)).data;
+  project.value = await initiativeState.value.projectService.getProject({ projectId });
 
   projectStore.setProject(project.value);
 

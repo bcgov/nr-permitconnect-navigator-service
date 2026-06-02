@@ -27,7 +27,7 @@ import {
 import { generalErrorHandler, toTitleCase } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { DraftableProjectService, ElectrificationProject, HousingProject, User } from '@/types';
+import type { DraftableProjectService, Project, User } from '@/types';
 
 // Props
 const {
@@ -47,7 +47,7 @@ interface InitiativeState {
   enquiryNoteRouteName: RouteName;
   projectEnquiryNoteRouteName: RouteName;
   projectRouteName: RouteName;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
 }
 
 // Constants
@@ -92,7 +92,7 @@ const { getEnquiry, getEnquiryIsCompleted, getNoteHistory } = storeToRefs(enquir
 const activeTab: Ref<number> = ref(Number(initialTab));
 const activityId: Ref<string | undefined> = ref(undefined);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
-const relatedProject: Ref<ElectrificationProject | HousingProject | undefined> = ref(undefined);
+const relatedProject: Ref<Project | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const noteHistoryCreatedByFullnames: Ref<{ noteHistoryId: string; createdByFullname: string }[]> = ref([]);
 
@@ -117,11 +117,10 @@ function onEnquiryFormSaved() {
 
 async function updateRelatedEnquiry() {
   if (getEnquiry?.value?.relatedActivityId) {
-    relatedProject.value = (
-      await initiativeState.value.projectService.searchProjects({
-        activityId: [getEnquiry?.value?.relatedActivityId]
-      })
-    ).data[0];
+    const response = await initiativeState.value.projectService.searchProjects({
+      activityId: [getEnquiry?.value?.relatedActivityId]
+    });
+    relatedProject.value = response[0];
   } else relatedProject.value = undefined;
 }
 
@@ -164,7 +163,7 @@ onBeforeMount(async () => {
     }
 
     if (projectId) {
-      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
+      const project = await initiativeState.value.projectService.getProject({ projectId });
       projectStore.setProject(project);
     }
 

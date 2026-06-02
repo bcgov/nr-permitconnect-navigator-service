@@ -6,20 +6,26 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosInstance } from 'axios';
-import type { Draft } from '@/types';
+import type {
+  Draft,
+  ElectrificationProjectIntake,
+  GetProjectStatisticsRequest,
+  PatchElectrificationProjectRequest,
+  UpsertDraftRequest
+} from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Constants
 const PATH = 'project';
 
-const testID = 'foobar';
-const testObj = {
+const TEST_ID = 'foobar';
+const TEST_OBJ = {
   field1: 'testField1',
   date1: new Date().toISOString(),
   field2: 'testField2'
 };
 
-const testDraft: Partial<Draft<FormSchemaType>> = {
+const TEST_DRAFT: Partial<Draft<FormSchemaType>> = {
   draftId: 'draft123',
   activityId: 'activity456',
   draftCode: 'code789',
@@ -78,44 +84,46 @@ describe('electrificationProjectService', () => {
 
   describe('createProject', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.createProject();
+      electrificationProjectService.createProject({});
 
       expect(postSpy).toHaveBeenCalledTimes(1);
       expect(postSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, undefined);
     });
 
     it('passes parameters', () => {
-      electrificationProjectService.createProject({ foo: 'bar' });
+      electrificationProjectService.createProject({ projectName: 'foo' });
 
       expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, { foo: 'bar' });
+      expect(postSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`, {
+        projectName: 'foo'
+      });
     });
   });
 
   describe('deleteDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.deleteDraft(testID);
+      electrificationProjectService.deleteDraft({ draftId: TEST_ID });
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
     });
   });
 
   describe('deleteProject', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.deleteProject(testID);
+      electrificationProjectService.deleteProject({ projectId: TEST_ID });
 
       expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testID}`);
+      expect(deleteSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${TEST_ID}`);
     });
   });
 
   describe('getDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.getDraft(testID);
+      electrificationProjectService.getDraft({ draftId: TEST_ID });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${testID}`);
+      expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/${TEST_ID}`);
     });
   });
 
@@ -128,9 +136,9 @@ describe('electrificationProjectService', () => {
     });
   });
 
-  describe('getProjects', () => {
+  describe('listProjects', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.getProjects();
+      electrificationProjectService.listProjects();
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}`);
@@ -139,10 +147,10 @@ describe('electrificationProjectService', () => {
 
   describe('getStatistics', () => {
     it('calls correct endpoint', () => {
-      const testFilter = {
-        dateFrom: '02/02/2022',
-        dateTo: '03/03/2022',
-        monthYear: '04/2022',
+      const testFilter: GetProjectStatisticsRequest = {
+        dateFrom: new Date(2022, 1, 2), // 02/02/2022
+        dateTo: new Date(2022, 2, 3), // 03/03/2022
+        monthYear: new Date(2022, 3, 1), // 04/2022 -> 1 Apr 2022
         userId: 'testUserId'
       };
       electrificationProjectService.getStatistics(testFilter);
@@ -157,7 +165,7 @@ describe('electrificationProjectService', () => {
   describe('getProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      electrificationProjectService.getProject(testActivityId);
+      electrificationProjectService.getProject({ projectId: testActivityId });
 
       expect(getSpy).toHaveBeenCalledTimes(1);
       expect(getSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`);
@@ -166,47 +174,42 @@ describe('electrificationProjectService', () => {
 
   describe('searchProjects', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.searchProjects({ activityId: [testID] });
+      electrificationProjectService.searchProjects({ activityId: [TEST_ID] });
 
       expect(postSpy).toHaveBeenCalledTimes(1);
       expect(postSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/search`, {
-        activityId: [testID]
+        activityId: [TEST_ID]
       });
     });
   });
 
   describe('submitDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.submitDraft(testObj);
+      electrificationProjectService.submitDraft(TEST_OBJ as unknown as ElectrificationProjectIntake);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, testObj);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft/submit`, TEST_OBJ);
     });
   });
 
   describe('updateDraft', () => {
     it('calls correct endpoint', () => {
-      electrificationProjectService.upsertDraft(testDraft);
+      electrificationProjectService.upsertDraft(TEST_DRAFT as unknown as UpsertDraftRequest);
 
       expect(putSpy).toHaveBeenCalledTimes(1);
-      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, testDraft);
+      expect(putSpy).toHaveBeenCalledWith(`${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/draft`, TEST_DRAFT);
     });
   });
 
-  describe('updateProject', () => {
+  describe('patchProject', () => {
     it('calls correct endpoint', () => {
       const testActivityId = 'testActivityId';
-      const testObj = {
-        field1: 'testField1',
-        date1: new Date().toISOString(),
-        field2: 'testField2'
-      };
-      electrificationProjectService.updateProject(testActivityId, testObj);
+      electrificationProjectService.patchProject(TEST_OBJ as unknown as PatchElectrificationProjectRequest);
 
       expect(patchSpy).toHaveBeenCalledTimes(1);
       expect(patchSpy).toHaveBeenCalledWith(
         `${Initiative.ELECTRIFICATION.toLowerCase()}/${PATH}/${testActivityId}`,
-        testObj
+        TEST_OBJ
       );
     });
   });

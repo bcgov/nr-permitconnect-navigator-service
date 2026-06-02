@@ -18,7 +18,7 @@ import { GroupName, Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/internal/InitiativeView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { Group } from '@/types';
+import type { Group, Statistics } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -106,10 +106,10 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 beforeEach(() => {
   vi.mocked(enquiryService.searchEnquiries).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.getStatistics).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.getStatistics).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
+  vi.mocked(electrificationProjectService.getStatistics).mockResolvedValue({} as Statistics);
+  vi.mocked(housingProjectService.listProjects).mockResolvedValue([]);
+  vi.mocked(housingProjectService.getStatistics).mockResolvedValue({} as Statistics);
   vi.mocked(noteHistoryService.listBringForwards).mockResolvedValue([]);
 });
 

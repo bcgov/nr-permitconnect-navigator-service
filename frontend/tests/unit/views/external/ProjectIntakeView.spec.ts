@@ -95,15 +95,11 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(documentService.listDocuments).mockResolvedValue([]);
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({ activityId: '123' } as ElectrificationProject)
-  );
-  vi.mocked(generalProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<GeneralProject>({ activityId: '123' } as GeneralProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ activityId: '123' } as HousingProject)
-  );
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(generalProjectService.getProject).mockResolvedValue({ activityId: '123' } as GeneralProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({ activityId: '123' } as HousingProject);
   vi.mocked(permitService.getPermitTypes).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
 });

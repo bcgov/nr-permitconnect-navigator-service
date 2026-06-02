@@ -87,8 +87,8 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 beforeEach(() => {
   vi.mocked(contactService.searchContacts).mockResolvedValue(mockAxiosResponse([]));
   vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue([]);
+  vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
 });
 
 afterEach(() => {

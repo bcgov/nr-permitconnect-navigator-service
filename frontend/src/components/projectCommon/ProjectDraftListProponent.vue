@@ -42,12 +42,12 @@ function onDelete(draftId: string) {
     accept: () => {
       if (!projectService?.value) throw new Error('No service');
       projectService.value
-        .deleteDraft(draftId)
+        .deleteDraft({ draftId })
         .then(() => {
           emit('submissionDraft:delete', draftId);
           toast.success(t('projectDraftListProponent.deleteSuccess'));
         })
-        .catch((e) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
+        .catch((e: Error) => toast.error(t('projectDraftListProponent.deleteFailed'), e.message));
     }
   });
 }

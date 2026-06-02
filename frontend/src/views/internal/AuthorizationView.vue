@@ -12,7 +12,7 @@ import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { DraftableProjectService } from '@/types';
+import type { DraftableProjectService, Project } from '@/types';
 
 // Props
 const { projectId, permitId = undefined } = defineProps<{
@@ -23,7 +23,7 @@ const { projectId, permitId = undefined } = defineProps<{
 // Interfaces
 interface InitiativeState {
   projectRouteName: RouteName;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
 }
 
 // Constants
@@ -78,7 +78,7 @@ onBeforeMount(async () => {
     }
 
     if (!getProject.value) {
-      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
+      const project = await initiativeState.value.projectService.getProject({ projectId });
       projectStore.setProject(project);
     }
 

@@ -7,7 +7,7 @@ import NoteForm from '@/components/note/NoteForm.vue';
 import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { Initiative } from '@/utils/enums/application';
 import NoteView from '@/views/internal/NoteView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '@/types';
 
@@ -96,15 +96,14 @@ beforeEach(() => {
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
     { noteHistoryId: '1', createdBy: '123' }
   ] as NoteHistory[]);
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
 });
 
 afterEach(() => {

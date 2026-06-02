@@ -151,18 +151,18 @@ beforeEach(() => {
     })
   );
 
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(generalProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<GeneralProject>({ generalProjectId: '123', activityId: '123' } as GeneralProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(generalProjectService.getProject).mockResolvedValue({
+    generalProjectId: '123',
+    activityId: '123'
+  } as GeneralProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(documentService.listDocuments).mockResolvedValue([{ documentId: '123', filename: 'foo' } as Document]);
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([{ noteHistoryId: '123' }] as NoteHistory[]);

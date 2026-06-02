@@ -26,7 +26,7 @@ import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/key
 import { toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Pagination, Project } from '@/types';
+import type { ActivityContact, Pagination, Project, ProjectService } from '@/types';
 
 // Types
 interface FilterOption {
@@ -42,7 +42,7 @@ const { projects } = defineProps<{
 // Injections
 const projectResource = inject(resourceKey);
 const projectRoute = inject(projectRouteNameKey);
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 
 // Composables
 const confirmDialog = useConfirm();
@@ -128,7 +128,7 @@ function handleCreateNewActivity() {
       try {
         if (!projectService) throw new Error('No service');
 
-        const response = (await projectService.value.createProject()).data;
+        const response = await projectService.value.createProject({});
         if (response?.activityId) {
           router.push({
             name: projectRoute?.value,
@@ -160,13 +160,13 @@ function onDelete(projectId: string, activityId: string) {
     rejectProps: { outlined: true },
     accept: () => {
       projectService?.value
-        ?.deleteProject(projectId)
+        ?.deleteProject({ projectId })
         .then(() => {
           emit('submission:delete', projectId, activityId);
           selection.value = undefined;
           toast.success('Project deleted');
         })
-        .catch((e) => toast.error('Failed to delete project', e.message));
+        .catch((e: Error) => toast.error('Failed to delete project', e.message));
     }
   });
 }

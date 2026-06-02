@@ -1,24 +1,31 @@
-import type { AxiosResponse } from 'axios';
-import type { ElectrificationProjectSearchParameters, HousingProjectSearchParameters } from './api/requests';
+import type {
+  CreateProjectRequest,
+  DeleteDraftRequest,
+  DeleteProjectRequest,
+  GetDraftRequest,
+  GetProjectRequest,
+  GetProjectStatisticsRequest,
+  PatchProjectRequest,
+  UpsertDraftRequest
+} from './api/requests';
 import type { Draft } from './api/resources';
+import type { Statistics } from './api/responses';
 
-export interface ProjectService {
-  createProject(data?: unknown): Promise<AxiosResponse>;
-  deleteProject(projectId: string): Promise<AxiosResponse>;
-  getActivityIds(): Promise<AxiosResponse>;
-  getProjects(): Promise<AxiosResponse>;
-  getStatistics(filters?: unknown): Promise<AxiosResponse>;
-  getProject(projectId: string): Promise<AxiosResponse>;
-  searchProjects(
-    filters?: ElectrificationProjectSearchParameters | HousingProjectSearchParameters
-  ): Promise<AxiosResponse>;
-  submitDraft(data?: unknown): Promise<AxiosResponse>;
-  updateProject(projectId: string, data: unknown): Promise<AxiosResponse>;
+export interface ProjectService<T> {
+  createProject(req: CreateProjectRequest): Promise<T>;
+  deleteProject(req: DeleteProjectRequest): Promise<void>;
+  getActivityIds(): Promise<string[]>;
+  getProject(req: GetProjectRequest): Promise<T>;
+  listProjects(): Promise<T[]>;
+  getStatistics(req: GetProjectStatisticsRequest): Promise<Statistics>;
+  searchProjects(filters?: unknown): Promise<T[]>;
+  submitDraft(req: unknown): Promise<T>;
+  patchProject(req: PatchProjectRequest): Promise<T>;
 }
 
-export interface DraftableProjectService extends ProjectService {
-  deleteDraft(draftId: string): Promise<AxiosResponse>;
-  getDraft(draftId: string): Promise<AxiosResponse<Draft<unknown>>>;
-  getDrafts(): Promise<AxiosResponse>;
-  upsertDraft(data?: Partial<Draft<unknown>>): Promise<AxiosResponse>;
+export interface DraftableProjectService<T, U> extends ProjectService<T> {
+  deleteDraft(req: DeleteDraftRequest): Promise<void>;
+  getDraft(req: GetDraftRequest): Promise<Draft<U>>;
+  getDrafts(): Promise<Draft<U>[]>;
+  upsertDraft(req: UpsertDraftRequest): Promise<Draft<U>>;
 }

@@ -36,7 +36,7 @@ import {
 import { generalErrorHandler, getFilenameAndExtension } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Document, DraftableProjectService, Enquiry, User } from '@/types';
+import type { Document, DraftableProjectService, Enquiry, Project, User } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -50,7 +50,7 @@ interface InitiativeState {
   projectEnquiryRouteName: RouteName;
   projectNoteRouteName: RouteName;
   projectProponentName: RouteName;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
 }
 
 // Constants
@@ -137,17 +137,15 @@ onBeforeMount(async () => {
         throw new Error(t('views.initiativeStateError'));
     }
 
-    const project = (await initiativeState.value.projectService.getProject(projectId)).data;
+    const project = await initiativeState.value.projectService.getProject({ projectId });
     activityId.value = project.activityId;
-    const [documents, notes, permits, relatedEnquiries, contacts] = (
-      await Promise.all([
-        documentService.listDocuments(project.activityId),
-        noteHistoryService.listNoteHistories(project.activityId),
-        permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
-        enquiryService.listRelatedEnquiries(project.activityId),
-        activityContactService.listActivityContacts(project.activityId)
-      ])
-    ).map((r) => r);
+    const [documents, notes, permits, relatedEnquiries, contacts] = await Promise.all([
+      documentService.listDocuments({ activityId: project.activityId }),
+      noteHistoryService.listNoteHistories({ activityId: project.activityId }),
+      permitService.listPermits({ activityId: project.activityId, includeNotes: true }),
+      enquiryService.listRelatedEnquiries({ activityId: project.activityId }),
+      activityContactService.listActivityContacts({ activityId: project.activityId })
+    ]);
     const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
 
     project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');

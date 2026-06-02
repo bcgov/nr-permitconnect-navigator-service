@@ -36,7 +36,7 @@ import type { Draft, DraftableProjectService, Enquiry, HousingProject, Permit } 
 
 // Interfaces
 interface InitiativeState {
-  draftableProjectService: DraftableProjectService;
+  draftableProjectService: DraftableProjectService<unknown, unknown>;
   enquiryIntakeRouteName?: RouteName;
   enquiryRouteName?: RouteName;
   headerText: string;
@@ -200,7 +200,7 @@ onBeforeMount(async () => {
       await Promise.all([
         permitService.listPermits(),
         enquiryService.listEnquiries(),
-        provideDraftableProjectService.value.getProjects(),
+        provideDraftableProjectService.value.listProjects(),
         provideDraftableProjectService.value.getDrafts()
       ])
     ).map((r) => r);

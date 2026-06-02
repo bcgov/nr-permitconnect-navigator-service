@@ -6,11 +6,24 @@ import type {
   GetRequestDTO,
   ListRequestDTO,
   PatchRequestDTO,
-  PutRequestDTO
+  PutRequestDTO,
+  UpsertRequestDTO
 } from './dto';
-import type { ActivityContactBase, Document, Enquiry, EnquiryBase, NoteHistory } from './resources';
+import type {
+  ActivityContactBase,
+  Document,
+  Draft,
+  ElectrificationProjectBase,
+  Enquiry,
+  EnquiryBase,
+  GeneralProjectBase,
+  HousingProjectBase,
+  NoteHistory,
+  ProjectBase
+} from './resources';
 import type { UUID } from '../common';
 import type { PartialFields } from '../util';
+import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
 
 /**
  * Activity Contact
@@ -41,6 +54,37 @@ export type DeleteDocumentRequest = DeleteRequestDTO<Document, ['documentId']> &
 };
 
 /**
+ * Draft
+ */
+
+export type GetDraftRequest = GetRequestDTO<Draft<unknown>, ['draftId']>;
+export type UpsertDraftRequest = UpsertRequestDTO<Draft<unknown>, ['draftId', 'activityId'], ['draftCode']>;
+export type DeleteDraftRequest = DeleteRequestDTO<Draft<unknown>, ['draftId']>;
+
+/**
+ * Electrification Project
+ */
+
+export type CreateElectrificationProjectRequest = CreateRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ['activityId', 'electrificationProjectId', 'projectId']
+>;
+export interface SearchElectrificationProjectsRequest {
+  activityId?: string[];
+  createdBy?: string[];
+  includeUser?: boolean;
+  electrificationProjectId?: string[];
+  projectType?: string[];
+  projectCategory?: string[];
+}
+export type PatchElectrificationProjectRequest = PatchRequestDTO<
+  ElectrificationProjectBase,
+  ['projectId'],
+  ['activityId']
+>;
+export type SubmitDraftElectrificationProjectRequest = CreateRequestDTO<ElectrificationProjectIntake>;
+
+/**
  * Enquiry
  */
 
@@ -62,6 +106,42 @@ export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, ['enquiryId']>;
 export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, ['enquiryId']>;
 
 /**
+ * General Project
+ */
+
+export type CreateGeneralProjectRequest = CreateRequestDTO<
+  Partial<GeneralProjectBase>,
+  ['activityId', 'generalProjectId', 'projectId']
+>;
+export interface SearchGeneralProjectsRequest {
+  activityId?: string[];
+  createdBy?: string[];
+  includeUser?: boolean;
+  generalProjectId?: string[];
+  submissionType?: string[];
+}
+export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, ['projectId'], ['activityId']>;
+export type SubmitDraftGeneralProjectRequest = CreateRequestDTO<GeneralProjectIntake>;
+
+/**
+ * Housing Project
+ */
+
+export type CreateHousingProjectRequest = CreateRequestDTO<
+  Partial<HousingProjectBase>,
+  ['activityId', 'housingProjectId', 'projectId']
+>;
+export interface SearchHousingProjectsRequest {
+  activityId?: string[];
+  createdBy?: string[];
+  includeUser?: boolean;
+  housingProjectId?: string[];
+  submissionType?: string[];
+}
+export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, ['projectId'], ['activityId']>;
+export type SubmitDraftHousingProjectRequest = CreateRequestDTO<HousingProjectIntake>;
+
+/**
  * Note History
  */
 
@@ -70,6 +150,22 @@ export type ListBringForwardsRequest = ListRequestDTO<NoteHistory, ['bringForwar
 export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistory, ['activityId']>;
 export type PutNoteHistoryRequest = PutRequestDTO<NoteHistory & { resource: Resource }, ['noteHistoryId']>;
 export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistory, ['noteHistoryId']>;
+
+/**
+ * Project
+ */
+
+export type CreateProjectRequest = CreateRequestDTO<Partial<ProjectBase>, ['activityId', 'projectId']>;
+export type GetProjectRequest = GetRequestDTO<ProjectBase, ['projectId']>;
+export interface GetProjectStatisticsRequest {
+  dateFrom?: Date;
+  dateTo?: Date;
+  monthYear?: Date;
+  userId?: string;
+}
+export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ['projectId']>;
+export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ['projectId']>;
+
 /**
  * Other
  */
@@ -87,15 +183,6 @@ export interface ContactSearchParameters {
   includeActivities?: boolean;
 }
 
-export interface ElectrificationProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  electrificationProjectId?: string[];
-  projectType?: string[];
-  projectCategory?: string[];
-}
-
 export interface Email {
   bcc?: string[];
   bodyType: string;
@@ -110,22 +197,6 @@ export interface Email {
   tag?: string;
 }
 
-export interface GeneralProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  generalProjectId?: string[];
-  submissionType?: string[];
-}
-
-export interface HousingProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  housingProjectId?: string[];
-  submissionType?: string[];
-}
-
 export interface ListPermitsOptions {
   activityId?: string;
   includeNotes?: boolean;
@@ -136,13 +207,6 @@ export interface SearchPermitsOptions extends PaginationOptions {
   permitTypeId?: number;
   searchTag?: string;
   sourceSystemKindId?: number;
-}
-
-export interface StatisticFilters {
-  dateFrom?: Date;
-  dateTo?: Date;
-  monthYear?: Date;
-  userId?: string;
 }
 
 export interface UserSearchParameters {

@@ -31,7 +31,7 @@ export interface AuditFields {
   deletedAt?: Nullable<string>;
 }
 
-interface Project extends AuditFields {
+export interface ProjectBase extends AuditFields {
   projectId: string;
   activityId: string;
   submittedAt: string;
@@ -46,15 +46,18 @@ interface Project extends AuditFields {
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
+  relatedEnquiries?: string;
   astNotes?: string | null;
   atsClientId: number | null;
   atsEnquiryId: number | null;
   addedToAts: boolean;
   aaiUpdated: boolean;
+}
 
-  activity?: Activity;
+interface ProjectRelations {
+  activity: Activity;
   contacts: Contact[];
-  user?: User;
+  user: User;
 }
 
 /**
@@ -150,7 +153,7 @@ export interface Draft<T> extends AuditFields {
  * Electrification Project
  */
 
-export interface ElectrificationProject extends Project {
+export interface ElectrificationProjectBase extends ProjectBase {
   electrificationProjectId: UUID;
   projectType?: string;
   projectCategory?: Nullable<string>;
@@ -160,6 +163,8 @@ export interface ElectrificationProject extends Project {
   megawatts?: Nullable<number>;
   bcEnvironmentAssessNeeded?: Nullable<string>;
 }
+
+export type ElectrificationProject = ElectrificationProjectBase & Partial<ProjectRelations>;
 
 /**
  * Enquiry
@@ -192,10 +197,9 @@ export type Enquiry = EnquiryBase & Partial<EnquiryRelations>;
  * General Project
  */
 
-export interface GeneralProject extends Project {
+export interface GeneralProjectBase extends ProjectBase {
   generalProjectId: UUID;
   projectNumber?: string;
-  relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
   geoJson?: GeoJSON;
   projectLocation: string;
@@ -215,13 +219,14 @@ export interface GeneralProject extends Project {
   businessArea?: Nullable<BusinessArea>;
 }
 
+export type GeneralProject = GeneralProjectBase & Partial<ProjectRelations>;
+
 /**
  * Housing Project
  */
 
-export interface HousingProject extends Project {
+export interface HousingProjectBase extends ProjectBase {
   housingProjectId: UUID;
-  relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
   consentToFeedback?: boolean;
   geoJson?: GeoJSON;
@@ -252,6 +257,8 @@ export interface HousingProject extends Project {
   bcOnlineCompleted: boolean;
   hasAppliedProvincialPermits: boolean;
 }
+
+export type HousingProject = HousingProjectBase & Partial<ProjectRelations>;
 
 /**
  * Identity Provider

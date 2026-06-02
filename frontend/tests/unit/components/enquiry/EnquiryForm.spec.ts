@@ -20,7 +20,7 @@ import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey 
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../helpers';
 
 import type { Ref } from 'vue';
-import type { Enquiry, ProjectService } from '@/types';
+import type { Enquiry, Project, ProjectService } from '@/types';
 
 const searchContactSpy = vi.spyOn(userService, 'searchUsers');
 const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
@@ -64,7 +64,7 @@ vi.mock(import('vue-router'), async (importOriginal) => {
 const wrapperSettings = (
   testEnquiryProp = testEnquiry,
   editableProp?: boolean,
-  projectServiceMock: Ref<ProjectService> = ref(housingProjectService),
+  projectServiceMock: Ref<ProjectService<Project>> = ref(housingProjectService),
   atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
   atsEnquiryTypeCode = testAtsEnquiryTypeCode
 ) => ({

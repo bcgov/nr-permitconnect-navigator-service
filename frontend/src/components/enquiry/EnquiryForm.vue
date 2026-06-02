@@ -38,6 +38,8 @@ import type {
   Enquiry,
   InputEvent,
   PatchEnquiryRequest,
+  Project,
+  ProjectService,
   User
 } from '@/types';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
@@ -49,7 +51,7 @@ const { editable = true, enquiry } = defineProps<{
 }>();
 
 // Injections
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 const atsEnquiryPartnerAgencies = inject(atsEnquiryPartnerAgenciesKey);
 const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 
@@ -377,7 +379,7 @@ function setBasicInfo(contact?: Contact) {
 
 onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
-  projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
+  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.getActivityIds();
 
   initialFormValues.value = await initializeFormValues();
 });

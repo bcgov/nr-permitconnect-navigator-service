@@ -129,15 +129,14 @@ beforeEach(() => {
   vi.mocked(permitService.listPermits).mockResolvedValue(
     mockAxiosResponse([{ needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }])
   );
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
     { noteHistoryId: '123', shownToProponent: true, note: [] as Note[] }
   ] as NoteHistory[]);

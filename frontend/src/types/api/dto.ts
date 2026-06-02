@@ -12,6 +12,7 @@ type MutableFields<T, ImmutableFields extends readonly (keyof T)[] = []> = Omit<
   ImmutableFields[number]
 >;
 type PatchFields<T, ImmutableFields extends readonly (keyof T)[] = []> = Partial<MutableFields<T, ImmutableFields>>;
+type OptionalResourceKey<T, IdFields extends readonly (keyof T)[]> = Partial<ResourceKey<T, IdFields>>;
 type ResourceKey<T, IdFields extends readonly (keyof T)[]> = Pick<T, IdFields[number]>;
 
 /**
@@ -33,4 +34,9 @@ export type PatchRequestDTO<
   IdFields extends readonly (keyof T)[],
   ImmutableFields extends readonly (keyof T)[] = []
 > = Simplify<ResourceKey<T, IdFields> & PatchFields<T, [...ImmutableFields, ...IdFields]>>;
+export type UpsertRequestDTO<
+  T,
+  IdFields extends readonly (keyof T)[],
+  ImmutableFields extends readonly (keyof T)[] = []
+> = Simplify<OptionalResourceKey<T, IdFields> & MutableFields<T, [...ImmutableFields, ...IdFields]>>;
 export type DeleteRequestDTO<T, IdFields extends readonly (keyof T)[]> = Simplify<ResourceKey<T, IdFields>>;

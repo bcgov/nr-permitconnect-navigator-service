@@ -26,7 +26,15 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { BringForward, DraftableProjectService, Enquiry, HousingProject, Permit, Statistics } from '@/types';
+import type {
+  BringForward,
+  DraftableProjectService,
+  Enquiry,
+  HousingProject,
+  Permit,
+  Project,
+  Statistics
+} from '@/types';
 
 // Interfaces
 interface InitiativeState {
@@ -35,7 +43,7 @@ interface InitiativeState {
   navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectRouteName: RouteName;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
   resource: Resource;
 }
 
@@ -114,10 +122,10 @@ onBeforeMount(async () => {
 
     [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = (
       await Promise.all([
-        enquiryService.searchEnquiries(),
+        enquiryService.listEnquiries(),
         permitService.listPermits(),
-        initiativeState.value.projectService.getProjects(),
-        initiativeState.value.projectService.getStatistics(),
+        initiativeState.value.projectService.listProjects(),
+        initiativeState.value.projectService.getStatistics({}),
         noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED })
       ])
     ).map((r) => r);
