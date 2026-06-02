@@ -138,12 +138,12 @@ async function createATSEnquiry(atsClientId?: number) {
   try {
     const ATSEnquiryData: ATSEnquiryResource = {
       '@type': 'EnquiryResource',
-      clientId: (atsClientId as number) ?? formRef.value?.values.atsClientId,
+      clientId: (atsClientId as number) ?? formRef.value?.values.atsInfo.atsClientId,
       contactFirstName: formRef.value?.values.contact.firstName,
       contactSurname: formRef.value?.values.contact.lastName,
       regionName: ATS_MANAGING_REGION,
       subRegionalOffice: GroupName.NAVIGATOR,
-      enquiryFileNumbers: [formRef.value?.values.activityId],
+      enquiryFileNumbers: [enquiry.activityId],
       enquiryPartnerAgencies: [atsEnquiryPartnerAgencies?.value ?? ''],
       enquiryMethodCodes: [Initiative.PCNS],
       notes: formRef.value?.values.enquiryDescription,
@@ -232,7 +232,7 @@ function onInvalidSubmit(e: GenericObject) {
 }
 
 async function onRelatedActivityChange(e: SelectChangeEvent) {
-  formRef.value?.setFieldValue('atsClientId', null);
+  formRef.value?.setFieldValue('atsInfo.atsClientId', null);
   formRef.value?.setFieldValue('addedToAts', false);
   atsCreateType.value = undefined;
 
@@ -241,7 +241,7 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
       const response = (await projectService.value.searchProjects({ activityId: [e.value] })).data;
       if (response.length > 0) {
         // Set ATS client ID from the related project
-        formRef.value?.setFieldValue('atsClientId', response[0].atsClientId);
+        formRef.value?.setFieldValue('atsInfo.atsClientId', response[0].atsClientId);
         if (response[0].activity?.activityContact?.[0]?.contact)
           setBasicInfo(response[0].activity?.activityContact?.[0]?.contact);
       }

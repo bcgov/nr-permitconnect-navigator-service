@@ -531,10 +531,10 @@ describe('EnquiryForm.vue', () => {
       const formComponent = component.findComponent({ name: 'VeeFormStub' });
       const formValues = (
         formComponent.vm as unknown as {
-          values: { atsClientId?: number; contact?: { firstName?: string; lastName?: string } };
+          values: { atsInfo: { atsClientId?: number }; contact?: { firstName?: string; lastName?: string } };
         }
       ).values;
-      expect(formValues.atsClientId).toBe(345);
+      expect(formValues.atsInfo.atsClientId).toBe(345);
       expect(formValues.contact?.firstName).toBe('John');
       expect(formValues.contact?.lastName).toBe('Doe');
     });
