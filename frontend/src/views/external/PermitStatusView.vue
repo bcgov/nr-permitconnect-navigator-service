@@ -101,7 +101,7 @@ onBeforeMount(async () => {
     }
 
     try {
-      const permitData = (await permitService.getPermit(permitId)).data;
+      const permitData = await permitService.getPermit({ permitId });
       permitStore.setPermit(permitData);
 
       if (!getProject.value) {

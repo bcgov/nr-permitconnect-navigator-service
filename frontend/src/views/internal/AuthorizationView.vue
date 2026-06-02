@@ -85,7 +85,7 @@ onBeforeMount(async () => {
     if (!permitId) {
       permitStore.reset();
     } else {
-      const permit = (await permitService.getPermit(permitId)).data;
+      const permit = await permitService.getPermit({ permitId });
       permitStore.setPermit(permit);
     }
     loading.value = false;

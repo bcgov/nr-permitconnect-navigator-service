@@ -1,4 +1,5 @@
 import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { Permit } from './resources';
 
 export interface BringForward {
   activityId: string;
@@ -35,6 +36,11 @@ export interface Permission {
   initiative: Initiative;
   resource: Resource;
   action: Action;
+}
+
+export interface SearchPermitsResponse {
+  permits: Permit[];
+  totalRecords: number;
 }
 
 export interface Statistics {

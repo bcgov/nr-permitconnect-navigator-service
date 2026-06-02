@@ -26,15 +26,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type {
-  BringForward,
-  DraftableProjectService,
-  Enquiry,
-  HousingProject,
-  Permit,
-  Project,
-  Statistics
-} from '@/types';
+import type { BringForward, DraftableProjectService, Enquiry, Permit, Project, Statistics } from '@/types';
 
 // Interfaces
 interface InitiativeState {
@@ -88,7 +80,7 @@ const enquiries: Ref<Enquiry[]> = ref([]);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
 const permits: Ref<Permit[]> = ref([]);
-const projects: Ref<HousingProject[]> = ref([]);
+const projects: Ref<Project[]> = ref([]);
 const statistics: Ref<Statistics | undefined> = ref(undefined);
 
 // Providers
@@ -120,15 +112,13 @@ onBeforeMount(async () => {
         throw new Error(t('views.initiativeStateError'));
     }
 
-    [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = (
-      await Promise.all([
-        enquiryService.listEnquiries(),
-        permitService.listPermits(),
-        initiativeState.value.projectService.listProjects(),
-        initiativeState.value.projectService.getStatistics({}),
-        noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED })
-      ])
-    ).map((r) => r);
+    [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = await Promise.all([
+      enquiryService.listEnquiries(),
+      permitService.listPermits(),
+      initiativeState.value.projectService.listProjects(),
+      initiativeState.value.projectService.getStatistics({}),
+      noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED })
+    ]);
     loading.value = false;
   } catch (e) {
     generalErrorHandler(e);

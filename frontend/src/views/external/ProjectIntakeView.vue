@@ -110,7 +110,7 @@ async function loadProject() {
   });
   projectStore.setDocuments(documents);
 
-  const permits = (await permitService.listPermits({ activityId: project.value!.activityId })).data;
+  const permits = await permitService.listPermits({ activityId: project.value!.activityId });
   projectStore.setPermits(permits);
 
   // Disallow form editing for submitted intake
@@ -145,7 +145,7 @@ onBeforeMount(async () => {
     // Clear certain store data on load
     projectStore.setDocuments([]);
 
-    usePermitStore().setPermitTypes((await permitService.getPermitTypes(getInitiative.value)).data);
+    usePermitStore().setPermitTypes(await permitService.listPermitTypes({ initiative: getInitiative.value }));
 
     if (draftId) {
       await loadDraft();

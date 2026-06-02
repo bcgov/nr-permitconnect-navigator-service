@@ -179,7 +179,7 @@ onBeforeMount(async () => {
 
     try {
       const activityId = projectValue.activityId;
-      const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
+      const permitsValue = await permitService.listPermits({ activityId, includeNotes: true });
       projectStore.setPermits(permitsValue);
     } catch (e) {
       throw new Error(t('views.e.projectView.toastPermitLoadFailed'), { cause: e });

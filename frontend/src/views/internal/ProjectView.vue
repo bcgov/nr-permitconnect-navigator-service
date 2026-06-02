@@ -165,7 +165,7 @@ onBeforeMount(async () => {
     liveName.value = project.projectName;
 
     if (getPermitTypes.value.length === 0) {
-      const permitTypes = (await permitService.getPermitTypes(getInitiative.value)).data;
+      const permitTypes = await permitService.listPermitTypes({ initiative: getInitiative.value });
       permitStore.setPermitTypes(permitTypes);
     }
 

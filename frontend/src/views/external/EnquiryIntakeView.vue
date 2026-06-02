@@ -119,7 +119,7 @@ onBeforeMount(async () => {
     }
 
     if (permitId) {
-      const permit = (await permitService.getPermit(permitId)).data;
+      const permit = await permitService.getPermit({ permitId });
       permitStore.setPermit(permit);
     }
 

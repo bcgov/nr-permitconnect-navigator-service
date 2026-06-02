@@ -308,12 +308,10 @@ export type NoteHistory = NoteHistoryBase & Partial<NoteHistoryRelations>;
  */
 
 interface PermitBase extends AuditFields {
+  permitId: UUID;
   activityId: string;
   issuedPermitId?: Nullable<string>;
   needed: string;
-  permitNote?: PermitNote[];
-  permitTracking?: PermitTracking[];
-  permitType?: PermitType;
   permitTypeId: number;
   stage: PermitStage;
   state: PermitState;
@@ -330,13 +328,13 @@ interface PermitBase extends AuditFields {
   onHoldCode?: Nullable<PiesOnHold>;
 }
 
-export interface Permit extends PermitBase {
-  permitId: UUID;
+interface PermitRelations {
+  permitNote: PermitNote[];
+  permitTracking: PermitTracking[];
+  permitType: PermitType;
 }
 
-export interface PermitArgs extends PermitBase {
-  permitId?: UUID;
-}
+export type Permit = PermitBase & Partial<PermitRelations>;
 
 /**
  * Permit Note

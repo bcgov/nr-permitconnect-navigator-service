@@ -19,6 +19,7 @@ import type {
   GeneralProjectBase,
   HousingProjectBase,
   NoteHistory,
+  Permit,
   ProjectBase
 } from './resources';
 import type { UUID } from '../common';
@@ -152,6 +153,32 @@ export type PutNoteHistoryRequest = PutRequestDTO<NoteHistory & { resource: Reso
 export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistory, ['noteHistoryId']>;
 
 /**
+ * Permit
+ */
+
+export type DeletePermitRequest = DeleteRequestDTO<Permit, ['permitId']>;
+export type GetPermitRequest = GetRequestDTO<Permit, ['permitId']>;
+export interface ListPermitsRequest {
+  activityId?: string;
+  includeNotes?: boolean;
+}
+export interface SearchPermitsRequest extends PaginationOptions {
+  dateRange?: [Date, Date];
+  permitTypeId?: number;
+  searchTag?: string;
+  sourceSystemKindId?: number;
+}
+export type UpsertPermitRequest = UpsertRequestDTO<Permit, ['permitId', 'activityId']>;
+
+/**
+ * Permit Type
+ */
+
+export interface ListPermitTypesRequest {
+  initiative: Initiative;
+}
+
+/**
  * Project
  */
 
@@ -195,18 +222,6 @@ export interface Email {
   subject: string;
   to: string[];
   tag?: string;
-}
-
-export interface ListPermitsOptions {
-  activityId?: string;
-  includeNotes?: boolean;
-}
-
-export interface SearchPermitsOptions extends PaginationOptions {
-  dateRange?: [Date, Date];
-  permitTypeId?: number;
-  searchTag?: string;
-  sourceSystemKindId?: number;
 }
 
 export interface UserSearchParameters {
