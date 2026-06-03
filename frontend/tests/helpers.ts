@@ -72,7 +72,11 @@ export const PRIMEVUE_STUBS = {
 export const VEE_FORM_STUB = {
   name: 'VeeFormStub',
   props: ['initialValues'],
-  setup(props: { initialValues?: GenericObject }) {
+  emits: ['submit'],
+  setup(
+    props: { initialValues?: GenericObject },
+    { emit }: { emit: (event: 'submit', values: GenericObject) => void }
+  ) {
     // Make values reactive so watchers trigger updates
     const values = reactive(props.initialValues || {});
 
@@ -109,8 +113,17 @@ export const VEE_FORM_STUB = {
       }
     };
 
-    return { values, setFieldValue, resetField, resetForm };
+    // Provide a handleSubmit function to emit the submit event with the current values
+    const handleSubmit = () => {
+      const plainValues = structuredClone(values) as GenericObject;
+      emit('submit', plainValues);
+    };
+
+    return { values, setFieldValue, resetField, resetForm, handleSubmit };
   },
-  template:
-    '<form class="vee-form-stub" @submit.prevent><slot :values="values" :setFieldValue="setFieldValue" /></form>'
+  template: [
+    '<form class="vee-form-stub" @submit.prevent="handleSubmit">',
+    '<slot :values="values" :setFieldValue="setFieldValue" />',
+    '</form>'
+  ].join('')
 };

@@ -55,7 +55,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   atsEnquiryPartnerAgencies: Initiative.ELECTRIFICATION,
   atsEnquiryTypeCode: toTitleCase(Initiative.ELECTRIFICATION) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   enquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE,
-  projectEnquiryNoteRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
+  projectEnquiryNoteRouteName: RouteName.INT_ELECTRIFICATION_PROJECT_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_ELECTRIFICATION_PROJECT,
   projectService: electrificationProjectService
 };
@@ -73,7 +73,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   atsEnquiryPartnerAgencies: Initiative.HOUSING,
   atsEnquiryTypeCode: toTitleCase(Initiative.HOUSING) + ATS_ENQUIRY_TYPE_CODE_ENQUIRY_SUFFIX,
   enquiryNoteRouteName: RouteName.INT_HOUSING_ENQUIRY_NOTE,
-  projectEnquiryNoteRouteName: RouteName.INT_GENERAL_PROJECT_ENQUIRY_NOTE,
+  projectEnquiryNoteRouteName: RouteName.INT_HOUSING_PROJECT_ENQUIRY_NOTE,
   projectRouteName: RouteName.INT_HOUSING_PROJECT,
   projectService: housingProjectService
 };
