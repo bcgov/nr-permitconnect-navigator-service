@@ -29,6 +29,7 @@ import { createProjectFormNavigatorSchema } from '@/validators/general/projectFo
 import type { Ref } from 'vue';
 import type { Contact, DeepPartial, GeneralProject, OrgBookOption, User } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
+import type { BusinessArea } from '@/utils/enums/codeEnums';
 
 // Props
 const { editable = true, project } = defineProps<{
@@ -208,7 +209,7 @@ const onSubmit = async (formValues: GenericObject) => {
       queuePriority: values.submissionState.queuePriority,
 
       // ATS
-      businessArea: values.atsInfo.businessArea,
+      businessArea: values.atsInfo.businessArea as BusinessArea,
 
       // Updates
       aaiUpdated: values.projectAreasUpdated.aaiUpdated

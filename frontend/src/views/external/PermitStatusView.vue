@@ -24,7 +24,7 @@ import { PermitState } from '@/utils/enums/codeEnums';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces/IProjectService';
+import type { ProjectService } from '@/types';
 
 // Props
 const { permitId, projectId } = defineProps<{
@@ -36,7 +36,7 @@ const { permitId, projectId } = defineProps<{
 interface InitiativeState {
   enquiryPermitRouteName: RouteName;
   initiativeNavigationPermission: NavigationPermission;
-  projectService: IProjectService;
+  projectService: ProjectService;
 }
 
 // Constants

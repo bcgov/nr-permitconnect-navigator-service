@@ -21,13 +21,14 @@ import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
 import { useCodeStore, useContactStore, useFormStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
+import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
+import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { DeepPartial, Draft, ElectrificationProject, ElectrificationProjectIntake, OrgBookOption } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
-import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 
 // Props
 const { project = undefined } = defineProps<{
@@ -123,7 +124,7 @@ async function onSubmit(data: FormSchemaType) {
       draftId: draft.value?.draftId,
       project: {
         bcHydroNumber: data.project.bcHydroNumber,
-        projectType: data.project.projectType
+        projectType: data.project.projectType as ElectrificationProjectType
       }
     };
 

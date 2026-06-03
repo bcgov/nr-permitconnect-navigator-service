@@ -34,7 +34,7 @@ import { generalErrorHandler, isDefined } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { Contact, Enquiry, Project } from '@/types';
-import type { IProjectService } from '@/interfaces/IProjectService';
+import type { ProjectService } from '@/types';
 
 // Props
 const { initialTab = '0', projectId } = defineProps<{
@@ -52,7 +52,7 @@ interface InitiativeState {
   navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectIntakeRouteName: RouteName;
-  projectService: IProjectService;
+  projectService: ProjectService;
 }
 
 // Constants

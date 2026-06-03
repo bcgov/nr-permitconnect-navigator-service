@@ -3,8 +3,8 @@ import { useField, ErrorMessage } from 'vee-validate';
 
 import { Select } from '@/lib/primevue';
 
-import type { IInputEvent } from '@/interfaces';
 import type { SelectChangeEvent } from 'primevue/select';
+import type { InputEvent } from '@/types';
 
 // Props
 const {
@@ -32,7 +32,7 @@ const {
 
 // Emits
 const emit = defineEmits<{
-  (e: 'onInput', event: IInputEvent): void;
+  (e: 'onInput', event: InputEvent): void;
   (e: 'onChange', event: SelectChangeEvent): void;
 }>();
 
@@ -63,7 +63,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :option-label="getOptionLabel"
       :data-key="dataKey"
       @blur="handleBlur"
-      @input="(e: IInputEvent) => emit('onInput', e)"
+      @input="(e: InputEvent) => emit('onInput', e)"
       @change="(e) => emit('onChange', e)"
     />
     <small :id="`${name}-help`">{{ helpText }}</small>

@@ -2,13 +2,18 @@ import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { Draft, GeneralProject, GeneralProjectSearchParameters, StatisticFilters } from '@/types';
+import type {
+  Draft,
+  DraftableProjectService,
+  GeneralProject,
+  GeneralProjectSearchParameters,
+  StatisticFilters
+} from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 const PATH = 'project';
 
-export interface IGeneralProjectService extends IDraftableProjectService {
+export interface IGeneralProjectService extends DraftableProjectService {
   getProject(projectId: string): Promise<AxiosResponse<GeneralProject>>;
   deleteDraft(draftId: string): Promise<AxiosResponse>;
   getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;

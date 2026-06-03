@@ -14,7 +14,7 @@ import {
   ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
-import type { EnquiryArgs } from '@/types/Enquiry';
+import type { EnquiryArgs } from '@/types';
 
 // Constants
 const PATH = 'enquiry';

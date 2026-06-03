@@ -2,13 +2,18 @@ import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 
 import type { AxiosResponse } from 'axios';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import type { ElectrificationProjectSearchParameters, Draft, ElectrificationProject, StatisticFilters } from '@/types';
+import type {
+  ElectrificationProjectSearchParameters,
+  Draft,
+  DraftableProjectService,
+  ElectrificationProject,
+  StatisticFilters
+} from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 const PATH = 'project';
 
-export interface IElectrificationProjectService extends IDraftableProjectService {
+export interface IElectrificationProjectService extends DraftableProjectService {
   getProject(projectId: string): Promise<AxiosResponse<ElectrificationProject>>;
   deleteDraft(draftId: string): Promise<AxiosResponse>;
   getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;

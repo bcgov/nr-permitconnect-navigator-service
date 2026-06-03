@@ -18,7 +18,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces/IProjectService';
+import type { ProjectService } from '@/types';
 
 // Props
 const {
@@ -37,7 +37,7 @@ interface InitiativeState {
   enquiryIntakeRouteName?: RouteName;
   enquiryPermitConfirmRouteName: RouteName;
   enquiryProjectConfirmRouteName: RouteName;
-  projectService: IProjectService;
+  projectService: ProjectService;
 }
 
 // Constants

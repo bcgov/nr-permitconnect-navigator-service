@@ -12,8 +12,7 @@ import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey 
 
 import type { AxiosResponse } from 'axios';
 import type { Ref } from 'vue';
-import type { IProjectService } from '@/interfaces/IProjectService';
-import type { Enquiry } from '@/types';
+import type { Enquiry, ProjectService } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -63,7 +62,7 @@ vi.mock(import('vue-router'), async (importOriginal) => {
 const wrapperSettings = (
   testEnquiryProp = testEnquiry,
   editableProp?: boolean,
-  projectServiceMock: Ref<IProjectService> = ref(housingProjectService),
+  projectServiceMock: Ref<ProjectService> = ref(housingProjectService),
   atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
   atsEnquiryTypeCode = testAtsEnquiryTypeCode
 ) => ({

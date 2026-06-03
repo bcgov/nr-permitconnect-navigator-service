@@ -3,8 +3,7 @@ import { object, ObjectSchema, string } from 'yup';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { emailValidator } from '@/validators/common';
 
-import type { Contact, CreateContactDto } from '@/types';
-import type { IStamps } from '@/interfaces';
+import type { AuditFields, Contact, CreateContactDto } from '@/types';
 
 export const createContactSchema: ObjectSchema<CreateContactDto> = object({
   bceidBusinessName: string().optional().label('BCeID business name'),
@@ -16,7 +15,7 @@ export const createContactSchema: ObjectSchema<CreateContactDto> = object({
   phoneNumber: string().required().label('Phone number')
 });
 
-type ContactDto = Omit<Contact, keyof IStamps | 'activityContact'>;
+type ContactDto = Omit<Contact, keyof AuditFields | 'activityContact'>;
 
 export const contactSchema: ObjectSchema<ContactDto> = createContactSchema.concat(
   object({

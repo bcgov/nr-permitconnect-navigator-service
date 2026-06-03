@@ -6,6 +6,7 @@ import { useRoute, useRouter } from 'vue-router';
 
 import AuthorizationStatePill from '@/components/authorization/AuthorizationStatePill.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
+import ViewHeader from '@/components/common/ViewHeader.vue';
 import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue';
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
 import { Button, Paginator } from '@/lib/primevue';
@@ -31,13 +32,11 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Draft, Enquiry, HousingProject, Permit } from '@/types';
-import type { IDraftableProjectService } from '@/interfaces/IProjectService';
-import ViewHeader from '@/components/common/ViewHeader.vue';
+import type { Draft, DraftableProjectService, Enquiry, HousingProject, Permit } from '@/types';
 
 // Interfaces
 interface InitiativeState {
-  draftableProjectService: IDraftableProjectService;
+  draftableProjectService: DraftableProjectService;
   enquiryIntakeRouteName?: RouteName;
   enquiryRouteName?: RouteName;
   headerText: string;

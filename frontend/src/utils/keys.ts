@@ -1,6 +1,6 @@
 import type { InjectionKey, Ref } from 'vue';
 
-import type { IDraftableProjectService, IProjectService } from '@/interfaces/IProjectService';
+import type { DraftableProjectService, ProjectService } from '@/types';
 import type { NavigationPermission } from '@/store/authzStore';
 import type { Resource, RouteName } from '@/utils/enums/application';
 
@@ -30,5 +30,5 @@ export const projectNoteRouteNameKey: InjectionKey<Ref<RouteName>> = Symbol();
 export const projectRouteNameKey: InjectionKey<Ref<RouteName | undefined>> = Symbol();
 
 // Services
-export const projectServiceKey: InjectionKey<Ref<IProjectService>> = Symbol();
-export const draftableProjectServiceKey: InjectionKey<Ref<IDraftableProjectService>> = Symbol();
+export const projectServiceKey: InjectionKey<Ref<ProjectService>> = Symbol();
+export const draftableProjectServiceKey: InjectionKey<Ref<DraftableProjectService>> = Symbol();

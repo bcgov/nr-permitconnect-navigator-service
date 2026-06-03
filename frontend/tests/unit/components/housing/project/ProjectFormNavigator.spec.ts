@@ -23,7 +23,7 @@ import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
 import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { HousingProject, IDIRAttribute, BasicBCeIDAttribute, BusinessBCeIDAttribute, Group } from '@/types';
+import type { HousingProject, IdirAttribute, BasicBceidAttribute, BusinessBceidAttribute, Group } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
 
 vi.mock('@/services', () => ({
@@ -47,20 +47,20 @@ vi.mock('@/services', () => ({
 
 const currentDate = new Date().toISOString();
 
-const exampleIDIRAttribute: IDIRAttribute = {
+const exampleIdirAttribute: IdirAttribute = {
   idirUsername: 'idirUser',
   idirUserGuid: 'idir-guid-123'
 };
 
-const exampleBasicBCeIDAttribute: BasicBCeIDAttribute = {
+const exampleBasicBceidAttribute: BasicBceidAttribute = {
   bceidUsername: 'bceidUser',
   bceidUserGuid: 'bceid-guid-123'
 };
 
-const exampleBusinessBCeIDAttribute: BusinessBCeIDAttribute = {
+const exampleBusinessBceidAttribute: BusinessBceidAttribute = {
   bceidBusinessGuid: 'business-guid-123',
   bceidBusinessName: 'Example Business',
-  ...exampleBasicBCeIDAttribute
+  ...exampleBasicBceidAttribute
 };
 
 const testUser = {
@@ -75,9 +75,9 @@ const testUser = {
   userId: 'user123',
   sub: 'sub-123',
   elevatedRights: true,
-  idirAttributes: exampleIDIRAttribute,
-  bceidAttributes: exampleBasicBCeIDAttribute,
-  businessBceidAttribute: exampleBusinessBCeIDAttribute,
+  IdirAttributes: exampleIdirAttribute,
+  bceidAttributes: exampleBasicBceidAttribute,
+  BusinessBceidAttribute: exampleBusinessBceidAttribute,
   bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
