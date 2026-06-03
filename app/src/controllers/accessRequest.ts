@@ -5,6 +5,7 @@ import {
   getAccessRequests,
   updateAccessRequest
 } from '../services/accessRequest.ts';
+import { assignPermissions } from '../services/coms.ts';
 import { getInitiative } from '../services/initiative.ts';
 import { createUser, readUser } from '../services/user.ts';
 import {
@@ -115,6 +116,8 @@ export const createUserAccessRequestController = async (
     const isGroupUpdate = existingUser && accessRequest.grant && userAlreadyInInitiative;
     let data;
 
+    let updateComsPerms = false;
+
     if (isGroupUpdate) {
       // Remove current initiative groups
       await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
@@ -123,6 +126,8 @@ export const createUserAccessRequestController = async (
       await assignGroup(tx, userResponse.sub, accessRequest.groupId);
       const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
       await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
+
+      updateComsPerms = true;
 
       // Mock an access request for the response
       data = {
@@ -149,11 +154,18 @@ export const createUserAccessRequestController = async (
         // Remove current initiative groups
         await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
       }
+
+      updateComsPerms = true;
     } else {
       data = await createUserAccessRequest(tx, {
         ...accessRequest,
         userId: userResponse?.userId
       });
+    }
+
+    // Assign new COMS permissions
+    if (updateComsPerms) {
+      await assignPermissions(tx, req.currentContext, userResponse.sub);
     }
 
     return { isAdmin, data };
@@ -199,6 +211,9 @@ export const processUserAccessRequestController = async (
 
           // Update access request status
           await updateAccessRequest(tx, { status: AccessRequestStatus.APPROVED }, accessRequest.accessRequestId);
+
+          // Assign new COMS permissions
+          await assignPermissions(tx, req.currentContext, userResponse.sub);
         } else {
           await updateAccessRequest(tx, { status: AccessRequestStatus.REJECTED }, accessRequest.accessRequestId);
         }

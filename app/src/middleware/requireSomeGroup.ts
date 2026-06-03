@@ -47,7 +47,7 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
         groups = await getSubjectGroups(tx, sub);
 
         // Assign COMS permissions
-        await assignPermissions(tx, req.currentContext);
+        await assignPermissions(tx, req.currentContext, sub);
       }
     }
 

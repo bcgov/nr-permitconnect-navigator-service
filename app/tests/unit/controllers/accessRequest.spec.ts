@@ -5,6 +5,7 @@ import {
   getAccessRequestsController,
   processUserAccessRequestController
 } from '../../../src/controllers/accessRequest';
+import { assignPermissions } from '../../../src/services/coms';
 import { getInitiative } from '../../../src/services/initiative';
 import { createUser, readUser } from '../../../src/services/user';
 import {
@@ -33,6 +34,10 @@ jest.mock('../../../src/services/accessRequest', () => ({
   updateAccessRequest: jest.fn()
 }));
 
+jest.mock('../../../src/services/coms', () => ({
+  assignPermissions: jest.fn()
+}));
+
 jest.mock('../../../src/services/yars', () => ({
   assignGroup: jest.fn(),
   getCorrespondingGlobalGroup: jest.fn(),
@@ -55,6 +60,7 @@ const mockCreateUserAccessRequest = createUserAccessRequest as jest.Mock;
 const mockGetAccessRequest = getAccessRequest as jest.Mock;
 const mockGetAccessRequests = getAccessRequests as jest.Mock;
 const mockUpdateAccessRequest = updateAccessRequest as jest.Mock;
+const mockAssignPermissions = assignPermissions as jest.Mock;
 const mockGetGroups = getGroups as jest.Mock;
 const mockAssignGroup = assignGroup as jest.Mock;
 const mockCreateUser = createUser as jest.Mock;
@@ -118,6 +124,7 @@ describe('createUserAccessRequestController', () => {
     mockGetCorrespondingGlobalGroup
       .mockResolvedValueOnce({ groupId: 'global-old' })
       .mockResolvedValueOnce({ groupId: 'global-new' });
+    mockAssignPermissions.mockResolvedValue(undefined);
 
     await createUserAccessRequestController(
       req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
@@ -128,6 +135,7 @@ describe('createUserAccessRequestController', () => {
     expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'global-old');
     expect(mockAssignGroup).toHaveBeenNthCalledWith(1, prismaTxMock, 'sub-123', 'g-new');
     expect(mockAssignGroup).toHaveBeenNthCalledWith(2, prismaTxMock, 'sub-123', 'global-new');
+    expect(mockAssignPermissions).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith({
       userId: 'u1',
@@ -170,6 +178,7 @@ describe('createUserAccessRequestController', () => {
       mockGetCorrespondingGlobalGroup.mockResolvedValue({
         groupId: 'global-g1'
       });
+      mockAssignPermissions.mockResolvedValue(undefined);
 
       await createUserAccessRequestController(
         req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
@@ -179,6 +188,7 @@ describe('createUserAccessRequestController', () => {
       expect(mockAssignGroup).toHaveBeenCalledTimes(2);
       expect(mockAssignGroup).toHaveBeenNthCalledWith(1, prismaTxMock, 'sub-123', 'g1');
       expect(mockAssignGroup).toHaveBeenNthCalledWith(2, prismaTxMock, 'sub-123', 'global-g1');
+      expect(mockAssignPermissions).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith({
         userId: 'u1',
@@ -216,6 +226,7 @@ describe('createUserAccessRequestController', () => {
       mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g1', initiativeId: 'i1', name: GroupName.ADMIN }]);
       mockSubjectHasGroupName.mockResolvedValue(false);
       mockGetCorrespondingGlobalGroup.mockResolvedValueOnce({ groupId: 'global-g1' });
+      mockAssignPermissions.mockResolvedValue(undefined);
 
       await createUserAccessRequestController(
         req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
@@ -225,6 +236,7 @@ describe('createUserAccessRequestController', () => {
       expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'g1');
       expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'global-g1');
       expect(mockAssignGroup).not.toHaveBeenCalled();
+      expect(mockAssignPermissions).toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(200);
       expect(res.json).toHaveBeenCalledWith(undefined);
     });
@@ -277,6 +289,7 @@ describe('createUserAccessRequestController', () => {
         userId: 'u1'
       });
       expect(mockAssignGroup).not.toHaveBeenCalled();
+      expect(mockAssignPermissions).not.toHaveBeenCalled();
       expect(res.status).toHaveBeenCalledWith(201);
       expect(res.json).toHaveBeenCalledWith({
         id: 'req-1',
@@ -311,6 +324,7 @@ describe('processUserAccessRequestController', () => {
     mockGetCorrespondingGlobalGroup.mockResolvedValue({
       groupId: 'global-g1'
     });
+    mockAssignPermissions.mockResolvedValue(undefined);
 
     await processUserAccessRequestController(
       req as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>,
@@ -325,6 +339,7 @@ describe('processUserAccessRequestController', () => {
       { status: AccessRequestStatus.APPROVED },
       'ar-1'
     );
+    expect(mockAssignPermissions).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalled();
   });
@@ -352,6 +367,7 @@ describe('processUserAccessRequestController', () => {
     mockGetCorrespondingGlobalGroup.mockResolvedValue({
       groupId: 'global-g1'
     });
+    mockAssignPermissions.mockResolvedValue(undefined);
 
     await processUserAccessRequestController(
       req as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>,
@@ -365,6 +381,7 @@ describe('processUserAccessRequestController', () => {
       { status: AccessRequestStatus.APPROVED },
       'ar-1'
     );
+    expect(mockAssignPermissions).toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalled();
   });
@@ -400,6 +417,7 @@ describe('processUserAccessRequestController', () => {
     );
     expect(mockAssignGroup).not.toHaveBeenCalled();
     expect(mockRemoveGroup).not.toHaveBeenCalled();
+    expect(mockAssignPermissions).not.toHaveBeenCalled();
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalled();
   });
