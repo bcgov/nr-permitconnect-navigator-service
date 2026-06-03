@@ -64,10 +64,6 @@ export interface ATSUserSearchParameters extends ParsedQs {
   phone?: string;
 }
 
-export interface BceidSearchParameters extends ParsedQs {
-  guid: string;
-}
-
 export interface BringForward {
   activityId: string;
   noteId: string;

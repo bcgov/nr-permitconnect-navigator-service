@@ -302,3 +302,9 @@ export interface Email {
   to: string[];
   tag?: string;
 }
+
+export interface SearchIdirUsersRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+}

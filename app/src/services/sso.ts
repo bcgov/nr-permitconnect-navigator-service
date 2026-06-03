@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { BceidSearchParameters, IdirSearchParameters } from '../types/index.ts';
+import type { IdirSearchParameters } from '../types/index.ts';
 
 /**
  * Gets Auth token using SSO credentials
@@ -54,56 +54,6 @@ export const searchIdirUsers = async (params?: IdirSearchParameters) => {
   try {
     const env = config.get('server.env');
     const { data, status } = await ssoAxios().get(`/${env}/azure-idir/users`, { params: params });
-    return { data: data.data, status };
-  } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      return {
-        data: e.response?.data.message,
-        status: e.response ? e.response.status : 500
-      };
-    } else {
-      return {
-        data: 'Error',
-        status: 500
-      };
-    }
-  }
-};
-
-/**
- * Retrieve all basic BCeID matching the search parameters
- * @param params - The search parameters
- * @returns A Promise that resolves to the response from the external api
- */
-export const searchBasicBceidUsers = async (params?: BceidSearchParameters) => {
-  try {
-    const env = config.get('server.env');
-    const { data, status } = await ssoAxios().get(`/${env}/basic-bceid/users`, { params: params });
-    return { data: data.data, status };
-  } catch (e: unknown) {
-    if (axios.isAxiosError(e)) {
-      return {
-        data: e.response?.data.message,
-        status: e.response ? e.response.status : 500
-      };
-    } else {
-      return {
-        data: 'Error',
-        status: 500
-      };
-    }
-  }
-};
-
-/**
- * Retrieve all business BCeID matching the search parameters
- * @param params - The search parameters
- * @returns A Promise that resolves to the response from the external api
- */
-export const searchBusinessBceidUsers = async (params?: BceidSearchParameters) => {
-  try {
-    const env = config.get('server.env');
-    const { data, status } = await ssoAxios().get(`/${env}/business-bceid/users`, { params: params });
     return { data: data.data, status };
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {

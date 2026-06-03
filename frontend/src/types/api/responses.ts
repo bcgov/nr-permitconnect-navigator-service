@@ -1,5 +1,7 @@
 import type { ActivityContact, Permit } from './resources';
 import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { Permit } from './resources';
+import type { SsoIdirUserAttributes } from '../oidc';
 
 export interface BringForward {
   activityId: string;
@@ -41,6 +43,14 @@ export interface Permission {
 export interface SearchPermitsResponse {
   permits: Permit[];
   totalRecords: number;
+}
+
+export interface SearchIdirUsersResponse {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  attributes: SsoIdirUserAttributes;
 }
 
 export interface Statistics {

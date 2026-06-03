@@ -20,6 +20,6 @@ export { permitService } from './permitService';
 export { default as reportingService } from './reportingService';
 export { default as roadmapService } from './roadmapService';
 export { default as sourceSystemKindService } from './sourceSystemKindService';
-export { default as ssoService } from './ssoService';
+export { ssoService } from './ssoService';
 export { userService } from './userService';
 export { default as yarsService } from './yarsService';

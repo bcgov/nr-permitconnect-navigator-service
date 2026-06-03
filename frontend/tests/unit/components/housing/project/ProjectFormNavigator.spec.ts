@@ -23,7 +23,7 @@ import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
 import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { HousingProject, IdirAttribute, BasicBceidAttribute, BusinessBceidAttribute, Group, User } from '@/types';
+import type { HousingProject, Group, User } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
 
 vi.mock('@/services', () => ({
@@ -47,22 +47,6 @@ vi.mock('@/services', () => ({
 
 const currentDate = new Date().toISOString();
 
-const exampleIdirAttribute: IdirAttribute = {
-  idirUsername: 'idirUser',
-  idirUserGuid: 'idir-guid-123'
-};
-
-const exampleBasicBceidAttribute: BasicBceidAttribute = {
-  bceidUsername: 'bceidUser',
-  bceidUserGuid: 'bceid-guid-123'
-};
-
-const exampleBusinessBceidAttribute: BusinessBceidAttribute = {
-  bceidBusinessGuid: 'business-guid-123',
-  bceidBusinessName: 'Example Business',
-  ...exampleBasicBceidAttribute
-};
-
 const testUser = {
   active: true,
   email: 'john.doe@example.com',
@@ -75,9 +59,6 @@ const testUser = {
   userId: 'user123',
   sub: 'sub-123',
   elevatedRights: true,
-  IdirAttributes: exampleIdirAttribute,
-  bceidAttributes: exampleBasicBceidAttribute,
-  BusinessBceidAttribute: exampleBusinessBceidAttribute,
   bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
