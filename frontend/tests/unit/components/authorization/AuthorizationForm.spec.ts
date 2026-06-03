@@ -11,7 +11,7 @@ import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
-import type { Permit, PermitTracking, PermitType } from '@/types';
+import type { Permit, PermitTracking, PermitType, User } from '@/types';
 import type { AxiosResponse } from 'axios';
 
 // Mock Services
@@ -155,9 +155,7 @@ describe('AuthorizationForm.vue', () => {
     vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue({
       data: testSourceSystemKinds
     } as AxiosResponse);
-    vi.mocked(userService.searchUsers).mockResolvedValue({
-      data: [{ firstName: 'John', lastName: 'Doe' }]
-    } as AxiosResponse);
+    vi.mocked(userService.searchUsers).mockResolvedValue([{ firstName: 'John', lastName: 'Doe' }] as User[]);
   });
 
   describe('Initialization and Rendering', () => {

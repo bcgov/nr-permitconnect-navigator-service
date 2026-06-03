@@ -5,7 +5,7 @@ import { validate } from '../middleware/validation.ts';
 
 const schema = {
   searchUsers: {
-    query: Joi.object({
+    body: Joi.object({
       userId: Joi.array().items(uuidv4),
       idp: Joi.array().items(Joi.string().max(255)),
       sub: Joi.string().max(255),
@@ -13,7 +13,7 @@ const schema = {
       firstName: Joi.string().max(255),
       fullName: Joi.string().max(255),
       lastName: Joi.string().max(255),
-      active: Joi.string().max(255),
+      active: Joi.boolean(),
       group: Joi.array().items(Joi.string().max(255)),
       includeUserGroups: Joi.boolean(),
       initiative: Joi.array().items(Joi.string().max(255))

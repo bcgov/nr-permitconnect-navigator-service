@@ -38,9 +38,9 @@ async function onAssigneeInput(e: InputEvent) {
   const input = e.target.value;
 
   if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input, fullName: input })).data;
+    assigneeOptions.value = await userService.searchUsers({ email: input, fullName: input });
   } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = (await userService.searchUsers({ email: input })).data;
+    assigneeOptions.value = await userService.searchUsers({ email: input });
   } else {
     assigneeOptions.value = [];
   }

@@ -326,15 +326,13 @@ onBeforeMount(async () => {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
-    const users: User[] = (
-      await userService.searchUsers({
-        active: true,
-        idp: [idpCfg.idp],
-        includeUserGroups: true,
-        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
-        initiative: [useAppStore().getInitiative]
-      })
-    ).data;
+    const users: User[] = await userService.searchUsers({
+      active: true,
+      idp: [idpCfg.idp],
+      includeUserGroups: true,
+      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
+      initiative: [useAppStore().getInitiative]
+    });
     const accessRequests: AccessRequest[] = (await accessRequestService.getAccessRequests()).data;
     const currentAccessRequests = new Map();
 
@@ -360,11 +358,9 @@ onBeforeMount(async () => {
       .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
     // Get requesting users and add their access requests
-    const newRequestingUsers: User[] = (
-      await userService.searchUsers({
-        userId: Array.from(currentAccessRequests.keys())
-      })
-    ).data;
+    const newRequestingUsers: User[] = await userService.searchUsers({
+      userId: Array.from(currentAccessRequests.keys())
+    });
 
     newRequestingUsers.forEach((user) => {
       const accessRequest = currentAccessRequests.get(user.userId);
@@ -374,8 +370,9 @@ onBeforeMount(async () => {
       usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
     });
   } catch (error) {
-    if (isAxiosError(error)) toast.error('Failed to request access', error.response?.data?.message ?? error.message);
-    else if (error instanceof Error) toast.error('Failed to request access', error.message);
+    if (isAxiosError(error))
+      toast.error('Failed to load access requests', error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error('Failed to load access requests', error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;

@@ -254,8 +254,27 @@ export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ProjectSchema>;
 export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
 
 /**
+ * User
+ */
+
+export interface SearchUsersRequest {
+  userId?: string[];
+  idp?: string[];
+  sub?: string;
+  email?: string;
+  firstName?: string;
+  fullName?: string;
+  lastName?: string;
+  active?: boolean;
+  group?: GroupName[];
+  includeUserGroups?: boolean;
+  initiative?: Initiative[];
+}
+
+/**
  * Other
  */
+
 export interface ContactSearchParameters {
   contactApplicantRelationship?: string;
   contactPreference?: string;
@@ -282,18 +301,4 @@ export interface Email {
   subject: string;
   to: string[];
   tag?: string;
-}
-
-export interface UserSearchParameters {
-  userId?: string[];
-  idp?: string[];
-  sub?: string;
-  email?: string;
-  firstName?: string;
-  fullName?: string;
-  lastName?: string;
-  active?: boolean;
-  group?: GroupName[];
-  includeUserGroups?: boolean;
-  initiative?: Initiative[];
 }

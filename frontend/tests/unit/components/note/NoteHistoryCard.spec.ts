@@ -11,8 +11,7 @@ import { StorageKey } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
-import type { AxiosResponse } from 'axios';
-import type { Note, NoteHistory } from '@/types';
+import type { Note, NoteHistory, User } from '@/types';
 
 const { t } = useI18n();
 
@@ -125,7 +124,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  useUserService.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {

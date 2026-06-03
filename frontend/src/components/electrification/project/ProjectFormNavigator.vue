@@ -85,8 +85,7 @@ const projectFormNavigatorSchema = computed(() => {
 // Actions
 async function initializeFormValues(project: ElectrificationProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
-  if (project.assignedUserId)
-    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
+  if (project.assignedUserId) assigneeOptions = await userService.searchUsers({ userId: [project.assignedUserId] });
 
   return {
     contact: {

@@ -177,8 +177,7 @@ async function handleAtsCreate(formValues: AtsCreateResponse) {
 
 async function initializeFormValues(project: HousingProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
-  if (project.assignedUserId)
-    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
+  if (project.assignedUserId) assigneeOptions = await userService.searchUsers({ userId: [project.assignedUserId] });
 
   return {
     contact: {

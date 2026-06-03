@@ -25,7 +25,7 @@ const userName: Ref<string> = ref('');
 onBeforeMount(() => {
   if (enquiry.createdBy) {
     userService.searchUsers({ userId: [enquiry.createdBy] }).then((res) => {
-      userName.value = res?.data.length ? res?.data[0].fullName : '';
+      userName.value = res?.length ? res?.[0].fullName : '';
     });
   }
 });

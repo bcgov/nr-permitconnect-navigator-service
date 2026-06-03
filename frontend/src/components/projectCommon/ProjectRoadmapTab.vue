@@ -121,7 +121,7 @@ watch(
     };
 
     if (project?.assignedUserId) {
-      const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] })).data[0];
+      const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] }))[0];
 
       if (assignee) {
         navigator = assignee;

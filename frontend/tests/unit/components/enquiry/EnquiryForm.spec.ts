@@ -17,12 +17,12 @@ import {
   ProjectRelationship
 } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { mockAxiosResponse, VEE_FORM_STUB } from '../../../helpers';
+import { VEE_FORM_STUB } from '../../../helpers';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject, Project, ProjectService } from '@/types';
+import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
 
-const searchContactSpy = vi.spyOn(userService, 'searchUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
 const getHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
 const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'getActivityIds');
@@ -108,7 +108,7 @@ const wrapperSettings = (
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }]));
+    vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
       enquiryId: 'enquiry123',
       activityId: 'activity456'
@@ -163,8 +163,8 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(searchContactSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
+      expect(searchUsersSpy).toHaveBeenCalledTimes(1);
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
     });
 
     it('gets housing activity Ids onMount', async () => {

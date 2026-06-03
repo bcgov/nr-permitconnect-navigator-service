@@ -177,7 +177,7 @@ async function getRelatedATSClientID(activityId: string) {
 async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
   if (enquiry?.assignedUserId) {
-    assigneeOptions = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
+    assigneeOptions = await userService.searchUsers({ userId: [enquiry.assignedUserId] });
   }
 
   let atsClientId;

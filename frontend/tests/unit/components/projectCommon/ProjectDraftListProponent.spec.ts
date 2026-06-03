@@ -5,9 +5,7 @@ import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
 import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftListProponent.vue';
-import { userService } from '@/services';
 
-import type { AxiosResponse } from 'axios';
 import type { Draft } from '@/types';
 
 // Mock dependencies
@@ -17,12 +15,8 @@ vi.mock('vue-i18n', () => ({
   })
 }));
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
-
 const testDraft = { draftId: 'bar' };
 const testDrafts = [testDraft] as Draft<unknown>[];
-
-useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 
 const wrapperSettings = (testDraftsProp = testDrafts) => ({
   props: {

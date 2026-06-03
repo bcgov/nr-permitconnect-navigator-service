@@ -36,14 +36,14 @@ describe('searchUsersController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
+      body: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     await searchUsersController(
-      req as unknown as Request<never, never, never, UserSearchParameters>,
+      req as unknown as Request<never, never, UserSearchParameters, never>,
       res as unknown as Response
     );
 
@@ -57,14 +57,14 @@ describe('searchUsersController', () => {
 
   it('adds dashes to user IDs', async () => {
     const req = {
-      query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
+      body: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     await searchUsersController(
-      req as unknown as Request<never, never, never, UserSearchParameters>,
+      req as unknown as Request<never, never, UserSearchParameters, never>,
       res as unknown as Response
     );
 

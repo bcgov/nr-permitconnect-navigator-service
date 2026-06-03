@@ -23,7 +23,7 @@ import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
 import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { HousingProject, IdirAttribute, BasicBceidAttribute, BusinessBceidAttribute, Group } from '@/types';
+import type { HousingProject, IdirAttribute, BasicBceidAttribute, BusinessBceidAttribute, Group, User } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
 
 vi.mock('@/services', () => ({
@@ -262,7 +262,7 @@ const wrapperSettings = (testProjectProp = testProject, editableProp = true) => 
 describe('ProjectForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }]));
+    vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
   });
 

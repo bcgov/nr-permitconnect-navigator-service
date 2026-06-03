@@ -21,5 +21,5 @@ export { default as reportingService } from './reportingService';
 export { default as roadmapService } from './roadmapService';
 export { default as sourceSystemKindService } from './sourceSystemKindService';
 export { default as ssoService } from './ssoService';
-export { default as userService } from './userService';
+export { userService } from './userService';
 export { default as yarsService } from './yarsService';
