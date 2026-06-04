@@ -1,14 +1,20 @@
 import { appAxios } from './interceptors';
 
-const path = 'code';
+import type { GetCodeTablesResponse } from '@/types';
 
-export default {
-  /**
-   * Retrieves all code tables
-   * @returns {Promise} An axios response
-   */
+const PATH = 'code';
 
-  getCodeTables() {
-    return appAxios().get(path);
-  }
+/**
+ * Retrieves all code tables.
+ * @returns A promise resolving to the list of code tables.
+ */
+export async function getCodeTables(): Promise<GetCodeTablesResponse> {
+  const { data } = await appAxios().get<GetCodeTablesResponse>(PATH);
+
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+export const codeService = {
+  getCodeTables
 };

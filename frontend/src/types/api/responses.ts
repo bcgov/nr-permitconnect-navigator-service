@@ -3,6 +3,7 @@ import type { ActivityContact, Permit } from './resources';
 import type { Permit } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
+import type { CodeTableName } from '../common';
 
 export interface BringForward {
   activityId: string;
@@ -26,6 +27,8 @@ export interface Code {
   active: boolean;
 }
 
+export type GetCodeTablesResponse = Record<CodeTableName, Code[]>;
+
 export interface Group {
   groupId: number;
   initiativeCode?: string;
@@ -39,6 +42,11 @@ export interface Permission {
   initiative: Initiative;
   resource: Resource;
   action: Action;
+}
+
+export interface GetPermissionsResponse {
+  groups: Group[];
+  permissions: Permission[];
 }
 
 export interface SearchPermitsResponse {

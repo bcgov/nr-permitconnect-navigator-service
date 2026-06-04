@@ -89,7 +89,7 @@ async function searchIdirUsers() {
 }
 
 watchEffect(async () => {
-  const yarsGroups: Group[] = (await yarsService.getGroups(useAppStore().getInitiative)).data;
+  const yarsGroups: Group[] = await yarsService.getGroups({ initiative: useAppStore().getInitiative });
 
   const allowedGroups: GroupName[] = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN])) {

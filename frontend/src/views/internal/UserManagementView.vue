@@ -179,10 +179,10 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         if (admin) {
           // Delete subject group
-          response = await yarsService.deleteSubjectGroup(
-            userAccessRequest.user.sub,
-            userAccessRequest.user.groups[0]!.groupId
-          );
+          response = await yarsService.deleteSubjectGroup({
+            sub: userAccessRequest.user.sub,
+            groupId: userAccessRequest.user.groups[0]!.groupId
+          });
         } else {
           // Create user access request
           response = await accessRequestService.createUserAccessRequest({

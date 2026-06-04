@@ -303,6 +303,15 @@ export interface Email {
   tag?: string;
 }
 
+export interface DeleteSubjectGroupRequest {
+  sub: string;
+  groupId: number;
+}
+
+export interface GetGroupsRequest {
+  initiative: Initiative;
+}
+
 export interface GetPidsRequest {
   projectId: string;
 }

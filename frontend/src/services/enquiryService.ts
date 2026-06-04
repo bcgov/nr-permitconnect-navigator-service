@@ -34,7 +34,7 @@ export async function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry>
 export async function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
   const { enquiryId } = req;
 
-  await appAxios().delete<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
+  await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
 }
 
 /**
