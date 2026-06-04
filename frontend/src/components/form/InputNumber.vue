@@ -56,7 +56,7 @@ const { errorMessage, handleBlur, value } = useField<number>(name);
       {{ helpText }}
       <span
         v-if="required"
-        class="text-[var(--p-red-400)]"
+        class="text-[var(--p-support-required-text)]"
       >
         *
       </span>

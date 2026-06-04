@@ -62,7 +62,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
       <div class="col-span-1 grid grid-row">
         <h6 class="font-bold mb-2">
           {{ t('i.housing.project.projectForm.indigenousHousingProvider') }}
-          <span class="text-[var(--p-red-400)]">*</span>
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select
@@ -87,7 +87,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
       <div class="col-span-1 grid grid-row">
         <h6 class="font-bold mb-2">
           {{ t('i.housing.project.projectForm.nonProfitHousingSociety') }}
-          <span class="text-[var(--p-red-400)]">*</span>
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select
@@ -113,7 +113,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedPanel', tab);
       <div class="col-span-1 grid grid-row">
         <h6 class="font-bold mb-2">
           {{ t('i.housing.project.projectForm.housingCoop') }}
-          <span class="text-[var(--p-red-400)]">*</span>
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
         <div class="grid grid-cols-4 gap-x-3">
           <Select

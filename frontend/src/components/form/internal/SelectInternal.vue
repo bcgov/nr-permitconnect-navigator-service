@@ -52,7 +52,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       {{ label }}
       <span
         v-if="required"
-        class="text-[var(--p-red-400)]"
+        class="text-[var(--p-support-required-text)]"
       >
         *
       </span>
@@ -84,7 +84,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       {{ label }}
       <span
         v-if="required"
-        class="text-[var(--p-red-400)]"
+        class="text-[var(--p-support-required-text)]"
       >
         *
       </span>

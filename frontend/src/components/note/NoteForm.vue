@@ -294,7 +294,7 @@ onBeforeMount(async () => {
             <div class="flex items-center">
               <h6 class="font-bold app-label-color">
                 {{ t('note.noteForm.note') }}
-                <span class="text-[var(--p-red-400)]">*</span>
+                <span class="text-[var(--p-support-required-text)]">*</span>
               </h6>
               <Tooltip
                 v-if="

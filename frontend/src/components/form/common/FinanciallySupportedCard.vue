@@ -81,7 +81,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
                 >
                   BC Housing
                 </a>
-                <span class="text-[var(--p-red-400)]">*</span>
+                <span class="text-[var(--p-support-required-text)]">*</span>
               </legend>
               <Tooltip
                 class="pl-2 mb-2"
@@ -109,7 +109,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Indigenous Housing Provider
               </a>
-              <span class="text-[var(--p-red-400)]">*</span>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedIndigenous"
@@ -137,7 +137,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Non-profit housing society
               </a>
-              <span class="text-[var(--p-red-400)]">*</span>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedNonProfit"
@@ -165,7 +165,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Housing co-operative
               </a>
-              <span class="text-[var(--p-red-400)]">*</span>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedHousingCoop"

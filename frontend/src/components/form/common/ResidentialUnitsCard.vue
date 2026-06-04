@@ -43,7 +43,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsCard', tab);
         aria-level="2"
       >
         {{ t('projectIntakeForm.residentialUnitsCard.selectUnitTypes') }}
-        <span class="text-[var(--p-red-400)]">*</span>
+        <span class="text-[var(--p-support-required-text)]">*</span>
       </h6>
       <Divider type="solid" />
     </template>

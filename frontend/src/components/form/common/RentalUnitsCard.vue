@@ -44,7 +44,7 @@ useFormErrorWatcher(formRef, 'RentalUnitsCard', tab);
           aria-level="2"
         >
           {{ t('projectIntakeForm.rentalUnitsCard.hasRentalUnitsCard') }}
-          <span class="text-[var(--p-red-400)]">*</span>
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
         <Tooltip
           right

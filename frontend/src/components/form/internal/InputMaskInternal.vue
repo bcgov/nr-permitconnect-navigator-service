@@ -44,7 +44,7 @@ const normalizedValue = computed({
     {{ label }}
     <span
       v-if="required"
-      class="text-[var(--p-red-400)]"
+      class="text-[var(--p-support-required-text)]"
     >
       *
     </span>
