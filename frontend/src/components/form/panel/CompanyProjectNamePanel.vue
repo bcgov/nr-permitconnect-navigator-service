@@ -52,11 +52,11 @@ useFormErrorWatcher(formRef, 'CompanyProjectNamePanel', tab);
 
 async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   if (e?.query?.length >= 2) {
-    const results = (await externalApiService.searchOrgBook(e.query))?.data?.results ?? [];
+    const results = (await externalApiService.searchOrgBook({ query: e.query }))?.results ?? [];
     orgBookOptions.value = results
-      .filter((obo: Record<string, string>) => obo.type === 'name')
-      // Map value and topic_source_id for AutoComplete display and selection
-      .map((obo: Record<string, string>) => ({
+      .filter((obo) => obo.type === 'name')
+      // map value and topic_source_id for AutoComplete display and selection
+      .map((obo) => ({
         registeredName: obo.value,
         registeredId: obo.topic_source_id
       }));

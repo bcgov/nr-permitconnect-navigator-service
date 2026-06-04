@@ -11,8 +11,8 @@ import { mount } from '@vue/test-utils';
 import PrimeVue from 'primevue/config';
 import ToastService from 'primevue/toastservice';
 
-import type { AxiosResponse } from 'axios';
 import type { GeoJSON } from 'geojson';
+import type { GetGeocoderNearestOccupantResponse } from '@/types';
 
 interface Props {
   disabled?: boolean;
@@ -79,7 +79,7 @@ vi.mock('leaflet', async (importOriginal) => {
 
 vi.mock('@geoman-io/leaflet-geoman-free');
 
-const getNearestOccupantSpy = vi.spyOn(externalApiService, 'getNearestOccupant');
+const getNearestOccupantSpy = vi.spyOn(externalApiService, 'getGeocoderNearestOccupant');
 
 const testGeoJson: GeoJSON = {
   type: 'Feature',
@@ -156,12 +156,10 @@ describe('Map.vue', () => {
     const addressString = 'address string';
 
     getNearestOccupantSpy.mockResolvedValue({
-      data: {
-        properties: {
-          occupantAliasAddress: addressString
-        }
+      properties: {
+        occupantAliasAddress: addressString
       }
-    } as AxiosResponse);
+    } as GetGeocoderNearestOccupantResponse);
     const newProps: Props = {
       ...defaultTestProps,
       latitude: 45,
@@ -171,23 +169,21 @@ describe('Map.vue', () => {
     await nextTick();
 
     // @ts-expect-error - wrapper.vm functions not exposed for typing
-    wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
+    wrapper.vm.getNearestOccupant(newProps.latitude, newProps.longitude);
     await nextTick();
 
     expect(getNearestOccupantSpy).toHaveBeenCalledTimes(1);
-    expect(getNearestOccupantSpy).toHaveBeenCalledWith(newProps.longitude, newProps.latitude);
+    expect(getNearestOccupantSpy).toHaveBeenCalledWith({ latitude: newProps.latitude, longitude: newProps.longitude });
   });
 
   it('getNearestOccupant fcn returns properly formatted data', async () => {
     const addressString = 'address string2';
 
     getNearestOccupantSpy.mockResolvedValue({
-      data: {
-        properties: {
-          occupantAliasAddress: addressString
-        }
+      properties: {
+        occupantAliasAddress: addressString
       }
-    } as AxiosResponse);
+    } as GetGeocoderNearestOccupantResponse);
     const newProps: Props = {
       ...defaultTestProps,
       latitude: 45,
@@ -198,7 +194,7 @@ describe('Map.vue', () => {
     await nextTick();
 
     // @ts-expect-error - wrapper.vm functions not exposed for typing
-    wrapper.vm.getNearestOccupant(newProps.longitude, newProps.latitude);
+    wrapper.vm.getNearestOccupant(newProps.latitude, newProps.longitude);
     await nextTick();
 
     // Listen to emits

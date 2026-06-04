@@ -1,56 +1,187 @@
 import { externalApiService } from '@/services';
+import { getGeocoderNearestOccupant, searchGeocoderAddress, searchOrgBook } from '@/services/externalApiService';
 import { geocoderAxios, orgBookAxios } from '@/services/interceptors';
 import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
-import type { AxiosInstance } from 'axios';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  geocoderAxios: vi.fn(),
+  orgBookAxios: vi.fn()
 }));
 
-const getSpy = vi.fn();
-const testData = 'testDatas';
-const testAddressString = '2975 Imaginary Ave';
+describe('external api service', () => {
+  const mockGeocoderGet = vi.fn();
+  const mockOrgBookGet = vi.fn();
 
-vi.mock('@/services/interceptors');
-vi.mocked(geocoderAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
-vi.mocked(orgBookAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+    vi.mocked(geocoderAxios).mockReturnValue({
+      get: mockGeocoderGet
+    } as never);
 
-describe('externalApiService tests', () => {
-  it('calls geocoderAxios with the right params', async () => {
-    const geocoderSpy = vi.mocked(geocoderAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await externalApiService.searchAddressCoder(testAddressString);
+    vi.mocked(orgBookAxios).mockReturnValue({
+      get: mockOrgBookGet
+    } as never);
+  });
 
-    expect(geocoderSpy).toBeCalledTimes(1);
-    expect(geocoderSpy).toHaveBeenCalledWith('/addresses.json', {
-      params: {
-        addressString: testAddressString,
-        ...ADDRESS_CODER_QUERY_PARAMS
-      }
+  describe('getGeocoderNearestOccupant', () => {
+    it('returns nearest occupant data', async () => {
+      const response = {
+        occupantName: 'Acme Testing Services',
+        siteID: 'fake-site-id'
+      };
+
+      mockGeocoderGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getGeocoderNearestOccupant({
+        longitude: '12.3456',
+        latitude: '-78.9012'
+      });
+
+      expect(mockGeocoderGet).toHaveBeenCalledWith('/occupants/nearest.json', {
+        params: {
+          point: '12.3456,-78.9012'
+        }
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGeocoderGet.mockRejectedValue(error);
+
+      await expect(
+        getGeocoderNearestOccupant({
+          longitude: '12.3456',
+          latitude: '-78.9012'
+        })
+      ).rejects.toThrow(error);
     });
   });
 
-  it('calls orgBookAxios with the right params', async () => {
-    const orgBookSpy = vi.mocked(orgBookAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await externalApiService.searchOrgBook(testAddressString);
+  describe('searchGeocoderAddress', () => {
+    it('returns address search results', async () => {
+      const response = {
+        addresses: [
+          {
+            fullAddress: '123 Example Ave, Sample City, ZZ'
+          }
+        ]
+      };
 
-    expect(orgBookSpy).toBeCalledTimes(1);
-    expect(orgBookSpy).toHaveBeenCalledWith('/search/autocomplete', {
-      params: {
-        q: testAddressString,
-        ...ORG_BOOK_QUERY_PARAMS
-      }
+      mockGeocoderGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await searchGeocoderAddress({
+        addressSearch: '123 Example'
+      });
+
+      expect(mockGeocoderGet).toHaveBeenCalledWith('/addresses.json', {
+        params: {
+          addressString: '123 Example',
+          ...ADDRESS_CODER_QUERY_PARAMS
+        }
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('returns empty results', async () => {
+      const response = {
+        addresses: []
+      };
+
+      mockGeocoderGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await searchGeocoderAddress({
+        addressSearch: 'unknown-location'
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGeocoderGet.mockRejectedValue(error);
+
+      await expect(
+        searchGeocoderAddress({
+          addressSearch: '123 Example'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('searchOrgBook', () => {
+    it('returns orgbook search results', async () => {
+      const response = {
+        results: [
+          {
+            value: 'ACME TEST HOLDINGS INC.'
+          }
+        ]
+      };
+
+      mockOrgBookGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await searchOrgBook({
+        query: 'acme'
+      });
+
+      expect(mockOrgBookGet).toHaveBeenCalledWith('/search/autocomplete', {
+        params: {
+          q: 'acme',
+          ...ORG_BOOK_QUERY_PARAMS
+        }
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('returns empty results', async () => {
+      const response = {
+        results: []
+      };
+
+      mockOrgBookGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await searchOrgBook({
+        query: 'no-match'
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockOrgBookGet.mockRejectedValue(error);
+
+      await expect(
+        searchOrgBook({
+          query: 'acme'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(externalApiService).toEqual({
+      getGeocoderNearestOccupant,
+      searchGeocoderAddress,
+      searchOrgBook
     });
   });
 });

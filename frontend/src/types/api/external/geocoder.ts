@@ -19,36 +19,48 @@ interface GeocoderResponse {
  */
 interface GeocoderAddress {
   fullAddress: string;
-  score: number;
-  matchPrecision: string;
-  precisionPoints: number;
-  faults: string;
   siteName: string;
   unitDesignator: string;
   unitNumber: string;
   unitNumberSuffix: string;
-  civicNumber: string;
+  civicNumber: number;
   civicNumberSuffix: string;
   streetName: string;
   streetType: string;
-  isStreetTypePrefix: boolean;
+  isStreetTypePrefix: string; // "true" | "false"
   streetDirection: string;
-  isStreetDirectionPrefix: boolean;
+  isStreetDirectionPrefix: string; // "true" | "false"
   streetQualifier: string;
   localityName: string;
+  streetAddress: string;
   localityType: string;
   electoralArea: string;
   provinceCode: string;
   locationPositionalAccuracy: string;
   locationDescriptor: string;
   siteID: string;
-  blockID: string;
+  blockID: number;
   fullSiteDescriptor: string;
   accessNotes: string;
   siteStatus: string;
-  siteRetireDate: Date;
-  changeDate: string;
-  isOfficial: string;
+  siteRetireDate: string; // ISO date
+  changeDate: string; // ISO date
+  isOfficial: string; // "true" | "false"
+  occupantName: string;
+  occupantID: string;
+  occupantAliasAddress: string;
+  occupantDescription: string;
+  contactEmail: string;
+  contactPhone: number;
+  contactFax: string;
+  websiteUrl: string;
+  imageUrl: string;
+  keywords: string;
+  businessCategoryClass: string;
+  businessCategoryDescription: string;
+  naicsCode: number;
+  dateOccupantUpdated: string; // ISO date
+  dateOccupantAdded: string; // ISO date
 }
 
 export interface GeocoderFeature {
@@ -67,8 +79,33 @@ export interface GeocoderFeature {
 }
 
 /*
- * Response type for a Geocoder address search
+ * Request type for Geocoder
  */
-export interface GeocoderAddressResponse extends GeocoderResponse {
+
+export interface GetGeocoderNearestOccupantRequest {
+  latitude: string;
+  longitude: string;
+}
+
+export interface SearchGeocoderAddressRequest {
+  addressSearch: string;
+}
+
+/*
+ * Response type for Geocoder
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface GetGeocoderNearestOccupantResponse extends GeocoderFeature {}
+
+export interface SearchGeocoderAddressResponse extends GeocoderResponse {
+  type: string;
+  queryAddress: string;
+  crs: {
+    type: string;
+    properties: {
+      code: number;
+    };
+  };
   features: GeocoderFeature[];
 }

@@ -51,7 +51,8 @@ async function onAddressSearchInput(e: InputEvent) {
     setLocality(null);
     setProvince(null);
   } else {
-    addressGeocoderFeatures.value = (await externalApiService.searchAddressCoder(input))?.data?.features ?? [];
+    addressGeocoderFeatures.value =
+      (await externalApiService.searchGeocoderAddress({ addressSearch: input }))?.features ?? [];
   }
 }
 

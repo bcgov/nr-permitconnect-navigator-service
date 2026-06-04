@@ -9,7 +9,7 @@ export { default as contactService } from './contactService';
 export { documentService } from './documentService';
 export { electrificationProjectService } from './electrificationProjectService';
 export { enquiryService } from './enquiryService';
-export { default as externalApiService } from './externalApiService';
+export { externalApiService } from './externalApiService';
 export { generalProjectService } from './generalProjectService';
 export { housingProjectService } from './housingProjectService';
 export { mapService } from './mapService';

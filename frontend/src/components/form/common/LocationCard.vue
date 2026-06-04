@@ -87,7 +87,8 @@ function handleProjectLocationClick() {
 
 async function onAddressSearchInput(e: InputEvent) {
   const input = e.target.value;
-  addressGeocoderFeatures.value = (await externalApiService.searchAddressCoder(input))?.data?.features ?? [];
+  addressGeocoderFeatures.value =
+    (await externalApiService.searchGeocoderAddress({ addressSearch: input }))?.features ?? [];
 }
 
 async function onAddressSelect(e: SelectChangeEvent) {
