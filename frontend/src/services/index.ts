@@ -15,7 +15,6 @@ export { housingProjectService } from './housingProjectService';
 export { mapService } from './mapService';
 export { noteHistoryService } from './noteHistoryService';
 export { default as peachService } from './peachService';
-export { default as permitNoteService } from './permitNoteService';
 export { permitService } from './permitService';
 export { reportingService } from './reportingService';
 export { roadmapService } from './roadmapService';

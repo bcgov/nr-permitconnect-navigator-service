@@ -1,6 +1,5 @@
-import type * as codeEnums from '@/utils/enums/codeEnums';
-
 import type { ElectrificationProject, GeneralProject, HousingProject } from './api/resources';
+import type * as codeEnums from '@/utils/enums/codeEnums';
 
 export interface PaginationOptions {
   skip?: number;
