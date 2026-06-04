@@ -152,9 +152,7 @@ describe('AuthorizationForm.vue', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any);
 
-    vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue({
-      data: testSourceSystemKinds
-    } as AxiosResponse);
+    vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue(testSourceSystemKinds);
     vi.mocked(userService.searchUsers).mockResolvedValue([{ firstName: 'John', lastName: 'Doe' }] as User[]);
   });
 

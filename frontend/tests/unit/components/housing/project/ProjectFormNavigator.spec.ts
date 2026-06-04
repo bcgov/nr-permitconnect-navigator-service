@@ -35,7 +35,7 @@ vi.mock('@/services', () => ({
     searchOrgBook: vi.fn()
   },
   mapService: {
-    getPIDs: vi.fn()
+    getPids: vi.fn()
   },
   userService: {
     searchUsers: vi.fn()
@@ -244,7 +244,7 @@ describe('ProjectForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('renders the component with the provided props', async () => {
@@ -269,8 +269,8 @@ describe('ProjectForm.vue', () => {
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
-    expect(mapService.getPIDs).toHaveBeenCalledTimes(1);
-    expect(mapService.getPIDs).toHaveBeenCalledWith(testProject.housingProjectId);
+    expect(mapService.getPids).toHaveBeenCalledTimes(1);
+    expect(mapService.getPids).toHaveBeenCalledWith({ projectId: testProject.housingProjectId });
   });
 });
 
@@ -291,7 +291,7 @@ describe('Form Submission & ATS Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(housingProjectService.patchProject).mockResolvedValue(testProject);
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('handles CLIENT_ENQUIRY creation path upon form submit', async () => {
@@ -420,7 +420,7 @@ describe('Form Submission & ATS Integration', () => {
 describe('Watchers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('updates form values passed to ContactCardNavForm when primaryContact changes in store', async () => {

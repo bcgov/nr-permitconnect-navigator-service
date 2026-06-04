@@ -10,7 +10,6 @@ import { permitService, sourceSystemKindService } from '@/services';
 import { SYSTEM_ID } from '@/utils/constants/application';
 import { StorageKey } from '@/utils/enums/application';
 
-import type { AxiosResponse } from 'axios';
 import type { PermitType, SourceSystemKind } from '@/types';
 
 const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
@@ -84,7 +83,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  getSourceSystemKindsSpy.mockResolvedValue({ data: [sampleSourceSystemKind] } as AxiosResponse);
+  getSourceSystemKindsSpy.mockResolvedValue([sampleSourceSystemKind] as SourceSystemKind[]);
   listPermitTypesSpy.mockResolvedValue(permitTypesList);
 });
 

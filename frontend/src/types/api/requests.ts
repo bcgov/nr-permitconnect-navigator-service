@@ -303,6 +303,19 @@ export interface Email {
   tag?: string;
 }
 
+export interface GetPidsRequest {
+  projectId: string;
+}
+
+export interface GetRoadmapNoteRequest {
+  activityId: string;
+}
+export interface SendRoadmapRequest {
+  activityId: string;
+  selectedFileIds: string[];
+  emailData: Email;
+}
+
 export interface SearchIdirUsersRequest {
   firstName?: string;
   lastName?: string;

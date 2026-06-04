@@ -269,7 +269,7 @@ watch(getPrimaryActivityContact, (newContact, oldContact) => {
 onBeforeMount(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
-  locationPidsAuto.value = (await mapService.getPIDs(project.generalProjectId)).data;
+  locationPidsAuto.value = await mapService.getPids({ projectId: project.generalProjectId });
 
   // Default form values
   initialFormValues.value = await initializeFormValues(project);

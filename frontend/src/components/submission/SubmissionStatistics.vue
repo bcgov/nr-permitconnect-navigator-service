@@ -12,7 +12,7 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { ProjectService } from '@/types/services';
-import type { InputEvent, GetProjectStatisticsRequest, Statistics, User } from '@/types';
+import type { InputEvent, GetProjectStatisticsRequest, Statistics, User, ReportingResponse } from '@/types';
 
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
@@ -55,14 +55,14 @@ async function onDownloadProjectPermitData() {
   else if (initiative === Initiative.GENERAL) response = await reportingService.getGeneralProjectPermitData();
   else if (initiative === Initiative.HOUSING) response = await reportingService.getHousingProjectPermitData();
 
-  const data = response?.data;
+  const data = response;
 
-  if (!data || data.length === 0) {
+  if (!data || (Array.isArray(data) && data.length === 0)) {
     toast.info('No Data', 'Data not available for downloaded.');
     return;
   }
 
-  const headers = Object.keys(data[0]);
+  const headers = Object.keys(data[0]) as (keyof ReportingResponse)[];
   const csvRows = [];
 
   csvRows.push(headers.join(','));

@@ -436,7 +436,7 @@ onBeforeMount(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
 
-  locationPidsAuto.value = (await mapService.getPIDs(project.housingProjectId)).data;
+  locationPidsAuto.value = await mapService.getPids({ projectId: project.housingProjectId });
 
   // Default form values
   initialFormValues.value = await initializeFormValues(project);

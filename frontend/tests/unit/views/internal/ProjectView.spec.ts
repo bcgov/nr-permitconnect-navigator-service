@@ -21,7 +21,7 @@ import {
 } from '@/services';
 import { Initiative, StorageKey } from '@/utils/enums/application';
 import ProjectView from '@/views/internal/ProjectView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type {
   ElectrificationProject,
@@ -117,7 +117,7 @@ vi.mock('@/services/documentService', () => ({
 }));
 
 vi.mock('@/services/roadmapService', () => ({
-  default: {
+  roadmapService: {
     getRoadmapNote: vi.fn()
   }
 }));
@@ -178,7 +178,7 @@ beforeEach(() => {
   vi.mocked(permitService.listPermits).mockResolvedValue([{ permitId: '123' }] as Permit[]);
   vi.mocked(permitService.listPermitTypes).mockResolvedValue([{ permitTypeId: 123 }] as PermitType[]);
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([{ enquiryId: '123' }] as Enquiry[]);
-  vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue(mockAxiosResponse({ roadmapNoteId: '123' }));
+  vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('some note text');
 });
 
 afterEach(() => {

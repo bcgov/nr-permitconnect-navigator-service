@@ -1,7 +1,8 @@
+import type { Action, BasicResponse, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import type { ActivityContact, Permit } from './resources';
-import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import type { Permit } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
+import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 export interface BringForward {
   activityId: string;
@@ -78,6 +79,48 @@ export interface Statistics {
   guidance: number;
   inapplicable: number;
   status_request: number;
+}
+
+export interface ReportingResponse {
+  project_name: string;
+  consent_to_feedback?: BasicResponse;
+  first_name: string;
+  last_name: string;
+  phone_number: string | null;
+  email: string | null;
+  contact_preference: ContactPreference;
+  contact_applicant_relationship: ProjectRelationship;
+  activity_id: string;
+  street_address: string;
+  locality: string;
+  latitude: number | null;
+  longitude: number | null;
+  location_pids: string | null;
+  submission_type: string;
+  application_status: string;
+  issued_permit_id: string | null;
+  tracking_id: string | null;
+  state: string;
+  needed: boolean;
+  stage: string | null;
+  submitted_date: string | null;
+  submitted_time: string | null;
+  decision_date: string | null;
+  decision_time: string | null;
+  status_last_verified: string | null;
+  status_last_verified_time: string | null;
+  status_last_changed: string | null;
+  status_last_changed_time: string | null;
+  agency: string | null;
+  division: string | null;
+  branch: string | null;
+  permit_type: string | null;
+  family: string | null;
+  name: string | null;
+  acronym: string | null;
+  tracked_in_ats: boolean;
+  source_system: string | null;
+  source_system_acronym: string | null;
 }
 
 export interface PutActivityContactResponse {

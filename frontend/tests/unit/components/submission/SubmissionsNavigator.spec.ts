@@ -12,7 +12,7 @@ import {
 } from '@/services';
 import { StorageKey, Resource } from '@/utils/enums/application';
 import { mount } from '@vue/test-utils';
-import type { AxiosResponse } from 'axios';
+
 import type { BringForward, Enquiry, HousingProject, Permit, SearchPermitsResponse, Statistics } from '@/types';
 
 vi.mock('vue-i18n', () => ({
@@ -47,7 +47,7 @@ searchProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingPr
 getStatistics.mockResolvedValue({} as Statistics);
 searchPermitsSpy.mockResolvedValue({ permits: [], totalRecords: 0 } as SearchPermitsResponse);
 listPermitTypesSpy.mockResolvedValue([]);
-getSourceSystemKindsSpy.mockResolvedValue({ data: [] } as AxiosResponse);
+getSourceSystemKindsSpy.mockResolvedValue([]);
 
 const wrapperSettings = () => ({
   props: {

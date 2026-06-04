@@ -79,13 +79,11 @@ const confirmSubmit = (data: GenericObject) => {
       try {
         if (!getProject.value?.activityId) throw new Error('No activity ID');
 
-        const response = (
-          await roadmapService.send(
-            getProject.value?.activityId,
-            selectedFiles.value.map((x: Document) => x.documentId),
-            setEmptyStringsToNull(data)
-          )
-        ).data;
+        const response = await roadmapService.sendRoadmap({
+          activityId: getProject.value?.activityId,
+          selectedFileIds: selectedFiles.value.map((x: Document) => x.documentId),
+          emailData: setEmptyStringsToNull(data)
+        });
         projectStore.addNoteHistory(response);
         toast.success('Roadmap sent');
       } catch (e) {
@@ -108,7 +106,7 @@ watch(
   [() => getPrimaryActivityContact.value, () => getProject.value],
   async ([contact, project]) => {
     if (getProject.value?.activityId) {
-      const roadMapNote = (await roadmapService.getRoadmapNote(getProject.value.activityId)).data;
+      const roadMapNote = await roadmapService.getRoadmapNote({ activityId: getProject.value.activityId });
       projectStore.setRoadmapNote(roadMapNote);
     }
 

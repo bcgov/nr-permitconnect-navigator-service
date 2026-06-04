@@ -1,44 +1,104 @@
-import { reportingService } from '@/services';
+import {
+  reportingService,
+  getElectrificationProjectPermitData,
+  getGeneralProjectPermitData,
+  getHousingProjectPermitData
+} from '@/services/reportingService';
+
 import { appAxios } from '@/services/interceptors';
 
-import type { AxiosInstance } from 'axios';
-
-// Constants
-const PATH = 'reporting';
-
-// Mocks
-const getSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
+describe('reporting service', () => {
+  const mockGet = vi.fn();
 
-// Tests
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-describe('getElectrificationProjectPermitData', () => {
-  it('calls correct endpoint', () => {
-    reportingService.getElectrificationProjectPermitData();
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/electrificationProject/permit`);
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet
+    } as never);
   });
-});
 
-describe('getHousingProjectPermitData', () => {
-  it('calls correct endpoint', () => {
-    reportingService.getHousingProjectPermitData();
+  describe('getElectrificationProjectPermitData', () => {
+    it('returns electrification permit data', async () => {
+      const response = [{ project_name: 'Project A' }, { project_name: 'Project B' }];
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith(`${PATH}/housingProject/permit`);
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getElectrificationProjectPermitData();
+
+      expect(mockGet).toHaveBeenCalledWith('reporting/electrificationProject/permit');
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getElectrificationProjectPermitData()).rejects.toThrow(error);
+    });
+  });
+
+  describe('getGeneralProjectPermitData', () => {
+    it('returns general permit data', async () => {
+      const response = [{ project_name: 'General A' }];
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getGeneralProjectPermitData();
+
+      expect(mockGet).toHaveBeenCalledWith('reporting/generalProject/permit');
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getGeneralProjectPermitData()).rejects.toThrow(error);
+    });
+  });
+
+  describe('getHousingProjectPermitData', () => {
+    it('returns housing permit data', async () => {
+      const response = [{ project_name: 'Housing A' }];
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getHousingProjectPermitData();
+
+      expect(mockGet).toHaveBeenCalledWith('reporting/housingProject/permit');
+
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getHousingProjectPermitData()).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(reportingService).toEqual({
+      getElectrificationProjectPermitData,
+      getGeneralProjectPermitData,
+      getHousingProjectPermitData
+    });
   });
 });

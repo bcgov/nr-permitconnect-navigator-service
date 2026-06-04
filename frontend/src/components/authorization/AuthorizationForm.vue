@@ -406,7 +406,7 @@ async function onSubmit(data: GenericObject) {
 
 onBeforeMount(async () => {
   initializeFormValues();
-  const response: SourceSystemKind[] = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  const response: SourceSystemKind[] = await sourceSystemKindService.getSourceSystemKinds();
   sourceSystemKinds.value = response.sort(sortForDisplayOrder);
   if (authorization?.updatedBy) {
     updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] }))[0];
