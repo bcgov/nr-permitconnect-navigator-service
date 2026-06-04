@@ -11,7 +11,8 @@ const {
   name,
   placeholder = '',
   disabled = false,
-  bold = true
+  bold = true,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -19,6 +20,7 @@ const {
   placeholder?: string;
   disabled?: boolean;
   bold?: boolean;
+  required?: boolean;
 }>();
 
 // State
@@ -52,6 +54,12 @@ const { errorMessage, handleBlur, value } = useField<number>(name);
       :id="`${name}-help`"
     >
       {{ helpText }}
+      <span
+        v-if="required"
+        class="text-[var(--p-support-required-text)]"
+      >
+        *
+      </span>
     </small>
     <div class="mt-2">
       <ErrorMessage

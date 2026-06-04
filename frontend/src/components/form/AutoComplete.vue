@@ -20,7 +20,8 @@ const {
   forceSelection = false,
   loading = false,
   editable = false,
-  delay = 300
+  delay = 300,
+  required = false
 } = defineProps<{
   helpText?: string;
   label?: string;
@@ -35,6 +36,7 @@ const {
   loading?: boolean;
   editable?: boolean;
   delay?: number;
+  required?: boolean;
 }>();
 
 // Emits
@@ -54,6 +56,12 @@ onBeforeMount(() => {
       :for="name"
     >
       {{ label }}
+      <span
+        v-if="required"
+        class="text-[var(--p-support-required-text)]"
+      >
+        *
+      </span>
     </label>
     <AutoComplete
       v-model="value"

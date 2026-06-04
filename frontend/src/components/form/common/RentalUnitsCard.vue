@@ -43,12 +43,13 @@ useFormErrorWatcher(formRef, 'RentalUnitsCard', tab);
           class="section-header"
           aria-level="2"
         >
-          {{ t('projectIntakeForm.hasRentalUnitsCard') }}
+          {{ t('projectIntakeForm.rentalUnitsCard.hasRentalUnitsCard') }}
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
         <Tooltip
           right
           icon="fa-solid fa-circle-question"
-          :text="t('projectIntakeForm.rentalUnitsTooltip')"
+          :text="t('projectIntakeForm.rentalUnitsCard.rentalUnitsTooltip')"
         />
       </div>
       <Divider type="solid" />
@@ -68,7 +69,7 @@ useFormErrorWatcher(formRef, 'RentalUnitsCard', tab);
           name="housing.rentalUnits"
           :disabled="!getEditable"
           :options="NUM_RESIDENTIAL_UNITS_LIST"
-          placeholder="How many expected units?"
+          :placeholder="t('projectIntakeForm.common.noOfExpectedUnits')"
         />
       </div>
     </template>

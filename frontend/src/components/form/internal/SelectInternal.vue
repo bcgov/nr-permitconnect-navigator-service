@@ -16,7 +16,8 @@ const {
   optionValue = undefined,
   bold = true,
   loading = undefined,
-  floatLabel = false
+  floatLabel = false,
+  required = false
 } = defineProps<{
   label?: string;
   name: string;
@@ -30,6 +31,7 @@ const {
   bold?: boolean;
   loading?: boolean;
   floatLabel?: boolean;
+  required?: boolean;
 }>();
 
 // Emits
@@ -46,7 +48,15 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     :class="{ 'font-bold': bold }"
     :for="name"
   >
-    {{ label }}
+    <div>
+      {{ label }}
+      <span
+        v-if="required"
+        class="text-[var(--p-support-required-text)]"
+      >
+        *
+      </span>
+    </div>
   </label>
   <Select
     v-model="value"
@@ -70,7 +80,15 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
     :class="{ 'font-bold': bold }"
     :for="name"
   >
-    {{ label }}
+    <div>
+      {{ label }}
+      <span
+        v-if="required"
+        class="text-[var(--p-support-required-text)]"
+      >
+        *
+      </span>
+    </div>
   </label>
 </template>
 

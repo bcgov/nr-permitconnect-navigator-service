@@ -75,6 +75,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionCard', tab);
         :bold="false"
         :label="t('projectDescriptionCard.labels.projectDescription')"
         :tooltip="tooltip ? t('projectIntakeForm.additionalInfoTooltip') : undefined"
+        required
       />
       <i18n-t
         keypath="projectDescriptionCard.upload"

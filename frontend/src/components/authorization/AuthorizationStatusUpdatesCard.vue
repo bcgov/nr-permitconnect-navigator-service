@@ -113,6 +113,7 @@ const { codeDefinition, codeDisplay, options } = useCodeStore();
             name="needed"
             :label="t('authorization.authorizationStatusUpdatesCard.needed')"
             :options="PERMIT_NEEDED_LIST"
+            required
             :disabled="(peachIntegratedAuthType && peachIntegratedTrackingId) || !editable"
           />
         </div>

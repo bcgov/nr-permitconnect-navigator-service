@@ -173,6 +173,7 @@ watchEffect(() => {
             aria-level="2"
           >
             {{ t('locationCard.header') }}
+            <span class="text-[var(--p-support-required-text)]">*</span>
           </h6>
           <Tooltip
             class="mb-2"
@@ -275,6 +276,7 @@ watchEffect(() => {
                   :disabled="!getEditable"
                   :help-text="t('locationCard.provideLatitude')"
                   :placeholder="t('locationCard.placeholders.latitude')"
+                  required
                   @keyup.enter="onLatLongInput"
                 />
                 <InputNumber
@@ -283,6 +285,7 @@ watchEffect(() => {
                   :disabled="!getEditable"
                   :help-text="t('locationCard.provideLongitude')"
                   :placeholder="t('locationCard.placeholders.longitude')"
+                  required
                   @keyup.enter="onLatLongInput"
                 />
                 <div class="col-span-4">

@@ -102,6 +102,9 @@ export const ThemeOverride = definePreset(Material, {
         icon: '#CE3E39',
         surface: '#F4E1E2'
       },
+      required: {
+        text: '{red.400}'
+      },
       success: {
         border: '#42814A',
         icon: '#42814A',

@@ -177,7 +177,7 @@ export function createResidentialUnitsSchema({ t }: CreateSchemaOptions) {
       otherUnits: string()
         .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
         .notRequired()
-        .when('units.otherUnitsDescription', {
+        .when('otherUnitsDescription', {
           is: (val: string) => val === BasicResponse.YES,
           then: (schema) => schema.required().label(t('i.housing.project.projectFormNavigatorSchema.unitsOtherUnits')),
           otherwise: () => string().notRequired()
@@ -186,7 +186,7 @@ export function createResidentialUnitsSchema({ t }: CreateSchemaOptions) {
         .required()
         .oneOf(YES_NO_UNSURE_LIST)
         .label(t('i.housing.project.projectFormNavigatorSchema.unitsHasRentalUnits')),
-      rentalUnits: string().when('units.hasRentalUnits', {
+      rentalUnits: string().when('hasRentalUnits', {
         is: (val: string) => val === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -210,7 +210,7 @@ export function createFinanciallySupportedPanelSchema({ t }: CreateSchemaOptions
         .required()
         .oneOf(YES_NO_UNSURE_LIST)
         .label(t('i.housing.project.projectFormNavigatorSchema.financeFinanciallySupportedIndigenous')),
-      indigenousDescription: string().when('finance.financiallySupportedIndigenous', {
+      indigenousDescription: string().when('financiallySupportedIndigenous', {
         is: (val: string) => val === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -223,7 +223,7 @@ export function createFinanciallySupportedPanelSchema({ t }: CreateSchemaOptions
         .required()
         .oneOf(YES_NO_UNSURE_LIST)
         .label(t('i.housing.project.projectFormNavigatorSchema.financeFinanciallySupportedNonProfit')),
-      nonProfitDescription: string().when('finance.financiallySupportedNonProfit', {
+      nonProfitDescription: string().when('financiallySupportedNonProfit', {
         is: (val: string) => val === BasicResponse.YES,
         then: (schema) =>
           schema
@@ -236,7 +236,7 @@ export function createFinanciallySupportedPanelSchema({ t }: CreateSchemaOptions
         .required()
         .oneOf(YES_NO_UNSURE_LIST)
         .label(t('i.housing.project.projectFormNavigatorSchema.financeFinanciallySupportedHousingCoop')),
-      housingCoopDescription: string().when('finance.financiallySupportedHousingCoop', {
+      housingCoopDescription: string().when('financiallySupportedHousingCoop', {
         is: (val: string) => val === BasicResponse.YES,
         then: (schema) =>
           schema

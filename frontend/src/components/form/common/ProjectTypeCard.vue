@@ -47,6 +47,7 @@ useFormErrorWatcher(formRef, 'ProjectTypeCard', tab);
         aria-level="2"
       >
         {{ t('projectTypeCard.header') }}
+        <span class="text-[var(--p-support-required-text)]">*</span>
       </h6>
       <Divider type="solid" />
     </template>

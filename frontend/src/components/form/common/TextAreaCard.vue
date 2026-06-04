@@ -9,11 +9,13 @@ import { useFormStore } from '@/store';
 const {
   header,
   fieldName,
-  placeholder = undefined
+  placeholder = undefined,
+  required = false
 } = defineProps<{
   header: string;
   fieldName: string;
   placeholder?: string;
+  required?: boolean;
 }>();
 
 // Store
@@ -28,6 +30,12 @@ const { getEditable } = storeToRefs(useFormStore());
         aria-level="2"
       >
         {{ header }}
+        <span
+          v-if="required"
+          class="text-[var(--p-support-required-text)]"
+        >
+          *
+        </span>
       </h6>
       <Divider type="solid" />
     </template>
@@ -38,6 +46,7 @@ const { getEditable } = storeToRefs(useFormStore());
           :name="fieldName"
           :placeholder="placeholder"
           :disabled="!getEditable"
+          :aria-required="required"
         />
       </div>
     </template>

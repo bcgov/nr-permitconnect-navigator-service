@@ -47,7 +47,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
             class="section-header"
             aria-level="2"
           >
-            {{ t('projectIntakeForm.financiallySupportedCard') }}
+            {{ t('projectIntakeForm.financiallySupportedCard.financiallySupportedCardTitle') }}
           </h6>
         </div>
         <Button
@@ -81,6 +81,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
                 >
                   BC Housing
                 </a>
+                <span class="text-[var(--p-support-required-text)]">*</span>
               </legend>
               <Tooltip
                 class="pl-2 mb-2"
@@ -108,6 +109,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Indigenous Housing Provider
               </a>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedIndigenous"
@@ -121,7 +123,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
             class="w-1/2 pl-0"
             name="housing.indigenousDescription"
             :disabled="!getEditable"
-            placeholder="Name of Indigenous Housing Provider"
+            :placeholder="t('projectIntakeForm.financiallySupportedCard.indigenousHousingProviderName')"
           />
         </div>
 
@@ -135,6 +137,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Non-profit housing society
               </a>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedNonProfit"
@@ -148,7 +151,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
             class="w-1/2 pl-0"
             name="housing.nonProfitDescription"
             :disabled="!getEditable"
-            placeholder="Name of Non-profit housing society"
+            :placeholder="t('projectIntakeForm.financiallySupportedCard.nonProfitHousingSocietyName')"
           />
         </div>
 
@@ -162,6 +165,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
               >
                 Housing co-operative
               </a>
+              <span class="text-[var(--p-support-required-text)]">*</span>
             </legend>
             <RadioList
               name="housing.financiallySupportedHousingCoop"
@@ -175,7 +179,7 @@ useFormErrorWatcher(formRef, 'FinanciallySupportedCard', tab);
             class="w-1/2 pl-0"
             name="housing.housingCoopDescription"
             :disabled="!getEditable"
-            placeholder="Name of Housing co-operative"
+            :placeholder="t('projectIntakeForm.financiallySupportedCard.housingCoopName')"
           />
         </div>
       </div>

@@ -11,7 +11,8 @@ const {
   mask,
   placeholder = '',
   disabled,
-  bold
+  bold,
+  required = false
 } = defineProps<{
   label: string;
   name: string;
@@ -19,6 +20,7 @@ const {
   placeholder?: string;
   disabled: boolean;
   bold: boolean;
+  required?: boolean;
 }>();
 
 const { errorMessage, handleBlur, value } = useField<string>(name);
@@ -40,6 +42,12 @@ const normalizedValue = computed({
     :for="name"
   >
     {{ label }}
+    <span
+      v-if="required"
+      class="text-[var(--p-support-required-text)]"
+    >
+      *
+    </span>
   </label>
   <InputMask
     v-model="normalizedValue"

@@ -68,6 +68,7 @@ useFormErrorWatcher(formRef, 'ResidentialUnitsPanel', tab);
         :label="t('i.housing.project.projectForm.rentalIncluded')"
         :disabled="!getEditable"
         :options="YES_NO_UNSURE_LIST"
+        required
         @on-change="
           (e) => {
             if (e.value !== BasicResponse.YES) setRentalUnits(null);

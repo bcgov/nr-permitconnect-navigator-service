@@ -40,6 +40,7 @@ useFormErrorWatcher(formRef, 'NaturalDisasterCard', tab);
           aria-level="2"
         >
           {{ t('naturalDisasterCard.header') }}
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h6>
       </div>
       <Divider type="solid" />

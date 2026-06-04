@@ -854,7 +854,7 @@
     "addressTooltip": "A civic address contains a street name and number where a non-civic does not.",
     "header": "Provide one of the following project locations",
     "placeholders": {
-      "addressSearch": "Type to search the address of your housing project",
+      "addressSearch": "Type to search the address of your housing project *",
       "latitude": "Latitude",
       "longitude": "Longitude",
       "locality": "Locality",
@@ -1060,7 +1060,7 @@
     "headerTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "shareNotification": "Sharing this information will authorize the navigators to seek additional information about this permit.",
     "placeholders": {
-      "permitTypeId": "Select Permit type",
+      "permitTypeId": "Select Permit type *",
       "submittedDate": "Date applied",
       "trackingId": "Tracking #"
     }
@@ -1086,6 +1086,9 @@
     "message": "Check this box if you agree to be contacted for user feedback, helping us improve our digital service. Your personal information will not be shared with third parties."
   },
   "projectIntakeForm": {
+    "common": {
+      "noOfExpectedUnits": "How many expected units? *"
+    },
     "draft": {
       "autoSaved": "Draft autosaved",
       "saved": "Draft saved",
@@ -1110,11 +1113,21 @@
     },
     "additionalInfoTooltip": "Provide us with additional information - short description about the project, project website link, or upload a document.",
     "bcHousingTooltip": "BC Housing welcomes the opportunity to work with individuals and organizations to create affordable housing solutions.",
-    "financiallySupportedCard": "Is this project associated with any of the following?",
-    "hasRentalUnitsCard": "Will this project include rental units?",
+    "financiallySupportedCard": {
+      "financiallySupportedCardTitle": "Is this project associated with any of the following?",
+      "housingCoopName": "Name of Housing co-operative *",
+      "indigenousHousingProviderName": "Name of Indigenous Housing Provider *",
+      "nonProfitHousingSocietyName": "Name of Non-profit housing society *"
+    },
     "multiFamilyTooltip": "Multi-family dwelling: a residential building that contains two or more attached dwellings, including duplex, triplex, fourplex, townhouse, row houses, and apartment forms.",
-    "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants.",
-    "singleFamilySelectedCard": "Select the types of residential units being developed"
+    "rentalUnitsCard": {
+      "hasRentalUnitsCard": "Will this project include rental units?",
+      "rentalUnitsTooltip": "Rental refers to a purpose built residential unit, property, or dwelling that is available for long term rent by tenants."
+    },
+    "residentialUnitsCard": {
+      "selectUnitTypes": "Select the types of residential units being developed",
+      "typesOfHousing": "Type to describe what other type of housing *"
+    }
   },
   "projectTeamAddModal": {
     "addTeamMember": "Add team member",

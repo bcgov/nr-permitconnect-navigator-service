@@ -39,6 +39,7 @@ useFormErrorWatcher(formRef, 'ProjectDescriptionPanel', tab);
         <AdditionalInfo />
         <h3 class="section-header m-0">
           {{ t('i.housing.project.projectForm.additionalInfoHeader') }}
+          <span class="text-[var(--p-support-required-text)]">*</span>
         </h3>
       </div>
     </template>

@@ -80,6 +80,7 @@ onMounted(async () => {
           :label="t('i.housing.project.projectForm.regionLabel')"
           :disabled="!getEditable"
           :options="REGION_LIST"
+          required
         />
         <Select
           v-if="getInitiative === Initiative.GENERAL"
@@ -87,6 +88,7 @@ onMounted(async () => {
           :label="t('i.housing.project.projectForm.areaLabel')"
           :disabled="!getEditable"
           :options="AREA_LIST"
+          required
         />
         <Select
           name="submissionState.applicationStatus"
@@ -105,6 +107,7 @@ onMounted(async () => {
           :label="t('i.housing.project.projectForm.priorityLabel')"
           :disabled="!getEditable"
           :options="QUEUE_PRIORITY"
+          required
         />
       </span>
       <span v-else>
