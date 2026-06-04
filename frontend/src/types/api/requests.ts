@@ -19,6 +19,7 @@ import type {
   HousingProjectBase,
   NoteHistoryBase,
   Permit,
+  PermitTracking,
   PermitType,
   ProjectBase
 } from './resources';
@@ -310,6 +311,10 @@ export interface DeleteSubjectGroupRequest {
 
 export interface GetGroupsRequest {
   initiative: Initiative;
+}
+
+export interface GetPeachSummaryRequest {
+  data: PermitTracking[];
 }
 
 export interface GetPidsRequest {

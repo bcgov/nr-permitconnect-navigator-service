@@ -11,8 +11,7 @@ import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
-import type { Permit, PermitTracking, PermitType, User } from '@/types';
-import type { AxiosResponse } from 'axios';
+import type { PeachSummary, Permit, PermitTracking, PermitType, User } from '@/types';
 
 // Mock Services
 vi.mock('@/services', () => ({
@@ -206,8 +205,9 @@ describe('AuthorizationForm.vue', () => {
       };
 
       vi.mocked(peachService.getPeachSummary).mockResolvedValue({
-        data: { state: PermitState.ACCEPTED, stage: PermitStage.POST_DECISION }
-      } as AxiosResponse);
+        state: PermitState.ACCEPTED,
+        stage: PermitStage.POST_DECISION
+      } as PeachSummary);
 
       const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
       await flushPromises();

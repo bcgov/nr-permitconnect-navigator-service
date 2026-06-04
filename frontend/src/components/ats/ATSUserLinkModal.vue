@@ -10,7 +10,7 @@ import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource } from '@/types';
+import type { AtsClientResource } from '@/types';
 
 // Props
 const {
@@ -40,8 +40,8 @@ const { getInitiative } = storeToRefs(appStore);
 const atsClientId: Ref<string> = ref('');
 const loading: Ref<boolean> = ref(false);
 const hasSearched: Ref<boolean> = ref(false);
-const selectedUser: Ref<ATSClientResource | undefined> = ref(undefined);
-const users: Ref<ATSClientResource[]> = ref([]);
+const selectedUser: Ref<AtsClientResource | undefined> = ref(undefined);
+const users: Ref<AtsClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 const fName: Ref<string> = ref('');
 const lName: Ref<string> = ref('');
@@ -56,13 +56,13 @@ watchEffect(() => {
 });
 
 // Actions
-async function searchATSUsers() {
+async function searchAtsUsers() {
   selectedUser.value = undefined;
   hasSearched.value = true;
   try {
     loading.value = true;
 
-    const response = await atsService.searchATSUsers({
+    const response = await atsService.searchAtsUsers({
       firstName: fName.value,
       lastName: lName.value,
       clientId: atsClientId.value,
@@ -71,7 +71,7 @@ async function searchATSUsers() {
     });
     users.value = response.data.clients;
 
-    users.value.forEach((client: ATSClientResource) => {
+    users.value.forEach((client: AtsClientResource) => {
       // Combine address lines and filter out empty lines
       const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;
@@ -133,7 +133,7 @@ async function searchATSUsers() {
       <Button
         class="col p-button-solid"
         :label="t('i.ats.atsUserLinkModal.search')"
-        @click="searchATSUsers"
+        @click="searchAtsUsers"
       />
     </div>
     <DataTable

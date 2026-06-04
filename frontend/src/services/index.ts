@@ -1,6 +1,6 @@
 export { default as accessRequestService } from './accessRequestService';
 export { activityContactService } from './activityContactService';
-export { default as atsService } from './atsService';
+export { atsService } from './atsService';
 export { default as AuthService } from './authService';
 export { codeService } from './codeService';
 export { default as ConfigService } from './configService';
@@ -14,7 +14,7 @@ export { generalProjectService } from './generalProjectService';
 export { housingProjectService } from './housingProjectService';
 export { mapService } from './mapService';
 export { noteHistoryService } from './noteHistoryService';
-export { default as peachService } from './peachService';
+export { peachService } from './peachService';
 export { permitService } from './permitService';
 export { reportingService } from './reportingService';
 export { roadmapService } from './roadmapService';

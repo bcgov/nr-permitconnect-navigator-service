@@ -179,8 +179,8 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
         sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
       };
     });
-    const peachSummary = await peachService.getPeachSummary(data);
-    return peachSummary.data;
+    const peachSummary = await peachService.getPeachSummary({ data });
+    return peachSummary;
   } catch (e) {
     if (isAxiosError(e)) {
       const systemRecordNotFound =

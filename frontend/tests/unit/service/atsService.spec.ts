@@ -1,95 +1,204 @@
-import atsService from '@/services/atsService';
+import { atsService, createAtsClient, createAtsEnquiry, searchAtsUsers } from '@/services/atsService';
 import { appAxios } from '@/services/interceptors';
 
-import type { AxiosInstance } from 'axios';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-const testObj = {
-  firstName: 'John'
-};
+describe('ats service', () => {
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
 
-const testRelLink = {
-  '@type': 'LinkType',
-  rel: 'self',
-  href: 'http://example.com',
-  method: 'GET'
-};
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-const testAddressResource = {
-  '@type': 'AddressType',
-  links: [testRelLink],
-  addressId: 1,
-  addressLine1: '123 Main St',
-  addressLine2: 'Apt 4B',
-  city: 'Anytown',
-  provinceCode: 'CA',
-  countryCode: 'US',
-  postalCode: '12345',
-  primaryPhone: '123-456-7890',
-  secondaryPhone: '098-765-4321',
-  fax: '123-456-7890',
-  email: 'address@example.com',
-  createdBy: 'creator',
-  createdDateTime: Date.now(),
-  updatedBy: 'updater',
-  updatedDateTime: Date.now()
-};
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost
+    } as never);
+  });
 
-const testATSClientResource = {
-  '@type': 'ClientType',
-  links: [testRelLink],
-  clientId: 123,
-  address: testAddressResource,
-  businessOrgCode: 'BUS123',
-  firstName: 'John',
-  formattedAddress: '123 Main St, Apt 4B, Anytown, BC, V6H1T4',
-  surName: 'Doe',
-  companyName: 'Example Company',
-  organizationNumber: 'ORG456',
-  confirmedIndicator: true,
-  createdBy: 'creator',
-  createdDateTime: Date.now(),
-  updatedBy: 'updater',
-  updatedDateTime: Date.now(),
-  regionName: 'RegionName',
-  optOutOfBCStatSurveyInd: 'N'
-};
+  describe('searchAtsUsers', () => {
+    it('returns ATS users and status', async () => {
+      const request = {
+        firstName: 'Jane',
+        lastName: 'Doe'
+      };
 
-const getSpy = vi.fn();
-const postSpy = vi.fn();
+      const response = {
+        '@type': 'Clients',
+        links: [],
+        pageNumber: 1,
+        pageRowCount: 1,
+        totalRowCount: 1,
+        totalPageCount: 1,
+        clients: []
+      };
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  post: postSpy
-} as unknown as AxiosInstance);
+      mockGet.mockResolvedValue({
+        status: 200,
+        data: response
+      });
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
+      const result = await searchAtsUsers(request);
 
-describe('atsService', () => {
-  describe('searchATSUsers', () => {
-    it('calls with given data', () => {
-      atsService.searchATSUsers(testObj);
+      expect(mockGet).toHaveBeenCalledWith('ats/clients', {
+        params: request
+      });
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('ats/clients', { params: testObj });
+      expect(result).toEqual({
+        status: 200,
+        data: response
+      });
+    });
+
+    it('handles empty search parameters', async () => {
+      const response = {
+        '@type': 'Clients',
+        links: [],
+        pageNumber: 1,
+        pageRowCount: 0,
+        totalRowCount: 0,
+        totalPageCount: 0,
+        clients: []
+      };
+
+      mockGet.mockResolvedValue({
+        status: 200,
+        data: response
+      });
+
+      const result = await searchAtsUsers({});
+
+      expect(mockGet).toHaveBeenCalledWith('ats/clients', {
+        params: {}
+      });
+
+      expect(result.data.clients).toEqual([]);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        searchAtsUsers({
+          firstName: 'Jane'
+        })
+      ).rejects.toThrow(error);
     });
   });
 
-  describe('createATSClient', () => {
-    it('calls with given data', () => {
-      atsService.createATSClient(testATSClientResource);
+  describe('createAtsClient', () => {
+    it('creates a client and returns status', async () => {
+      const request = {
+        '@type': 'Client',
+        links: [],
+        clientId: 123,
+        address: {
+          '@type': 'Address',
+          links: [],
+          addressId: 456,
+          addressLine1: '123 Example Ave',
+          addressLine2: null,
+          city: 'Sample City',
+          provinceCode: 'BC',
+          countryCode: 'CA',
+          postalCode: 'A1A1A1',
+          primaryPhone: null,
+          secondaryPhone: null,
+          fax: null,
+          email: null,
+          createdBy: null,
+          createdDateTime: null,
+          updatedBy: null,
+          updatedDateTime: null
+        },
+        businessOrgCode: null,
+        firstName: 'Jane',
+        formattedAddress: '123 Example Ave',
+        surName: 'Doe',
+        companyName: null,
+        organizationNumber: null,
+        confirmedIndicator: true,
+        createdBy: null,
+        createdDateTime: null,
+        updatedBy: null,
+        updatedDateTime: null,
+        regionName: null,
+        optOutOfBCStatSurveyInd: null
+      };
 
-      expect(postSpy).toHaveBeenCalledTimes(1);
-      expect(postSpy).toHaveBeenCalledWith('ats/client', testATSClientResource);
+      mockPost.mockResolvedValue({
+        status: 201,
+        data: request
+      });
+
+      const result = await createAtsClient(request);
+
+      expect(mockPost).toHaveBeenCalledWith('ats/client', request);
+
+      expect(result).toEqual({
+        status: 201,
+        data: request
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('create client failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(createAtsClient({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('createAtsEnquiry', () => {
+    it('creates an enquiry and returns status', async () => {
+      const request = {
+        '@type': 'Enquiry',
+        clientId: 123,
+        contactFirstName: 'Jane',
+        contactSurname: 'Doe',
+        notes: 'Test enquiry',
+        regionName: 'Region A',
+        subRegionalOffice: 'Office A',
+        enquiryTypeCodes: ['TYPE_1'],
+        enquiryMethodCodes: ['PHONE'],
+        enquiryPartnerAgencies: [],
+        enquiryFileNumbers: []
+      };
+
+      mockPost.mockResolvedValue({
+        status: 201,
+        data: request
+      });
+
+      const result = await createAtsEnquiry(request);
+
+      expect(mockPost).toHaveBeenCalledWith('ats/enquiry', request);
+
+      expect(result).toEqual({
+        status: 201,
+        data: request
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('create enquiry failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(createAtsEnquiry({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(atsService).toEqual({
+      searchAtsUsers,
+      createAtsClient,
+      createAtsEnquiry
     });
   });
 });

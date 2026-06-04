@@ -4,6 +4,7 @@ import type { Permit } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import type { CodeTableName } from '../common';
+import type { PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 
 export interface BringForward {
   activityId: string;
@@ -35,6 +36,18 @@ export interface Group {
   initiativeId: string;
   name: GroupName;
   label?: string;
+}
+
+export interface PeachSummary {
+  stage: PermitStage;
+  state: PermitState;
+  onHoldCode?: PiesOnHold;
+  submittedDate: string | null;
+  submittedTime: string | null;
+  decisionDate: string | null;
+  decisionTime: string | null;
+  statusLastChanged: string;
+  statusLastChangedTime: string | null;
 }
 
 export interface Permission {

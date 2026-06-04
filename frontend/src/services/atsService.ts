@@ -1,33 +1,52 @@
+import type { AxiosResponse } from 'axios';
 import { appAxios } from './interceptors';
 
-import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '@/types';
+import type { AtsClientResource, AtsClientsResource, AtsEnquiryResource, SearchAtsUsersRequest } from '@/types';
 
-export default {
-  /**
-   * Searches for ATS users
-   * @param params The search parameters
-   * @returns {Promise} An axios response
-   */
+const PATH = 'ats';
 
-  searchATSUsers(params?: ATSUserSearchParameters) {
-    return appAxios().get('ats/clients', { params: params });
-  },
+// TODO: As part of the ATS refactor, these services should return the resource directly
 
-  /**
-   * Create a client resource in ATS
-   * @param data ATS client resource to create
-   * @returns {Promise} An axios response
-   */
-  createATSClient(data?: ATSClientResource) {
-    return appAxios().post('ats/client', data);
-  },
+/**
+ * Searches for ATS users.
+ * @param req - The search request payload.
+ * @returns A promise resolving to ATS user search results.
+ */
+export async function searchAtsUsers(req: SearchAtsUsersRequest): Promise<AxiosResponse<AtsClientsResource>> {
+  const { ...params } = req;
 
-  /**
-   * Create an enquiry resource in ATS
-   * @param data ATS enquiry resource to create
-   * @returns {Promise} An axios response
-   */
-  createATSEnquiry(data?: ATSEnquiryResource) {
-    return appAxios().post('ats/enquiry', data);
-  }
+  const response = await appAxios().get<AtsClientsResource>(`${PATH}/clients`, {
+    params
+  });
+
+  return response;
+}
+
+/**
+ * Creates a client resource in ATS.
+ * @param req - The ATS client creation payload.
+ * @returns A promise resolving to the created ATS client.
+ */
+export async function createAtsClient(req: AtsClientResource): Promise<AxiosResponse<AtsClientResource>> {
+  const response = await appAxios().post<AtsClientResource>(`${PATH}/client`, req);
+
+  return response;
+}
+
+/**
+ * Creates an enquiry resource in ATS.
+ * @param req - The ATS enquiry creation payload.
+ * @returns A promise resolving to the created ATS enquiry.
+ */
+export async function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosResponse<AtsEnquiryResource>> {
+  const response = await appAxios().post<AtsEnquiryResource>(`${PATH}/enquiry`, req);
+
+  return response;
+}
+
+/** Hybrid default export object for backward compatibility */
+export const atsService = {
+  searchAtsUsers,
+  createAtsClient,
+  createAtsEnquiry
 };

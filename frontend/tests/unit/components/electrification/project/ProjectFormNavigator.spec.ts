@@ -17,17 +17,17 @@ import {
   ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
+import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
-import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { ElectrificationProject } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
-import { updateLiveNameKey } from '@/utils/keys';
+import type { DefineComponent, ComponentPublicInstance } from 'vue';
+import type { AtsClientResource, AtsEnquiryResource, ElectrificationProject } from '@/types';
 
 vi.mock('@/services', () => ({
   atsService: {
-    createATSClient: vi.fn(),
-    createATSEnquiry: vi.fn()
+    createAtsClient: vi.fn(),
+    createAtsEnquiry: vi.fn()
   },
   externalApiService: {
     searchOrgBook: vi.fn()
@@ -185,8 +185,12 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles CLIENT_ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(
+      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
+    );
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
+      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
@@ -201,8 +205,8 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).toHaveBeenCalled();
-    expect(atsService.createATSEnquiry).toHaveBeenCalled();
+    expect(atsService.createAtsClient).toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.electrificationProjectId,
@@ -214,7 +218,9 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
+      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
@@ -229,7 +235,7 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSEnquiry).toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.electrificationProjectId,
@@ -241,7 +247,9 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles CLIENT creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(
+      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
@@ -255,7 +263,7 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).toHaveBeenCalled();
+    expect(atsService.createAtsClient).toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.electrificationProjectId,
@@ -267,8 +275,8 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('bypasses addedToAts in CLIENT_ENQUIRY path when IDs fail to generate', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({}));
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({}));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(mockAxiosResponse({} as AtsClientResource));
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(mockAxiosResponse({} as AtsEnquiryResource));
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
     await flushPromises();
@@ -301,8 +309,8 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).not.toHaveBeenCalled();
-    expect(atsService.createATSEnquiry).not.toHaveBeenCalled();
+    expect(atsService.createAtsClient).not.toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).not.toHaveBeenCalled();
     expect(electrificationProjectService.patchProject).toHaveBeenCalled();
   });
 });
