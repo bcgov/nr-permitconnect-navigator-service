@@ -50,7 +50,7 @@ function handlePrevClick() {
 <template>
   <div class="flex pt-6 justify-between">
     <Button
-      :aria-label="t('stepperNavigation.next')"
+      :aria-label="t('stepperNavigation.previous')"
       :class="prevDisabled ? 'button-hidden' : 'button-visible'"
       class="px-6 py-1"
       outlined
@@ -61,7 +61,7 @@ function handlePrevClick() {
     />
     <slot name="content" />
     <Button
-      :aria-label="t('stepperNavigation.previous')"
+      :aria-label="t('stepperNavigation.next')"
       :class="nextDisabled ? 'button-hidden' : 'button-visible'"
       class="px-6 py-1"
       outlined

@@ -66,19 +66,27 @@ const toHousing = (): void => {
         <h1 class="!mt-0">{{ t('views.homeView.pcns') }}</h1>
         <h3 class="mb-7">{{ t('views.homeView.chooseProject') }}</h3>
         <div class="mb-4 space-x-4">
-          <Button @click="toHousing">
+          <Button
+            :aria-label="t('views.homeView.housing')"
+            @click="toHousing"
+          >
             <img
               class="mr-4"
               src="@/assets/images/H.Land.Button.svg"
-              alt="Housing image"
+              alt=""
+              aria-hidden="true"
             />
             {{ t('views.homeView.housing') }}
           </Button>
-          <Button @click="toElectrification">
+          <Button
+            :aria-label="t('views.homeView.electrification')"
+            @click="toElectrification"
+          >
             <img
               class="mr-4"
               src="@/assets/images/E.Land.Button.svg"
-              alt="Electrification image"
+              alt=""
+              aria-hidden="true"
             />
             {{ t('views.homeView.electrification') }}
           </Button>
@@ -91,7 +99,8 @@ const toHousing = (): void => {
             <img
               class="mr-4"
               src="@/assets/images/G.Land.Button.svg"
-              alt="General image"
+              alt=""
+              aria-hidden="true"
             />
             {{ t('views.homeView.other') }}
           </Button>
@@ -146,6 +155,12 @@ h3 {
     }
     &:hover {
       background-color: var(--p-greyscale-200);
+    }
+    &:focus,
+    &:focus-visible {
+      outline: 3px solid var(--p-primary-contrast-color);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 3px rgba(252, 186, 25, 0.5);
     }
   }
 }

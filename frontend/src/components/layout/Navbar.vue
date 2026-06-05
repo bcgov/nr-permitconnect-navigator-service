@@ -9,7 +9,7 @@ import { PCNS_CONTACT } from '@/utils/constants/application';
 import { HOUSING_ASSISTANCE } from '@/utils/constants/housing';
 import { Initiative, RouteName } from '@/utils/enums/application';
 
-import type { Ref } from 'vue';
+import type { ComputedRef, Ref } from 'vue';
 import type { CallbackFn } from '@/types';
 
 // Types
@@ -33,7 +33,7 @@ const authzStore = useAuthZStore();
 // State
 const items: Ref<NavItem[]> = ref([]);
 
-const permittedItems = computed(() =>
+const permittedItems: ComputedRef<NavItem[]> = computed(() =>
   items.value.filter((item) => item.public || (item.access && authzStore.canNavigate(item.access)))
 );
 

@@ -78,6 +78,7 @@ async function onAssistanceRequest() {
     <div :class="{ 'teleport-container': true, '--open': showTab }">
       <div
         class="assistance-tab pb-4 pt-4 pr-1 pl-1"
+        tabindex="0"
         @click="showTab = !showTab"
         @keydown.enter.prevent="showTab = !showTab"
         @keydown.space.prevent="showTab = !showTab"
