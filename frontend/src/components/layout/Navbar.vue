@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watchEffect } from 'vue';
+import { computed, ref, watchEffect } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Menubar } from '@/lib/primevue';
@@ -32,6 +32,10 @@ const authzStore = useAuthZStore();
 
 // State
 const items: Ref<NavItem[]> = ref([]);
+
+const permittedItems = computed(() =>
+  items.value.filter((item) => item.public || (item.access && authzStore.canNavigate(item.access)))
+);
 
 // Actions
 async function createIntake(route: RouteName) {
@@ -247,7 +251,7 @@ watchEffect(() => {
 
 <template>
   <Menubar
-    :model="items"
+    :model="permittedItems"
     class="!pl-12"
     role="navigation"
   >
