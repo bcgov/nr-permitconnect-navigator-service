@@ -1,3 +1,5 @@
+import pLimit from 'p-limit';
+
 import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
@@ -19,6 +21,7 @@ import type {
 } from '../types/index.ts';
 
 const log = getLogger(module.filename);
+const limit = pLimit(5);
 
 /**
  * Tracking priority for which tracking ids to use, priority is inferred by order of array
@@ -116,9 +119,9 @@ export const syncPeachRecords = async (): Promise<UpdatedPermitWithNote[]> => {
     }
   });
 
-  // Note: May need rate limiting in the future
+  // Uses rate limiting with p-limit to avoid overwhelming PEACH with requests, limit is set to 5.
   const results = await Promise.allSettled(
-    systemRecordPermits.map((srp) => getPeachRecord(srp.recordId, srp.systemId))
+    systemRecordPermits.map((srp) => limit(() => getPeachRecord(srp.recordId, srp.systemId)))
   );
 
   const records: PeachRecord[] = [];
