@@ -106,7 +106,9 @@ export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelat
  * Contact
  */
 
-interface ContactBase {
+export interface ContactBase extends AuditFields {
+  contactId: UUID;
+  userId?: UUID;
   bceidBusinessName?: string;
   contactApplicantRelationship?: ProjectRelationship;
   contactPreference?: ContactPreference;
@@ -116,13 +118,11 @@ interface ContactBase {
   phoneNumber?: string;
 }
 
-export interface Contact extends ContactBase, AuditFields {
-  contactId: UUID;
-  userId?: UUID;
+interface ContactRelations {
   activityContact?: ActivityContact[];
 }
 
-export type CreateContactDto = ContactBase;
+export type Contact = ContactBase & Partial<ContactRelations>;
 
 /**
  * Document

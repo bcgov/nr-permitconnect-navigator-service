@@ -10,6 +10,7 @@ import type {
 } from './dto';
 import type {
   ActivityContactBase,
+  ContactBase,
   Document,
   Draft,
   ElectrificationProjectBase,
@@ -41,6 +42,43 @@ export type CreateActivityContactRequest = CreateRequestDTO<ActivityContactBase,
 export type ListActivityContactsRequest = ListRequestDTO<ActivityContactBase, ActivityContactSchema>;
 export type PutActivityContactRequest = PutRequestDTO<ActivityContactBase, ActivityContactSchema>;
 export type DeleteActivityContactRequest = DeleteRequestDTO<ActivityContactBase, ActivityContactSchema>;
+
+/**
+ * Contact
+ */
+
+interface ContactBaseSchema extends ResourceSchemaConfig<ContactBase> {
+  ids: 'contactId';
+  immutable: 'contactId';
+  serverGenerated: 'contactId';
+}
+interface ContactGetSchema extends ContactBaseSchema {
+  scope: 'contactId';
+  query: {
+    includeActivities?: boolean;
+  };
+}
+interface ContactSearchSchema extends ContactBaseSchema {
+  query: {
+    contactApplicantRelationship?: string;
+    contactPreference?: string;
+    contactId?: string[];
+    email?: string;
+    firstName?: string;
+    hasActivity?: boolean;
+    lastName?: string;
+    phoneNumber?: string;
+    userId?: string[];
+    initiative?: Initiative;
+    includeActivities?: boolean;
+  };
+}
+
+export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
+export type GetContactRequest = ListRequestDTO<ContactBase, ContactGetSchema>;
+export type ListContactsRequest = ListRequestDTO<ContactBase, ContactSearchSchema>;
+export type PutContactRequest = PutRequestDTO<ContactBase, ContactBaseSchema>;
+export type DeleteContactRequest = DeleteRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
  * Document
@@ -275,20 +313,6 @@ export interface SearchUsersRequest {
 /**
  * Other
  */
-
-export interface ContactSearchParameters {
-  contactApplicantRelationship?: string;
-  contactPreference?: string;
-  contactId?: string[];
-  email?: string;
-  firstName?: string;
-  hasActivity?: boolean;
-  lastName?: string;
-  phoneNumber?: string;
-  userId?: string[];
-  initiative?: Initiative;
-  includeActivities?: boolean;
-}
 
 export interface Email {
   bcc?: string[];

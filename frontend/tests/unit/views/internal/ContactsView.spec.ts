@@ -9,7 +9,7 @@ import ContactsProponentsList from '@/components/contact/ContactsProponentsList.
 import { contactService } from '@/services';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import ContactsView from '@/views/internal/ContactsView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { ActivityContact, Contact } from '@/types';
 
@@ -39,7 +39,7 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/contactService', () => ({
-  default: {
+  contactService: {
     searchContacts: vi.fn()
   }
 }));
@@ -108,7 +108,7 @@ describe('ContactsView.vue', () => {
   });
 
   it('renders ContactsProponentsList after loading', async () => {
-    vi.mocked(contactService.searchContacts).mockResolvedValueOnce(mockAxiosResponse([]));
+    vi.mocked(contactService.searchContacts).mockResolvedValueOnce([]);
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
     await flushPromises();
@@ -118,9 +118,9 @@ describe('ContactsView.vue', () => {
   });
 
   it('passes contacts to ContactsProponentsList', async () => {
-    vi.mocked(contactService.searchContacts).mockResolvedValueOnce(
-      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }] as Contact[])
-    );
+    vi.mocked(contactService.searchContacts).mockResolvedValueOnce([
+      { contactId: '1', activityContact: [{} as ActivityContact] }
+    ] as Contact[]);
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
     await flushPromises();
@@ -132,9 +132,10 @@ describe('ContactsView.vue', () => {
   });
 
   it('filters to contacts with activityContacts', async () => {
-    vi.mocked(contactService.searchContacts).mockResolvedValueOnce(
-      mockAxiosResponse([{ contactId: '1', activityContact: [{} as ActivityContact] }, { contactId: '2' }] as Contact[])
-    );
+    vi.mocked(contactService.searchContacts).mockResolvedValueOnce([
+      { contactId: '1', activityContact: [{} as ActivityContact] },
+      { contactId: '2' }
+    ] as Contact[]);
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
     await flushPromises();
@@ -146,12 +147,10 @@ describe('ContactsView.vue', () => {
   });
 
   it('removes a contact when ContactsProponentsList emits contact-deleted', async () => {
-    vi.mocked(contactService.searchContacts).mockResolvedValueOnce(
-      mockAxiosResponse([
-        { contactId: '1', activityContact: [{} as ActivityContact] },
-        { contactId: '2', activityContact: [{} as ActivityContact] }
-      ] as Contact[])
-    );
+    vi.mocked(contactService.searchContacts).mockResolvedValueOnce([
+      { contactId: '1', activityContact: [{} as ActivityContact] },
+      { contactId: '2', activityContact: [{} as ActivityContact] }
+    ] as Contact[]);
 
     const wrapper = shallowMount(ContactsView, wrapperSettings());
     await flushPromises();

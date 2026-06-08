@@ -5,7 +5,7 @@ export { default as AuthService } from './authService';
 export { codeService } from './codeService';
 export { default as ConfigService } from './configService';
 export { default as comsService } from './comsService';
-export { default as contactService } from './contactService';
+export { contactService } from './contactService';
 export { documentService } from './documentService';
 export { electrificationProjectService } from './electrificationProjectService';
 export { enquiryService } from './enquiryService';

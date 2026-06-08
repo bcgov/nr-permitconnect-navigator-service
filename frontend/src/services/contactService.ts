@@ -1,64 +1,84 @@
 import { appAxios } from './interceptors';
 
-import type { AxiosResponse } from 'axios';
-import type { Contact, ContactSearchParameters } from '@/types';
+import type { Contact, DeleteContactRequest, GetContactRequest, ListContactsRequest, PutContactRequest } from '@/types';
 
 const PATH = 'contact';
 
-export default {
-  /**
-   * @function getContact
-   * Returns a specific contact details
-   * @returns {Promise<AxiosResponse>} An axios response or empty object
-   */
-  getContact(contactId: string, includeActivities = false): Promise<AxiosResponse<Contact>> {
-    return appAxios().get(`${PATH}/${contactId}`, { params: { includeActivities } });
-  },
+/**
+ * Retrieves a specific contact.
+ * @param req - The request payload containing the contact ID and optional activity inclusion flag.
+ * @returns A promise resolving to the requested `Contact` resource.
+ */
+export async function getContact(req: GetContactRequest): Promise<Contact> {
+  const { contactId, includeActivities = false } = req;
 
-  /**
-   * @function getCurrentUserContact
-   * Returns current user's contact details
-   * @returns {Promise<AxiosResponse>} An axios response or empty object
-   */
-  getCurrentUserContact(): Promise<AxiosResponse<Contact>> {
-    return appAxios().get(`${PATH}`);
-  },
+  const { data } = await appAxios().get<Contact>(`${PATH}/${contactId}`, {
+    params: { includeActivities }
+  });
 
-  /**
-   * @function deleteContact
-   * Deletes a specific contact
-   * @param contactId
-   * @returns An axios response
-   */
-  deleteContact(contactId: string): Promise<AxiosResponse<Contact>> {
-    return appAxios().delete(`${PATH}/${contactId}`);
-  },
+  return data;
+}
 
-  /**
-   * @function matchContacts
-   * Returns a list of contacts if any of the provided filtering parameters match
-   * @param {ContactSearchParameters} params SearchUsersOptions object containing the data to filter against
-   * @returns {Promise<AxiosResponse>} An axios response or empty array
-   */
-  matchContacts(data: ContactSearchParameters): Promise<AxiosResponse<Contact[]>> {
-    return appAxios().post(`${PATH}/match`, data);
-  },
+/**
+ * Retrieves the current user's contact details.
+ * @returns A promise resolving to the current user's `Contact` resource.
+ */
+export async function getCurrentUserContact(): Promise<Contact> {
+  const { data } = await appAxios().get<Contact>(`${PATH}`);
 
-  /**
-   * @function searchContacts
-   * Returns a list of users based on the provided filtering parameters
-   * @param {SearchUsersOptions} params SearchUsersOptions object containing the data to filter against
-   * @returns {Promise<AxiosResponse>} An axios response or empty array
-   */
-  searchContacts(params: ContactSearchParameters): Promise<AxiosResponse<Contact[]>> {
-    return appAxios().post(`${PATH}/search`, params);
-  },
+  return data;
+}
 
-  /**
-   * @function updateContact
-   * @returns {Promise} An axios response
-   */
-  updateContact(data?: Contact): Promise<AxiosResponse<Contact>> {
-    return appAxios().put(`${PATH}`, data);
-  }
+/**
+ * Deletes a specific contact.
+ * @param req - The request payload containing the contact ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteContact(req: DeleteContactRequest): Promise<void> {
+  const { contactId } = req;
+
+  await appAxios().delete(`${PATH}/${contactId}`);
+}
+
+/**
+ * Returns contacts matching the supplied criteria.
+ * @param req - The request payload containing matching criteria.
+ * @returns A promise resolving to an array of matching `Contact` resources.
+ */
+export async function matchContacts(req: ListContactsRequest): Promise<Contact[]> {
+  const { data } = await appAxios().post<Contact[]>(`${PATH}/match`, req);
+
+  return data;
+}
+
+/**
+ * Searches contacts using the supplied filters.
+ * @param req - The request payload containing search criteria.
+ * @returns A promise resolving to an array of `Contact` resources.
+ */
+export async function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
+  const { data } = await appAxios().post<Contact[]>(`${PATH}/search`, req);
+
+  return data;
+}
+
+/**
+ * Updates the current contact.
+ * @param req - The request payload containing updated contact data.
+ * @returns A promise resolving to the updated `Contact` resource.
+ */
+export async function putContact(req: PutContactRequest): Promise<Contact> {
+  const { data } = await appAxios().put<Contact>(`${PATH}`, req);
+
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+export const contactService = {
+  getContact,
+  getCurrentUserContact,
+  deleteContact,
+  matchContacts,
+  searchContacts,
+  putContact
 };

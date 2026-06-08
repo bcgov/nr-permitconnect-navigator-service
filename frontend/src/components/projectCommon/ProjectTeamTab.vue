@@ -136,7 +136,7 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
     try {
       if (!contact.contactId) {
-        contact = (await contactService.updateContact(contact)).data;
+        contact = await contactService.putContact(contact);
       }
 
       if (!getProject.value?.activityId) throw new Error('No activity ID');

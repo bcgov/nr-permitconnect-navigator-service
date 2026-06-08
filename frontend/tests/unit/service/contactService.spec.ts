@@ -1,80 +1,234 @@
-import { contactService } from '@/services';
+import {
+  contactService,
+  getContact,
+  getCurrentUserContact,
+  deleteContact,
+  matchContacts,
+  searchContacts,
+  putContact
+} from '@/services/contactService';
 import { appAxios } from '@/services/interceptors';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { AxiosInstance } from 'axios';
-import type { Contact, ContactSearchParameters } from '@/types';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-const sampleContact: Contact = {
-  contactId: 'contact123',
-  userId: 'user123',
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '123-456-7890',
-  email: 'john.doe@example.com',
-  contactPreference: ContactPreference.EITHER,
-  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
-  createdBy: 'testCreatedBy',
-  createdAt: new Date().toISOString(),
-  updatedBy: 'testUpdatedAt',
-  updatedAt: new Date().toISOString()
-};
-
-const sampleContactSearchParameters: ContactSearchParameters = {
-  contactApplicantRelationship: 'applicant',
-  contactPreference: 'email',
-  contactId: ['contact123', 'contact456'],
-  email: 'john.doe@example.com',
-  firstName: 'John',
-  lastName: 'Doe',
-  phoneNumber: '123-456-7890',
-  userId: ['user123', 'user456']
-};
-
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
-const patchSpy = vi.fn();
-const postSpy = vi.fn();
-const putSpy = vi.fn();
-
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  delete: deleteSpy,
-  patch: patchSpy,
-  post: postSpy,
-  put: putSpy
-} as unknown as AxiosInstance);
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
 describe('contactService', () => {
-  it('calls getCurrentUserContact', () => {
-    contactService.getCurrentUserContact();
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
+  const mockPut = vi.fn();
+  const mockDelete = vi.fn();
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost,
+      put: mockPut,
+      delete: mockDelete
+    } as never);
   });
 
-  it('calls searchContacts with correct data', () => {
-    contactService.searchContacts(sampleContactSearchParameters);
+  describe('getContact', () => {
+    it('returns a contact', async () => {
+      const contact = {
+        contactId: 'contact-1'
+      };
 
-    expect(postSpy).toHaveBeenCalledTimes(1);
-    expect(postSpy).toHaveBeenCalledWith('contact/search', sampleContactSearchParameters);
+      mockGet.mockResolvedValue({
+        data: contact
+      });
+
+      const result = await getContact({
+        contactId: 'contact-1',
+        includeActivities: true
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('contact/contact-1', {
+        params: {
+          includeActivities: true
+        }
+      });
+
+      expect(result).toEqual(contact);
+    });
+
+    it('defaults includeActivities to false', async () => {
+      mockGet.mockResolvedValue({
+        data: {}
+      });
+
+      await getContact({
+        contactId: 'contact-1'
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('contact/contact-1', {
+        params: {
+          includeActivities: false
+        }
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('get failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        getContact({
+          contactId: 'contact-1'
+        } as never)
+      ).rejects.toThrow(error);
+    });
   });
 
-  it('calls updateContact with correct data', () => {
-    contactService.updateContact(sampleContact);
+  describe('getCurrentUserContact', () => {
+    it('returns the current user contact', async () => {
+      const contact = {
+        contactId: 'contact-1'
+      };
 
-    expect(putSpy).toHaveBeenCalledTimes(1);
-    expect(putSpy).toHaveBeenCalledWith('contact', sampleContact);
+      mockGet.mockResolvedValue({
+        data: contact
+      });
+
+      const result = await getCurrentUserContact();
+
+      expect(mockGet).toHaveBeenCalledWith('contact');
+
+      expect(result).toEqual(contact);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('get failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getCurrentUserContact()).rejects.toThrow(error);
+    });
+  });
+
+  describe('deleteContact', () => {
+    it('deletes a contact', async () => {
+      mockDelete.mockResolvedValue({});
+
+      await deleteContact({
+        contactId: 'contact-1'
+      } as never);
+
+      expect(mockDelete).toHaveBeenCalledWith('contact/contact-1');
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
+
+      mockDelete.mockRejectedValue(error);
+
+      await expect(
+        deleteContact({
+          contactId: 'contact-1'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('matchContacts', () => {
+    it('returns matching contacts', async () => {
+      const request = {
+        userId: ['user-1']
+      };
+
+      const contacts = [{ contactId: 'contact-1' }];
+
+      mockPost.mockResolvedValue({
+        data: contacts
+      });
+
+      const result = await matchContacts(request as never);
+
+      expect(mockPost).toHaveBeenCalledWith('contact/match', request);
+
+      expect(result).toEqual(contacts);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('match failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(matchContacts({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('searchContacts', () => {
+    it('returns searched contacts', async () => {
+      const request = {
+        firstName: 'John'
+      };
+
+      const contacts = [{ contactId: 'contact-1' }];
+
+      mockPost.mockResolvedValue({
+        data: contacts
+      });
+
+      const result = await searchContacts(request as never);
+
+      expect(mockPost).toHaveBeenCalledWith('contact/search', request);
+
+      expect(result).toEqual(contacts);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(searchContacts({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('putContact', () => {
+    it('updates a contact and returns the updated resource', async () => {
+      const request = {
+        firstName: 'Jane',
+        lastName: 'Doe'
+      };
+
+      const contact = {
+        contactId: 'contact-1',
+        ...request
+      };
+
+      mockPut.mockResolvedValue({
+        data: contact
+      });
+
+      const result = await putContact(request as never);
+
+      expect(mockPut).toHaveBeenCalledWith('contact', request);
+
+      expect(result).toEqual(contact);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('update failed');
+
+      mockPut.mockRejectedValue(error);
+
+      await expect(putContact({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(contactService).toEqual({
+      getContact,
+      getCurrentUserContact,
+      deleteContact,
+      matchContacts,
+      searchContacts,
+      putContact
+    });
   });
 });

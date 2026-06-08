@@ -10,7 +10,6 @@ import { contactService, housingProjectService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { AxiosResponse } from 'axios';
 import type { Contact, HousingProject } from '@/types';
 
 vi.mock('vue-i18n', () => ({
@@ -48,11 +47,11 @@ const sampleContact: Contact = {
 
 const getActivityIds = vi.spyOn(housingProjectService, 'getActivityIds');
 const listProjects = vi.spyOn(housingProjectService, 'listProjects');
-const getContactSpy = vi.spyOn(contactService, 'searchContacts');
+const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
 getActivityIds.mockResolvedValue(['someActivityid']);
 listProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
-getContactSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
+searchContactsSpy.mockResolvedValue([sampleContact]);
 
 const wrapperSettings = () => ({
   global: {

@@ -1,6 +1,5 @@
 import type { Action, BasicResponse, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import type { ActivityContact, Permit } from './resources';
-import type { Permit } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import type { CodeTableName } from '../common';
@@ -60,6 +59,11 @@ export interface Permission {
 export interface GetPermissionsResponse {
   groups: Group[];
   permissions: Permission[];
+}
+
+export interface PutActivityContactResponse {
+  updated: ActivityContact;
+  demoted: ActivityContact | undefined;
 }
 
 export interface SearchPermitsResponse {
@@ -142,9 +146,4 @@ export interface ReportingResponse {
   tracked_in_ats: boolean;
   source_system: string | null;
   source_system_acronym: string | null;
-}
-
-export interface PutActivityContactResponse {
-  updated: ActivityContact;
-  demoted: ActivityContact | undefined;
 }

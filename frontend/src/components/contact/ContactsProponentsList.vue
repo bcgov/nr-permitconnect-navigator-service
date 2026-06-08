@@ -73,10 +73,8 @@ function onDelete(contact: Contact) {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        const response = await contactService.deleteContact(contact.contactId);
-        if (response.status !== 204) {
-          throw new Error();
-        }
+        await contactService.deleteContact({ contactId: contact.contactId });
+
         toast.success(
           t('contactsProponentsList.deleteContactSuccess'),
           `${contact.firstName} ${contact.lastName} ${t('contactsProponentsList.deleteContactSuccessMessage')}`

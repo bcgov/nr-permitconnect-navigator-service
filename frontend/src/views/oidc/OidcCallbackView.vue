@@ -22,7 +22,7 @@ onMounted(async () => {
   if (getIsAuthenticated.value) {
     const permissions = await yarsService.getPermissions();
     useAuthZStore().setPermissions(permissions);
-    const contact: Contact = (await contactService.getCurrentUserContact())?.data;
+    const contact: Contact = await contactService.getCurrentUserContact();
     contactStore.setContact(contact);
   }
 

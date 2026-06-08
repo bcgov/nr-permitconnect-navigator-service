@@ -8,7 +8,7 @@ import i18n from '@/i18n';
 import { activityContactService, contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
-import { mockAxiosError, mockAxiosErrorNoResponse, mockAxiosResponse } from '../../../helpers';
+import { mockAxiosError, mockAxiosErrorNoResponse } from '../../../helpers';
 
 import type { ActivityContact, Contact } from '@/types';
 
@@ -32,7 +32,7 @@ vi.mock('@/services', () => ({
     deleteActivityContact: vi.fn()
   },
   contactService: {
-    updateContact: vi.fn()
+    putContact: vi.fn()
   }
 }));
 
@@ -161,7 +161,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('handles single success toast for PRIMARY role', async () => {
-      vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
+      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -251,7 +251,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('calls updateContact when contactId is missing (manual entry)', async () => {
-      vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
+      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -262,12 +262,12 @@ describe('ProjectTeamTab.vue', () => {
       ]);
       await flushPromises();
 
-      expect(contactService.updateContact).toHaveBeenCalled();
+      expect(contactService.putContact).toHaveBeenCalled();
       expect(activityContactService.createActivityContact).toHaveBeenCalled();
     });
 
     it('covers single success toast for ADMIN role', async () => {
-      vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
+      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -282,7 +282,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('covers single success toast for MEMBER role', async () => {
-      vi.mocked(contactService.updateContact).mockResolvedValue(mockAxiosResponse(mockContact));
+      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
