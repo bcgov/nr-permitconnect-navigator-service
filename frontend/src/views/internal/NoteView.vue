@@ -24,7 +24,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { DraftableProjectService } from '@/types';
+import type { DraftableProjectService, Project } from '@/types';
 
 // Props
 const {
@@ -42,7 +42,7 @@ interface InitiativeState {
   enquiryRouteName?: RouteName;
   projectRouteName?: RouteName;
   projectEnquiryRouteName?: RouteName;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
   resource: Resource;
 }
 
@@ -178,18 +178,18 @@ onBeforeMount(async () => {
     }
 
     if (!getProject.value && initiativeState.value.projectService && projectId) {
-      const project = (await initiativeState.value.projectService.getProject(projectId)).data;
+      const project = await initiativeState.value.projectService.getProject({ projectId });
       projectStore.setProject(project);
     }
     if (!getEnquiry.value && enquiryId) {
-      const enquiry = (await enquiryService.getEnquiry(enquiryId)).data;
+      const enquiry = await enquiryService.getEnquiry({ enquiryId });
       enquiryStore.setEnquiry(enquiry);
     }
 
     activityId.value = getEnquiry.value?.activityId || getProject.value?.activityId;
 
     if (noteHistoryId && activityId.value) {
-      const noteHistory = (await noteHistoryService.listNoteHistories(activityId.value)).data;
+      const noteHistory = await noteHistoryService.listNoteHistories({ activityId: activityId.value });
 
       if (enquiryId) enquiryStore.setNoteHistory(noteHistory);
       else if (projectId) projectStore.setNoteHistory(noteHistory);

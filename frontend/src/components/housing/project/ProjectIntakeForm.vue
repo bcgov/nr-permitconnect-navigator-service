@@ -64,7 +64,6 @@ const router = useRouter();
 const toast = useToast();
 
 // Store
-const contactStore = useContactStore();
 const formStore = useFormStore();
 const { getEditable, getFormType, getFirstErrorTab } = storeToRefs(formStore);
 
@@ -103,15 +102,14 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
 
     const response = await housingProjectService.upsertDraft({
       draftId: draft.value?.draftId,
-      activityId: draft.value?.activityId,
       data: data as FormSchemaType
     });
 
-    draft.value = response.data;
+    draft.value = response;
     formStore.setFormType(FormType.DRAFT);
 
     router.replace({
-      params: { draftId: response.data.draftId }
+      params: { draftId: response.draftId }
     });
 
     if (showToast)
@@ -191,14 +189,11 @@ async function onSubmit(data: FormSchemaType) {
 
     const response = await housingProjectService.submitDraft(payload);
 
-    if (response.data.activityId && response.data.housingProjectId) {
-      // TODO: Remove once user is forced to fill contact data out
-      contactStore.setContact(response.data.contact);
-
+    if (response.activityId && response.housingProjectId) {
       router.push({
         name: RouteName.EXT_HOUSING_INTAKE_CONFIRMATION,
         params: {
-          projectId: response.data.housingProjectId
+          projectId: response.housingProjectId
         }
       });
     } else {

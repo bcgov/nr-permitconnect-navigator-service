@@ -141,7 +141,7 @@ function onDelete() {
       rejectProps: { outlined: true },
       accept: () => {
         noteHistoryService
-          .deleteNoteHistory(noteHistory?.noteHistoryId as string)
+          .deleteNoteHistory({ noteHistoryId: noteHistory.noteHistoryId })
           .then(() => {
             toast.success(t('note.noteForm.noteDeleted'));
             navigateToOrigin();
@@ -180,7 +180,7 @@ async function onSubmit(data: GenericObject) {
       });
     } else {
       if (!resource?.value) throw new Error(t('note.noteForm.resourceNotDef'));
-      await noteHistoryService.updateNoteHistory(data.noteHistoryId, {
+      await noteHistoryService.putNoteHistory({
         ...body,
         activityId,
         note: data.note,
@@ -202,7 +202,7 @@ function onTypeChange(e: SelectChangeEvent) {
 }
 
 async function fetchCreatedBy() {
-  const userIds = Array.from(new Set(noteHistory?.note.map((n) => n.createdBy).filter(Boolean))) as [];
+  const userIds = Array.from(new Set(noteHistory?.note?.map((n) => n.createdBy).filter(Boolean))) as [];
   const users = (await userService.searchUsers({ userId: userIds })).data;
   users.forEach((u: User) => {
     createdByFullNames.value[u.userId] = u.fullName;

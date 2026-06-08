@@ -45,24 +45,8 @@ vi.spyOn(contactService, 'getContact').mockResolvedValue({
     headers: {} as AxiosRequestHeaders
   }
 });
-vi.spyOn(housingProjectService, 'searchProjects').mockResolvedValue({
-  data: [],
-  status: 200,
-  statusText: 'OK',
-  headers: {},
-  config: {
-    headers: {} as AxiosRequestHeaders
-  }
-});
-vi.spyOn(enquiryService, 'searchEnquiries').mockResolvedValue({
-  data: [],
-  status: 200,
-  statusText: 'OK',
-  headers: {},
-  config: {
-    headers: {} as AxiosRequestHeaders
-  }
-});
+vi.spyOn(housingProjectService, 'searchProjects').mockResolvedValue([]);
+vi.spyOn(enquiryService, 'searchEnquiries').mockResolvedValue([]);
 vi.spyOn(userService, 'searchUsers').mockResolvedValue({
   data: [],
   status: 200,

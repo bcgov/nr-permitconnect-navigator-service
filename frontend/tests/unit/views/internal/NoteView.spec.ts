@@ -7,9 +7,9 @@ import NoteForm from '@/components/note/NoteForm.vue';
 import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { Initiative } from '@/utils/enums/application';
 import NoteView from '@/views/internal/NoteView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, Enquiry, HousingProject } from '@/types';
+import type { ElectrificationProject, Enquiry, HousingProject, NoteHistory } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -36,25 +36,25 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
+  enquiryService: {
     getEnquiry: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
+  noteHistoryService: {
     listNoteHistories: vi.fn()
   }
 }));
@@ -92,21 +92,18 @@ const wrapperSettings = (
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiry).mockResolvedValue(
-    mockAxiosResponse({ activityId: '1', enquiryId: '1' } as Enquiry)
-  );
-  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
-    mockAxiosResponse([{ noteHistoryId: '1', createdBy: '123' }])
-  );
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
+  vi.mocked(enquiryService.getEnquiry).mockResolvedValue({ activityId: '1', enquiryId: '1' } as Enquiry);
+  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
+    { noteHistoryId: '1', createdBy: '123' }
+  ] as NoteHistory[]);
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
 });
 
 afterEach(() => {

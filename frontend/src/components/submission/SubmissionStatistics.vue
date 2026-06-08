@@ -11,15 +11,16 @@ import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { InputEvent, StatisticFilters, Statistics, User } from '@/types';
+import type { ProjectService } from '@/types/services';
+import type { InputEvent, GetProjectStatisticsRequest, Statistics, User } from '@/types';
 
 // Injections
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
 
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<Statistics | undefined>('statistics');
-const statisticFilters: Ref<StatisticFilters> = ref({});
+const statisticFilters: Ref<GetProjectStatisticsRequest> = ref({});
 
 // Actions
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
@@ -118,7 +119,7 @@ watch(
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
     if (validUser) {
-      if (projectService) statistics.value = (await projectService.value.getStatistics(statisticFilters.value)).data;
+      if (projectService) statistics.value = await projectService.value.getStatistics(statisticFilters.value);
     }
   },
   { deep: true }

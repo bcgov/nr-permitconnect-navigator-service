@@ -63,11 +63,11 @@ const onUpload = async (files: File[]) => {
           if (!getConfig.value?.coms.bucketId) throw new Error('No bucket ID');
 
           documentService
-            .createDocument(sanitizedFile, activityId, getConfig.value?.coms.bucketId)
+            .createDocument({ document: sanitizedFile, activityId, bucketId: getConfig.value?.coms.bucketId })
             .then((response) => {
-              if (response?.data) {
-                response.data.filename = decodeURI(response.data.filename);
-                projectStore.addDocument(response.data);
+              if (response) {
+                response.filename = decodeURI(response.filename);
+                projectStore.addDocument(response);
                 toast.success('Document uploaded');
               }
               return resolve(response);
@@ -163,7 +163,7 @@ const filteredDocuments = computed(() => {
         :document="document"
         :delete-button="!disabled"
         class="hover-hand hover-shadow mb-2"
-        @click="documentService.downloadDocument(document.documentId, document.filename)"
+        @click="documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })"
       />
     </div>
   </div>

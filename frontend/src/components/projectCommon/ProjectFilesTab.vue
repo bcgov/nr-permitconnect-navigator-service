@@ -183,7 +183,9 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
               :document="document"
               :editable="!getProjectIsCompleted"
               class="hover-hand hover-shadow"
-              @click="documentService.downloadDocument(document.documentId, document.filename)"
+              @click="
+                documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })
+              "
             />
           </div>
         </div>
@@ -208,7 +210,7 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
             @click="
               () => {
                 if (useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.READ))
-                  documentService.downloadDocument(data.documentId, data.filename);
+                  documentService.downloadDocument({ documentId: data.documentId, filename: data.filename });
               }
             "
           >

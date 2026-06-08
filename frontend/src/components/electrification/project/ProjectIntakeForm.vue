@@ -44,7 +44,6 @@ const router = useRouter();
 const toast = useToast();
 
 // Store
-const contactStore = useContactStore();
 const formStore = useFormStore();
 const { codeList } = useCodeStore();
 const { getEditable } = storeToRefs(formStore);
@@ -80,15 +79,14 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
 
     const response = await electrificationProjectService.upsertDraft({
       draftId: draft.value?.draftId,
-      activityId: draft.value?.activityId,
       data: data as FormSchemaType
     });
 
-    draft.value = response.data;
+    draft.value = response;
     formStore.setFormType(FormType.DRAFT);
 
     router.replace({
-      params: { draftId: response.data.draftId }
+      params: { draftId: response.draftId }
     });
 
     if (showToast)
@@ -130,14 +128,11 @@ async function onSubmit(data: FormSchemaType) {
 
     const response = await electrificationProjectService.submitDraft(payload);
 
-    if (response.data.activityId && response.data.electrificationProjectId) {
-      // TODO: Remove once user is forced to fill contact data out
-      contactStore.setContact(response.data.contact);
-
+    if (response.activityId && response.electrificationProjectId) {
       router.push({
         name: RouteName.EXT_ELECTRIFICATION_INTAKE_CONFIRMATION,
         params: {
-          projectId: response.data.electrificationProjectId
+          projectId: response.electrificationProjectId
         }
       });
     } else {

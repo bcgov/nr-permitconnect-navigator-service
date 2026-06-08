@@ -53,9 +53,11 @@ const onUpload = async (files: File[]) => {
         uploading.value = true;
         if (!getConfig.value?.coms.bucketId) throw new Error('No bucket ID');
 
-        const response = (
-          await documentService.createDocument(sanitizedFile, activityId, getConfig.value?.coms.bucketId)
-        )?.data;
+        const response = await documentService.createDocument({
+          document: sanitizedFile,
+          activityId,
+          bucketId: getConfig.value?.coms.bucketId
+        });
 
         if (response) {
           response.extension = getFilenameAndExtension(response.filename).extension;

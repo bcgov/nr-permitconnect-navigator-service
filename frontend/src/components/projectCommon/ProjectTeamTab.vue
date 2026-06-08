@@ -141,9 +141,11 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
       if (!getProject.value?.activityId) throw new Error('No activity ID');
 
-      const response = (
-        await activityContactService.createActivityContact(getProject.value.activityId, contact.contactId, role)
-      ).data;
+      const response = await activityContactService.createActivityContact({
+        activityId: getProject.value.activityId,
+        contactId: contact.contactId,
+        role
+      });
 
       // Update store
       projectStore.addActivityContact(response);
@@ -179,9 +181,11 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
   try {
     if (!getProject.value?.activityId) throw new Error('No activity ID');
 
-    const { updated, demoted } = (
-      await activityContactService.updateActivityContact(getProject.value.activityId, contact.contactId, role)
-    ).data;
+    const { updated, demoted } = await activityContactService.putActivityContact({
+      activityId: getProject.value.activityId,
+      contactId: contact.contactId,
+      role
+    });
 
     // Update store
     projectStore.updateActivityContact(updated);
@@ -230,7 +234,10 @@ async function onRevokeUser(contact: ActivityContact) {
   try {
     if (!getProject.value?.activityId) throw new Error('No activity ID');
 
-    await activityContactService.deleteActivityContact(getProject.value.activityId, contact.contactId);
+    await activityContactService.deleteActivityContact({
+      activityId: getProject.value.activityId,
+      contactId: contact.contactId
+    });
 
     // Update store
     projectStore.removeActivityContact(contact);

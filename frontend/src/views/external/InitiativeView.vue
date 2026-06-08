@@ -32,11 +32,11 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { Draft, DraftableProjectService, Enquiry, HousingProject, Permit } from '@/types';
+import type { Draft, DraftableProjectService, Enquiry, Permit, Project } from '@/types';
 
 // Interfaces
 interface InitiativeState {
-  draftableProjectService: DraftableProjectService;
+  draftableProjectService: DraftableProjectService<Project, unknown>;
   enquiryIntakeRouteName?: RouteName;
   enquiryRouteName?: RouteName;
   headerText: string;
@@ -105,7 +105,7 @@ const enquiries: Ref<Enquiry[]> = ref([]);
 const first: Ref<number> = ref(0);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
-const projects: Ref<HousingProject[]> = ref([]);
+const projects: Ref<Project[]> = ref([]);
 
 // Providers
 const provideDraftableProjectService = computed(() => initiativeState.value.draftableProjectService);
@@ -157,7 +157,7 @@ function onHousingProjectDraftDelete(draftId: string) {
   drafts.value = drafts.value.filter((x) => x.draftId !== draftId);
 }
 
-function sortByLastUpdated(a: HousingProject, b: HousingProject) {
+function sortByLastUpdated(a: Project, b: Project) {
   if (a.updatedAt && b.updatedAt) {
     return a.updatedAt > b.updatedAt ? -1 : 1;
   } else {
@@ -196,14 +196,12 @@ onBeforeMount(async () => {
         throw new Error(t('views.initiativeStateError'));
     }
 
-    [authorizations.value, enquiries.value, projects.value, drafts.value] = (
-      await Promise.all([
-        permitService.listPermits(),
-        enquiryService.getEnquiries(),
-        provideDraftableProjectService.value.getProjects(),
-        provideDraftableProjectService.value.getDrafts()
-      ])
-    ).map((r) => r.data);
+    [authorizations.value, enquiries.value, projects.value, drafts.value] = await Promise.all([
+      permitService.listPermits(),
+      enquiryService.listEnquiries(),
+      provideDraftableProjectService.value.listProjects(),
+      provideDraftableProjectService.value.listDrafts()
+    ]);
 
     // Sort by last updated, push non-updated projects to bottom
     projects.value.sort(sortByLastUpdated);

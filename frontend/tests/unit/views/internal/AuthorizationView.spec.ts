@@ -8,9 +8,9 @@ import AuthorizationForm from '@/components/authorization/AuthorizationForm.vue'
 import { electrificationProjectService, housingProjectService, permitService } from '@/services';
 import { Initiative } from '@/utils/enums/application';
 import AuthorizationView from '@/views/internal/AuthorizationView.vue';
-import { mockAxiosResponse, t } from '../../../helpers';
+import { t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject, Permit } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -37,19 +37,19 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     getPermit: vi.fn()
   }
 }));
@@ -79,16 +79,15 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
-  vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse({ permitId: '3' }));
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
+  vi.mocked(permitService.getPermit).mockResolvedValue({ permitId: '3' } as Permit);
 });
 
 afterEach(() => {

@@ -458,7 +458,7 @@ export const submitHousingProjectDraftController = async (
 };
 
 export const upsertHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
-  const update = req.body.draftId && req.body.activityId;
+  const update = !!req.body.draftId;
 
   const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
     if (update) {

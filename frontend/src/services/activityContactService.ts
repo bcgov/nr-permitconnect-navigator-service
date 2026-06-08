@@ -1,42 +1,62 @@
 import { appAxios } from './interceptors';
 
-import type { AxiosResponse } from 'axios';
-import type { ActivityContact } from '@/types';
+import type {
+  ActivityContact,
+  CreateActivityContactRequest,
+  DeleteActivityContactRequest,
+  ListActivityContactsRequest,
+  PutActivityContactRequest,
+  PutActivityContactResponse
+} from '@/types';
 
-export default {
-  /**
-   * @function listActivityContacts
-   * @returns {Promise} An axios response
-   */
-  createActivityContact(activityId: string, contactId: string, role: string): Promise<AxiosResponse<ActivityContact>> {
-    return appAxios().post(`activity/${activityId}/contact/${contactId}`, { role });
-  },
+/**
+ * Creates a contact association for an activity.
+ * @param req - The request payload containing path parameters and the contact role.
+ * @returns A promise resolving to the created `ActivityContact` resource.
+ */
+export async function createActivityContact(req: CreateActivityContactRequest): Promise<ActivityContact> {
+  const { activityId, contactId, ...body } = req;
+  const { data } = await appAxios().post<ActivityContact>(`activity/${activityId}/contact/${contactId}`, body);
+  return data;
+}
 
-  /**
-   * @function deleteActivityContacts
-   * @returns {Promise} An axios response
-   */
-  deleteActivityContact(activityId: string, contactId: string): Promise<AxiosResponse<ActivityContact>> {
-    return appAxios().delete(`activity/${activityId}/contact/${contactId}`);
-  },
+/**
+ * Deletes a contact association from an activity.
+ * @param req - The request payload containing the compound key for deletion.
+ * @returns A promise resolving to the deleted `ActivityContact` resource.
+ */
+export async function deleteActivityContact(req: DeleteActivityContactRequest): Promise<ActivityContact> {
+  const { activityId, contactId } = req;
+  const { data } = await appAxios().delete<ActivityContact>(`activity/${activityId}/contact/${contactId}`);
+  return data;
+}
 
-  /**
-   * @function listActivityContacts
-   * @returns {Promise} An axios response
-   */
-  listActivityContacts(activityId: string): Promise<AxiosResponse<ActivityContact[]>> {
-    return appAxios().get(`activity/${activityId}/contact`);
-  },
+/**
+ * Retrieves all contacts associated with a specific activity.
+ * @param activityId - The ID of the activity to list contacts for.
+ * @returns A promise resolving to an array of `ActivityContact` resources.
+ */
+export async function listActivityContacts(req: ListActivityContactsRequest): Promise<ActivityContact[]> {
+  const { activityId } = req;
+  const { data } = await appAxios().get<ActivityContact[]>(`activity/${activityId}/contact`);
+  return data;
+}
 
-  /**
-   * @function updateActivityContact
-   * @returns {Promise} An axios response
-   */
-  updateActivityContact(
-    activityId: string,
-    contactId: string,
-    role: string
-  ): Promise<AxiosResponse<{ updated: ActivityContact; demoted: ActivityContact | undefined }>> {
-    return appAxios().put(`activity/${activityId}/contact/${contactId}`, { role });
-  }
+/**
+ * Updates a contact association for an activity.
+ * @param req - The request payload containing path parameters and updatable fields.
+ * @returns A promise resolving to the updated `ActivityContact` and any optionally demoted contact.
+ */
+export async function putActivityContact(req: PutActivityContactRequest): Promise<PutActivityContactResponse> {
+  const { activityId, contactId, ...body } = req;
+  const { data } = await appAxios().put(`activity/${activityId}/contact/${contactId}`, body);
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+export const activityContactService = {
+  createActivityContact,
+  putActivityContact,
+  deleteActivityContact,
+  listActivityContacts
 };

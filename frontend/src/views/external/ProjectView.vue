@@ -52,7 +52,7 @@ interface InitiativeState {
   navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectIntakeRouteName: RouteName;
-  projectService: ProjectService;
+  projectService: ProjectService<Project>;
 }
 
 // Constants
@@ -168,8 +168,9 @@ onBeforeMount(async () => {
     let projectValue: Project;
 
     try {
-      projectValue = (await initiativeState.value.projectService.getProject(projectId)).data;
-      if (projectValue) enquiriesValue = (await enquiryService.listRelatedEnquiries(projectValue.activityId)).data;
+      projectValue = await initiativeState.value.projectService.getProject({ projectId });
+      if (projectValue)
+        enquiriesValue = await enquiryService.listRelatedEnquiries({ activityId: projectValue.activityId });
     } catch {
       toast.error(t('views.e.projectView.toastProjectLoadFailed'));
       router.replace({ name: initiativeState.value.initiativeRouteName });
@@ -178,7 +179,7 @@ onBeforeMount(async () => {
 
     try {
       const activityId = projectValue.activityId;
-      const permitsValue = (await permitService.listPermits({ activityId, includeNotes: true })).data;
+      const permitsValue = await permitService.listPermits({ activityId, includeNotes: true });
       projectStore.setPermits(permitsValue);
     } catch (e) {
       throw new Error(t('views.e.projectView.toastPermitLoadFailed'), { cause: e });
@@ -186,7 +187,7 @@ onBeforeMount(async () => {
 
     try {
       const activityId = projectValue.activityId;
-      const noteHistory = (await noteHistoryService.listNoteHistories(activityId)).data;
+      const noteHistory = await noteHistoryService.listNoteHistories({ activityId });
       projectStore.setNoteHistory(noteHistory);
     } catch (e) {
       throw new Error(t('views.e.projectView.toastNoteHistoryLoadFailed'), { cause: e });
@@ -206,7 +207,7 @@ onBeforeMount(async () => {
     );
     createdBy.value = contacts.find((contact: Contact) => contact.userId === projectValue?.createdBy);
 
-    const activityContacts = (await activityContactService.listActivityContacts(projectValue.activityId)).data;
+    const activityContacts = await activityContactService.listActivityContacts({ activityId: projectValue.activityId });
     projectStore.setActivityContacts(activityContacts);
 
     // Determine if the current user has admin priviledges
@@ -289,8 +290,8 @@ onBeforeMount(async () => {
               @basic-project-info-card:navigate-to-submission-intake-view="navigateToSubmissionIntakeView"
             />
             <NoteBanner
-              v-if="getNoteHistoryShownToProponent[0]?.note[0]"
-              :note="getNoteHistoryShownToProponent[0].note[0]"
+              v-if="getNoteHistoryShownToProponent[0]?.note?.[0]"
+              :note="getNoteHistoryShownToProponent[0].note?.[0]"
               @note-banner:show-history="noteHistoryVisible = true"
             />
             <div class="disclaimer-block p-8 mt-8">

@@ -22,7 +22,7 @@ import {
 import ProjectView from '@/views/external/ProjectView.vue';
 import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject, Note, NoteHistory, Permit } from '@/types';
 
 // Mock functions we need to test
 const routerReplace = vi.fn();
@@ -54,7 +54,7 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/activityContactService', () => ({
-  default: {
+  activityContactService: {
     listActivityContacts: vi.fn()
   }
 }));
@@ -66,31 +66,31 @@ vi.mock('@/services/contactService', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
+  enquiryService: {
     listRelatedEnquiries: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     listPermits: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/noteHistoryService', () => ({
-  default: {
+  noteHistoryService: {
     listNoteHistories: vi.fn()
   }
 }));
@@ -123,24 +123,23 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
   vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(permitService.listPermits).mockResolvedValue(
-    mockAxiosResponse([{ needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }])
-  );
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
-  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue(
-    mockAxiosResponse([{ noteHistoryId: '123', shownToProponent: true, note: [{}] }])
-  );
+  vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([]);
+  vi.mocked(permitService.listPermits).mockResolvedValue([
+    { needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }
+  ] as Permit[]);
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
+  vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
+    { noteHistoryId: '123', shownToProponent: true, note: [{ noteId: '123' }] as Note[] }
+  ] as NoteHistory[]);
 });
 
 afterEach(() => {

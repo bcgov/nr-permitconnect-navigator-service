@@ -1,156 +1,251 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
-
-import { permitService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import {
+  permitService,
+  deletePermit,
+  getPermit,
+  listPermits,
+  listPermitTypes,
+  searchPermits,
+  upsertPermit
+} from '@/services/permitService';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
-import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 
-import type { AxiosInstance } from 'axios';
-import type { Permit, PermitType } from '@/types';
-
-// Constants
-const PATH = 'permit';
-const TEST_ID = 'testID';
-
-const TEST_PERMIT_TYPE: PermitType = {
-  permitTypeId: 1,
-  agency: 'Water, Land and Resource Stewardship',
-  division: 'Forest Resiliency and Archaeology',
-  branch: 'Archaeology',
-  businessDomain: 'Archaeology',
-  type: 'Alteration',
-  family: undefined,
-  name: 'Archaeology Alteration Permit',
-  nameSubtype: undefined,
-  acronym: 'SAP',
-  trackedInATS: false,
-  sourceSystem: 'Archaeology Permit Tracking System',
-  sourceSystemAcronym: 'APTS'
-};
-
-const TEST_PERMIT_1: Permit = {
-  permitId: 'permitId',
-  activityId: 'activityId',
-  issuedPermitId: 'issuedPermitId',
-  state: PermitState.IN_PROGRESS,
-  needed: 'needed',
-  stage: PermitStage.APPLICATION_SUBMISSION,
-  submittedDate: new Date().toISOString(),
-  decisionDate: new Date().toISOString(),
-  permitType: TEST_PERMIT_TYPE,
-  permitTypeId: TEST_PERMIT_TYPE.permitTypeId,
-  permitNote: [],
-  permitTracking: []
-};
-
-// Mocks
-const getSpy = vi.fn();
-const putSpy = vi.fn();
-const deleteSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  put: putSpy,
-  delete: deleteSpy
-} as unknown as AxiosInstance);
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
-// Spies
-const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+describe('permit service', () => {
+  const mockGet = vi.fn();
+  const mockPut = vi.fn();
+  const mockDelete = vi.fn();
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-  vi.clearAllMocks();
-});
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
 
-describe('permitService', () => {
-  let appStore: StoreGeneric;
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      put: mockPut,
+      delete: mockDelete
+    } as never);
+  });
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore = useAppStore();
-        appStore.setInitiative(initiative);
-      });
-      afterEach(() => {
-        upsertPermitSpy.mockReset();
-      });
+  describe('deletePermit', () => {
+    it('calls delete with the correct url', async () => {
+      mockDelete.mockResolvedValue({});
 
-      it('calls creates a permit', async () => {
-        await permitService.upsertPermit(TEST_PERMIT_1);
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
+      await deletePermit({
+        permitId: 'permit-123'
       });
 
-      it('calls delete permit', async () => {
-        await permitService.deletePermit(TEST_ID);
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_ID}`);
+      expect(mockDelete).toHaveBeenCalledWith('housing/permit/permit-123');
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
+
+      mockDelete.mockRejectedValue(error);
+
+      await expect(deletePermit({ permitId: 'permit-123' })).rejects.toThrow(error);
+    });
+  });
+
+  describe('getPermit', () => {
+    it('returns permit data', async () => {
+      const permit = {
+        permitId: 'permit-123'
+      };
+
+      mockGet.mockResolvedValue({
+        data: permit
       });
 
-      it('calls delete permit with wrong ID', async () => {
-        await permitService.deletePermit('wrongId');
-        expect(deleteSpy).toHaveBeenCalledTimes(1);
-        expect(deleteSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/${TEST_ID}`);
+      const result = await getPermit({
+        permitId: 'permit-123'
       });
 
-      it('calls get permit type list', async () => {
-        await permitService.getPermitTypes(Initiative.HOUSING);
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/types`, {
-          params: { initiative: Initiative.HOUSING }
-        });
+      expect(mockGet).toHaveBeenCalledWith('housing/permit/permit-123');
+
+      expect(result).toEqual(permit);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('get failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getPermit({ permitId: 'permit-123' })).rejects.toThrow(error);
+    });
+  });
+
+  describe('listPermitTypes', () => {
+    it('returns permit types', async () => {
+      const permitTypes = [{ code: 'TYPE1' }, { code: 'TYPE2' }];
+
+      mockGet.mockResolvedValue({
+        data: permitTypes
       });
 
-      it('calls get permit list', async () => {
-        await permitService.listPermits({ activityId: TEST_ID });
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, { params: { activityId: TEST_ID } });
+      const result = await listPermitTypes({
+        initiative: Initiative.HOUSING
       });
 
-      it('calls get permit list with wrong ID', async () => {
-        await permitService.listPermits({ activityId: 'wrongId' });
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ID}`);
+      expect(mockGet).toHaveBeenCalledWith('housing/permit/types', {
+        params: {
+          initiative: Initiative.HOUSING
+        }
       });
 
-      it('calls put permit', async () => {
-        await permitService.upsertPermit(TEST_PERMIT_1);
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, TEST_PERMIT_1);
+      expect(result).toEqual(permitTypes);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('types failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listPermitTypes({
+          initiative: Initiative.HOUSING
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('listPermits', () => {
+    it('returns permits with filters', async () => {
+      const permits = [{ permitId: '1' }, { permitId: '2' }];
+
+      const options = {
+        page: 1,
+        pageSize: 25
+      };
+
+      mockGet.mockResolvedValue({
+        data: permits
       });
 
-      it('calls put permit with wrong object type', async () => {
-        upsertPermitSpy.mockRejectedValue(new Error('Invalid permit object'));
-        const modifiedPermit: { permitTypeId?: string } = { permitTypeId: '123' };
-        delete modifiedPermit.permitTypeId;
+      const result = await listPermits(options as never);
 
-        await expect(permitService.upsertPermit(modifiedPermit as unknown as Permit)).rejects.toThrow();
-        expect(upsertPermitSpy).toHaveBeenCalledTimes(1);
+      expect(mockGet).toHaveBeenCalledWith('housing/permit', {
+        params: options
       });
 
-      it('calls get permit', async () => {
-        await permitService.listPermits({ activityId: TEST_ID });
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, { params: { activityId: TEST_ID } });
+      expect(result).toEqual(permits);
+    });
+
+    it('supports undefined options', async () => {
+      mockGet.mockResolvedValue({
+        data: []
       });
 
-      it('calls get permit with wrong ID', async () => {
-        await permitService.listPermits({ activityId: 'wrongId' });
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).not.toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}/list/${TEST_ID}`);
+      await listPermits();
+
+      expect(mockGet).toHaveBeenCalledWith('housing/permit', {
+        params: undefined
       });
-    }
-  );
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(listPermits()).rejects.toThrow(error);
+    });
+  });
+
+  describe('searchPermits', () => {
+    it('returns permits and totalRecords', async () => {
+      const response = {
+        permits: [{ permitId: '1' }, { permitId: '2' }],
+        totalRecords: 2
+      };
+
+      const filters = {
+        searchText: 'test'
+      };
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await searchPermits(filters as never);
+
+      expect(mockGet).toHaveBeenCalledWith('housing/permit/search', {
+        params: filters
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('supports undefined filters', async () => {
+      mockGet.mockResolvedValue({
+        data: {
+          permits: [],
+          totalRecords: 0
+        }
+      });
+
+      await searchPermits();
+
+      expect(mockGet).toHaveBeenCalledWith('housing/permit/search', {
+        params: undefined
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(searchPermits()).rejects.toThrow(error);
+    });
+  });
+
+  describe('upsertPermit', () => {
+    it('puts permit and returns response data', async () => {
+      const permit = {
+        permitId: 'permit-123',
+        permitNumber: 'P-001'
+      };
+
+      mockPut.mockResolvedValue({
+        data: permit
+      });
+
+      const result = await upsertPermit(permit as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/permit', permit);
+
+      expect(result).toEqual(permit);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('upsert failed');
+
+      mockPut.mockRejectedValue(error);
+
+      await expect(upsertPermit({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(permitService).toEqual({
+      deletePermit,
+      getPermit,
+      listPermits,
+      listPermitTypes,
+      searchPermits,
+      upsertPermit
+    });
+  });
 });

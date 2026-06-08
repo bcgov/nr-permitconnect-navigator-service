@@ -34,6 +34,7 @@ import type {
   DeepPartial,
   ElectrificationProject,
   OrgBookOption,
+  PatchElectrificationProjectRequest,
   User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectFormNavigatorSchema';
@@ -290,7 +291,9 @@ const onSubmit = async (formValues: GenericObject) => {
     });
 
     // Generate final payload
-    const payload: Partial<ElectrificationProject> = {
+    const payload: PatchElectrificationProjectRequest = {
+      projectId: project.projectId,
+
       // Company and Project Information
       projectName: values.companyProjectName.projectName,
       companyNameRegistered: values.companyProjectName.companyNameRegistered,
@@ -329,15 +332,15 @@ const onSubmit = async (formValues: GenericObject) => {
     };
 
     // Update project
-    const result = await electrificationProjectService.updateProject(project.electrificationProjectId, payload);
-    projectStore.setProject(result.data);
+    const result = await electrificationProjectService.patchProject(payload);
+    projectStore.setProject(result);
 
     // Wait a tick for store to propagate
     await nextTick();
 
     // Reinitialize the form
     formRef.value?.resetForm({
-      values: await initializeFormValues(result.data)
+      values: await initializeFormValues(result)
     });
 
     toast.success(t('i.common.form.savedMessage'));

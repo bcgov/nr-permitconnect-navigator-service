@@ -1,7 +1,10 @@
 import type { GeoJSON } from 'geojson';
 
-import type { MaybeUndefined, Nullable, UUID } from '../util';
+import type { UUID } from '../common';
+import type { Group } from './responses';
+import type { MaybeUndefined, Nullable } from '../util';
 import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
+import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
   ActivityContactRole,
@@ -15,8 +18,6 @@ import type {
   Region,
   SubmissionType
 } from '@/utils/enums/projectCommon';
-import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
-import type { Group } from './responses';
 
 /**
  * Shared interfaces
@@ -30,7 +31,7 @@ export interface AuditFields {
   deletedAt?: Nullable<string>;
 }
 
-interface Project extends AuditFields {
+export interface ProjectBase extends AuditFields {
   projectId: string;
   activityId: string;
   submittedAt: string;
@@ -45,15 +46,18 @@ interface Project extends AuditFields {
   projectName: string;
   projectDescription: string;
   multiPermitsNeeded: string;
+  relatedEnquiries?: string;
   astNotes?: string | null;
   atsClientId: number | null;
   atsEnquiryId: number | null;
   addedToAts: boolean;
   aaiUpdated: boolean;
+}
 
-  activity?: Activity;
+interface ProjectRelations {
+  activity: Activity;
   contacts: Contact[];
-  user?: User;
+  user: User;
 }
 
 /**
@@ -86,14 +90,17 @@ export interface Activity extends AuditFields {
  * Activity Contact
  */
 
-export interface ActivityContact extends AuditFields {
+export interface ActivityContactBase extends AuditFields {
   activityId: string;
   contactId: UUID;
   role: ActivityContactRole;
-
-  // Joined
-  contact?: Contact;
 }
+
+interface ActivityContactRelations {
+  contact: Contact;
+}
+
+export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelations>;
 
 /**
  * Contact
@@ -146,7 +153,7 @@ export interface Draft<T> extends AuditFields {
  * Electrification Project
  */
 
-export interface ElectrificationProject extends Project {
+export interface ElectrificationProjectBase extends ProjectBase {
   electrificationProjectId: UUID;
   projectType?: string;
   projectCategory?: Nullable<string>;
@@ -157,11 +164,15 @@ export interface ElectrificationProject extends Project {
   bcEnvironmentAssessNeeded?: Nullable<string>;
 }
 
+export type ElectrificationProject = ElectrificationProjectBase & Partial<ProjectRelations>;
+
 /**
  * Enquiry
  */
 
-interface EnquiryBase extends AuditFields {
+export interface EnquiryBase extends AuditFields {
+  enquiryId: UUID;
+  activityId: string;
   addedToAts: boolean;
   assignedUserId?: Nullable<string>;
   atsClientId: Nullable<number>;
@@ -175,24 +186,20 @@ interface EnquiryBase extends AuditFields {
   submittedMethod: EnquirySubmittedMethod;
 }
 
-export interface Enquiry extends EnquiryBase {
-  activity?: Activity;
-  activityId: string;
-  enquiryId: UUID;
-}
-
-export interface EnquiryArgs extends Partial<EnquiryBase> {
+interface EnquiryRelations {
+  activity: Activity;
   contact: Contact;
 }
+
+export type Enquiry = EnquiryBase & Partial<EnquiryRelations>;
 
 /**
  * General Project
  */
 
-export interface GeneralProject extends Project {
+export interface GeneralProjectBase extends ProjectBase {
   generalProjectId: UUID;
   projectNumber?: string;
-  relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
   geoJson?: GeoJSON;
   projectLocation: string;
@@ -212,13 +219,14 @@ export interface GeneralProject extends Project {
   businessArea?: Nullable<BusinessArea>;
 }
 
+export type GeneralProject = GeneralProjectBase & Partial<ProjectRelations>;
+
 /**
  * Housing Project
  */
 
-export interface HousingProject extends Project {
+export interface HousingProjectBase extends ProjectBase {
   housingProjectId: UUID;
-  relatedEnquiries: string;
   projectApplicantType: ProjectApplicant;
   consentToFeedback?: boolean;
   geoJson?: GeoJSON;
@@ -250,6 +258,8 @@ export interface HousingProject extends Project {
   hasAppliedProvincialPermits: boolean;
 }
 
+export type HousingProject = HousingProjectBase & Partial<ProjectRelations>;
+
 /**
  * Identity Provider
  */
@@ -274,31 +284,34 @@ export interface Note extends AuditFields {
  * Note History
  */
 
-export interface NoteHistory extends AuditFields {
-  noteHistoryId?: UUID;
+export interface NoteHistoryBase extends AuditFields {
+  noteHistoryId: UUID;
   activityId: string;
   bringForwardDate: Nullable<string>;
   bringForwardState: Nullable<string>;
   escalateToDirector: boolean;
   escalateToSupervisor: boolean;
   escalationType: Nullable<string>;
-  note: Note[];
   shownToProponent: boolean;
   title: string;
   type: NoteType;
 }
+
+interface NoteHistoryRelations {
+  note: Note[];
+}
+
+export type NoteHistory = NoteHistoryBase & Partial<NoteHistoryRelations>;
 
 /**
  * Permit
  */
 
 interface PermitBase extends AuditFields {
+  permitId: UUID;
   activityId: string;
   issuedPermitId?: Nullable<string>;
   needed: string;
-  permitNote?: PermitNote[];
-  permitTracking?: PermitTracking[];
-  permitType?: PermitType;
   permitTypeId: number;
   stage: PermitStage;
   state: PermitState;
@@ -315,13 +328,13 @@ interface PermitBase extends AuditFields {
   onHoldCode?: Nullable<PiesOnHold>;
 }
 
-export interface Permit extends PermitBase {
-  permitId: UUID;
+interface PermitRelations {
+  permitNote: PermitNote[];
+  permitTracking: PermitTracking[];
+  permitType: PermitType;
 }
 
-export interface PermitArgs extends PermitBase {
-  permitId?: UUID;
-}
+export type Permit = PermitBase & Partial<PermitRelations>;
 
 /**
  * Permit Note

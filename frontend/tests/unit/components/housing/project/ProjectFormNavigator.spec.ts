@@ -41,7 +41,7 @@ vi.mock('@/services', () => ({
     searchUsers: vi.fn()
   },
   housingProjectService: {
-    updateProject: vi.fn()
+    patchProject: vi.fn()
   }
 }));
 
@@ -309,7 +309,7 @@ describe('Form Submission & ATS Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(housingProjectService.updateProject).mockResolvedValue(mockAxiosResponse(testProject));
+    vi.mocked(housingProjectService.patchProject).mockResolvedValue(testProject);
     vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
   });
 
@@ -332,9 +332,13 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSClient).toHaveBeenCalled();
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
-    expect(housingProjectService.updateProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -355,9 +359,13 @@ describe('Form Submission & ATS Integration', () => {
     await flushPromises();
 
     expect(atsService.createATSEnquiry).toHaveBeenCalled();
-    expect(housingProjectService.updateProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -377,9 +385,13 @@ describe('Form Submission & ATS Integration', () => {
     await flushPromises();
 
     expect(atsService.createATSClient).toHaveBeenCalled();
-    expect(housingProjectService.updateProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ atsClientId: 111, atsEnquiryId: 222, addedToAts: true })
+    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
+      expect.objectContaining({
+        projectId: testProject.housingProjectId,
+        atsClientId: 111,
+        atsEnquiryId: 222,
+        addedToAts: true
+      })
     );
   });
 
@@ -403,9 +415,8 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', noAtsPayload);
     await flushPromises();
 
-    expect(housingProjectService.updateProject).toHaveBeenCalledWith(
-      testProject.housingProjectId,
-      expect.objectContaining({ addedToAts: false })
+    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
+      expect.objectContaining({ projectId: testProject.housingProjectId, addedToAts: false })
     );
   });
 
@@ -421,7 +432,7 @@ describe('Form Submission & ATS Integration', () => {
 
     expect(atsService.createATSClient).not.toHaveBeenCalled();
     expect(atsService.createATSEnquiry).not.toHaveBeenCalled();
-    expect(housingProjectService.updateProject).toHaveBeenCalled();
+    expect(housingProjectService.patchProject).toHaveBeenCalled();
   });
 });
 

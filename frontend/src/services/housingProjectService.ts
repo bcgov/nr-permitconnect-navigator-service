@@ -1,132 +1,205 @@
 import { appAxios } from './interceptors';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosResponse } from 'axios';
 import type {
+  CreateHousingProjectRequest,
+  DeleteDraftRequest,
+  DeleteProjectRequest,
   Draft,
   DraftableProjectService,
+  GetDraftRequest,
+  GetProjectRequest,
+  GetProjectStatisticsRequest,
   HousingProject,
-  HousingProjectSearchParameters,
-  StatisticFilters
+  PatchHousingProjectRequest,
+  ListHousingProjectRequest,
+  Statistics,
+  SubmitDraftHousingProjectRequest,
+  UpsertDraftRequest
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
-const PATH = 'project';
+const PATH = `${Initiative.HOUSING.toLowerCase()}/project`;
 
-export interface IHousingProjectService extends DraftableProjectService {
-  getProject(projectId: string): Promise<AxiosResponse<HousingProject>>;
-  deleteDraft(draftId: string): Promise<AxiosResponse>;
-  getDraft(draftId: string): Promise<AxiosResponse<Draft<FormSchemaType>>>;
-  getDrafts(): Promise<AxiosResponse<Draft<FormSchemaType>[]>>;
-  upsertDraft(data?: Partial<Draft<FormSchemaType>>): Promise<AxiosResponse<Draft<FormSchemaType>>>;
+export interface HousingProjectService extends DraftableProjectService<HousingProject, FormSchemaType> {
+  getProject(req: GetProjectRequest): Promise<HousingProject>;
+  deleteDraft(req: DeleteDraftRequest): Promise<void>;
+  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
+  listDrafts(): Promise<Draft<FormSchemaType>[]>;
+  searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]>;
+  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+  submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
 }
 
-const service: IHousingProjectService = {
-  /**
-   * @function createProject
-   * @returns {Promise} An axios response
-   */
-  createProject(data?: Partial<HousingProject>) {
-    return appAxios().post(`${Initiative.HOUSING.toLowerCase()}/${PATH}`, data);
-  },
+/**
+ * Creates a new housing project.
+ * @param req - The request payload containing the project data to create.
+ * @returns A promise resolving to the created `HousingProject` resource.
+ */
+export async function createProject(req: CreateHousingProjectRequest): Promise<HousingProject> {
+  const { ...body } = req;
 
-  /**
-   * @function deleteProject
-   * @returns {Promise} An axios response
-   */
-  deleteProject(projectId: string) {
-    return appAxios().delete(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`);
-  },
+  const { data } = await appAxios().post<HousingProject>(PATH, body);
 
-  /**
-   * @function deleteDraft
-   * @returns {Promise} An axios response
-   */
-  deleteDraft(draftId: string) {
-    return appAxios().delete(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${draftId}`);
-  },
+  return data;
+}
 
-  /**
-   * @function getActivityIds
-   * @returns {Promise} An axios response
-   */
-  getActivityIds() {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/activityIds`);
-  },
+/**
+ * Deletes a housing project.
+ * @param req - The request payload containing the project ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
+  const { projectId } = req;
 
-  /**
-   * @function getProjects
-   * @returns {Promise} An axios response
-   */
-  getProjects() {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}`);
-  },
+  await appAxios().delete(`${PATH}/${projectId}`);
+}
 
-  /**
-   * @function getDraft
-   * @returns {Promise} An axios response
-   */
-  getDraft(draftId: string) {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/${draftId}`);
-  },
+/**
+ * Retrieves all activity IDs associated with housing projects.
+ * @returns A promise resolving to an array of activity IDs.
+ */
+export async function getActivityIds(): Promise<string[]> {
+  const { data } = await appAxios().get<string[]>(`${PATH}/activityIds`);
 
-  /**
-   * @function getDrafts
-   * @returns {Promise} An axios response
-   */
-  getDrafts() {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`);
-  },
+  return data;
+}
 
-  /**
-   * @function getStatistics
-   * @returns {Promise} An axios response
-   */
-  getStatistics(filters?: StatisticFilters) {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/statistics`, {
-      params: { ...filters }
-    });
-  },
+/**
+ * Retrieves a single housing project.
+ * @param req - The request payload containing the project ID.
+ * @returns A promise resolving to the requested `HousingProject` resource.
+ */
+export async function getProject(req: GetProjectRequest): Promise<HousingProject> {
+  const { projectId } = req;
 
-  /**
-   * @function getProject
-   * @returns {Promise} An axios response
-   */
-  getProject(projectId: string) {
-    return appAxios().get(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`);
-  },
+  const { data } = await appAxios().get<HousingProject>(`${PATH}/${projectId}`);
 
-  /**
-   * @function searchProjects
-   * @returns {Promise} An axios response
-   */
-  searchProjects(filters?: HousingProjectSearchParameters) {
-    return appAxios().post(`${Initiative.HOUSING.toLowerCase()}/${PATH}/search`, filters);
-  },
+  return data;
+}
 
-  /**
-   * @function submitDraft
-   * @returns {Promise} An axios response
-   */
-  submitDraft(data?: Partial<HousingProject>) {
-    return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft/submit`, data);
-  },
+/**
+ * Retrieves all housing projects.
+ * @returns A promise resolving to an array of `HousingProject` resources.
+ */
+export async function listProjects(): Promise<HousingProject[]> {
+  const { data } = await appAxios().get<HousingProject[]>(PATH);
 
-  /**
-   * @function upsertDraft
-   * @returns {Promise} An axios response
-   */
-  upsertDraft(data?: Partial<Draft<FormSchemaType>>) {
-    return appAxios().put(`${Initiative.HOUSING.toLowerCase()}/${PATH}/draft`, data);
-  },
+  return data;
+}
 
-  /**
-   * @function updateProject
-   * @returns {Promise} An axios response
-   */
-  updateProject(projectId: string, data: Partial<HousingProject>) {
-    return appAxios().patch(`${Initiative.HOUSING.toLowerCase()}/${PATH}/${projectId}`, data);
-  }
+/**
+ * Searches housing projects using the supplied filters.
+ * @param req - The request payload containing optional search criteria.
+ * @returns A promise resolving to an array of `HousingProject` resources.
+ */
+export async function searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]> {
+  const { data } = await appAxios().post<HousingProject[]>(`${PATH}/search`, req);
+
+  return data;
+}
+
+/**
+ * Updates an existing housing project.
+ * @param req - The request payload containing the project ID and updated fields.
+ * @returns A promise resolving to the updated `HousingProject` resource.
+ */
+export async function patchProject(req: PatchHousingProjectRequest): Promise<HousingProject> {
+  const { projectId, ...body } = req;
+
+  const { data } = await appAxios().patch<HousingProject>(`${PATH}/${projectId}`, body);
+
+  return data;
+}
+
+/**
+ * Retrieves project statistics.
+ * @param req - The request payload containing optional statistic filters.
+ * @returns A promise resolving to project statistics.
+ */
+export async function getStatistics(req: GetProjectStatisticsRequest): Promise<Statistics> {
+  const { ...filters } = req;
+
+  const { data } = await appAxios().get<Statistics>(`${PATH}/statistics`, {
+    params: filters
+  });
+
+  return data;
+}
+
+/**
+ * Submits a draft as a housing project.
+ * @param req - The request payload containing the project data to submit.
+ * @returns A promise resolving to the submitted `HousingProject` resource.
+ */
+export async function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
+  const { ...body } = req;
+
+  const { data } = await appAxios().put<HousingProject>(`${PATH}/draft/submit`, body);
+
+  return data;
+}
+
+/**
+ * Deletes a draft.
+ * @param req - The request payload containing the draft ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+  const { draftId } = req;
+
+  await appAxios().delete(`${PATH}/draft/${draftId}`);
+}
+
+/**
+ * Retrieves a single draft.
+ * @param req - The request payload containing the draft ID.
+ * @returns A promise resolving to the requested draft resource.
+ */
+export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+  const { draftId } = req;
+
+  const { data } = await appAxios().get<Draft<FormSchemaType>>(`${PATH}/draft/${draftId}`);
+
+  return data;
+}
+
+/**
+ * Retrieves all drafts.
+ * @returns A promise resolving to an array of draft resources.
+ */
+export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
+  const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
+
+  return data;
+}
+
+/**
+ * Creates or updates a draft.
+ * @param req - The request payload containing the draft data.
+ * @returns A promise resolving to the saved draft resource.
+ */
+export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
+  const { ...body } = req;
+
+  const { data } = await appAxios().put<Draft<FormSchemaType>>(`${PATH}/draft`, body);
+
+  return data;
+}
+
+/** Hybrid default export object for backward compatibility */
+export const housingProjectService: HousingProjectService = {
+  createProject,
+  deleteProject,
+  getActivityIds,
+  getProject,
+  listProjects,
+  searchProjects,
+  patchProject,
+  getStatistics,
+  submitDraft,
+  deleteDraft,
+  getDraft,
+  listDrafts,
+  upsertDraft
 };
-
-export default service;

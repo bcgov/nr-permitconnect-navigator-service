@@ -32,7 +32,7 @@ const confirmDelete = () => {
       rejectProps: { outlined: true },
       accept: () => {
         documentService
-          .deleteDocument(document.documentId)
+          .deleteDocument({ documentId: document.documentId })
           .then(() => {
             projectStore.removeDocument(document);
             toast.success('Document deleted');

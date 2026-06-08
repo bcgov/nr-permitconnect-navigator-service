@@ -7,9 +7,9 @@ import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
 import { electrificationProjectService, housingProjectService, permitService } from '@/services';
 import { Initiative } from '@/utils/enums/application';
 import EnquiryIntakeView from '@/views/external/EnquiryIntakeView.vue';
-import { mockAxiosResponse, t } from '../../../helpers';
+import { t } from '../../../helpers';
 
-import type { ElectrificationProject, HousingProject } from '@/types';
+import type { ElectrificationProject, HousingProject, Permit } from '@/types';
 import { FormState, FormType } from '@/utils/enums/projectCommon';
 import { nextTick } from 'vue';
 import { useFormStore } from '@/store';
@@ -37,19 +37,19 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
+  electrificationProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
+  housingProjectService: {
     getProject: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     getPermit: vi.fn()
   }
 }));
@@ -87,16 +87,15 @@ const wrapperSettings = (initiative = Initiative.HOUSING, props?: Props) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(electrificationProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<ElectrificationProject>({
-      electrificationProjectId: '123',
-      activityId: '123'
-    } as ElectrificationProject)
-  );
-  vi.mocked(housingProjectService.getProject).mockResolvedValue(
-    mockAxiosResponse<HousingProject>({ housingProjectId: '123', activityId: '123' } as HousingProject)
-  );
-  vi.mocked(permitService.getPermit).mockResolvedValue(mockAxiosResponse({ permitId: '123', activityId: '123' }));
+  vi.mocked(electrificationProjectService.getProject).mockResolvedValue({
+    electrificationProjectId: '123',
+    activityId: '123'
+  } as ElectrificationProject);
+  vi.mocked(housingProjectService.getProject).mockResolvedValue({
+    housingProjectId: '123',
+    activityId: '123'
+  } as HousingProject);
+  vi.mocked(permitService.getPermit).mockResolvedValue({ permitId: '123', activityId: '123' } as Permit);
 });
 
 afterEach(() => {

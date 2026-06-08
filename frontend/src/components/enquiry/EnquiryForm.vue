@@ -37,6 +37,9 @@ import type {
   DeepPartial,
   Enquiry,
   InputEvent,
+  PatchEnquiryRequest,
+  Project,
+  ProjectService,
   User
 } from '@/types';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
@@ -48,7 +51,7 @@ const { editable = true, enquiry } = defineProps<{
 }>();
 
 // Injections
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 const atsEnquiryPartnerAgencies = inject(atsEnquiryPartnerAgenciesKey);
 const atsEnquiryTypeCode = inject(atsEnquiryTypeCodeKey);
 
@@ -162,7 +165,7 @@ async function createATSEnquiry(atsClientId?: number) {
 
 async function getRelatedATSClientID(activityId: string) {
   if (projectService?.value) {
-    const response = (await projectService.value.searchProjects({ activityId: [activityId] })).data;
+    const response = await projectService.value.searchProjects({ activityId: [activityId] });
     if (response.length > 0) {
       return response[0].atsClientId;
     }
@@ -238,7 +241,7 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
 
   if (e.value) {
     if (projectService?.value) {
-      const response = (await projectService.value.searchProjects({ activityId: [e.value] })).data;
+      const response = await projectService.value.searchProjects({ activityId: [e.value] });
       if (response.length > 0) {
         // Set ATS client ID from the related project
         formRef.value?.setFieldValue('atsInfo.atsClientId', response[0].atsClientId);
@@ -282,7 +285,9 @@ const onSubmit = async (formValues: GenericObject) => {
     const values: FormSchemaType = await setAtsSubmitData(transformed);
 
     // Generate final payload
-    const payload: Partial<Enquiry> = {
+    const payload: PatchEnquiryRequest = {
+      enquiryId: enquiry.enquiryId,
+
       // Enquiry description
       enquiryDescription: values.enquiryDescription,
 
@@ -303,8 +308,8 @@ const onSubmit = async (formValues: GenericObject) => {
     };
 
     // Update enquiry
-    const result = await enquiryService.updateEnquiry(enquiry.enquiryId, payload);
-    enquiryStore.setEnquiry(result.data);
+    const result = await enquiryService.patchEnquiry(payload);
+    enquiryStore.setEnquiry(result);
 
     // Wait a tick for store to propagate
     await nextTick();
@@ -374,7 +379,7 @@ function setBasicInfo(contact?: Contact) {
 
 onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
-  projectActivityIds.value = filteredProjectActivityIds.value = (await projectService.value.getActivityIds()).data;
+  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.getActivityIds();
 
   initialFormValues.value = await initializeFormValues();
 });

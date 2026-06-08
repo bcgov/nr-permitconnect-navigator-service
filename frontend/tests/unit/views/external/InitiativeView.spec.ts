@@ -7,7 +7,7 @@ import { default as i18n } from '@/i18n';
 import { electrificationProjectService, enquiryService, housingProjectService, permitService } from '@/services';
 import { Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/external/InitiativeView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 import ViewHeader from '@/components/common/ViewHeader.vue';
 
 // Mock functions we need to test
@@ -40,27 +40,27 @@ vi.mock('vue-router', () => ({
 }));
 
 vi.mock('@/services/enquiryService', () => ({
-  default: {
-    getEnquiries: vi.fn()
+  enquiryService: {
+    listEnquiries: vi.fn()
   }
 }));
 
 vi.mock('@/services/electrificationProjectService', () => ({
-  default: {
-    getDrafts: vi.fn(),
-    getProjects: vi.fn()
+  electrificationProjectService: {
+    listDrafts: vi.fn(),
+    listProjects: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
-  default: {
-    getDrafts: vi.fn(),
-    getProjects: vi.fn()
+  housingProjectService: {
+    listDrafts: vi.fn(),
+    listProjects: vi.fn()
   }
 }));
 
 vi.mock('@/services/permitService', () => ({
-  default: {
+  permitService: {
     listPermits: vi.fn()
   }
 }));
@@ -88,12 +88,12 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.getEnquiries).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(electrificationProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.getDrafts).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(housingProjectService.getProjects).mockResolvedValue(mockAxiosResponse([]));
-  vi.mocked(permitService.listPermits).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(enquiryService.listEnquiries).mockResolvedValue([]);
+  vi.mocked(electrificationProjectService.listDrafts).mockResolvedValue([]);
+  vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
+  vi.mocked(housingProjectService.listDrafts).mockResolvedValue([]);
+  vi.mocked(housingProjectService.listProjects).mockResolvedValue([]);
+  vi.mocked(permitService.listPermits).mockResolvedValue([]);
 });
 
 afterEach(() => {
@@ -109,7 +109,7 @@ describe('InitiativeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(enquiryService.getEnquiries).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(enquiryService.listEnquiries).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(InitiativeView, wrapperSettings());
     await flushPromises();

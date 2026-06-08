@@ -1,3 +1,4 @@
+import type { ActivityContact, Permit } from './resources';
 import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 export interface BringForward {
@@ -37,6 +38,11 @@ export interface Permission {
   action: Action;
 }
 
+export interface SearchPermitsResponse {
+  permits: Permit[];
+  totalRecords: number;
+}
+
 export interface Statistics {
   total_submissions: number;
   total_submissions_between: number;
@@ -62,4 +68,9 @@ export interface Statistics {
   guidance: number;
   inapplicable: number;
   status_request: number;
+}
+
+export interface PutActivityContactResponse {
+  updated: ActivityContact;
+  demoted: ActivityContact | undefined;
 }

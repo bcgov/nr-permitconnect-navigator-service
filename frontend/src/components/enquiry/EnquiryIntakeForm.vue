@@ -22,7 +22,7 @@ import { enquirySchema } from '@/validators/enquiry';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { Enquiry, EnquiryArgs, Permit, Project } from '@/types';
+import type { CreateEnquiryRequest, Enquiry, Permit, Project } from '@/types';
 import type { FormSchemaType } from '@/validators/enquiry';
 
 // Props
@@ -107,7 +107,7 @@ async function onSubmit(values: FormSchemaType) {
   formStore.setFormState(FormState.LOCKED);
 
   try {
-    let payload: EnquiryArgs = {
+    let payload: CreateEnquiryRequest = {
       enquiryDescription: values.basic.enquiryDescription,
       relatedActivityId: project?.activityId ?? undefined,
       contact: values.contacts
@@ -127,9 +127,9 @@ async function onSubmit(values: FormSchemaType) {
 
     // Save contact data to store
     // TODO: Remove once user is forced to fill contact data out
-    contactStore.setContact(response.data.contact);
+    if (response.contact) contactStore.setContact(response.contact);
 
-    router.push(getEnquiryConfirmationRoute(response.data));
+    router.push(getEnquiryConfirmationRoute(response));
   } catch (e) {
     generalErrorHandler(e, t('enquiryIntakeForm.submit.saveFailed'), undefined, toast);
     formStore.setFormState(FormState.UNLOCKED);
@@ -141,7 +141,7 @@ onBeforeMount(async () => {
     let primaryContact, response;
 
     if (enquiryId) {
-      response = (await enquiryService.getEnquiry(enquiryId)).data;
+      response = await enquiryService.getEnquiry({ enquiryId });
 
       primaryContact = response
         ? response.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact

@@ -8,7 +8,6 @@ import EnquiryListProponent from '@/components/enquiry/EnquiryListProponent.vue'
 import { enquiryService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 
-import type { AxiosResponse } from 'axios';
 import type { Enquiry } from '@/types';
 
 // Mock dependencies
@@ -28,7 +27,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
-deleteEnquirySpy.mockResolvedValue({ data: {} } as AxiosResponse);
+deleteEnquirySpy.mockResolvedValue(undefined);
 const currentDate = new Date().toISOString();
 
 // Example Enquiry object

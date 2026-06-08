@@ -23,7 +23,15 @@ import { combineDateTime, omit, scrollToFirstError, setEmptyStringsToNull, split
 import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
-import type { AuditFields, Permit, PermitArgs, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
+import type {
+  AuditFields,
+  Permit,
+  PermitTracking,
+  PermitType,
+  SourceSystemKind,
+  UpsertPermitRequest,
+  User
+} from '@/types';
 
 // Props
 const { authorization = undefined, editable } = defineProps<{
@@ -282,7 +290,8 @@ function onDelete() {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        await permitService.deletePermit(authorization?.permitId as string);
+        if (!authorization) throw new Error('No authorization');
+        await permitService.deletePermit({ permitId: authorization.permitId });
         toast.success(t('authorization.authorizationForm.authDeleted'));
         if (!projectRouteName?.value) throw new Error('No route');
         router.push({
@@ -314,7 +323,7 @@ async function onSubmit(data: GenericObject) {
     const statusLastVerified = splitDateTime(data.statusLastVerified);
 
     const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-    const permitData: PermitArgs = {
+    const permitData: UpsertPermitRequest = {
       ...rest,
       activityId: getProject.value!.activityId,
       permitTypeId: authorizationType.permitTypeId,

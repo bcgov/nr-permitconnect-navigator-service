@@ -20,10 +20,10 @@ import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey 
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../helpers';
 
 import type { Ref } from 'vue';
-import type { Enquiry, ProjectService } from '@/types';
+import type { Enquiry, HousingProject, Project, ProjectService } from '@/types';
 
 const searchContactSpy = vi.spyOn(userService, 'searchUsers');
-const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
+const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
 const getHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
 const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'getActivityIds');
 const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
@@ -64,7 +64,7 @@ vi.mock(import('vue-router'), async (importOriginal) => {
 const wrapperSettings = (
   testEnquiryProp = testEnquiry,
   editableProp?: boolean,
-  projectServiceMock: Ref<ProjectService> = ref(housingProjectService),
+  projectServiceMock: Ref<ProjectService<Project>> = ref(housingProjectService),
   atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
   atsEnquiryTypeCode = testAtsEnquiryTypeCode
 ) => ({
@@ -109,12 +109,13 @@ describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }]));
-    vi.mocked(enquiryService.updateEnquiry).mockResolvedValue(
-      mockAxiosResponse({ enquiryId: 'enquiry123', activityId: 'activity456' })
-    );
-    vi.mocked(housingProjectService.getActivityIds).mockResolvedValue(mockAxiosResponse(activityIdMockData));
-    vi.mocked(electrificationProjectService.getActivityIds).mockResolvedValue(mockAxiosResponse(activityIdMockData));
-    vi.mocked(housingProjectService.searchProjects).mockResolvedValue(mockAxiosResponse([]));
+    vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
+      enquiryId: 'enquiry123',
+      activityId: 'activity456'
+    } as Enquiry);
+    vi.mocked(housingProjectService.getActivityIds).mockResolvedValue(activityIdMockData);
+    vi.mocked(electrificationProjectService.getActivityIds).mockResolvedValue(activityIdMockData);
+    vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
   });
 
   describe('Rendering and Initialization', () => {
@@ -301,10 +302,10 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(updateEnquirySpy).toHaveBeenCalledTimes(1);
-      expect(updateEnquirySpy).toHaveBeenCalledWith(
-        'enquiry123',
+      expect(patchEnquirySpy).toHaveBeenCalledTimes(1);
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
         expect.objectContaining({
+          enquiryId: 'enquiry123',
           enquiryDescription: submitValues.enquiryDescription,
           relatedActivityId: null,
           assignedUserId: null,
@@ -340,7 +341,11 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(updateEnquirySpy).toHaveBeenCalledWith('custom-enquiry-id', expect.any(Object));
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          enquiryId: 'custom-enquiry-id'
+        })
+      );
     });
 
     it('maps assigned user id from submissionState.assignedUser', async () => {
@@ -358,9 +363,9 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(updateEnquirySpy).toHaveBeenCalledWith(
-        'enquiry123',
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
         expect.objectContaining({
+          enquiryId: 'enquiry123',
           assignedUserId: 'user-789'
         })
       );
@@ -382,9 +387,9 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(updateEnquirySpy).toHaveBeenCalledWith(
-        'enquiry123',
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
         expect.objectContaining({
+          enquiryId: 'enquiry123',
           relatedActivityId: 'activity1',
           atsClientId: null
         })
@@ -407,9 +412,9 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(updateEnquirySpy).toHaveBeenCalledWith(
-        'enquiry123',
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
         expect.objectContaining({
+          enquiryId: 'enquiry123',
           relatedActivityId: null,
           atsClientId: null
         })
@@ -417,7 +422,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('does not emit saved event when updateEnquiry fails', async () => {
-      vi.mocked(enquiryService.updateEnquiry).mockRejectedValueOnce(new Error('save failed'));
+      vi.mocked(enquiryService.patchEnquiry).mockRejectedValueOnce(new Error('save failed'));
       const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
       await flushPromises();
       await nextTick();
@@ -494,28 +499,26 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('searches projects and updates related ATS info on EditableSelect change', async () => {
-      vi.mocked(housingProjectService.searchProjects).mockResolvedValueOnce(
-        mockAxiosResponse([
-          {
-            atsClientId: 345,
-            activity: {
-              activityContact: [
-                {
-                  contact: {
-                    contactId: 'contact123',
-                    firstName: 'John',
-                    lastName: 'Doe',
-                    phoneNumber: '555-1234',
-                    email: 'john@example.com',
-                    contactApplicantRelationship: ProjectRelationship.CONSULTANT,
-                    contactPreference: ContactPreference.EITHER
-                  }
+      vi.mocked(housingProjectService.searchProjects).mockResolvedValueOnce([
+        {
+          atsClientId: 345,
+          activity: {
+            activityContact: [
+              {
+                contact: {
+                  contactId: 'contact123',
+                  firstName: 'John',
+                  lastName: 'Doe',
+                  phoneNumber: '555-1234',
+                  email: 'john@example.com',
+                  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
+                  contactPreference: ContactPreference.EITHER
                 }
-              ]
-            }
+              }
+            ]
           }
-        ])
-      );
+        } as HousingProject
+      ]);
 
       const component = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
       await flushPromises();

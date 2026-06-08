@@ -36,7 +36,7 @@ import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Permit, Project, Statistics } from '@/types';
+import type { BringForward, Enquiry, Permit, Project, ProjectService, Statistics } from '@/types';
 
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
@@ -46,7 +46,7 @@ const projects = defineModel<Project[]>('projects', { required: true });
 const statistics = defineModel<Statistics>('statistics');
 
 // Injections
-const projectService = inject(projectServiceKey);
+const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
 
 // Composables
 const toast = useToast();
@@ -183,9 +183,9 @@ function onSubmissionDelete(projectId: string, activityId: string) {
 
 function refreshStatistics() {
   projectService?.value
-    ?.getStatistics()
+    ?.getStatistics({})
     .then((response) => {
-      statistics.value = response.data;
+      statistics.value = response;
     })
     .catch((e) => {
       toast.error('Failed to refresh statistics', e.message);

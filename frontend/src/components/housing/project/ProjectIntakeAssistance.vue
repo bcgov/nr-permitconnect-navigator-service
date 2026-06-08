@@ -60,11 +60,11 @@ async function onAssistanceRequest() {
       })
     };
 
-    const enquiryResponse = (await enquiryService.createEnquiry(enquiryData)).data;
+    const response = await enquiryService.createEnquiry(enquiryData);
     router.push({
       name: RouteName.EXT_HOUSING_ENQUIRY_CONFIRMATION,
       params: {
-        enquiryId: enquiryResponse.enquiryId
+        enquiryId: response.enquiryId
       }
     });
   } catch (e) {

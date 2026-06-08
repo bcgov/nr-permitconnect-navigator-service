@@ -41,7 +41,7 @@ const { draftId = undefined, projectId = undefined } = defineProps<{
 // Interfaces
 interface InitiativeState {
   headerText: string;
-  projectService: DraftableProjectService;
+  projectService: DraftableProjectService<Project, unknown>;
 }
 
 // Constants
@@ -82,9 +82,9 @@ const loading: Ref<boolean> = ref(true);
 async function loadDraft() {
   if (!draftId) throw new Error('No draft ID');
 
-  draft.value = (await initiativeState.value.projectService.getDraft(draftId)).data;
+  draft.value = await initiativeState.value.projectService.getDraft({ draftId });
 
-  const documents = (await documentService.listDocuments(draft.value.activityId)).data;
+  const documents = await documentService.listDocuments({ activityId: draft.value.activityId });
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);
   });
@@ -100,17 +100,17 @@ async function loadDraft() {
 async function loadProject() {
   if (!projectId) throw new Error('No project ID');
 
-  project.value = (await initiativeState.value.projectService.getProject(projectId)).data;
+  project.value = await initiativeState.value.projectService.getProject({ projectId });
 
   projectStore.setProject(project.value);
 
-  const documents = (await documentService.listDocuments(project.value!.activityId)).data;
+  const documents = await documentService.listDocuments({ activityId: project.value!.activityId });
   documents.forEach((d: Document) => {
     d.filename = decodeURI(d.filename);
   });
   projectStore.setDocuments(documents);
 
-  const permits = (await permitService.listPermits({ activityId: project.value!.activityId })).data;
+  const permits = await permitService.listPermits({ activityId: project.value!.activityId });
   projectStore.setPermits(permits);
 
   // Disallow form editing for submitted intake
@@ -145,7 +145,7 @@ onBeforeMount(async () => {
     // Clear certain store data on load
     projectStore.setDocuments([]);
 
-    usePermitStore().setPermitTypes((await permitService.getPermitTypes(getInitiative.value)).data);
+    usePermitStore().setPermitTypes(await permitService.listPermitTypes({ initiative: getInitiative.value }));
 
     if (draftId) {
       await loadDraft();
