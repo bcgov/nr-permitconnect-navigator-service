@@ -12,7 +12,7 @@ import type {
   GetProjectStatisticsRequest,
   HousingProject,
   PatchHousingProjectRequest,
-  SearchHousingProjectsRequest,
+  ListHousingProjectRequest,
   Statistics,
   SubmitDraftHousingProjectRequest,
   UpsertDraftRequest
@@ -26,7 +26,7 @@ export interface HousingProjectService extends DraftableProjectService<HousingPr
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchHousingProjectsRequest): Promise<HousingProject[]>;
+  searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
 }
@@ -93,7 +93,7 @@ export async function listProjects(): Promise<HousingProject[]> {
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export async function searchProjects(req: SearchHousingProjectsRequest): Promise<HousingProject[]> {
+export async function searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]> {
   const { data } = await appAxios().post<HousingProject[]>(`${PATH}/search`, req);
 
   return data;

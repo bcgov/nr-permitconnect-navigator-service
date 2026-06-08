@@ -196,7 +196,6 @@ async function onSaveDraft(data: GenericObject, isAutoSave = false, showToast = 
 
     const response = await generalProjectService.upsertDraft({
       draftId: draft.value?.draftId,
-      activityId: draft.value?.activityId,
       data: data as FormSchemaType
     });
 

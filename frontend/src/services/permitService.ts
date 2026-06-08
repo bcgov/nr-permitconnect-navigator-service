@@ -8,7 +8,6 @@ import type {
   ListPermitTypesRequest,
   Permit,
   PermitType,
-  SearchPermitsRequest,
   SearchPermitsResponse,
   UpsertPermitRequest
 } from '@/types';
@@ -72,7 +71,7 @@ export async function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching permits and total record count.
  */
-export async function searchPermits(req?: SearchPermitsRequest): Promise<SearchPermitsResponse> {
+export async function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsResponse> {
   const {
     data: { permits, totalRecords }
   } = await appAxios().get<SearchPermitsResponse>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, {

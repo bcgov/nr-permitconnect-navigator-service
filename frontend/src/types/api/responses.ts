@@ -1,5 +1,5 @@
+import type { ActivityContact, Permit } from './resources';
 import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
-import type { Permit } from './resources';
 
 export interface BringForward {
   activityId: string;
@@ -68,4 +68,9 @@ export interface Statistics {
   guidance: number;
   inapplicable: number;
   status_request: number;
+}
+
+export interface PutActivityContactResponse {
+  updated: ActivityContact;
+  demoted: ActivityContact | undefined;
 }

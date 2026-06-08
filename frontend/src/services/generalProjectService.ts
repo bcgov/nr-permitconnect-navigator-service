@@ -12,7 +12,7 @@ import type {
   GetProjectStatisticsRequest,
   GeneralProject,
   PatchGeneralProjectRequest,
-  SearchGeneralProjectsRequest,
+  ListGeneralProjectsRequest,
   Statistics,
   UpsertDraftRequest,
   SubmitDraftGeneralProjectRequest
@@ -26,7 +26,7 @@ export interface GeneralProjectService extends DraftableProjectService<GeneralPr
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchGeneralProjectsRequest): Promise<GeneralProject[]>;
+  searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
 }
@@ -93,7 +93,7 @@ export async function listProjects(): Promise<GeneralProject[]> {
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function searchProjects(req: SearchGeneralProjectsRequest): Promise<GeneralProject[]> {
+export async function searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]> {
   const { data } = await appAxios().post<GeneralProject[]>(`${PATH}/search`, req);
 
   return data;

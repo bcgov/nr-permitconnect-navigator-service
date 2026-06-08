@@ -1,7 +1,10 @@
 import type { GeoJSON } from 'geojson';
 
+import type { UUID } from '../common';
+import type { Group } from './responses';
 import type { MaybeUndefined, Nullable } from '../util';
 import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
+import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
   ActivityContactRole,
@@ -15,9 +18,6 @@ import type {
   Region,
   SubmissionType
 } from '@/utils/enums/projectCommon';
-import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
-import type { Group } from './responses';
-import type { UUID } from '../common';
 
 /**
  * Shared interfaces

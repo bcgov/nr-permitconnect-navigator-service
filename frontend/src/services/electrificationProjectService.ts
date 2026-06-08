@@ -12,7 +12,7 @@ import type {
   GetProjectStatisticsRequest,
   ElectrificationProject,
   PatchElectrificationProjectRequest,
-  SearchElectrificationProjectsRequest,
+  ListElectrificationProjectsRequest,
   Statistics,
   UpsertDraftRequest,
   SubmitDraftElectrificationProjectRequest
@@ -26,7 +26,7 @@ export interface ElectrificationProjectService extends DraftableProjectService<E
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchElectrificationProjectsRequest): Promise<ElectrificationProject[]>;
+  searchProjects(req: ListElectrificationProjectsRequest): Promise<ElectrificationProject[]>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject>;
 }
@@ -93,7 +93,7 @@ export async function listProjects(): Promise<ElectrificationProject[]> {
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `ElectrificationProject` resources.
  */
-export async function searchProjects(req: SearchElectrificationProjectsRequest): Promise<ElectrificationProject[]> {
+export async function searchProjects(req: ListElectrificationProjectsRequest): Promise<ElectrificationProject[]> {
   const { data } = await appAxios().post<ElectrificationProject[]>(`${PATH}/search`, req);
 
   return data;

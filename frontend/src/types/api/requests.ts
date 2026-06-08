@@ -1,5 +1,3 @@
-import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
-import type { PaginationOptions } from '../common';
 import type {
   CreateRequestDTO,
   DeleteRequestDTO,
@@ -7,6 +5,7 @@ import type {
   ListRequestDTO,
   PatchRequestDTO,
   PutRequestDTO,
+  ResourceSchemaConfig,
   UpsertRequestDTO
 } from './dto';
 import type {
@@ -18,27 +17,39 @@ import type {
   EnquiryBase,
   GeneralProjectBase,
   HousingProjectBase,
-  NoteHistory,
+  NoteHistoryBase,
   Permit,
+  PermitType,
   ProjectBase
 } from './resources';
 import type { UUID } from '../common';
-import type { PartialFields } from '../util';
+import type { Nullable, PartialFields } from '../util';
 import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
+import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 /**
  * Activity Contact
  */
 
-export type CreateActivityContactRequest = CreateRequestDTO<ActivityContactBase>;
-export type ListActivityContactsRequest = ListRequestDTO<ActivityContactBase, ['activityId']>;
-export type PutActivityContactRequest = PutRequestDTO<ActivityContactBase, ['activityId' | 'contactId']>;
-export type DeleteActivityContactRequest = DeleteRequestDTO<ActivityContactBase, ['activityId', 'contactId']>;
+interface ActivityContactSchema extends ResourceSchemaConfig<ActivityContactBase> {
+  ids: 'activityId' | 'contactId';
+  immutable: 'activityId' | 'contactId';
+  scope: 'activityId';
+}
+export type CreateActivityContactRequest = CreateRequestDTO<ActivityContactBase, ActivityContactSchema>;
+export type ListActivityContactsRequest = ListRequestDTO<ActivityContactBase, ActivityContactSchema>;
+export type PutActivityContactRequest = PutRequestDTO<ActivityContactBase, ActivityContactSchema>;
+export type DeleteActivityContactRequest = DeleteRequestDTO<ActivityContactBase, ActivityContactSchema>;
 
 /**
  * Document
  */
 
+interface DocumentSchema extends ResourceSchemaConfig<Document> {
+  ids: 'documentId';
+  immutable: 'documentId';
+  scope: 'activityId';
+}
 export interface CreateDocumentRequest {
   document: File;
   activityId: string;
@@ -49,8 +60,8 @@ export interface DownloadDocumentRequest {
   filename: string;
   versionId?: string;
 }
-export type ListDocumentsRequest = ListRequestDTO<Document, ['activityId']>;
-export type DeleteDocumentRequest = DeleteRequestDTO<Document, ['documentId']> & {
+export type ListDocumentsRequest = ListRequestDTO<Document, DocumentSchema>;
+export type DeleteDocumentRequest = DeleteRequestDTO<Document, DocumentSchema> & {
   versionId?: string;
 };
 
@@ -58,143 +69,189 @@ export type DeleteDocumentRequest = DeleteRequestDTO<Document, ['documentId']> &
  * Draft
  */
 
-export type GetDraftRequest = GetRequestDTO<Draft<unknown>, ['draftId']>;
-export type UpsertDraftRequest = UpsertRequestDTO<Draft<unknown>, ['draftId', 'activityId'], ['draftCode']>;
-export type DeleteDraftRequest = DeleteRequestDTO<Draft<unknown>, ['draftId']>;
+interface DraftSchema extends ResourceSchemaConfig<Draft<unknown>> {
+  ids: 'draftId';
+  immutable: 'draftId' | 'activityId' | 'draftCode';
+}
+export type GetDraftRequest = GetRequestDTO<Draft<unknown>, DraftSchema>;
+export type UpsertDraftRequest = UpsertRequestDTO<Draft<unknown>, DraftSchema>;
+export type DeleteDraftRequest = DeleteRequestDTO<Draft<unknown>, DraftSchema>;
 
 /**
  * Electrification Project
  */
 
+interface ElectrificationProjectBaseSchema extends ResourceSchemaConfig<ElectrificationProjectBase> {
+  ids: 'projectId';
+  immutable: 'activityId' | 'electrificationProjectId' | 'projectId';
+  serverGenerated: 'activityId' | 'electrificationProjectId' | 'projectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    electrificationProjectId: string[];
+    projectType: string[];
+    projectCategory: string[];
+  };
+}
 export type CreateElectrificationProjectRequest = CreateRequestDTO<
   Partial<ElectrificationProjectBase>,
-  ['activityId', 'electrificationProjectId', 'projectId']
+  ElectrificationProjectBaseSchema
 >;
-export interface SearchElectrificationProjectsRequest {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  electrificationProjectId?: string[];
-  projectType?: string[];
-  projectCategory?: string[];
-}
+export type ListElectrificationProjectsRequest = ListRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ElectrificationProjectBaseSchema
+>;
 export type PatchElectrificationProjectRequest = PatchRequestDTO<
   ElectrificationProjectBase,
-  ['projectId'],
-  ['activityId']
+  ElectrificationProjectBaseSchema
 >;
-export type SubmitDraftElectrificationProjectRequest = CreateRequestDTO<ElectrificationProjectIntake>;
+export type SubmitDraftElectrificationProjectRequest = ElectrificationProjectIntake;
 
 /**
  * Enquiry
  */
 
-export type CreateEnquiryRequest = CreateRequestDTO<
-  PartialFields<
-    Pick<Enquiry, 'contact' | 'enquiryDescription' | 'relatedActivityId' | 'submissionType'>,
-    'submissionType'
-  >
->;
-export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, ['enquiryId']>;
-export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, ['activityId']>;
-export interface SearchEnquiriesRequest {
-  activityId?: string[];
-  createdBy?: string[];
-  enquiryId?: string[];
-  includeUser?: boolean;
+interface EnquiryBaseSchema extends ResourceSchemaConfig<EnquiryBase> {
+  ids: 'enquiryId';
+  immutable: 'activityId' | 'enquiryId';
+  serverGenerated: 'activityId' | 'enquiryId';
 }
-export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, ['enquiryId']>;
-export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, ['enquiryId']>;
+interface EnquiryListRelatedSchema extends EnquiryBaseSchema {
+  scope: 'activityId';
+}
+interface EnquirySearchSchema extends EnquiryBaseSchema {
+  query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
+}
+export type CreateEnquiryRequest = PartialFields<
+  Pick<Enquiry, 'contact' | 'enquiryDescription' | 'relatedActivityId' | 'submissionType'>,
+  'submissionType'
+>;
+export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquiryListRelatedSchema>;
+export type SearchEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquirySearchSchema>;
+export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, EnquiryBaseSchema>;
 
 /**
  * General Project
  */
 
-export type CreateGeneralProjectRequest = CreateRequestDTO<
-  Partial<GeneralProjectBase>,
-  ['activityId', 'generalProjectId', 'projectId']
->;
-export interface SearchGeneralProjectsRequest {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  generalProjectId?: string[];
-  submissionType?: string[];
+interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBase> {
+  ids: 'projectId';
+  immutable: 'activityId' | 'generalProjectId' | 'projectId';
+  serverGenerated: 'activityId' | 'generalProjectId' | 'projectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    generalProjectId: string[];
+    submissionType: string[];
+  };
 }
-export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, ['projectId'], ['activityId']>;
-export type SubmitDraftGeneralProjectRequest = CreateRequestDTO<GeneralProjectIntake>;
+export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type ListGeneralProjectsRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
+export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
 
 /**
  * Housing Project
  */
 
-export type CreateHousingProjectRequest = CreateRequestDTO<
-  Partial<HousingProjectBase>,
-  ['activityId', 'housingProjectId', 'projectId']
->;
-export interface SearchHousingProjectsRequest {
-  activityId?: string[];
-  createdBy?: string[];
-  includeUser?: boolean;
-  housingProjectId?: string[];
-  submissionType?: string[];
+interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBase> {
+  ids: 'projectId';
+  immutable: 'activityId' | 'housingProjectId' | 'projectId';
+  serverGenerated: 'activityId' | 'housingProjectId' | 'projectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    housingProjectId: string[];
+    submissionType: string[];
+  };
 }
-export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, ['projectId'], ['activityId']>;
-export type SubmitDraftHousingProjectRequest = CreateRequestDTO<HousingProjectIntake>;
+export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type ListHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
+export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 /**
  * Note History
  */
 
-export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistory, ['noteHistoryId', 'note']> & { note: string };
-export type ListBringForwardsRequest = ListRequestDTO<NoteHistory, ['bringForwardState']>;
-export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistory, ['activityId']>;
-export type PutNoteHistoryRequest = PutRequestDTO<
-  Omit<NoteHistory & { resource: Resource }, 'note'>,
-  ['noteHistoryId']
-> & { note: string };
-export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistory, ['noteHistoryId']>;
+interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
+  ids: 'noteHistoryId';
+  immutable: 'noteHistoryId';
+  serverGenerated: 'noteHistoryId';
+}
+interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
+  query: {
+    bringForwardState: Nullable<string>;
+  };
+}
+interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
+  scope: 'activityId';
+}
+export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
+export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
+export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
+export type PutNoteHistoryRequest = PutRequestDTO<NoteHistoryBase & { resource: Resource }, NoteHistoryBaseSchema> & {
+  note: string;
+};
+export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
 
 /**
  * Permit
  */
 
-export type DeletePermitRequest = DeleteRequestDTO<Permit, ['permitId']>;
-export type GetPermitRequest = GetRequestDTO<Permit, ['permitId']>;
-export interface ListPermitsRequest {
-  activityId?: string;
-  includeNotes?: boolean;
+interface PermitSchema extends ResourceSchemaConfig<Permit> {
+  ids: 'permitId';
+  immutable: 'permitId';
+  serverGenerated: 'permitId';
+  query: {
+    activityId: string;
+    dateRange: [Date, Date];
+    includeNotes: boolean;
+    permitTypeId: number;
+    searchTag: string;
+    sourceSystemKindId: number;
+  };
 }
-export interface SearchPermitsRequest extends PaginationOptions {
-  dateRange?: [Date, Date];
-  permitTypeId?: number;
-  searchTag?: string;
-  sourceSystemKindId?: number;
-}
-export type UpsertPermitRequest = UpsertRequestDTO<Permit, ['permitId', 'activityId']>;
+export type DeletePermitRequest = DeleteRequestDTO<Permit, PermitSchema>;
+export type GetPermitRequest = GetRequestDTO<Permit, PermitSchema>;
+export type ListPermitsRequest = ListRequestDTO<Permit, PermitSchema>;
+export type UpsertPermitRequest = UpsertRequestDTO<Permit, PermitSchema>;
 
 /**
  * Permit Type
  */
 
-export interface ListPermitTypesRequest {
-  initiative: Initiative;
+interface PermitTypeSchema extends ResourceSchemaConfig<PermitType> {
+  query: {
+    initiative: Initiative;
+  };
 }
+export type ListPermitTypesRequest = ListRequestDTO<PermitType, PermitTypeSchema>;
 
 /**
  * Project
  */
 
-export type CreateProjectRequest = CreateRequestDTO<Partial<ProjectBase>, ['activityId', 'projectId']>;
-export type GetProjectRequest = GetRequestDTO<ProjectBase, ['projectId']>;
+interface ProjectSchema extends ResourceSchemaConfig<ProjectBase> {
+  ids: 'projectId';
+  immutable: 'activityId' | 'projectId';
+  serverGenerated: 'activityId' | 'projectId';
+}
+export type CreateProjectRequest = CreateRequestDTO<Partial<ProjectBase>, ProjectSchema>;
+export type GetProjectRequest = GetRequestDTO<ProjectBase, ProjectSchema>;
 export interface GetProjectStatisticsRequest {
   dateFrom?: Date;
   dateTo?: Date;
   monthYear?: Date;
   userId?: string;
 }
-export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ['projectId']>;
-export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ['projectId']>;
+export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ProjectSchema>;
+export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
 
 /**
  * Other

@@ -5,7 +5,8 @@ import type {
   CreateActivityContactRequest,
   DeleteActivityContactRequest,
   ListActivityContactsRequest,
-  PutActivityContactRequest
+  PutActivityContactRequest,
+  PutActivityContactResponse
 } from '@/types';
 
 /**
@@ -46,9 +47,7 @@ export async function listActivityContacts(req: ListActivityContactsRequest): Pr
  * @param req - The request payload containing path parameters and updatable fields.
  * @returns A promise resolving to the updated `ActivityContact` and any optionally demoted contact.
  */
-export async function putActivityContact(
-  req: PutActivityContactRequest
-): Promise<{ updated: ActivityContact; demoted: ActivityContact | undefined }> {
+export async function putActivityContact(req: PutActivityContactRequest): Promise<PutActivityContactResponse> {
   const { activityId, contactId, ...body } = req;
   const { data } = await appAxios().put(`activity/${activityId}/contact/${contactId}`, body);
   return data;
