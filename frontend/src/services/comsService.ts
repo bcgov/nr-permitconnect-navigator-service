@@ -104,7 +104,14 @@ export async function downloadObject(req: DownloadObjectRequest): Promise<void> 
   anchor.remove();
 }
 
-/** Hybrid default export object for backward compatibility */
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
 export const comsService = {
   createObject,
   deleteObject,

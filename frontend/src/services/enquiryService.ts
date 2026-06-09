@@ -102,7 +102,14 @@ export async function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
   return data;
 }
 
-/** Hybrid default export object for backward compatibility */
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
 export const enquiryService = {
   createEnquiry,
   deleteEnquiry,
