@@ -1,105 +1,113 @@
+import type {
+  CreateObjectRequest,
+  CreateObjectResponse,
+  DeleteObjectRequest,
+  DownloadObjectRequest,
+  GetObjectRequest
+} from '@/types';
 import { comsAxios } from './interceptors';
 import { setDispositionHeader } from '@/utils/utils';
 
-import type { AxiosRequestConfig } from 'axios';
-
 const PATH = 'object';
 
-export default {
-  /**
-   * @function createObject
-   * Post an object
-   * @param {any} object Object to be created
-   * @param {string} bucketId Bucket id containing the object
-   * @param {AxiosRequestConfig} axiosOptions Axios request config options
-   * @returns {Promise} An axios response
-   */
-  async createObject(
-    object: File,
+/**
+ * Creates an object in COMS.
+ * @param req - The request payload containing the file, metadata, and upload options.
+ * @returns A promise resolving to the created object.
+ */
+export async function createObject(req: CreateObjectRequest): Promise<CreateObjectResponse> {
+  const { file, metadata, bucketId, tagset, axiosOptions } = req;
+
+  const config = {
     headers: {
-      metadata?: { key: string; value: string }[];
+      'Content-Disposition': setDispositionHeader(file.name),
+      'Content-Type': file.type?.trim() || 'application/octet-stream'
     },
     params: {
-      bucketId?: string;
-      tagset?: { key: string; value: string }[];
-    },
-    axiosOptions?: AxiosRequestConfig
-  ) {
-    // setDispositionHeader constructs header based on file name
-    // Content-Type defaults octet-stream if MIME type unavailable
-    const config = {
-      headers: {
-        'Content-Disposition': setDispositionHeader(object.name),
-        'Content-Type': object?.type ?? 'application/octet-stream'
-      },
-      params: {
-        bucketId: params.bucketId,
-        tagset: {}
-      }
+      bucketId,
+      tagset: {}
+    }
+  };
+
+  if (metadata?.length) {
+    config.headers = {
+      ...config.headers,
+      ...Object.fromEntries(metadata.map(({ key, value }) => [key, value]))
     };
-
-    // Map the metadata if required
-    if (headers.metadata) {
-      config.headers = {
-        ...config.headers,
-        ...Object.fromEntries(headers.metadata.map((x: { key: string; value: string }) => [x.key, x.value]))
-      };
-    }
-
-    // Map the tagset if required
-    if (params.tagset) {
-      config.params.tagset = Object.fromEntries(
-        params.tagset.map((x: { key: string; value: string }) => [x.key, x.value])
-      );
-    }
-
-    return comsAxios(axiosOptions).put(PATH, object, config);
-  },
-
-  /**
-   * @function deleteObject
-   * Delete an object
-   * @param {string} objectId The id for the object to delete
-   * @param {string} versionId An optional versionId
-   * @returns {Promise} An axios response
-   */
-  deleteObject(objectId: string, versionId?: string) {
-    return comsAxios().delete(`${PATH}/${objectId}`, {
-      params: {
-        versionId: versionId
-      }
-    });
-  },
-
-  /**
-   * @function getObject
-   * Get an object
-   * @param {string} objectId The id for the object to get
-   * @param {string} filename The filename to be given to the object
-   * @param {string} versionId An optional versionId
-   */
-  getObject(objectId: string, filename: string, versionId?: string) {
-    // Running in 'proxy' download mode only, could add options for other modes if needed
-    return comsAxios({ responseType: 'arraybuffer' })
-      .get(`${PATH}/${objectId}`, {
-        params: {
-          versionId: versionId,
-          download: 'proxy'
-        }
-      })
-      .then((response) => {
-        const blob = new Blob([response.data], {
-          type: 'attachment'
-        });
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.style.display = 'none';
-        a.href = url;
-        a.download = filename;
-        a.click();
-        window.URL.revokeObjectURL(url);
-        a.remove();
-      });
   }
+
+  if (tagset?.length) {
+    config.params.tagset = Object.fromEntries(tagset.map(({ key, value }) => [key, value]));
+  }
+
+  const { data } = await comsAxios(axiosOptions).put<CreateObjectResponse>(PATH, file, config);
+
+  return data;
+}
+
+/**
+ * Deletes an object.
+ * @param req - The request payload containing the object ID and optional version ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteObject(req: DeleteObjectRequest): Promise<void> {
+  const { objectId, versionId } = req;
+
+  await comsAxios().delete(`${PATH}/${objectId}`, {
+    params: {
+      versionId
+    }
+  });
+}
+
+/**
+ * Downloads an object.
+ * @param req - The request payload containing the object ID and optional version ID.
+ * @returns A promise resolving to the object contents.
+ */
+export async function getObject(req: GetObjectRequest): Promise<ArrayBuffer> {
+  const { objectId, versionId } = req;
+
+  const { data } = await comsAxios({
+    responseType: 'arraybuffer'
+  }).get<ArrayBuffer>(`${PATH}/${objectId}`, {
+    params: {
+      versionId,
+      download: 'proxy'
+    }
+  });
+
+  return data;
+}
+
+/**
+ * Triggers a browser download for an object.
+ * @param req - The request payload containing the object ID, filename, and optional version ID.
+ */
+export async function downloadObject(req: DownloadObjectRequest): Promise<void> {
+  const data = await getObject(req);
+
+  const blob = new Blob([data], {
+    type: 'attachment'
+  });
+
+  const url = window.URL.createObjectURL(blob);
+
+  const anchor = document.createElement('a');
+
+  anchor.style.display = 'none';
+  anchor.href = url;
+  anchor.download = req.filename;
+  anchor.click();
+
+  window.URL.revokeObjectURL(url);
+  anchor.remove();
+}
+
+/** Hybrid default export object for backward compatibility */
+export const comsService = {
+  createObject,
+  deleteObject,
+  getObject,
+  downloadObject
 };

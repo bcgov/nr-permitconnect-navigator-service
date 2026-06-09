@@ -1,164 +1,225 @@
-import { comsService } from '@/services';
+import { createObject, deleteObject, getObject, downloadObject, comsService } from '@/services/comsService';
 import { comsAxios } from '@/services/interceptors';
-
 import type { AxiosInstance } from 'axios';
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  comsAxios: vi.fn()
 }));
 
-const PATH = 'object';
-const deleteSpy = vi.fn();
-const getSpy = vi.fn();
-const putSpy = vi.fn();
-const createObjectURLSpy = vi.spyOn(window.URL, 'createObjectURL');
-const revokeObjectURLSpy = vi.spyOn(window.URL, 'revokeObjectURL');
-const testObjectId = 'testObjectId';
-const testFilename = 'testFilename';
-const testVersionId = 'testObjectId';
-const testData = 'testDatas';
+describe('comsService', () => {
+  const mockPut = vi.fn();
+  const mockGet = vi.fn();
+  const mockDelete = vi.fn();
 
-vi.mock('@/services/interceptors');
-vi.mocked(comsAxios).mockReturnValue({
-  delete: deleteSpy,
-  get: getSpy,
-  put: putSpy
-} as unknown as AxiosInstance);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-beforeEach(() => {
-  vi.clearAllMocks();
-  createObjectURLSpy.mockImplementation(vi.fn());
-  revokeObjectURLSpy.mockImplementation(vi.fn());
-});
+    vi.mocked(comsAxios).mockReturnValue({
+      put: mockPut,
+      get: mockGet,
+      delete: mockDelete
+    } as unknown as AxiosInstance);
+  });
 
-describe('comsService test', () => {
-  describe('createObject tests', () => {
-    const testObject = {
-      name: 'testName',
-      type: 'text/html'
-    } as File;
-    const testParams = {
-      bucketId: 'testBucketId'
-    };
+  describe('createObject', () => {
+    it('creates an object with metadata and tagset', async () => {
+      const file = new File(['hello'], 'test.txt', {
+        type: 'text/plain'
+      });
 
-    const testKeys = [
-      {
-        key: 'testKey1',
-        value: 'testValue1'
-      },
-      {
-        key: 'testKey2',
-        value: 'testValue2'
-      }
-    ];
+      const response = {
+        id: 'obj-1',
+        name: 'test.txt'
+      };
 
-    it('creates an object', async () => {
-      await comsService.createObject(testObject, {}, testParams);
-      expect(putSpy).toBeCalledTimes(1);
-      expect(putSpy).toBeCalledWith(PATH, testObject, expect.anything());
+      mockPut.mockResolvedValue({ data: response });
+
+      const result = await createObject({
+        file,
+        bucketId: 'bucket-1',
+        metadata: [{ key: 'color', value: 'red' }],
+        tagset: [{ key: 'priority', value: 'high' }]
+      });
+
+      expect(mockPut).toHaveBeenCalledWith(
+        'object',
+        file,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'text/plain',
+            color: 'red'
+          }),
+          params: expect.objectContaining({
+            bucketId: 'bucket-1',
+            tagset: {
+              priority: 'high'
+            }
+          })
+        })
+      );
+
+      expect(result).toEqual(response);
     });
 
-    it('creates an object with metadata', async () => {
-      const headers = {
-        metadata: testKeys
-      };
-      const expectedConfig = {
-        headers: {
-          'Content-Disposition': `attachment; filename="${testObject.name}"`,
-          'Content-Type': 'text/html',
-          [testKeys[0]!.key]: testKeys[0]?.value,
-          [testKeys[1]!.key]: testKeys[1]?.value
-        },
+    it('handles missing metadata and tagset', async () => {
+      const file = new File(['hello'], 'test.txt');
+
+      mockPut.mockResolvedValue({
+        data: { id: 'obj-1' }
+      });
+
+      await createObject({ file });
+
+      expect(mockPut).toHaveBeenCalledWith(
+        'object',
+        file,
+        expect.objectContaining({
+          headers: expect.objectContaining({
+            'Content-Type': 'application/octet-stream'
+          }),
+          params: expect.objectContaining({
+            bucketId: undefined,
+            tagset: {}
+          })
+        })
+      );
+    });
+
+    it('propagates errors', async () => {
+      mockPut.mockRejectedValue(new Error('upload failed'));
+
+      await expect(
+        createObject({
+          file: new File(['x'], 'x.txt')
+        })
+      ).rejects.toThrow('upload failed');
+    });
+  });
+
+  describe('deleteObject', () => {
+    it('deletes object with versionId', async () => {
+      mockDelete.mockResolvedValue({});
+
+      await deleteObject({
+        objectId: 'obj-1',
+        versionId: 'v1'
+      });
+
+      expect(mockDelete).toHaveBeenCalledWith('object/obj-1', {
         params: {
-          bucketId: testParams.bucketId,
-          tagset: {}
+          versionId: 'v1'
         }
-      };
-
-      await comsService.createObject(testObject, headers, testParams);
-      expect(putSpy).toBeCalledTimes(1);
-      expect(putSpy).toBeCalledWith(PATH, testObject, expectedConfig);
+      });
     });
 
-    it('creates an object with tagsets', async () => {
-      const headers = {};
+    it('handles missing versionId', async () => {
+      mockDelete.mockResolvedValue({});
 
-      const newTestParams = {
-        ...testParams,
-        tagset: testKeys
-      };
-      const expectedConfig = {
-        headers: {
-          'Content-Disposition': `attachment; filename="${testObject.name}"`,
-          'Content-Type': 'text/html'
-        },
+      await deleteObject({
+        objectId: 'obj-1'
+      });
+
+      expect(mockDelete).toHaveBeenCalledWith('object/obj-1', {
         params: {
-          bucketId: testParams.bucketId,
-          tagset: {
-            [testKeys[0]!.key]: testKeys[0]?.value,
-            [testKeys[1]!.key]: testKeys[1]?.value
-          }
+          versionId: undefined
         }
+      });
+    });
+
+    it('propagates errors', async () => {
+      mockDelete.mockRejectedValue(new Error('delete failed'));
+
+      await expect(deleteObject({ objectId: 'obj-1' })).rejects.toThrow('delete failed');
+    });
+  });
+
+  describe('getObject', () => {
+    it('returns ArrayBuffer', async () => {
+      const buffer = new ArrayBuffer(8);
+
+      mockGet.mockResolvedValue({
+        data: buffer
+      });
+
+      const result = await getObject({
+        objectId: 'obj-1',
+        versionId: 'v1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('object/obj-1', {
+        params: {
+          versionId: 'v1',
+          download: 'proxy'
+        }
+      });
+
+      expect(result).toBe(buffer);
+    });
+
+    it('propagates errors', async () => {
+      mockGet.mockRejectedValue(new Error('get failed'));
+
+      await expect(getObject({ objectId: 'obj-1' })).rejects.toThrow('get failed');
+    });
+  });
+
+  describe('downloadObject', () => {
+    const clickMock = vi.fn();
+
+    const createElementMock = vi.fn(() => {
+      const anchor: Partial<HTMLAnchorElement> = {
+        style: {} as CSSStyleDeclaration,
+        href: '',
+        download: '',
+        click: clickMock,
+        remove: vi.fn()
       };
 
-      await comsService.createObject(testObject, headers, newTestParams);
-      expect(putSpy).toBeCalledTimes(1);
-      expect(putSpy).toBeCalledWith(PATH, testObject, expectedConfig);
+      return anchor as HTMLAnchorElement;
+    });
+
+    beforeEach(() => {
+      global.URL.createObjectURL = vi.fn(() => 'blob:url');
+      global.URL.revokeObjectURL = vi.fn();
+
+      document.createElement = createElementMock;
+    });
+
+    it('creates and triggers download', async () => {
+      mockGet.mockResolvedValue({
+        data: new ArrayBuffer(4)
+      });
+
+      await downloadObject({
+        objectId: 'obj-1',
+        filename: 'file.txt'
+      });
+
+      expect(mockGet).toHaveBeenCalled();
+
+      expect(global.URL.createObjectURL).toHaveBeenCalled();
+      expect(clickMock).toHaveBeenCalled();
+      expect(global.URL.revokeObjectURL).toHaveBeenCalled();
+    });
+
+    it('propagates getObject errors', async () => {
+      mockGet.mockRejectedValue(new Error('download failed'));
+
+      await expect(
+        downloadObject({
+          objectId: 'obj-1',
+          filename: 'file.txt'
+        })
+      ).rejects.toThrow('download failed');
     });
   });
 
-  it('deletes an object with versionId', async () => {
-    await comsService.deleteObject(testObjectId, testVersionId);
-
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
-      params: {
-        versionId: testVersionId
-      }
-    });
-  });
-
-  it('deletes an object without versionId', async () => {
-    await comsService.deleteObject(testObjectId);
-
-    expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
-      params: {
-        versionId: undefined
-      }
-    });
-  });
-
-  it('gets an object with versionId', async () => {
-    const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await comsService.getObject(testObjectId, testFilename, testVersionId);
-
-    expect(createObjectURLSpy).toBeCalledTimes(1);
-    expect(revokeObjectURLSpy).toBeCalledTimes(1);
-    expect(comsSpy).toBeCalledTimes(1);
-    expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
-      params: {
-        versionId: testVersionId,
-        download: 'proxy'
-      }
-    });
-  });
-
-  it('gets an object without versionId', async () => {
-    const comsSpy = vi.mocked(comsAxios().get).mockReturnValue(Promise.resolve({ data: testData }));
-    await comsService.getObject(testObjectId, testFilename);
-
-    expect(createObjectURLSpy).toBeCalledTimes(1);
-    expect(revokeObjectURLSpy).toBeCalledTimes(1);
-    expect(comsSpy).toBeCalledTimes(1);
-    expect(comsSpy).toHaveBeenCalledWith(`${PATH}/${testObjectId}`, {
-      params: {
-        versionId: undefined,
-        download: 'proxy'
-      }
+  it('exports service functions', () => {
+    expect(comsService).toEqual({
+      createObject,
+      deleteObject,
+      getObject,
+      downloadObject
     });
   });
 });

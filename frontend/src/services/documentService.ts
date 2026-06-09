@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import comsService from './comsService';
+import { comsService } from './comsService';
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
@@ -39,27 +39,27 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
     const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
 
     // Create COMS object
-    comsResponse = await comsService.createObject(
-      newDocument,
-      {},
-      { bucketId, tagset },
-      { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
-    );
+    comsResponse = await comsService.createObject({
+      file: newDocument,
+      bucketId,
+      tagset,
+      axiosOptions: { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
+    });
 
     // Create document link
     const { data } = await appAxios().post<Document>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
       activityId: activityId,
-      documentId: comsResponse.data.id,
-      filename: comsResponse.data.name,
-      mimeType: comsResponse.data.mimeType,
-      filesize: comsResponse.data.length
+      documentId: comsResponse.id,
+      filename: comsResponse.name,
+      mimeType: comsResponse.mimeType,
+      filesize: comsResponse.length
     });
 
     return data;
   } catch (e) {
     // In event of any error try to Delete COMS object if it was created
     if (comsResponse) {
-      comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
+      comsService.deleteObject({ objectId: comsResponse.id, versionId: comsResponse.versionId }).catch(() => {});
     }
     throw e;
   }
@@ -74,7 +74,7 @@ export async function deleteDocument(req: DeleteDocumentRequest) {
   const { documentId, versionId } = req;
 
   try {
-    await comsService.deleteObject(documentId, versionId);
+    await comsService.deleteObject({ objectId: documentId, versionId });
     await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
       params: {
         versionId: versionId
@@ -93,7 +93,7 @@ export async function deleteDocument(req: DeleteDocumentRequest) {
  */
 export async function downloadDocument(req: DownloadDocumentRequest) {
   const { documentId, filename, versionId } = req;
-  await comsService.getObject(documentId, filename, versionId);
+  await comsService.downloadObject({ objectId: documentId, filename, versionId });
 }
 
 /**

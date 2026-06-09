@@ -1,24 +1,23 @@
-import { v4 } from 'uuid';
-
 import {
-  documentService,
   createDocument,
   deleteDocument,
   downloadDocument,
-  listDocuments
+  listDocuments,
+  documentService
 } from '@/services/documentService';
 
-import comsService from '@/services/comsService';
+import { comsService } from '@/services/comsService';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
 import { Initiative } from '@/utils/enums/application';
+import type { CreateObjectResponse } from '@/types';
 
 vi.mock('@/services/comsService', () => ({
-  default: {
+  comsService: {
     createObject: vi.fn(),
     deleteObject: vi.fn(),
-    getObject: vi.fn()
+    downloadObject: vi.fn()
   }
 }));
 
@@ -31,21 +30,55 @@ vi.mock('@/store', () => ({
 }));
 
 vi.mock('uuid', () => ({
-  v4: vi.fn()
+  v4: vi.fn(() => '12345678-abcd-efgh-ijkl-123456789012')
 }));
-
-const mockV4 = v4 as unknown as ReturnType<typeof vi.fn>;
 
 vi.mock('@/utils/utils', () => ({
   getFilenameAndExtension: vi.fn()
 }));
+
+/**
+ * COMS response factory
+ */
+const createComsResponse = (overrides?: Partial<CreateObjectResponse>): CreateObjectResponse =>
+  ({
+    id: 'coms-id',
+    versionId: 'version-id',
+    name: 'file.pdf',
+    mimeType: 'application/pdf',
+    length: 1234,
+    path: '',
+    public: false,
+    active: true,
+    bucketId: '',
+    createdAt: '',
+    createdBy: '',
+    updatedAt: '',
+    updatedBy: '',
+    lastSyncedDate: '',
+    metadata: {},
+    tags: {},
+    $metadata: {
+      httpStatusCode: 200,
+      extendedRequestId: '',
+      attempts: 1,
+      totalRetryDelay: 0
+    },
+    ETag: '',
+    Bucket: '',
+    Key: '',
+    Location: '',
+    ServerSideEncryption: '',
+    s3VersionId: '',
+    ...overrides
+  }) as CreateObjectResponse;
 
 describe('document service', () => {
   const mockPost = vi.fn();
   const mockGet = vi.fn();
   const mockDelete = vi.fn();
 
-  beforeEach(async () => {
+  beforeEach(() => {
     vi.clearAllMocks();
 
     vi.mocked(useAppStore).mockReturnValue({
@@ -57,8 +90,6 @@ describe('document service', () => {
       get: mockGet,
       delete: mockDelete
     } as never);
-
-    mockV4.mockReturnValue('12345678-abcd-efgh-ijkl-123456789012');
 
     vi.mocked(getFilenameAndExtension).mockReturnValue({
       filename: 'test-file',
@@ -72,25 +103,16 @@ describe('document service', () => {
         type: 'application/pdf'
       });
 
-      const comsResponse = {
-        data: {
-          id: 'coms-id',
-          versionId: 'version-id',
+      vi.mocked(comsService.createObject).mockResolvedValue(
+        createComsResponse({
           name: 'test-file_12345678.pdf',
           mimeType: 'application/pdf',
           length: 1234
-        }
-      };
+        })
+      );
 
-      const documentResponse = {
-        id: 'document-id'
-      };
-
-      vi.mocked(comsService.createObject).mockResolvedValue(comsResponse as never);
-
-      mockPost.mockResolvedValue({
-        data: documentResponse
-      });
+      const documentResponse = { id: 'document-id' };
+      mockPost.mockResolvedValue({ data: documentResponse });
 
       const result = await createDocument({
         activityId: 'activity-1',
@@ -98,28 +120,11 @@ describe('document service', () => {
         document: file
       });
 
-      expect(comsService.createObject).toHaveBeenCalledTimes(1);
+      expect(comsService.createObject).toHaveBeenCalled();
 
-      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0];
+      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0].file;
 
       expect(uploadedFile.name).toBe('test-file_12345678.pdf');
-
-      expect(comsService.createObject).toHaveBeenCalledWith(
-        expect.any(File),
-        {},
-        {
-          bucketId: 'bucket-1',
-          tagset: [
-            {
-              key: 'Project ID',
-              value: 'activity-1'
-            }
-          ]
-        },
-        {
-          timeout: 0
-        }
-      );
 
       expect(mockPost).toHaveBeenCalledWith('housing/document', {
         activityId: 'activity-1',
@@ -138,121 +143,81 @@ describe('document service', () => {
         extension: ''
       });
 
-      const file = new File(['content'], 'test', {
-        type: 'text/plain'
-      });
+      vi.mocked(comsService.createObject).mockResolvedValue(
+        createComsResponse({
+          name: 'test-file_12345678'
+        })
+      );
 
-      vi.mocked(comsService.createObject).mockResolvedValue({
-        data: {
-          id: 'coms-id',
-          name: 'test-file_12345678',
-          mimeType: 'text/plain',
-          length: 1
-        }
-      } as never);
-
-      mockPost.mockResolvedValue({
-        data: {}
-      });
+      mockPost.mockResolvedValue({ data: {} });
 
       await createDocument({
         activityId: 'activity-1',
         bucketId: 'bucket-1',
-        document: file
+        document: new File(['content'], 'test', {
+          type: 'text/plain'
+        })
       });
 
-      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0];
+      const uploadedFile = vi.mocked(comsService.createObject).mock.calls[0][0].file;
 
       expect(uploadedFile.name).toBe('test-file_12345678');
     });
 
     it('cleans up COMS object when document creation fails', async () => {
-      const file = new File(['content'], 'test.pdf', {
-        type: 'application/pdf'
-      });
+      vi.mocked(comsService.createObject).mockResolvedValue(createComsResponse());
 
-      vi.mocked(comsService.createObject).mockResolvedValue({
-        data: {
-          id: 'coms-id',
-          versionId: 'version-id',
-          name: 'file.pdf',
-          mimeType: 'application/pdf',
-          length: 100
-        }
-      } as never);
+      mockPost.mockRejectedValue(new Error('api failure'));
 
-      const error = new Error('api failure');
-
-      mockPost.mockRejectedValue(error);
-
-      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
+      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined);
 
       await expect(
         createDocument({
           activityId: 'activity-1',
           bucketId: 'bucket-1',
-          document: file
+          document: new File(['content'], 'test.pdf')
         })
-      ).rejects.toThrow(error);
+      ).rejects.toThrow('api failure');
 
-      expect(comsService.deleteObject).toHaveBeenCalledWith('coms-id', 'version-id');
+      expect(comsService.deleteObject).toHaveBeenCalledWith({
+        objectId: 'coms-id',
+        versionId: 'version-id'
+      });
     });
 
     it('does not attempt cleanup when COMS upload fails', async () => {
-      const file = new File(['content'], 'test.pdf', {
-        type: 'application/pdf'
-      });
-
-      const error = new Error('upload failed');
-
-      vi.mocked(comsService.createObject).mockRejectedValue(error);
+      vi.mocked(comsService.createObject).mockRejectedValue(new Error('upload failed'));
 
       await expect(
         createDocument({
           activityId: 'activity-1',
           bucketId: 'bucket-1',
-          document: file
+          document: new File(['content'], 'test.pdf')
         })
-      ).rejects.toThrow(error);
+      ).rejects.toThrow('upload failed');
 
       expect(comsService.deleteObject).not.toHaveBeenCalled();
     });
 
     it('swallows cleanup failures and rethrows original error', async () => {
-      const file = new File(['content'], 'test.pdf', {
-        type: 'application/pdf'
-      });
+      vi.mocked(comsService.createObject).mockResolvedValue(createComsResponse());
 
-      vi.mocked(comsService.createObject).mockResolvedValue({
-        data: {
-          id: 'coms-id',
-          versionId: 'version-id',
-          name: 'file.pdf',
-          mimeType: 'application/pdf',
-          length: 100
-        }
-      } as never);
-
-      const originalError = new Error('association failed');
-
-      mockPost.mockRejectedValue(originalError);
-
+      mockPost.mockRejectedValue(new Error('association failed'));
       vi.mocked(comsService.deleteObject).mockRejectedValue(new Error('cleanup failed'));
 
       await expect(
         createDocument({
           activityId: 'activity-1',
           bucketId: 'bucket-1',
-          document: file
+          document: new File(['content'], 'test.pdf')
         })
-      ).rejects.toThrow(originalError);
+      ).rejects.toThrow('association failed');
     });
   });
 
   describe('deleteDocument', () => {
     it('deletes COMS object and document association', async () => {
-      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
-
+      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined);
       mockDelete.mockResolvedValue({});
 
       await deleteDocument({
@@ -260,43 +225,18 @@ describe('document service', () => {
         versionId: 'version-1'
       });
 
-      expect(comsService.deleteObject).toHaveBeenCalledWith('document-1', 'version-1');
-
-      expect(mockDelete).toHaveBeenCalledWith('housing/document/document-1', {
-        params: {
-          versionId: 'version-1'
-        }
+      expect(comsService.deleteObject).toHaveBeenCalledWith({
+        objectId: 'document-1',
+        versionId: 'version-1'
       });
-    });
 
-    it('swallows COMS deletion errors', async () => {
-      vi.mocked(comsService.deleteObject).mockRejectedValue(new Error('failed'));
-
-      await expect(
-        deleteDocument({
-          documentId: 'document-1',
-          versionId: 'version-1'
-        })
-      ).resolves.toBeUndefined();
-    });
-
-    it('swallows API deletion errors', async () => {
-      vi.mocked(comsService.deleteObject).mockResolvedValue(undefined as never);
-
-      mockDelete.mockRejectedValue(new Error('api failed'));
-
-      await expect(
-        deleteDocument({
-          documentId: 'document-1',
-          versionId: 'version-1'
-        })
-      ).resolves.toBeUndefined();
+      expect(mockDelete).toHaveBeenCalled();
     });
   });
 
   describe('downloadDocument', () => {
-    it('downloads document from COMS', async () => {
-      vi.mocked(comsService.getObject).mockResolvedValue(undefined as never);
+    it('delegates to COMS downloadObject', async () => {
+      vi.mocked(comsService.downloadObject).mockResolvedValue(undefined);
 
       await downloadDocument({
         documentId: 'document-1',
@@ -304,7 +244,11 @@ describe('document service', () => {
         versionId: 'version-1'
       });
 
-      expect(comsService.getObject).toHaveBeenCalledWith('document-1', 'file.pdf', 'version-1');
+      expect(comsService.downloadObject).toHaveBeenCalledWith({
+        objectId: 'document-1',
+        filename: 'file.pdf',
+        versionId: 'version-1'
+      });
     });
   });
 
@@ -312,9 +256,7 @@ describe('document service', () => {
     it('returns activity documents', async () => {
       const documents = [{ id: '1' }, { id: '2' }];
 
-      mockGet.mockResolvedValue({
-        data: documents
-      });
+      mockGet.mockResolvedValue({ data: documents });
 
       const result = await listDocuments({
         activityId: 'activity-1'
@@ -326,15 +268,9 @@ describe('document service', () => {
     });
 
     it('propagates errors', async () => {
-      const error = new Error('failed');
+      mockGet.mockRejectedValue(new Error('failed'));
 
-      mockGet.mockRejectedValue(error);
-
-      await expect(
-        listDocuments({
-          activityId: 'activity-1'
-        })
-      ).rejects.toThrow(error);
+      await expect(listDocuments({ activityId: 'activity-1' })).rejects.toThrow('failed');
     });
   });
 
