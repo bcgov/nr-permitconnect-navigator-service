@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 import AuthService from './authService';
-import ConfigService from './configService';
+import { configService } from './configService';
 
 import type { AxiosInstance, AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
 
@@ -19,7 +19,7 @@ const paramsSerializer = {
  * @returns {AxiosInstance} An axios instance
  */
 export function appAxios(options: AxiosRequestConfig = {}): AxiosInstance {
-  const cfg = new ConfigService().getConfig();
+  const cfg = configService.getCachedConfig();
   if (!cfg) throw new Error('Unable to obtain config');
 
   const instance = axios.create({
@@ -52,7 +52,7 @@ export function appAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
-  const cfg = new ConfigService().getConfig();
+  const cfg = configService.getCachedConfig();
   if (!cfg) throw new Error('Unable to obtain config');
 
   const instance = axios.create({
@@ -85,7 +85,7 @@ export function comsAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
-  const cfg = new ConfigService().getConfig();
+  const cfg = configService.getCachedConfig();
   if (!cfg) throw new Error('Unable to obtain config');
 
   const instance = axios.create({
@@ -114,7 +114,7 @@ export function geocoderAxios(options: AxiosRequestConfig = {}): AxiosInstance {
  * @returns {AxiosInstance} An axios instance
  */
 export function orgBookAxios(options: AxiosRequestConfig = {}): AxiosInstance {
-  const cfg = new ConfigService().getConfig();
+  const cfg = configService.getCachedConfig();
   if (!cfg) throw new Error('Unable to obtain config');
 
   const instance = axios.create({

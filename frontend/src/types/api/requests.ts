@@ -28,6 +28,7 @@ import type { UUID } from '../common';
 import type { Nullable, PartialFields } from '../util';
 import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
 import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { AxiosRequestConfig } from 'axios';
 
 /**
  * Activity Contact
@@ -313,6 +314,69 @@ export interface SearchUsersRequest {
 /**
  * Other
  */
+
+export interface KeyValuePair {
+  key: string;
+  value: string;
+}
+
+export interface CreateObjectRequest {
+  file: File;
+  metadata?: KeyValuePair[];
+  bucketId?: string;
+  tagset?: KeyValuePair[];
+  axiosOptions?: AxiosRequestConfig;
+}
+
+export interface CreateObjectResponse {
+  id: string;
+  path: string;
+  public: boolean;
+  active: boolean;
+  bucketId: string;
+  name: string;
+
+  lastSyncedDate: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+
+  length: number;
+  mimeType: string;
+  versionId: string;
+
+  metadata: Record<string, string>;
+  tags: Record<string, string>;
+
+  $metadata: {
+    httpStatusCode: number;
+    extendedRequestId: string;
+    attempts: number;
+    totalRetryDelay: number;
+  };
+
+  ETag: string;
+  Bucket: string;
+  Key: string;
+  Location: string;
+  ServerSideEncryption: string;
+  s3VersionId: string;
+}
+
+export interface DeleteObjectRequest {
+  objectId: string;
+  versionId?: string;
+}
+
+export interface GetObjectRequest {
+  objectId: string;
+  versionId?: string;
+}
+
+export interface DownloadObjectRequest extends GetObjectRequest {
+  filename: string;
+}
 
 export interface Email {
   bcc?: string[];

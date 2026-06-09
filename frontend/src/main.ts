@@ -13,7 +13,7 @@ import App from '@/App.vue';
 import i18n from '@/i18n';
 import getRouter from '@/router';
 import { ThemeOverride } from '@/ThemeOverride';
-import { AuthService, ConfigService } from '@/services';
+import { AuthService, configService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
 import 'primeicons/primeicons.css';
@@ -61,7 +61,7 @@ function initializeApp(): void {
  * @param next Optional callback function
  */
 async function initializeServices(next?: CallbackFn): Promise<void> {
-  await ConfigService.init();
+  await configService.refreshConfig();
   await AuthService.init();
   if (next) next();
 }

@@ -1,6 +1,6 @@
 import { Log, UserManager, WebStorageStateStore } from 'oidc-client-ts';
 
-import ConfigService from './configService';
+import { configService } from './configService';
 
 import type { User, UserManagerSettings } from 'oidc-client-ts';
 
@@ -36,7 +36,7 @@ export default class AuthService {
    * @throws If OIDC configuration is missing or incomplete
    */
   public getOidcSettings(): UserManagerSettings {
-    const config = new ConfigService().getConfig();
+    const config = configService.getCachedConfig();
 
     if (!config?.oidc?.authority || !config?.oidc?.clientId) {
       throw new Error('OIDC is misconfigured');

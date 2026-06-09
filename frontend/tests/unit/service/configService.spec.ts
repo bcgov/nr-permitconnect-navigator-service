@@ -1,105 +1,168 @@
 import axios from 'axios';
 
-import { ConfigService } from '@/services';
+import { getConfig, refreshConfig, getCachedConfig, configService } from '@/services/configService';
 import { StorageKey } from '@/utils/enums/application';
 
-const storageType = window.sessionStorage;
-
-const testData = 'testData';
-const PATH = 'config';
-const axiosConfig = {
-  headers: {
-    'Cache-Control': 'no-cache',
-    Pragma: 'no-cache'
+vi.mock('axios', () => ({
+  default: {
+    get: vi.fn()
   }
-};
+}));
 
-vi.mock('axios');
-vi.mocked(axios, true);
+describe('configService', () => {
+  const mockGet = vi.mocked(axios.get);
 
-beforeEach(() => {
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
-    })
-  );
+  const config = {
+    apiUrl: 'https://api.example.com',
+    featureFlag: true
+  };
 
-  vi.clearAllMocks();
-});
-
-afterEach(() => {
-  sessionStorage.clear();
-});
-
-describe('Config Store', () => {
   beforeEach(() => {
-    storageType.clear();
+    vi.clearAllMocks();
+    window.sessionStorage.clear();
   });
 
-  describe('init', () => {
-    it('initializes with sessionStorage null', async () => {
-      vi.mocked(axios.get).mockResolvedValue({ data: testData });
+  describe('getConfig', () => {
+    it('returns cached config when present', async () => {
+      window.sessionStorage.setItem(StorageKey.CONFIG, JSON.stringify(config));
 
-      await ConfigService.init();
+      const result = await getConfig();
 
-      expect(axios.get).toHaveBeenCalledExactlyOnceWith(`/${PATH}`, axiosConfig);
-      expect(storageType.getItem(StorageKey.CONFIG)).toBe(`"${testData}"`);
+      expect(mockGet).not.toHaveBeenCalled();
+
+      expect(result).toEqual(config);
     });
 
-    it('initializes with sessionStorage not null', async () => {
-      const testData2 = 'testData2';
-      storageType.setItem(StorageKey.CONFIG, testData2);
+    it('fetches config from api when cache is empty', async () => {
+      mockGet.mockResolvedValue({
+        data: config
+      });
 
-      await ConfigService.init();
+      const result = await getConfig();
 
-      expect(axios.get).not.toHaveBeenCalled();
-      expect(storageType.getItem(StorageKey.CONFIG)).toBe(`${testData2}`);
+      expect(mockGet).toHaveBeenCalledWith('/config', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
+        }
+      });
+
+      expect(result).toEqual(config);
+
+      expect(JSON.parse(window.sessionStorage.getItem(StorageKey.CONFIG) as string)).toEqual(config);
     });
 
-    it('fails the init get request', async () => {
-      vi.mocked(axios.get).mockImplementation(() => Promise.reject('errTest'));
+    it('removes invalid cached config and fetches from api', async () => {
+      window.sessionStorage.setItem(StorageKey.CONFIG, '{invalid-json');
 
-      await ConfigService.init().catch(() => {});
+      mockGet.mockResolvedValue({
+        data: config
+      });
 
-      expect(storageType.getItem(StorageKey.CONFIG)).toBeNull();
+      const result = await getConfig();
+
+      expect(mockGet).toHaveBeenCalledWith('/config', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
+        }
+      });
+
+      expect(result).toEqual(config);
+
+      expect(JSON.parse(window.sessionStorage.getItem(StorageKey.CONFIG) as string)).toEqual(config);
     });
 
-    it('gets information from getConfig()', async () => {
-      vi.mocked(axios.get).mockResolvedValue({ data: testData });
+    it('propagates api errors', async () => {
+      const error = new Error('get config failed');
 
-      const configService = await ConfigService.init();
+      mockGet.mockRejectedValue(error);
 
-      expect(configService.getConfig()).toBe(testData);
+      await expect(getConfig()).rejects.toThrow(error);
+    });
+  });
+
+  describe('refreshConfig', () => {
+    it('always fetches config from api even when cache exists', async () => {
+      const cachedConfig = {
+        apiUrl: 'https://old.example.com'
+      };
+
+      window.sessionStorage.setItem(StorageKey.CONFIG, JSON.stringify(cachedConfig));
+
+      mockGet.mockResolvedValue({
+        data: config
+      });
+
+      const result = await refreshConfig();
+
+      expect(mockGet).toHaveBeenCalledWith('/config', {
+        headers: {
+          'Cache-Control': 'no-cache',
+          Pragma: 'no-cache'
+        }
+      });
+
+      expect(result).toEqual(config);
+
+      expect(JSON.parse(window.sessionStorage.getItem(StorageKey.CONFIG) as string)).toEqual(config);
     });
 
-    it('getConfig reaquires missing config', async () => {
-      vi.mocked(axios.get).mockResolvedValue({ data: testData });
-
-      const configService = await ConfigService.init();
-
-      storageType.removeItem(StorageKey.CONFIG);
-      expect(configService.getConfig()).toBeNull();
-    });
-
-    it('getConfig fails to reaquire missing config', async () => {
-      vi.mocked(axios.get)
-        .mockResolvedValueOnce({
-          data: testData
+    it('overwrites existing cached config', async () => {
+      window.sessionStorage.setItem(
+        StorageKey.CONFIG,
+        JSON.stringify({
+          apiUrl: 'https://old.example.com'
         })
-        .mockRejectedValueOnce(() =>
-          Promise.reject({
-            data: testData
-          })
-        );
+      );
 
-      const configService = await ConfigService.init();
+      mockGet.mockResolvedValue({
+        data: config
+      });
 
-      storageType.removeItem(StorageKey.CONFIG);
-      expect(configService.getConfig()).toBeNull();
+      await refreshConfig();
+
+      expect(JSON.parse(window.sessionStorage.getItem(StorageKey.CONFIG) as string)).toEqual(config);
+    });
+
+    it('propagates api errors', async () => {
+      const error = new Error('refresh failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(refreshConfig()).rejects.toThrow(error);
+    });
+  });
+
+  describe('getCachedConfig', () => {
+    it('returns cached config when present', () => {
+      window.sessionStorage.setItem(StorageKey.CONFIG, JSON.stringify(config));
+
+      const result = getCachedConfig();
+
+      expect(result).toEqual(config);
+    });
+
+    it('returns null when cache is empty', () => {
+      expect(getCachedConfig()).toBeNull();
+    });
+
+    it('returns null and removes invalid cache when json is malformed', () => {
+      window.sessionStorage.setItem(StorageKey.CONFIG, '{invalid-json');
+
+      const result = getCachedConfig();
+
+      expect(result).toBeNull();
+
+      expect(window.sessionStorage.getItem(StorageKey.CONFIG)).toBeNull();
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(configService).toEqual({
+      getConfig,
+      refreshConfig,
+      getCachedConfig
     });
   });
 });
