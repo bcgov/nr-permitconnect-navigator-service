@@ -1,4 +1,4 @@
-import type { AccessRequest, IdentityProvider, Nullable, User } from '@/types';
+import type { AccessRequest, IdentityProvider, Nullable, PartialFields, User } from '@/types';
 
 export interface Config {
   // Additional data passed from backend
@@ -48,30 +48,30 @@ export interface Pagination {
 }
 
 export interface UserAccessRequest {
-  accessRequest?: AccessRequest;
+  accessRequest?: PartialFields<AccessRequest, 'accessRequestId'>;
   user: User;
 }
 
-export interface UserAccessRequestArgs {
-  user: {
-    userId: string;
-    idp: string;
-    sub: string;
-    email: string;
-    firstName: string;
-    fullName: string;
-    lastName: string;
-    active: boolean;
-  };
-  accessRequest: {
-    accessRequestId?: string;
-    userId?: string;
-    grant: boolean;
-    groupId?: number;
-    status?: string;
-    update?: boolean;
-  };
-}
+// export interface UserAccessRequestArgs {
+//   user: {
+//     userId: string;
+//     idp: string;
+//     sub: string;
+//     email: string;
+//     firstName: string;
+//     fullName: string;
+//     lastName: string;
+//     active: boolean;
+//   };
+//   accessRequest: {
+//     accessRequestId?: string;
+//     userId?: string;
+//     grant: boolean;
+//     groupId?: number;
+//     status?: string;
+//     update?: boolean;
+//   };
+// }
 
 export interface DateTimeStrings {
   date: Nullable<string>;

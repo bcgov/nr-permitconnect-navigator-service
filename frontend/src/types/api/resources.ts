@@ -64,15 +64,19 @@ interface ProjectRelations {
  * Access Request
  */
 
-export interface AccessRequest extends AuditFields {
-  accessRequestId?: UUID;
-  grant?: boolean;
+export interface AccessRequestBase extends AuditFields {
+  accessRequestId: UUID;
+  userId: UUID;
+  grant: boolean;
   groupId: number;
-  groupLabel?: string;
   status: AccessRequestStatus;
-  userId?: UUID;
-  update?: boolean;
 }
+
+interface AccessRequestRelations {
+  group: Group;
+}
+
+export type AccessRequest = AccessRequestBase & Partial<AccessRequestRelations>;
 
 /**
  * Activity

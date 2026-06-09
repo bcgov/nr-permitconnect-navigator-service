@@ -1,96 +1,161 @@
-import { setActivePinia, createPinia } from 'pinia';
-
-import { accessRequestService } from '@/services';
+import {
+  createAccessRequest,
+  processAccessRequest,
+  listAccessRequests,
+  accessRequestService
+} from '@/services/accessRequestService';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosInstance } from 'axios';
-import type { StoreGeneric } from 'pinia';
-
-// Constants
-const PATH = 'accessRequest';
-
-const TEST_ACCESS_REQUEST = {
-  accessRequestId: 'req123',
-  grant: true,
-  group: 'DEVELOPER',
-  status: 'pending',
-  userId: 'user456'
-};
-
-const TEST_USER = {
-  userId: 'user456',
-  username: 'testuser',
-  email: 'testuser@example.com'
-};
-
-const testUserAccessRequest = {
-  accessRequest: TEST_ACCESS_REQUEST,
-  user: TEST_USER
-};
-
-// Mocks
-const getSpy = vi.fn();
-const postSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  post: postSpy
-} as unknown as AxiosInstance);
-
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
-
-  vi.clearAllMocks();
-});
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
 describe('accessRequestService', () => {
-  let appStore: StoreGeneric;
+  const mockGet = vi.fn();
+  const mockPost = vi.fn();
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore = useAppStore();
-        appStore.setInitiative(initiative);
+  beforeEach(() => {
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
+
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      post: mockPost
+    } as never);
+  });
+
+  describe('createAccessRequest', () => {
+    it('creates an access request and returns the created resource', async () => {
+      const request = {
+        userId: 'user-1',
+        roleId: 'role-1'
+      };
+
+      const accessRequest = {
+        accessRequestId: 'access-request-1',
+        userId: 'user-1'
+      };
+
+      mockPost.mockResolvedValue({
+        data: accessRequest
       });
 
-      it('calls createUserAccessRequest with correct data', () => {
-        accessRequestService.createUserAccessRequest(testUserAccessRequest);
+      const result = await createAccessRequest(request as never);
 
-        expect(postSpy).toHaveBeenCalledTimes(1);
-        expect(postSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, testUserAccessRequest);
+      expect(mockPost).toHaveBeenCalledWith('housing/accessRequest', request);
+
+      expect(result).toEqual(accessRequest);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('create failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(createAccessRequest({} as never)).rejects.toThrow(error);
+    });
+  });
+
+  describe('processAccessRequest', () => {
+    it('processes an access request and returns the updated resource', async () => {
+      const request = {
+        accessRequestId: 'access-request-1',
+        status: 'Approved',
+        comments: 'Approved by admin'
+      };
+
+      const updatedAccessRequest = {
+        accessRequestId: 'access-request-1',
+        status: 'Approved'
+      };
+
+      mockPost.mockResolvedValue({
+        data: updatedAccessRequest
       });
 
-      it('calls processUserAccessRequest with correct data', () => {
-        accessRequestService.processUserAccessRequest(
-          testUserAccessRequest.accessRequest.accessRequestId,
-          testUserAccessRequest
-        );
+      const result = await processAccessRequest(request as never);
 
-        expect(postSpy).toHaveBeenCalledTimes(1);
-        expect(postSpy).toHaveBeenCalledWith(
-          `${initiative.toLowerCase()}/${PATH}/${testUserAccessRequest.accessRequest.accessRequestId}`,
-          testUserAccessRequest
-        );
+      expect(mockPost).toHaveBeenCalledWith('housing/accessRequest/access-request-1', {
+        status: 'Approved',
+        comments: 'Approved by admin'
       });
 
-      it('calls getAccessRequests', () => {
-        accessRequestService.getAccessRequests();
+      expect(result).toEqual(updatedAccessRequest);
+    });
 
-        expect(getSpy).toHaveBeenCalledTimes(1);
-        expect(getSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`);
+    it('sends only the request body excluding accessRequestId', async () => {
+      mockPost.mockResolvedValue({
+        data: {}
       });
-    }
-  );
+
+      await processAccessRequest({
+        accessRequestId: 'access-request-1',
+        status: 'Denied'
+      } as never);
+
+      expect(mockPost).toHaveBeenCalledWith('housing/accessRequest/access-request-1', {
+        status: 'Denied'
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('process failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(
+        processAccessRequest({
+          accessRequestId: 'access-request-1'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('listAccessRequests', () => {
+    it('returns all access requests', async () => {
+      const accessRequests = [
+        {
+          accessRequestId: '1'
+        },
+        {
+          accessRequestId: '2'
+        }
+      ];
+
+      mockGet.mockResolvedValue({
+        data: accessRequests
+      });
+
+      const result = await listAccessRequests();
+
+      expect(mockGet).toHaveBeenCalledWith('housing/accessRequest');
+
+      expect(result).toEqual(accessRequests);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('list failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(listAccessRequests()).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(accessRequestService).toEqual({
+      createAccessRequest,
+      processAccessRequest,
+      listAccessRequests
+    });
+  });
 });

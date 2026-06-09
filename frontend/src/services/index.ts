@@ -1,4 +1,4 @@
-export { default as accessRequestService } from './accessRequestService';
+export { accessRequestService } from './accessRequestService';
 export { activityContactService } from './activityContactService';
 export { atsService } from './atsService';
 export { default as AuthService } from './authService';

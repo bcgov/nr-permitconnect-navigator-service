@@ -107,12 +107,10 @@ async function onProcessUserAccessRequest() {
     const deniedRevocation =
       userProcessModalAction.value === REQUEST_ACTION.DENY && !selectedUserAccessRequest.value?.accessRequest?.grant;
 
-    const response = await accessRequestService.processUserAccessRequest(
-      selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
-      {
-        approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
-      }
-    );
+    const response = await accessRequestService.processAccessRequest({
+      accessRequestId: selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
+      approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
+    });
 
     if (response) {
       const idx = usersAndAccessRequests.value.findIndex(
@@ -185,7 +183,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
           });
         } else {
           // Create user access request
-          response = await accessRequestService.createUserAccessRequest({
+          response = await accessRequestService.createAccessRequest({
             user: omittedUser,
             accessRequest: {
               grant: false,
@@ -193,19 +191,19 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
             }
           });
         }
-        // Remove user from table and/or change status value
-        if (response) {
-          const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
-          if (admin) {
-            usersAndAccessRequests.value.splice(idx, 1);
-          } else {
-            usersAndAccessRequests.value[idx]!.accessRequest = response.data;
+        const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
+
+        if (admin) {
+          usersAndAccessRequests.value.splice(idx, 1);
+        } else {
+          if (response) {
+            usersAndAccessRequests.value[idx]!.accessRequest = response;
             usersAndAccessRequests.value[idx]!.user.status = PENDING_STATUSES.PENDING_REVOCATION;
           }
-
-          toast.success(successMessage);
         }
+
+        toast.success(successMessage);
       } catch (error) {
         toast.error(`${t('views.i.userManagementView.revokeError')}: ${error}`);
       }
@@ -228,7 +226,7 @@ async function onUserGroupChange(group: Group) {
         'deletedAt',
         'deletedBy'
       ]);
-      const response = await accessRequestService.createUserAccessRequest({
+      const response = await accessRequestService.createAccessRequest({
         user: omittedUser,
         accessRequest: {
           userId: user.userId,
@@ -285,9 +283,10 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       }
     };
 
-    const response = (await accessRequestService.createUserAccessRequest({ ...userAccessRequest, user: omittedUser }))
-      .data;
-
+    const response = await accessRequestService.createAccessRequest({
+      accessRequest: { ...userAccessRequest.accessRequest },
+      user: omittedUser
+    });
     // Update main data table
     if (response.status !== AccessRequestStatus.APPROVED) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;
@@ -333,7 +332,7 @@ onBeforeMount(async () => {
       group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
       initiative: [useAppStore().getInitiative]
     });
-    const accessRequests: AccessRequest[] = (await accessRequestService.getAccessRequests()).data;
+    const accessRequests = await accessRequestService.listAccessRequests();
     const currentAccessRequests = new Map();
 
     // Create map of all pending requests

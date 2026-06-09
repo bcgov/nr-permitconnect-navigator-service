@@ -27,8 +27,37 @@ import type {
 import type { UUID } from '../common';
 import type { Nullable, PartialFields } from '../util';
 import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
-import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { AccessRequestStatus, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import type { AxiosRequestConfig } from 'axios';
+
+/**
+ * Access Request
+ */
+
+export interface CreateAccessRequestRequest {
+  user: {
+    userId?: UUID;
+    idp: string;
+    sub: string;
+    email: string;
+    firstName: string;
+    fullName: string;
+    lastName: string;
+    active: boolean;
+  };
+  accessRequest: Partial<{
+    accessRequestId: UUID;
+    userId: UUID;
+    grant: boolean;
+    groupId: number;
+    status: AccessRequestStatus;
+    update: boolean;
+  }>;
+}
+export interface ProcessAccessRequestRequest {
+  accessRequestId: UUID;
+  approve: boolean;
+}
 
 /**
  * Activity Contact
