@@ -1,6 +1,21 @@
 import { Prisma } from '@prisma/client';
 
 import {
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_ACTIVITY_GENERAL,
+  TEST_GENERAL_DRAFT,
+  TEST_GENERAL_PROJECT_1,
+  TEST_GENERAL_PROJECT_CREATE,
+  TEST_GENERAL_PROJECT_INTAKE,
+  TEST_IDIR_USER_1,
+  TEST_PERMIT_1,
+  TEST_PERMIT_2,
+  TEST_PERMIT_3,
+  TEST_GENERAL_PROJECT_UPDATE
+} from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
@@ -24,11 +39,13 @@ import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as permitTrackingService from '../../../src/services/permitTracking.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import * as utils from '../../../src/utils/utils';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type {
   ActivityContact,
   Draft,
@@ -38,35 +55,18 @@ import type {
   GeneralProjectStatistics,
   StatisticsFilters
 } from '../../../src/types/index.ts';
-import {
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_GENERAL,
-  TEST_GENERAL_DRAFT,
-  TEST_GENERAL_PROJECT_1,
-  TEST_GENERAL_PROJECT_CREATE,
-  TEST_GENERAL_PROJECT_INTAKE,
-  TEST_IDIR_USER_1,
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_GENERAL_PROJECT_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import * as utils from '../../../src/utils/utils';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
@@ -77,17 +77,17 @@ afterEach(() => {
    * resetAllMocks seems to cause strange issues such as
    * functions not calling as expected
    */
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('createGeneralProjectController', () => {
-  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
-  const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
-  const createGeneralProjectSpy = jest.spyOn(generalProjectService, 'createGeneralProject');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const getCurrentUsernameSpy = jest.spyOn(utils, 'getCurrentUsername');
+  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
+  const createGeneralProjectSpy = vi.spyOn(generalProjectService, 'createGeneralProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const getCurrentUsernameSpy = vi.spyOn(utils, 'getCurrentUsername');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -235,9 +235,9 @@ describe('createGeneralProjectController', () => {
 });
 
 describe('deleteGeneralProjectController', () => {
-  const getGeneralProjectSpy = jest.spyOn(generalProjectService, 'getGeneralProject');
-  const deleteGeneralProjectSpy = jest.spyOn(generalProjectService, 'deleteGeneralProject');
-  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+  const getGeneralProjectSpy = vi.spyOn(generalProjectService, 'getGeneralProject');
+  const deleteGeneralProjectSpy = vi.spyOn(generalProjectService, 'deleteGeneralProject');
+  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -271,8 +271,8 @@ describe('deleteGeneralProjectController', () => {
 });
 
 describe('deleteGeneralProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = jest.spyOn(activityService, 'deleteActivityHard');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
+  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -298,7 +298,7 @@ describe('deleteGeneralProjectDraftController', () => {
 });
 
 describe('getGeneralProjectActivityIdsController', () => {
-  const getGeneralProjectsSpy = jest.spyOn(generalProjectService, 'getGeneralProjects');
+  const getGeneralProjectsSpy = vi.spyOn(generalProjectService, 'getGeneralProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -317,7 +317,7 @@ describe('getGeneralProjectActivityIdsController', () => {
 });
 
 describe('getGeneralProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -337,7 +337,7 @@ describe('getGeneralProjectDraftController', () => {
 });
 
 describe('getGeneralProjectDraftsController', () => {
-  const getDraftsSpy = jest.spyOn(draftService, 'getDrafts');
+  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -356,7 +356,7 @@ describe('getGeneralProjectDraftsController', () => {
 });
 
 describe('getGeneralProjectStatisticsController', () => {
-  const statisticsSpy = jest.spyOn(generalProjectService, 'getGeneralProjectStatistics');
+  const statisticsSpy = vi.spyOn(generalProjectService, 'getGeneralProjectStatistics');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -406,8 +406,8 @@ describe('getGeneralProjectStatisticsController', () => {
 });
 
 describe('getGeneralProjectController', () => {
-  const generalProjectSpy = jest.spyOn(generalProjectService, 'getGeneralProject');
-  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
+  const generalProjectSpy = vi.spyOn(generalProjectService, 'getGeneralProject');
+  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -431,7 +431,7 @@ describe('getGeneralProjectController', () => {
 });
 
 describe('getGeneralProjectsController', () => {
-  const generalProjectsSpy = jest.spyOn(generalProjectService, 'getGeneralProjects');
+  const generalProjectsSpy = vi.spyOn(generalProjectService, 'getGeneralProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -451,7 +451,7 @@ describe('getGeneralProjectsController', () => {
 });
 
 describe('searchGeneralProjectsController', () => {
-  const searchGeneralProjectsSpy = jest.spyOn(generalProjectService, 'searchGeneralProjects');
+  const searchGeneralProjectsSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -477,14 +477,14 @@ describe('searchGeneralProjectsController', () => {
 });
 
 describe('submitGeneralProjectDraftController', () => {
-  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
-  const createGeneralProjectSpy = jest.spyOn(generalProjectService, 'createGeneralProject');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
-  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
-  const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
+  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+  const createGeneralProjectSpy = vi.spyOn(generalProjectService, 'createGeneralProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
+  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
+  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -645,9 +645,9 @@ describe('submitGeneralProjectDraftController', () => {
 });
 
 describe('updateGeneralProjectDraftController', () => {
-  const createDraftSpy = jest.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
+  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -756,7 +756,7 @@ describe('updateGeneralProjectDraftController', () => {
 });
 
 describe('updateGeneralProjectController', () => {
-  const updateSpy = jest.spyOn(generalProjectService, 'updateGeneralProject');
+  const updateSpy = vi.spyOn(generalProjectService, 'updateGeneralProject');
 
   const { generalProjectId } = TEST_GENERAL_PROJECT_1;
 

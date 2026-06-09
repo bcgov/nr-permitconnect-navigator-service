@@ -6,25 +6,26 @@ import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/e
 import * as utils from '../../../src/utils/utils.ts';
 
 import type { JwtPayload } from 'jsonwebtoken';
+import type { Mock } from 'vitest';
 
-jest.mock('config', () => ({
-  has: jest.fn(),
-  get: jest.fn()
+vi.mock('config', () => {
+  const mock = { has: vi.fn(), get: vi.fn() };
+  return { default: mock, ...mock };
+});
+
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn(),
+  readFileSync: vi.fn(),
+  statSync: vi.fn()
 }));
 
-jest.mock('node:fs', () => ({
-  existsSync: jest.fn(),
-  readFileSync: jest.fn(),
-  statSync: jest.fn()
+vi.mock('../../../src/utils/log', () => ({
+  getLogger: () => ({ warn: vi.fn(), info: vi.fn(), error: vi.fn() })
 }));
 
-jest.mock('../../../src/utils/log', () => ({
-  getLogger: () => ({ warn: jest.fn(), info: jest.fn(), error: jest.fn() })
-}));
-
-jest.mock('uuid', () => ({
-  validate: jest.fn(),
-  version: jest.fn()
+vi.mock('uuid', () => ({
+  validate: vi.fn(),
+  version: vi.fn()
 }));
 
 const TOKEN_PAYLOAD: JwtPayload = {
@@ -66,12 +67,12 @@ const IDP_LIST = [
 
 describe('utils', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
-    (existsSync as jest.Mock).mockReset();
-    (readFileSync as jest.Mock).mockReset();
-    (statSync as jest.Mock).mockReset();
-    (config.get as jest.Mock).mockReset();
-    (config.has as jest.Mock).mockReset();
+    vi.clearAllMocks();
+    (existsSync as Mock).mockReset();
+    (readFileSync as Mock).mockReset();
+    (statSync as Mock).mockReset();
+    (config.get as Mock).mockReset();
+    (config.has as Mock).mockReset();
   });
 
   describe('addDashesToUuid', () => {
@@ -223,12 +224,12 @@ describe('utils', () => {
     });
 
     it('returns the HEAD hash if HEAD is detached', () => {
-      (existsSync as jest.Mock).mockImplementation((path: string) => {
+      (existsSync as Mock).mockImplementation((path: string) => {
         // .git and HEAD exist
         return path.endsWith('.git') || path.endsWith('HEAD');
       });
-      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
-      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+      (statSync as Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as Mock).mockImplementation((path: string) => {
         if (path.endsWith('HEAD')) return 'abcdef1234567890\n';
         return '';
       });
@@ -237,7 +238,7 @@ describe('utils', () => {
     });
 
     it('returns the commit hash from ref file if HEAD points to a ref', () => {
-      (existsSync as jest.Mock).mockImplementation((path: string) => {
+      (existsSync as Mock).mockImplementation((path: string) => {
         // .git, HEAD, and ref exist
         return (
           path.endsWith('.git') ||
@@ -246,8 +247,8 @@ describe('utils', () => {
           path.endsWith(String.raw`refs\heads\main`)
         );
       });
-      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
-      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+      (statSync as Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as Mock).mockImplementation((path: string) => {
         if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
         if (path.endsWith('refs/heads/main') || path.endsWith(String.raw`refs\heads\main`)) return '1234567890abcdef\n';
         return '';
@@ -257,12 +258,12 @@ describe('utils', () => {
     });
 
     it('returns the commit hash from packed-refs if ref file does not exist', () => {
-      (existsSync as jest.Mock).mockImplementation((path: string) => {
+      (existsSync as Mock).mockImplementation((path: string) => {
         // .git, HEAD, packed-refs exist, but not the ref file
         return path.endsWith('.git') || path.endsWith('HEAD') || path.endsWith('packed-refs');
       });
-      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
-      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+      (statSync as Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as Mock).mockImplementation((path: string) => {
         if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
         if (path.endsWith('packed-refs')) return 'fedcba9876543210 refs/heads/main\n';
         return '';
@@ -272,12 +273,12 @@ describe('utils', () => {
     });
 
     it('returns undefined if ref file does not exist', () => {
-      (existsSync as jest.Mock).mockImplementation((path: string) => {
+      (existsSync as Mock).mockImplementation((path: string) => {
         // .git, HEAD, packed-refs exist, but not the ref file
         return path.endsWith('.git') || path.endsWith('HEAD') || path.endsWith('packed-refs');
       });
-      (statSync as jest.Mock).mockReturnValue(mockStat(false)); // .git is a directory
-      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+      (statSync as Mock).mockReturnValue(mockStat(false)); // .git is a directory
+      (readFileSync as Mock).mockImplementation((path: string) => {
         if (path.endsWith('HEAD')) return 'ref: refs/heads/main\n';
         return '';
       });
@@ -286,13 +287,13 @@ describe('utils', () => {
     });
 
     it('returns undefined if .git does not exist', () => {
-      (existsSync as jest.Mock).mockReturnValue(false);
+      (existsSync as Mock).mockReturnValue(false);
 
       expect(utils.getGitRevision()).toBeUndefined();
     });
 
     it('returns undefined and logs warning if an error is thrown', () => {
-      (existsSync as jest.Mock).mockImplementation(() => {
+      (existsSync as Mock).mockImplementation(() => {
         throw new Error('fs error');
       });
 
@@ -300,7 +301,7 @@ describe('utils', () => {
     });
 
     it('resolves .git as a file (worktree/submodule) and reads gitdir', () => {
-      (existsSync as jest.Mock).mockImplementation((path: string) => {
+      (existsSync as Mock).mockImplementation((path: string) => {
         // .git file, HEAD, and ref exist
         return (
           path.endsWith('.git') ||
@@ -309,11 +310,11 @@ describe('utils', () => {
           path.endsWith(String.raw`refs\heads\feature`)
         );
       });
-      (statSync as jest.Mock).mockImplementation((path: string) => {
+      (statSync as Mock).mockImplementation((path: string) => {
         // .git is a file
         return mockStat(path.endsWith('.git'));
       });
-      (readFileSync as jest.Mock).mockImplementation((path: string) => {
+      (readFileSync as Mock).mockImplementation((path: string) => {
         if (path.endsWith('.git')) return 'gitdir: .git/worktrees/feature\n';
         if (path.endsWith('HEAD')) return 'ref: refs/heads/feature\n';
         if (path.endsWith('refs/heads/feature') || path.endsWith(String.raw`refs\heads\feature`))
@@ -336,13 +337,13 @@ describe('utils', () => {
 
   describe('getCurrentUsername', () => {
     beforeEach(() => {
-      (existsSync as jest.Mock).mockReset();
-      (readFileSync as jest.Mock).mockReset();
+      (existsSync as Mock).mockReset();
+      (readFileSync as Mock).mockReset();
     });
 
     it('extracts username based on idp mapping', () => {
-      (existsSync as jest.Mock).mockImplementation((p: string) => String(p).endsWith('idplist-local.json'));
-      (readFileSync as jest.Mock).mockImplementation((p: string, enc: string) => {
+      (existsSync as Mock).mockImplementation((p: string) => String(p).endsWith('idplist-local.json'));
+      (readFileSync as Mock).mockImplementation((p: string, enc: string) => {
         expect(enc).toBe('utf8');
         return JSON.stringify(IDP_LIST);
       });
@@ -351,8 +352,8 @@ describe('utils', () => {
     });
 
     it('returns undefined when idp mapping not found', () => {
-      (existsSync as jest.Mock).mockImplementation((p: string) => String(p).endsWith('idplist-local.json'));
-      (readFileSync as jest.Mock).mockImplementation((p: string, enc: string) => {
+      (existsSync as Mock).mockImplementation((p: string) => String(p).endsWith('idplist-local.json'));
+      (readFileSync as Mock).mockImplementation((p: string, enc: string) => {
         expect(enc).toBe('utf8');
         return JSON.stringify([
           {
@@ -372,13 +373,13 @@ describe('utils', () => {
 
   describe('getIdpAttributesByKind', () => {
     beforeEach(() => {
-      (existsSync as jest.Mock).mockReset();
-      (readFileSync as jest.Mock).mockReset();
+      (existsSync as Mock).mockReset();
+      (readFileSync as Mock).mockReset();
     });
 
     it('returns the correct IDP config for a given kind', () => {
-      (existsSync as jest.Mock).mockReturnValue(true);
-      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+      (existsSync as Mock).mockReturnValue(true);
+      (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
 
       const result = utils.getIdpAttributesByKind(IdentityProviderKind.AZUREIDIR);
 
@@ -390,8 +391,8 @@ describe('utils', () => {
     });
 
     it('returns undefined if the kind is not found', () => {
-      (existsSync as jest.Mock).mockReturnValue(true);
-      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+      (existsSync as Mock).mockReturnValue(true);
+      (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
 
       const result = utils.getIdpAttributesByKind('non-existent-kind' as unknown as IdentityProviderKind);
 
@@ -401,10 +402,10 @@ describe('utils', () => {
 
   describe('hasIdentity', () => {
     beforeEach(() => {
-      (existsSync as jest.Mock).mockReset();
-      (readFileSync as jest.Mock).mockReset();
-      (existsSync as jest.Mock).mockReturnValue(true);
-      (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+      (existsSync as Mock).mockReset();
+      (readFileSync as Mock).mockReset();
+      (existsSync as Mock).mockReturnValue(true);
+      (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
     });
 
     it('returns true when the identity kind matches the current context user identity', () => {
@@ -494,24 +495,24 @@ describe('utils', () => {
 
   describe('readIdpList', () => {
     beforeEach(() => {
-      (existsSync as jest.Mock).mockReset();
-      (readFileSync as jest.Mock).mockReset();
+      (existsSync as Mock).mockReset();
+      (readFileSync as Mock).mockReset();
     });
 
     it('prefers override idplist-local.json', () => {
-      (existsSync as jest.Mock).mockImplementation((p: string) => ('' + p).endsWith('idplist-local.json'));
-      (readFileSync as jest.Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'azureidir' }]));
+      (existsSync as Mock).mockImplementation((p: string) => ('' + p).endsWith('idplist-local.json'));
+      (readFileSync as Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'azureidir' }]));
       expect(utils.readIdpList()).toEqual([{ idp: 'azureidir' }]);
     });
 
     it('falls back to idplist-default.json', () => {
-      (existsSync as jest.Mock).mockImplementation((p: string) => ('' + p).endsWith('idplist-default.json'));
-      (readFileSync as jest.Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'github' }]));
+      (existsSync as Mock).mockImplementation((p: string) => ('' + p).endsWith('idplist-default.json'));
+      (readFileSync as Mock).mockReturnValueOnce(JSON.stringify([{ idp: 'github' }]));
       expect(utils.readIdpList()).toEqual([{ idp: 'github' }]);
     });
 
     it('returns [] when neither exists', () => {
-      (existsSync as jest.Mock).mockReturnValueOnce(false);
+      (existsSync as Mock).mockReturnValueOnce(false);
       expect(utils.readIdpList()).toEqual([]);
     });
   });
@@ -553,19 +554,19 @@ describe('utils', () => {
 
   describe('uuidValidateV4', () => {
     it('returns true when validate is true and version is 4', () => {
-      (validate as jest.Mock).mockReturnValue(true);
-      (version as jest.Mock).mockReturnValue(4);
+      (validate as Mock).mockReturnValue(true);
+      (version as Mock).mockReturnValue(4);
       expect(utils.uuidValidateV4('anything')).toBe(true);
     });
 
     it('returns false when not valid', () => {
-      (validate as jest.Mock).mockReturnValue(false);
+      (validate as Mock).mockReturnValue(false);
       expect(utils.uuidValidateV4('anything')).toBe(false);
     });
 
     it('returns false when version not 4', () => {
-      (validate as jest.Mock).mockReturnValue(true);
-      (version as jest.Mock).mockReturnValue(1);
+      (validate as Mock).mockReturnValue(true);
+      (version as Mock).mockReturnValue(1);
       expect(utils.uuidValidateV4('anything')).toBe(false);
     });
   });

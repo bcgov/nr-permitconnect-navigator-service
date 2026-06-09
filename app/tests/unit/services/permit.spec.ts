@@ -45,9 +45,8 @@ describe('getPermit', () => {
 describe('getPermitTypes', () => {
   it('calls initiative.findFirstOrThrow and returns result', async () => {
     prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce({
-      // @ts-expect-error Jest doesn't play nicely with Prisma includes
       permitTypeInitiativeXref: [{ permitType: { permitTypeId: 'ABC' } }]
-    });
+    } as never);
 
     const response = await permitService.getPermitTypes(prismaTxMock, Initiative.HOUSING);
 

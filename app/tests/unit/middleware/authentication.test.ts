@@ -4,60 +4,67 @@ import { transactionWrapper } from '../../../src/db/utils/transactionWrapper';
 import { getVerifiedPayload, hasAuthentication, jwtPayloadCache } from '../../../src/middleware/authentication';
 import * as oidcProviders from '../../../src/middleware/providers/oidc';
 import { login } from '../../../src/services/user';
-import { Problem } from '../../../src/utils/index';
 import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application';
+import { Problem } from '../../../src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { PrismaTransactionClient } from '../../../src/db/dataConnection';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 const AUTHORITY = 'https://auth.example.com';
 const INITIATIVE = Initiative.PCNS;
 
-jest.mock('config', () => ({
-  has: jest.fn(),
-  get: jest.fn().mockImplementation((key: string) => {
-    if (key === 'server.oidc.audience') return AUDIENCE;
-    if (key === 'server.oidc.authority') return AUTHORITY;
-    else return '';
-  })
+vi.mock('config', () => {
+  const mock = {
+    has: vi.fn(),
+    get: vi.fn().mockImplementation((key: string) => {
+      if (key === 'server.oidc.audience') return AUDIENCE;
+      if (key === 'server.oidc.authority') return AUTHORITY;
+      else return '';
+    })
+  };
+  return { default: mock, ...mock };
+});
+
+vi.mock('jsonwebtoken', () => {
+  const mock = {
+    decode: vi.fn(),
+    verify: vi.fn()
+  };
+  return { default: mock, ...mock };
+});
+
+vi.mock('../../../src/utils/log', () => ({
+  getLogger: () => ({ error: vi.fn() })
 }));
 
-jest.mock('jsonwebtoken', () => ({
-  decode: jest.fn(),
-  verify: jest.fn()
+vi.mock('../../../src/middleware/providers/oidc', () => ({
+  getAuthHeader: vi.fn(),
+  getBearerToken: vi.fn(),
+  getJwksClient: vi.fn(),
+  setAuthHeader: vi.fn()
 }));
 
-jest.mock('../../../src/utils/log', () => ({
-  getLogger: () => ({ error: jest.fn() })
+vi.mock('../../../src/db/utils/transactionWrapper', () => ({
+  transactionWrapper: vi.fn((cb) => cb({} as PrismaTransactionClient))
 }));
 
-jest.mock('../../../src/middleware/providers/oidc', () => ({
-  getAuthHeader: jest.fn(),
-  getBearerToken: jest.fn(),
-  getJwksClient: jest.fn(),
-  setAuthHeader: jest.fn()
-}));
-
-jest.mock('../../../src/db/utils/transactionWrapper', () => ({
-  transactionWrapper: jest.fn((cb) => cb({} as PrismaTransactionClient))
-}));
-
-jest.mock('../../../src/services/user', () => ({
-  login: jest.fn()
+vi.mock('../../../src/services/user', () => ({
+  login: vi.fn()
 }));
 
 describe('authentication middleware', () => {
-  const mockedJwtDecode = jwt.decode as jest.Mock;
-  const mockedJwtVerify = jwt.verify as jest.Mock;
-  const mockedGetAuthHeader = oidcProviders.getAuthHeader as jest.Mock;
-  const mockedGetBearerToken = oidcProviders.getBearerToken as jest.Mock;
-  const mockedGetJwksClient = oidcProviders.getJwksClient as jest.Mock;
-  const mockedSetAuthHeader = oidcProviders.setAuthHeader as jest.Mock;
-  const mockedLogin = login as jest.Mock;
+  const mockedJwtDecode = jwt.decode as Mock;
+  const mockedJwtVerify = jwt.verify as Mock;
+  const mockedGetAuthHeader = oidcProviders.getAuthHeader as Mock;
+  const mockedGetBearerToken = oidcProviders.getBearerToken as Mock;
+  const mockedGetJwksClient = oidcProviders.getJwksClient as Mock;
+  const mockedSetAuthHeader = oidcProviders.setAuthHeader as Mock;
+  const mockedLogin = login as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
     jwtPayloadCache.clear();
   });
 
@@ -69,7 +76,7 @@ describe('authentication middleware', () => {
     beforeEach(() => {
       req = { originalUrl: '/test' };
       res = {};
-      next = jest.fn();
+      next = vi.fn();
     });
 
     it('sets currentContext to NONE and calls next if no authorization header is present', async () => {
@@ -181,7 +188,7 @@ describe('authentication middleware', () => {
 
     beforeEach(() => {
       req = { originalUrl: '/test' };
-      res = { set: jest.fn() };
+      res = { set: vi.fn() };
     });
 
     it('returns the cached payload directly and skips verification if token is in cache', async () => {
@@ -213,7 +220,7 @@ describe('authentication middleware', () => {
 
       mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
+        getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
       });
       mockedJwtVerify.mockImplementation(() => {
         throw new Error('jwt expired');
@@ -231,7 +238,7 @@ describe('authentication middleware', () => {
 
       mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
+        getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
       });
       mockedJwtVerify.mockReturnValue('this-is-just-a-string-not-json');
 
@@ -252,7 +259,7 @@ describe('authentication middleware', () => {
 
       mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
+        getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
       });
       mockedJwtVerify.mockReturnValue(validPayload);
 
@@ -279,7 +286,7 @@ describe('authentication middleware', () => {
 
       mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
+        getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
       });
       mockedJwtVerify.mockReturnValue(invalidPayload);
 
@@ -295,7 +302,7 @@ describe('authentication middleware', () => {
 
       mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
+        getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
       });
       mockedJwtVerify.mockReturnValue(noExpPayload);
 
@@ -323,7 +330,7 @@ describe('authentication middleware', () => {
       mockedJwtDecode.mockReturnValue({ header: { kid: 'unknown-key-id' } });
 
       mockedGetJwksClient.mockResolvedValue({
-        getSigningKey: jest.fn().mockRejectedValue(new Error('Signing key not found'))
+        getSigningKey: vi.fn().mockRejectedValue(new Error('Signing key not found'))
       });
 
       const action = getVerifiedPayload(token, req as Request, res as Response);

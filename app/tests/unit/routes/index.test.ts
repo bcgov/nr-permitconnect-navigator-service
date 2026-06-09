@@ -7,16 +7,16 @@ import router from '../../../src/routes/index.ts';
 const app = express();
 app.use(router);
 
-jest.mock('config', () => ({
-  has: jest.fn(),
-  get: jest.fn()
-}));
-
-jest.mock('jwks-rsa', () => {
-  return jest.fn().mockReturnValue({
-    getSigningKey: jest.fn()
-  });
+vi.mock('config', () => {
+  const mock = { has: vi.fn(), get: vi.fn() };
+  return { default: mock, ...mock };
 });
+
+vi.mock('jwks-rsa', () => ({
+  default: vi.fn().mockReturnValue({
+    getSigningKey: vi.fn()
+  })
+}));
 
 describe('GET /', () => {
   it('should return the root endpoints', async () => {

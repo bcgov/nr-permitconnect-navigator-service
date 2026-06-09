@@ -23,9 +23,9 @@ describe('deleteManyPermitTracking', () => {
     expect(prismaTxMock.permit_tracking.deleteMany).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.permit_tracking.deleteMany).toHaveBeenCalledWith({
       where: {
-        permitId: FAKE_PERMIT.permitId,
+        permitId: TEST_PERMIT_1.permitId,
         permitTrackingId: {
-          notIn: FAKE_PERMIT.permitTracking?.map((x: PermitTracking) => x.permitTrackingId).filter((x) => x)
+          notIn: FAKE_PERMIT.permitTracking?.map((x: PermitTracking) => x.permitTrackingId).filter(Boolean)
         }
       }
     });

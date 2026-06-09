@@ -1,18 +1,18 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { searchUsersController } from '../../../src/controllers/user.ts';
 import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { UserSearchParameters } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
 
   return res;
 };
@@ -23,13 +23,13 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const TEST_USER_LIST = [TEST_IDIR_USER_1];
 
 describe('searchUsersController', () => {
-  const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
+  const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {

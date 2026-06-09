@@ -1,4 +1,5 @@
 import config from 'config';
+
 import {
   TEST_ACTIVITY_CONTACT_1,
   TEST_ACTIVITY_ELECTRIFICATION,
@@ -19,6 +20,7 @@ import {
 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { codeTable } from '../../../src/db/codes/cache';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import {
   deletePermitController,
   getPermitController,
@@ -29,21 +31,19 @@ import {
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
 } from '../../../src/controllers/permit.ts';
-import * as permitController from '../../../src/controllers/permit.ts';
-import * as permitService from '../../../src/services/permit.ts';
-import * as projectService from '../../../src/services/project.ts';
-import * as userService from '../../../src/services/user.ts';
-import * as permitNoteService from '../../../src/services/permitNote.ts';
 import * as emailService from '../../../src/services/email.ts';
+import * as permitService from '../../../src/services/permit.ts';
+import * as permitNoteService from '../../../src/services/permitNote.ts';
+import * as projectService from '../../../src/services/project.ts';
 import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
-import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
+import * as userService from '../../../src/services/user.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import { permitNoteUpdateTemplate, navPermitStatusUpdateTemplate } from '../../../src/utils/templates.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock, MockInstance } from 'vitest';
 import type {
   ListPermitsOptions,
   Permit,
@@ -51,32 +51,38 @@ import type {
   SearchPermitsOptions
 } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
+
+vi.mock('../../../src/utils/templates.ts', async (importOriginal) => {
+  const actual = (await importOriginal()) as Record<string, unknown>; // nosonar
+  return {
+    ...actual,
+    navPermitStatusUpdateTemplate: vi.fn(() => 'NAV_TEMPLATE_BODY'),
+    permitNoteUpdateTemplate: vi.fn(() => 'NOTE_TEMPLATE_BODY'),
+    initialPeachPermitUpdateTemplate: vi.fn(() => 'PEACH_TEMPLATE_BODY')
+  };
+});
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
 let res = mockResponse();
-let txWrapperSpy: jest.SpyInstance;
 
 beforeEach(() => {
   res = mockResponse();
-  txWrapperSpy = jest.spyOn(txWrapper, 'transactionWrapper').mockImplementation(async (fn) => fn(prismaTxMock));
 });
 
 afterEach(() => {
-  txWrapperSpy.mockRestore();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('deletePermitController', () => {
-  const deleteSpy = jest.spyOn(permitService, 'deletePermit');
+  const deleteSpy = vi.spyOn(permitService, 'deletePermit');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -96,7 +102,7 @@ describe('deletePermitController', () => {
 });
 
 describe('getPermitController', () => {
-  const getSpy = jest.spyOn(permitService, 'getPermit');
+  const getSpy = vi.spyOn(permitService, 'getPermit');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -116,7 +122,7 @@ describe('getPermitController', () => {
 });
 
 describe('getPermitTypesController', () => {
-  const permitTypesSpy = jest.spyOn(permitService, 'getPermitTypes');
+  const permitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -139,7 +145,7 @@ describe('getPermitTypesController', () => {
 });
 
 describe('listPermitsController', () => {
-  const listSpy = jest.spyOn(permitService, 'listPermits');
+  const listSpy = vi.spyOn(permitService, 'listPermits');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -200,7 +206,7 @@ describe('listPermitsController', () => {
 });
 
 describe('searchPermitsController', () => {
-  const searchSpy = jest.spyOn(permitService, 'searchPermitsPaginated');
+  const searchSpy = vi.spyOn(permitService, 'searchPermitsPaginated');
 
   it('should call services and respond with 200 and paginated results', async () => {
     const req = {
@@ -318,8 +324,8 @@ describe('searchPermitsController', () => {
 });
 
 describe('upsertPermitController', () => {
-  const upsertSpy = jest.spyOn(permitService, 'upsertPermit');
-  const getSourceSystemKindsSpy = jest.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
+  const upsertSpy = vi.spyOn(permitService, 'upsertPermit');
+  const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
 
   it('should call services and respond with 200 and result', async () => {
     const now = new Date();
@@ -362,15 +368,19 @@ describe('upsertPermitController', () => {
 });
 
 describe('sendPermitUpdateEmail', () => {
-  const emailSpy = jest.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
+  let emailSpy: MockInstance<typeof emailService.email>;
+
+  beforeEach(() => {
+    emailSpy = vi.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
+  });
 
   it('builds the template context and sends an email', async () => {
-    (config.get as jest.Mock).mockImplementation((key: string) => {
+    (config.get as Mock).mockImplementation((key: string) => {
       if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
     });
 
-    const templateMock = jest.fn().mockReturnValue('<html>email body</html>');
+    const templateMock = vi.fn().mockReturnValue('<html>email body</html>');
 
     const permit: Permit = {
       ...TEST_PERMIT_1,
@@ -416,16 +426,16 @@ describe('sendPermitUpdateEmail', () => {
 });
 
 describe('createNoteAndSendUpdateEmails', () => {
-  const getProjectSpy = jest.spyOn(projectService, 'getProjectByActivityId');
-  const readUserSpy = jest.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
-  const createNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
-  const emailSpy = jest.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
-  const sendEmailJobSpy = jest.spyOn(permitController, 'sendPermitUpdateEmail');
+  const getProjectSpy = vi.spyOn(projectService, 'getProjectByActivityId');
+  const readUserSpy = vi.spyOn(userService, 'readUser').mockResolvedValue(TEST_IDIR_USER_1);
+  const createNoteSpy = vi.spyOn(permitNoteService, 'createPermitNote').mockResolvedValue(TEST_PERMIT_NOTE_UPDATE);
+  let emailSpy: MockInstance<typeof emailService.email>;
 
   beforeEach(() => {
-    emailSpy.mockClear();
-    sendEmailJobSpy.mockClear();
-    (config.get as jest.Mock).mockImplementation((key: string) => {
+    emailSpy = vi.spyOn(emailService, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE);
+    (navPermitStatusUpdateTemplate as Mock).mockClear();
+    (permitNoteUpdateTemplate as Mock).mockClear();
+    (config.get as Mock).mockImplementation((key: string) => {
       if (key === 'server.pcns.navEmail') return 'navteam@example.com';
       if (key === 'server.ches.submission.cc') return 'noreply@example.com';
       return '';
@@ -444,7 +454,7 @@ describe('createNoteAndSendUpdateEmails', () => {
   });
 
   afterEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it('creates notes and enqueues both navigator and proponent emails when contact email exists', async () => {
@@ -469,27 +479,41 @@ describe('createNoteAndSendUpdateEmails', () => {
       })
     );
 
-    expect(sendEmailJobSpy).toHaveBeenCalledTimes(2);
+    expect(emailSpy).toHaveBeenCalledTimes(2);
 
-    const firstJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
-    const secondJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[1][0];
+    expect(navPermitStatusUpdateTemplate).toHaveBeenCalledTimes(1);
+    expect(navPermitStatusUpdateTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activityId: permit.activityId,
+        dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
+        initiative: Initiative.ELECTRIFICATION.toLowerCase(),
+        permitId: permit.permitId,
+        projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+      })
+    );
 
-    expect(firstJob).toMatchObject({
-      permit,
-      initiative: Initiative.ELECTRIFICATION,
-      dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
-      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
-      toEmails: ['navteam@example.com'],
-      emailTemplate: navPermitStatusUpdateTemplate
+    expect(permitNoteUpdateTemplate).toHaveBeenCalledTimes(1);
+    expect(permitNoteUpdateTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activityId: permit.activityId,
+        dearName: TEST_CONTACT_1.firstName,
+        initiative: Initiative.ELECTRIFICATION.toLowerCase(),
+        permitId: permit.permitId,
+        projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+      })
+    );
+
+    const firstEmail = emailSpy.mock.calls[0][0];
+    const secondEmail = emailSpy.mock.calls[1][0];
+
+    expect(firstEmail).toMatchObject({
+      to: ['navteam@example.com'],
+      body: 'NAV_TEMPLATE_BODY'
     });
 
-    expect(secondJob).toMatchObject({
-      permit,
-      initiative: Initiative.ELECTRIFICATION,
-      dearName: TEST_CONTACT_1.firstName,
-      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
-      toEmails: [TEST_CONTACT_1.email],
-      emailTemplate: permitNoteUpdateTemplate
+    expect(secondEmail).toMatchObject({
+      to: [TEST_CONTACT_1.email],
+      body: 'NOTE_TEMPLATE_BODY'
     });
   });
 
@@ -507,7 +531,7 @@ describe('createNoteAndSendUpdateEmails', () => {
       }
     });
 
-    (readUserSpy as jest.Mock).mockResolvedValueOnce({
+    (readUserSpy as Mock).mockResolvedValueOnce({
       ...TEST_IDIR_USER_1,
       firstName: 'Another',
       lastName: 'Navigator'
@@ -523,15 +547,20 @@ describe('createNoteAndSendUpdateEmails', () => {
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
 
-    expect(sendEmailJobSpy).toHaveBeenCalledTimes(1);
-    const job: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
+    expect(emailSpy).toHaveBeenCalledTimes(1);
+    expect(navPermitStatusUpdateTemplate).toHaveBeenCalledTimes(1);
+    expect(navPermitStatusUpdateTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dearName: 'Another Navigator',
+        projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+      })
+    );
+    expect(permitNoteUpdateTemplate).not.toHaveBeenCalled();
 
-    expect(job).toMatchObject({
-      permit,
-      dearName: 'Another Navigator',
-      projectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
-      toEmails: ['navteam@example.com'],
-      emailTemplate: navPermitStatusUpdateTemplate
+    const email = emailSpy.mock.calls[0][0];
+    expect(email).toMatchObject({
+      to: ['navteam@example.com'],
+      body: 'NAV_TEMPLATE_BODY'
     });
   });
 
@@ -561,27 +590,35 @@ describe('createNoteAndSendUpdateEmails', () => {
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
 
-    expect(sendEmailJobSpy).toHaveBeenCalledTimes(2);
+    expect(emailSpy).toHaveBeenCalledTimes(2);
 
-    const firstJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[0][0];
-    const secondJob: PermitUpdateEmailParams = sendEmailJobSpy.mock.calls[1][0];
+    expect(navPermitStatusUpdateTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
+        initiative: Initiative.HOUSING.toLowerCase(),
+        projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+      })
+    );
 
-    expect(firstJob).toMatchObject({
-      permit,
-      initiative: Initiative.HOUSING,
-      dearName: `${TEST_IDIR_USER_1.firstName} ${TEST_IDIR_USER_1.lastName}`,
-      projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
-      toEmails: ['navteam@example.com'],
-      emailTemplate: navPermitStatusUpdateTemplate
+    expect(permitNoteUpdateTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        dearName: TEST_CONTACT_1.firstName,
+        initiative: Initiative.HOUSING.toLowerCase(),
+        projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+      })
+    );
+
+    const firstEmail = emailSpy.mock.calls[0][0];
+    const secondEmail = emailSpy.mock.calls[1][0];
+
+    expect(firstEmail).toMatchObject({
+      to: ['navteam@example.com'],
+      body: 'NAV_TEMPLATE_BODY'
     });
 
-    expect(secondJob).toMatchObject({
-      permit,
-      initiative: Initiative.HOUSING,
-      dearName: TEST_CONTACT_1.firstName,
-      projectId: TEST_HOUSING_PROJECT_1.housingProjectId,
-      toEmails: [TEST_CONTACT_1.email],
-      emailTemplate: permitNoteUpdateTemplate
+    expect(secondEmail).toMatchObject({
+      to: [TEST_CONTACT_1.email],
+      body: 'NOTE_TEMPLATE_BODY'
     });
   });
 

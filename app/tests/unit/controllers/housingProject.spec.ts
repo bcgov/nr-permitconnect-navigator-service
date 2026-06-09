@@ -1,6 +1,21 @@
 import { Prisma } from '@prisma/client';
 
 import {
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_ACTIVITY_HOUSING,
+  TEST_HOUSING_DRAFT,
+  TEST_HOUSING_PROJECT_1,
+  TEST_HOUSING_PROJECT_CREATE,
+  TEST_HOUSING_PROJECT_INTAKE,
+  TEST_IDIR_USER_1,
+  TEST_PERMIT_1,
+  TEST_PERMIT_2,
+  TEST_PERMIT_3,
+  TEST_HOUSING_PROJECT_UPDATE
+} from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock';
+import {
   assignPriority,
   createHousingProjectController,
   deleteHousingProjectController,
@@ -25,11 +40,13 @@ import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as permitTrackingService from '../../../src/services/permitTracking.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import * as utils from '../../../src/utils/utils';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type {
   ActivityContact,
   Draft,
@@ -39,25 +56,8 @@ import type {
   HousingProjectStatistics,
   StatisticsFilters
 } from '../../../src/types/index.ts';
-import {
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_HOUSING,
-  TEST_HOUSING_DRAFT,
-  TEST_HOUSING_PROJECT_1,
-  TEST_HOUSING_PROJECT_CREATE,
-  TEST_HOUSING_PROJECT_INTAKE,
-  TEST_IDIR_USER_1,
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_HOUSING_PROJECT_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import * as utils from '../../../src/utils/utils';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const PROJECT_WITH_PROJECTID = {
   ...TEST_HOUSING_PROJECT_1,
@@ -65,14 +65,14 @@ const PROJECT_WITH_PROJECTID = {
 };
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
@@ -83,7 +83,7 @@ afterEach(() => {
    * resetAllMocks seems to cause strange issues such as
    * functions not calling as expected
    */
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('assignPriority', () => {
@@ -222,13 +222,13 @@ describe('assignPriority', () => {
 });
 
 describe('createHousingProjectController', () => {
-  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
-  const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
-  const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const getCurrentUsernameSpy = jest.spyOn(utils, 'getCurrentUsername');
+  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
+  const createHousingProjectSpy = vi.spyOn(housingProjectService, 'createHousingProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const getCurrentUsernameSpy = vi.spyOn(utils, 'getCurrentUsername');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -379,9 +379,9 @@ describe('createHousingProjectController', () => {
 });
 
 describe('deleteHousingProjectController', () => {
-  const getHousingProjectSpy = jest.spyOn(housingProjectService, 'getHousingProject');
-  const deleteHousingProjectSpy = jest.spyOn(housingProjectService, 'deleteHousingProject');
-  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+  const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+  const deleteHousingProjectSpy = vi.spyOn(housingProjectService, 'deleteHousingProject');
+  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -415,8 +415,8 @@ describe('deleteHousingProjectController', () => {
 });
 
 describe('deleteHousingProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = jest.spyOn(activityService, 'deleteActivityHard');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
+  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -442,7 +442,7 @@ describe('deleteHousingProjectDraftController', () => {
 });
 
 describe('getHousingProjectActivityIdsController', () => {
-  const getHousingProjectsSpy = jest.spyOn(housingProjectService, 'getHousingProjects');
+  const getHousingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -461,7 +461,7 @@ describe('getHousingProjectActivityIdsController', () => {
 });
 
 describe('getHousingProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -481,7 +481,7 @@ describe('getHousingProjectDraftController', () => {
 });
 
 describe('getHousingProjectDraftsController', () => {
-  const getDraftsSpy = jest.spyOn(draftService, 'getDrafts');
+  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -500,7 +500,7 @@ describe('getHousingProjectDraftsController', () => {
 });
 
 describe('getHousingProjectStatisticsController', () => {
-  const statisticsSpy = jest.spyOn(housingProjectService, 'getHousingProjectStatistics');
+  const statisticsSpy = vi.spyOn(housingProjectService, 'getHousingProjectStatistics');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -554,8 +554,8 @@ describe('getHousingProjectStatisticsController', () => {
 });
 
 describe('getHousingProjectController', () => {
-  const housingProjectSpy = jest.spyOn(housingProjectService, 'getHousingProject');
-  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
+  const housingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
+  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -579,7 +579,7 @@ describe('getHousingProjectController', () => {
 });
 
 describe('getHousingProjectsController', () => {
-  const housingProjectsSpy = jest.spyOn(housingProjectService, 'getHousingProjects');
+  const housingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -599,7 +599,7 @@ describe('getHousingProjectsController', () => {
 });
 
 describe('searchHousingProjectsController', () => {
-  const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
+  const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -625,14 +625,14 @@ describe('searchHousingProjectsController', () => {
 });
 
 describe('submitHousingProjectDraftController', () => {
-  const upsertPermitSpy = jest.spyOn(permitService, 'upsertPermit');
-  const createHousingProjectSpy = jest.spyOn(housingProjectService, 'createHousingProject');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
-  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
-  const upsertPermitTrackingSpy = jest.spyOn(permitTrackingService, 'upsertPermitTracking');
+  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
+  const createHousingProjectSpy = vi.spyOn(housingProjectService, 'createHousingProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
+  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
+  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -802,9 +802,9 @@ describe('submitHousingProjectDraftController', () => {
 });
 
 describe('updateHousingProjectDraftController', () => {
-  const createDraftSpy = jest.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
+  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -913,7 +913,7 @@ describe('updateHousingProjectDraftController', () => {
 });
 
 describe('updateHousingProjectController', () => {
-  const updateSpy = jest.spyOn(housingProjectService, 'updateHousingProject');
+  const updateSpy = vi.spyOn(housingProjectService, 'updateHousingProject');
 
   const { housingProjectId } = TEST_HOUSING_PROJECT_1;
 

@@ -73,13 +73,13 @@ const createMockPolicyAttribute = (overrides = {}) => ({
 });
 
 beforeEach(() => {
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('assignGroup', () => {
   it('calls subject_group.create and returns result', async () => {
     prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(createMockGroup());
-    jest.spyOn(yarsService, 'subjectHasGroup').mockResolvedValueOnce(false);
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
     prismaTxMock.subject_group.create.mockResolvedValueOnce(createMockSubjectGroup());
 
     const response = await yarsService.assignGroup(prismaTxMock, 'sub', 1);
@@ -96,7 +96,7 @@ describe('assignGroup', () => {
 
   it('returns group if already assigned', async () => {
     prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(createMockGroup());
-    jest.spyOn(yarsService, 'subjectHasGroup').mockResolvedValueOnce(true);
+    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
 
     const response = await yarsService.assignGroup(prismaTxMock, 'sub', 1);
 

@@ -23,7 +23,7 @@ describe('getProjectByActivityId', () => {
   };
 
   beforeEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
   it('returns a housing project when only housing_result is found', async () => {

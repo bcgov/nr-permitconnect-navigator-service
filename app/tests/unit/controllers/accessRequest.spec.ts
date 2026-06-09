@@ -19,6 +19,7 @@ import {
 import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../../../src/utils/enums/application';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { AccessRequest, User } from '../../../src/types';
 import {
   createUserAccessRequest,
@@ -27,59 +28,59 @@ import {
   updateAccessRequest
 } from '../../../src/services/accessRequest';
 
-jest.mock('../../../src/services/accessRequest', () => ({
-  createUserAccessRequest: jest.fn(),
-  getAccessRequest: jest.fn(),
-  getAccessRequests: jest.fn(),
-  updateAccessRequest: jest.fn()
+vi.mock('../../../src/services/accessRequest', () => ({
+  createUserAccessRequest: vi.fn(),
+  getAccessRequest: vi.fn(),
+  getAccessRequests: vi.fn(),
+  updateAccessRequest: vi.fn()
 }));
 
-jest.mock('../../../src/services/coms', () => ({
-  assignPermissions: jest.fn()
+vi.mock('../../../src/services/coms', () => ({
+  assignPermissions: vi.fn()
 }));
 
-jest.mock('../../../src/services/yars', () => ({
-  assignGroup: jest.fn(),
-  getCorrespondingGlobalGroup: jest.fn(),
-  getGroups: jest.fn(),
-  getSubjectGroups: jest.fn(),
-  removeGroup: jest.fn(),
-  subjectHasGroupName: jest.fn()
+vi.mock('../../../src/services/yars', () => ({
+  assignGroup: vi.fn(),
+  getCorrespondingGlobalGroup: vi.fn(),
+  getGroups: vi.fn(),
+  getSubjectGroups: vi.fn(),
+  removeGroup: vi.fn(),
+  subjectHasGroupName: vi.fn()
 }));
 
-jest.mock('../../../src/services/user', () => ({
-  createUser: jest.fn(),
-  readUser: jest.fn()
+vi.mock('../../../src/services/user', () => ({
+  createUser: vi.fn(),
+  readUser: vi.fn()
 }));
 
-jest.mock('../../../src/services/initiative', () => ({
-  getInitiative: jest.fn()
+vi.mock('../../../src/services/initiative', () => ({
+  getInitiative: vi.fn()
 }));
 
-const mockCreateUserAccessRequest = createUserAccessRequest as jest.Mock;
-const mockGetAccessRequest = getAccessRequest as jest.Mock;
-const mockGetAccessRequests = getAccessRequests as jest.Mock;
-const mockUpdateAccessRequest = updateAccessRequest as jest.Mock;
-const mockAssignPermissions = assignPermissions as jest.Mock;
-const mockGetGroups = getGroups as jest.Mock;
-const mockAssignGroup = assignGroup as jest.Mock;
-const mockCreateUser = createUser as jest.Mock;
-const mockReadUser = readUser as jest.Mock;
-const mockGetCorrespondingGlobalGroup = getCorrespondingGlobalGroup as jest.Mock;
-const mockGetInitiative = getInitiative as jest.Mock;
-const mockGetSubjectGroups = getSubjectGroups as jest.Mock;
-const mockSubjectHasGroupName = subjectHasGroupName as jest.Mock;
-const mockRemoveGroup = removeGroup as jest.Mock;
+const mockCreateUserAccessRequest = createUserAccessRequest as Mock;
+const mockGetAccessRequest = getAccessRequest as Mock;
+const mockGetAccessRequests = getAccessRequests as Mock;
+const mockUpdateAccessRequest = updateAccessRequest as Mock;
+const mockAssignPermissions = assignPermissions as Mock;
+const mockGetGroups = getGroups as Mock;
+const mockAssignGroup = assignGroup as Mock;
+const mockCreateUser = createUser as Mock;
+const mockReadUser = readUser as Mock;
+const mockGetCorrespondingGlobalGroup = getCorrespondingGlobalGroup as Mock;
+const mockGetInitiative = getInitiative as Mock;
+const mockGetSubjectGroups = getSubjectGroups as Mock;
+const mockSubjectHasGroupName = subjectHasGroupName as Mock;
+const mockRemoveGroup = removeGroup as Mock;
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
@@ -90,7 +91,7 @@ afterEach(() => {
    * resetAllMocks seems to cause strange issues such as
    * functions not calling as expected
    */
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('createUserAccessRequestController', () => {

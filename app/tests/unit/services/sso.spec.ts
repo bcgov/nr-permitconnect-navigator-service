@@ -1,14 +1,14 @@
+import type { Mocked } from 'vitest';
 import axios from 'axios';
 import config from 'config';
 
 import * as ssoService from '../../../src/services/sso.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
-let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+vi.mock('config');
+let mockedConfig = config as Mocked<typeof config>;
 
-jest.mock('axios');
-let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+vi.mock('axios');
+let mockedAxios = axios as Mocked<typeof axios>;
 
 const FAKE_PERSON = {
   firstName: 'Test',
@@ -19,20 +19,20 @@ const FAKE_PERSON = {
 const GUID = 'e6f92db3-e931-4e0e-a465-ab6db6c78b2d';
 
 beforeEach(() => {
-  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
-  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+  mockedConfig = config as Mocked<typeof config>;
+  mockedAxios = axios as Mocked<typeof axios>;
 
   // Replace any instances with the mocked instance
   mockedAxios.create.mockImplementation(() => mockedAxios);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => {
+  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => {
     return cfg;
   });
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('searchIdirUsers', () => {

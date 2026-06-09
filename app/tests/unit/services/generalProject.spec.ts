@@ -2,10 +2,11 @@ import { TEST_CURRENT_CONTEXT, TEST_GENERAL_PROJECT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
-import { InputJsonValue } from '@prisma/client/runtime/library';
+
+import type { InputJsonValue } from '@prisma/client/runtime/library';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const FAKE_PROJECT = {

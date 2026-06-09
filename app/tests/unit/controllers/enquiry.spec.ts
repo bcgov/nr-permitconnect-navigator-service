@@ -1,3 +1,14 @@
+import { Prisma } from '@prisma/client';
+
+import {
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_ACTIVITY_ELECTRIFICATION,
+  TEST_ENQUIRY_1,
+  TEST_ENQUIRY_INTAKE,
+  TEST_HOUSING_PROJECT_1
+} from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   createEnquiryController,
   deleteEnquiryController,
@@ -9,56 +20,46 @@ import {
 } from '../../../src/controllers/enquiry.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as contactService from '../../../src/services/contact.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as projectService from '../../../src/services/project.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types/index.ts';
-import {
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_ELECTRIFICATION,
-  TEST_ENQUIRY_1,
-  TEST_ENQUIRY_INTAKE,
-  TEST_HOUSING_PROJECT_1
-} from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
-import { Prisma } from '@prisma/client';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 // Set an initiative for the context
 TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
 describe('createEnquiryController', () => {
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
-  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
-  const createEnquirySpy = jest.spyOn(enquiryService, 'createEnquiry');
-  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
+  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
+  const createEnquirySpy = vi.spyOn(enquiryService, 'createEnquiry');
+  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -115,9 +116,9 @@ describe('createEnquiryController', () => {
 });
 
 describe('deleteEnquiryController', () => {
-  const getEnquirySpy = jest.spyOn(enquiryService, 'getEnquiry');
-  const deleteEnquirySpy = jest.spyOn(enquiryService, 'deleteEnquiry');
-  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
+  const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
+  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -148,7 +149,7 @@ describe('deleteEnquiryController', () => {
 });
 
 describe('getEnquiriesController', () => {
-  const getEnquiriesSpy = jest.spyOn(enquiryService, 'getEnquiries');
+  const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -159,7 +160,7 @@ describe('getEnquiriesController', () => {
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     getEnquiriesSpy.mockResolvedValue(enquiries);
 
-    await getEnquiriesController(req as unknown as Request, res as unknown as Response);
+    await getEnquiriesController(req, res as unknown as Response);
 
     expect(getEnquiriesSpy).toHaveBeenCalledWith(prismaTxMock);
     expect(res.status).toHaveBeenCalledWith(200);
@@ -168,7 +169,7 @@ describe('getEnquiriesController', () => {
 });
 
 describe('getEnquiryController', () => {
-  const getEnquirySpy = jest.spyOn(enquiryService, 'getEnquiry');
+  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -178,7 +179,7 @@ describe('getEnquiryController', () => {
 
     getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
-    await getEnquiryController(req as unknown as Request<{ enquiryId: string }>, res as unknown as Response);
+    await getEnquiryController(req, res as unknown as Response);
 
     expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211');
     expect(res.status).toHaveBeenCalledWith(200);
@@ -187,7 +188,7 @@ describe('getEnquiryController', () => {
 });
 
 describe('listRelatedEnquiriesController', () => {
-  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
+  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -206,7 +207,7 @@ describe('listRelatedEnquiriesController', () => {
 });
 
 describe('searchEnquiriesController', () => {
-  const searchEnquiriesSpy = jest.spyOn(enquiryService, 'searchEnquiries');
+  const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -218,10 +219,7 @@ describe('searchEnquiriesController', () => {
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     searchEnquiriesSpy.mockResolvedValue(enquiries);
 
-    await searchEnquiriesController(
-      req as unknown as Request<never, never, EnquirySearchParameters, never>,
-      res as unknown as Response
-    );
+    await searchEnquiriesController(req, res as unknown as Response);
 
     expect(searchEnquiriesSpy).toHaveBeenCalledWith(
       prismaTxMock,
@@ -237,7 +235,7 @@ describe('searchEnquiriesController', () => {
 });
 
 describe('updateEnquiryController', () => {
-  const updateEnquirySpy = jest.spyOn(enquiryService, 'updateEnquiry');
+  const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {

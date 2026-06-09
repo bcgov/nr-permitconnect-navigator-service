@@ -4,30 +4,30 @@ import config from 'config';
 import * as atsService from '../../../src/services/ats.ts';
 
 import type { InternalAxiosRequestConfig } from 'axios';
+import type { Mocked } from 'vitest';
 import type { ATSClientResource, ATSEnquiryResource } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
-let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+vi.mock('config');
+let mockedConfig = config as Mocked<typeof config>;
 
-jest.mock('axios');
-let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+vi.mock('axios');
+let mockedAxios = axios as Mocked<typeof axios>;
 
 beforeEach(() => {
-  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
-  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+  mockedConfig = config as Mocked<typeof config>;
+  mockedAxios = axios as Mocked<typeof axios>;
 
   // Replace any instances with the mocked instance (a new mock could be used here instead):
   mockedAxios.create.mockImplementation(() => mockedAxios);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => {
+  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => {
     return cfg;
   });
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('searchATSUsers', () => {
@@ -48,7 +48,7 @@ describe('searchATSUsers', () => {
     expect(response).toStrictEqual({ data: 1, status: 200 });
   });
 
-  // catch doesn't seem to get the AxiosError
+  // Catch doesn't seem to get the AxiosError
   it.skip('returns the AxiosError if thrown', async () => {
     mockedAxios.get.mockRejectedValueOnce(
       new AxiosError('AxiosError', 'ESOMETHING', undefined, undefined, {
@@ -67,7 +67,7 @@ describe('searchATSUsers', () => {
   });
 
   it('returns Error 500 if error is unknown', async () => {
-    mockedAxios.get.mockRejectedValueOnce(new Error());
+    mockedAxios.get.mockRejectedValueOnce(new Error('Error'));
     mockedAxios.isAxiosError.mockReturnValueOnce(false);
 
     const response = await atsService.searchATSUsers({ firstName: 'A', lastName: 'B' });
@@ -86,7 +86,7 @@ describe('createATSClient', () => {
   });
 
   it('returns Error 500 if error is unknown', async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error());
+    mockedAxios.post.mockRejectedValueOnce(new Error('Error'));
     mockedAxios.isAxiosError.mockReturnValueOnce(false);
 
     const response = await atsService.createATSClient({ firstName: 'A', surName: 'B' } as ATSClientResource);
@@ -105,7 +105,7 @@ describe('createATSEnquiry', () => {
   });
 
   it('returns Error 500 if error is unknown', async () => {
-    mockedAxios.post.mockRejectedValueOnce(new Error());
+    mockedAxios.post.mockRejectedValueOnce(new Error('Error'));
     mockedAxios.isAxiosError.mockReturnValueOnce(false);
 
     const response = await atsService.createATSEnquiry({ clientId: 123 } as ATSEnquiryResource);

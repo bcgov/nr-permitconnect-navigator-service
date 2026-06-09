@@ -37,6 +37,7 @@ import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/project
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type {
   ActivityContact,
   Draft,
@@ -47,18 +48,17 @@ import type {
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
@@ -69,14 +69,14 @@ afterEach(() => {
    * resetAllMocks seems to cause strange issues such as
    * functions not calling as expected
    */
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('createElectrificationProjectController', () => {
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const createElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProject');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -144,9 +144,9 @@ describe('createElectrificationProjectController', () => {
 });
 
 describe('deleteElectrificationProjectController', () => {
-  const getElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProject');
-  const deleteElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'deleteElectrificationProject');
-  const deleteActivitySpy = jest.spyOn(activityService, 'deleteActivity');
+  const getElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProject');
+  const deleteElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'deleteElectrificationProject');
+  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -180,8 +180,8 @@ describe('deleteElectrificationProjectController', () => {
 });
 
 describe('deleteElectrificationProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = jest.spyOn(activityService, 'deleteActivityHard');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
+  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -207,7 +207,7 @@ describe('deleteElectrificationProjectDraftController', () => {
 });
 
 describe('getElectrificationProjectActivityIdsController', () => {
-  const getElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjects');
+  const getElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -226,7 +226,7 @@ describe('getElectrificationProjectActivityIdsController', () => {
 });
 
 describe('getElectrificationProjectDraftController', () => {
-  const getDraftSpy = jest.spyOn(draftService, 'getDraft');
+  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -249,7 +249,7 @@ describe('getElectrificationProjectDraftController', () => {
 });
 
 describe('getElectrificationProjectDraftsController', () => {
-  const getDraftsSpy = jest.spyOn(draftService, 'getDrafts');
+  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
 
   it('should call services and respond with 200', async () => {
     const req = {
@@ -268,7 +268,7 @@ describe('getElectrificationProjectDraftsController', () => {
 });
 
 describe('getElectrificationProjectStatistics', () => {
-  const statisticsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjectStatistics');
+  const statisticsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjectStatistics');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -318,8 +318,8 @@ describe('getElectrificationProjectStatistics', () => {
 });
 
 describe('getElectrificationProjectController', () => {
-  const getElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProject');
-  const getRelatedEnquiriesSpy = jest.spyOn(enquiryService, 'getRelatedEnquiries');
+  const getElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProject');
+  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -343,7 +343,7 @@ describe('getElectrificationProjectController', () => {
 });
 
 describe('getElectrificationProjectsController', () => {
-  const electrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'getElectrificationProjects');
+  const electrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -363,7 +363,7 @@ describe('getElectrificationProjectsController', () => {
 });
 
 describe('searchElectrificationProjectsController', () => {
-  const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+  const searchElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -389,12 +389,12 @@ describe('searchElectrificationProjectsController', () => {
 });
 
 describe('submitElectrificationProjectDraftController', () => {
-  const createElectrificationProjectSpy = jest.spyOn(electrificationProjectService, 'createElectrificationProject');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const deleteDraftSpy = jest.spyOn(draftService, 'deleteDraft');
-  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+  const createElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProject');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
+  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -471,9 +471,9 @@ describe('submitElectrificationProjectDraftController', () => {
 });
 
 describe('updateElectrificationProjectDraftController', () => {
-  const createDraftSpy = jest.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = jest.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = jest.spyOn(activityService, 'createActivity');
+  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
+  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
+  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -570,7 +570,7 @@ describe('updateElectrificationProjectDraftController', () => {
 });
 
 describe('updateElectrificationProjectController', () => {
-  const updateSpy = jest.spyOn(electrificationProjectService, 'updateElectrificationProject');
+  const updateSpy = vi.spyOn(electrificationProjectService, 'updateElectrificationProject');
 
   const { electrificationProjectId } = TEST_ELECTRIFICATION_PROJECT_1;
 

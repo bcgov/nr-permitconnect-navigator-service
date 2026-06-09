@@ -16,14 +16,16 @@ import {
   updateActivityContactController
 } from '../../../src/controllers/activityContact.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as activityContactHelpers from '../../../src/services/helpers/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as emailService from '../../../src/services/email.ts';
+import * as activityContactHelpers from '../../../src/services/helpers/activityContact.ts';
 import * as projectService from '../../../src/services/project.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
-jest.mock('config');
-let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+import type { Mocked } from 'vitest';
+
+vi.mock('config');
+let mockedConfig = config as Mocked<typeof config>;
 
 const FAKE_ADMIN_ACTIVITY_CONTACT = {
   ...TEST_ACTIVITY_CONTACT_1,
@@ -42,7 +44,7 @@ const PROJECT_WITH_PROJECTID = {
   projectId: TEST_HOUSING_PROJECT_1.housingProjectId
 };
 
-const verifyPrimaryChangeSpy = jest.spyOn(activityContactHelpers, 'verifyPrimaryChange');
+const verifyPrimaryChangeSpy = vi.spyOn(activityContactHelpers, 'verifyPrimaryChange');
 
 let app: express.Express;
 
@@ -56,18 +58,18 @@ beforeEach(() => {
   app.post('/activity/:activityId/contact/:contactId', createActivityContactController);
   app.put('/activity/:activityId/contact/:contactId', updateActivityContactController);
 
-  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+  mockedConfig = config as Mocked<typeof config>;
   mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
 
   verifyPrimaryChangeSpy.mockResolvedValue(undefined);
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('GET /activity/:activityId/contact', () => {
-  const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
+  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 
   it('should call services and respond with 200 and result', async () => {
     listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
@@ -81,11 +83,11 @@ describe('GET /activity/:activityId/contact', () => {
 });
 
 describe('DELETE /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const deleteActivityContactSpy = jest.spyOn(activityContactService, 'deleteActivityContact');
-  const getActivityContactSpy = jest.spyOn(activityContactService, 'getActivityContact');
-  const emailSpy = jest.spyOn(emailService, 'email');
+  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const deleteActivityContactSpy = vi.spyOn(activityContactService, 'deleteActivityContact');
+  const getActivityContactSpy = vi.spyOn(activityContactService, 'getActivityContact');
+  const emailSpy = vi.spyOn(emailService, 'email');
 
   beforeEach(() => {
     getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
@@ -145,10 +147,10 @@ describe('DELETE /activity/:activityId/contact/:contactId', () => {
 });
 
 describe('POST /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = jest.spyOn(activityContactService, 'createActivityContact');
-  const emailSpy = jest.spyOn(emailService, 'email');
+  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
+  const emailSpy = vi.spyOn(emailService, 'email');
 
   beforeEach(() => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
@@ -212,11 +214,11 @@ describe('POST /activity/:activityId/contact/:contactId', () => {
 });
 
 describe('PUT /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const updateActivityContactSpy = jest.spyOn(activityContactService, 'updateActivityContact');
-  const getActivityContactSpy = jest.spyOn(activityContactService, 'getActivityContact');
-  const emailSpy = jest.spyOn(emailService, 'email');
+  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const updateActivityContactSpy = vi.spyOn(activityContactService, 'updateActivityContact');
+  const getActivityContactSpy = vi.spyOn(activityContactService, 'getActivityContact');
+  const emailSpy = vi.spyOn(emailService, 'email');
 
   beforeEach(() => {
     searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);

@@ -4,28 +4,24 @@ import { checkDatabaseHealth, checkDatabaseSchema, generateUniqueActivityId } fr
 
 describe('checkDatabaseHealth', () => {
   it('should return true when the database is healthy', async () => {
-    const queryRawSpy = jest.spyOn(prismaMock, '$queryRaw');
-
     prismaMock.$queryRaw.mockResolvedValue([{ result: 1 }]);
     const result = await checkDatabaseHealth();
 
-    expect(queryRawSpy).toHaveBeenCalledWith(['SELECT 1 AS result']);
+    expect(prismaMock.$queryRaw).toHaveBeenCalledWith(['SELECT 1 AS result']);
     expect(result).toBe(true);
   });
 
   it('should return false and log an error when the database is unhealthy', async () => {
-    const queryRawSpy = jest.spyOn(prismaMock, '$queryRaw');
-
     prismaMock.$queryRaw.mockRejectedValue(new Error('Database error'));
     const result = await checkDatabaseHealth();
 
-    expect(queryRawSpy).toHaveBeenCalledWith(['SELECT 1 AS result']);
+    expect(prismaMock.$queryRaw).toHaveBeenCalledWith(['SELECT 1 AS result']);
     expect(result).toBe(false);
   });
 });
 
 describe('checkDatabaseSchema', () => {
-  const freezeSpy = jest.spyOn(Object, 'freeze');
+  const freezeSpy = vi.spyOn(Object, 'freeze');
 
   it('should return true when the database schema matches the expected structure', async () => {
     const result = checkDatabaseSchema();

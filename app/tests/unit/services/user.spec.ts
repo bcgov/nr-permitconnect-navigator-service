@@ -8,7 +8,8 @@ import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
 import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
-import type { Contact, IdentityProvider, User } from '../../../src/types/index.ts';
+import type { MockInstance } from 'vitest';
+import type { IdentityProvider, User } from '../../../src/types/index.ts';
 
 const idirIdentityProvider: IdentityProvider = {
   idp: IdentityProviderKind.AZUREIDIR,
@@ -76,8 +77,8 @@ const idirToken = {
 };
 
 afterEach(() => {
-  jest.resetAllMocks();
-  jest.restoreAllMocks();
+  vi.resetAllMocks();
+  vi.restoreAllMocks();
 });
 
 describe('createIdp', () => {
@@ -100,32 +101,27 @@ describe('createUser', () => {
   });
 
   it('creates new idp if not existing', async () => {
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-    const createIdpSpy = jest.spyOn(userService, 'createIdp');
-
     prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    readIdpSpy.mockResolvedValueOnce(null);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(null);
+    prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
     prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
 
     await userService.createUser(prismaTxMock, { ...idirUser });
 
-    expect(readIdpSpy).toHaveBeenCalledTimes(1);
-    expect(createIdpSpy).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
   });
 
   it('creates new user if not existing', async () => {
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-    const createIdpSpy = jest.spyOn(userService, 'createIdp');
-
     prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
     prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
 
     const response = await userService.createUser(prismaTxMock, { ...idirUser });
 
     expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(readIdpSpy).toHaveBeenCalledTimes(1);
-    expect(createIdpSpy).toHaveBeenCalledTimes(0);
+    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(0);
     expect(prismaTxMock.user.create).toHaveBeenCalledTimes(1);
     expect(response).toEqual(
       expect.objectContaining({
@@ -136,10 +132,8 @@ describe('createUser', () => {
   });
 
   it('uses existing transaction if provided', async () => {
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-
     prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
     prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
 
     await userService.createUser(prismaTxMock, { ...idirUser });
@@ -175,22 +169,21 @@ describe('listIdps', () => {
 });
 
 describe('login', () => {
-  let createUserSpy = jest.spyOn(userService, 'createUser');
-  let updateUserSpy = jest.spyOn(userService, 'updateUser');
-  let searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  let upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+  let searchContactsSpy: MockInstance<typeof contactService.searchContacts>;
+  let upsertContactsSpy: MockInstance<typeof contactService.upsertContacts>;
 
   beforeEach(() => {
-    createUserSpy = jest.spyOn(userService, 'createUser');
-    updateUserSpy = jest.spyOn(userService, 'updateUser');
-    searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-    upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+    searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+    upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
   });
 
   it('searches for and returns an existing user', async () => {
     prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    updateUserSpy.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce({} as Contact[]);
+    // updateUser path: readUser -> findUnique; identity_provider.findUnique; user.update
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
+    searchContactsSpy.mockResolvedValueOnce([]);
 
     await userService.login(prismaTxMock, idirToken);
 
@@ -198,47 +191,56 @@ describe('login', () => {
   });
 
   it('calls createUser if existing user not found', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    createUserSpy.mockResolvedValueOnce(idirUser);
+    // login.findFirst and createUser.findFirst both see null
+    prismaTxMock.user.findFirst.mockResolvedValue(null);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
     searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce({} as Contact[]);
+    upsertContactsSpy.mockResolvedValueOnce([]);
 
     await userService.login(prismaTxMock, idirToken);
 
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(createUserSpy).toHaveBeenCalledTimes(1);
-    expect(updateUserSpy).toHaveBeenCalledTimes(0);
+    expect(prismaTxMock.user.create).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.user.update).not.toHaveBeenCalled();
   });
 
   it('calls updateUser if existing user found', async () => {
     prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    updateUserSpy.mockResolvedValueOnce(idirUser);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
     searchContactsSpy.mockResolvedValueOnce([]);
+    upsertContactsSpy.mockResolvedValueOnce([]);
 
     await userService.login(prismaTxMock, idirToken);
 
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(createUserSpy).toHaveBeenCalledTimes(0);
-    expect(updateUserSpy).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.user.create).not.toHaveBeenCalled();
+    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
   });
 
   it('creates contact entry if not existing', async () => {
     prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    updateUserSpy.mockResolvedValueOnce(idirUser);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
     searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce({} as Contact[]);
+    upsertContactsSpy.mockResolvedValueOnce([]);
 
     await userService.login(prismaTxMock, idirToken);
 
-    expect(updateUserSpy).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
     expect(searchContactsSpy).toHaveBeenCalledTimes(1);
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
   });
 
   it('splits the BCeID first name into first/last for contact', async () => {
     prismaTxMock.user.findFirst.mockResolvedValueOnce(bceidUser);
-    updateUserSpy.mockResolvedValueOnce(bceidUser);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(bceidUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(bceidUser);
     searchContactsSpy.mockResolvedValueOnce([]);
+    upsertContactsSpy.mockResolvedValueOnce([]);
+
     await userService.login(prismaTxMock, bceidToken);
 
     expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
@@ -270,8 +272,11 @@ describe('login', () => {
     blankToken.family_name = null;
 
     prismaTxMock.user.findFirst.mockResolvedValueOnce(blankNameUser);
-    updateUserSpy.mockResolvedValueOnce(blankNameUser);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(blankNameUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(blankNameUser);
     searchContactsSpy.mockResolvedValueOnce([]);
+    upsertContactsSpy.mockResolvedValueOnce([]);
 
     await userService.login(prismaTxMock, blankToken);
 
@@ -296,11 +301,14 @@ describe('login', () => {
 
   it('returns the user', async () => {
     prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    updateUserSpy.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([{}] as Contact[]);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
+    searchContactsSpy.mockResolvedValueOnce([]);
+
     const response = await userService.login(prismaTxMock, idirToken);
 
-    expect(updateUserSpy).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
     expect(response).toEqual(idirUser);
   });
 });
@@ -370,9 +378,7 @@ describe('searchUsers', () => {
 
 describe('updateUser', () => {
   it('returns same user if no data changes', async () => {
-    const readUserSpy = jest.spyOn(userService, 'readUser');
-
-    readUserSpy.mockResolvedValueOnce(idirUser);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
 
     const response = await userService.updateUser(prismaTxMock, idirUser.userId, idirUser);
 
@@ -381,26 +387,21 @@ describe('updateUser', () => {
   });
 
   it('creates new idp if not existing', async () => {
-    const readUserSpy = jest.spyOn(userService, 'readUser');
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-    const createIdpSpy = jest.spyOn(userService, 'createIdp');
-
-    readUserSpy.mockResolvedValueOnce(idirUser);
-    readIdpSpy.mockResolvedValueOnce(null);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(null);
+    prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
 
     const changedUser = { ...idirUser, firstName: 'Changed' };
     await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
 
-    expect(readIdpSpy).toHaveBeenCalledTimes(1);
-    expect(createIdpSpy).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
   });
 
   it('updates the user', async () => {
-    const readUserSpy = jest.spyOn(userService, 'readUser');
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-
-    readUserSpy.mockResolvedValueOnce(idirUser);
-    readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
     prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
 
     const changedUser = { ...idirUser, firstName: 'Changed' };
@@ -415,11 +416,8 @@ describe('updateUser', () => {
   });
 
   it('uses existing transaction if provided', async () => {
-    const readUserSpy = jest.spyOn(userService, 'readUser');
-    const readIdpSpy = jest.spyOn(userService, 'readIdp');
-
-    readUserSpy.mockResolvedValueOnce(idirUser);
-    readIdpSpy.mockResolvedValueOnce(idirIdentityProvider);
+    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
+    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
     prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
 
     const changedUser = { ...idirUser, firstName: 'Changed' };

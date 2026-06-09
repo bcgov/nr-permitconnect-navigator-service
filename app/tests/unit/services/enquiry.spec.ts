@@ -1,12 +1,13 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { TEST_CURRENT_CONTEXT, TEST_ENQUIRY_1 } from '../data/index.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import * as enquiryService from '../../../src/services/enquiry.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { EnquiryBase } from '../../../src/types/models.ts';
+
+import type { EnquiryBase } from '../../../src/types/models.ts';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createEnquiry', () => {
