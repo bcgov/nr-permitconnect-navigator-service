@@ -9,7 +9,6 @@ import { Problem } from '../../../src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { PrismaTransactionClient } from '../../../src/db/dataConnection';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 const AUTHORITY = 'https://auth.example.com';
@@ -47,7 +46,7 @@ vi.mock('../../../src/middleware/providers/oidc', () => ({
 }));
 
 vi.mock('../../../src/db/utils/transactionWrapper', () => ({
-  transactionWrapper: vi.fn((cb) => cb({} as PrismaTransactionClient))
+  transactionWrapper: vi.fn((cb) => cb({}))
 }));
 
 vi.mock('../../../src/services/user', () => ({
