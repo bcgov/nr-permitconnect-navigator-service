@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
 
-import { Card } from '@/lib/primevue';
+import { Button, Card } from '@/lib/primevue';
 
 // Props
 const { assignee, createdBy, activityId } = defineProps<{
@@ -41,19 +41,19 @@ const { t } = useI18n();
     </Card>
     <Card class="mb-0 card-bg-bcblue-50">
       <template #content>
-        <div
-          class="cursor-pointer"
+        <Button
+          variant="link"
+          :aria-label="t('basicProjectInfoCard.submittedProjectInfo')"
           @click="emit('basicProjectInfoCard:navigateToSubmissionIntakeView')"
         >
           <font-awesome-icon
             class="mr-2"
             icon="fa-solid fa-file-lines"
           />
-
           <span class="underline app-primary-color">
             {{ t('basicProjectInfoCard.submittedProjectInfo') }}
           </span>
-        </div>
+        </Button>
       </template>
     </Card>
   </div>

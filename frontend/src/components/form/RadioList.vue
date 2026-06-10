@@ -59,7 +59,7 @@ onBeforeMount(() => {
         :key="getRadioListOptionValue(option)"
         class="flex flex-col items-start"
       >
-        <div>
+        <div class="my-0">
           <RadioButton
             v-model="value"
             :aria-describedby="`${name}-help`"
@@ -72,13 +72,13 @@ onBeforeMount(() => {
             @blur="handleBlur"
             @click="emit('onClick', value)"
           />
-          <span
+          <label
             :id="`${name}-option-${getRadioListOptionValue(option)}`"
             :for="getRadioListOptionValue(option)"
             class="ml-2 mb-0"
           >
             {{ getRadioListOptionLabel(option) }}
-          </span>
+          </label>
         </div>
       </div>
     </div>

@@ -208,4 +208,12 @@ const filteredDocuments = computed(() => {
     color: var(--p-content-hover-background);
   }
 }
+
+:deep(.p-button) {
+  &:focus,
+  &:focus-visible {
+    outline: 2px solid var(--p-primary-color) !important;
+    outline-offset: 2px !important;
+  }
+}
 </style>

@@ -33,7 +33,9 @@ const errors = computed(() => useFormStore().getFormErrors.some((x) => x.tab ===
   <div class="flex flex-col items-center">
     <button
       type="button"
-      :aria-label="`Go to ${title} step`"
+      :aria-label="index === activeStep ? `${title} selected` : `Go to ${title}`"
+      :aria-current="index === activeStep ? 'step' : undefined"
+      tabindex="0"
       class="bg-transparent border-0 inline-flex flex-col p-1 mt-1"
       :class="[{ 'outer-border': index === activeStep, 'outer-border-error': index === activeStep && errors }]"
       @click="
