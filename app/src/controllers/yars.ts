@@ -12,7 +12,7 @@ import { Initiative } from '../utils/enums/application.ts';
 import Problem from '../utils/problem.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,

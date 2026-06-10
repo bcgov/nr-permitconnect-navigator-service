@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['coverage/**', 'dist/**', 'jest.config.js', 'node_modules/**', 'sbin/**']
+    ignores: ['coverage/**', 'dist/**', 'vitest.config.ts', 'node_modules/**', 'sbin/**']
   },
   {
     files: ['**/*.{js,ts}'],

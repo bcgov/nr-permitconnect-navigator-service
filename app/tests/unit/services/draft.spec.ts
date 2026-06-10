@@ -8,16 +8,14 @@ import type { JsonValue } from '@prisma/client/runtime/library';
 import type { Draft } from '../../../src/types/index.ts';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const DRAFT = {
   draftId: '1',
   activityId: 'ACT',
   draftCode: DraftCode.HOUSING_PROJECT,
-  data: {
-    key: 'value'
-  } as JsonValue,
+  data: { key: 'value' } as JsonValue, // nosonar
   ...generateCreateStamps(TEST_CURRENT_CONTEXT)
 } as Draft;
 

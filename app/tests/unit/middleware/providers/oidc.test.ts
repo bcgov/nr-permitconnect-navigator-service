@@ -5,40 +5,44 @@ import { Problem } from '../../../../src/utils/index';
 
 import type { Request, Response } from 'express';
 import type { JwksClient } from 'jwks-rsa';
+import type { Mock } from 'vitest';
 import type { AuthErrorAttributes } from '../../../../src/middleware/providers/oidc';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 
-jest.mock('config', () => ({
-  has: jest.fn(),
-  get: jest.fn().mockImplementation((key: string) => {
-    if (key === 'server.oidc.audience') return 'nr-permitting-connect-test';
-    else return '';
+vi.mock('config', () => {
+  const mock = {
+    has: vi.fn(),
+    get: vi.fn().mockImplementation((key: string) => {
+      if (key === 'server.oidc.audience') return 'nr-permitting-connect-test';
+      else return '';
+    })
+  };
+  return { default: mock, ...mock };
+});
+
+vi.mock('jwks-rsa', () => ({
+  default: vi.fn().mockReturnValue({
+    getSigningKey: vi.fn()
   })
 }));
 
-jest.mock('jwks-rsa', () => {
-  return jest.fn().mockReturnValue({
-    getSigningKey: jest.fn()
-  });
-});
-
-jest.mock('../../../../src/utils/log', () => ({
-  getLogger: () => ({ debug: jest.fn() })
+vi.mock('../../../../src/utils/log', () => ({
+  getLogger: () => ({ debug: vi.fn() })
 }));
 
 describe('oidc providers', () => {
-  let mockedConfigGet = config.get as jest.Mock;
+  let mockedConfigGet = config.get as Mock;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   describe('getAuthHeader', () => {
     let res: Response;
 
     beforeEach(() => {
-      res = { set: jest.fn() } as unknown as Response;
+      res = { set: vi.fn() } as unknown as Response;
     });
 
     it('returns the authorization header if it is the only method used', () => {
@@ -119,7 +123,7 @@ describe('oidc providers', () => {
     let res: Response;
 
     beforeEach(() => {
-      res = { set: jest.fn() } as unknown as Response;
+      res = { set: vi.fn() } as unknown as Response;
     });
 
     it('extracts the Bearer token from the authorization header string', () => {
@@ -204,11 +208,11 @@ describe('oidc providers', () => {
     let getJwksClient: () => Promise<JwksClient>;
 
     beforeEach(async () => {
-      jest.resetModules();
+      vi.resetModules();
 
       const configModule = await import('config');
       const config = configModule.default || configModule;
-      mockedConfigGet = config.get as jest.Mock;
+      mockedConfigGet = config.get as Mock;
 
       getJwksClient = (await import('../../../../src/middleware/providers/oidc.ts')).getJwksClient;
     });
@@ -216,9 +220,9 @@ describe('oidc providers', () => {
     it('creates a JWKS client and caches the promise', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com/');
 
-      globalThis.fetch = jest.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
+        json: vi.fn().mockResolvedValue({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
       });
 
       const client1 = await getJwksClient();
@@ -232,7 +236,7 @@ describe('oidc providers', () => {
     it('clears the cache if getJwksUri fails, allowing subsequent retries', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error'
@@ -240,9 +244,9 @@ describe('oidc providers', () => {
 
       await expect(getJwksClient()).rejects.toThrow('Failed to load OIDC Provider configuration');
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as Mock).mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
+        json: vi.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
       });
 
       const client = await getJwksClient();
@@ -257,11 +261,11 @@ describe('oidc providers', () => {
     let getJwksUri: () => Promise<string>;
 
     beforeEach(async () => {
-      jest.resetModules();
+      vi.resetModules();
 
       const configModule = await import('config');
       const config = configModule.default || configModule;
-      mockedConfigGet = config.get as jest.Mock;
+      mockedConfigGet = config.get as Mock;
 
       getJwksClient = (await import('../../../../src/middleware/providers/oidc.ts')).getJwksClient;
       getJwksUri = (await import('../../../../src/middleware/providers/oidc.ts')).getJwksUri;
@@ -270,9 +274,9 @@ describe('oidc providers', () => {
     it('fetches the jwks_uri from the OIDC Provider configuration', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
+        json: vi.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
       });
 
       const result = await getJwksUri();
@@ -284,9 +288,9 @@ describe('oidc providers', () => {
     it('returns the cached promise on subsequent calls', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValue({
+      globalThis.fetch = vi.fn().mockResolvedValue({
         ok: true,
-        json: jest.fn().mockResolvedValue({ jwks_uri: 'https://auth.example.com/jwks.json' })
+        json: vi.fn().mockResolvedValue({ jwks_uri: 'https://auth.example.com/jwks.json' })
       });
 
       const result1 = await getJwksUri();
@@ -300,9 +304,9 @@ describe('oidc providers', () => {
     it('handles issuer URL with trailing slash', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com/');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
+        json: vi.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
       });
 
       const result = await getJwksUri();
@@ -320,7 +324,7 @@ describe('oidc providers', () => {
     it('throws an error when fetch fails', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 404,
         statusText: 'Not Found'
@@ -332,9 +336,9 @@ describe('oidc providers', () => {
     it('throws an error when jwks_uri is missing in the configuration', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({})
+        json: vi.fn().mockResolvedValueOnce({})
       });
 
       await expect(getJwksUri()).rejects.toThrow('`jwks_uri` missing or invalid in OIDC Provider configuration');
@@ -343,7 +347,7 @@ describe('oidc providers', () => {
     it('throws an error if getJwksUri fails', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error'
@@ -355,7 +359,7 @@ describe('oidc providers', () => {
     it('clears the cache on failure allowing subsequent calls to retry the network', async () => {
       mockedConfigGet.mockReturnValue('https://auth.example.com');
 
-      globalThis.fetch = jest.fn().mockResolvedValueOnce({
+      globalThis.fetch = vi.fn().mockResolvedValueOnce({
         ok: false,
         status: 500,
         statusText: 'Internal Server Error'
@@ -365,9 +369,9 @@ describe('oidc providers', () => {
         'Failed to load OIDC Provider configuration: 500 Internal Server Error'
       );
 
-      (globalThis.fetch as jest.Mock).mockResolvedValueOnce({
+      (globalThis.fetch as Mock).mockResolvedValueOnce({
         ok: true,
-        json: jest.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
+        json: vi.fn().mockResolvedValueOnce({ jwks_uri: 'https://auth.example.com/.well-known/jwks.json' })
       });
 
       const result = await getJwksUri();
@@ -381,7 +385,7 @@ describe('oidc providers', () => {
     let res: Response;
 
     beforeEach(() => {
-      res = { set: jest.fn() } as unknown as Response;
+      res = { set: vi.fn() } as unknown as Response;
     });
 
     it('sets the WWW-Authenticate header with the provided attributes', () => {

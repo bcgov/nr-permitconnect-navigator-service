@@ -33,7 +33,7 @@ export default defineConfig({
     include: ['**/*.{test,spec}.{js,mjs,cjs,ts,mts,cts,jsx,tsx,vue}'],
     exclude: [...configDefaults.exclude, 'packages/template/*'],
     coverage: {
-      provider: 'istanbul', // 'istanbul' or 'v8'
+      provider: 'v8',
       reporter: ['text', 'json', 'html', 'clover', 'lcov']
     }
   }

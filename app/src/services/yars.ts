@@ -1,7 +1,7 @@
 /* TODO: Create group policy details type and set explicit return types */
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Group } from '../types/index.ts';
 
 /**

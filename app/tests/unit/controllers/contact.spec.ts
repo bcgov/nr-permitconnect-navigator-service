@@ -10,16 +10,16 @@ import * as contactService from '../../../src/services/contact.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { Contact, ContactSearchParameters } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
@@ -29,11 +29,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('deleteContactController', () => {
-  const deleteContactSpy = jest.spyOn(contactService, 'deleteContact');
+  const deleteContactSpy = vi.spyOn(contactService, 'deleteContact');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -53,7 +53,7 @@ describe('deleteContactController', () => {
 });
 
 describe('getContactController', () => {
-  const getContactSpy = jest.spyOn(contactService, 'getContact');
+  const getContactSpy = vi.spyOn(contactService, 'getContact');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -97,7 +97,7 @@ describe('getContactController', () => {
 });
 
 describe('searchContactsController', () => {
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -184,7 +184,7 @@ describe('searchContactsController', () => {
 });
 
 describe('updateContactController', () => {
-  const upsertContactsSpy = jest.spyOn(contactService, 'upsertContacts');
+  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
 
   describe('no contactId in body', () => {
     it('should call services and respond with 200 and result', async () => {

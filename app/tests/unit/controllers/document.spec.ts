@@ -9,15 +9,15 @@ import * as documentService from '../../../src/services/document.ts';
 import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
@@ -27,12 +27,12 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createDocumentController', () => {
-  const createSpy = jest.spyOn(documentService, 'createDocument');
-  const readUserSpy = jest.spyOn(userService, 'readUser');
+  const createSpy = vi.spyOn(documentService, 'createDocument');
+  const readUserSpy = vi.spyOn(userService, 'readUser');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -115,7 +115,7 @@ describe('createDocumentController', () => {
 });
 
 describe('deleteDocumentController', () => {
-  const deleteSpy = jest.spyOn(documentService, 'deleteDocument');
+  const deleteSpy = vi.spyOn(documentService, 'deleteDocument');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -135,8 +135,8 @@ describe('deleteDocumentController', () => {
 });
 
 describe('listDocumentsController', () => {
-  const listSpy = jest.spyOn(documentService, 'listDocuments');
-  const readUserSpy = jest.spyOn(userService, 'readUser');
+  const listSpy = vi.spyOn(documentService, 'listDocuments');
+  const readUserSpy = vi.spyOn(userService, 'readUser');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {

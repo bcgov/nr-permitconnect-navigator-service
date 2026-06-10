@@ -3,12 +3,13 @@ import config from 'config';
 
 import * as mapService from '../../../src/services/map.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
-let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+import type { Mocked } from 'vitest';
 
-jest.mock('axios');
-let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+vi.mock('config');
+let mockedConfig = config as Mocked<typeof config>;
+
+vi.mock('axios');
+let mockedAxios = axios as Mocked<typeof axios>;
 
 const FAKE_GEOJSON = {
   type: 'Feature',
@@ -51,20 +52,20 @@ const FAKE_RESPONSE = {
 };
 
 beforeEach(() => {
-  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
-  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+  mockedConfig = config as Mocked<typeof config>;
+  mockedAxios = axios as Mocked<typeof axios>;
 
   // Replace any instances with the mocked instance
   mockedAxios.create.mockImplementation(() => mockedAxios);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => {
+  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => {
     return cfg;
   });
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getPolygonArray', () => {

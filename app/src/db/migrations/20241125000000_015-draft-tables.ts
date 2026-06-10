@@ -1,4 +1,4 @@
-import stamps from '../stamps.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -8,7 +8,7 @@ export async function up(knex: Knex): Promise<void> {
     knex.schema
       .createTable('draft_code', (table) => {
         table.text('draft_code').primary();
-        stamps(knex, table);
+        addAuditStamps(knex, table);
       })
 
       .createTable('draft', (table) => {
@@ -28,7 +28,7 @@ export async function up(knex: Knex): Promise<void> {
           .onUpdate('CASCADE')
           .onDelete('CASCADE');
         table.json('data').notNullable();
-        stamps(knex, table);
+        addAuditStamps(knex, table);
       })
 
       // Create before update triggers

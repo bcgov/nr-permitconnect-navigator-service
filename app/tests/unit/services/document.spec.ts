@@ -6,7 +6,7 @@ import { generateCreateStamps } from '../../../src/db/utils/utils.ts';
 import type { Document } from '../../../src/types/index.ts';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createDocument', () => {

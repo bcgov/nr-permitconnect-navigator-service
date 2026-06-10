@@ -33,7 +33,7 @@ import { confirmationTemplateEnquiry } from '../utils/templates';
 import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
 
 const generateEnquiryData = async (

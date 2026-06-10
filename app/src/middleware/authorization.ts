@@ -22,7 +22,7 @@ import { Problem } from '../utils/index.ts';
 import { getCurrentSubject } from '../utils/utils.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { CurrentAuthorization } from '../types/index.ts';
 
 /**

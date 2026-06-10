@@ -7,7 +7,7 @@ import { IdentityProviderKind } from '../utils/enums/application.ts';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
 import { Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, IdentityProvider, User } from '../types/models.ts';
 import type { UserSearchParameters } from '../types/stuff.ts';
 

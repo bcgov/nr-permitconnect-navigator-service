@@ -11,48 +11,49 @@ import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as parser from '../../../src/parsers/peach.ts';
-import * as permitService from '../../../src/services/permit.ts';
 import * as peachService from '../../../src/services/peach.ts';
+import * as permitService from '../../../src/services/permit.ts';
 import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
+import { splitDateTime, Problem } from '../../../src/utils/index.ts';
 import * as txWrapper from '../../../src/db/utils/transactionWrapper.ts';
 import * as stamps from '../../../src/db/utils/utils.ts';
-import { splitDateTime, Problem } from '../../../src/utils/index.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { PermitTracking } from '../../../src/types/index.ts';
 
-jest.mock('config');
+vi.mock('config');
 
-jest.mock('../../../src/utils/log', () => ({
+vi.mock('../../../src/utils/log', () => ({
   getLogger: () => ({
-    info: jest.fn(),
-    warn: jest.fn(),
-    error: jest.fn(),
-    verbose: jest.fn(),
-    log: jest.fn()
+    info: vi.fn(),
+    warn: vi.fn(),
+    error: vi.fn(),
+    verbose: vi.fn(),
+    log: vi.fn()
   })
 }));
 
-jest.spyOn(txWrapper, 'transactionWrapper').mockImplementation(async (fn) => fn(prismaTxMock));
+vi.spyOn(txWrapper, 'transactionWrapper').mockImplementation(async (fn) => fn(prismaTxMock));
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 
 beforeEach(() => {
   res = mockResponse();
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('getPeachSummaryController', () => {
-  const getPeachRecordSpy = jest.spyOn(peachService, 'getPeachRecord');
-  const summarizeSpy = jest.spyOn(parser, 'summarizePeachRecord');
+  const getPeachRecordSpy = vi.spyOn(peachService, 'getPeachRecord');
+  const summarizeSpy = vi.spyOn(parser, 'summarizePeachRecord');
 
   it('should call service, summarize, and respond with 200 and summary', async () => {
     const req = {
@@ -177,11 +178,11 @@ describe('getPeachSummaryController', () => {
 });
 
 describe('syncPeachRecords', () => {
-  const searchSpy = jest.spyOn(permitService, 'searchPermits');
-  const upsertSpy = jest.spyOn(permitService, 'upsertPermit');
-  const getRecSpy = jest.spyOn(peachService, 'getPeachRecord');
-  const parseSpy = jest.spyOn(parser, 'parsePeachRecords');
-  const stampsSpy = jest.spyOn(stamps, 'generateUpdateStamps');
+  const searchSpy = vi.spyOn(permitService, 'searchPermits');
+  const upsertSpy = vi.spyOn(permitService, 'upsertPermit');
+  const getRecSpy = vi.spyOn(peachService, 'getPeachRecord');
+  const parseSpy = vi.spyOn(parser, 'parsePeachRecords');
+  const stampsSpy = vi.spyOn(stamps, 'generateUpdateStamps');
 
   it('fetches from PEACH and upserts when differences are detected', async () => {
     searchSpy.mockResolvedValueOnce([TEST_PERMIT_1]);

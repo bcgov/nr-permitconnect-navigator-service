@@ -7,19 +7,19 @@ import {
 import * as reportingService from '../../../src/services/reporting.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
 
   return res;
 };
 
-let res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock };
+let res: { status?: Mock; json?: Mock; end?: Mock };
 beforeEach(() => {
   res = mockResponse();
 });
@@ -30,11 +30,11 @@ afterEach(() => {
    * resetAllMocks seems to cause strange issues such as
    * functions not calling as expected
    */
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('getElectrificationProjectPermitDataController', () => {
-  const getElectrificationProjectPermitDataSpy = jest.spyOn(reportingService, 'getElectrificationProjectPermitData');
+  const getElectrificationProjectPermitDataSpy = vi.spyOn(reportingService, 'getElectrificationProjectPermitData');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -96,7 +96,7 @@ describe('getElectrificationProjectPermitDataController', () => {
 });
 
 describe('getHousingProjectPermitDataController', () => {
-  const getHousingProjectPermitDataSpy = jest.spyOn(reportingService, 'getHousingProjectPermitData');
+  const getHousingProjectPermitDataSpy = vi.spyOn(reportingService, 'getHousingProjectPermitData');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {

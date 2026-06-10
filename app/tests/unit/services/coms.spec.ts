@@ -1,29 +1,29 @@
-import axios, { AxiosResponse } from 'axios';
+import axios from 'axios';
 import config from 'config';
 
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as comsService from '../../../src/services/coms.ts';
 import * as yarsService from '../../../src/services/yars.ts';
-
-import { Action, GroupName } from '../../../src/utils/enums/application.ts';
 import { CurrentContext, Group } from '../../../src/types/stuff';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { Action, GroupName } from '../../../src/utils/enums/application.ts';
 
-// Mock config library
-jest.mock('config');
-jest.mock('axios');
-jest.mock('../../../src/services/yars.ts');
+import type { Mocked } from 'vitest';
 
-let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
-const mockedConfig = config as jest.Mocked<typeof config>;
-const mockedGetSubjectGroups = jest.mocked(yarsService.getSubjectGroups);
+vi.mock('config');
+vi.mock('axios');
+vi.mock('../../../src/services/yars.ts');
+
+let mockedAxios = axios as Mocked<typeof axios>;
+const mockedConfig = config as Mocked<typeof config>;
+const mockedGetSubjectGroups = vi.mocked(yarsService.getSubjectGroups);
 
 beforeEach(() => {
-  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+  mockedAxios = axios as Mocked<typeof axios>;
 
   mockedAxios.create.mockImplementation(() => mockedAxios);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => cfg);
+  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => cfg);
 
   mockedConfig.get.mockImplementation((key: string) => {
     switch (key) {
@@ -46,7 +46,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('getObject', () => {
@@ -224,6 +224,37 @@ describe('searchUserBucketPermissions', () => {
 });
 
 describe('assignPermissions', () => {
+  // Helper to set up the underlying axios mocks that searchUserBucketPermissions consumes:
+  //  - mockedAxios.put('/bucket')          -> getBucket()
+  //  - mockedAxios.get('/user', ...)       -> searchUser()
+  //  - mockedAxios.get('/permission/bucket', ...) -> the perms lookup
+  const mockSearchUserBucketPermissions = (perms: Action[]) => {
+    // searchUser GET (called first inside Promise.all)
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      headers: {},
+      data: [{ userId: 'user-1' }]
+    });
+
+    // getBucket PUT
+    mockedAxios.put.mockResolvedValueOnce({
+      status: 200,
+      headers: {},
+      data: { bucketId: 'bucket-1' }
+    });
+
+    // Permissions GET
+    mockedAxios.get.mockResolvedValueOnce({
+      status: 200,
+      headers: {},
+      data: [
+        {
+          permissions: perms.map((p) => ({ permCode: p }))
+        }
+      ]
+    });
+  };
+
   it('throws when sub is missing', async () => {
     await expect(
       comsService.assignPermissions(prismaTxMock, { bearerToken: 'TOKEN' } as CurrentContext, '')
@@ -235,31 +266,21 @@ describe('assignPermissions', () => {
 
   it('does nothing when permissions already match', async () => {
     mockedGetSubjectGroups.mockResolvedValue([{ name: GroupName.NAVIGATOR }] as Group[]);
-
-    jest.spyOn(comsService, 'searchUserBucketPermissions').mockResolvedValue({
-      data: {
-        userId: 'user-1',
-        bucketId: 'bucket-1',
-        perms: new Set([Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE])
-      }
-    } as AxiosResponse);
+    mockSearchUserBucketPermissions([Action.CREATE, Action.READ, Action.UPDATE, Action.DELETE]);
 
     await comsService.assignPermissions(prismaTxMock, { bearerToken: 'TOKEN' } as CurrentContext, 'sub');
 
+    // No permission mutations should occur
     expect(mockedAxios.delete).not.toHaveBeenCalled();
-    expect(mockedAxios.put).not.toHaveBeenCalled();
+    expect(mockedAxios.put).not.toHaveBeenCalledWith(
+      expect.stringMatching(/^\/permission\/bucket\//),
+      expect.anything()
+    );
   });
 
   it('removes permissions that are no longer required', async () => {
     mockedGetSubjectGroups.mockResolvedValue([{ name: GroupName.NAVIGATOR_READ_ONLY }] as Group[]);
-
-    jest.spyOn(comsService, 'searchUserBucketPermissions').mockResolvedValue({
-      data: {
-        userId: 'user-1',
-        bucketId: 'bucket-1',
-        perms: new Set([Action.READ, Action.UPDATE])
-      }
-    } as AxiosResponse);
+    mockSearchUserBucketPermissions([Action.READ, Action.UPDATE]);
 
     await comsService.assignPermissions(prismaTxMock, { bearerToken: 'TOKEN' } as CurrentContext, 'sub');
 
@@ -273,14 +294,7 @@ describe('assignPermissions', () => {
 
   it('adds permissions that are missing', async () => {
     mockedGetSubjectGroups.mockResolvedValue([{ name: GroupName.NAVIGATOR }] as Group[]);
-
-    jest.spyOn(comsService, 'searchUserBucketPermissions').mockResolvedValue({
-      data: {
-        userId: 'user-1',
-        bucketId: 'bucket-1',
-        perms: new Set([Action.READ])
-      }
-    } as AxiosResponse);
+    mockSearchUserBucketPermissions([Action.READ]);
 
     await comsService.assignPermissions(prismaTxMock, { bearerToken: 'TOKEN' } as CurrentContext, 'sub');
 

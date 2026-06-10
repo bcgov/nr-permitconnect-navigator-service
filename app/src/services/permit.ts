@@ -1,6 +1,6 @@
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   ListPermitsOptions,
   Permit,

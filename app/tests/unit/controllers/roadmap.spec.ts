@@ -1,23 +1,23 @@
-import * as comsService from '../../../src/services/coms.ts';
-import * as emailService from '../../../src/services/email.ts';
-import * as noteHistoryService from '../../../src/services/noteHistory.ts';
-import * as noteService from '../../../src/services/note.ts';
-import { sendRoadmapController } from '../../../src/controllers/roadmap.ts';
 import { TEST_CURRENT_CONTEXT, TEST_EMAIL_RESPONSE, TEST_NOTE_1, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import { sendRoadmapController } from '../../../src/controllers/roadmap.ts';
 import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
+import * as comsService from '../../../src/services/coms.ts';
+import * as emailService from '../../../src/services/email.ts';
+import * as noteService from '../../../src/services/note.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { Email, Note, NoteHistory } from '../../../src/types';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
 
   return res;
 };
@@ -28,14 +28,14 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('send', () => {
-  const emailSpy = jest.spyOn(emailService, 'email');
-  const getObjectSpy = jest.spyOn(comsService, 'getObject');
-  const createNoteSpy = jest.spyOn(noteService, 'createNote');
-  const createHistorySpy = jest.spyOn(noteHistoryService, 'createNoteHistory');
+  const emailSpy = vi.spyOn(emailService, 'email');
+  const getObjectSpy = vi.spyOn(comsService, 'getObject');
+  const createNoteSpy = vi.spyOn(noteService, 'createNote');
+  const createHistorySpy = vi.spyOn(noteHistoryService, 'createNoteHistory');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {

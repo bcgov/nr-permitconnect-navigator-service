@@ -7,7 +7,7 @@ import { GroupName } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity

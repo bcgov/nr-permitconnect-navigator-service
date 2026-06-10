@@ -1,11 +1,11 @@
 import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import prisma from '../dataConnection.ts';
+import prisma from '../database.ts';
 import { getLogger } from '../../utils/log.ts';
 import { CODE_TABLES } from './tables.ts';
 
-import type { CodeTableDelegate } from './types.ts';
+import type { CodeTableDelegate } from '../../types/codes.ts';
 
 const log = getLogger(module.filename);
 

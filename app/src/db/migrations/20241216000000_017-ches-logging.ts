@@ -1,4 +1,4 @@
-import stamps from '../stamps.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -12,7 +12,7 @@ export async function up(knex: Knex): Promise<void> {
         table.uuid('msg_id').defaultTo(null);
         table.text('to').defaultTo(null);
         table.uuid('tx_id').defaultTo(null);
-        stamps(knex, table);
+        addAuditStamps(knex, table);
       })
 
       // Create before update triggers

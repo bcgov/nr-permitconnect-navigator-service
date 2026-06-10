@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { TEST_CURRENT_CONTEXT, TEST_PERMIT_NOTE_1, TEST_PERMIT_1, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { createPermitNoteController } from '../../../src/controllers/permitNote.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
@@ -10,16 +10,16 @@ import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { PermitNote } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
@@ -29,18 +29,18 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 // Set an initiative for the context
 TEST_CURRENT_CONTEXT.initiative = Initiative.HOUSING;
 
 describe('createPermitNoteController', () => {
-  const createPermitNoteSpy = jest.spyOn(permitNoteService, 'createPermitNote');
-  const getPermitSpy = jest.spyOn(permitService, 'getPermit');
-  const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
-  const getSourceSystemKindsSpy = jest.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
-  const getProjectByActivityIdSpy = jest.spyOn(projectService, 'getProjectByActivityId');
+  const createPermitNoteSpy = vi.spyOn(permitNoteService, 'createPermitNote');
+  const getPermitSpy = vi.spyOn(permitService, 'getPermit');
+  const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+  const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
+  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {

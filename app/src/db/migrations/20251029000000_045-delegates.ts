@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import type { Knex } from 'knex';
 
-import * as yars from '../utils/yars.ts';
+import * as yars from '../utils/migrations/yars.ts';
 import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 const resources = [Resource.ACTIVITY_CONTACT];

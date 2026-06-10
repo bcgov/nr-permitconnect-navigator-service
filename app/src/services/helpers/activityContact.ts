@@ -1,6 +1,6 @@
 import { listActivityContacts, updateActivityContact } from '../activityContact';
 import { searchContacts } from '../contact';
-import { PrismaTransactionClient } from '../../db/dataConnection';
+import { PrismaTransactionClient } from '../../db/database';
 import { Problem } from '../../utils';
 import { GroupName } from '../../utils/enums/application';
 import { ActivityContactRole } from '../../utils/enums/projectCommon';

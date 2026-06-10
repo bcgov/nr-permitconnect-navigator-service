@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import stamps from '../stamps.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -13,7 +13,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('display').unique().notNullable();
           table.text('definition').notNullable();
           table.boolean('active').notNullable().defaultTo(true);
-          stamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

@@ -6,7 +6,7 @@ import { searchUsers } from '../services/user.ts';
 import { getSubjectGroups } from '../services/yars.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Group, User, UserSearchParameters } from '../types/index.ts';
 
 type UserWithGroup = User & { groups?: Group[] };

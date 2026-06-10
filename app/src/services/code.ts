@@ -1,7 +1,7 @@
 import { CODE_TABLES } from '../db/codes/tables.ts';
 
-import type { CodeTableName, CodeRow } from '../db/codes/types.ts';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { CodeTableName, CodeRow } from '../types/codes.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 /**
  * List all active code tables

@@ -56,7 +56,7 @@ function buildApp() {
 describe('filterActivityResponseByScope middleware', () => {
   let app: express.Express;
 
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
   beforeEach(() => {
     app = buildApp();

@@ -11,7 +11,7 @@ import {
   deleteResources,
   deleteRolePolicies,
   deleteRoles
-} from '../utils/yars.ts';
+} from '../utils/migrations/yars.ts';
 
 import type { Knex } from 'knex';
 

@@ -9,7 +9,7 @@ import { getLogger } from '../utils/log.ts';
 import { PeachIntegratedSystem } from '../utils/enums/permit.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   PeachSummary,
   Permit,

@@ -7,7 +7,7 @@ import { ContactPreference, ProjectRelationship } from '../../../src/utils/enums
 import type { Contact } from '../../../src/types/index.ts';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('deleteContact', () => {

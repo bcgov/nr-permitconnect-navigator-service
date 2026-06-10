@@ -83,8 +83,8 @@ describe('Problem', () => {
     it('should send a JSON response with the problem details', () => {
       const req = { originalUrl: '/test' } as Request;
       const res = {
-        writeHead: jest.fn(),
-        end: jest.fn()
+        writeHead: vi.fn(),
+        end: vi.fn()
       } as unknown as Response;
 
       const problem = new Problem(401, { title: 'Unauthorized' });

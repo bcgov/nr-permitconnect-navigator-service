@@ -1,11 +1,10 @@
 import express from 'express';
 import request from 'supertest';
 
-import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin.ts';
-import * as contactService from '../../../src/services/contact.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-
 import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin.ts';
+import * as activityContactService from '../../../src/services/activityContact.ts';
+import * as contactService from '../../../src/services/contact.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
@@ -37,8 +36,8 @@ function buildApp() {
 describe('requireActivityAdmin middleware', () => {
   let app: express.Express;
 
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 
   beforeEach(() => {
     app = buildApp();

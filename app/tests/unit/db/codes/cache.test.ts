@@ -1,21 +1,22 @@
 // Unmock the cache module so we test the actual implementation
-jest.unmock('../../../../src/db/codes/cache.ts');
+vi.unmock('../../../../src/db/codes/cache.ts');
 
 import { codeTable, refreshCodeCaches } from '../../../../src/db/codes/cache.ts';
 import { CODE_TABLES } from '../../../../src/db/codes/tables.ts';
 import * as txWrapper from '../../../../src/db/utils/transactionWrapper.ts';
 import * as codeService from '../../../../src/services/code.ts';
 import { getLogger } from '../../../../src/utils/log.ts';
-import type { CodeTableName } from '../../../../src/db/codes/types.ts';
 
-jest.mock('../../../../src/utils/log.ts', () => {
+import type { CodeTableName } from '../../../../src/types/codes.ts';
+
+vi.mock('../../../../src/utils/log.ts', () => {
   const mLogger = {
-    debug: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warn: jest.fn(),
-    verbose: jest.fn(),
-    log: jest.fn()
+    debug: vi.fn(),
+    error: vi.fn(),
+    info: vi.fn(),
+    warn: vi.fn(),
+    verbose: vi.fn(),
+    log: vi.fn()
   };
   return {
     getLogger: () => mLogger
@@ -25,11 +26,11 @@ jest.mock('../../../../src/utils/log.ts', () => {
 const mockLogger = getLogger();
 
 describe('codeTable cache', () => {
-  const listAllCodeTablesSpy = jest.spyOn(codeService, 'listAllCodeTables');
-  const txWrapperSpy = jest.spyOn(txWrapper, 'transactionWrapper');
+  const listAllCodeTablesSpy = vi.spyOn(codeService, 'listAllCodeTables');
+  const txWrapperSpy = vi.spyOn(txWrapper, 'transactionWrapper');
 
   beforeEach(async () => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
     // Reset the module's in-memory cache state before each test
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

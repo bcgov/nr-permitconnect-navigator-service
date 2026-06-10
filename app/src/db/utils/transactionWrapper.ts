@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
 
-import prisma from '../dataConnection.ts';
+import prisma from '../database.ts';
 
-import type { PrismaTransactionClient } from '../dataConnection.ts';
+import type { PrismaTransactionClient } from '../database.ts';
 
 interface TxOpts {
   isolationLevel?: Prisma.TransactionIsolationLevel;

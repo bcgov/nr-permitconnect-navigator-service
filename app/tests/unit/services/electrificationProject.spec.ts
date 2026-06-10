@@ -1,10 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { TEST_CURRENT_CONTEXT, TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
 import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const FAKE_PROJECT = {

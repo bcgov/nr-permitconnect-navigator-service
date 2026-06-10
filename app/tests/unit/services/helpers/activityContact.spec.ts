@@ -12,12 +12,12 @@ import { ActivityContactRole } from '../../../../src/utils/enums/projectCommon';
 
 describe('verifyPrimaryChange', () => {
   afterEach(() => {
-    jest.resetAllMocks();
+    vi.resetAllMocks();
   });
 
-  const listActivityContactsSpy = jest.spyOn(activityContactService, 'listActivityContacts');
-  const searchContactsSpy = jest.spyOn(contactService, 'searchContacts');
-  const updateActivityContactSpy = jest.spyOn(activityContactService, 'updateActivityContact');
+  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
+  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const updateActivityContactSpy = vi.spyOn(activityContactService, 'updateActivityContact');
 
   const mockAuthBase = { attributes: [], groups: [] };
 

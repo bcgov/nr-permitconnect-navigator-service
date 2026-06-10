@@ -39,7 +39,7 @@ product_technology_information:
     - name: Other
       version: knex 3.1.0
     - name: Other
-      version: jest 30.3.0
+      version: vitest 4.1.8
   backend_languages_version:
     - name: TypeScript
       version: 5.9.3

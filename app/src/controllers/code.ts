@@ -2,7 +2,7 @@ import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { listAllCodeTables } from '../services/code.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 export const listAllCodeTablesController = async (req: Request, res: Response) => {
   const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {

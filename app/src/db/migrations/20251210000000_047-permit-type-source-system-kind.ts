@@ -1,4 +1,4 @@
-import stamps from '../stamps.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -145,7 +145,7 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
 
-          stamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

@@ -4,14 +4,14 @@ import config from 'config';
 import { prismaMock } from '../../__mocks__/prismaMock.ts';
 import * as emailService from '../../../src/services/email.ts';
 
+import type { Mocked } from 'vitest';
 import type { Email } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
-let mockedConfig = config as jest.MockedObjectDeep<typeof config>;
+vi.mock('config');
+let mockedConfig = config as Mocked<typeof config>;
 
-jest.mock('axios');
-let mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+vi.mock('axios');
+let mockedAxios = axios as Mocked<typeof axios>;
 
 interface Message {
   msgId: string;
@@ -37,14 +37,14 @@ const chesResponse: EmailData = {
 const recipientsDefault: string[] = ['test1@test.com', 'test2@test.com', 'test3@test.com', 'test4@test.com'];
 
 beforeEach(() => {
-  mockedConfig = config as jest.MockedObjectDeep<typeof config>;
-  mockedAxios = axios as jest.MockedObjectDeep<typeof axios>;
+  mockedConfig = config as Mocked<typeof config>;
+  mockedAxios = axios as Mocked<typeof axios>;
 
   // Replace any instances with the mocked instance
   mockedAxios.create.mockImplementation(() => mockedAxios);
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  mockedAxios.interceptors.request.use.mockImplementation((cfg: any) => {
+  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => {
     return cfg;
   });
 
@@ -55,7 +55,7 @@ beforeEach(() => {
 });
 
 describe('email', () => {
-  const logEmailSpy = jest.spyOn(emailService, 'logEmail');
+  const logEmailSpy = vi.spyOn(emailService, 'logEmail');
 
   it('calls POST /email with correct body and returns result', async () => {
     mockedConfig.get.mockImplementation(() => '');

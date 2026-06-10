@@ -2,7 +2,7 @@ import { Prisma } from '@prisma/client';
 
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types/index.ts';
 

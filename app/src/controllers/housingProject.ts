@@ -35,7 +35,7 @@ import { confirmationTemplateHousingSubmission } from '../utils/templates';
 import { getCurrentUsername, isTruthy, omit, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   Contact,
   CurrentContext,

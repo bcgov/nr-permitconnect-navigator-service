@@ -7,15 +7,15 @@ import {
 import * as atsService from '../../../src/services/ats.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
 
   return res;
 };
@@ -26,11 +26,11 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 describe('createATSClientController', () => {
-  const createSpy = jest.spyOn(atsService, 'createATSClient');
+  const createSpy = vi.spyOn(atsService, 'createATSClient');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -87,7 +87,7 @@ describe('createATSClientController', () => {
 });
 
 describe('createATSEnquiryController', () => {
-  const createSpy = jest.spyOn(atsService, 'createATSEnquiry');
+  const createSpy = vi.spyOn(atsService, 'createATSEnquiry');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -142,7 +142,7 @@ describe('createATSEnquiryController', () => {
 });
 
 describe('searchATSUsersController', () => {
-  const searchATSUsersSpy = jest.spyOn(atsService, 'searchATSUsers');
+  const searchATSUsersSpy = vi.spyOn(atsService, 'searchATSUsers');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {

@@ -1,7 +1,7 @@
 import { generateUniqueActivityId } from '../db/utils/utils.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { Activity } from '../types/index.ts';
 

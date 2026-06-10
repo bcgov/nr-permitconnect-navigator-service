@@ -15,14 +15,17 @@ import {
   teamPrimaryAddedTemplate
 } from '../../../src/utils/templates.ts';
 
-jest.mock('config', () => ({
-  get: (key: string) => {
-    if (key === 'server.pcns.appUrl') {
-      return 'http://localhost:5173';
+vi.mock('config', () => {
+  const mock = {
+    get: (key: string) => {
+      if (key === 'server.pcns.appUrl') {
+        return 'http://localhost:5173';
+      }
+      return '';
     }
-    return '';
-  }
-}));
+  };
+  return { default: mock, ...mock };
+});
 
 describe('replacePlaceholders', () => {
   it('returns baseText when baseText is an empty string', () => {

@@ -12,9 +12,9 @@ import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 
 import type { ProcessEvent } from '../../../src/types/index.ts';
 
-jest.mock('config');
-jest.mock('../../../src/utils/log', () => ({
-  getLogger: () => ({ info: jest.fn(), warn: jest.fn(), error: jest.fn(), verbose: jest.fn(), log: jest.fn() })
+vi.mock('config');
+vi.mock('../../../src/utils/log', () => ({
+  getLogger: () => ({ info: vi.fn(), warn: vi.fn(), error: vi.fn(), verbose: vi.fn(), log: vi.fn() })
 }));
 
 describe('peachRecordParser', () => {

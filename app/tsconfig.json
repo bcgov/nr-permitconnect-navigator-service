@@ -9,7 +9,7 @@
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
     "types": [
-      "jest"
+      "vitest/globals"
     ],
     "verbatimModuleSyntax": false
   },

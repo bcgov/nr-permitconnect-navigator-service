@@ -2,26 +2,27 @@ import express from 'express';
 import request from 'supertest';
 import { existsSync, readFileSync } from 'node:fs';
 
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import { hasIdentity } from '../../../src/middleware/identity.ts';
 import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type { CurrentContext } from '../../../src/types/stuff';
 import type Problem from '../../../src/utils/problem.ts';
 
-jest.mock('node:fs', () => ({
-  existsSync: jest.fn(),
-  readFileSync: jest.fn()
+vi.mock('node:fs', () => ({
+  existsSync: vi.fn(),
+  readFileSync: vi.fn()
 }));
 
-jest.mock('config', () => ({
-  has: jest.fn(),
-  get: jest.fn()
+vi.mock('config', () => ({
+  has: vi.fn(),
+  get: vi.fn()
 }));
 
-jest.mock('../../../src/utils/log', () => ({
-  getLogger: () => ({ warn: jest.fn(), info: jest.fn(), error: jest.fn(), verbose: jest.fn() })
+vi.mock('../../../src/utils/log', () => ({
+  getLogger: () => ({ warn: vi.fn(), info: vi.fn(), error: vi.fn(), verbose: vi.fn() })
 }));
 
 const IDP_LIST = [
@@ -68,10 +69,10 @@ function buildApp(kind: IdentityProviderKind, contextPayloadOverride?: CurrentCo
 
 describe('hasIdentity middleware', () => {
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    (existsSync as jest.Mock).mockReturnValue(true);
-    (readFileSync as jest.Mock).mockReturnValue(JSON.stringify(IDP_LIST));
+    (existsSync as Mock).mockReturnValue(true);
+    (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
   });
 
   it('calls next and allows the request if the user has the required identity', async () => {

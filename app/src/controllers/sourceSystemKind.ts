@@ -2,7 +2,7 @@ import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { getSourceSystemKinds } from '../services/sourceSystemKind.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { SourceSystemKind } from '../types/index.ts';
 
 export const getSourceSystemKindsController = async (req: Request, res: Response) => {

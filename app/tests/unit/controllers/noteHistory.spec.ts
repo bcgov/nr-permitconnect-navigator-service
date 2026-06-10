@@ -16,8 +16,8 @@ import {
 } from '../../../src/controllers/noteHistory.ts';
 import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
-import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
+import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as noteService from '../../../src/services/note.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
@@ -27,6 +27,7 @@ import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type {
   ElectrificationProject,
   Enquiry,
@@ -35,14 +36,13 @@ import type {
   NoteHistory
 } from '../../../src/types/index.ts';
 
-// Mock config library - @see {@link https://stackoverflow.com/a/64819698}
-jest.mock('config');
+vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: jest.Mock; json?: jest.Mock; end?: jest.Mock } = {};
-  res.status = jest.fn().mockReturnValue(res);
-  res.json = jest.fn().mockReturnValue(res);
-  res.end = jest.fn().mockReturnValue(res);
+  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
@@ -52,7 +52,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.resetAllMocks();
+  vi.resetAllMocks();
 });
 
 const CURRENT_AUTHORIZATION = {
@@ -62,8 +62,8 @@ const CURRENT_AUTHORIZATION = {
 TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
 describe('createNoteHistoryController', () => {
-  const createHistorySpy = jest.spyOn(noteHistoryService, 'createNoteHistory');
-  const createNoteSpy = jest.spyOn(noteService, 'createNote');
+  const createHistorySpy = vi.spyOn(noteHistoryService, 'createNoteHistory');
+  const createNoteSpy = vi.spyOn(noteService, 'createNote');
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
@@ -102,7 +102,7 @@ describe('createNoteHistoryController', () => {
 });
 
 describe('deleteNoteHistoryController', () => {
-  const deleteHistorySpy = jest.spyOn(noteHistoryService, 'deleteNoteHistory');
+  const deleteHistorySpy = vi.spyOn(noteHistoryService, 'deleteNoteHistory');
 
   it('should call services and respond with 204', async () => {
     const req = {
@@ -125,12 +125,12 @@ describe('deleteNoteHistoryController', () => {
 });
 
 describe('listBringForwardController', () => {
-  const listSpy = jest.spyOn(noteHistoryService, 'listBringForward');
-  const searchElectrificationProjectsSpy = jest.spyOn(electrificationProjectService, 'searchElectrificationProjects');
-  const searchGeneralProjectsSpy = jest.spyOn(generalProjectService, 'searchGeneralProjects');
-  const searchHousingProjectsSpy = jest.spyOn(housingProjectService, 'searchHousingProjects');
-  const searchEnquiries = jest.spyOn(enquiryService, 'searchEnquiries');
-  const searchUsersSpy = jest.spyOn(userService, 'searchUsers');
+  const listSpy = vi.spyOn(noteHistoryService, 'listBringForward');
+  const searchElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+  const searchGeneralProjectsSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
+  const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+  const searchEnquiries = vi.spyOn(enquiryService, 'searchEnquiries');
+  const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -192,7 +192,7 @@ describe('listBringForwardController', () => {
 });
 
 describe('listNoteHistoryController', () => {
-  const listNoteHistorySpy = jest.spyOn(noteHistoryService, 'listNoteHistory');
+  const listNoteHistorySpy = vi.spyOn(noteHistoryService, 'listNoteHistory');
 
   const req = {
     params: { activityId: 'ACTI1234' },
@@ -230,9 +230,9 @@ describe('listNoteHistoryController', () => {
 });
 
 describe('updateNoteHistoryController', () => {
-  const createNoteSpy = jest.spyOn(noteService, 'createNote');
-  const getNoteHistorySpy = jest.spyOn(noteHistoryService, 'getNoteHistory');
-  const updateNoteHistorySpy = jest.spyOn(noteHistoryService, 'updateNoteHistory');
+  const createNoteSpy = vi.spyOn(noteService, 'createNote');
+  const getNoteHistorySpy = vi.spyOn(noteHistoryService, 'getNoteHistory');
+  const updateNoteHistorySpy = vi.spyOn(noteHistoryService, 'updateNoteHistory');
 
   const UPDATED_HISTORY: NoteHistory = { ...TEST_NOTE_HISTORY_1, title: 'New title' };
 

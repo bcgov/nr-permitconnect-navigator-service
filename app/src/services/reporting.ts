@@ -1,4 +1,4 @@
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 /**
  * Execute a raw query to get electrification permit reporting data

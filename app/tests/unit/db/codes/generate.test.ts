@@ -3,26 +3,28 @@ import { normalize } from 'node:path';
 
 import { prismaMock } from '../../../__mocks__/prismaMock.ts';
 
-jest.mock('node:fs', () => ({
-  writeFileSync: jest.fn()
+import type { Mock, MockInstance } from 'vitest';
+
+vi.mock('node:fs', () => ({
+  writeFileSync: vi.fn()
 }));
 
-jest.mock('../../../../src/db/codes/tables.ts', () => ({
+vi.mock('../../../../src/db/codes/tables.ts', () => ({
   CODE_TABLES: [{ name: 'TestEnum', model: 'testCodeModel' }]
 }));
 
-const mockLogError = jest.fn();
-jest.mock('../../../../src/utils/log.ts', () => ({
-  getLogger: () => ({ info: jest.fn(), error: mockLogError })
+const mockLogError = vi.fn();
+vi.mock('../../../../src/utils/log.ts', () => ({
+  getLogger: () => ({ info: vi.fn(), error: mockLogError })
 }));
 
 describe('codes/generate script', () => {
-  let exitSpy: jest.SpyInstance;
+  let exitSpy: MockInstance;
 
   beforeEach(() => {
-    jest.clearAllMocks();
+    vi.clearAllMocks();
 
-    exitSpy = jest.spyOn(process, 'exit').mockImplementation((code) => {
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation((code) => {
       throw new Error(`process.exit(${code}) was called. Check the error log above.`);
     });
   });
@@ -34,7 +36,7 @@ describe('codes/generate script', () => {
   it('should fetch codes, format them, and write to both directories', async () => {
     // @ts-expect-error - dynamically attaching a mock model to the deep mock
     prismaMock.testCodeModel = {
-      findMany: jest.fn().mockResolvedValue([{ code: 'VALID_CODE' }, { code: 'INVALID-CHAR' }])
+      findMany: vi.fn().mockResolvedValue([{ code: 'VALID_CODE' }, { code: 'INVALID-CHAR' }])
     };
 
     await import('../../../../src/db/codes/generate.ts');
@@ -50,8 +52,8 @@ describe('codes/generate script', () => {
 
     expect(writeFileSync).toHaveBeenCalledTimes(2);
 
-    const [appPath, appOutput] = (writeFileSync as jest.Mock).mock.calls[0];
-    const [frontendPath, frontendOutput] = (writeFileSync as jest.Mock).mock.calls[1];
+    const [appPath, appOutput] = (writeFileSync as Mock).mock.calls[0];
+    const [frontendPath, frontendOutput] = (writeFileSync as Mock).mock.calls[1];
 
     expect(normalize(appPath)).toContain(normalize('src/db/codes/enums.ts'));
     expect(normalize(frontendPath)).toContain(normalize('frontend/src/utils/enums/codeEnums.ts'));

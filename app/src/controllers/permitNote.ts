@@ -5,7 +5,7 @@ import { generateCreateStamps } from '../db/utils/utils.ts';
 import { createPermitNote } from '../services/permitNote.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { PermitNote } from '../types/index.ts';
 
 export const createPermitNoteController = async (req: Request<never, never, PermitNote>, res: Response) => {

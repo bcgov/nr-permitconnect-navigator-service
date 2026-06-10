@@ -9,7 +9,7 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -34,7 +34,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('email');
           table.text('contact_preference');
           table.text('contact_applicant_relationship');
-          stamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -55,7 +55,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('contact')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
-          stamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

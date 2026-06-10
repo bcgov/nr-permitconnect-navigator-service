@@ -1,7 +1,7 @@
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { NoteHistory, NoteHistoryBase } from '../types/index.ts';
 

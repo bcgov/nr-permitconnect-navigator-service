@@ -1,4 +1,4 @@
-import prisma from '../db/dataConnection.ts';
+import prisma from '../db/database.ts';
 import { searchContacts } from '../services/contact.ts';
 import { Problem } from '../utils/index.ts';
 

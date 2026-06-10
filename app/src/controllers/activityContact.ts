@@ -24,7 +24,7 @@ import {
 } from '../utils/templates.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { ActivityContact, Contact } from '../types/index.ts';
 
 const getTeamMemberEmailTemplateData = async (
