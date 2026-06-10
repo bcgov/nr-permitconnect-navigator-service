@@ -38,12 +38,12 @@ export async function createActivityContact(req: CreateActivityContactRequest): 
 /**
  * Deletes a contact association from an activity.
  * @param req - The request payload containing the compound key for deletion.
- * @returns A promise resolving to the deleted `ActivityContact` resource.
+ * @returns A promise resolving when the operation completes.
  */
 export async function deleteActivityContact(req: DeleteActivityContactRequest): Promise<void> {
   const { activityId, contactId } = req;
 
-  return api.delete<void>(activityRoutes.contacts.byId(activityId, contactId));
+  return api.delete(activityRoutes.contacts.byId(activityId, contactId));
 }
 
 /**
@@ -65,7 +65,7 @@ export async function listActivityContacts(req: ListActivityContactsRequest): Pr
 export async function putActivityContact(req: PutActivityContactRequest): Promise<PutActivityContactResponse> {
   const { activityId, contactId, ...body } = req;
 
-  return api.put(activityRoutes.contacts.byId(activityId, contactId), body);
+  return api.put<PutActivityContactResponse>(activityRoutes.contacts.byId(activityId, contactId), body);
 }
 
 /**

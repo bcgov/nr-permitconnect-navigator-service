@@ -15,7 +15,7 @@ import type {
  * Routes should be referenced through this object rather than
  * constructing endpoint paths directly within service methods.
  */
-const comsRoute = createRouteBuilder();
+const comsRoute = createRouteBuilder('object');
 
 const comsRoutes = {
   root: () => comsRoute(),

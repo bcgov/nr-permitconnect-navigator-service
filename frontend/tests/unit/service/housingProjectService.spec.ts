@@ -50,7 +50,7 @@ describe('housingProject service', () => {
 
       const result = await createProject(project as never);
 
-      expect(mockPost).toHaveBeenCalledWith(PATH, project);
+      expect(mockPost).toHaveBeenCalledWith(PATH, project, undefined);
       expect(result).toEqual(project);
     });
 
@@ -71,7 +71,7 @@ describe('housingProject service', () => {
         projectId: 'project-1'
       });
 
-      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/project-1`);
+      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/project-1`, undefined);
     });
 
     it('propagates errors', async () => {
@@ -93,7 +93,7 @@ describe('housingProject service', () => {
 
       const result = await listActivityIds();
 
-      expect(mockGet).toHaveBeenCalledWith(`${PATH}/activityIds`);
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/activityIds`, undefined);
 
       expect(result).toEqual(activityIds);
     });
@@ -117,7 +117,7 @@ describe('housingProject service', () => {
         projectId: 'project-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith(`${PATH}/project-1`);
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/project-1`, undefined);
 
       expect(result).toEqual(project);
     });
@@ -139,7 +139,7 @@ describe('housingProject service', () => {
 
       const result = await listProjects();
 
-      expect(mockGet).toHaveBeenCalledWith(PATH);
+      expect(mockGet).toHaveBeenCalledWith(PATH, undefined);
       expect(result).toEqual(projects);
     });
   });
@@ -158,7 +158,7 @@ describe('housingProject service', () => {
 
       const result = await searchProjects(filters as never);
 
-      expect(mockPost).toHaveBeenCalledWith(`${PATH}/search`, filters);
+      expect(mockPost).toHaveBeenCalledWith(`${PATH}/search`, filters, undefined);
 
       expect(result).toEqual(projects);
     });
@@ -188,9 +188,13 @@ describe('housingProject service', () => {
 
       const result = await patchProject(request as never);
 
-      expect(mockPatch).toHaveBeenCalledWith(`${PATH}/project-1`, {
-        name: 'Updated Name'
-      });
+      expect(mockPatch).toHaveBeenCalledWith(
+        `${PATH}/project-1`,
+        {
+          name: 'Updated Name'
+        },
+        undefined
+      );
 
       expect(result).toEqual(updatedProject);
     });
@@ -252,7 +256,7 @@ describe('housingProject service', () => {
 
       const result = await submitDraft(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft/submit`, request);
+      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft/submit`, request, undefined);
 
       expect(result).toEqual(project);
     });
@@ -272,7 +276,7 @@ describe('housingProject service', () => {
         draftId: 'draft-1'
       });
 
-      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/draft/draft-1`);
+      expect(mockDelete).toHaveBeenCalledWith(`${PATH}/draft/draft-1`, undefined);
     });
 
     it('propagates errors', async () => {
@@ -296,7 +300,7 @@ describe('housingProject service', () => {
         draftId: 'draft-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft/draft-1`);
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft/draft-1`, undefined);
 
       expect(result).toEqual(draft);
     });
@@ -318,7 +322,7 @@ describe('housingProject service', () => {
 
       const result = await listDrafts();
 
-      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft`);
+      expect(mockGet).toHaveBeenCalledWith(`${PATH}/draft`, undefined);
 
       expect(result).toEqual(drafts);
     });
@@ -336,7 +340,7 @@ describe('housingProject service', () => {
 
       const result = await upsertDraft(draft as never);
 
-      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft`, draft);
+      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft`, draft, undefined);
 
       expect(result).toEqual(draft);
     });

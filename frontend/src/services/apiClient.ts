@@ -36,9 +36,7 @@ export const api = {
   },
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return await (
-      await appAxios().delete(url, config)
-    ).data;
+    return (await appAxios().delete<T>(url, config)).data;
   }
 };
 

@@ -126,13 +126,17 @@ describe('document service', () => {
 
       expect(uploadedFile.name).toBe('test-file_12345678.pdf');
 
-      expect(mockPost).toHaveBeenCalledWith('housing/document', {
-        activityId: 'activity-1',
-        documentId: 'coms-id',
-        filename: 'test-file_12345678.pdf',
-        mimeType: 'application/pdf',
-        filesize: 1234
-      });
+      expect(mockPost).toHaveBeenCalledWith(
+        'housing/document',
+        {
+          activityId: 'activity-1',
+          documentId: 'coms-id',
+          filename: 'test-file_12345678.pdf',
+          mimeType: 'application/pdf',
+          filesize: 1234
+        },
+        undefined
+      );
 
       expect(result).toEqual(documentResponse);
     });
@@ -262,7 +266,7 @@ describe('document service', () => {
         activityId: 'activity-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith('housing/document/list/activity-1');
+      expect(mockGet).toHaveBeenCalledWith('housing/document/list/activity-1', undefined);
 
       expect(result).toEqual(documents);
     });

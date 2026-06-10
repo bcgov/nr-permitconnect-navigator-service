@@ -57,7 +57,7 @@ describe('noteHistory service', () => {
 
       const result = await createNoteHistory(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('housing/note', request);
+      expect(mockPost).toHaveBeenCalledWith('housing/note', request, undefined);
 
       expect(result).toEqual(response);
     });
@@ -85,7 +85,7 @@ describe('noteHistory service', () => {
         noteHistoryId: 'note-history-1'
       });
 
-      expect(mockDelete).toHaveBeenCalledWith('housing/note/note-history-1');
+      expect(mockDelete).toHaveBeenCalledWith('housing/note/note-history-1', undefined);
     });
 
     it('propagates errors', async () => {
@@ -149,7 +149,7 @@ describe('noteHistory service', () => {
         activityId: 'activity-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith('housing/note/list/activity-1');
+      expect(mockGet).toHaveBeenCalledWith('housing/note/list/activity-1', undefined);
 
       expect(result).toEqual(noteHistories);
     });
@@ -186,10 +186,14 @@ describe('noteHistory service', () => {
 
       const result = await putNoteHistory(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/note/note-history-1', {
-        note: 'Updated note',
-        bringForwardDate: '2026-01-01'
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/note/note-history-1',
+        {
+          note: 'Updated note',
+          bringForwardDate: '2026-01-01'
+        },
+        undefined
+      );
 
       expect(result).toEqual(response);
     });

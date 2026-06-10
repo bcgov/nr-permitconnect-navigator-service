@@ -37,7 +37,7 @@ describe('external api service', () => {
         latitude: '-78.9012'
       });
 
-      expect(mockGeocoderGet).toHaveBeenCalledWith('/occupants/nearest.json', {
+      expect(mockGeocoderGet).toHaveBeenCalledWith('occupants/nearest.json', {
         params: {
           point: '12.3456,-78.9012'
         }
@@ -72,7 +72,7 @@ describe('external api service', () => {
         addressSearch: '123 Example'
       });
 
-      expect(mockGeocoderGet).toHaveBeenCalledWith('/addresses.json', {
+      expect(mockGeocoderGet).toHaveBeenCalledWith('addresses.json', {
         params: {
           addressString: '123 Example',
           ...ADDRESS_CODER_QUERY_PARAMS
@@ -129,7 +129,7 @@ describe('external api service', () => {
         query: 'acme'
       });
 
-      expect(mockOrgBookGet).toHaveBeenCalledWith('/search/autocomplete', {
+      expect(mockOrgBookGet).toHaveBeenCalledWith('search/autocomplete', {
         params: {
           q: 'acme',
           ...ORG_BOOK_QUERY_PARAMS

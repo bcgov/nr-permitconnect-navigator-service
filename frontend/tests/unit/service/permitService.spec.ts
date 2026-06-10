@@ -46,7 +46,7 @@ describe('permit service', () => {
         permitId: 'permit-123'
       });
 
-      expect(mockDelete).toHaveBeenCalledWith('housing/permit/permit-123');
+      expect(mockDelete).toHaveBeenCalledWith('housing/permit/permit-123', undefined);
     });
 
     it('propagates errors', async () => {
@@ -72,7 +72,7 @@ describe('permit service', () => {
         permitId: 'permit-123'
       });
 
-      expect(mockGet).toHaveBeenCalledWith('housing/permit/permit-123');
+      expect(mockGet).toHaveBeenCalledWith('housing/permit/permit-123', undefined);
 
       expect(result).toEqual(permit);
     });
@@ -224,7 +224,7 @@ describe('permit service', () => {
 
       const result = await upsertPermit(permit as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/permit', permit);
+      expect(mockPut).toHaveBeenCalledWith('housing/permit', permit, undefined);
 
       expect(result).toEqual(permit);
     });

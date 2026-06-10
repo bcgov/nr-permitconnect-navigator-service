@@ -139,6 +139,7 @@ export function errorHandler(
   _next: NextFunction // eslint-disable-line @typescript-eslint/no-unused-vars
 ): void {
   if (err instanceof Problem) {
+    log.error(err);
     err.send(req, res);
   } else if (err instanceof Prisma.PrismaClientKnownRequestError) {
     switch (err.code) {

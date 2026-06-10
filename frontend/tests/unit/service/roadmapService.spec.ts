@@ -50,16 +50,20 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
-        activityId: 'activity-1',
-        selectedFileIds: ['file-1', 'file-2'],
-        emailData: {
-          to: ['test@test.com'],
-          cc: [],
-          bcc: [],
-          subject: 'Roadmap'
-        }
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/roadmap',
+        {
+          activityId: 'activity-1',
+          selectedFileIds: ['file-1', 'file-2'],
+          emailData: {
+            to: ['test@test.com'],
+            cc: [],
+            bcc: [],
+            subject: 'Roadmap'
+          }
+        },
+        undefined
+      );
 
       expect(result).toEqual(response);
     });
@@ -79,15 +83,19 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
-        activityId: 'activity-1',
-        selectedFileIds: ['file-1'],
-        emailData: {
-          to: ['to@test.com'],
-          cc: ['cc@test.com'],
-          bcc: ['bcc@test.com']
-        }
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/roadmap',
+        {
+          activityId: 'activity-1',
+          selectedFileIds: ['file-1'],
+          emailData: {
+            to: ['to@test.com'],
+            cc: ['cc@test.com'],
+            bcc: ['bcc@test.com']
+          }
+        },
+        undefined
+      );
     });
 
     it('splits multiple email addresses', async () => {
@@ -103,14 +111,18 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
-        activityId: 'activity-1',
-        selectedFileIds: ['file-1'],
-        emailData: {
-          to: ['a@test.com', 'b@test.com', 'c@test.com'],
-          cc: []
-        }
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/roadmap',
+        {
+          activityId: 'activity-1',
+          selectedFileIds: ['file-1'],
+          emailData: {
+            to: ['a@test.com', 'b@test.com', 'c@test.com'],
+            cc: []
+          }
+        },
+        undefined
+      );
     });
 
     it('defaults cc to an empty array when not supplied', async () => {
@@ -126,14 +138,18 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
-        activityId: 'activity-1',
-        selectedFileIds: ['file-1'],
-        emailData: {
-          to: ['test@test.com'],
-          cc: []
-        }
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/roadmap',
+        {
+          activityId: 'activity-1',
+          selectedFileIds: ['file-1'],
+          emailData: {
+            to: ['test@test.com'],
+            cc: []
+          }
+        },
+        undefined
+      );
     });
 
     it('does not modify array email fields', async () => {
@@ -151,15 +167,19 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
-        activityId: 'activity-1',
-        selectedFileIds: ['file-1'],
-        emailData: {
-          to: ['to@test.com'],
-          cc: ['cc@test.com'],
-          bcc: ['bcc@test.com']
-        }
-      });
+      expect(mockPut).toHaveBeenCalledWith(
+        'housing/roadmap',
+        {
+          activityId: 'activity-1',
+          selectedFileIds: ['file-1'],
+          emailData: {
+            to: ['to@test.com'],
+            cc: ['cc@test.com'],
+            bcc: ['bcc@test.com']
+          }
+        },
+        undefined
+      );
     });
 
     it('propagates errors', async () => {

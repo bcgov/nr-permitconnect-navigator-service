@@ -15,9 +15,14 @@ import { useAppStore } from '@/store';
  * @returns A function that builds URL paths from additional segments
  */
 export function createRouteBuilder(resource?: string) {
-  return (...segments: (string | number)[]) =>
-    [resource, ...segments.map((segment) => encodeURIComponent(String(segment)))]
-      .filter((v) => v !== undefined && v !== '')
+  return (...segments: (string | number | null | undefined)[]) =>
+    [resource]
+      .filter((v): v is string => v !== undefined && v !== null && v !== '')
+      .concat(
+        segments
+          .filter((v): v is string | number => v !== undefined && v !== null && v !== '')
+          .map((s) => encodeURIComponent(String(s)))
+      )
       .join('/');
 }
 
@@ -39,9 +44,15 @@ export function createRouteBuilder(resource?: string) {
  * @returns A function that builds initiative-scoped URL paths
  */
 export function createInitiativeRouteBuilder(resource: string) {
-  return (...segments: (string | number)[]) => {
-    const initiative = encodeURIComponent(useAppStore().getInitiative.toLowerCase());
+  return (...segments: (string | number | null | undefined)[]) => {
+    const initiative = useAppStore().getInitiative.toLowerCase();
 
-    return [initiative, resource, ...segments.map((segment) => encodeURIComponent(String(segment)))].join('/');
+    return [
+      initiative,
+      resource,
+      ...segments
+        .filter((v): v is string | number => v !== undefined && v !== null && v !== '')
+        .map((segment) => encodeURIComponent(String(segment)))
+    ].join('/');
   };
 }
