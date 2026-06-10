@@ -6,6 +6,7 @@ import { randomBytes } from 'crypto';
 import express from 'express';
 import helmet from 'helmet';
 import { join } from 'path';
+import { rateLimit } from 'express-rate-limit';
 import querystring from 'querystring';
 
 import { requestSanitizer } from './src/middleware/requestSanitizer.ts';
@@ -24,6 +25,18 @@ const appRouter = express.Router();
 const app = express();
 app.disable('x-powered-by');
 app.set('trust proxy', 1);
+app.use(
+  rateLimit({
+    handler: (req: Request, res: Response): void => {
+      new Problem(429, { detail: 'Too many requests, please try again later.' }).send(req, res);
+    },
+    legacyHeaders: true,
+    limit: 250,
+    /** @see https://datatracker.ietf.org/doc/html/draft-ietf-httpapi-ratelimit-headers-08 */
+    standardHeaders: 'draft-8',
+    windowMs: 60000 // 1 minute
+  })
+);
 app.use(compression());
 app.use(cors(DEFAULTCORS));
 app.use(express.json({ limit: config.get('server.bodyLimit') }));
