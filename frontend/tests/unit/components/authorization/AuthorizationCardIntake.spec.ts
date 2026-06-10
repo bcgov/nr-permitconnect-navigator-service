@@ -13,7 +13,7 @@ import { StorageKey } from '@/utils/enums/application';
 import type { PermitType, SourceSystemKind } from '@/types';
 
 const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
-const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
+const listSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'listSourceSystemKinds');
 
 const sampleSourceSystemKind: SourceSystemKind = {
   description: 'ATS Project Number',
@@ -83,7 +83,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  getSourceSystemKindsSpy.mockResolvedValue([sampleSourceSystemKind] as SourceSystemKind[]);
+  listSourceSystemKindsSpy.mockResolvedValue([sampleSourceSystemKind] as SourceSystemKind[]);
   listPermitTypesSpy.mockResolvedValue(permitTypesList);
 });
 

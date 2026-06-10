@@ -38,7 +38,7 @@ vi.mock('@/services', () => ({
     getPids: vi.fn()
   },
   userService: {
-    searchUsers: vi.fn()
+    listUsers: vi.fn()
   },
   housingProjectService: {
     patchProject: vi.fn()
@@ -243,7 +243,7 @@ const wrapperSettings = (testProjectProp = testProject, editableProp = true) => 
 describe('ProjectForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+    vi.mocked(userService.listUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
@@ -260,8 +260,8 @@ describe('ProjectForm.vue', () => {
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
-    expect(userService.searchUsers).toHaveBeenCalledTimes(1);
-    expect(userService.searchUsers).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
+    expect(userService.listUsers).toHaveBeenCalledTimes(1);
+    expect(userService.listUsers).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
   });
 
   it('gets PIDs onMount', async () => {

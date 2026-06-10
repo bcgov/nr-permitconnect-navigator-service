@@ -1,5 +1,5 @@
 import { appAxios } from '@/services/interceptors';
-import { searchUsers, userService } from '@/services/userService';
+import { listUsers, userService } from '@/services/userService';
 
 vi.mock('@/services/interceptors', () => ({
   appAxios: vi.fn()
@@ -16,7 +16,7 @@ describe('user service', () => {
     } as never);
   });
 
-  describe('searchUsers', () => {
+  describe('listUsers', () => {
     it('posts search criteria and returns users', async () => {
       const filters = {
         userId: ['user-1']
@@ -37,7 +37,7 @@ describe('user service', () => {
         data: users
       });
 
-      const result = await searchUsers(filters as never);
+      const result = await listUsers(filters as never);
 
       expect(mockPost).toHaveBeenCalledWith('user', filters);
       expect(result).toEqual(users);
@@ -48,7 +48,7 @@ describe('user service', () => {
         data: []
       });
 
-      const result = await searchUsers({} as never);
+      const result = await listUsers({} as never);
 
       expect(mockPost).toHaveBeenCalledWith('user', {});
       expect(result).toEqual([]);
@@ -59,13 +59,13 @@ describe('user service', () => {
 
       mockPost.mockRejectedValue(error);
 
-      await expect(searchUsers({} as never)).rejects.toThrow(error);
+      await expect(listUsers({} as never)).rejects.toThrow(error);
     });
   });
 
   it('exports all service functions', () => {
     expect(userService).toEqual({
-      searchUsers
+      listUsers
     });
   });
 });

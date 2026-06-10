@@ -55,7 +55,7 @@ vi.mock('@/services/noteHistoryService', () => ({
 
 vi.mock('@/services/userService', () => ({
   userService: {
-    searchUsers: vi.fn()
+    listUsers: vi.fn()
   }
 }));
 
@@ -97,7 +97,7 @@ beforeEach(() => {
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
     { noteHistoryId: '1', createdBy: '123' }
   ] as NoteHistory[]);
-  vi.mocked(userService.searchUsers).mockResolvedValue([{ userId: '123', fullName: 'Fake User' }] as User[]);
+  vi.mocked(userService.listUsers).mockResolvedValue([{ userId: '123', fullName: 'Fake User' }] as User[]);
 });
 
 afterEach(() => {

@@ -178,7 +178,7 @@ onBeforeMount(async () => {
       .filter((x) => x.noteHistoryId && x.createdBy);
 
     if (noteHistoryCreatedByUsers.length) {
-      const noteHistoryUsers = await userService.searchUsers({
+      const noteHistoryUsers = await userService.listUsers({
         userId: noteHistoryCreatedByUsers.map((x) => x.createdBy!)
       });
 

@@ -1,5 +1,5 @@
 import { appAxios } from '@/services/interceptors';
-import { sourceSystemKindService, getSourceSystemKinds } from '@/services/sourceSystemKindService';
+import { sourceSystemKindService, listSourceSystemKinds } from '@/services/sourceSystemKindService';
 
 vi.mock('@/services/interceptors', () => ({
   appAxios: vi.fn()
@@ -16,7 +16,7 @@ describe('sourceSystemKind service', () => {
     } as never);
   });
 
-  describe('getSourceSystemKinds', () => {
+  describe('listSourceSystemKinds', () => {
     it('returns source system kinds', async () => {
       const sourceSystemKinds = [
         {
@@ -33,7 +33,7 @@ describe('sourceSystemKind service', () => {
         data: sourceSystemKinds
       });
 
-      const result = await getSourceSystemKinds();
+      const result = await listSourceSystemKinds();
 
       expect(mockGet).toHaveBeenCalledWith('sourceSystemKind');
 
@@ -45,13 +45,13 @@ describe('sourceSystemKind service', () => {
 
       mockGet.mockRejectedValue(error);
 
-      await expect(getSourceSystemKinds()).rejects.toThrow(error);
+      await expect(listSourceSystemKinds()).rejects.toThrow(error);
     });
   });
 
   it('exports all service functions', () => {
     expect(sourceSystemKindService).toEqual({
-      getSourceSystemKinds
+      listSourceSystemKinds
     });
   });
 });

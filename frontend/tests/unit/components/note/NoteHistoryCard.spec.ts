@@ -15,7 +15,7 @@ import type { Note, NoteHistory, User } from '@/types';
 
 const { t } = useI18n();
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -124,7 +124,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useUserService.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {
@@ -151,7 +151,7 @@ describe('NoteHistoryCard', () => {
         stubs: ['font-awesome-icon']
       }
     });
-    expect(useUserService).not.toHaveBeenCalled();
+    expect(listUsersSpy).not.toHaveBeenCalled();
     expect(wrapper.get('h3').text()).toBe(TEST_NOTE_HISTORY.title);
   });
 

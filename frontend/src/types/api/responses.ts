@@ -1,43 +1,19 @@
-import type { Action, BasicResponse, GroupName, Initiative, Resource } from '@/utils/enums/application';
-import type { ActivityContact, Permit } from './resources';
+import type { BasicResponse } from '@/utils/enums/application';
+import type { ActivityContact, Group, Permit } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import type { CodeTableName } from '../common';
 import type { PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
+import type { Code, Permission } from '../ui';
 
-export interface BringForward {
-  activityId: string;
-  enquiryId?: string;
-  noteId: string;
-  electrificationProjectId?: string;
-  escalateToDirector?: boolean;
-  escalateToSupervisor?: boolean;
-  generalProjectId?: string;
-  housingProjectId?: string;
-  title: string;
-  projectName?: string;
-  bringForwardDate: string;
-  createdByFullName?: string;
-}
-
-export interface Code {
-  code: string;
-  display: string;
-  definition?: string;
-  active: boolean;
+export interface GetAuthorizationContextResponse {
+  groups: Group[];
+  permissions: Permission[];
 }
 
 export type GetCodeTablesResponse = Record<CodeTableName, Code[]>;
 
-export interface Group {
-  groupId: number;
-  initiativeCode?: string;
-  initiativeId: string;
-  name: GroupName;
-  label?: string;
-}
-
-export interface PeachSummary {
+export interface GetPeachSummaryResponse {
   stage: PermitStage;
   state: PermitState;
   onHoldCode?: PiesOnHold;
@@ -49,64 +25,7 @@ export interface PeachSummary {
   statusLastChangedTime: string | null;
 }
 
-export interface Permission {
-  group: GroupName;
-  initiative: Initiative;
-  resource: Resource;
-  action: Action;
-}
-
-export interface GetPermissionsResponse {
-  groups: Group[];
-  permissions: Permission[];
-}
-
-export interface PutActivityContactResponse {
-  updated: ActivityContact;
-  demoted: ActivityContact | undefined;
-}
-
-export interface SearchPermitsResponse {
-  permits: Permit[];
-  totalRecords: number;
-}
-
-export interface SearchIdirUsersResponse {
-  firstName: string;
-  lastName: string;
-  email: string;
-  username: string;
-  attributes: SsoIdirUserAttributes;
-}
-
-export interface Statistics {
-  total_submissions: number;
-  total_submissions_between: number;
-  total_submissions_monthyear: number;
-  total_submissions_assignedto: number;
-  intake_submitted: number;
-  intake_assigned: number;
-  intake_completed: number;
-  multi_permits_needed: number;
-  state_new: number;
-  state_inprogress: number;
-  state_delayed: number;
-  state_completed: number;
-  supported_bc: number;
-  supported_indigenous: number;
-  supported_non_profit: number;
-  supported_housing_coop: number;
-  queue_1: number;
-  queue_2: number;
-  queue_3: number;
-  escalation: number;
-  general_enquiry: number;
-  guidance: number;
-  inapplicable: number;
-  status_request: number;
-}
-
-export interface ReportingResponse {
+export interface GetProjectPermitDataResponse {
   project_name: string;
   consent_to_feedback?: BasicResponse;
   first_name: string;
@@ -146,4 +65,22 @@ export interface ReportingResponse {
   tracked_in_ats: boolean;
   source_system: string | null;
   source_system_acronym: string | null;
+}
+
+export interface ListIdirUsersResponse {
+  firstName: string;
+  lastName: string;
+  email: string;
+  username: string;
+  attributes: SsoIdirUserAttributes;
+}
+
+export interface SearchPermitsResponse {
+  permits: Permit[];
+  totalRecords: number;
+}
+
+export interface PutActivityContactResponse {
+  updated: ActivityContact;
+  demoted: ActivityContact | undefined;
 }

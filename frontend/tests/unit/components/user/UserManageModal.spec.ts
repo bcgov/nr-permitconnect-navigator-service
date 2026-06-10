@@ -17,9 +17,9 @@ vi.mock('vue-i18n', () => ({
 }));
 
 // Spies
-const getGroups = vi.spyOn(yarsService, 'getGroups');
+const listGroupsSpy = vi.spyOn(yarsService, 'listGroups');
 
-getGroups.mockResolvedValue([{ groupId: 123 }] as Group[]);
+listGroupsSpy.mockResolvedValue([{ groupId: 123 }] as Group[]);
 
 const wrapperSettings = () => ({
   global: {

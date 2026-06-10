@@ -1,3 +1,4 @@
+import type { ProjectStatistics } from './api/reports';
 import type {
   CreateProjectRequest,
   DeleteDraftRequest,
@@ -9,18 +10,17 @@ import type {
   UpsertDraftRequest
 } from './api/requests';
 import type { Draft } from './api/resources';
-import type { Statistics } from './api/responses';
 
 export interface ProjectService<T> {
   createProject(req: CreateProjectRequest): Promise<T>;
   deleteProject(req: DeleteProjectRequest): Promise<void>;
-  getActivityIds(): Promise<string[]>;
   getProject(req: GetProjectRequest): Promise<T>;
+  getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics>;
+  listActivityIds(): Promise<string[]>;
   listProjects(): Promise<T[]>;
-  getStatistics(req: GetProjectStatisticsRequest): Promise<Statistics>;
+  patchProject(req: PatchProjectRequest): Promise<T>;
   searchProjects(filters?: unknown): Promise<T[]>;
   submitDraft(req: unknown): Promise<T>;
-  patchProject(req: PatchProjectRequest): Promise<T>;
 }
 
 export interface DraftableProjectService<T, U> extends ProjectService<T> {

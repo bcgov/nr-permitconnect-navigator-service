@@ -44,7 +44,7 @@ const getEscalationLabel = computed(() => (type: string) => {
 
 onBeforeMount(() => {
   if (!userName.value && noteHistory.createdBy) {
-    userService.searchUsers({ userId: [noteHistory.createdBy] }).then((res) => {
+    userService.listUsers({ userId: [noteHistory.createdBy] }).then((res) => {
       userName.value = res?.length ? res?.[0].fullName : '';
     });
   }

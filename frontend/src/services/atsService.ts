@@ -8,21 +8,6 @@ const PATH = 'ats';
 // TODO: As part of the ATS refactor, these services should return the resource directly
 
 /**
- * Searches for ATS users.
- * @param req - The search request payload.
- * @returns A promise resolving to ATS user search results.
- */
-export async function searchAtsUsers(req: SearchAtsUsersRequest): Promise<AxiosResponse<AtsClientsResource>> {
-  const { ...params } = req;
-
-  const response = await appAxios().get<AtsClientsResource>(`${PATH}/clients`, {
-    params
-  });
-
-  return response;
-}
-
-/**
  * Creates a client resource in ATS.
  * @param req - The ATS client creation payload.
  * @returns A promise resolving to the created ATS client.
@@ -45,6 +30,21 @@ export async function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosRe
 }
 
 /**
+ * Searches for ATS users.
+ * @param req - The search request payload.
+ * @returns A promise resolving to ATS user search results.
+ */
+export async function searchAtsUsers(req: SearchAtsUsersRequest): Promise<AxiosResponse<AtsClientsResource>> {
+  const { ...params } = req;
+
+  const response = await appAxios().get<AtsClientsResource>(`${PATH}/clients`, {
+    params
+  });
+
+  return response;
+}
+
+/**
  * Backward compatibility layer for legacy default-export service usage.
  *
  * This object preserves the previous pattern:
@@ -53,7 +53,7 @@ export async function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosRe
  * It may be removed once all consumers are migrated to named imports.
  */
 export const atsService = {
-  searchAtsUsers,
   createAtsClient,
-  createAtsEnquiry
+  createAtsEnquiry,
+  searchAtsUsers
 };

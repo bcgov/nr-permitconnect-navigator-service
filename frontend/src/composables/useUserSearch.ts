@@ -16,7 +16,7 @@ export function useUserSearch() {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) return;
 
-    users.value = await userService.searchUsers({
+    users.value = await userService.listUsers({
       userId: Array.isArray(userId) ? userId : [userId]
     });
   };
@@ -28,9 +28,9 @@ export function useUserSearch() {
 
     if (idpCfg) {
       if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-        users.value = await userService.searchUsers({ email: input, fullName: input, idp: [idpCfg.idp] });
+        users.value = await userService.listUsers({ email: input, fullName: input, idp: [idpCfg.idp] });
       } else if (EMAILREGEX.test(input)) {
-        users.value = await userService.searchUsers({ email: input, idp: [idpCfg.idp] });
+        users.value = await userService.listUsers({ email: input, idp: [idpCfg.idp] });
       } else {
         users.value = [];
       }

@@ -29,14 +29,10 @@ export async function createNoteHistory(req: CreateNoteHistoryRequest): Promise<
  * @param req - The request payload containing the note history ID.
  * @returns A promise resolving to the deleted `NoteHistory` resource.
  */
-export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<NoteHistory> {
+export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> {
   const { noteHistoryId } = req;
 
-  const { data } = await appAxios().delete<NoteHistory>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`
-  );
-
-  return data;
+  await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`);
 }
 
 /**

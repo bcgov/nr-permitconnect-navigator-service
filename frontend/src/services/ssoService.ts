@@ -1,17 +1,17 @@
 import { appAxios } from './interceptors';
 
 import type { CancelToken } from 'axios';
-import type { SearchIdirUsersRequest, SearchIdirUsersResponse } from '@/types';
+import type { ListIdirUsersRequest, ListIdirUsersResponse } from '@/types';
 
 /**
- * Searches idir users using the supplied filters.
+ * List idir users using the supplied filters.
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching users.
  */
-export async function searchIdirUsers(
-  req: SearchIdirUsersRequest,
+export async function listIdirUsers(
+  req: ListIdirUsersRequest,
   cancelToken?: CancelToken
-): Promise<SearchIdirUsersResponse[]> {
+): Promise<ListIdirUsersResponse[]> {
   const { data } = await appAxios().get('sso/idir/users', { params: req, cancelToken: cancelToken });
 
   return data;
@@ -26,5 +26,5 @@ export async function searchIdirUsers(
  * It may be removed once all consumers are migrated to named imports.
  */
 export const ssoService = {
-  searchIdirUsers
+  listIdirUsers
 };

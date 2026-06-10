@@ -127,7 +127,7 @@ function removeAllMarkers() {
 async function getNearestOccupant(latitude: string, longitude: string) {
   const result = await externalApiService.getGeocoderNearestOccupant({ latitude, longitude });
   const address = result.properties.occupantAliasAddress;
-  if (!address || address.length == 0) {
+  if (!address || address.length === 0) {
     toast.warn('No address found');
   }
   emit('map:pinUpdated', {

@@ -2,14 +2,15 @@ import { appAxios } from './interceptors';
 
 import type { SourceSystemKind } from '@/types';
 
-const path = 'sourceSystemKind';
+const PATH = 'sourceSystemKind';
 
 /**
  * Retrieves all source system kinds.
  * @returns A promise resolving to the list of source system kinds.
  */
-export async function getSourceSystemKinds(): Promise<SourceSystemKind[]> {
-  const { data } = await appAxios().get<SourceSystemKind[]>(path);
+export async function listSourceSystemKinds(): Promise<SourceSystemKind[]> {
+  const { data } = await appAxios().get<SourceSystemKind[]>(PATH);
+
   return data;
 }
 
@@ -22,5 +23,5 @@ export async function getSourceSystemKinds(): Promise<SourceSystemKind[]> {
  * It may be removed once all consumers are migrated to named imports.
  */
 export const sourceSystemKindService = {
-  getSourceSystemKinds
+  listSourceSystemKinds
 };

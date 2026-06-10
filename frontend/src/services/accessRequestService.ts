@@ -16,6 +16,16 @@ export async function createAccessRequest(req: CreateAccessRequestRequest): Prom
 }
 
 /**
+ * Retrieves all access requests.
+ * @returns A promise resolving to an array of AccessRequest resources.
+ */
+export async function listAccessRequests(): Promise<AccessRequest[]> {
+  const { data } = await appAxios().get<AccessRequest[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
+
+  return data;
+}
+
+/**
  * Processes an existing access request.
  * This may represent approval, denial, revocation, role change, etc.
  *
@@ -34,16 +44,6 @@ export async function processAccessRequest(req: ProcessAccessRequestRequest): Pr
 }
 
 /**
- * Retrieves all access requests.
- * @returns A promise resolving to an array of AccessRequest resources.
- */
-export async function listAccessRequests(): Promise<AccessRequest[]> {
-  const { data } = await appAxios().get<AccessRequest[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
-
-  return data;
-}
-
-/**
  * Backward compatibility layer for legacy default-export service usage.
  *
  * This object preserves the previous pattern:
@@ -53,6 +53,6 @@ export async function listAccessRequests(): Promise<AccessRequest[]> {
  */
 export const accessRequestService = {
   createAccessRequest,
-  processAccessRequest,
-  listAccessRequests
+  listAccessRequests,
+  processAccessRequest
 };

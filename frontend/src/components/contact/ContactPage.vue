@@ -101,7 +101,7 @@ onBeforeMount(async () => {
   if (userIds) {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (idpCfg) {
-      const users = await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] });
+      const users = await userService.listUsers({ userId: userIds, idp: [idpCfg.idp] });
       users.forEach((u: User) => {
         assignedUsers.value[u.userId] = u.fullName;
       });

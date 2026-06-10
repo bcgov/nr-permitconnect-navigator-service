@@ -10,7 +10,7 @@ import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/uti
 
 import type { Enquiry, User } from '@/types';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
 const currentDate = new Date().toISOString();
 
@@ -32,7 +32,7 @@ const testEnquiry: Enquiry = {
   atsEnquiryId: 654321
 };
 
-useUserService.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 
 const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
   props: {

@@ -212,7 +212,7 @@ export const useAuthZStore = defineStore('authz', () => {
   };
 
   // Actions
-  function setPermissions(data: { groups: Group[]; permissions: Permission[] }) {
+  function setAuthorizationContext(data: { groups: Group[]; permissions: Permission[] }) {
     state.groups.value = data.groups;
     state.permissions.value = data.permissions;
   }
@@ -233,7 +233,7 @@ export const useAuthZStore = defineStore('authz', () => {
     ...getters,
 
     // Actions
-    setPermissions,
+    setAuthorizationContext,
     setGroupOverride,
     setInitiativeOverride
   };

@@ -12,14 +12,20 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { ProjectService } from '@/types/services';
-import type { InputEvent, GetProjectStatisticsRequest, Statistics, User, ReportingResponse } from '@/types';
+import type {
+  InputEvent,
+  GetProjectStatisticsRequest,
+  ProjectStatistics,
+  User,
+  GetProjectPermitDataResponse
+} from '@/types';
 
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
 
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
-const statistics = defineModel<Statistics | undefined>('statistics');
+const statistics = defineModel<ProjectStatistics | undefined>('statistics');
 const statisticFilters: Ref<GetProjectStatisticsRequest> = ref({});
 
 // Actions
@@ -38,9 +44,9 @@ async function onAssigneeInput(e: InputEvent) {
   const input = e.target.value;
 
   if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-    assigneeOptions.value = await userService.searchUsers({ email: input, fullName: input });
+    assigneeOptions.value = await userService.listUsers({ email: input, fullName: input });
   } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = await userService.searchUsers({ email: input });
+    assigneeOptions.value = await userService.listUsers({ email: input });
   } else {
     assigneeOptions.value = [];
   }
@@ -62,7 +68,7 @@ async function onDownloadProjectPermitData() {
     return;
   }
 
-  const headers = Object.keys(data[0]) as (keyof ReportingResponse)[];
+  const headers = Object.keys(data[0]) as (keyof GetProjectPermitDataResponse)[];
   const csvRows = [];
 
   csvRows.push(headers.join(','));
@@ -119,7 +125,7 @@ watch(
         uuidVersion(statisticFilters.value.userId as string) === 4);
 
     if (validUser) {
-      if (projectService) statistics.value = await projectService.value.getStatistics(statisticFilters.value);
+      if (projectService) statistics.value = await projectService.value.getProjectStatistics(statisticFilters.value);
     }
   },
   { deep: true }

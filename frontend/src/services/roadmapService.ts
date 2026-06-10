@@ -7,6 +7,21 @@ import type { GetRoadmapNoteRequest, NoteHistory, SendRoadmapRequest } from '@/t
 const PATH = 'roadmap';
 
 /**
+ * Retrieves the roadmap note for an activity.
+ * @param req - The request payload containing the activity ID.
+ * @returns A promise resolving to the roadmap note.
+ */
+export async function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
+  const { activityId } = req;
+
+  const { data } = await appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/note`, {
+    params: { activityId }
+  });
+
+  return data;
+}
+
+/**
  * Sends a roadmap email.
  * @param req - The request payload containing the activity ID, selected files, and email data.
  * @returns A promise resolving to the send result.
@@ -42,21 +57,6 @@ export async function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory>
 }
 
 /**
- * Retrieves the roadmap note for an activity.
- * @param req - The request payload containing the activity ID.
- * @returns A promise resolving to the roadmap note.
- */
-export async function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
-  const { activityId } = req;
-
-  const { data } = await appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/note`, {
-    params: { activityId }
-  });
-
-  return data;
-}
-
-/**
  * Backward compatibility layer for legacy default-export service usage.
  *
  * This object preserves the previous pattern:
@@ -65,6 +65,6 @@ export async function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string
  * It may be removed once all consumers are migrated to named imports.
  */
 export const roadmapService = {
-  sendRoadmap,
-  getRoadmapNote
+  getRoadmapNote,
+  sendRoadmap
 };

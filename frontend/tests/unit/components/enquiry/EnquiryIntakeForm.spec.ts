@@ -45,11 +45,11 @@ const sampleContact: Contact = {
   updatedAt: new Date().toISOString()
 };
 
-const getActivityIds = vi.spyOn(housingProjectService, 'getActivityIds');
+const listActivityIds = vi.spyOn(housingProjectService, 'listActivityIds');
 const listProjects = vi.spyOn(housingProjectService, 'listProjects');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
-getActivityIds.mockResolvedValue(['someActivityid']);
+listActivityIds.mockResolvedValue(['someActivityid']);
 listProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
 searchContactsSpy.mockResolvedValue([sampleContact]);
 

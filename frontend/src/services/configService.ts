@@ -33,6 +33,14 @@ function writeCachedConfig(config: Config): void {
 }
 
 /**
+ * Retrieves the cached configuration without triggering an API call.
+ * @returns The cached Config object or null if not available.
+ */
+export function getCachedConfig(): Config | null {
+  return readCachedConfig();
+}
+
+/**
  * Retrieves application configuration.
  *
  * This function first attempts to read the configuration from sessionStorage.
@@ -73,14 +81,6 @@ export async function refreshConfig(): Promise<Config> {
 }
 
 /**
- * Retrieves the cached configuration without triggering an API call.
- * @returns The cached Config object or null if not available.
- */
-export function getCachedConfig(): Config | null {
-  return readCachedConfig();
-}
-
-/**
  * Backward compatibility layer for legacy default-export service usage.
  *
  * This object preserves the previous pattern:
@@ -89,7 +89,7 @@ export function getCachedConfig(): Config | null {
  * It may be removed once all consumers are migrated to named imports.
  */
 export const configService = {
+  getCachedConfig,
   getConfig,
-  refreshConfig,
-  getCachedConfig
+  refreshConfig
 };

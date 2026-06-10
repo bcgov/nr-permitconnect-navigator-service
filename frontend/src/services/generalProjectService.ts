@@ -12,8 +12,8 @@ import type {
   GetProjectStatisticsRequest,
   GeneralProject,
   PatchGeneralProjectRequest,
+  ProjectStatistics,
   ListGeneralProjectsRequest,
-  Statistics,
   UpsertDraftRequest,
   SubmitDraftGeneralProjectRequest
 } from '@/types';
@@ -22,13 +22,13 @@ import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchem
 const PATH = `${Initiative.GENERAL.toLowerCase()}/project`;
 
 export interface GeneralProjectService extends DraftableProjectService<GeneralProject, FormSchemaType> {
-  getProject(req: GetProjectRequest): Promise<GeneralProject>;
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
+  getProject(req: GetProjectRequest): Promise<GeneralProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
+  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }
 
 /**
@@ -45,6 +45,17 @@ export async function createProject(req: CreateGeneralProjectRequest): Promise<G
 }
 
 /**
+ * Deletes a draft.
+ * @param req - The request payload containing the draft ID.
+ * @returns A promise resolving when the operation completes.
+ */
+export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+  const { draftId } = req;
+
+  await appAxios().delete(`${PATH}/draft/${draftId}`);
+}
+
+/**
  * Deletes a general project.
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
@@ -56,11 +67,14 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
 }
 
 /**
- * Retrieves all activity IDs associated with general projects.
- * @returns A promise resolving to an array of activity IDs.
+ * Retrieves a single draft.
+ * @param req - The request payload containing the draft ID.
+ * @returns A promise resolving to the requested draft resource.
  */
-export async function getActivityIds(): Promise<string[]> {
-  const { data } = await appAxios().get<string[]>(`${PATH}/activityIds`);
+export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+  const { draftId } = req;
+
+  const { data } = await appAxios().get<Draft<FormSchemaType>>(`${PATH}/draft/${draftId}`);
 
   return data;
 }
@@ -79,22 +93,46 @@ export async function getProject(req: GetProjectRequest): Promise<GeneralProject
 }
 
 /**
- * Retrieves all general projects.
- * @returns A promise resolving to an array of `GeneralProject` resources.
+ * Retrieves project statistics.
+ * @param req - The request payload containing optional statistic filters.
+ * @returns A promise resolving to project statistics.
  */
-export async function listProjects(): Promise<GeneralProject[]> {
-  const { data } = await appAxios().get<GeneralProject[]>(PATH);
+export async function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
+  const { ...filters } = req;
+
+  const { data } = await appAxios().get<ProjectStatistics>(`${PATH}/statistics`, {
+    params: filters
+  });
 
   return data;
 }
 
 /**
- * Searches general projects using the supplied filters.
- * @param req - The request payload containing optional search criteria.
+ * Retrieves all activity IDs associated with general projects.
+ * @returns A promise resolving to an array of activity IDs.
+ */
+export async function listActivityIds(): Promise<string[]> {
+  const { data } = await appAxios().get<string[]>(`${PATH}/activityIds`);
+
+  return data;
+}
+
+/**
+ * Retrieves all drafts.
+ * @returns A promise resolving to an array of draft resources.
+ */
+export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
+  const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
+
+  return data;
+}
+
+/**
+ * Retrieves all general projects.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]> {
-  const { data } = await appAxios().post<GeneralProject[]>(`${PATH}/search`, req);
+export async function listProjects(): Promise<GeneralProject[]> {
+  const { data } = await appAxios().get<GeneralProject[]>(PATH);
 
   return data;
 }
@@ -113,16 +151,12 @@ export async function patchProject(req: PatchGeneralProjectRequest): Promise<Gen
 }
 
 /**
- * Retrieves project statistics.
- * @param req - The request payload containing optional statistic filters.
- * @returns A promise resolving to project statistics.
+ * Searches general projects using the supplied filters.
+ * @param req - The request payload containing optional search criteria.
+ * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function getStatistics(req: GetProjectStatisticsRequest): Promise<Statistics> {
-  const { ...filters } = req;
-
-  const { data } = await appAxios().get<Statistics>(`${PATH}/statistics`, {
-    params: filters
-  });
+export async function searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]> {
+  const { data } = await appAxios().post<GeneralProject[]>(`${PATH}/search`, req);
 
   return data;
 }
@@ -136,40 +170,6 @@ export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promis
   const { ...body } = req;
 
   const { data } = await appAxios().put<GeneralProject>(`${PATH}/draft/submit`, body);
-
-  return data;
-}
-
-/**
- * Deletes a draft.
- * @param req - The request payload containing the draft ID.
- * @returns A promise resolving when the operation completes.
- */
-export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
-  const { draftId } = req;
-
-  await appAxios().delete(`${PATH}/draft/${draftId}`);
-}
-
-/**
- * Retrieves a single draft.
- * @param req - The request payload containing the draft ID.
- * @returns A promise resolving to the requested draft resource.
- */
-export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
-  const { draftId } = req;
-
-  const { data } = await appAxios().get<Draft<FormSchemaType>>(`${PATH}/draft/${draftId}`);
-
-  return data;
-}
-
-/**
- * Retrieves all drafts.
- * @returns A promise resolving to an array of draft resources.
- */
-export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
-  const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
 
   return data;
 }
@@ -197,16 +197,16 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
  */
 export const generalProjectService: GeneralProjectService = {
   createProject,
-  deleteProject,
-  getActivityIds,
-  getProject,
-  listProjects,
-  searchProjects,
-  patchProject,
-  getStatistics,
-  submitDraft,
   deleteDraft,
+  deleteProject,
   getDraft,
+  getProject,
+  getProjectStatistics,
+  listActivityIds,
   listDrafts,
+  listProjects,
+  patchProject,
+  searchProjects,
+  submitDraft,
   upsertDraft
 };

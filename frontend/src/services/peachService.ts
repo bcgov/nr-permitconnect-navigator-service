@@ -1,6 +1,6 @@
 import { appAxios } from './interceptors';
 
-import type { GetPeachSummaryRequest, PeachSummary } from '@/types';
+import type { GetPeachSummaryRequest, GetPeachSummaryResponse } from '@/types';
 
 const PATH = 'peach';
 
@@ -9,8 +9,8 @@ const PATH = 'peach';
  * @param req - The permit tracking payload.
  * @returns A promise resolving to the peach summary.
  */
-export async function getPeachSummary(req: GetPeachSummaryRequest): Promise<PeachSummary> {
-  const { data } = await appAxios().post<PeachSummary>(`${PATH}/record`, req);
+export async function getPeachSummary(req: GetPeachSummaryRequest): Promise<GetPeachSummaryResponse> {
+  const { data } = await appAxios().post<GetPeachSummaryResponse>(`${PATH}/record`, req);
 
   return data;
 }

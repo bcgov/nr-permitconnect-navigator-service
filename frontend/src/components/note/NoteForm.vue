@@ -203,7 +203,7 @@ function onTypeChange(e: SelectChangeEvent) {
 
 async function fetchCreatedBy() {
   const userIds = Array.from(new Set(noteHistory?.note?.map((n) => n.createdBy).filter(Boolean))) as [];
-  const users = await userService.searchUsers({ userId: userIds });
+  const users = await userService.listUsers({ userId: userIds });
   users.forEach((u: User) => {
     createdByFullNames.value[u.userId] = u.fullName;
   });

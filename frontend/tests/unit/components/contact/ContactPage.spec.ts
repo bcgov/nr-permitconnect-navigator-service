@@ -37,7 +37,7 @@ const testContact = {
 vi.spyOn(contactService, 'getContact').mockResolvedValue(testContact);
 vi.spyOn(housingProjectService, 'searchProjects').mockResolvedValue([]);
 vi.spyOn(enquiryService, 'searchEnquiries').mockResolvedValue([]);
-vi.spyOn(userService, 'searchUsers').mockResolvedValue([]);
+vi.spyOn(userService, 'listUsers').mockResolvedValue([]);
 
 beforeEach(() => {
   vi.clearAllMocks();

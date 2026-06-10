@@ -24,7 +24,7 @@ import type {
   PermitType,
   ProjectBase
 } from './resources';
-import type { UUID } from '../common';
+import type { KeyValuePair, UUID } from '../common';
 import type { Nullable, PartialFields } from '../util';
 import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
 import type { AccessRequestStatus, GroupName, Initiative, Resource } from '@/utils/enums/application';
@@ -107,7 +107,7 @@ interface ContactSearchSchema extends ContactBaseSchema {
 export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
 export type GetContactRequest = ListRequestDTO<ContactBase, ContactGetSchema>;
 export type ListContactsRequest = ListRequestDTO<ContactBase, ContactSearchSchema>;
-export type PutContactRequest = PutRequestDTO<ContactBase, ContactBaseSchema>;
+export type PutContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
 export type DeleteContactRequest = DeleteRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
@@ -326,7 +326,7 @@ export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
  * User
  */
 
-export interface SearchUsersRequest {
+export interface ListUsersRequest {
   userId?: string[];
   idp?: string[];
   sub?: string;
@@ -343,11 +343,6 @@ export interface SearchUsersRequest {
 /**
  * Other
  */
-
-export interface KeyValuePair {
-  key: string;
-  value: string;
-}
 
 export interface CreateObjectRequest {
   file: File;
@@ -426,7 +421,7 @@ export interface DeleteSubjectGroupRequest {
   groupId: number;
 }
 
-export interface GetGroupsRequest {
+export interface ListGroupsRequest {
   initiative: Initiative;
 }
 
@@ -447,7 +442,7 @@ export interface SendRoadmapRequest {
   emailData: Email;
 }
 
-export interface SearchIdirUsersRequest {
+export interface ListIdirUsersRequest {
   firstName?: string;
   lastName?: string;
   email?: string;

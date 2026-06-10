@@ -194,13 +194,13 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
+        if (idx < 0) throw new Error('User not found in table');
+
         if (admin) {
           usersAndAccessRequests.value.splice(idx, 1);
-        } else {
-          if (response) {
-            usersAndAccessRequests.value[idx]!.accessRequest = response;
-            usersAndAccessRequests.value[idx]!.user.status = PENDING_STATUSES.PENDING_REVOCATION;
-          }
+        } else if (response) {
+          usersAndAccessRequests.value[idx].accessRequest = response;
+          usersAndAccessRequests.value[idx].user.status = PENDING_STATUSES.PENDING_REVOCATION;
         }
 
         toast.success(successMessage);
@@ -325,7 +325,7 @@ onBeforeMount(async () => {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
-    const users: User[] = await userService.searchUsers({
+    const users: User[] = await userService.listUsers({
       active: true,
       idp: [idpCfg.idp],
       includeUserGroups: true,
@@ -357,7 +357,7 @@ onBeforeMount(async () => {
       .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
     // Get requesting users and add their access requests
-    const newRequestingUsers: User[] = await userService.searchUsers({
+    const newRequestingUsers: User[] = await userService.listUsers({
       userId: Array.from(currentAccessRequests.keys())
     });
 

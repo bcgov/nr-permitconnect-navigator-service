@@ -1,5 +1,5 @@
 import { appAxios } from '@/services/interceptors';
-import { searchIdirUsers, ssoService } from '@/services/ssoService';
+import { listIdirUsers, ssoService } from '@/services/ssoService';
 
 vi.mock('@/services/interceptors', () => ({
   appAxios: vi.fn()
@@ -39,7 +39,7 @@ describe('sso service', () => {
         data: users
       });
 
-      const result = await searchIdirUsers(filters as never);
+      const result = await listIdirUsers(filters as never);
 
       expect(mockGet).toHaveBeenCalledWith('sso/idir/users', {
         params: filters,
@@ -60,7 +60,7 @@ describe('sso service', () => {
         data: []
       });
 
-      await searchIdirUsers(filters as never, cancelToken);
+      await listIdirUsers(filters as never, cancelToken);
 
       expect(mockGet).toHaveBeenCalledWith('sso/idir/users', {
         params: filters,
@@ -73,13 +73,13 @@ describe('sso service', () => {
 
       mockGet.mockRejectedValue(error);
 
-      await expect(searchIdirUsers({} as never)).rejects.toThrow(error);
+      await expect(listIdirUsers({} as never)).rejects.toThrow(error);
     });
   });
 
   it('exports all service functions', () => {
     expect(ssoService).toEqual({
-      searchIdirUsers
+      listIdirUsers
     });
   });
 });

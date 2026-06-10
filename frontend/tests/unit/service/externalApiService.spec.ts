@@ -26,10 +26,7 @@ describe('external api service', () => {
 
   describe('getGeocoderNearestOccupant', () => {
     it('returns nearest occupant data', async () => {
-      const response = {
-        occupantName: 'Acme Testing Services',
-        siteID: 'fake-site-id'
-      };
+      const response = { properties: { occupantName: 'Acme Testing Services', siteID: 'fake-site-id' } };
 
       mockGeocoderGet.mockResolvedValue({
         data: response
@@ -65,13 +62,7 @@ describe('external api service', () => {
 
   describe('searchGeocoderAddress', () => {
     it('returns address search results', async () => {
-      const response = {
-        addresses: [
-          {
-            fullAddress: '123 Example Ave, Sample City, ZZ'
-          }
-        ]
-      };
+      const response = { features: [{ properties: { fullAddress: '123 Example Ave, Sample City, ZZ' } }] };
 
       mockGeocoderGet.mockResolvedValue({
         data: response

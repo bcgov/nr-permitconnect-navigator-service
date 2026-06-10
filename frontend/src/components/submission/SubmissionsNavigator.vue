@@ -36,14 +36,14 @@ import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Permit, Project, ProjectService, Statistics } from '@/types';
+import type { BringForward, Enquiry, Permit, Project, ProjectService, ProjectStatistics } from '@/types';
 
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
 const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
 const permits = defineModel<Permit[]>('permits', { required: true });
 const projects = defineModel<Project[]>('projects', { required: true });
-const statistics = defineModel<Statistics>('statistics');
+const statistics = defineModel<ProjectStatistics>('statistics');
 
 // Injections
 const projectService = inject<Ref<ProjectService<Project>>>(projectServiceKey);
@@ -183,7 +183,7 @@ function onSubmissionDelete(projectId: string, activityId: string) {
 
 function refreshStatistics() {
   projectService?.value
-    ?.getStatistics({})
+    ?.getProjectStatistics({})
     .then((response) => {
       statistics.value = response;
     })

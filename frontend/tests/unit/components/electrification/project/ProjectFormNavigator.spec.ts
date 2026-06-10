@@ -36,7 +36,7 @@ vi.mock('@/services', () => ({
     getPIDs: vi.fn()
   },
   userService: {
-    searchUsers: vi.fn()
+    listUsers: vi.fn()
   },
   electrificationProjectService: {
     patchProject: vi.fn()

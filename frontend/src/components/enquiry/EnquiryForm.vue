@@ -177,7 +177,7 @@ async function getRelatedATSClientID(activityId: string) {
 async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
   if (enquiry?.assignedUserId) {
-    assigneeOptions = await userService.searchUsers({ userId: [enquiry.assignedUserId] });
+    assigneeOptions = await userService.listUsers({ userId: [enquiry.assignedUserId] });
   }
 
   let atsClientId;
@@ -379,7 +379,7 @@ function setBasicInfo(contact?: Contact) {
 
 onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
-  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.getActivityIds();
+  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.listActivityIds();
 
   initialFormValues.value = await initializeFormValues();
 });

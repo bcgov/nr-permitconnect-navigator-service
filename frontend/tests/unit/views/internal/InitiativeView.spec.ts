@@ -18,7 +18,7 @@ import { GroupName, Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/internal/InitiativeView.vue';
 import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { Group, Statistics } from '@/types';
+import type { Group, ProjectStatistics } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -60,14 +60,14 @@ vi.mock('@/services/permitService', () => ({
 vi.mock('@/services/electrificationProjectService', () => ({
   electrificationProjectService: {
     listProjects: vi.fn(),
-    getStatistics: vi.fn()
+    getProjectStatistics: vi.fn()
   }
 }));
 
 vi.mock('@/services/housingProjectService', () => ({
   housingProjectService: {
     listProjects: vi.fn(),
-    getStatistics: vi.fn()
+    getProjectStatistics: vi.fn()
   }
 }));
 
@@ -107,9 +107,9 @@ beforeEach(() => {
   vi.mocked(enquiryService.listEnquiries).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
-  vi.mocked(electrificationProjectService.getStatistics).mockResolvedValue({} as Statistics);
+  vi.mocked(electrificationProjectService.getProjectStatistics).mockResolvedValue({} as ProjectStatistics);
   vi.mocked(housingProjectService.listProjects).mockResolvedValue([]);
-  vi.mocked(housingProjectService.getStatistics).mockResolvedValue({} as Statistics);
+  vi.mocked(housingProjectService.getProjectStatistics).mockResolvedValue({} as ProjectStatistics);
   vi.mocked(noteHistoryService.listBringForwards).mockResolvedValue([]);
 });
 
@@ -175,7 +175,7 @@ describe('InitiativeView.vue', () => {
     await flushPromises();
 
     const authzStore = useAuthZStore();
-    authzStore.setPermissions({
+    authzStore.setAuthorizationContext({
       groups: [
         {
           initiativeCode: 'HOUSING',

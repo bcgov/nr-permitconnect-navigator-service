@@ -1,15 +1,15 @@
 import { appAxios } from './interceptors';
 
-import type { SearchUsersRequest, User } from '@/types';
+import type { ListUsersRequest, User } from '@/types';
 
 const PATH = 'user';
 
 /**
- * Searches users using the supplied filters.
+ * Lists users using the supplied filters.
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching users.
  */
-export async function searchUsers(req: SearchUsersRequest): Promise<User[]> {
+export async function listUsers(req: ListUsersRequest): Promise<User[]> {
   const { data } = await appAxios().post(PATH, req);
 
   return data;
@@ -24,5 +24,5 @@ export async function searchUsers(req: SearchUsersRequest): Promise<User[]> {
  * It may be removed once all consumers are migrated to named imports.
  */
 export const userService = {
-  searchUsers
+  listUsers
 };
