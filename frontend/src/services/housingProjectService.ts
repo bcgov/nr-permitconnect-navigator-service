@@ -1,4 +1,5 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 import { Initiative } from '@/utils/enums/application';
 
 import type {
@@ -19,29 +20,35 @@ import type {
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
-const PATH = `${Initiative.HOUSING.toLowerCase()}/project`;
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const housingProjectRoute = createRouteBuilder(`${Initiative.HOUSING.toLowerCase()}/project`);
 
-export interface HousingProjectService extends DraftableProjectService<HousingProject, FormSchemaType> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  getProject(req: GetProjectRequest): Promise<HousingProject>;
-  listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]>;
-  submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
-}
+const housingProjectRoutes = {
+  root: () => housingProjectRoute(),
+  byId: (id: string) => housingProjectRoute(id),
+
+  draft: () => housingProjectRoute('draft'),
+  draftById: (id: string) => housingProjectRoute('draft', id),
+  submitDraft: () => housingProjectRoute('draft', 'submit'),
+
+  search: () => housingProjectRoute('search'),
+  statistics: () => housingProjectRoute('statistics'),
+  activityIds: () => housingProjectRoute('activityIds')
+} as const;
 
 /**
  * Creates a new housing project.
  * @param req - The request payload containing the project data to create.
  * @returns A promise resolving to the created `HousingProject` resource.
  */
-export async function createProject(req: CreateHousingProjectRequest): Promise<HousingProject> {
+export function createProject(req: CreateHousingProjectRequest): Promise<HousingProject> {
   const { ...body } = req;
 
-  const { data } = await appAxios().post<HousingProject>(PATH, body);
-
-  return data;
+  return api.post<HousingProject>(housingProjectRoutes.root(), body);
 }
 
 /**
@@ -49,10 +56,10 @@ export async function createProject(req: CreateHousingProjectRequest): Promise<H
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+export function deleteDraft(req: DeleteDraftRequest): Promise<void> {
   const { draftId } = req;
 
-  await appAxios().delete(`${PATH}/draft/${draftId}`);
+  return api.delete(housingProjectRoutes.draftById(draftId));
 }
 
 /**
@@ -60,10 +67,10 @@ export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
+export function deleteProject(req: DeleteProjectRequest): Promise<void> {
   const { projectId } = req;
 
-  await appAxios().delete(`${PATH}/${projectId}`);
+  return api.delete(housingProjectRoutes.byId(projectId));
 }
 
 /**
@@ -71,12 +78,10 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving to the requested draft resource.
  */
-export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+export function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
   const { draftId } = req;
 
-  const { data } = await appAxios().get<Draft<FormSchemaType>>(`${PATH}/draft/${draftId}`);
-
-  return data;
+  return api.get<Draft<FormSchemaType>>(housingProjectRoutes.draftById(draftId));
 }
 
 /**
@@ -84,12 +89,10 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving to the requested `HousingProject` resource.
  */
-export async function getProject(req: GetProjectRequest): Promise<HousingProject> {
+export function getProject(req: GetProjectRequest): Promise<HousingProject> {
   const { projectId } = req;
 
-  const { data } = await appAxios().get<HousingProject>(`${PATH}/${projectId}`);
-
-  return data;
+  return api.get<HousingProject>(housingProjectRoutes.byId(projectId));
 }
 
 /**
@@ -97,44 +100,36 @@ export async function getProject(req: GetProjectRequest): Promise<HousingProject
  * @param req - The request payload containing optional statistic filters.
  * @returns A promise resolving to project statistics.
  */
-export async function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
+export function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
   const { ...filters } = req;
 
-  const { data } = await appAxios().get<ProjectStatistics>(`${PATH}/statistics`, {
+  return api.get<ProjectStatistics>(housingProjectRoutes.statistics(), {
     params: filters
   });
-
-  return data;
 }
 
 /**
  * Retrieves all activity IDs associated with housing projects.
  * @returns A promise resolving to an array of activity IDs.
  */
-export async function listActivityIds(): Promise<string[]> {
-  const { data } = await appAxios().get<string[]>(`${PATH}/activityIds`);
-
-  return data;
+export function listActivityIds(): Promise<string[]> {
+  return api.get<string[]>(housingProjectRoutes.activityIds());
 }
 
 /**
  * Retrieves all drafts.
  * @returns A promise resolving to an array of draft resources.
  */
-export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
-  const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
-
-  return data;
+export function listDrafts(): Promise<Draft<FormSchemaType>[]> {
+  return api.get<Draft<FormSchemaType>[]>(housingProjectRoutes.draft());
 }
 
 /**
  * Retrieves all housing projects.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export async function listProjects(): Promise<HousingProject[]> {
-  const { data } = await appAxios().get<HousingProject[]>(PATH);
-
-  return data;
+export function listProjects(): Promise<HousingProject[]> {
+  return api.get<HousingProject[]>(housingProjectRoutes.root());
 }
 
 /**
@@ -142,12 +137,10 @@ export async function listProjects(): Promise<HousingProject[]> {
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `HousingProject` resource.
  */
-export async function patchProject(req: PatchHousingProjectRequest): Promise<HousingProject> {
+export function patchProject(req: PatchHousingProjectRequest): Promise<HousingProject> {
   const { projectId, ...body } = req;
 
-  const { data } = await appAxios().patch<HousingProject>(`${PATH}/${projectId}`, body);
-
-  return data;
+  return api.patch<HousingProject>(housingProjectRoutes.byId(projectId), body);
 }
 
 /**
@@ -155,10 +148,8 @@ export async function patchProject(req: PatchHousingProjectRequest): Promise<Hou
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export async function searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]> {
-  const { data } = await appAxios().post<HousingProject[]>(`${PATH}/search`, req);
-
-  return data;
+export function searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]> {
+  return api.post<HousingProject[]>(housingProjectRoutes.search(), req);
 }
 
 /**
@@ -166,12 +157,10 @@ export async function searchProjects(req: ListHousingProjectRequest): Promise<Ho
  * @param req - The request payload containing the project data to submit.
  * @returns A promise resolving to the submitted `HousingProject` resource.
  */
-export async function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
+export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
   const { ...body } = req;
 
-  const { data } = await appAxios().put<HousingProject>(`${PATH}/draft/submit`, body);
-
-  return data;
+  return api.put<HousingProject>(housingProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -179,12 +168,10 @@ export async function submitDraft(req: SubmitDraftHousingProjectRequest): Promis
  * @param req - The request payload containing the draft data.
  * @returns A promise resolving to the saved draft resource.
  */
-export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
+export function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  const { data } = await appAxios().put<Draft<FormSchemaType>>(`${PATH}/draft`, body);
-
-  return data;
+  return api.put<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
 }
 
 /**
@@ -195,6 +182,16 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
  *
  * It may be removed once all consumers are migrated to named imports.
  */
+export interface HousingProjectService extends DraftableProjectService<HousingProject, FormSchemaType> {
+  deleteDraft(req: DeleteDraftRequest): Promise<void>;
+  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
+  getProject(req: GetProjectRequest): Promise<HousingProject>;
+  listDrafts(): Promise<Draft<FormSchemaType>[]>;
+  searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]>;
+  submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
+  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+}
+
 export const housingProjectService: HousingProjectService = {
   createProject,
   deleteDraft,

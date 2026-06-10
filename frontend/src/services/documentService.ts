@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { api } from './apiClient';
 import { comsService } from './comsService';
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 import { getFilenameAndExtension } from '@/utils/utils';
 
 import type {
@@ -13,8 +13,18 @@ import type {
   ListDocumentsRequest
 } from '@/types';
 
-const PATH = 'document';
-const PROJECT_ID = 'Project ID';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const documentRoute = createInitiativeRouteBuilder('document');
+
+const documentRoutes = {
+  root: () => documentRoute(),
+  byId: (documentId: string) => documentRoute(documentId),
+  list: (activityId: string) => documentRoute('list', activityId)
+} as const;
 
 /**
  * Uploads a file to COMS and creates a document association.
@@ -36,6 +46,7 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
     const newDocument = new File([document], newDocumentName, { type: document.type });
 
     // The tagset is used to filter the objects in the bucket
+    const PROJECT_ID = 'Project ID';
     const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
 
     // Create COMS object
@@ -47,15 +58,13 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
     });
 
     // Create document link
-    const { data } = await appAxios().post<Document>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+    return await api.post<Document>(documentRoutes.root(), {
       activityId: activityId,
       documentId: comsResponse.id,
       filename: comsResponse.name,
       mimeType: comsResponse.mimeType,
       filesize: comsResponse.length
     });
-
-    return data;
   } catch (e) {
     // In event of any error try to Delete COMS object if it was created
     if (comsResponse) {
@@ -75,7 +84,7 @@ export async function deleteDocument(req: DeleteDocumentRequest): Promise<void> 
 
   try {
     await comsService.deleteObject({ objectId: documentId, versionId });
-    await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
+    return await api.delete(documentRoutes.byId(documentId), {
       params: {
         versionId: versionId
       }
@@ -103,10 +112,7 @@ export async function downloadDocument(req: DownloadDocumentRequest): Promise<vo
  */
 export async function listDocuments(req: ListDocumentsRequest): Promise<Document[]> {
   const { activityId } = req;
-  const { data } = await appAxios().get<Document[]>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`
-  );
-  return data;
+  return api.get<Document[]>(documentRoutes.list(activityId));
 }
 
 /**

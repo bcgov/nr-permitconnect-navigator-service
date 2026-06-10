@@ -1,5 +1,5 @@
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { api } from './apiClient';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 
 import type {
   BringForward,
@@ -10,18 +10,28 @@ import type {
   NoteHistory,
   PutNoteHistoryRequest
 } from '@/types';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const noteRoute = createInitiativeRouteBuilder('note');
 
-const PATH = 'note';
+const noteRoutes = {
+  root: () => noteRoute(),
+  byId: (noteHistoryId: string) => noteRoute(noteHistoryId),
+
+  bringForwards: () => noteRoute('bringForward'),
+  list: (activityId: string) => noteRoute('list', activityId)
+} as const;
 
 /**
  * Creates a note history record.
  * @param req - The request payload containing the note history data and note content.
  * @returns A promise resolving to the created `NoteHistory` resource.
  */
-export async function createNoteHistory(req: CreateNoteHistoryRequest): Promise<NoteHistory> {
-  const { data } = await appAxios().post<NoteHistory>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, req);
-
-  return data;
+export function createNoteHistory(req: CreateNoteHistoryRequest): Promise<NoteHistory> {
+  return api.post<NoteHistory>(noteRoutes.root(), req);
 }
 
 /**
@@ -29,10 +39,10 @@ export async function createNoteHistory(req: CreateNoteHistoryRequest): Promise<
  * @param req - The request payload containing the note history ID.
  * @returns A promise resolving to the deleted `NoteHistory` resource.
  */
-export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> {
+export function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> {
   const { noteHistoryId } = req;
 
-  await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`);
+  return api.delete(noteRoutes.byId(noteHistoryId));
 }
 
 /**
@@ -40,17 +50,12 @@ export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<
  * @param req - The request payload containing optional bring-forward filter criteria.
  * @returns A promise resolving to an array of `BringForward` resources.
  */
-export async function listBringForwards(req: ListBringForwardsRequest): Promise<BringForward[]> {
+export function listBringForwards(req: ListBringForwardsRequest): Promise<BringForward[]> {
   const { bringForwardState } = req;
 
-  const { data } = await appAxios().get<BringForward[]>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/bringForward`,
-    {
-      params: { bringForwardState }
-    }
-  );
-
-  return data;
+  return api.get<BringForward[]>(noteRoutes.bringForwards(), {
+    params: { bringForwardState }
+  });
 }
 
 /**
@@ -58,14 +63,10 @@ export async function listBringForwards(req: ListBringForwardsRequest): Promise<
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to an array of `NoteHistory` resources.
  */
-export async function listNoteHistories(req: ListNoteHistoriesRequest): Promise<NoteHistory[]> {
+export function listNoteHistories(req: ListNoteHistoriesRequest): Promise<NoteHistory[]> {
   const { activityId } = req;
 
-  const { data } = await appAxios().get<NoteHistory[]>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`
-  );
-
-  return data;
+  return api.get<NoteHistory[]>(noteRoutes.list(activityId));
 }
 
 /**
@@ -73,15 +74,10 @@ export async function listNoteHistories(req: ListNoteHistoriesRequest): Promise<
  * @param req - The request payload containing the note history ID and updated fields.
  * @returns A promise resolving to the updated `NoteHistory` resource.
  */
-export async function putNoteHistory(req: PutNoteHistoryRequest): Promise<NoteHistory> {
+export function putNoteHistory(req: PutNoteHistoryRequest): Promise<NoteHistory> {
   const { noteHistoryId, ...body } = req;
 
-  const { data } = await appAxios().put<NoteHistory>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`,
-    body
-  );
-
-  return data;
+  return api.put<NoteHistory>(noteRoutes.byId(noteHistoryId), body);
 }
 
 /**

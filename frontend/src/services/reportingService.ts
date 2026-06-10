@@ -1,37 +1,43 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { GetProjectPermitDataResponse } from '@/types';
 
-const PATH = 'reporting';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const reportingRoute = createRouteBuilder('reporting');
+
+const reportingRoutes = {
+  electrificationProjectPermit: () => reportingRoute('electrificationProject', 'permit'),
+  generalProjectPermit: () => reportingRoute('generalProject', 'permit'),
+  housingProjectPermit: () => reportingRoute('housingProject', 'permit')
+} as const;
 
 /**
  * Retrieves permit data for electrification projects.
  * @returns A promise resolving to the electrification project permit data.
  */
-export async function getElectrificationProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  const { data } = await appAxios().get<GetProjectPermitDataResponse[]>(`${PATH}/electrificationProject/permit`);
-
-  return data;
+export function getElectrificationProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
+  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.electrificationProjectPermit());
 }
 
 /**
  * Retrieves permit data for general projects.
  * @returns A promise resolving to the general project permit data.
  */
-export async function getGeneralProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  const { data } = await appAxios().get<GetProjectPermitDataResponse[]>(`${PATH}/generalProject/permit`);
-
-  return data;
+export function getGeneralProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
+  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.generalProjectPermit());
 }
 
 /**
  * Retrieves permit data for housing projects.
  * @returns A promise resolving to the housing project permit data.
  */
-export async function getHousingProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
-  const { data } = await appAxios().get<GetProjectPermitDataResponse[]>(`${PATH}/housingProject/permit`);
-
-  return data;
+export function getHousingProjectPermitData(): Promise<GetProjectPermitDataResponse[]> {
+  return api.get<GetProjectPermitDataResponse[]>(reportingRoutes.housingProjectPermit());
 }
 
 /**

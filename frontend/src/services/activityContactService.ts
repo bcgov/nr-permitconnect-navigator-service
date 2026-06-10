@@ -1,4 +1,5 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type {
   ActivityContact,
@@ -10,14 +11,28 @@ import type {
 } from '@/types';
 
 /**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const activityRoute = createRouteBuilder('activity');
+
+const activityRoutes = {
+  contacts: {
+    list: (activityId: string) => activityRoute(activityId, 'contact'),
+    byId: (activityId: string, contactId: string) => activityRoute(activityId, 'contact', contactId)
+  }
+} as const;
+
+/**
  * Creates a contact association for an activity.
  * @param req - The request payload containing path parameters and the contact role.
  * @returns A promise resolving to the created `ActivityContact` resource.
  */
 export async function createActivityContact(req: CreateActivityContactRequest): Promise<ActivityContact> {
   const { activityId, contactId, ...body } = req;
-  const { data } = await appAxios().post<ActivityContact>(`activity/${activityId}/contact/${contactId}`, body);
-  return data;
+
+  return api.post<ActivityContact>(activityRoutes.contacts.byId(activityId, contactId), body);
 }
 
 /**
@@ -25,10 +40,10 @@ export async function createActivityContact(req: CreateActivityContactRequest): 
  * @param req - The request payload containing the compound key for deletion.
  * @returns A promise resolving to the deleted `ActivityContact` resource.
  */
-export async function deleteActivityContact(req: DeleteActivityContactRequest): Promise<ActivityContact> {
+export async function deleteActivityContact(req: DeleteActivityContactRequest): Promise<void> {
   const { activityId, contactId } = req;
-  const { data } = await appAxios().delete<ActivityContact>(`activity/${activityId}/contact/${contactId}`);
-  return data;
+
+  return api.delete<void>(activityRoutes.contacts.byId(activityId, contactId));
 }
 
 /**
@@ -38,8 +53,8 @@ export async function deleteActivityContact(req: DeleteActivityContactRequest): 
  */
 export async function listActivityContacts(req: ListActivityContactsRequest): Promise<ActivityContact[]> {
   const { activityId } = req;
-  const { data } = await appAxios().get<ActivityContact[]>(`activity/${activityId}/contact`);
-  return data;
+
+  return api.get<ActivityContact[]>(activityRoutes.contacts.list(activityId));
 }
 
 /**
@@ -49,8 +64,8 @@ export async function listActivityContacts(req: ListActivityContactsRequest): Pr
  */
 export async function putActivityContact(req: PutActivityContactRequest): Promise<PutActivityContactResponse> {
   const { activityId, contactId, ...body } = req;
-  const { data } = await appAxios().put(`activity/${activityId}/contact/${contactId}`, body);
-  return data;
+
+  return api.put(activityRoutes.contacts.byId(activityId, contactId), body);
 }
 
 /**

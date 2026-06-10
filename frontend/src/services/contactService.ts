@@ -1,32 +1,42 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { Contact, DeleteContactRequest, GetContactRequest, ListContactsRequest, PutContactRequest } from '@/types';
 
-const PATH = 'contact';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const contactRoute = createRouteBuilder('contact');
+
+const contactRoutes = {
+  root: () => contactRoute(),
+  byId: (contactId: string) => contactRoute(contactId),
+
+  match: () => contactRoute('match'),
+  search: () => contactRoute('search')
+} as const;
 
 /**
  * Retrieves a specific contact.
  * @param req - The request payload containing the contact ID and optional activity inclusion flag.
  * @returns A promise resolving to the requested `Contact` resource.
  */
-export async function getContact(req: GetContactRequest): Promise<Contact> {
+export function getContact(req: GetContactRequest): Promise<Contact> {
   const { contactId, includeActivities = false } = req;
 
-  const { data } = await appAxios().get<Contact>(`${PATH}/${contactId}`, {
+  return api.get<Contact>(contactRoutes.byId(contactId), {
     params: { includeActivities }
   });
-
-  return data;
 }
 
 /**
  * Retrieves the current user's contact details.
  * @returns A promise resolving to the current user's `Contact` resource.
  */
-export async function getCurrentUserContact(): Promise<Contact> {
-  const { data } = await appAxios().get<Contact>(`${PATH}`);
-
-  return data;
+export function getCurrentUserContact(): Promise<Contact> {
+  return api.get<Contact>(contactRoutes.root());
 }
 
 /**
@@ -34,10 +44,10 @@ export async function getCurrentUserContact(): Promise<Contact> {
  * @param req - The request payload containing the contact ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteContact(req: DeleteContactRequest): Promise<void> {
+export function deleteContact(req: DeleteContactRequest): Promise<void> {
   const { contactId } = req;
 
-  await appAxios().delete(`${PATH}/${contactId}`);
+  return api.delete(contactRoutes.byId(contactId));
 }
 
 /**
@@ -45,10 +55,8 @@ export async function deleteContact(req: DeleteContactRequest): Promise<void> {
  * @param req - The request payload containing matching criteria.
  * @returns A promise resolving to an array of matching `Contact` resources.
  */
-export async function matchContacts(req: ListContactsRequest): Promise<Contact[]> {
-  const { data } = await appAxios().post<Contact[]>(`${PATH}/match`, req);
-
-  return data;
+export function matchContacts(req: ListContactsRequest): Promise<Contact[]> {
+  return api.post<Contact[]>(contactRoutes.match(), req);
 }
 
 /**
@@ -56,10 +64,8 @@ export async function matchContacts(req: ListContactsRequest): Promise<Contact[]
  * @param req - The request payload containing search criteria.
  * @returns A promise resolving to an array of `Contact` resources.
  */
-export async function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
-  const { data } = await appAxios().post<Contact[]>(`${PATH}/search`, req);
-
-  return data;
+export function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
+  return api.post<Contact[]>(contactRoutes.search(), req);
 }
 
 /**
@@ -67,10 +73,8 @@ export async function searchContacts(req: ListContactsRequest): Promise<Contact[
  * @param req - The request payload containing updated contact data.
  * @returns A promise resolving to the updated `Contact` resource.
  */
-export async function putContact(req: PutContactRequest): Promise<Contact> {
-  const { data } = await appAxios().put<Contact>(`${PATH}`, req);
-
-  return data;
+export function putContact(req: PutContactRequest): Promise<Contact> {
+  return api.put<Contact>(contactRoutes.root(), req);
 }
 
 /**

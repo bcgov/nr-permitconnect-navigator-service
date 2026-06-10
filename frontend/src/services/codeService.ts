@@ -1,17 +1,25 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { GetCodeTablesResponse } from '@/types';
 
-const PATH = 'code';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const codeRoute = createRouteBuilder('code');
+
+const codeRoutes = {
+  root: () => codeRoute()
+} as const;
 
 /**
  * Retrieves all code tables.
  * @returns A promise resolving to the list of code tables.
  */
-export async function getCodeTables(): Promise<GetCodeTablesResponse> {
-  const { data } = await appAxios().get<GetCodeTablesResponse>(PATH);
-
-  return data;
+export function getCodeTables(): Promise<GetCodeTablesResponse> {
+  return api.get<GetCodeTablesResponse>(codeRoutes.root());
 }
 
 /**

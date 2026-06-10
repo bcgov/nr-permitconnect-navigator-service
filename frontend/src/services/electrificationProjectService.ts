@@ -1,4 +1,5 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 import { Initiative } from '@/utils/enums/application';
 
 import type {
@@ -19,17 +20,25 @@ import type {
 } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
-const PATH = `${Initiative.ELECTRIFICATION.toLowerCase()}/project`;
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const electrificationProjectRoute = createRouteBuilder(`${Initiative.ELECTRIFICATION.toLowerCase()}/project`);
 
-export interface ElectrificationProjectService extends DraftableProjectService<ElectrificationProject, FormSchemaType> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getProject(req: GetProjectRequest): Promise<ElectrificationProject>;
-  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: ListElectrificationProjectsRequest): Promise<ElectrificationProject[]>;
-  submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
-}
+const electrificationProjectRoutes = {
+  root: () => electrificationProjectRoute(),
+  byId: (id: string) => electrificationProjectRoute(id),
+
+  draft: () => electrificationProjectRoute('draft'),
+  draftById: (id: string) => electrificationProjectRoute('draft', id),
+  submitDraft: () => electrificationProjectRoute('draft', 'submit'),
+
+  search: () => electrificationProjectRoute('search'),
+  statistics: () => electrificationProjectRoute('statistics'),
+  activityIds: () => electrificationProjectRoute('activityIds')
+} as const;
 
 /**
  * Creates a new general project.
@@ -39,9 +48,7 @@ export interface ElectrificationProjectService extends DraftableProjectService<E
 export async function createProject(req: CreateElectrificationProjectRequest): Promise<ElectrificationProject> {
   const { ...body } = req;
 
-  const { data } = await appAxios().post<ElectrificationProject>(PATH, body);
-
-  return data;
+  return api.post<ElectrificationProject>(electrificationProjectRoutes.root(), body);
 }
 
 /**
@@ -52,7 +59,7 @@ export async function createProject(req: CreateElectrificationProjectRequest): P
 export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
   const { draftId } = req;
 
-  await appAxios().delete(`${PATH}/draft/${draftId}`);
+  return api.delete(electrificationProjectRoutes.draftById(draftId));
 }
 
 /**
@@ -63,7 +70,7 @@ export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
 export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
   const { projectId } = req;
 
-  await appAxios().delete(`${PATH}/${projectId}`);
+  return api.delete(electrificationProjectRoutes.byId(projectId));
 }
 
 /**
@@ -74,9 +81,7 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
 export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
   const { draftId } = req;
 
-  const { data } = await appAxios().get<Draft<FormSchemaType>>(`${PATH}/draft/${draftId}`);
-
-  return data;
+  return api.get<Draft<FormSchemaType>>(electrificationProjectRoutes.draftById(draftId));
 }
 
 /**
@@ -87,9 +92,7 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
 export async function getProject(req: GetProjectRequest): Promise<ElectrificationProject> {
   const { projectId } = req;
 
-  const { data } = await appAxios().get<ElectrificationProject>(`${PATH}/${projectId}`);
-
-  return data;
+  return api.get<ElectrificationProject>(electrificationProjectRoutes.byId(projectId));
 }
 
 /**
@@ -100,11 +103,9 @@ export async function getProject(req: GetProjectRequest): Promise<Electrificatio
 export async function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
   const { ...filters } = req;
 
-  const { data } = await appAxios().get<ProjectStatistics>(`${PATH}/statistics`, {
+  return api.get<ProjectStatistics>(electrificationProjectRoutes.statistics(), {
     params: filters
   });
-
-  return data;
 }
 
 /**
@@ -112,9 +113,7 @@ export async function getProjectStatistics(req: GetProjectStatisticsRequest): Pr
  * @returns A promise resolving to an array of activity IDs.
  */
 export async function listActivityIds(): Promise<string[]> {
-  const { data } = await appAxios().get<string[]>(`${PATH}/activityIds`);
-
-  return data;
+  return api.get<string[]>(electrificationProjectRoutes.activityIds());
 }
 
 /**
@@ -122,9 +121,7 @@ export async function listActivityIds(): Promise<string[]> {
  * @returns A promise resolving to an array of draft resources.
  */
 export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
-  const { data } = await appAxios().get<Draft<FormSchemaType>[]>(`${PATH}/draft`);
-
-  return data;
+  return api.get<Draft<FormSchemaType>[]>(electrificationProjectRoutes.draft());
 }
 
 /**
@@ -132,9 +129,7 @@ export async function listDrafts(): Promise<Draft<FormSchemaType>[]> {
  * @returns A promise resolving to an array of `ElectrificationProject` resources.
  */
 export async function listProjects(): Promise<ElectrificationProject[]> {
-  const { data } = await appAxios().get<ElectrificationProject[]>(PATH);
-
-  return data;
+  return api.get<ElectrificationProject[]>(electrificationProjectRoutes.root());
 }
 
 /**
@@ -145,9 +140,7 @@ export async function listProjects(): Promise<ElectrificationProject[]> {
 export async function patchProject(req: PatchElectrificationProjectRequest): Promise<ElectrificationProject> {
   const { projectId, ...body } = req;
 
-  const { data } = await appAxios().patch<ElectrificationProject>(`${PATH}/${projectId}`, body);
-
-  return data;
+  return api.patch<ElectrificationProject>(electrificationProjectRoutes.byId(projectId), body);
 }
 
 /**
@@ -156,9 +149,7 @@ export async function patchProject(req: PatchElectrificationProjectRequest): Pro
  * @returns A promise resolving to an array of `ElectrificationProject` resources.
  */
 export async function searchProjects(req: ListElectrificationProjectsRequest): Promise<ElectrificationProject[]> {
-  const { data } = await appAxios().post<ElectrificationProject[]>(`${PATH}/search`, req);
-
-  return data;
+  return api.post<ElectrificationProject[]>(electrificationProjectRoutes.search(), req);
 }
 
 /**
@@ -169,9 +160,7 @@ export async function searchProjects(req: ListElectrificationProjectsRequest): P
 export async function submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject> {
   const { ...body } = req;
 
-  const { data } = await appAxios().put<ElectrificationProject>(`${PATH}/draft/submit`, body);
-
-  return data;
+  return api.put<ElectrificationProject>(electrificationProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -182,9 +171,7 @@ export async function submitDraft(req: SubmitDraftElectrificationProjectRequest)
 export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  const { data } = await appAxios().put<Draft<FormSchemaType>>(`${PATH}/draft`, body);
-
-  return data;
+  return api.put<Draft<FormSchemaType>>(electrificationProjectRoutes.draft(), body);
 }
 
 /**
@@ -195,6 +182,16 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
  *
  * It may be removed once all consumers are migrated to named imports.
  */
+export interface ElectrificationProjectService extends DraftableProjectService<ElectrificationProject, FormSchemaType> {
+  deleteDraft(req: DeleteDraftRequest): Promise<void>;
+  getProject(req: GetProjectRequest): Promise<ElectrificationProject>;
+  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
+  listDrafts(): Promise<Draft<FormSchemaType>[]>;
+  searchProjects(req: ListElectrificationProjectsRequest): Promise<ElectrificationProject[]>;
+  submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject>;
+  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+}
+
 export const electrificationProjectService: ElectrificationProjectService = {
   createProject,
   deleteDraft,

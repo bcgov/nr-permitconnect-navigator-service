@@ -1,24 +1,31 @@
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { api } from './apiClient';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 import { delimitEmails } from '@/utils/utils';
 
 import type { GetRoadmapNoteRequest, NoteHistory, SendRoadmapRequest } from '@/types';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const roadmapRoute = createInitiativeRouteBuilder('roadmap');
 
-const PATH = 'roadmap';
+const roadmapRoutes = {
+  note: () => roadmapRoute('note'),
+  root: () => roadmapRoute()
+} as const;
 
 /**
  * Retrieves the roadmap note for an activity.
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to the roadmap note.
  */
-export async function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
+export function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
   const { activityId } = req;
 
-  const { data } = await appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/note`, {
+  return api.get<string>(roadmapRoutes.note(), {
     params: { activityId }
   });
-
-  return data;
 }
 
 /**
@@ -26,7 +33,7 @@ export async function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string
  * @param req - The request payload containing the activity ID, selected files, and email data.
  * @returns A promise resolving to the send result.
  */
-export async function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory> {
+export function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory> {
   const { activityId, selectedFileIds, emailData } = req;
 
   const normalizedEmailData = { ...emailData };
@@ -47,13 +54,11 @@ export async function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory>
     normalizedEmailData.bcc = delimitEmails(normalizedEmailData.bcc);
   }
 
-  const { data } = await appAxios().put(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+  return api.put<NoteHistory>(roadmapRoutes.root(), {
     activityId,
     selectedFileIds,
     emailData: normalizedEmailData
   });
-
-  return data;
 }
 
 /**

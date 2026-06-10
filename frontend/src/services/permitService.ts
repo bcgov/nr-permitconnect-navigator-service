@@ -1,5 +1,5 @@
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { api } from './apiClient';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 
 import type {
   DeletePermitRequest,
@@ -11,18 +11,30 @@ import type {
   SearchPermitsResponse,
   UpsertPermitRequest
 } from '@/types';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const permitRoute = createInitiativeRouteBuilder('permit');
 
-const PATH = 'permit';
+const permitRoutes = {
+  root: () => permitRoute(),
+  byId: (permitId: string) => permitRoute(permitId),
+
+  types: () => permitRoute('types'),
+  search: () => permitRoute('search')
+} as const;
 
 /**
  * Deletes a permit.
  * @param req - The request payload containing the permit ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deletePermit(req: DeletePermitRequest): Promise<void> {
+export function deletePermit(req: DeletePermitRequest): Promise<void> {
   const { permitId } = req;
 
-  await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${permitId}`);
+  return api.delete(permitRoutes.byId(permitId));
 }
 
 /**
@@ -30,12 +42,10 @@ export async function deletePermit(req: DeletePermitRequest): Promise<void> {
  * @param req - The request payload containing the permit ID.
  * @returns A promise resolving to the requested `Permit` resource.
  */
-export async function getPermit(req: GetPermitRequest): Promise<Permit> {
+export function getPermit(req: GetPermitRequest): Promise<Permit> {
   const { permitId } = req;
 
-  const { data } = await appAxios().get<Permit>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${permitId}`);
-
-  return data;
+  return api.get<Permit>(permitRoutes.byId(permitId));
 }
 
 /**
@@ -43,14 +53,12 @@ export async function getPermit(req: GetPermitRequest): Promise<Permit> {
  * @param req - The request payload containing the initiative.
  * @returns A promise resolving to the available permit types.
  */
-export async function listPermitTypes(req: ListPermitTypesRequest): Promise<PermitType[]> {
+export function listPermitTypes(req: ListPermitTypesRequest): Promise<PermitType[]> {
   const { initiative } = req;
 
-  const { data } = await appAxios().get<PermitType[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/types`, {
+  return api.get<PermitType[]>(permitRoutes.types(), {
     params: { initiative }
   });
-
-  return data;
 }
 
 /**
@@ -58,12 +66,10 @@ export async function listPermitTypes(req: ListPermitTypesRequest): Promise<Perm
  * @param req - Optional list filters.
  * @returns A promise resolving to an array of permits.
  */
-export async function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
-  const { data } = await appAxios().get<Permit[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
+export function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
+  return api.get<Permit[]>(permitRoutes.root(), {
     params: req
   });
-
-  return data;
 }
 
 /**
@@ -71,14 +77,10 @@ export async function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching permits and total record count.
  */
-export async function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsResponse> {
-  const {
-    data: { permits, totalRecords }
-  } = await appAxios().get<SearchPermitsResponse>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, {
+export function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsResponse> {
+  return api.get<SearchPermitsResponse>(permitRoutes.search(), {
     params: req
   });
-
-  return { permits, totalRecords };
 }
 
 /**
@@ -86,10 +88,8 @@ export async function searchPermits(req?: ListPermitsRequest): Promise<SearchPer
  * @param req - The permit payload to save.
  * @returns A promise resolving to the saved permit.
  */
-export async function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
-  const { data } = await appAxios().put<Permit>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, req);
-
-  return data;
+export function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
+  return api.put<Permit>(permitRoutes.root(), req);
 }
 
 /**
