@@ -11,7 +11,7 @@ import { getLogger } from '../utils/log.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 const log = getLogger(module.filename);
 

@@ -1,8 +1,8 @@
 import { CustomHelpers, ErrorReport } from 'joi';
 
-import { listAllCodeTables } from '../../services/code.ts';
+import { listAllCodeTables } from '../services/code.ts';
 
-import type * as codeEnums from './enums.ts';
+import type * as codeEnums from '../db/codes/enums.ts';
 
 export interface CodeRow {
   code: string;

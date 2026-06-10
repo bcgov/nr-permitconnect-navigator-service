@@ -5,7 +5,7 @@ import { Problem } from '../utils/index.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 /**
  * Attempt to assign proponent groups to users with external IDPs

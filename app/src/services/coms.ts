@@ -6,7 +6,7 @@ import { Problem, uuidValidateV4 } from '../utils/index.ts';
 import { getSubjectGroups } from './yars.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { CurrentContext } from '../types/stuff';
 
 /**

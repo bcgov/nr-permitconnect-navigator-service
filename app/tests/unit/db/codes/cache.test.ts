@@ -7,7 +7,7 @@ import * as txWrapper from '../../../../src/db/utils/transactionWrapper.ts';
 import * as codeService from '../../../../src/services/code.ts';
 import { getLogger } from '../../../../src/utils/log.ts';
 
-import type { CodeTableName } from '../../../../src/db/codes/types.ts';
+import type { CodeTableName } from '../../../../src/types/codes.ts';
 
 vi.mock('../../../../src/utils/log.ts', () => {
   const mLogger = {

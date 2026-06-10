@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { NIL, v4 as uuidv4 } from 'uuid';
 
-import { createStamps } from '../utils/utils.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -26,7 +26,7 @@ export async function up(knex: Knex): Promise<void> {
         knex.schema.createTable('identity_provider', (table) => {
           table.text('idp').primary();
           table.boolean('active').notNullable().defaultTo(true);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -41,7 +41,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('full_name');
           table.text('last_name');
           table.boolean('active').notNullable().defaultTo(true);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -50,7 +50,7 @@ export async function up(knex: Knex): Promise<void> {
           table.uuid('initiative_id').primary();
           table.text('code').notNullable();
           table.text('label').notNullable();
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -64,7 +64,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('initiative')
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -115,7 +115,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('inquiry').notNullable().defaultTo(false);
           table.boolean('emergency_assist').notNullable().defaultTo(false);
           table.boolean('inapplicable').notNullable().defaultTo(false);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -132,7 +132,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('filename').notNullable();
           table.text('mime_type').defaultTo('application/octet-stream').notNullable();
           table.bigInteger('filesize').notNullable();
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
           table.unique(['document_id', 'activity_id']);
         })
       )
@@ -152,7 +152,7 @@ export async function up(knex: Knex): Promise<void> {
           table.boolean('tracked_in_ats').notNullable().defaultTo(false);
           table.text('source_system');
           table.text('source_system_acronym').notNullable();
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -180,7 +180,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('status');
           table.timestamp('submitted_date', { useTz: true });
           table.timestamp('adjudication_date', { useTz: true });
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
           table.unique(['permit_id', 'permit_type_id', 'activity_id']);
         })
       )
@@ -198,7 +198,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('note').defaultTo('').notNullable();
           table.text('note_type').defaultTo('').notNullable();
           table.text('title').defaultTo('').notNullable();
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

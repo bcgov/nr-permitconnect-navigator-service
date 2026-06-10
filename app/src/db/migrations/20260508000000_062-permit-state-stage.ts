@@ -1,12 +1,12 @@
 /* eslint-disable max-len, quotes */
 
 import {
+  addAuditStamps,
   createAuditLogTrigger,
-  createStamps,
   createUpdatedAtTrigger,
   dropAuditLogTrigger,
   dropUpdatedAtTrigger
-} from '../utils/utils.ts';
+} from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -19,7 +19,7 @@ export async function up(knex: Knex): Promise<void> {
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
-        createStamps(knex, table);
+        addAuditStamps(knex, table);
       })
 
       .createTable('permit_stage_code', (table) => {
@@ -27,7 +27,7 @@ export async function up(knex: Knex): Promise<void> {
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
-        createStamps(knex, table);
+        addAuditStamps(knex, table);
       })
 
       // Create before update triggers

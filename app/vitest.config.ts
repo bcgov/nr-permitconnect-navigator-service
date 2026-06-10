@@ -16,14 +16,7 @@ export default defineConfig({
 
         // Knex seeds, migrations and migration helpers.
         'src/db/{manual-migrations,migrations,seeds}/**',
-        'src/db/utils/yars.ts',
-
-        // Note: this file reads DB settings from config and constructs a PrismaClient against a
-        // live Postgres connection. It can't be exercised in unit tests without a real database.
-        'src/db/dataConnection.ts',
-
-        // Route utils used just by devs
-        'src/routes/utils.ts',
+        'src/db/utils/migrations/**',
 
         ...coverageConfigDefaults.exclude
       ]

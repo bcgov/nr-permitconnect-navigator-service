@@ -1,11 +1,11 @@
 import { mockDeep, mockReset } from 'vitest-mock-extended';
 import { vi } from 'vitest';
 
-import prisma from '../../src/db/dataConnection.ts';
+import prisma from '../../src/db/database.ts';
 import * as codeEnums from '../../src/db/codes/enums.ts';
 
 import type { DeepMockProxy } from 'vitest-mock-extended';
-import type { ExtendedClient, PrismaTransactionClient } from '../../src/db/dataConnection.ts';
+import type { ExtendedClient, PrismaTransactionClient } from '../../src/db/database.ts';
 
 function makeCodeTableMock() {
   const codeTable: Record<
@@ -30,9 +30,11 @@ function makeCodeTableMock() {
 type TransactionWrapperFn = <T>(callback: (tx: DeepMockProxy<PrismaTransactionClient>) => Promise<T>) => Promise<T>;
 let transactionWrapperMock: ReturnType<typeof vi.fn> | undefined;
 
-vi.mock('../../src/db/dataConnection', () => ({
+vi.mock('../../src/db/database', () => ({
   __esModule: true,
-  default: mockDeep<ExtendedClient>()
+  default: mockDeep<ExtendedClient>(),
+  checkDatabaseHealth: vi.fn(),
+  checkDatabaseSchema: vi.fn()
 }));
 
 vi.mock('../../src/db/utils/transactionWrapper', () => {

@@ -1,4 +1,4 @@
-import { createStamps } from '../utils/utils.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -18,7 +18,7 @@ export async function up(knex: Knex): Promise<void> {
             .onDelete('CASCADE'); // Foreign key to 'permit'
           table.text('note').notNullable().defaultTo('');
           table.boolean('is_deleted').notNullable().defaultTo(false);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

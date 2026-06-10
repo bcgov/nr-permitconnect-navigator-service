@@ -6,7 +6,7 @@ import { createServer } from 'node:http';
 
 import app from './app.ts';
 import { refreshCodeCaches } from './src/db/codes/cache.ts';
-import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/utils/utils.ts';
+import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/database.ts';
 import getLogger from './src/utils/log.ts';
 import { state } from './state.ts';
 

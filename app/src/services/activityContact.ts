@@ -1,6 +1,6 @@
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { ActivityContact } from '../types/index.ts';
 
 /**

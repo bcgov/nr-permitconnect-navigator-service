@@ -2,7 +2,7 @@ import type { CustomHelpers } from 'joi';
 
 import { codeTable } from './cache.ts';
 
-import type { CodeTableName, ValidatorFunction } from './types.ts';
+import type { CodeTableName, ValidatorFunction } from '../../types/codes.ts';
 
 /**
  * A Proxy that dynamically generates runtime validation functions for code tables.

@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import { createStamps } from '../utils/utils.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
@@ -210,7 +210,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('display').unique().notNullable();
           table.text('definition').notNullable();
           table.boolean('active').notNullable().defaultTo(true);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
       .then(() =>
@@ -219,7 +219,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('display').unique().notNullable();
           table.text('definition').notNullable();
           table.boolean('active').notNullable().defaultTo(true);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -320,7 +320,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('electrification_project_category_code')
             .onUpdate('CASCADE')
             .onDelete('SET NULL');
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -341,7 +341,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('initiative')
             .onDelete('CASCADE')
             .onUpdate('CASCADE');
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

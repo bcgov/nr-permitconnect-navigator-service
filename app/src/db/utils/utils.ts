@@ -1,81 +1,11 @@
-import { Knex } from 'knex';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import prisma from '../../db/dataConnection.ts';
 import { SYSTEM_ID } from '../../utils/constants/application.ts';
-import { getLogger } from '../../utils/log.ts';
 import { uuidToActivityId } from '../../utils/utils.ts';
 
-import type { PrismaTransactionClient } from '../../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../database.ts';
 import type { CurrentContext } from '../../types/index.ts';
-
-const log = getLogger(module.filename);
-
-/**
- * Checks the health of the database by executing a simple query.
- * @returns A promise that resolves to `true` if the database is healthy, or
- * `false` if the health check fails.
- * Will log an error and return `false` if the database is not healthy.
- */
-export async function checkDatabaseHealth(): Promise<boolean> {
-  try {
-    const result = await prisma.$queryRaw<{ result: number }[]>`SELECT 1 AS result`;
-    log.debug('Database is healthy');
-    return result[0]?.result === 1;
-  } catch (error) {
-    log.error('Database is unhealthy', error);
-    return false;
-  }
-}
-
-/**
- * Checks if the database schema matches the expected structure.
- * @returns A promise that resolves to `true` if the  database schema matches
- * the expected structure, or `false` otherwise.
- * Will log an error and return `false` if the database introspection fails.
- */
-export function checkDatabaseSchema(): boolean {
-  // TODO: Should this be in a different location?
-  const expected = Object.freeze({
-    schemas: ['public', 'yars'],
-    tables: [
-      'access_request',
-      'activity',
-      'activity_contact',
-      'contact',
-      'document',
-      'draft',
-      'draft_code',
-      'electrification_project',
-      'electrification_project_category_code',
-      'electrification_project_type_code',
-      'email_log',
-      'enquiry',
-      'general_project',
-      'housing_project',
-      'identity_provider',
-      'initiative',
-      'note',
-      'note_history',
-      'permit',
-      'permit_note',
-      'permit_type',
-      'user',
-      'permit_type_initiative_xref'
-    ]
-  });
-
-  const schemas = new Set(Prisma.dmmf.datamodel.models.map((x) => x.schema));
-  const tables = new Set(Prisma.dmmf.datamodel.models.map((x) => x.dbName ?? x.name));
-  const matches = {
-    schemas: expected.schemas.every((t) => schemas.has(t)),
-    tables: expected.tables.every((t) => tables.has(t))
-  };
-
-  log.debug('Database schema introspection', { matches });
-  return matches.tables;
-}
 
 /**
  * Generates DB create stamps
@@ -148,65 +78,5 @@ export async function generateUniqueActivityId(tx: PrismaTransactionClient): Pro
 
 export function jsonToPrismaInputJson(json: Prisma.JsonValue): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
-  return json as Prisma.InputJsonValue;
-}
-
-/**
- * Create Audit Log Trigger for a given table
- * @param knex Knex instance
- * @param schema Schema
- * @param table Table
- */
-export async function createAuditLogTrigger(knex: Knex, schema: string, table: string): Promise<void> {
-  await knex.schema.raw(`CREATE TRIGGER audit_${table}_trigger
-    AFTER UPDATE OR DELETE ON ${schema}.${table}
-    FOR EACH ROW EXECUTE PROCEDURE audit.if_modified_func();`);
-}
-
-/**
- * Create an updated at trigger for a given table
- * @param knex Knex instance
- * @param schema Schema
- * @param table Table
- */
-export async function createUpdatedAtTrigger(knex: Knex, schema: string, table: string): Promise<void> {
-  await knex.schema.raw(`CREATE TRIGGER before_update_${table}_trigger
-    BEFORE UPDATE ON ${schema}.${table}
-    FOR EACH ROW EXECUTE PROCEDURE public.set_updated_at();`);
-}
-
-/**
- * Drop Audit Log Trigger for a given table
- * @param knex Knex instance
- * @param schema Schema
- * @param table Table
- * @returns Query Builder Promise
- */
-export async function dropAuditLogTrigger(knex: Knex, schema: string, table: string): Promise<void> {
-  await knex.schema.raw(`DROP TRIGGER IF EXISTS audit_${table}_trigger ON ${schema}.${table}`);
-}
-
-/**
- * Drop an updated at trigger for a given table
- * @param knex Knex instance
- * @param schema Schema
- * @param table Table
- * @returns Query Builder Result
- */
-export async function dropUpdatedAtTrigger(knex: Knex, schema: string, table: string): Promise<void> {
-  await knex.schema.raw(`DROP TRIGGER IF EXISTS before_update_${table}_trigger ON ${schema}.${table}`);
-}
-
-/**
- * Add standard timestamp and user tracking columns to a table
- * @param knex Knex instance
- * @param table Table builder
- */
-export function createStamps(knex: Knex, table: Knex.CreateTableBuilder) {
-  table.text('created_by').defaultTo(SYSTEM_ID);
-  table.timestamp('created_at', { useTz: true }).defaultTo(knex.fn.now());
-  table.text('updated_by');
-  table.timestamp('updated_at', { useTz: true });
-  table.text('deleted_by');
-  table.timestamp('deleted_at', { useTz: true });
+  return json;
 }

@@ -16,7 +16,7 @@ import { roadmapTemplate } from '../utils/templates';
 import { description } from '../../package.json';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Email, EmailAttachment, NoteHistory, Permit } from '../types';
 
 function getPermitTypeNamesByNeeded(permits: Permit[], permitNeeded: PermitNeeded) {

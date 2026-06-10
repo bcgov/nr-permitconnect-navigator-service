@@ -2,12 +2,12 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import {
+  addAuditStamps,
   createAuditLogTrigger,
-  createStamps,
   createUpdatedAtTrigger,
   dropAuditLogTrigger,
   dropUpdatedAtTrigger
-} from '../utils/utils.ts';
+} from '../utils/migrations/helpers.ts';
 import {
   addAttributeGroup,
   addGroupRoles,
@@ -24,7 +24,7 @@ import {
   deleteResources,
   deleteRolePolicies,
   deleteRoles
-} from '../utils/yars.ts';
+} from '../utils/migrations/yars.ts';
 import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
@@ -57,7 +57,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('display').unique().notNullable();
           table.text('definition');
           table.boolean('active').notNullable().defaultTo(true);
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 
@@ -109,7 +109,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('business_area_code')
             .onUpdate('CASCADE')
             .onDelete('SET NULL');
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

@@ -3,7 +3,7 @@ import { getPIDs } from '../services/map.ts';
 import { getProjectByProjectId } from '../services/project.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 export const getPIDsController = async (req: Request<{ projectId: string }>, res: Response) => {
   const response = await transactionWrapper<string | void>(async (tx: PrismaTransactionClient) => {

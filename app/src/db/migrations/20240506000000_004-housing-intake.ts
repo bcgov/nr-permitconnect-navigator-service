@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { createStamps } from '../utils/utils.ts';
+import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
 
@@ -34,7 +34,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('intake_status');
           table.text('enquiry_status');
           table.text('waiting_on');
-          createStamps(knex, table);
+          addAuditStamps(knex, table);
         })
       )
 

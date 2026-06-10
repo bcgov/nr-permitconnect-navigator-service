@@ -1,4 +1,4 @@
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 
 import type { SourceSystemKind } from '../types/index.ts';
 

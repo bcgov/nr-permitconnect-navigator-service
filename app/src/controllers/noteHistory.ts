@@ -32,7 +32,7 @@ import { BringForwardType, NoteType } from '../utils/enums/projectCommon.ts';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { BringForward, Note, NoteHistory, User } from '../types/index.ts';
 
 /**

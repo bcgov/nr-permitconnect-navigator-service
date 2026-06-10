@@ -30,7 +30,7 @@ import { confirmationTemplateElectrificationSubmission } from '../utils/template
 import { isTruthy, toTitleCase } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   Contact,
   CurrentContext,

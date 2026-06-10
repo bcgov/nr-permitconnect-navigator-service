@@ -2,7 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AccessRequestStatus, Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { AccessRequest, AccessRequestBase, AccessRequestPatch } from '../types/index.ts';
 
 /**

@@ -1,6 +1,6 @@
 import { generateCreateStamps } from '../db/utils/utils.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types/index.ts';
 
 /**

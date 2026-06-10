@@ -34,7 +34,7 @@ import { differential, formatDateOnly, isEmptyObject, isTruthy } from '../utils/
 import { state } from '../../state.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   ListPermitsOptions,
   Permit,

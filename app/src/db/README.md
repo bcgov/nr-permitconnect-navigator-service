@@ -4,29 +4,16 @@
 
 ```txt
 db/                       - Database Root
+├── codes/                - Contains codes cache, enums (and generator file), tables, types, and validators
+├── extensions/           - Defines Prisma extensions
+├── manual-migrations/    - Knex database manual migrations files
 ├── migrations/           - Knex database migrations files
-├── models/               - Database/Application conversion layer
-├── prisma/               - Location of the Prisma schema
-└── utils/                - Utility functions
-dataConnection.ts         - Defines the Prisma database connection
-stamps.ts                 - Defines default timestamp columns
+├── prisma/               - Location of the Prisma schema and views
+├── seeds/                - Knex database seeds files
+└── utils/                - Utility functions and Transaction Wrapper
+    └── migrations/       - Yars and helper functions for Knex migrations
+database.ts               - Defines the Prisma database and database health checks
 ```
-
-## Models
-
-The files in `models/` contain two key sections: type definitions, and `toPrismaModel`/`fromPrismaModel` conversion functions.
-
-The type definitions are necessary to generate the appropriate hard typings for the conversions. They do not need to be exported as they should never need to be referenced outsite their respective files.
-
-Due to the way Prisma handles foreign keys multiple types may need to be created.
-
-Types beginning with `PrismaRelation` are type definitions for an object going to the database. This type may or may not include relational information, but for consistency are named with the same prefix.
-
-Types beginning with `PrismaGraph` are type definitions for an object coming from the database. The incoming type may also begin with `PrismaRelation` - it depends if there is any relational information required or not.
-
-See `user.ts` and `document.ts` for examples of the differences.
-
-The `toPrismaModel` and `fromPrismaModel` functions are used to convert Prisma database models to application `src/types/` and vice versa. These functions should only ever be used in the application service layer.
 
 ## Update Backup Container
 

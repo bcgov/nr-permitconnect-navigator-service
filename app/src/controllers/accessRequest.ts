@@ -20,7 +20,7 @@ import { Problem } from '../utils/index.ts';
 import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { AccessRequest, Group, User } from '../types/index.ts';
 
 const isUserAdmin = async (

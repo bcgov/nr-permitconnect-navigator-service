@@ -3,8 +3,8 @@ import { listAllCodeTables } from '../../services/code.ts';
 import { getLogger } from '../../utils/log.ts';
 import { CODE_TABLES } from './tables.ts';
 
-import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from './types.ts';
-import type { PrismaTransactionClient } from '../dataConnection.ts';
+import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from '../../types/codes.ts';
+import type { PrismaTransactionClient } from '../database.ts';
 
 const log = getLogger(module.filename);
 

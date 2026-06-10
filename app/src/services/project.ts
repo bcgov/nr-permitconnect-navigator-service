@@ -1,6 +1,6 @@
 import { Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Project } from '../types/index.ts';
 
 /**

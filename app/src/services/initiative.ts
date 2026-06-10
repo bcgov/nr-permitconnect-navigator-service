@@ -1,6 +1,6 @@
 import { Initiative as EInitiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Initiative } from '../types/index.ts';
 
 /**

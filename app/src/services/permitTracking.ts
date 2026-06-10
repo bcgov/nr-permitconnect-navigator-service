@@ -1,4 +1,4 @@
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Permit, PermitTracking } from '../types/index.ts';
 
 /**

@@ -14,7 +14,7 @@ import { IdentityProviderKind } from '../utils/enums/application.ts';
 import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/dataConnection.ts';
+import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, ContactSearchParameters } from '../types/index.ts';
 
 export const deleteContactController = async (req: Request<{ contactId: string }>, res: Response) => {
