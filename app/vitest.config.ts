@@ -3,7 +3,7 @@ import { coverageConfigDefaults, defineConfig } from 'vitest/config';
 export default defineConfig({
   test: {
     coverage: {
-      provider: 'istanbul',
+      provider: 'v8',
       reporter: ['clover', 'html', 'json', 'lcov', 'text', 'text-summary'],
       include: ['src/**/*.ts'],
       exclude: [
