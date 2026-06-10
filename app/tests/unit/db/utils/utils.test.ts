@@ -1,6 +1,6 @@
-import { TEST_ACTIVITY_HOUSING } from '../data/index.ts';
-import { prismaMock, prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { checkDatabaseHealth, checkDatabaseSchema, generateUniqueActivityId } from '../../../src/db/utils/utils.ts';
+import { TEST_ACTIVITY_HOUSING } from '../../data/index.ts';
+import { prismaMock, prismaTxMock } from '../../../__mocks__/prismaMock.ts';
+import { checkDatabaseHealth, checkDatabaseSchema, generateUniqueActivityId } from '../../../../src/db/utils/utils.ts';
 
 describe('checkDatabaseHealth', () => {
   it('should return true when the database is healthy', async () => {

@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import stamps from '../stamps.ts';
+import { createStamps } from '../utils/utils.ts';
 
 import type { Knex } from 'knex';
 
@@ -54,7 +54,7 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate('CASCADE')
             .onDelete('CASCADE'); // Foreign key to 'permit'
           table.text('note').notNullable().defaultTo('');
-          stamps(knex, table);
+          createStamps(knex, table);
         })
       )
 

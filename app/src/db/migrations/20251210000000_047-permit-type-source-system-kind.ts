@@ -1,4 +1,4 @@
-import stamps from '../stamps.ts';
+import { createStamps } from '../utils/utils.ts';
 
 import type { Knex } from 'knex';
 
@@ -145,7 +145,7 @@ export async function up(knex: Knex): Promise<void> {
             .onUpdate('CASCADE')
             .onDelete('CASCADE');
 
-          stamps(knex, table);
+          createStamps(knex, table);
         })
       )
 

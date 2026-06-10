@@ -1,4 +1,4 @@
-import stamps from '../stamps.ts';
+import { createStamps } from '../utils/utils.ts';
 
 import type { Knex } from 'knex';
 
@@ -11,7 +11,7 @@ export async function up(knex: Knex): Promise<void> {
         table.text('display').unique().notNullable();
         table.text('definition').notNullable();
         table.boolean('active').notNullable().defaultTo(true);
-        stamps(knex, table);
+        createStamps(knex, table);
       })
 
       .createTable('source_system_kind', (table) => {
@@ -25,7 +25,7 @@ export async function up(knex: Knex): Promise<void> {
           .inTable('source_system_code')
           .onUpdate('CASCADE')
           .onDelete('CASCADE');
-        stamps(knex, table);
+        createStamps(knex, table);
       })
 
       .createTable('permit_tracking', (table) => {
@@ -46,7 +46,7 @@ export async function up(knex: Knex): Promise<void> {
           .onUpdate('CASCADE')
           .onDelete('CASCADE');
         table.boolean('shown_to_proponent').notNullable().defaultTo(false);
-        stamps(knex, table);
+        createStamps(knex, table);
       })
 
       // Alter public schema tables

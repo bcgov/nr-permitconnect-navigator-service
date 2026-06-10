@@ -1,10 +1,9 @@
 /* eslint-disable max-len */
 import { v4 as uuidv4 } from 'uuid';
 
-import stamps from '../stamps.ts';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 import {
   createAuditLogTrigger,
+  createStamps,
   createUpdatedAtTrigger,
   dropAuditLogTrigger,
   dropUpdatedAtTrigger
@@ -26,6 +25,7 @@ import {
   deleteRolePolicies,
   deleteRoles
 } from '../utils/yars.ts';
+import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 
 import type { Knex } from 'knex';
 
@@ -57,7 +57,7 @@ export async function up(knex: Knex): Promise<void> {
           table.text('display').unique().notNullable();
           table.text('definition');
           table.boolean('active').notNullable().defaultTo(true);
-          stamps(knex, table);
+          createStamps(knex, table);
         })
       )
 
@@ -109,7 +109,7 @@ export async function up(knex: Knex): Promise<void> {
             .inTable('business_area_code')
             .onUpdate('CASCADE')
             .onDelete('SET NULL');
-          stamps(knex, table);
+          createStamps(knex, table);
         })
       )
 

@@ -7,16 +7,24 @@ export default defineConfig({
       reporter: ['clover', 'html', 'json', 'lcov', 'text', 'text-summary'],
       include: ['src/**/*.ts'],
       exclude: [
+        '**/index.ts',
+
+        // Type-only files
         'src/**/*.d.ts',
-        'src/db/{extensions,manual-migrations,migrations,seeds}/**',
-        'src/db/codes/generate.ts',
-        'src/db/dataConnection.ts',
-        'src/db/stamps.ts',
-        'src/db/utils/transactionWrapper.ts',
-        'src/db/utils/yars.ts',
         'src/interfaces/**',
-        'src/routes/utils.ts',
         'src/types/**',
+
+        // Knex seeds, migrations and migration helpers.
+        'src/db/{manual-migrations,migrations,seeds}/**',
+        'src/db/utils/yars.ts',
+
+        // Note: this file reads DB settings from config and constructs a PrismaClient against a
+        // live Postgres connection. It can't be exercised in unit tests without a real database.
+        'src/db/dataConnection.ts',
+
+        // Route utils used just by devs
+        'src/routes/utils.ts',
+
         ...coverageConfigDefaults.exclude
       ]
     },
