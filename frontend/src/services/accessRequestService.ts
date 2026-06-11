@@ -1,48 +1,58 @@
+import type { AccessRequest, CreateAccessRequestRequest, ProcessAccessRequestRequest } from '@/types';
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 
-import type { AxiosResponse } from 'axios';
-
 const PATH = 'accessRequest';
 
-/*
-Supervisor
- - create access request
- - create revoke request
- - change role
+/**
+ * Creates a new access request.
+ * @param req - The request payload.
+ * @returns A promise resolving to the created AccessRequest resource.
+ */
+export async function createAccessRequest(req: CreateAccessRequestRequest): Promise<AccessRequest> {
+  const { data } = await appAxios().post<AccessRequest>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, req);
 
-Admin
- - create access request (auto approved)
- - create revoke request (auto approved)
- - approve access request
- - approve revoke request
- - deny access request
- - deny revoke request
- - change role
-*/
+  return data;
+}
 
-export default {
-  /**
-   * @function createUserAccessRequest
-   * @returns {Promise} An axios response
-   */
-  createUserAccessRequest(data: unknown) {
-    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, data);
-  },
+/**
+ * Retrieves all access requests.
+ * @returns A promise resolving to an array of AccessRequest resources.
+ */
+export async function listAccessRequests(): Promise<AccessRequest[]> {
+  const { data } = await appAxios().get<AccessRequest[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
 
-  /**
-   * @function processUserAccessRequest
-   * @returns {Promise} An axios response
-   */
-  processUserAccessRequest(accessRequestId: string, data: unknown) {
-    return appAxios().post(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${accessRequestId}`, data);
-  },
+  return data;
+}
 
-  /**
-   * @function getAccessRequests
-   * @returns {Promise} An axios response
-   */
-  getAccessRequests(): Promise<AxiosResponse> {
-    return appAxios().get(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
-  }
+/**
+ * Processes an existing access request.
+ * This may represent approval, denial, revocation, role change, etc.
+ *
+ * @param req - The request payload containing the access request ID and action details.
+ * @returns A promise resolving to the updated AccessRequest resource.
+ */
+export async function processAccessRequest(req: ProcessAccessRequestRequest): Promise<AccessRequest> {
+  const { accessRequestId, ...body } = req;
+
+  const { data } = await appAxios().post<AccessRequest>(
+    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${accessRequestId}`,
+    body
+  );
+
+  return data;
+}
+
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
+export const accessRequestService = {
+  createAccessRequest,
+  listAccessRequests,
+  processAccessRequest
 };

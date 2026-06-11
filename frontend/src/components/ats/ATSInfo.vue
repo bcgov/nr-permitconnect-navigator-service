@@ -13,7 +13,7 @@ import { useAppStore, useCodeStore } from '@/store';
 import { ATSCreateTypes, Initiative } from '@/utils/enums/application.ts';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource } from '@/types/index.ts';
+import type { AtsClientResource } from '@/types/index.ts';
 
 // Props
 const {
@@ -176,7 +176,7 @@ function onNewATSEnquiry() {
     :phone-number="phoneNumber"
     :email-id="email"
     @ats-user-link:link="
-      (atsClientResource: ATSClientResource) => {
+      (atsClientResource: AtsClientResource) => {
         atsUserLinkModalVisible = false;
         emit('atsInfo:setClientId', atsClientResource.clientId);
         if (!atsEnquiryId) {

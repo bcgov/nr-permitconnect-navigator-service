@@ -1,56 +1,133 @@
-import { setActivePinia, createPinia } from 'pinia';
+import { createPinia, setActivePinia } from 'pinia';
 
-import { ConfigService } from '@/services';
-import { useConfigStore } from '@/store';
-import { StorageKey } from '@/utils/enums/application';
+import { configService } from '@/services/configService';
+import { useConfigStore } from '@/store/configStore';
 
-import type { StoreGeneric } from 'pinia';
-import type { MockInstance } from 'vitest';
+vi.mock('@/services/configService', () => ({
+  configService: {
+    getConfig: vi.fn()
+  }
+}));
 
-beforeEach(() => {
-  setActivePinia(createPinia());
-
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
-    })
-  );
-
-  vi.clearAllMocks();
-});
-
-afterEach(() => {
-  sessionStorage.clear();
-});
-
-describe('Config Store', () => {
-  let configService: ConfigService;
-  let configStore: StoreGeneric;
-
-  let configServiceInitSpy: MockInstance;
-  let configServiceGetConfigSpy: MockInstance;
+describe('configStore', () => {
+  const mockGetConfig = vi.mocked(configService.getConfig);
 
   beforeEach(() => {
-    configService = new ConfigService();
-    configStore = useConfigStore();
+    vi.clearAllMocks();
 
-    configServiceInitSpy = vi.spyOn(ConfigService, 'init');
-    configServiceGetConfigSpy = vi.spyOn(configService, 'getConfig');
+    setActivePinia(createPinia());
+  });
+
+  describe('initial state', () => {
+    it('initializes with null config', () => {
+      const store = useConfigStore();
+
+      expect(store.config).toBeNull();
+      expect(store.getConfig).toBeNull();
+    });
+  });
+
+  describe('getConfig', () => {
+    it('returns the current config state', () => {
+      const store = useConfigStore();
+
+      const config = {
+        apiUrl: 'https://api.example.com',
+        featureFlag: true
+      };
+
+      store.config = config as never;
+
+      expect(store.getConfig).toEqual(config);
+    });
+
+    it('updates when config changes', () => {
+      const store = useConfigStore();
+
+      const configA = {
+        apiUrl: 'https://a.example.com'
+      };
+
+      const configB = {
+        apiUrl: 'https://b.example.com'
+      };
+
+      store.config = configA as never;
+
+      expect(store.getConfig).toEqual(configA);
+
+      store.config = configB as never;
+
+      expect(store.getConfig).toEqual(configB);
+    });
   });
 
   describe('init', () => {
-    it('initializes the service and sets the state', async () => {
-      configServiceGetConfigSpy.mockReturnValue(sessionStorage.getItem(StorageKey.CONFIG));
+    it('loads config from the service', async () => {
+      const config = {
+        apiUrl: 'https://api.example.com',
+        featureFlag: true
+      };
 
-      await configStore.init();
+      mockGetConfig.mockResolvedValue(config as never);
 
-      expect(configServiceInitSpy).toHaveBeenCalledTimes(1);
-      expect(configServiceGetConfigSpy).toHaveBeenCalledTimes(1);
-      expect(configStore.getConfig).toStrictEqual(sessionStorage.getItem(StorageKey.CONFIG));
+      const store = useConfigStore();
+
+      await store.init();
+
+      expect(mockGetConfig).toHaveBeenCalledTimes(1);
+
+      expect(store.config).toEqual(config);
+      expect(store.getConfig).toEqual(config);
+    });
+
+    it('replaces an existing config value', async () => {
+      const store = useConfigStore();
+
+      store.config = {
+        apiUrl: 'https://old.example.com'
+      } as never;
+
+      const newConfig = {
+        apiUrl: 'https://new.example.com'
+      };
+
+      mockGetConfig.mockResolvedValue(newConfig as never);
+
+      await store.init();
+
+      expect(store.config).toEqual(newConfig);
+      expect(store.getConfig).toEqual(newConfig);
+    });
+
+    it('propagates service errors', async () => {
+      const error = new Error('config load failed');
+
+      mockGetConfig.mockRejectedValue(error);
+
+      const store = useConfigStore();
+
+      await expect(store.init()).rejects.toThrow(error);
+
+      expect(store.config).toBeNull();
+      expect(store.getConfig).toBeNull();
+    });
+
+    it('does not modify existing state when service fails', async () => {
+      const store = useConfigStore();
+
+      const existingConfig = {
+        apiUrl: 'https://existing.example.com'
+      };
+
+      store.config = existingConfig as never;
+
+      mockGetConfig.mockRejectedValue(new Error('config load failed'));
+
+      await expect(store.init()).rejects.toThrow();
+
+      expect(store.config).toEqual(existingConfig);
+      expect(store.getConfig).toEqual(existingConfig);
     });
   });
 });

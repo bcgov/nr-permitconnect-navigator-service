@@ -11,7 +11,7 @@ import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
 import { GroupName } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
-import type { Group, User } from '@/types';
+import type { Group, ListIdirUsersResponse, User } from '@/types';
 
 // Constants
 const USER_SEARCH_PARAMS: Record<string, string> = {
@@ -19,19 +19,6 @@ const USER_SEARCH_PARAMS: Record<string, string> = {
   lastName: 'Last name',
   email: 'Email'
 };
-
-// Interfaces
-interface IdirResult {
-  username: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  attributes: {
-    display_name: string[];
-    idir_user_guid: string[];
-    idir_username: string[];
-  };
-}
 
 // Composables
 const { t } = useI18n();
@@ -72,19 +59,21 @@ async function searchIdirUsers() {
         try {
           loading.value = true;
 
-          const response = await ssoService.searchIdirUsers({
+          const response = await ssoService.listIdirUsers({
             [searchParam]: searchTag.value
           });
 
-          // Map the response data to the required format
-          // Spread the rest of the properties and filter out users without email
-          users.value = response.data
-            .map(({ attributes, username, ...rest }: IdirResult) => ({
-              ...rest,
-              sub: username,
-              fullName: attributes?.display_name?.[0]
-            }))
-            .filter((user: User) => !!user.email);
+          // Map the response data to the User type and filter out users without email
+          users.value = response
+            .map(
+              ({ attributes, username, ...rest }: ListIdirUsersResponse) =>
+                ({
+                  ...rest,
+                  sub: username,
+                  fullName: attributes?.display_name?.[0]
+                }) as User
+            )
+            .filter((user) => !!user.email);
         } catch (error) {
           toast.error(t('userCreateModal.searchError'), String(error));
         } finally {
@@ -100,14 +89,14 @@ async function searchIdirUsers() {
 }
 
 watchEffect(async () => {
-  const yarsGroups: Group[] = (await yarsService.getGroups(useAppStore().getInitiative)).data;
+  const listGroupsResponse = await yarsService.listGroups({ initiative: useAppStore().getInitiative });
 
   const allowedGroups: GroupName[] = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
   if (authzStore.isInGroup([GroupName.ADMIN])) {
     allowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
   }
 
-  selectableGroups.value = yarsGroups.filter((x) => allowedGroups.includes(x.name));
+  selectableGroups.value = listGroupsResponse.filter((x) => allowedGroups.includes(x.name));
 });
 </script>
 

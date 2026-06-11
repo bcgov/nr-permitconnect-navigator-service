@@ -100,7 +100,7 @@ function shouldDisplayLocation() {
 onBeforeMount(async () => {
   searchPermits();
   permitTypes.value = await permitService.listPermitTypes({ initiative: useAppStore().getInitiative });
-  const kinds = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  const kinds = await sourceSystemKindService.listSourceSystemKinds();
   sourceSystemKinds.value = kinds.sort((a: SourceSystemKind, b: SourceSystemKind) =>
     (codeDisplay.SourceSystem[a.sourceSystem] || '').localeCompare(codeDisplay.SourceSystem[b.sourceSystem] || '')
   );

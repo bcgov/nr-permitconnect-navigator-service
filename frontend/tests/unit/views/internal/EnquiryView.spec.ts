@@ -10,9 +10,9 @@ import { enquiryService, noteHistoryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import EnquiryView from '@/views/internal/EnquiryView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
-import type { Enquiry, NoteHistory } from '@/types';
+import type { Enquiry, NoteHistory, User } from '@/types';
 
 // Mock functions we need to test
 const toastErrorMock = vi.fn();
@@ -54,8 +54,8 @@ vi.mock('@/services/noteHistoryService', () => ({
 }));
 
 vi.mock('@/services/userService', () => ({
-  default: {
-    searchUsers: vi.fn()
+  userService: {
+    listUsers: vi.fn()
   }
 }));
 
@@ -97,7 +97,7 @@ beforeEach(() => {
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([
     { noteHistoryId: '1', createdBy: '123' }
   ] as NoteHistory[]);
-  vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ userId: '123', fullName: 'Fake User' }]));
+  vi.mocked(userService.listUsers).mockResolvedValue([{ userId: '123', fullName: 'Fake User' }] as User[]);
 });
 
 afterEach(() => {

@@ -91,11 +91,23 @@ export const getObject = async (bearerToken: string, objectId: string) => {
  * @returns The COMS response
  */
 export const searchUser = async (currentContext: CurrentContext, sub: string) => {
-  const { status, headers, data } = await comsAxios({
-    headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
-    // TODO: COMS is still on idir, remove once they migrate
-  }).get('/user', { params: { username: sub.replace('@azureidir', '@idir') } });
-  return { status, headers, data };
+  try {
+    const { status, headers, data } = await comsAxios({
+      headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
+      // TODO: COMS is still on idir, remove once they migrate
+    }).get('/user', { params: { username: sub.replace('@azureidir', '@idir') } });
+    return { status, headers, data };
+  } catch (e) {
+    if (axios.isAxiosError(e)) {
+      const detail = e.response?.data.detail;
+      const status = e.response ? e.response.status : 500;
+      throw new Problem(status, { detail }, { extra: { comsError: e.response?.data } });
+    } else if (e instanceof Error) {
+      throw new Problem(500, { detail: e.message });
+    } else {
+      throw new Problem(500, { detail: 'Server Error' });
+    }
+  }
 };
 
 /**
@@ -130,6 +142,8 @@ export const searchUserBucketPermissions = async (currentContext: CurrentContext
       const detail = e.response?.data.detail;
       const status = e.response ? e.response.status : 500;
       throw new Problem(status, { detail }, { extra: { comsError: e.response?.data } });
+    } else if (e instanceof Error) {
+      throw new Problem(500, { detail: e.message });
     } else {
       throw new Problem(500, { detail: 'Server Error' });
     }
@@ -195,6 +209,8 @@ export const assignPermissions = async (
         const detail = e.response?.data.detail;
         const status = e.response ? e.response.status : 500;
         throw new Problem(status, { detail }, { extra: { comsError: e.response?.data } });
+      } else if (e instanceof Error) {
+        throw new Problem(500, { detail: e.message });
       } else {
         throw new Problem(500, { detail: 'Server Error' });
       }

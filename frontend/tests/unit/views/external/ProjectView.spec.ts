@@ -20,7 +20,7 @@ import {
   noteHistoryService
 } from '@/services';
 import ProjectView from '@/views/external/ProjectView.vue';
-import { mockAxiosResponse, PRIMEVUE_STUBS, t } from '../../../helpers';
+import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
 import type { ElectrificationProject, HousingProject, Note, NoteHistory, Permit } from '@/types';
 
@@ -60,7 +60,7 @@ vi.mock('@/services/activityContactService', () => ({
 }));
 
 vi.mock('@/services/contactService', () => ({
-  default: {
+  contactService: {
     matchContacts: vi.fn()
   }
 }));
@@ -124,7 +124,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(activityContactService.listActivityContacts).mockResolvedValue([]);
-  vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
+  vi.mocked(contactService.matchContacts).mockResolvedValue([]);
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue([
     { needed: PermitNeeded.YES, stage: PermitStage.PRE_SUBMISSION }

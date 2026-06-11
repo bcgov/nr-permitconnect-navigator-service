@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import comsService from './comsService';
+import { comsService } from './comsService';
 import { appAxios } from './interceptors';
 import { useAppStore } from '@/store';
 import { getFilenameAndExtension } from '@/utils/utils';
@@ -39,27 +39,27 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
     const tagset: { key: string; value: string }[] = [{ key: PROJECT_ID, value: activityId }];
 
     // Create COMS object
-    comsResponse = await comsService.createObject(
-      newDocument,
-      {},
-      { bucketId, tagset },
-      { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
-    );
+    comsResponse = await comsService.createObject({
+      file: newDocument,
+      bucketId,
+      tagset,
+      axiosOptions: { timeout: 0 } // Infinite timeout for big documents upload to avoid timeout error
+    });
 
     // Create document link
     const { data } = await appAxios().post<Document>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, {
       activityId: activityId,
-      documentId: comsResponse.data.id,
-      filename: comsResponse.data.name,
-      mimeType: comsResponse.data.mimeType,
-      filesize: comsResponse.data.length
+      documentId: comsResponse.id,
+      filename: comsResponse.name,
+      mimeType: comsResponse.mimeType,
+      filesize: comsResponse.length
     });
 
     return data;
   } catch (e) {
     // In event of any error try to Delete COMS object if it was created
     if (comsResponse) {
-      comsService.deleteObject(comsResponse.data.id, comsResponse.data.versionId).catch(() => {});
+      comsService.deleteObject({ objectId: comsResponse.id, versionId: comsResponse.versionId }).catch(() => {});
     }
     throw e;
   }
@@ -70,12 +70,12 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
  * @param req - The request payload containing the document identifier and version identifier.
  * @returns A promise that resolves when the document and its association have been deleted.
  */
-export async function deleteDocument(req: DeleteDocumentRequest) {
+export async function deleteDocument(req: DeleteDocumentRequest): Promise<void> {
   const { documentId, versionId } = req;
 
   try {
-    await comsService.deleteObject(documentId, versionId);
-    await appAxios().delete(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
+    await comsService.deleteObject({ objectId: documentId, versionId });
+    await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${documentId}`, {
       params: {
         versionId: versionId
       }
@@ -91,9 +91,9 @@ export async function deleteDocument(req: DeleteDocumentRequest) {
  * @param req - The request payload containing the document identifier, filename, and optional version identifier.
  * @returns A promise that resolves when the document download has been initiated or completed.
  */
-export async function downloadDocument(req: DownloadDocumentRequest) {
+export async function downloadDocument(req: DownloadDocumentRequest): Promise<void> {
   const { documentId, filename, versionId } = req;
-  await comsService.getObject(documentId, filename, versionId);
+  await comsService.downloadObject({ objectId: documentId, filename, versionId });
 }
 
 /**
@@ -109,7 +109,14 @@ export async function listDocuments(req: ListDocumentsRequest): Promise<Document
   return data;
 }
 
-/** Hybrid default export object for backward compatibility */
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
 export const documentService = {
   createDocument,
   deleteDocument,

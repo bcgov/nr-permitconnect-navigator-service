@@ -1,6 +1,6 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { GroupName, Initiative } from '../utils/enums/application.ts';
-import { addDashesToUuid, mixedQueryToArray, isTruthy } from '../utils/utils.ts';
+import { isTruthy } from '../utils/utils.ts';
 import { getInitiative } from '../services/initiative.ts';
 import { searchUsers } from '../services/user.ts';
 import { getSubjectGroups } from '../services/yars.ts';
@@ -11,27 +11,23 @@ import type { Group, User, UserSearchParameters } from '../types/index.ts';
 
 type UserWithGroup = User & { groups?: Group[] };
 
-export const searchUsersController = async (req: Request<never, never, never, UserSearchParameters>, res: Response) => {
+export const searchUsersController = async (req: Request<never, never, UserSearchParameters, never>, res: Response) => {
   const response = await transactionWrapper<UserWithGroup[]>(async (tx: PrismaTransactionClient) => {
-    const reqGroup = mixedQueryToArray(req.query.group) as GroupName[];
-    const reqInitiative = mixedQueryToArray(req.query.initiative) as Initiative[];
-    const userIds = mixedQueryToArray(req.query.userId);
-
     const response = await searchUsers(tx, {
-      userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
-      idp: mixedQueryToArray(req.query.idp),
-      sub: req.query.sub,
-      email: req.query.email,
-      firstName: req.query.firstName,
-      fullName: req.query.fullName,
-      lastName: req.query.lastName,
-      active: isTruthy(req.query.active)
+      userId: req.body.userId,
+      idp: req.body.idp,
+      sub: req.body.sub,
+      email: req.body.email,
+      firstName: req.body.firstName,
+      fullName: req.body.fullName,
+      lastName: req.body.lastName,
+      active: isTruthy(req.body.active)
     });
 
     return await getUsersWithGroups(tx, response, {
-      group: reqGroup,
-      initiative: reqInitiative,
-      includeUserGroups: isTruthy(req.query.includeUserGroups)
+      group: req.body.group,
+      initiative: req.body.initiative,
+      includeUserGroups: isTruthy(req.body.includeUserGroups)
     });
   });
 

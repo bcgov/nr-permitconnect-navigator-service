@@ -1,53 +1,79 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+import { getPids, mapService } from '@/services/mapService';
 
-import mapService from '@/services/mapService';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosInstance } from 'axios';
-
-// Constants
-const PATH = 'map';
-
-const TEST_PROJECT_ID = 'project123';
-
-// Mocks
-const getSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
-
-  vi.clearAllMocks();
-});
-
-describe('mapService', () => {
-  let appStore: StoreGeneric;
+describe('map service', () => {
+  const mockGet = vi.fn();
 
   beforeEach(() => {
-    appStore = useAppStore();
-    appStore.setInitiative(Initiative.HOUSING);
+    vi.clearAllMocks();
+
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
+
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet
+    } as never);
   });
 
-  describe('getPIDs', () => {
-    it('calls with given data', () => {
-      mapService.getPIDs(TEST_PROJECT_ID);
+  describe('getPids', () => {
+    it('returns PIDs as CSV string', async () => {
+      const response = 'pid-1,pid-2,pid-3';
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith(`${Initiative.HOUSING.toLowerCase()}/${PATH}/pids/${TEST_PROJECT_ID}`);
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getPids({
+        projectId: 'project-123'
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123');
+
+      expect(result).toEqual(response);
+    });
+
+    it('returns empty string when no PIDs exist', async () => {
+      mockGet.mockResolvedValue({
+        data: ''
+      });
+
+      const result = await getPids({
+        projectId: 'project-123'
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123');
+
+      expect(result).toEqual('');
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('fetch failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        getPids({
+          projectId: 'project-123'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(mapService).toEqual({
+      getPids
     });
   });
 });

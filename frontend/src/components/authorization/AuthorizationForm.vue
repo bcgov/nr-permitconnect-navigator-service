@@ -179,8 +179,8 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
         sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
       };
     });
-    const peachSummary = await peachService.getPeachSummary(data);
-    return peachSummary.data;
+    const peachSummary = await peachService.getPeachSummary({ data });
+    return peachSummary;
   } catch (e) {
     if (isAxiosError(e)) {
       const systemRecordNotFound =
@@ -406,10 +406,10 @@ async function onSubmit(data: GenericObject) {
 
 onBeforeMount(async () => {
   initializeFormValues();
-  const response: SourceSystemKind[] = (await sourceSystemKindService.getSourceSystemKinds()).data;
+  const response: SourceSystemKind[] = await sourceSystemKindService.listSourceSystemKinds();
   sourceSystemKinds.value = response.sort(sortForDisplayOrder);
   if (authorization?.updatedBy) {
-    updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] })).data[0];
+    updatedBy.value = (await userService.listUsers({ userId: [authorization?.updatedBy] }))[0];
   }
 });
 

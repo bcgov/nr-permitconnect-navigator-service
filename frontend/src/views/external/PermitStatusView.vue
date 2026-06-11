@@ -110,7 +110,7 @@ onBeforeMount(async () => {
       }
 
       if (getPermit.value?.updatedBy) {
-        const updatedByUser = (await contactService.matchContacts({ userId: [getPermit.value.updatedBy] })).data[0];
+        const updatedByUser = (await contactService.matchContacts({ userId: [getPermit.value.updatedBy] }))[0];
         if (updatedByUser) updatedBy.value = updatedByUser.firstName + ' ' + updatedByUser.lastName;
       }
     } catch (e) {

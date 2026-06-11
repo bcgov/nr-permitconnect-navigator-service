@@ -21,9 +21,12 @@ const db = {
 const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;
 
 // Note: These two types are a workaround for using Prisma's TransactionClient type while also extending the client.
+// The interface is necessary for function args to not show an expanded type
 // see - https://github.com/prisma/prisma/issues/20738
 export type ExtendedClient = typeof prisma;
-export type PrismaTransactionClient = Parameters<Parameters<ExtendedClient['$transaction']>[0]>[0];
+type _PrismaTransactionClient = Parameters<Parameters<ExtendedClient['$transaction']>[0]>[0];
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface PrismaTransactionClient extends _PrismaTransactionClient {}
 
 const prisma = new PrismaClient({
   // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging

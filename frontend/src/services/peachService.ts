@@ -1,15 +1,28 @@
 import { appAxios } from './interceptors';
 
-import type { PermitTracking } from '@/types';
+import type { GetPeachSummaryRequest, GetPeachSummaryResponse } from '@/types';
 
 const PATH = 'peach';
 
-export default {
-  /**
-   * @function getPeachSummary
-   * @returns {Promise} An axios response
-   */
-  getPeachSummary(data: PermitTracking[]) {
-    return appAxios().post(`${PATH}/record`, data);
-  }
+/**
+ * Get peach summary for permit tracking records.
+ * @param req - The permit tracking payload.
+ * @returns A promise resolving to the peach summary.
+ */
+export async function getPeachSummary(req: GetPeachSummaryRequest): Promise<GetPeachSummaryResponse> {
+  const { data } = await appAxios().post<GetPeachSummaryResponse>(`${PATH}/record`, req);
+
+  return data;
+}
+
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
+export const peachService = {
+  getPeachSummary
 };

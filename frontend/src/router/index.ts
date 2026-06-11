@@ -49,9 +49,9 @@ export async function bootstrap() {
   const { getIsAuthenticated } = storeToRefs(authnStore);
 
   if (getIsAuthenticated.value && !authzStore.getGroups.length) {
-    const permissions = await yarsService.getPermissions();
-    authzStore.setPermissions(permissions.data);
-    const contact: Contact = (await contactService.getCurrentUserContact())?.data;
+    const authorizationContext = await yarsService.getAuthorizationContext();
+    authzStore.setAuthorizationContext(authorizationContext);
+    const contact: Contact = await contactService.getCurrentUserContact();
     contactStore.setContact(contact);
   }
 }

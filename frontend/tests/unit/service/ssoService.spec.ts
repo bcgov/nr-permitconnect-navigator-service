@@ -1,50 +1,85 @@
-import ssoService from '@/services/ssoService';
 import { appAxios } from '@/services/interceptors';
+import { listIdirUsers, ssoService } from '@/services/ssoService';
 
-import type { AxiosInstance } from 'axios';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-const testIdirObj = {
-  firstName: 'John'
-};
+describe('sso service', () => {
+  const mockGet = vi.fn();
 
-const testBceidObj = {
-  guid: '1234'
-};
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-const getSpy = vi.fn();
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet
+    } as never);
+  });
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('ssoService', () => {
   describe('searchIdirUsers', () => {
-    it('calls with given data', () => {
-      ssoService.searchIdirUsers(testIdirObj);
+    it('returns idir users with search criteria', async () => {
+      const filters = {
+        searchText: 'smith'
+      };
 
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('sso/idir/users', { params: testIdirObj });
+      const users = [
+        {
+          firstName: 'John',
+          lastName: 'Smith',
+          username: 'JSMITH'
+        },
+        {
+          firstName: 'Jane',
+          lastName: 'Smith',
+          username: 'JANES'
+        }
+      ];
+
+      mockGet.mockResolvedValue({
+        data: users
+      });
+
+      const result = await listIdirUsers(filters as never);
+
+      expect(mockGet).toHaveBeenCalledWith('sso/idir/users', {
+        params: filters,
+        cancelToken: undefined
+      });
+
+      expect(result).toEqual(users);
+    });
+
+    it('passes cancel token when supplied', async () => {
+      const filters = {
+        searchText: 'smith'
+      };
+
+      const cancelToken = {} as never;
+
+      mockGet.mockResolvedValue({
+        data: []
+      });
+
+      await listIdirUsers(filters as never, cancelToken);
+
+      expect(mockGet).toHaveBeenCalledWith('sso/idir/users', {
+        params: filters,
+        cancelToken
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(listIdirUsers({} as never)).rejects.toThrow(error);
     });
   });
 
-  describe('searchBasicBceidUsers', () => {
-    it('calls with given data', () => {
-      ssoService.searchBasicBceidUsers(testBceidObj);
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('sso/basic-bceid/users', { params: testBceidObj });
+  it('exports all service functions', () => {
+    expect(ssoService).toEqual({
+      listIdirUsers
     });
   });
 });

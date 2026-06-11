@@ -5,10 +5,9 @@ import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { contactSchema } from '@/validators';
 import { optionalText } from '@/validators/common';
 
-import type { CodeName } from '@/store/codeStore';
-import type { OrgBookOption } from '@/types';
+import type { CodeTableName, OrgBookOption } from '@/types';
 
-export function createProjectIntakeSchema(codeList: Record<CodeName, string[]>, orgBookOptions: OrgBookOption[]) {
+export function createProjectIntakeSchema(codeList: Record<CodeTableName, string[]>, orgBookOptions: OrgBookOption[]) {
   return object({
     [IntakeFormCategory.BASIC]: object({
       projectDescription: string().when('$project.projectType', {

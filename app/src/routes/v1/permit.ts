@@ -1,6 +1,5 @@
 import express from 'express';
 
-import permitNote from './permitNote.ts';
 import {
   deletePermitController,
   getPermitController,
@@ -18,7 +17,6 @@ import { permitValidator } from '../../validators/index.ts';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
-router.use('/note', permitNote);
 
 /** Get a list of permits */
 router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);

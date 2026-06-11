@@ -7,7 +7,7 @@ import { Button, Column, DataTable, Dialog, useToast } from '@/lib/primevue';
 import { atsService } from '@/services';
 
 import type { Ref } from 'vue';
-import type { ATSClientResource } from '@/types';
+import type { AtsClientResource } from '@/types';
 
 // Props
 const {
@@ -28,7 +28,7 @@ const { t } = useI18n();
 
 // State
 const loading: Ref<boolean> = ref(false);
-const users: Ref<ATSClientResource[]> = ref([]);
+const users: Ref<AtsClientResource[]> = ref([]);
 const visible = defineModel<boolean>('visible');
 
 // Actions
@@ -38,13 +38,13 @@ async function getATSClientInformation() {
   try {
     loading.value = true;
 
-    const response = await atsService.searchATSUsers({
+    const response = await atsService.searchAtsUsers({
       clientId: atsClientId
     });
 
     users.value = response.data.clients;
 
-    users.value.forEach((client: ATSClientResource) => {
+    users.value.forEach((client: AtsClientResource) => {
       // Combine address lines and filter out empty lines
       const address = [client.address.addressLine1, client.address.addressLine2].filter(Boolean).join(', ');
       client.formattedAddress = address;

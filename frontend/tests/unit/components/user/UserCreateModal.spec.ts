@@ -1,4 +1,3 @@
-import type { AxiosResponse } from 'axios';
 import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
@@ -7,6 +6,7 @@ import { mount } from '@vue/test-utils';
 
 import UserCreateModal from '@/components/user/UserCreateModal.vue';
 import { yarsService } from '@/services';
+import type { Group } from '@/types';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -16,10 +16,10 @@ vi.mock('vue-i18n', () => ({
 }));
 
 // Spies
-const getGroups = vi.spyOn(yarsService, 'getGroups');
+const listGroupsSpy = vi.spyOn(yarsService, 'listGroups');
 
 // Mocks
-getGroups.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+listGroupsSpy.mockResolvedValue([{ groupId: 123 }] as Group[]);
 
 const wrapperSettings = () => ({
   global: {

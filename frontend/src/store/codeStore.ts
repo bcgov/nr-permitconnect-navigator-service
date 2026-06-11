@@ -2,24 +2,13 @@ import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
 import { codeService } from '@/services';
+import * as codeEnums from '@/utils/enums/codeEnums';
 
 import type { Ref } from 'vue';
-import type { Code } from '@/types';
+import type { Code, CodeTableName } from '@/types';
 
-// Add new code tables here, name refers to returns from service call
-const codeNames = [
-  'BusinessArea',
-  'ElectrificationProjectCategory',
-  'ElectrificationProjectType',
-  'EscalationType',
-  'PermitStage',
-  'PermitState',
-  'PiesOnHold',
-  'SourceSystem'
-] as const;
-
-export type CodeName = (typeof codeNames)[number];
-export type CodeMap = Record<CodeName, Code[]>;
+const codeNames = Object.keys(codeEnums) as CodeTableName[];
+type CodeMap = Record<CodeTableName, Code[]>;
 
 const initialCodeMap = codeNames.reduce<CodeMap>((acc, name) => {
   acc[name] = [];
@@ -39,17 +28,17 @@ export const useCodeStore = defineStore('code', () => {
   // Getters
   const getters = {
     // List of codes for each code table
-    codeList: computed<Record<CodeName, string[]>>(() =>
+    codeList: computed<Record<CodeTableName, string[]>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].map((r) => r.code);
           return acc;
         },
-        {} as Record<CodeName, string[]>
+        {} as Record<CodeTableName, string[]>
       )
     ),
     // List of objects for display purposes, { code, display }
-    codeDisplay: computed<Record<CodeName, Record<string, string>>>(() =>
+    codeDisplay: computed<Record<CodeTableName, Record<string, string>>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].reduce(
@@ -61,11 +50,11 @@ export const useCodeStore = defineStore('code', () => {
           );
           return acc;
         },
-        {} as Record<CodeName, Record<string, string>>
+        {} as Record<CodeTableName, Record<string, string>>
       )
     ),
     // List of objects for definition purposes, { code, definition }
-    codeDefinition: computed<Record<CodeName, Record<string, string>>>(() =>
+    codeDefinition: computed<Record<CodeTableName, Record<string, string>>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].reduce(
@@ -79,11 +68,11 @@ export const useCodeStore = defineStore('code', () => {
           );
           return acc;
         },
-        {} as Record<CodeName, Record<string, string>>
+        {} as Record<CodeTableName, Record<string, string>>
       )
     ),
     // Option objects for primevue select inputs
-    options: computed<Record<CodeName, { value: string; label: string }[]>>(() =>
+    options: computed<Record<CodeTableName, { value: string; label: string }[]>>(() =>
       codeNames.reduce(
         (acc, name) => {
           acc[name] = state.codes.value[name].map((r) => ({
@@ -92,22 +81,22 @@ export const useCodeStore = defineStore('code', () => {
           }));
           return acc;
         },
-        {} as Record<CodeName, { value: string; label: string }[]>
+        {} as Record<CodeTableName, { value: string; label: string }[]>
       )
     )
   };
 
   // Actions
-  function setCode(name: CodeName, rows: Code[]) {
+  function setCode(name: CodeTableName, rows: Code[]) {
     state.codes.value[name] = rows;
   }
 
   function setCodes(data: CodeMap) {
-    Object.entries(data).forEach(([k, v]) => setCode(k as CodeName, v as Code[])); // nosonar
+    Object.entries(data).forEach(([k, v]) => setCode(k as CodeTableName, v as Code[])); // nosonar
   }
 
   async function init(): Promise<void> {
-    const codeTableData = (await codeService.getCodeTables()).data;
+    const codeTableData = await codeService.getCodeTables();
 
     setCodes(codeTableData);
   }

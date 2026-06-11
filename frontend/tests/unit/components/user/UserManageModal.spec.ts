@@ -7,7 +7,7 @@ import { mount } from '@vue/test-utils';
 import UserManageModal from '@/components/user/UserManageModal.vue';
 import { yarsService } from '@/services';
 
-import type { AxiosResponse } from 'axios';
+import type { Group } from '@/types';
 
 // Mock dependenciefs
 vi.mock('vue-i18n', () => ({
@@ -17,9 +17,9 @@ vi.mock('vue-i18n', () => ({
 }));
 
 // Spies
-const getGroups = vi.spyOn(yarsService, 'getGroups');
+const listGroupsSpy = vi.spyOn(yarsService, 'listGroups');
 
-getGroups.mockResolvedValue({ data: [{ activityId: 'someActivityid' }] } as AxiosResponse);
+listGroupsSpy.mockResolvedValue([{ groupId: 123 }] as Group[]);
 
 const wrapperSettings = () => ({
   global: {

@@ -24,8 +24,8 @@ const userName: Ref<string> = ref('');
 // Actions
 onBeforeMount(() => {
   if (enquiry.createdBy) {
-    userService.searchUsers({ userId: [enquiry.createdBy] }).then((res) => {
-      userName.value = res?.data.length ? res?.data[0].fullName : '';
+    userService.listUsers({ userId: [enquiry.createdBy] }).then((res) => {
+      userName.value = res?.length ? res?.[0].fullName : '';
     });
   }
 });

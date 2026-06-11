@@ -1,9 +1,8 @@
 import type { GeoJSON } from 'geojson';
 
 import type { UUID } from '../common';
-import type { Group } from './responses';
 import type { MaybeUndefined, Nullable } from '../util';
-import type { AccessRequestStatus, BasicResponse, IdentityProviderKind } from '@/utils/enums/application';
+import type { AccessRequestStatus, BasicResponse, GroupName, IdentityProviderKind } from '@/utils/enums/application';
 import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
@@ -64,15 +63,19 @@ interface ProjectRelations {
  * Access Request
  */
 
-export interface AccessRequest extends AuditFields {
-  accessRequestId?: UUID;
-  grant?: boolean;
+export interface AccessRequestBase extends AuditFields {
+  accessRequestId: UUID;
+  userId: UUID;
+  grant: boolean;
   groupId: number;
-  groupLabel?: string;
   status: AccessRequestStatus;
-  userId?: UUID;
-  update?: boolean;
 }
+
+interface AccessRequestRelations {
+  group: Group;
+}
+
+export type AccessRequest = AccessRequestBase & Partial<AccessRequestRelations>;
 
 /**
  * Activity
@@ -103,10 +106,31 @@ interface ActivityContactRelations {
 export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelations>;
 
 /**
+ * Bring Forward
+ */
+
+export interface BringForward {
+  activityId: string;
+  enquiryId?: string;
+  noteId: string;
+  electrificationProjectId?: string;
+  escalateToDirector?: boolean;
+  escalateToSupervisor?: boolean;
+  generalProjectId?: string;
+  housingProjectId?: string;
+  title: string;
+  projectName?: string;
+  bringForwardDate: string;
+  createdByFullName?: string;
+}
+
+/**
  * Contact
  */
 
-interface ContactBase {
+export interface ContactBase extends AuditFields {
+  contactId: UUID;
+  userId?: UUID;
   bceidBusinessName?: string;
   contactApplicantRelationship?: ProjectRelationship;
   contactPreference?: ContactPreference;
@@ -116,13 +140,11 @@ interface ContactBase {
   phoneNumber?: string;
 }
 
-export interface Contact extends ContactBase, AuditFields {
-  contactId: UUID;
-  userId?: UUID;
+interface ContactRelations {
   activityContact?: ActivityContact[];
 }
 
-export type CreateContactDto = ContactBase;
+export type Contact = ContactBase & Partial<ContactRelations>;
 
 /**
  * Document
@@ -220,6 +242,18 @@ export interface GeneralProjectBase extends ProjectBase {
 }
 
 export type GeneralProject = GeneralProjectBase & Partial<ProjectRelations>;
+
+/**
+ * Group
+ */
+
+export interface Group {
+  groupId: number;
+  initiativeCode?: string;
+  initiativeId: string;
+  name: GroupName;
+  label?: string;
+}
 
 /**
  * Housing Project

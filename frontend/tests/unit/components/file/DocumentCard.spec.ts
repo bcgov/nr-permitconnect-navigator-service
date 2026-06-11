@@ -2,17 +2,13 @@ import { createTestingPinia } from '@pinia/testing';
 import { mount } from '@vue/test-utils';
 
 import DocumentCard from '@/components/file/DocumentCard.vue';
-import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import Tooltip from 'primevue/tooltip';
 
-import type { AxiosResponse } from 'axios';
 import type { Document } from '@/types';
-
-const useUserService = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -79,8 +75,6 @@ beforeEach(() => {
   );
 
   vi.clearAllMocks();
-
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
 });
 
 afterEach(() => {

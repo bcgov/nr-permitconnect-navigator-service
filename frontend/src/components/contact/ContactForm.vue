@@ -11,7 +11,7 @@ import { setEmptyStringsToNull } from '@/utils/utils';
 import { contactSchema } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
-import type { Contact } from '@/types';
+import type { Contact, PutContactRequest } from '@/types';
 
 // Props
 const { contact, editable } = defineProps<{
@@ -43,17 +43,16 @@ const initialFormValues = ref({
 // Actions
 const onSubmit = async (values: GenericObject) => {
   try {
-    const submitData: Contact = setEmptyStringsToNull(values);
-    const result = await contactService.updateContact(submitData);
-    if (result.status === 200) {
-      toast.success(t('contactForm.formSaved'));
-      formRef.value?.resetForm({
-        values: {
-          ...formRef.value?.values
-        }
-      });
-      emit('updateContact', result.data);
-    } else toast.error(t('contactForm.failedToSaveTheForm'));
+    const req: PutContactRequest = setEmptyStringsToNull(values);
+    const result = await contactService.putContact(req);
+
+    formRef.value?.resetForm({
+      values: {
+        ...formRef.value?.values
+      }
+    });
+    emit('updateContact', result);
+    toast.success(t('contactForm.formSaved'));
   } catch (e) {
     toast.error(t('contactForm.failedToSaveTheForm'), String(e));
   }

@@ -170,7 +170,7 @@ async function searchContacts() {
         contactSearchFilter = { email: searchTag.value };
       }
 
-      contactSearchResults.value = (await contactService.matchContacts(contactSearchFilter)).data;
+      contactSearchResults.value = await contactService.matchContacts(contactSearchFilter);
     } catch (error) {
       toast.error(t('userCreateModal.searchError'), String(error));
     } finally {

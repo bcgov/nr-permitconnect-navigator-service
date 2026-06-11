@@ -9,8 +9,6 @@ import ContactPage from '@/components/contact/ContactPage.vue';
 import { contactService, housingProjectService, enquiryService, userService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { AxiosRequestHeaders } from 'axios';
-
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: vi.fn()
@@ -36,26 +34,10 @@ const testContact = {
   activityContact: []
 };
 
-vi.spyOn(contactService, 'getContact').mockResolvedValue({
-  data: testContact,
-  status: 200,
-  statusText: 'OK',
-  headers: {},
-  config: {
-    headers: {} as AxiosRequestHeaders
-  }
-});
+vi.spyOn(contactService, 'getContact').mockResolvedValue(testContact);
 vi.spyOn(housingProjectService, 'searchProjects').mockResolvedValue([]);
 vi.spyOn(enquiryService, 'searchEnquiries').mockResolvedValue([]);
-vi.spyOn(userService, 'searchUsers').mockResolvedValue({
-  data: [],
-  status: 200,
-  statusText: 'OK',
-  headers: {},
-  config: {
-    headers: {} as AxiosRequestHeaders
-  }
-});
+vi.spyOn(userService, 'listUsers').mockResolvedValue([]);
 
 beforeEach(() => {
   vi.clearAllMocks();

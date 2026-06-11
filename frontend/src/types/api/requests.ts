@@ -10,6 +10,7 @@ import type {
 } from './dto';
 import type {
   ActivityContactBase,
+  ContactBase,
   Document,
   Draft,
   ElectrificationProjectBase,
@@ -19,13 +20,44 @@ import type {
   HousingProjectBase,
   NoteHistoryBase,
   Permit,
+  PermitTracking,
   PermitType,
   ProjectBase
 } from './resources';
-import type { UUID } from '../common';
+import type { KeyValuePair, UUID } from '../common';
 import type { Nullable, PartialFields } from '../util';
 import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes';
-import type { GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { AccessRequestStatus, GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { AxiosRequestConfig } from 'axios';
+
+/**
+ * Access Request
+ */
+
+export interface CreateAccessRequestRequest {
+  user: {
+    userId?: UUID;
+    idp: string;
+    sub: string;
+    email: string;
+    firstName: string;
+    fullName: string;
+    lastName: string;
+    active: boolean;
+  };
+  accessRequest: Partial<{
+    accessRequestId: UUID;
+    userId: UUID;
+    grant: boolean;
+    groupId: number;
+    status: AccessRequestStatus;
+    update: boolean;
+  }>;
+}
+export interface ProcessAccessRequestRequest {
+  accessRequestId: UUID;
+  approve: boolean;
+}
 
 /**
  * Activity Contact
@@ -40,6 +72,43 @@ export type CreateActivityContactRequest = CreateRequestDTO<ActivityContactBase,
 export type ListActivityContactsRequest = ListRequestDTO<ActivityContactBase, ActivityContactSchema>;
 export type PutActivityContactRequest = PutRequestDTO<ActivityContactBase, ActivityContactSchema>;
 export type DeleteActivityContactRequest = DeleteRequestDTO<ActivityContactBase, ActivityContactSchema>;
+
+/**
+ * Contact
+ */
+
+interface ContactBaseSchema extends ResourceSchemaConfig<ContactBase> {
+  ids: 'contactId';
+  immutable: 'contactId';
+  serverGenerated: 'contactId';
+}
+interface ContactGetSchema extends ContactBaseSchema {
+  scope: 'contactId';
+  query: {
+    includeActivities?: boolean;
+  };
+}
+interface ContactSearchSchema extends ContactBaseSchema {
+  query: {
+    contactApplicantRelationship?: string;
+    contactPreference?: string;
+    contactId?: string[];
+    email?: string;
+    firstName?: string;
+    hasActivity?: boolean;
+    lastName?: string;
+    phoneNumber?: string;
+    userId?: string[];
+    initiative?: Initiative;
+    includeActivities?: boolean;
+  };
+}
+
+export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
+export type GetContactRequest = ListRequestDTO<ContactBase, ContactGetSchema>;
+export type ListContactsRequest = ListRequestDTO<ContactBase, ContactSearchSchema>;
+export type PutContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
+export type DeleteContactRequest = DeleteRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
  * Document
@@ -254,20 +323,83 @@ export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ProjectSchema>;
 export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
 
 /**
- * Other
+ * User
  */
-export interface ContactSearchParameters {
-  contactApplicantRelationship?: string;
-  contactPreference?: string;
-  contactId?: string[];
+
+export interface ListUsersRequest {
+  userId?: string[];
+  idp?: string[];
+  sub?: string;
   email?: string;
   firstName?: string;
-  hasActivity?: boolean;
+  fullName?: string;
   lastName?: string;
-  phoneNumber?: string;
-  userId?: string[];
-  initiative?: Initiative;
-  includeActivities?: boolean;
+  active?: boolean;
+  group?: GroupName[];
+  includeUserGroups?: boolean;
+  initiative?: Initiative[];
+}
+
+/**
+ * Other
+ */
+
+export interface CreateObjectRequest {
+  file: File;
+  metadata?: KeyValuePair[];
+  bucketId?: string;
+  tagset?: KeyValuePair[];
+  axiosOptions?: AxiosRequestConfig;
+}
+
+export interface CreateObjectResponse {
+  id: string;
+  path: string;
+  public: boolean;
+  active: boolean;
+  bucketId: string;
+  name: string;
+
+  lastSyncedDate: string;
+  createdBy: string;
+  createdAt: string;
+  updatedBy: string;
+  updatedAt: string;
+
+  length: number;
+  mimeType: string;
+  versionId: string;
+
+  metadata: Record<string, string>;
+  tags: Record<string, string>;
+
+  $metadata: {
+    httpStatusCode: number;
+    extendedRequestId: string;
+    attempts: number;
+    totalRetryDelay: number;
+  };
+
+  ETag: string;
+  Bucket: string;
+  Key: string;
+  Location: string;
+  ServerSideEncryption: string;
+  s3VersionId: string;
+}
+
+export interface DeleteObjectRequest {
+  objectId: string;
+  versionId?: string;
+}
+
+export interface GetObjectRequest {
+  objectId: string;
+  versionId?: string;
+}
+
+export interface DownloadObjectRequest extends GetObjectRequest {
+  filename: string;
 }
 
 export interface Email {
@@ -284,16 +416,34 @@ export interface Email {
   tag?: string;
 }
 
-export interface UserSearchParameters {
-  userId?: string[];
-  idp?: string[];
-  sub?: string;
-  email?: string;
+export interface DeleteSubjectGroupRequest {
+  sub: string;
+  groupId: number;
+}
+
+export interface ListGroupsRequest {
+  initiative: Initiative;
+}
+
+export interface GetPeachSummaryRequest {
+  data: PermitTracking[];
+}
+
+export interface GetPidsRequest {
+  projectId: string;
+}
+
+export interface GetRoadmapNoteRequest {
+  activityId: string;
+}
+export interface SendRoadmapRequest {
+  activityId: string;
+  selectedFileIds: string[];
+  emailData: Email;
+}
+
+export interface ListIdirUsersRequest {
   firstName?: string;
-  fullName?: string;
   lastName?: string;
-  active?: boolean;
-  group?: GroupName[];
-  includeUserGroups?: boolean;
-  initiative?: Initiative[];
+  email?: string;
 }

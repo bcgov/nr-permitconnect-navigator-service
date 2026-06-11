@@ -9,7 +9,7 @@ import i18n from '@/i18n';
 import { contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
-import { mockAxiosResponse, t } from '../../../helpers';
+import { t } from '../../../helpers';
 
 import type * as VeeValidate from 'vee-validate';
 import type { Contact, ActivityContact } from '@/types';
@@ -100,7 +100,7 @@ describe('ProjectTeamAddModal.vue', () => {
     });
 
     it('triggers numeric search via Enter key', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
 
       const searchInput = wrapper.find('input');
@@ -113,7 +113,7 @@ describe('ProjectTeamAddModal.vue', () => {
     });
 
     it('uses email search and covers specific external zone labels via button click', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.EXTERNAL));
 
       const searchInput = wrapper.find('input');
@@ -146,9 +146,7 @@ describe('ProjectTeamAddModal.vue', () => {
       const contactWithUser = { ...mockContact, userId: 'user-123' };
       const contactWithoutUser = { ...mockContact, contactId: 'contact2', userId: undefined };
 
-      vi.mocked(contactService.matchContacts).mockResolvedValue(
-        mockAxiosResponse([contactWithUser, contactWithoutUser])
-      );
+      vi.mocked(contactService.matchContacts).mockResolvedValue([contactWithUser, contactWithoutUser]);
 
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
 
@@ -164,7 +162,7 @@ describe('ProjectTeamAddModal.vue', () => {
 
   describe('Adding & Removing Users', () => {
     it('checks manualEntry addition via Form submit', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
 
       const searchInput = wrapper.find('input');
@@ -197,7 +195,7 @@ describe('ProjectTeamAddModal.vue', () => {
       expect(wrapper.html()).toContain(t('projectTeamAddModal.contactAlreadyExists'));
     });
     it('disables "Add User" button if user is already in the selected list', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([mockContact]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([mockContact]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings());
 
       const input = wrapper.find('input');
@@ -272,7 +270,7 @@ describe('ProjectTeamAddModal.vue', () => {
     });
 
     it('checks optionDisabled edge cases dynamically via the Select component prop', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
 
       const searchInput = wrapper.find('input');
@@ -354,7 +352,7 @@ describe('ProjectTeamAddModal.vue', () => {
     });
 
     it('applies the correct column width classes based on the zone', async () => {
-      vi.mocked(contactService.matchContacts).mockResolvedValue(mockAxiosResponse([mockContact]));
+      vi.mocked(contactService.matchContacts).mockResolvedValue([mockContact]);
       const wrapperInt = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
 
       const inputInt = wrapperInt.find('input');

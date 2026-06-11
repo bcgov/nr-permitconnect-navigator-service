@@ -146,7 +146,7 @@ onBeforeMount(async () => {
       enquiryService.listRelatedEnquiries({ activityId: project.activityId }),
       activityContactService.listActivityContacts({ activityId: project.activityId })
     ]);
-    const roadMapNote = (await roadmapService.getRoadmapNote(project.activityId)).data;
+    const roadMapNote = await roadmapService.getRoadmapNote({ activityId: project.activityId });
 
     project.relatedEnquiries = relatedEnquiries.map((x: Enquiry) => x.activityId).join(', ');
     documents.forEach((d: Document) => {
@@ -178,15 +178,13 @@ onBeforeMount(async () => {
       .filter((x) => x.noteHistoryId && x.createdBy);
 
     if (noteHistoryCreatedByUsers.length) {
-      const noteHistoryUsers = (
-        await userService.searchUsers({
-          userId: noteHistoryCreatedByUsers.map((x) => x.createdBy!)
-        })
-      ).data;
+      const noteHistoryUsers = await userService.listUsers({
+        userId: noteHistoryCreatedByUsers.map((x) => x.createdBy!)
+      });
 
       noteHistoryCreatedByFullnames.value = noteHistoryCreatedByUsers.map((x) => ({
         noteHistoryId: x.noteHistoryId as string,
-        createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy).fullName
+        createdByFullname: noteHistoryUsers.find((user: User) => user.userId === x.createdBy)?.fullName ?? ''
       }));
     }
 

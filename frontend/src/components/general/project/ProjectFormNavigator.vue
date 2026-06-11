@@ -58,8 +58,7 @@ const showCancelMessage: Ref<boolean> = ref(false);
 // Actions
 async function initializeFormValues(project: GeneralProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
-  if (project.assignedUserId)
-    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
+  if (project.assignedUserId) assigneeOptions = await userService.listUsers({ userId: [project.assignedUserId] });
 
   return {
     contact: {
@@ -270,7 +269,7 @@ watch(getPrimaryActivityContact, (newContact, oldContact) => {
 onBeforeMount(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
-  locationPidsAuto.value = (await mapService.getPIDs(project.generalProjectId)).data;
+  locationPidsAuto.value = await mapService.getPids({ projectId: project.generalProjectId });
 
   // Default form values
   initialFormValues.value = await initializeFormValues(project);

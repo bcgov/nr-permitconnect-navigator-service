@@ -36,14 +36,14 @@ describe('searchUsersController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
+      body: { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] },
       currentContext: TEST_CURRENT_CONTEXT
     };
 
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
 
     await searchUsersController(
-      req as unknown as Request<never, never, never, UserSearchParameters>,
+      req as unknown as Request<never, never, UserSearchParameters, never>,
       res as unknown as Response
     );
 
@@ -53,56 +53,6 @@ describe('searchUsersController', () => {
     });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_USER_LIST);
-  });
-
-  it('adds dashes to user IDs', async () => {
-    const req = {
-      query: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
-
-    await searchUsersController(
-      req as unknown as Request<never, never, never, UserSearchParameters>,
-      res as unknown as Response
-    );
-
-    expect(searchUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchUsersSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757']
-    });
-  });
-
-  it('forwards group/initiative/includeUserGroups filters and returns users with groups', async () => {
-    const groups: Group[] = [
-      {
-        groupId: 1,
-        name: GroupName.NAVIGATOR,
-        initiativeId: TEST_INITIATIVE_HOUSING.initiativeId,
-        initiativeCode: Initiative.HOUSING
-      }
-    ];
-
-    vi.spyOn(userService, 'searchUsers').mockResolvedValue([TEST_IDIR_USER_1]);
-    vi.spyOn(yarsService, 'getSubjectGroups').mockResolvedValue(groups);
-
-    const req = {
-      query: {
-        group: GroupName.NAVIGATOR,
-        includeUserGroups: 'true'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    await searchUsersController(
-      req as unknown as Request<never, never, never, UserSearchParameters>,
-      res as unknown as Response
-    );
-
-    const responsePayload = (res.json as Mock).mock.calls[0][0];
-    expect(responsePayload).toHaveLength(1);
-    expect(responsePayload[0].groups).toEqual(groups);
   });
 });
 

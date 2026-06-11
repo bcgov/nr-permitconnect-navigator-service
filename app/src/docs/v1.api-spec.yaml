@@ -978,34 +978,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/permit/note:
-    post:
-      summary: Create a permit note
-      description: Creates a new permit note for a specified permit.
-      operationId: createElectrificationPermitNote
-      tags:
-        - Electrification Permit Note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-PermitNote'
-      responses:
-        '201':
-          description: Permit note created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-PermitNote'
-        '401':
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
-        default:
-          $ref: '#/components/responses/Error'
   /electrification/project:
     get:
       summary: Get a list of electrification projects
@@ -1913,34 +1885,6 @@ paths:
           $ref: "#/components/responses/Unauthorized"
         '403':
           $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
-  /general/permit/note:
-    post:
-      summary: Create a permit note
-      description: Creates a new permit note for a specified permit.
-      operationId: createGeneralPermitNote
-      tags:
-        - General Permit Note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-PermitNote'
-      responses:
-        '201':
-          description: Permit note created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-PermitNote'
-        '401':
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /general/project:
@@ -2945,34 +2889,6 @@ paths:
           $ref: '#/components/responses/Forbidden'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
-        default:
-          $ref: '#/components/responses/Error'
-  /housing/permit/note:
-    post:
-      summary: Create a permit note
-      description: Creates a new permit note for a specified permit.
-      operationId: createHousingPermitNote
-      tags:
-        - Housing Permit Note
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Request-PermitNote'
-      responses:
-        '201':
-          description: Permit note created successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DB-PermitNote'
-        '401':
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        '422':
-          $ref: '#/components/responses/UnprocessableEntity'
         default:
           $ref: '#/components/responses/Error'
   /housing/project:

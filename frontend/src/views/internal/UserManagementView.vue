@@ -107,12 +107,10 @@ async function onProcessUserAccessRequest() {
     const deniedRevocation =
       userProcessModalAction.value === REQUEST_ACTION.DENY && !selectedUserAccessRequest.value?.accessRequest?.grant;
 
-    const response = await accessRequestService.processUserAccessRequest(
-      selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
-      {
-        approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
-      }
-    );
+    const response = await accessRequestService.processAccessRequest({
+      accessRequestId: selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
+      approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
+    });
 
     if (response) {
       const idx = usersAndAccessRequests.value.findIndex(
@@ -179,13 +177,13 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
 
         if (admin) {
           // Delete subject group
-          response = await yarsService.deleteSubjectGroup(
-            userAccessRequest.user.sub,
-            userAccessRequest.user.groups[0]!.groupId
-          );
+          response = await yarsService.deleteSubjectGroup({
+            sub: userAccessRequest.user.sub,
+            groupId: userAccessRequest.user.groups[0]!.groupId
+          });
         } else {
           // Create user access request
-          response = await accessRequestService.createUserAccessRequest({
+          response = await accessRequestService.createAccessRequest({
             user: omittedUser,
             accessRequest: {
               grant: false,
@@ -193,19 +191,19 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
             }
           });
         }
-        // Remove user from table and/or change status value
-        if (response) {
-          const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
-          if (admin) {
-            usersAndAccessRequests.value.splice(idx, 1);
-          } else {
-            usersAndAccessRequests.value[idx]!.accessRequest = response.data;
-            usersAndAccessRequests.value[idx]!.user.status = PENDING_STATUSES.PENDING_REVOCATION;
-          }
+        const idx = usersAndAccessRequests.value.findIndex((x) => x.user?.userId === userAccessRequest.user.userId);
 
-          toast.success(successMessage);
+        if (idx < 0) throw new Error('User not found in table');
+
+        if (admin) {
+          usersAndAccessRequests.value.splice(idx, 1);
+        } else if (response) {
+          usersAndAccessRequests.value[idx].accessRequest = response;
+          usersAndAccessRequests.value[idx].user.status = PENDING_STATUSES.PENDING_REVOCATION;
         }
+
+        toast.success(successMessage);
       } catch (error) {
         toast.error(`${t('views.i.userManagementView.revokeError')}: ${error}`);
       }
@@ -228,7 +226,7 @@ async function onUserGroupChange(group: Group) {
         'deletedAt',
         'deletedBy'
       ]);
-      const response = await accessRequestService.createUserAccessRequest({
+      const response = await accessRequestService.createAccessRequest({
         user: omittedUser,
         accessRequest: {
           userId: user.userId,
@@ -285,9 +283,10 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       }
     };
 
-    const response = (await accessRequestService.createUserAccessRequest({ ...userAccessRequest, user: omittedUser }))
-      .data;
-
+    const response = await accessRequestService.createAccessRequest({
+      accessRequest: { ...userAccessRequest.accessRequest },
+      user: omittedUser
+    });
     // Update main data table
     if (response.status !== AccessRequestStatus.APPROVED) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;
@@ -326,16 +325,14 @@ onBeforeMount(async () => {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
-    const users: User[] = (
-      await userService.searchUsers({
-        active: true,
-        idp: [idpCfg.idp],
-        includeUserGroups: true,
-        group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
-        initiative: [useAppStore().getInitiative]
-      })
-    ).data;
-    const accessRequests: AccessRequest[] = (await accessRequestService.getAccessRequests()).data;
+    const users: User[] = await userService.listUsers({
+      active: true,
+      idp: [idpCfg.idp],
+      includeUserGroups: true,
+      group: MANAGED_GROUP_NAME_LIST.map((x) => x.id),
+      initiative: [useAppStore().getInitiative]
+    });
+    const accessRequests = await accessRequestService.listAccessRequests();
     const currentAccessRequests = new Map();
 
     // Create map of all pending requests
@@ -360,11 +357,9 @@ onBeforeMount(async () => {
       .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
     // Get requesting users and add their access requests
-    const newRequestingUsers: User[] = (
-      await userService.searchUsers({
-        userId: Array.from(currentAccessRequests.keys())
-      })
-    ).data;
+    const newRequestingUsers: User[] = await userService.listUsers({
+      userId: Array.from(currentAccessRequests.keys())
+    });
 
     newRequestingUsers.forEach((user) => {
       const accessRequest = currentAccessRequests.get(user.userId);
@@ -374,8 +369,9 @@ onBeforeMount(async () => {
       usersAndAccessRequests.value.push(assignUserStatus({ accessRequest, user }));
     });
   } catch (error) {
-    if (isAxiosError(error)) toast.error('Failed to request access', error.response?.data?.message ?? error.message);
-    else if (error instanceof Error) toast.error('Failed to request access', error.message);
+    if (isAxiosError(error))
+      toast.error('Failed to load access requests', error.response?.data?.message ?? error.message);
+    else if (error instanceof Error) toast.error('Failed to load access requests', error.message);
   } finally {
     createUserModalVisible.value = false;
     loading.value = false;

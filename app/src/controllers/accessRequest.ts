@@ -18,10 +18,13 @@ import {
 } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
 import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
+import { getLogger } from '../utils/log.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
 import type { AccessRequest, Group, User } from '../types/index.ts';
+
+const log = getLogger(module.filename);
 
 const isUserAdmin = async (
   tx: PrismaTransactionClient,
@@ -165,7 +168,12 @@ export const createUserAccessRequestController = async (
 
     // Assign new COMS permissions
     if (updateComsPerms) {
-      await assignPermissions(tx, req.currentContext, userResponse.sub);
+      try {
+        await assignPermissions(tx, req.currentContext, userResponse.sub);
+      } catch (e) {
+        if (e instanceof Error) log.warn(e.message);
+        if (e instanceof Problem) log.warn(e.detail);
+      }
     }
 
     return { isAdmin, data };

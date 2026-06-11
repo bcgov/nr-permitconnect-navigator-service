@@ -30,9 +30,9 @@ import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type {
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
+  AtsAddressResource,
+  AtsClientResource,
+  AtsEnquiryResource,
   Contact,
   DeepPartial,
   Enquiry,
@@ -106,9 +106,9 @@ const primaryContact = computed(
 );
 
 // Actions
-async function createATSClientEnquiry() {
+async function createAtsClientEnquiry() {
   try {
-    const address: Partial<ATSAddressResource> = {
+    const address: Partial<AtsAddressResource> = {
       '@type': 'AddressResource',
       primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
       email: formRef.value?.values?.contact.email ?? ''
@@ -122,12 +122,12 @@ async function createATSClientEnquiry() {
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
 
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
+    const submitData: AtsClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createAtsClient(submitData);
     if (response.status === 201) {
       let atsEnquiryId = undefined;
       if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
+        atsEnquiryId = await createAtsEnquiry(response.data.clientId);
       if (atsEnquiryId) toast.success(t('enquiryForm.atsClientEnquiryPushed'));
       else toast.success(t('enquiryForm.atsClientPushed'));
       return { atsClientId: response.data.clientId, atsEnquiryId: atsEnquiryId };
@@ -137,9 +137,9 @@ async function createATSClientEnquiry() {
   }
 }
 
-async function createATSEnquiry(atsClientId?: number) {
+async function createAtsEnquiry(atsClientId?: number) {
   try {
-    const ATSEnquiryData: ATSEnquiryResource = {
+    const ATSEnquiryData: AtsEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: (atsClientId as number) ?? formRef.value?.values.atsInfo.atsClientId,
       contactFirstName: formRef.value?.values.contact.firstName,
@@ -152,7 +152,7 @@ async function createATSEnquiry(atsClientId?: number) {
       notes: formRef.value?.values.enquiryDescription,
       enquiryTypeCodes: [atsEnquiryTypeCode?.value ?? '']
     };
-    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    const response = await atsService.createAtsEnquiry(ATSEnquiryData);
     if (response.status === 201) {
       if (atsCreateType.value === ATSCreateTypes.ENQUIRY) toast.success(t('enquiryForm.atsEnquiryPushed'));
       return response.data.enquiryId;
@@ -177,7 +177,7 @@ async function getRelatedATSClientID(activityId: string) {
 async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
   if (enquiry?.assignedUserId) {
-    assigneeOptions = (await userService.searchUsers({ userId: [enquiry.assignedUserId] })).data;
+    assigneeOptions = await userService.listUsers({ userId: [enquiry.assignedUserId] });
   }
 
   let atsClientId;
@@ -333,7 +333,7 @@ async function setAtsSubmitData(values: FormSchemaType) {
 
   // Create ATS data as necessary
   if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-    const response = await createATSClientEnquiry();
+    const response = await createAtsClientEnquiry();
     updated.atsInfo.atsClientId = response?.atsClientId;
     updated.atsInfo.atsEnquiryId = response?.atsEnquiryId;
     if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
@@ -341,13 +341,13 @@ async function setAtsSubmitData(values: FormSchemaType) {
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    updated.atsInfo.atsEnquiryId = await createATSEnquiry();
+    updated.atsInfo.atsEnquiryId = await createAtsEnquiry();
     if (updated.atsInfo.atsEnquiryId) {
       updated.addedToAts = true;
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-    const response = await createATSClientEnquiry();
+    const response = await createAtsClientEnquiry();
     updated.atsInfo.atsClientId = response?.atsClientId;
     if (updated.atsInfo.atsEnquiryId && updated.atsInfo.atsClientId) {
       updated.addedToAts = true;
@@ -379,7 +379,7 @@ function setBasicInfo(contact?: Contact) {
 
 onBeforeMount(async () => {
   if (!projectService?.value) throw new Error('No service');
-  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.getActivityIds();
+  projectActivityIds.value = filteredProjectActivityIds.value = await projectService.value.listActivityIds();
 
   initialFormValues.value = await initializeFormValues();
 });

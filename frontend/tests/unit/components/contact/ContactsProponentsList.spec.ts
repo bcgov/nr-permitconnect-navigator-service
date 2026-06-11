@@ -10,7 +10,6 @@ import { contactService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { contactRouteNameKey } from '@/utils/keys';
 
-import type { AxiosResponse, AxiosRequestHeaders } from 'axios';
 import type { Contact } from '@/types';
 
 const CONTACT_DATA = {
@@ -39,17 +38,9 @@ vi.mock('vue-router', () => ({
   useRouter: vi.fn(() => ({ replace: vi.fn() }))
 }));
 
-vi.spyOn(contactService, 'getContact').mockResolvedValue({
-  data: CONTACT_DATA,
-  status: 200,
-  statusText: 'OK',
-  headers: {},
-  config: {
-    headers: {} as AxiosRequestHeaders
-  }
-});
+vi.spyOn(contactService, 'getContact').mockResolvedValue(CONTACT_DATA);
 
-vi.spyOn(contactService, 'deleteContact').mockResolvedValue({ status: 204 } as AxiosResponse);
+vi.spyOn(contactService, 'deleteContact').mockResolvedValue(undefined);
 
 const testContacts: Contact[] = [
   {

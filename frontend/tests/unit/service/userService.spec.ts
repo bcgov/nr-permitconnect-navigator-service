@@ -1,75 +1,71 @@
-import { userService } from '@/services';
 import { appAxios } from '@/services/interceptors';
+import { listUsers, userService } from '@/services/userService';
 
-import type { AxiosInstance, AxiosResponse } from 'axios';
-import type { UserSearchParameters } from '@/types';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-const getSpy = vi.fn();
+describe('user service', () => {
+  const mockPost = vi.fn();
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy
-} as unknown as AxiosInstance);
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('userService test', () => {
-  it('searches for user with valid object with all values', async () => {
-    const testSearchParam: UserSearchParameters = {
-      userId: ['testUserId1', 'testUserId2'],
-      idp: ['idp1', 'idp2'],
-      sub: 'testSub',
-      email: 'testEmail@test.com',
-      firstName: 'testFirst',
-      fullName: 'testFull',
-      lastName: 'testLast',
-      active: true
-    };
-    await userService.searchUsers(testSearchParam);
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('user', { params: testSearchParam });
+    vi.mocked(appAxios).mockReturnValue({
+      post: mockPost
+    } as never);
   });
 
-  it('filters out duplicate userIds', async () => {
-    const searchParams: UserSearchParameters = {
-      userId: ['testUserId1', 'testUserId2', 'duplicateId', 'duplicateId', 'testUserId2']
-    };
-    const expectedCall: UserSearchParameters = {
-      userId: ['testUserId1', 'testUserId2', 'duplicateId']
-    };
-    await userService.searchUsers(searchParams);
+  describe('listUsers', () => {
+    it('posts search criteria and returns users', async () => {
+      const filters = {
+        userId: ['user-1']
+      };
 
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
+      const users = [
+        {
+          userId: 'user-1',
+          firstName: 'John'
+        },
+        {
+          userId: 'user-2',
+          firstName: 'Jane'
+        }
+      ];
+
+      mockPost.mockResolvedValue({
+        data: users
+      });
+
+      const result = await listUsers(filters as never);
+
+      expect(mockPost).toHaveBeenCalledWith('user', filters);
+      expect(result).toEqual(users);
+    });
+
+    it('supports an empty request', async () => {
+      mockPost.mockResolvedValue({
+        data: []
+      });
+
+      const result = await listUsers({} as never);
+
+      expect(mockPost).toHaveBeenCalledWith('user', {});
+      expect(result).toEqual([]);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('search failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(listUsers({} as never)).rejects.toThrow(error);
+    });
   });
 
-  it('does not call with userId in params if userId array is empty', async () => {
-    const searchParams: UserSearchParameters = {
-      userId: [],
-      active: true
-    };
-    const expectedCall: UserSearchParameters = {
-      active: true
-    };
-    await userService.searchUsers(searchParams);
-
-    expect(getSpy).toHaveBeenCalledTimes(1);
-    expect(getSpy).toHaveBeenCalledWith('user', { params: expectedCall });
-  });
-
-  it('returns empty data if no params', async () => {
-    const searchParams: UserSearchParameters = {};
-    const result = await userService.searchUsers(searchParams);
-    expect(getSpy).not.toHaveBeenCalled();
-    expect(result).toMatchObject({ data: [] } as AxiosResponse);
+  it('exports all service functions', () => {
+    expect(userService).toEqual({
+      listUsers
+    });
   });
 });

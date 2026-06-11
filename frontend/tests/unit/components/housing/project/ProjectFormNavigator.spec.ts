@@ -23,22 +23,22 @@ import { updateLiveNameKey } from '@/utils/keys';
 import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
 import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { HousingProject, IdirAttribute, BasicBceidAttribute, BusinessBceidAttribute, Group } from '@/types';
+import type { HousingProject, Group, User, AtsClientResource, AtsEnquiryResource } from '@/types';
 import type { VueWrapper } from '@vue/test-utils';
 
 vi.mock('@/services', () => ({
   atsService: {
-    createATSClient: vi.fn(),
-    createATSEnquiry: vi.fn()
+    createAtsClient: vi.fn(),
+    createAtsEnquiry: vi.fn()
   },
   externalApiService: {
     searchOrgBook: vi.fn()
   },
   mapService: {
-    getPIDs: vi.fn()
+    getPids: vi.fn()
   },
   userService: {
-    searchUsers: vi.fn()
+    listUsers: vi.fn()
   },
   housingProjectService: {
     patchProject: vi.fn()
@@ -46,22 +46,6 @@ vi.mock('@/services', () => ({
 }));
 
 const currentDate = new Date().toISOString();
-
-const exampleIdirAttribute: IdirAttribute = {
-  idirUsername: 'idirUser',
-  idirUserGuid: 'idir-guid-123'
-};
-
-const exampleBasicBceidAttribute: BasicBceidAttribute = {
-  bceidUsername: 'bceidUser',
-  bceidUserGuid: 'bceid-guid-123'
-};
-
-const exampleBusinessBceidAttribute: BusinessBceidAttribute = {
-  bceidBusinessGuid: 'business-guid-123',
-  bceidBusinessName: 'Example Business',
-  ...exampleBasicBceidAttribute
-};
 
 const testUser = {
   active: true,
@@ -75,9 +59,6 @@ const testUser = {
   userId: 'user123',
   sub: 'sub-123',
   elevatedRights: true,
-  IdirAttributes: exampleIdirAttribute,
-  bceidAttributes: exampleBasicBceidAttribute,
-  BusinessBceidAttribute: exampleBusinessBceidAttribute,
   bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
@@ -262,8 +243,8 @@ const wrapperSettings = (testProjectProp = testProject, editableProp = true) => 
 describe('ProjectForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }]));
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(userService.listUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('renders the component with the provided props', async () => {
@@ -279,8 +260,8 @@ describe('ProjectForm.vue', () => {
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
-    expect(userService.searchUsers).toHaveBeenCalledTimes(1);
-    expect(userService.searchUsers).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
+    expect(userService.listUsers).toHaveBeenCalledTimes(1);
+    expect(userService.listUsers).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
   });
 
   it('gets PIDs onMount', async () => {
@@ -288,8 +269,8 @@ describe('ProjectForm.vue', () => {
     await flushPromises();
 
     expect(wrapper.isVisible()).toBeTruthy();
-    expect(mapService.getPIDs).toHaveBeenCalledTimes(1);
-    expect(mapService.getPIDs).toHaveBeenCalledWith(testProject.housingProjectId);
+    expect(mapService.getPids).toHaveBeenCalledTimes(1);
+    expect(mapService.getPids).toHaveBeenCalledWith({ projectId: testProject.housingProjectId });
   });
 });
 
@@ -310,12 +291,16 @@ describe('Form Submission & ATS Integration', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(housingProjectService.patchProject).mockResolvedValue(testProject);
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('handles CLIENT_ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(
+      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
+    );
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
+      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
@@ -330,8 +315,8 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).toHaveBeenCalled();
-    expect(atsService.createATSEnquiry).toHaveBeenCalled();
+    expect(atsService.createAtsClient).toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.housingProjectId,
@@ -343,7 +328,9 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({ enquiryId: 222 }, 201));
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
+      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
@@ -358,7 +345,7 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSEnquiry).toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.housingProjectId,
@@ -370,7 +357,9 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('handles CLIENT creation path upon form submit', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({ clientId: 111 }, 201));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(
+      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
+    );
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
@@ -384,7 +373,7 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).toHaveBeenCalled();
+    expect(atsService.createAtsClient).toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalledWith(
       expect.objectContaining({
         projectId: testProject.housingProjectId,
@@ -396,8 +385,8 @@ describe('Form Submission & ATS Integration', () => {
   });
 
   it('bypasses addedToAts in CLIENT_ENQUIRY path when IDs fail to generate', async () => {
-    vi.mocked(atsService.createATSClient).mockResolvedValue(mockAxiosResponse({}));
-    vi.mocked(atsService.createATSEnquiry).mockResolvedValue(mockAxiosResponse({}));
+    vi.mocked(atsService.createAtsClient).mockResolvedValue(mockAxiosResponse({} as AtsClientResource));
+    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(mockAxiosResponse({} as AtsEnquiryResource));
 
     const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
     await flushPromises();
@@ -430,8 +419,8 @@ describe('Form Submission & ATS Integration', () => {
     form.vm.$emit('submit', payload);
     await flushPromises();
 
-    expect(atsService.createATSClient).not.toHaveBeenCalled();
-    expect(atsService.createATSEnquiry).not.toHaveBeenCalled();
+    expect(atsService.createAtsClient).not.toHaveBeenCalled();
+    expect(atsService.createAtsEnquiry).not.toHaveBeenCalled();
     expect(housingProjectService.patchProject).toHaveBeenCalled();
   });
 });
@@ -439,7 +428,7 @@ describe('Form Submission & ATS Integration', () => {
 describe('Watchers', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(mapService.getPIDs).mockResolvedValue(mockAxiosResponse({ pids: ['123456789'] }));
+    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
   });
 
   it('updates form values passed to ContactCardNavForm when primaryContact changes in store', async () => {

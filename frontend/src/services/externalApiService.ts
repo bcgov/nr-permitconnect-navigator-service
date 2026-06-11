@@ -1,34 +1,80 @@
 import { geocoderAxios, orgBookAxios } from './interceptors';
 import { ADDRESS_CODER_QUERY_PARAMS, ORG_BOOK_QUERY_PARAMS } from '@/utils/constants/housing';
 
-import type { AxiosResponse } from 'axios';
-import type { GeocoderAddressResponse } from '@/types';
+import type {
+  GetGeocoderNearestOccupantRequest,
+  GetGeocoderNearestOccupantResponse,
+  SearchGeocoderAddressRequest,
+  SearchGeocoderAddressResponse,
+  SearchOrgBookRequest,
+  SearchOrgBookResponse
+} from '@/types';
 
-export default {
-  /**
-   * @function searchOrgBook
-   * Calls OrgBook API to search for company names
-   * @param {string} nameSearch SearchUsersOptions object containing the data to filter against
-   * @returns {Promise<AxiosResponse>} An axios response or empty array
-   */
-  searchOrgBook(nameSearch: string): Promise<AxiosResponse> {
-    return orgBookAxios().get('/search/autocomplete', { params: { q: nameSearch, ...ORG_BOOK_QUERY_PARAMS } });
-  },
+/**
+ * Get the nearest occupant for a given coordinate pair.
+ * @param req - The coordinate request payload.
+ * @returns A promise resolving to the nearest occupant data.
+ */
+export async function getGeocoderNearestOccupant(
+  req: GetGeocoderNearestOccupantRequest
+): Promise<GetGeocoderNearestOccupantResponse> {
+  const { latitude, longitude } = req;
 
-  searchAddressCoder(addressSearch: string): Promise<AxiosResponse<GeocoderAddressResponse>> {
-    return geocoderAxios().get('/addresses.json', {
-      params: {
-        addressString: addressSearch,
-        ...ADDRESS_CODER_QUERY_PARAMS
-      }
-    });
-  },
+  const { data } = await geocoderAxios().get('/occupants/nearest.json', {
+    params: {
+      point: `${longitude},${latitude}`
+    }
+  });
 
-  async getNearestOccupant(longitude: string, lattitude: string) {
-    return geocoderAxios().get('/occupants/nearest.json', {
-      params: {
-        point: `${longitude},${lattitude}`
-      }
-    });
-  }
+  return data;
+}
+
+/**
+ * Search for addresses using the BC Geocoder service.
+ * @param req - The address search request payload.
+ * @returns A promise resolving to the geocoder search results.
+ */
+export async function searchGeocoderAddress(req: SearchGeocoderAddressRequest): Promise<SearchGeocoderAddressResponse> {
+  const { addressSearch } = req;
+
+  const { data } = await geocoderAxios().get<SearchGeocoderAddressResponse>('/addresses.json', {
+    params: {
+      addressString: addressSearch,
+      ...ADDRESS_CODER_QUERY_PARAMS
+    }
+  });
+
+  return data;
+}
+
+/**
+ * Search OrgBook for organizations matching the provided name.
+ * @param req - The search request payload.
+ * @returns A promise resolving to the OrgBook search results.
+ */
+export async function searchOrgBook(req: SearchOrgBookRequest): Promise<SearchOrgBookResponse> {
+  const { query } = req;
+
+  const { data } = await orgBookAxios().get<SearchOrgBookResponse>('/search/autocomplete', {
+    params: {
+      q: query,
+      ...ORG_BOOK_QUERY_PARAMS
+    }
+  });
+
+  return data;
+}
+
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
+export const externalApiService = {
+  getGeocoderNearestOccupant,
+  searchGeocoderAddress,
+  searchOrgBook
 };

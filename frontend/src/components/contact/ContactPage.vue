@@ -60,10 +60,7 @@ function onDelete() {
         if (!contact.value) {
           toast.error(t('contactsProponentsList.deleteContactNotLoaded'));
         } else {
-          const response = await contactService.deleteContact(contact.value.contactId);
-          if (response.status !== 204) {
-            throw new Error();
-          }
+          await contactService.deleteContact({ contactId: contact.value.contactId });
           toast.success(
             t('contactsProponentsList.deleteContactSuccess'),
             `${contact.value?.firstName} ${contact.value?.lastName}
@@ -82,7 +79,7 @@ function onDelete() {
 }
 
 onBeforeMount(async () => {
-  const contactData = (await contactService.getContact(contactId, true)).data;
+  const contactData = await contactService.getContact({ contactId, includeActivities: true });
   const activityIds = contactData.activityContact?.map((ac: ActivityContact) => ac.activityId);
 
   contact.value = contactData;
@@ -104,7 +101,7 @@ onBeforeMount(async () => {
   if (userIds) {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (idpCfg) {
-      const users = (await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] })).data;
+      const users = await userService.listUsers({ userId: userIds, idp: [idpCfg.idp] });
       users.forEach((u: User) => {
         assignedUsers.value[u.userId] = u.fullName;
       });

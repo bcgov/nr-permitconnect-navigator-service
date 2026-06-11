@@ -11,8 +11,7 @@ import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
-import type { Permit, PermitTracking, PermitType } from '@/types';
-import type { AxiosResponse } from 'axios';
+import type { GetPeachSummaryResponse, Permit, PermitTracking, PermitType, User } from '@/types';
 
 // Mock Services
 vi.mock('@/services', () => ({
@@ -23,8 +22,8 @@ vi.mock('@/services', () => ({
   peachService: { getPeachSummary: vi.fn() },
   permitService: { upsertPermit: vi.fn(), deletePermit: vi.fn() },
   permitNoteService: { createPermitNote: vi.fn() },
-  sourceSystemKindService: { getSourceSystemKinds: vi.fn() },
-  userService: { searchUsers: vi.fn() }
+  sourceSystemKindService: { listSourceSystemKinds: vi.fn() },
+  userService: { listUsers: vi.fn() }
 }));
 
 // Mock PrimeVue Composables
@@ -152,12 +151,8 @@ describe('AuthorizationForm.vue', () => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any);
 
-    vi.mocked(sourceSystemKindService.getSourceSystemKinds).mockResolvedValue({
-      data: testSourceSystemKinds
-    } as AxiosResponse);
-    vi.mocked(userService.searchUsers).mockResolvedValue({
-      data: [{ firstName: 'John', lastName: 'Doe' }]
-    } as AxiosResponse);
+    vi.mocked(sourceSystemKindService.listSourceSystemKinds).mockResolvedValue(testSourceSystemKinds);
+    vi.mocked(userService.listUsers).mockResolvedValue([{ firstName: 'John', lastName: 'Doe' }] as User[]);
   });
 
   describe('Initialization and Rendering', () => {
@@ -165,7 +160,7 @@ describe('AuthorizationForm.vue', () => {
       const wrapper = mount(AuthorizationForm, wrapperSettings());
       await flushPromises();
 
-      expect(sourceSystemKindService.getSourceSystemKinds).toHaveBeenCalledTimes(1);
+      expect(sourceSystemKindService.listSourceSystemKinds).toHaveBeenCalledTimes(1);
       expect(wrapper.html()).toContain('authorization.authorizationForm.addAuthorization');
     });
 
@@ -176,7 +171,7 @@ describe('AuthorizationForm.vue', () => {
       );
       await flushPromises();
 
-      expect(userService.searchUsers).toHaveBeenCalledWith({ userId: ['user-1'] });
+      expect(userService.listUsers).toHaveBeenCalledWith({ userId: ['user-1'] });
       expect(wrapper.html()).toContain('Agency');
       expect(wrapper.html()).toContain('Domain');
       expect(wrapper.html()).toContain('Doe, John');
@@ -210,8 +205,9 @@ describe('AuthorizationForm.vue', () => {
       };
 
       vi.mocked(peachService.getPeachSummary).mockResolvedValue({
-        data: { state: PermitState.ACCEPTED, stage: PermitStage.POST_DECISION }
-      } as AxiosResponse);
+        state: PermitState.ACCEPTED,
+        stage: PermitStage.POST_DECISION
+      } as GetPeachSummaryResponse);
 
       const wrapper = mount(AuthorizationForm, wrapperSettings({ authorization: peachAuth }));
       await flushPromises();

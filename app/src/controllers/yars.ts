@@ -9,10 +9,13 @@ import {
   subjectHasGroupName
 } from '../services/yars.ts';
 import { Initiative } from '../utils/enums/application.ts';
+import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
+
+const log = getLogger(module.filename);
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,
@@ -60,7 +63,12 @@ export const deleteSubjectGroupController = async (
     }
 
     // Assign new COMS permissions
-    await assignPermissions(tx, req.currentContext, req.body.sub);
+    try {
+      await assignPermissions(tx, req.currentContext, req.body.sub);
+    } catch (e) {
+      if (e instanceof Error) log.warn(e.message);
+      if (e instanceof Problem) log.warn(e.detail);
+    }
   });
   res.status(204).end();
 };

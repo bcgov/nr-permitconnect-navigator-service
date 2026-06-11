@@ -1,59 +1,134 @@
 import { appAxios } from '@/services/interceptors';
-import yarsService from '@/services/yarsService';
-import { Initiative } from '@/utils/enums/application';
+import { deleteSubjectGroup, getAuthorizationContext, listGroups, yarsService } from '@/services/yarsService';
 
-import type { AxiosInstance } from 'axios';
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-const testObj = {
-  sub: 'foobar',
-  groupId: 1
-};
+describe('yars service', () => {
+  const mockGet = vi.fn();
+  const mockDelete = vi.fn();
 
-const getSpy = vi.fn();
-const deleteSpy = vi.fn();
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  get: getSpy,
-  delete: deleteSpy
-} as unknown as AxiosInstance);
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('yarsService', () => {
-  describe('getGroups', () => {
-    it('calls with given data', () => {
-      yarsService.getGroups(Initiative.HOUSING);
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('yars/groups', { params: { initiative: Initiative.HOUSING } });
-    });
-  });
-
-  describe('getPermissions', () => {
-    it('calls with given data', () => {
-      yarsService.getPermissions();
-
-      expect(getSpy).toHaveBeenCalledTimes(1);
-      expect(getSpy).toHaveBeenCalledWith('yars/permissions');
-    });
+    vi.mocked(appAxios).mockReturnValue({
+      get: mockGet,
+      delete: mockDelete
+    } as never);
   });
 
   describe('deleteSubjectGroup', () => {
-    it('calls with given data', () => {
-      yarsService.deleteSubjectGroup(testObj.sub, testObj.groupId);
+    it('calls delete with correct payload', async () => {
+      mockDelete.mockResolvedValue({});
 
-      expect(deleteSpy).toHaveBeenCalledTimes(1);
-      expect(deleteSpy).toHaveBeenCalledWith('yars/subject/group', { data: testObj });
+      await deleteSubjectGroup({
+        sub: 'subject-123',
+        groupId: 99
+      } as never);
+
+      expect(mockDelete).toHaveBeenCalledWith('yars/subject/group', {
+        data: {
+          sub: 'subject-123',
+          groupId: 99
+        }
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('delete failed');
+
+      mockDelete.mockRejectedValue(error);
+
+      await expect(
+        deleteSubjectGroup({
+          sub: 'subject-123',
+          groupId: 99
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('getAuthorizationContext', () => {
+    it('returns permissions data', async () => {
+      const response = {
+        canEdit: true,
+        canDelete: false
+      };
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await getAuthorizationContext();
+
+      expect(mockGet).toHaveBeenCalledWith('yars/permissions');
+      expect(result).toEqual(response);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('permission fetch failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(getAuthorizationContext()).rejects.toThrow(error);
+    });
+  });
+
+  describe('listGroups', () => {
+    it('returns groups for initiative', async () => {
+      const response = [
+        { id: 1, name: 'Group A' },
+        { id: 2, name: 'Group B' }
+      ];
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await listGroups({
+        initiative: 'TEST_INITIATIVE'
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('yars/groups', {
+        params: {
+          initiative: 'TEST_INITIATIVE'
+        }
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('returns empty array when no groups exist', async () => {
+      mockGet.mockResolvedValue({
+        data: []
+      });
+
+      const result = await listGroups({
+        initiative: 'TEST_INITIATIVE'
+      } as never);
+
+      expect(result).toEqual([]);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('network error');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listGroups({
+          initiative: 'TEST_INITIATIVE'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(yarsService).toEqual({
+      deleteSubjectGroup,
+      getAuthorizationContext,
+      listGroups
     });
   });
 });

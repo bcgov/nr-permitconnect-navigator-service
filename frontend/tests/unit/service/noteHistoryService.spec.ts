@@ -81,13 +81,11 @@ describe('noteHistory service', () => {
         data: response
       });
 
-      const result = await deleteNoteHistory({
+      await deleteNoteHistory({
         noteHistoryId: 'note-history-1'
       });
 
       expect(mockDelete).toHaveBeenCalledWith('housing/note/note-history-1');
-
-      expect(result).toEqual(response);
     });
 
     it('propagates errors', async () => {

@@ -15,7 +15,6 @@ import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { AxiosResponse } from 'axios';
 import type { Contact, PermitType } from '@/types';
 
 vi.mock('vue-router', () => ({
@@ -90,7 +89,7 @@ const sampleContact: Contact = {
   updatedBy: 'testUpdatedAt',
   updatedAt: new Date().toISOString()
 };
-searchContactsSpy.mockResolvedValue({ data: [sampleContact] } as AxiosResponse);
+searchContactsSpy.mockResolvedValue([sampleContact]);
 const wrapperSettings = () => ({
   global: {
     plugins: [

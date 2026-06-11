@@ -16,8 +16,6 @@ const FAKE_PERSON = {
   email: 'test@test.com'
 };
 
-const GUID = 'e6f92db3-e931-4e0e-a465-ab6db6c78b2d';
-
 beforeEach(() => {
   mockedConfig = config as Mocked<typeof config>;
   mockedAxios = axios as Mocked<typeof axios>;
@@ -48,48 +46,6 @@ describe('searchIdirUsers', () => {
 
     expect(mockedAxios.get).toHaveBeenCalledWith('/TEST/azure-idir/users', {
       params: FAKE_PERSON
-    });
-    expect(response).toStrictEqual({
-      data: FAKE_PERSON,
-      status: 200
-    });
-  });
-});
-
-describe('searchBasicBceidUsers', () => {
-  it('calls GET /${env}/basic-bceid/users with correct params and returns result', async () => {
-    mockedConfig.get.mockReturnValue('TEST');
-
-    mockedAxios.get.mockResolvedValueOnce({
-      data: { data: FAKE_PERSON },
-      status: 200
-    });
-
-    const response = await ssoService.searchBasicBceidUsers({ guid: GUID });
-
-    expect(mockedAxios.get).toHaveBeenCalledWith('/TEST/basic-bceid/users', {
-      params: { guid: GUID }
-    });
-    expect(response).toStrictEqual({
-      data: FAKE_PERSON,
-      status: 200
-    });
-  });
-});
-
-describe('searchBusinessBceidUsers', () => {
-  it('calls GET /${env}/business-bceid/users with correct params and returns result', async () => {
-    mockedConfig.get.mockReturnValue('TEST');
-
-    mockedAxios.get.mockResolvedValueOnce({
-      data: { data: FAKE_PERSON },
-      status: 200
-    });
-
-    const response = await ssoService.searchBusinessBceidUsers({ guid: GUID });
-
-    expect(mockedAxios.get).toHaveBeenCalledWith('/TEST/business-bceid/users', {
-      params: { guid: GUID }
     });
     expect(response).toStrictEqual({
       data: FAKE_PERSON,

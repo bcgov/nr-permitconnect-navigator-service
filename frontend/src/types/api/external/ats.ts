@@ -1,4 +1,4 @@
-import type { MaybeUndefined, Nullable } from '../../util';
+import type { Nullable } from '../../util';
 
 export interface RelLink {
   '@type': string;
@@ -7,31 +7,41 @@ export interface RelLink {
   method: string;
 }
 
-export interface ATSAddressResource {
+export interface AtsAddressResource {
   '@type': string;
   links: RelLink[];
   addressId: number;
-  addressLine1: string;
+  addressLine1: Nullable<string>;
   addressLine2: Nullable<string>;
-  city: string;
-  provinceCode: string;
-  countryCode: string;
+  city: Nullable<string>;
+  provinceCode: Nullable<string>;
+  countryCode: Nullable<string>;
   postalCode: Nullable<string>;
   primaryPhone: Nullable<string>;
   secondaryPhone: Nullable<string>;
   fax: Nullable<string>;
   email: Nullable<string>;
   createdBy: Nullable<string>;
-  createdDateTime: number | null;
+  createdDateTime: Nullable<number>;
   updatedBy: Nullable<string>;
   updatedDateTime: number | null;
 }
 
-export interface ATSClientResource {
-  '@type': MaybeUndefined<string>;
-  links: RelLink[] | undefined;
-  clientId: MaybeUndefined<number>;
-  address: ATSAddressResource;
+export interface AtsClientsResource {
+  '@type': string;
+  links: RelLink[];
+  pageNumber: number;
+  pageRowCount: number;
+  totalRowCount: number;
+  totalPageCount: number;
+  clients: AtsClientResource[];
+}
+
+export interface AtsClientResource {
+  '@type': string;
+  links: RelLink[];
+  clientId: number;
+  address: AtsAddressResource;
   businessOrgCode: Nullable<string>;
   firstName: string;
   formattedAddress: string;
@@ -39,16 +49,17 @@ export interface ATSClientResource {
   companyName: Nullable<string>;
   organizationNumber: Nullable<string>;
   confirmedIndicator: boolean;
-  createdBy: MaybeUndefined<string>;
-  createdDateTime: MaybeUndefined<number>;
-  updatedBy: MaybeUndefined<string>;
-  updatedDateTime: MaybeUndefined<number>;
-  regionName: MaybeUndefined<string>;
-  optOutOfBCStatSurveyInd: MaybeUndefined<string>;
+  createdBy: Nullable<string>;
+  createdDateTime: Nullable<number>;
+  updatedBy: Nullable<string>;
+  updatedDateTime: Nullable<number>;
+  regionName: Nullable<string>;
+  optOutOfBCStatSurveyInd: Nullable<string>;
 }
 
-export interface ATSEnquiryResource {
+export interface AtsEnquiryResource {
   '@type': string;
+  enquiryId?: number;
   clientId: number;
   contactFirstName: string;
   notes: string;
@@ -62,7 +73,7 @@ export interface ATSEnquiryResource {
   enquiryFileNumbers: string[];
 }
 
-export interface ATSUserSearchParameters {
+export interface SearchAtsUsersRequest {
   clientId?: string | number | null;
   email?: string;
   firstName?: string;

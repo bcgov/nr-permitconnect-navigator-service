@@ -1,4 +1,12 @@
-import type { AccessRequest, IdentityProvider, Nullable, User } from '@/types';
+import type { AccessRequest, IdentityProvider, Nullable, PartialFields, User } from '@/types';
+import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
+
+export interface Code {
+  code: string;
+  display: string;
+  definition?: string;
+  active: boolean;
+}
 
 export interface Config {
   // Additional data passed from backend
@@ -40,6 +48,11 @@ export interface InputEvent extends Event {
   target: HTMLInputElement;
 }
 
+export interface DateTimeStrings {
+  date: Nullable<string>;
+  time: Nullable<string>;
+}
+
 export interface Pagination {
   rows?: number;
   order?: number;
@@ -47,33 +60,14 @@ export interface Pagination {
   page?: number;
 }
 
+export interface Permission {
+  group: GroupName;
+  initiative: Initiative;
+  resource: Resource;
+  action: Action;
+}
+
 export interface UserAccessRequest {
-  accessRequest?: AccessRequest;
+  accessRequest?: PartialFields<AccessRequest, 'accessRequestId'>;
   user: User;
-}
-
-export interface UserAccessRequestArgs {
-  user: {
-    userId: string;
-    idp: string;
-    sub: string;
-    email: string;
-    firstName: string;
-    fullName: string;
-    lastName: string;
-    active: boolean;
-  };
-  accessRequest: {
-    accessRequestId?: string;
-    userId?: string;
-    grant: boolean;
-    groupId?: number;
-    status?: string;
-    update?: boolean;
-  };
-}
-
-export interface DateTimeStrings {
-  date: Nullable<string>;
-  time: Nullable<string>;
 }

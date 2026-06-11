@@ -11,12 +11,11 @@ import { StorageKey } from '@/utils/enums/application';
 import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
-import type { AxiosResponse } from 'axios';
-import type { Note, NoteHistory } from '@/types';
+import type { Note, NoteHistory, User } from '@/types';
 
 const { t } = useI18n();
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -125,7 +124,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {
@@ -152,7 +151,7 @@ describe('NoteHistoryCard', () => {
         stubs: ['font-awesome-icon']
       }
     });
-    expect(useUserService).not.toHaveBeenCalled();
+    expect(listUsersSpy).not.toHaveBeenCalled();
     expect(wrapper.get('h3').text()).toBe(TEST_NOTE_HISTORY.title);
   });
 

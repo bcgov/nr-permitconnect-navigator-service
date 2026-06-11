@@ -94,7 +94,7 @@ async function initMap() {
           // @ts-expect-error - insufficient type definitions
           let longitude = geo.toGeoJSON().geometry.coordinates[0];
 
-          getNearestOccupant(longitude, latitude);
+          getNearestOccupant(latitude, longitude);
         } else {
           geoJson.value = geo.toGeoJSON();
 
@@ -124,10 +124,10 @@ function removeAllMarkers() {
 }
 
 // show parcel data from Geocoder
-async function getNearestOccupant(longitude: string, latitude: string) {
-  const result = await externalApiService.getNearestOccupant(longitude, latitude);
-  const address = result.data.properties.occupantAliasAddress;
-  if (!address || address.length == 0) {
+async function getNearestOccupant(latitude: string, longitude: string) {
+  const result = await externalApiService.getGeocoderNearestOccupant({ latitude, longitude });
+  const address = result.properties.occupantAliasAddress;
+  if (!address || address.length === 0) {
     toast.warn('No address found');
   }
   emit('map:pinUpdated', {

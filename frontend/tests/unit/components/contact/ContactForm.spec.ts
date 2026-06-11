@@ -10,7 +10,6 @@ import { contactService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
 
-import type { AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import type { Contact } from '@/types';
 
 const mockToastSuccess = vi.fn();
@@ -22,7 +21,7 @@ vi.mock('@/lib/primevue/useToast', () => ({
   })
 }));
 
-const updateContactSpy = vi.spyOn(contactService, 'updateContact');
+const putContactSpy = vi.spyOn(contactService, 'putContact');
 
 const testContact: Contact = {
   contactId: 'contact123',
@@ -81,15 +80,7 @@ describe('ContactForm.vue', () => {
 
   describe('onSubmit', () => {
     it('handles successful form submission', async () => {
-      const successResponse: AxiosResponse<Contact> = {
-        data: testContact,
-        status: 200,
-        statusText: 'OK',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig
-      };
-
-      updateContactSpy.mockResolvedValueOnce(successResponse);
+      putContactSpy.mockResolvedValueOnce(testContact);
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -97,40 +88,32 @@ describe('ContactForm.vue', () => {
       vm.formRef = { resetForm: vi.fn(), values: {} };
       await vm.onSubmit(testContact);
 
-      expect(updateContactSpy).toHaveBeenCalled();
+      expect(putContactSpy).toHaveBeenCalled();
       expect(mockToastSuccess).toHaveBeenCalledWith(t('contactForm.formSaved'));
       expect(wrapper.emitted('updateContact')?.[0]).toEqual([testContact]);
     });
 
-    it('handles API failure response (status !== 200)', async () => {
-      const errorResponse: AxiosResponse<Contact> = {
-        data: testContact,
-        status: 400,
-        statusText: 'Bad Request',
-        headers: {},
-        config: {} as InternalAxiosRequestConfig
-      };
-
-      updateContactSpy.mockResolvedValueOnce(errorResponse);
+    it('handles API failure response', async () => {
+      putContactSpy.mockRejectedValueOnce(new Error('Bad Request'));
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       await vm.onSubmit(testContact);
 
-      expect(updateContactSpy).toHaveBeenCalled();
-      expect(mockToastError).toHaveBeenCalledWith(t('contactForm.failedToSaveTheForm'));
+      expect(putContactSpy).toHaveBeenCalled();
+      expect(mockToastError).toHaveBeenCalledWith(t('contactForm.failedToSaveTheForm'), 'Error: Bad Request');
     });
 
     it('handles caught exceptions during submission', async () => {
-      updateContactSpy.mockRejectedValueOnce(new Error('Network Failure'));
+      putContactSpy.mockRejectedValueOnce(new Error('Network Failure'));
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       await vm.onSubmit(testContact);
 
-      expect(updateContactSpy).toHaveBeenCalled();
+      expect(putContactSpy).toHaveBeenCalled();
       expect(mockToastError).toHaveBeenCalledWith(t('contactForm.failedToSaveTheForm'), 'Error: Network Failure');
     });
   });

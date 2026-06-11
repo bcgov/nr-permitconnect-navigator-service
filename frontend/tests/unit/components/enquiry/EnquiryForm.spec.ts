@@ -17,15 +17,15 @@ import {
   ProjectRelationship
 } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { mockAxiosResponse, VEE_FORM_STUB } from '../../../helpers';
+import { VEE_FORM_STUB } from '../../../helpers';
 
 import type { Ref } from 'vue';
-import type { Enquiry, HousingProject, Project, ProjectService } from '@/types';
+import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
 
-const searchContactSpy = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
-const getHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'getActivityIds');
-const getElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'getActivityIds');
+const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityIds');
+const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
 const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
 const currentDate = new Date().toISOString();
@@ -108,13 +108,13 @@ const wrapperSettings = (
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue(mockAxiosResponse([{ fullName: 'dummyName' }]));
+    vi.mocked(userService.listUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
       enquiryId: 'enquiry123',
       activityId: 'activity456'
     } as Enquiry);
-    vi.mocked(housingProjectService.getActivityIds).mockResolvedValue(activityIdMockData);
-    vi.mocked(electrificationProjectService.getActivityIds).mockResolvedValue(activityIdMockData);
+    vi.mocked(housingProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
+    vi.mocked(electrificationProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
     vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
   });
 
@@ -163,8 +163,8 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(searchContactSpy).toHaveBeenCalledTimes(1);
-      expect(searchContactSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
+      expect(listUsersSpy).toHaveBeenCalledTimes(1);
+      expect(listUsersSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
     });
 
     it('gets housing activity Ids onMount', async () => {
@@ -173,7 +173,7 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(getHousingActivityIdsSpy).toHaveBeenCalledTimes(1);
+      expect(listHousingActivityIdsSpy).toHaveBeenCalledTimes(1);
     });
 
     it('gets electrification activity Ids onMount', async () => {
@@ -182,7 +182,7 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(getElectrificationActivityIdsSpy).toHaveBeenCalledTimes(1);
+      expect(listElectrificationActivityIdsSpy).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -482,7 +482,7 @@ describe('EnquiryForm.vue', () => {
       const relatedActivitySelect = component.findComponent({ name: 'EditableSelect' });
       expect(relatedActivitySelect.exists()).toBe(true);
       expect(relatedActivitySelect.props('options')).toEqual(activityIdMockData);
-      expect(getHousingActivityIdsSpy).toHaveBeenCalled();
+      expect(listHousingActivityIdsSpy).toHaveBeenCalled();
     });
 
     it('filters related activity options on EditableSelect input', async () => {

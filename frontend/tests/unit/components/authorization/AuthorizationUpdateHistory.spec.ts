@@ -9,9 +9,9 @@ import AuthorizationUpdateHistory from '@/components/authorization/Authorization
 import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 
-import type { AxiosResponse } from 'axios';
+import type { User } from '@/types';
 
-const useUserService = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -62,7 +62,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  useUserService.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {

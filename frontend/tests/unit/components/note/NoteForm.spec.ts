@@ -10,8 +10,7 @@ import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 
-import type { AxiosResponse } from 'axios';
-import type { Note, NoteHistory } from '@/types';
+import type { Note, NoteHistory, User } from '@/types';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -26,7 +25,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
 const TEST_NOTE: Note = {
   noteId: '123',
@@ -101,7 +100,7 @@ afterEach(() => {
 // Currently, modal functionality hidden behind Primevue component Dialog
 describe('NoteForm', () => {
   it('renders', () => {
-    searchUsersSpy.mockResolvedValue({ data: [{ fullName: 'dummyName' }] } as AxiosResponse);
+    listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     const wrapper = shallowMount(NoteForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });

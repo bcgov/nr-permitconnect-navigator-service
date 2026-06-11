@@ -27,9 +27,9 @@ import { createProjectFormNavigatorSchema } from '@/validators/electrification/p
 
 import type { Ref } from 'vue';
 import type {
-  ATSAddressResource,
-  ATSClientResource,
-  ATSEnquiryResource,
+  AtsAddressResource,
+  AtsClientResource,
+  AtsEnquiryResource,
   Contact,
   DeepPartial,
   ElectrificationProject,
@@ -85,8 +85,7 @@ const projectFormNavigatorSchema = computed(() => {
 // Actions
 async function initializeFormValues(project: ElectrificationProject): Promise<DeepPartial<FormSchemaType>> {
   let assigneeOptions: User[] = [];
-  if (project.assignedUserId)
-    assigneeOptions = (await userService.searchUsers({ userId: [project.assignedUserId] })).data;
+  if (project.assignedUserId) assigneeOptions = await userService.listUsers({ userId: [project.assignedUserId] });
 
   return {
     contact: {
@@ -146,11 +145,11 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
   };
 }
 
-async function createATSClientEnquiry(): Promise<
+async function createAtsClientEnquiry(): Promise<
   { atsClientId: number; atsEnquiryId: number | undefined } | undefined
 > {
   try {
-    const address: Partial<ATSAddressResource> = {
+    const address: Partial<AtsAddressResource> = {
       '@type': 'AddressResource',
       primaryPhone: formRef.value?.values.contact.phoneNumber ?? '',
       email: formRef.value?.values?.contact.email ?? ''
@@ -165,12 +164,12 @@ async function createATSClientEnquiry(): Promise<
       optOutOfBCStatSurveyInd: BasicResponse.NO.toUpperCase()
     };
 
-    const submitData: ATSClientResource = setEmptyStringsToNull(data);
-    const response = await atsService.createATSClient(submitData);
+    const submitData: AtsClientResource = setEmptyStringsToNull(data);
+    const response = await atsService.createAtsClient(submitData);
     if (response.status === 201) {
       let atsEnquiryId = undefined;
       if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY)
-        atsEnquiryId = await createATSEnquiry(response.data.clientId);
+        atsEnquiryId = await createAtsEnquiry(response.data.clientId);
 
       if (atsEnquiryId) toast.success(t('i.electrification.projectForm.atsClientEnquiryPushed'));
       else toast.success(t('i.electrification.projectForm.atsClientPushed'));
@@ -181,9 +180,9 @@ async function createATSClientEnquiry(): Promise<
   }
 }
 
-async function createATSEnquiry(atsClientId: number | null | undefined): Promise<number | undefined> {
+async function createAtsEnquiry(atsClientId: number | null | undefined): Promise<number | undefined> {
   try {
-    const ATSEnquiryData: ATSEnquiryResource = {
+    const ATSEnquiryData: AtsEnquiryResource = {
       '@type': 'EnquiryResource',
       clientId: atsClientId as number,
       contactFirstName: formRef.value?.values.contact.firstName,
@@ -196,7 +195,7 @@ async function createATSEnquiry(atsClientId: number | null | undefined): Promise
       notes: formRef.value?.values.companyProjectName.projectName,
       enquiryTypeCodes: [ATS_ENQUIRY_TYPE_CODE]
     };
-    const response = await atsService.createATSEnquiry(ATSEnquiryData);
+    const response = await atsService.createAtsEnquiry(ATSEnquiryData);
     if (response.status === 201) {
       if (atsCreateType.value === ATSCreateTypes.ENQUIRY)
         toast.success(t('i.electrification.projectForm.atsEnquiryPushed'));
@@ -216,7 +215,7 @@ async function handleAtsCreate(formValues: AtsCreateResponse) {
   };
 
   if (atsCreateType.value === ATSCreateTypes.CLIENT_ENQUIRY) {
-    const response = await createATSClientEnquiry();
+    const response = await createAtsClientEnquiry();
     atsCreateResponse.atsClientId = response?.atsClientId;
     atsCreateResponse.atsEnquiryId = response?.atsEnquiryId;
     if (atsCreateResponse.atsEnquiryId && atsCreateResponse.atsClientId) {
@@ -224,13 +223,13 @@ async function handleAtsCreate(formValues: AtsCreateResponse) {
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.ENQUIRY) {
-    atsCreateResponse.atsEnquiryId = await createATSEnquiry(atsCreateResponse.atsClientId);
+    atsCreateResponse.atsEnquiryId = await createAtsEnquiry(atsCreateResponse.atsClientId);
     if (atsCreateResponse.atsEnquiryId) {
       atsCreateResponse.addedToAts = true;
     }
     atsCreateType.value = undefined;
   } else if (atsCreateType.value === ATSCreateTypes.CLIENT) {
-    const response = await createATSClientEnquiry();
+    const response = await createAtsClientEnquiry();
     atsCreateResponse.atsClientId = response?.atsClientId;
     if (atsCreateResponse.atsEnquiryId && atsCreateResponse.atsClientId) {
       atsCreateResponse.addedToAts = true;

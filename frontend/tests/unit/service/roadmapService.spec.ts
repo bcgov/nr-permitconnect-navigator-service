@@ -1,101 +1,220 @@
-import { createPinia, setActivePinia, type StoreGeneric } from 'pinia';
+import { roadmapService, sendRoadmap, getRoadmapNote } from '@/services/roadmapService';
 
-import { roadmapService } from '@/services';
 import { appAxios } from '@/services/interceptors';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 
-import type { AxiosInstance } from 'axios';
-
-// Consants
-const PATH = 'roadmap';
-
-const TEST_ADDRESS_STRING = ['test.1.address@test.bc.ca', 'testAddress2@test.com', 'test3Email@test.ca'];
-const UNFORMATTED_EMAIL_LIST = 'test.1.address@test.bc.ca, testAddress2@test.com,; test3Email@test.ca';
-const BCC_FIELD = 'addressTest2@test.com';
-
-const TEST_DATA = {
-  activityId: '123-123',
-  emailData: {
-    from: 'fromAddress@test.com',
-    to: TEST_ADDRESS_STRING,
-    bcc: [BCC_FIELD],
-    subject: 'Here is your housing project Permit Roadmap',
-    bodyType: 'text',
-    body: 'testText'
-  }
-};
-
-// Mocks
-const putSpy = vi.fn();
-
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn()
-  })
+vi.mock('@/services/interceptors', () => ({
+  appAxios: vi.fn()
 }));
 
-vi.mock('@/services/interceptors');
-vi.mocked(appAxios).mockReturnValue({
-  put: putSpy
-} as unknown as AxiosInstance);
+vi.mock('@/store', () => ({
+  useAppStore: vi.fn()
+}));
 
-// Tests
-beforeEach(() => {
-  setActivePinia(createPinia());
+describe('roadmap service', () => {
+  const mockPut = vi.fn();
+  const mockGet = vi.fn();
 
-  vi.clearAllMocks();
-});
+  beforeEach(() => {
+    vi.clearAllMocks();
 
-describe('roadmapService', () => {
-  let appStore: StoreGeneric;
+    vi.mocked(useAppStore).mockReturnValue({
+      getInitiative: Initiative.HOUSING
+    } as never);
 
-  describe.each([{ initiative: Initiative.ELECTRIFICATION }, { initiative: Initiative.HOUSING }])(
-    '$initiative',
-    ({ initiative }) => {
-      beforeEach(() => {
-        appStore = useAppStore();
-        appStore.setInitiative(initiative);
+    vi.mocked(appAxios).mockReturnValue({
+      put: mockPut,
+      get: mockGet
+    } as never);
+  });
+
+  describe('sendRoadmap', () => {
+    it('sends roadmap email and returns data', async () => {
+      const response = {
+        success: true
+      };
+
+      mockPut.mockResolvedValue({
+        data: response
       });
 
-      it('sends email when called with right params', async () => {
-        await roadmapService.send(TEST_DATA.activityId, ['testSelectedFileIds'], TEST_DATA.emailData);
+      const result = await sendRoadmap({
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1', 'file-2'],
+        emailData: {
+          to: ['test@test.com'],
+          cc: [],
+          bcc: [],
+          subject: 'Roadmap'
+        }
+      } as never);
 
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(`${initiative.toLowerCase()}/${PATH}`, {
-          activityId: TEST_DATA.activityId,
-          selectedFileIds: ['testSelectedFileIds'],
-          emailData: expect.objectContaining({
-            to: ['test.1.address@test.bc.ca', 'testAddress2@test.com', 'test3Email@test.ca'],
-            bcc: [BCC_FIELD]
-          })
-        });
-        expect(putSpy).not.toHaveBeenCalledWith(expect.objectContaining({ cc: expect.anything() }));
+      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1', 'file-2'],
+        emailData: {
+          to: ['test@test.com'],
+          cc: [],
+          bcc: [],
+          subject: 'Roadmap'
+        }
       });
 
-      it('formats improper to/cc/bcc fields', async () => {
-        const modifiedEmail = {
-          ...TEST_DATA.emailData,
-          to: UNFORMATTED_EMAIL_LIST,
-          cc: UNFORMATTED_EMAIL_LIST,
-          bcc: UNFORMATTED_EMAIL_LIST
-        };
+      expect(result).toEqual(response);
+    });
 
-        // @ts-expect-error: testing if email object it not proper type
-        await roadmapService.send(TEST_DATA.activityId, ['testSelectedFileIds'], modifiedEmail);
-
-        expect(putSpy).toHaveBeenCalledTimes(1);
-        expect(putSpy).toHaveBeenCalledWith(
-          `${initiative.toLowerCase()}/${PATH}`,
-          expect.objectContaining({
-            emailData: expect.objectContaining({
-              to: ['test.1.address@test.bc.ca', 'testAddress2@test.com', 'test3Email@test.ca'],
-              cc: ['test.1.address@test.bc.ca', 'testAddress2@test.com', 'test3Email@test.ca'],
-              bcc: ['test.1.address@test.bc.ca', 'testAddress2@test.com', 'test3Email@test.ca']
-            })
-          })
-        );
+    it('normalizes string email fields', async () => {
+      mockPut.mockResolvedValue({
+        data: {}
       });
-    }
-  );
+
+      await sendRoadmap({
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: 'to@test.com',
+          cc: 'cc@test.com',
+          bcc: 'bcc@test.com'
+        }
+      } as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['to@test.com'],
+          cc: ['cc@test.com'],
+          bcc: ['bcc@test.com']
+        }
+      });
+    });
+
+    it('splits multiple email addresses', async () => {
+      mockPut.mockResolvedValue({
+        data: {}
+      });
+
+      await sendRoadmap({
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: 'a@test.com; b@test.com, c@test.com'
+        }
+      } as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['a@test.com', 'b@test.com', 'c@test.com'],
+          cc: []
+        }
+      });
+    });
+
+    it('defaults cc to an empty array when not supplied', async () => {
+      mockPut.mockResolvedValue({
+        data: {}
+      });
+
+      await sendRoadmap({
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['test@test.com']
+        }
+      } as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['test@test.com'],
+          cc: []
+        }
+      });
+    });
+
+    it('does not modify array email fields', async () => {
+      mockPut.mockResolvedValue({
+        data: {}
+      });
+
+      await sendRoadmap({
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['to@test.com'],
+          cc: ['cc@test.com'],
+          bcc: ['bcc@test.com']
+        }
+      } as never);
+
+      expect(mockPut).toHaveBeenCalledWith('housing/roadmap', {
+        activityId: 'activity-1',
+        selectedFileIds: ['file-1'],
+        emailData: {
+          to: ['to@test.com'],
+          cc: ['cc@test.com'],
+          bcc: ['bcc@test.com']
+        }
+      });
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('send failed');
+
+      mockPut.mockRejectedValue(error);
+
+      await expect(
+        sendRoadmap({
+          activityId: 'activity-1',
+          selectedFileIds: [],
+          emailData: {}
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
+  describe('getRoadmapNote', () => {
+    it('returns roadmap note', async () => {
+      const note = 'Roadmap note content';
+
+      mockGet.mockResolvedValue({
+        data: note
+      });
+
+      const result = await getRoadmapNote({
+        activityId: 'activity-1'
+      });
+
+      expect(mockGet).toHaveBeenCalledWith('housing/roadmap/note', {
+        params: {
+          activityId: 'activity-1'
+        }
+      });
+
+      expect(result).toEqual(note);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('get failed');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        getRoadmapNote({
+          activityId: 'activity-1'
+        })
+      ).rejects.toThrow(error);
+    });
+  });
+
+  it('exports all service functions', () => {
+    expect(roadmapService).toEqual({
+      sendRoadmap,
+      getRoadmapNote
+    });
+  });
 });

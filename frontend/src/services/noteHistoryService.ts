@@ -29,14 +29,10 @@ export async function createNoteHistory(req: CreateNoteHistoryRequest): Promise<
  * @param req - The request payload containing the note history ID.
  * @returns A promise resolving to the deleted `NoteHistory` resource.
  */
-export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<NoteHistory> {
+export async function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> {
   const { noteHistoryId } = req;
 
-  const { data } = await appAxios().delete<NoteHistory>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`
-  );
-
-  return data;
+  await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${noteHistoryId}`);
 }
 
 /**
@@ -88,7 +84,14 @@ export async function putNoteHistory(req: PutNoteHistoryRequest): Promise<NoteHi
   return data;
 }
 
-/** Hybrid default export object for backward compatibility */
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
 export const noteHistoryService = {
   createNoteHistory,
   deleteNoteHistory,

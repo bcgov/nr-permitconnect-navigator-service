@@ -5,87 +5,91 @@ import { StorageKey } from '@/utils/enums/application';
 import type { Config } from '@/types';
 
 const storageType = window.sessionStorage;
+const CONFIG_URL = '/config';
 
 /**
- * @class ConfigService
- * A singleton wrapper for acquiring and storing configuration data
- * in session storage
+ * Reads the cached config from sessionStorage.
+ * @returns The cached Config object or null if not present/invalid.
  */
-export default class ConfigService {
-  private static _instance: ConfigService;
+function readCachedConfig(): Config | null {
+  const raw = storageType.getItem(StorageKey.CONFIG);
 
-  /**
-   * @constructor
-   */
-  constructor() {
-    if (!ConfigService._instance) {
-      ConfigService._instance = this;
-    }
+  if (!raw) return null;
 
-    return ConfigService._instance;
-  }
-
-  /**
-   * @function init
-   * Initializes the ConfigService singleton
-   * @returns {Promise<ConfigService>} An instance of ConfigService
-   */
-  public static async init(): Promise<ConfigService> {
-    return new Promise((resolve, reject) => {
-      if (storageType.getItem(StorageKey.CONFIG) === null) {
-        axios
-          .get('/config', {
-            headers: {
-              'Cache-Control': 'no-cache',
-              Pragma: 'no-cache'
-            }
-          })
-          .then(({ data }) => {
-            storageType.setItem(StorageKey.CONFIG, JSON.stringify(data));
-            resolve(new ConfigService());
-          })
-          .catch((err) => {
-            storageType.removeItem(StorageKey.CONFIG);
-            reject(`Failed to initialize configuration: ${err}`);
-          });
-      } else {
-        resolve(new ConfigService());
-      }
-    });
-  }
-
-  /**
-   * @function getConfig
-   * Fetches and returns the config object if available
-   * @returns The config object if available
-   */
-  public getConfig(): Config | undefined {
-    try {
-      let cfgString = storageType.getItem(StorageKey.CONFIG);
-      if (cfgString === null) {
-        // eslint-disable-next-line no-console
-        console.warn('Configuration missing. Attempting to reacquire...');
-        axios
-          .get('/config', {
-            headers: {
-              'Cache-Control': 'no-cache',
-              Pragma: 'no-cache'
-            }
-          })
-          .then(({ data }) => {
-            storageType.setItem(StorageKey.CONFIG, JSON.stringify(data));
-            cfgString = data;
-          })
-          .catch((err) => {
-            // eslint-disable-next-line no-console
-            console.error(`Failed to reacquire configuration: ${err}`);
-          });
-      }
-      return JSON.parse(cfgString as string);
-    } catch (err: unknown) {
-      // eslint-disable-next-line no-console
-      console.error(`Unparseable configuration: ${err}`);
-      return undefined;
-    }
+  try {
+    return JSON.parse(raw) as Config;
+  } catch {
+    storageType.removeItem(StorageKey.CONFIG);
+    return null;
   }
 }
+
+/**
+ * Writes config to sessionStorage.
+ * @param config - The configuration object to persist.
+ */
+function writeCachedConfig(config: Config): void {
+  storageType.setItem(StorageKey.CONFIG, JSON.stringify(config));
+}
+
+/**
+ * Retrieves the cached configuration without triggering an API call.
+ * @returns The cached Config object or null if not available.
+ */
+export function getCachedConfig(): Config | null {
+  return readCachedConfig();
+}
+
+/**
+ * Retrieves application configuration.
+ *
+ * This function first attempts to read the configuration from sessionStorage.
+ * If not available, it fetches the configuration from the API and caches it.
+ *
+ * @returns A promise resolving to the application Config.
+ */
+export async function getConfig(): Promise<Config> {
+  const cached = readCachedConfig();
+  if (cached) return cached;
+
+  const { data } = await axios.get<Config>(CONFIG_URL, {
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache'
+    }
+  });
+
+  writeCachedConfig(data);
+  return data;
+}
+
+/**
+ * Forces a refresh of the configuration from the API,
+ * bypassing any cached sessionStorage value.
+ * @returns A promise resolving to the refreshed Config.
+ */
+export async function refreshConfig(): Promise<Config> {
+  const { data } = await axios.get<Config>(CONFIG_URL, {
+    headers: {
+      'Cache-Control': 'no-cache',
+      Pragma: 'no-cache'
+    }
+  });
+
+  writeCachedConfig(data);
+  return data;
+}
+
+/**
+ * Backward compatibility layer for legacy default-export service usage.
+ *
+ * This object preserves the previous pattern:
+ *   export default { ...serviceMethods }
+ *
+ * It may be removed once all consumers are migrated to named imports.
+ */
+export const configService = {
+  getCachedConfig,
+  getConfig,
+  refreshConfig
+};

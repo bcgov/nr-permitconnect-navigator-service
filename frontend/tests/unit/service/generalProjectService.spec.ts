@@ -2,12 +2,12 @@ import {
   generalProjectService,
   createProject,
   deleteProject,
-  getActivityIds,
   getProject,
+  listActivityIds,
   listProjects,
   searchProjects,
   patchProject,
-  getStatistics,
+  getProjectStatistics,
   submitDraft,
   deleteDraft,
   getDraft,
@@ -83,7 +83,7 @@ describe('generalProject service', () => {
     });
   });
 
-  describe('getActivityIds', () => {
+  describe('listActivityIds', () => {
     it('returns activity ids', async () => {
       const activityIds = ['a1', 'a2'];
 
@@ -91,7 +91,7 @@ describe('generalProject service', () => {
         data: activityIds
       });
 
-      const result = await getActivityIds();
+      const result = await listActivityIds();
 
       expect(mockGet).toHaveBeenCalledWith(`${PATH}/activityIds`);
 
@@ -101,7 +101,7 @@ describe('generalProject service', () => {
     it('propagates errors', async () => {
       mockGet.mockRejectedValue(new Error('failed'));
 
-      await expect(getActivityIds()).rejects.toThrow('failed');
+      await expect(listActivityIds()).rejects.toThrow('failed');
     });
   });
 
@@ -212,7 +212,7 @@ describe('generalProject service', () => {
     });
   });
 
-  describe('getStatistics', () => {
+  describe('getProjectStatistics', () => {
     it('passes filters as query params', async () => {
       const filters = {
         year: 2025
@@ -226,7 +226,7 @@ describe('generalProject service', () => {
         data: statistics
       });
 
-      const result = await getStatistics(filters as never);
+      const result = await getProjectStatistics(filters as never);
 
       expect(mockGet).toHaveBeenCalledWith(`${PATH}/statistics`, {
         params: filters
@@ -238,7 +238,7 @@ describe('generalProject service', () => {
     it('propagates errors', async () => {
       mockGet.mockRejectedValue(new Error('failed'));
 
-      await expect(getStatistics({} as never)).rejects.toThrow('failed');
+      await expect(getProjectStatistics({} as never)).rejects.toThrow('failed');
     });
   });
 
@@ -363,17 +363,17 @@ describe('generalProject service', () => {
   it('exports all service functions', () => {
     expect(generalProjectService).toEqual({
       createProject,
-      deleteProject,
-      getActivityIds,
-      getProject,
-      listProjects,
-      searchProjects,
-      patchProject,
-      getStatistics,
-      submitDraft,
       deleteDraft,
+      deleteProject,
       getDraft,
+      getProject,
+      getProjectStatistics,
+      listActivityIds,
       listDrafts,
+      listProjects,
+      patchProject,
+      searchProjects,
+      submitDraft,
       upsertDraft
     });
   });
