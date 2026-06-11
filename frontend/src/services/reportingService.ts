@@ -11,9 +11,9 @@ import type { GetProjectPermitDataResponse } from '@/types';
 const reportingRoute = createRouteBuilder('reporting');
 
 const reportingRoutes = {
-  electrificationProjectPermit: () => reportingRoute('electrificationProject', 'permit'),
-  generalProjectPermit: () => reportingRoute('generalProject', 'permit'),
-  housingProjectPermit: () => reportingRoute('housingProject', 'permit')
+  electrificationProjectPermit: () => reportingRoute('electrification-project', 'permit'),
+  generalProjectPermit: () => reportingRoute('general-project', 'permit'),
+  housingProjectPermit: () => reportingRoute('housing-project', 'permit')
 } as const;
 
 /**

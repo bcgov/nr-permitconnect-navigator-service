@@ -21,7 +21,7 @@ const noteRoutes = {
   root: () => noteRoute(),
   byId: (noteHistoryId: string) => noteRoute(noteHistoryId),
 
-  bringForwards: () => noteRoute('bringForward'),
+  bringForwards: () => noteRoute('bring-forward'),
   list: (activityId: string) => noteRoute('list', activityId)
 } as const;
 

@@ -32,7 +32,7 @@ describe('reporting service', () => {
 
       const result = await getElectrificationProjectPermitData();
 
-      expect(mockGet).toHaveBeenCalledWith('reporting/electrificationProject/permit', undefined);
+      expect(mockGet).toHaveBeenCalledWith('reporting/electrification-project/permit', undefined);
 
       expect(result).toEqual(response);
     });
@@ -56,7 +56,7 @@ describe('reporting service', () => {
 
       const result = await getGeneralProjectPermitData();
 
-      expect(mockGet).toHaveBeenCalledWith('reporting/generalProject/permit', undefined);
+      expect(mockGet).toHaveBeenCalledWith('reporting/general-project/permit', undefined);
 
       expect(result).toEqual(response);
     });
@@ -80,7 +80,7 @@ describe('reporting service', () => {
 
       const result = await getHousingProjectPermitData();
 
-      expect(mockGet).toHaveBeenCalledWith('reporting/housingProject/permit', undefined);
+      expect(mockGet).toHaveBeenCalledWith('reporting/housing-project/permit', undefined);
 
       expect(result).toEqual(response);
     });

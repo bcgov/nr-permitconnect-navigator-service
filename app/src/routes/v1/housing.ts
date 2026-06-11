@@ -18,11 +18,11 @@ router.use(hasAuthentication(Initiative.HOUSING));
 // Base v1 Responder
 router.get('/housing', (_req, res) => {
   res.status(200).json({
-    endpoints: ['/accessRequest', '/document', '/enquiry', '/project', '/map', '/note', '/permit', '/roadmap']
+    endpoints: ['/access-request', '/document', '/enquiry', '/project', '/map', '/note', '/permit', '/roadmap']
   });
 });
 
-router.use('/accessRequest', accessRequest);
+router.use('/access-request', accessRequest);
 router.use('/document', document);
 router.use('/enquiry', enquiry);
 router.use('/project', housingProject);

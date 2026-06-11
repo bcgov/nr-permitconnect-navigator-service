@@ -8,7 +8,7 @@ import type { SourceSystemKind } from '@/types';
  * Routes should be referenced through this object rather than
  * constructing endpoint paths directly within service methods.
  */
-const sourceSystemKindRoute = createRouteBuilder('sourceSystemKind');
+const sourceSystemKindRoute = createRouteBuilder('source-system-kind');
 
 const sourceSystemKindRoutes = {
   root: () => sourceSystemKindRoute()

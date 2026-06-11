@@ -307,7 +307,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/accessRequest:
+  /electrification/access-request:
     get:
       summary: Get access requests
       description: >-
@@ -364,7 +364,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/accessRequest/{accessRequestId}:
+  /electrification/access-request/{accessRequestId}:
     post:
       summary: Process access request
       description: >-
@@ -741,7 +741,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /electrification/note/bringForward:
+  /electrification/note/bring-forward:
     get:
       summary: List note histories with bring forward type
       description: Retrieve a list of note histories with the Bring forward type given
@@ -1304,7 +1304,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /general/accessRequest:
+  /general/access-request:
     get:
       summary: Get access requests
       description: >-
@@ -1361,7 +1361,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /general/accessRequest/{accessRequestId}:
+  /general/access-request/{accessRequestId}:
     post:
       summary: Process access request
       description: >-
@@ -1738,7 +1738,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /general/note/bringForward:
+  /general/note/bring-forward:
     get:
       summary: List note histories with bring forward type
       description: Retrieve a list of note histories with the Bring forward type given
@@ -2220,7 +2220,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housing/accessRequest:
+  /housing/access-request:
     get:
       summary: Get access requests
       description: >-
@@ -2277,7 +2277,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housing/accessRequest/{accessRequestId}:
+  /housing/access-request/{accessRequestId}:
     post:
       summary: Process access request
       description: >-
@@ -2654,7 +2654,7 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-  /housing/note/bringForward:
+  /housing/note/bring-forward:
     get:
       summary: List note histories with bring forward type
       description: Retrieve a list of note histories with the Bring forward type given
@@ -3224,7 +3224,7 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /reporting/electrificationProject/permit:
+  /reporting/electrification-project/permit:
     get:
       summary: Query and retrieve all electrification project data related to permits
       operationId: getElectrificationProjectPermitData
@@ -3245,7 +3245,28 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
-  /reporting/housingProject/permit:
+  /reporting/general-project/permit:
+    get:
+      summary: Query and retrieve all general project data related to permits
+      operationId: getGeneralProjectPermitData
+      tags:
+        - Reporting
+      responses:
+        '200':
+          description: A list of general projects joined with permits and permit type
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Response-GeneralProjectPermitData'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        default:
+          $ref: '#/components/responses/Error'
+  /reporting/housing-project/permit:
     get:
       summary: Query and retrieve all housing project data related to permits
       operationId: getHousingProjectPermitData
@@ -3266,7 +3287,7 @@ paths:
           $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
-  /sourceSystemKind:
+  /source-system-kind:
     get:
       summary: List source system kinds
       description: Gets a list of all the source system kinds
@@ -5662,6 +5683,166 @@ components:
           description: UUID for the general project
           format: uuid
           example: d95f1de6-698b-4d9d-b938-487eb446ace8
+    Response-GeneralProjectPermitData:
+      type: object
+      properties:
+        projectName:
+          type: string
+          description: Name of the Project
+          example: New Project
+        consentToFeedback:
+          type: boolean
+          description: Whether or not user consents to feedback requests
+        firstName:
+          type: string
+          description: First name of the contact person related to general project
+          example: John
+        lastName:
+          type: string
+          description: Last name of the contact person related to general project
+          example: Smith
+        phoneNumber:
+          type: string
+          description: Phone number for contact related to general project
+          example: (123) 456-7890
+        email:
+          type: string
+          format: email
+          description: Email address for contact related to general project
+          example: john.smith@example.com
+        contactPreference:
+          type: string
+          enum: [Phone call, Email, Either]
+          description: Preferred method of contact related to general project
+          example: Email
+        activityId:
+          type: string
+          description: Activity ID related to general project and permit
+          example: D95F1DE6
+        locality:
+          type: string
+          description: City, town, etc. (Location) of project
+          example: Maple Ridge
+        streetAddress:
+          type: string
+          description: Street address of project
+          example: 2975 Jutland Rd
+        latitude:
+          type: number
+          description: Latitude Cordinate for project
+          example: 48.440531
+        longitude:
+          type: number
+          description: Longitude Cordinate for project
+          example: -123.377677
+        locationPids:
+          type: string
+          description: Location PIDs for the project
+          example: 006-209-521, 007-209-522
+        issuedPermitId:
+          type: string
+          description: ID of the issued permit
+          example: '123'
+        trackingId:
+          type: string
+          description: ID for tracking permit
+          example: H7kidnhd948594
+        state:
+          type: string
+          description: State of the permit
+          example: Pending
+        needed:
+          type: string
+          description: Whether permit is needed, or still uner investigation
+          example: Under Investigation
+        stage:
+          type: string
+          description: Stage of the permit
+          example: New
+        submittedDate:
+          type: string
+          description: Date the permit was submitted
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        submittedTime:
+          type: string
+          description: Time the permit was submitted
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        decisionDate:
+          type: string
+          description: Date of the permit's decision
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        decisionTime:
+          type: string
+          description: Time of the permit's decision
+          format: timetz
+          nullable: true
+          example: '2024-08-14'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastChangedTime:
+          type: string
+          description: Time of the last time the status of permit was changed
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastVerifiedTime:
+          type: string
+          description: Time of the last verified status of permit
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        acronym:
+          type: string
+          description: Acronym for permit type name
+          example: SAP
+        agency:
+          type: string
+          description: Government agency
+          example: Water, Land and Resource Stewardship
+        branch:
+          type: string
+          description: Government branch
+          example: Archaeology
+        division:
+          type: string
+          description: Government division
+          example: Forest Resiliency and Archaeology
+        name:
+          type: string
+          description: Name of permit type
+          example: Site Alteration Permit
+        sourceSystem:
+          type: string
+          description: Source of the system used for this permit type
+          example: Archaeology Permit Tracking System
+        sourceSystemAcronym:
+          type: string
+          description: Acronym for source system
+          example: APTS
+        trackedInAts:
+          type: boolean
+          description: Whether this permit type is tracked in ATS or not
+          example: false
+        type:
+          type: string
+          description: Type of permit type
+          example: Alteration
     Response-HousingProjectCreate:
       title: Response for Create Housing Project
       type: object
