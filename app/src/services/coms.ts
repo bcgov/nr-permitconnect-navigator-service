@@ -85,6 +85,22 @@ export const getObject = async (bearerToken: string, objectId: string) => {
 };
 
 /**
+ * Search for an object and obtain information about it
+ * @param bearerToken The bearer token of the authorized user
+ * @param objectId The id for the object to get metadata for
+ * @returns The obtained information about the object
+ */
+export const searchObject = async (bearerToken: string, objectId: string) => {
+  if (!uuidValidateV4(objectId)) {
+    throw new Problem(422, { detail: 'Invalid objectId parameter' });
+  }
+  const { status, headers, data } = await comsAxios({
+    headers: { Authorization: `Bearer ${bearerToken}` }
+  }).get('/object', { params: { objectId } });
+  return { status, headers, data };
+};
+
+/**
  * Obtain the current user information in COMS
  * @param currentContext The current context of the Express request
  * @param sub The subject to search for
