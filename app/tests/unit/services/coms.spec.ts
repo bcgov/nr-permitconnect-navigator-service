@@ -115,7 +115,7 @@ describe('searchUser', () => {
 
     expect(mockedAxios.get).toHaveBeenCalledWith('/user', {
       params: {
-        username: 'abc@idir'
+        username: 'abc@azureidir'
       }
     });
 
@@ -156,7 +156,7 @@ describe('searchUserBucketPermissions', () => {
 
     const response = await comsService.searchUserBucketPermissions(
       { bearerToken: 'TOKEN' } as CurrentContext,
-      'user@idir'
+      'user@azureidir'
     );
 
     expect(response.data).toEqual({

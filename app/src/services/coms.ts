@@ -94,8 +94,7 @@ export const searchUser = async (currentContext: CurrentContext, sub: string) =>
   try {
     const { status, headers, data } = await comsAxios({
       headers: { Authorization: `Bearer ${currentContext.bearerToken}` }
-      // TODO: COMS is still on idir, remove once they migrate
-    }).get('/user', { params: { username: sub.replace('@azureidir', '@idir') } });
+    }).get('/user', { params: { username: sub } });
     return { status, headers, data };
   } catch (e) {
     if (axios.isAxiosError(e)) {
