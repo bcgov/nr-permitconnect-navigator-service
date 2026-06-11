@@ -76,9 +76,8 @@ async function onAssistanceRequest() {
 <template>
   <Teleport to="#app">
     <div :class="{ 'teleport-container': true, '--open': showTab }">
-      <div
+      <button
         class="assistance-tab pb-4 pt-4 pr-1 pl-1"
-        tabindex="0"
         @click="showTab = !showTab"
         @keydown.enter.prevent="showTab = !showTab"
         @keydown.space.prevent="showTab = !showTab"
@@ -88,7 +87,7 @@ async function onAssistanceRequest() {
           class="-rotate-90 mt-2"
           icon="fa-solid fa-circle-question"
         />
-      </div>
+      </button>
       <div class="assistance-modal">
         <div class="font-bold mb-4">{{ t('projectIntakeAssistance.needAssistance') }}</div>
         <div>
