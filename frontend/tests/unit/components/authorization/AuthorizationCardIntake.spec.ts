@@ -6,13 +6,12 @@ import Tooltip from 'primevue/tooltip';
 import { shallowMount } from '@vue/test-utils';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
-import { permitService, sourceSystemKindService } from '@/services';
+import { sourceSystemKindService } from '@/services';
 import { SYSTEM_ID } from '@/utils/constants/application';
 import { StorageKey } from '@/utils/enums/application';
 
-import type { PermitType, SourceSystemKind } from '@/types';
+import type { SourceSystemKind } from '@/types';
 
-const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
 const listSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'listSourceSystemKinds');
 
 const sampleSourceSystemKind: SourceSystemKind = {
@@ -25,12 +24,6 @@ const sampleSourceSystemKind: SourceSystemKind = {
   createdBy: SYSTEM_ID,
   permitTypeIds: [26]
 };
-
-const permitTypesList = [
-  {
-    permitTypeId: 123
-  }
-] as PermitType[];
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -84,7 +77,6 @@ beforeEach(() => {
   vi.clearAllMocks();
 
   listSourceSystemKindsSpy.mockResolvedValue([sampleSourceSystemKind] as SourceSystemKind[]);
-  listPermitTypesSpy.mockResolvedValue(permitTypesList);
 });
 
 afterEach(() => {

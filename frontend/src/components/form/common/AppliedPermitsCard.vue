@@ -29,7 +29,7 @@ const setAppliedPermits = useSetFieldValue('permits.appliedPermits');
 // Store
 const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
-const { getPermitTypes } = storeToRefs(usePermitStore());
+const { getInitiativePermitTypes } = storeToRefs(usePermitStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
@@ -113,10 +113,10 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                     :disabled="!getEditable"
                     :name="`permits.appliedPermits[${idx}].permitTypeId`"
                     :placeholder="t('appliedPermitsCard.placeholders.permitTypeId')"
-                    :options="getPermitTypes"
+                    :options="getInitiativePermitTypes"
                     :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                     option-value="permitTypeId"
-                    :loading="getPermitTypes === undefined"
+                    :loading="getInitiativePermitTypes === undefined"
                   />
                 </div>
                 <InputText

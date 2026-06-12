@@ -99,7 +99,6 @@ beforeEach(() => {
   } as ElectrificationProject);
   vi.mocked(generalProjectService.getProject).mockResolvedValue({ activityId: '123' } as GeneralProject);
   vi.mocked(housingProjectService.getProject).mockResolvedValue({ activityId: '123' } as HousingProject);
-  vi.mocked(permitService.listPermitTypes).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue([]);
 });
 
@@ -115,7 +114,7 @@ describe('ProjectIntakeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(permitService.listPermitTypes).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(permitService.listPermits).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(ProjectIntakeView, wrapperSettings());
     await flushPromises();

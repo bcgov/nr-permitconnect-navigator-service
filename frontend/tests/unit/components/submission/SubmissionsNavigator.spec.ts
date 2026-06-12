@@ -36,7 +36,6 @@ const listBringForward = vi.spyOn(noteHistoryService, 'listBringForwards');
 const searchProjects = vi.spyOn(housingProjectService, 'searchProjects');
 const getProjectStatistics = vi.spyOn(housingProjectService, 'getProjectStatistics');
 const searchPermitsSpy = vi.spyOn(permitService, 'searchPermits');
-const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
 const listSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'listSourceSystemKinds');
 
 listProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
@@ -46,7 +45,6 @@ listBringForward.mockResolvedValue([{ activityId: 'someActivityid' }] as BringFo
 searchProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
 getProjectStatistics.mockResolvedValue({} as ProjectStatistics);
 searchPermitsSpy.mockResolvedValue({ permits: [], totalRecords: 0 } as SearchPermitsResponse);
-listPermitTypesSpy.mockResolvedValue([]);
 listSourceSystemKindsSpy.mockResolvedValue([]);
 
 const wrapperSettings = () => ({

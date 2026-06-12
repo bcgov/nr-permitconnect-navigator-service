@@ -16,6 +16,7 @@ export { mapService } from './mapService';
 export { noteHistoryService } from './noteHistoryService';
 export { peachService } from './peachService';
 export { permitService } from './permitService';
+export { permitTypeService } from './permitTypeService';
 export { reportingService } from './reportingService';
 export { roadmapService } from './roadmapService';
 export { sourceSystemKindService } from './sourceSystemKindService';

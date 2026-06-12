@@ -24,7 +24,7 @@ import {
   roadmapService,
   userService
 } from '@/services';
-import { useAppStore, useAuthZStore, usePermitStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, useProjectStore } from '@/store';
 import { Action, Initiative, Resource, RouteName } from '@/utils/enums/application';
 import {
   projectAuthorizationRouteNameKey,
@@ -84,9 +84,7 @@ const router = useRouter();
 
 // Store
 const { getInitiative } = storeToRefs(useAppStore());
-const permitStore = usePermitStore();
 const projectStore = useProjectStore();
-const { getPermitTypes } = storeToRefs(permitStore);
 const {
   getActivityContacts,
   getDocuments,
@@ -163,11 +161,6 @@ onBeforeMount(async () => {
     projectStore.setRoadmapNote(roadMapNote);
 
     liveName.value = project.projectName;
-
-    if (getPermitTypes.value.length === 0) {
-      const permitTypes = await permitService.listPermitTypes({ initiative: getInitiative.value });
-      permitStore.setPermitTypes(permitTypes);
-    }
 
     // Batch lookup the users who have created notes
     const noteHistoryCreatedByUsers = getNoteHistory.value

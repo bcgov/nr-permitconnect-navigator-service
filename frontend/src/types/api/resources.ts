@@ -305,6 +305,16 @@ export interface IdentityProvider extends AuditFields {
 }
 
 /**
+ * Initiative
+ */
+
+export interface Initiative extends AuditFields {
+  initiativeId: UUID;
+  code: string;
+  label: string;
+}
+
+/**
  * Note
  */
 
@@ -397,7 +407,7 @@ export interface PermitTracking extends AuditFields {
  * Permit Type
  */
 
-export interface PermitType extends AuditFields {
+export interface PermitTypeBase extends AuditFields {
   permitTypeId: number;
   agency: string;
   branch: string;
@@ -414,6 +424,16 @@ export interface PermitType extends AuditFields {
   trackedInATS?: boolean;
   type: string;
 }
+
+interface PermitTypeRelations {
+  permitTypeInitiativeXref: {
+    permitTypeId: number;
+    initiativeId: UUID;
+    initiative: Initiative;
+  }[];
+}
+
+export type PermitType = PermitTypeBase & Partial<PermitTypeRelations>;
 
 /**
  * Source System Kind

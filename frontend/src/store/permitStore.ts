@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 
+import useAppStore from '@/store/appStore';
+
 import type { Ref } from 'vue';
 import type { Permit, PermitType } from '@/types';
 
@@ -19,7 +21,12 @@ export const usePermitStore = defineStore('permit', () => {
   // Getters
   const getters = {
     getPermit: computed(() => state.permit.value),
-    getPermitTypes: computed(() => state.permitTypes.value)
+    getAllPermitTypes: computed(() => state.permitTypes.value),
+    getInitiativePermitTypes: computed(() =>
+      state.permitTypes.value.filter((permit) =>
+        permit.permitTypeInitiativeXref?.some((xref) => xref.initiative.code === useAppStore().getInitiative)
+      )
+    )
   };
 
   // Actions
@@ -33,7 +40,6 @@ export const usePermitStore = defineStore('permit', () => {
 
   function reset() {
     state.permit.value = undefined;
-    state.permitTypes.value = [];
   }
 
   return {

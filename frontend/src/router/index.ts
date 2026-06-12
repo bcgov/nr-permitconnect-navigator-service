@@ -5,7 +5,7 @@ import externalRoutes from '@/router/external';
 import internalRoutes from '@/router/internal';
 import oidcRoutes from '@/router/oidc';
 import contactRoutes from '@/router/contact';
-import { AuthService, contactService, yarsService } from '@/services';
+import { AuthService, contactService, permitTypeService, yarsService } from '@/services';
 import {
   useAppStore,
   useAuthNStore,
@@ -38,21 +38,26 @@ export function accessHandler(to: RouteLocationNormalizedGeneric) {
 }
 
 /**
- * Obtains user permissions if authenticated before hard navigation
+ * Obtains any information that should be loaded only once on hard navigation
  * @returns A Vue route
  */
 export async function bootstrap() {
   const authnStore = useAuthNStore();
   const authzStore = useAuthZStore();
   const contactStore = useContactStore();
+  const permitStore = usePermitStore();
 
   const { getIsAuthenticated } = storeToRefs(authnStore);
 
-  if (getIsAuthenticated.value && !authzStore.getGroups.length) {
-    const authorizationContext = await yarsService.getAuthorizationContext();
-    authzStore.setAuthorizationContext(authorizationContext);
-    const contact: Contact = await contactService.getCurrentUserContact();
-    contactStore.setContact(contact);
+  if (getIsAuthenticated.value) {
+    if (!authzStore.getGroups.length) {
+      const authorizationContext = await yarsService.getAuthorizationContext();
+      authzStore.setAuthorizationContext(authorizationContext);
+      const contact: Contact = await contactService.getCurrentUserContact();
+      contactStore.setContact(contact);
+    }
+    const permitTypes = await permitTypeService.listPermitTypes({});
+    permitStore.setPermitTypes(permitTypes);
   }
 }
 
