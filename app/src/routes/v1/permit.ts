@@ -3,7 +3,6 @@ import express from 'express';
 import {
   deletePermitController,
   getPermitController,
-  getPermitTypesController,
   listPermitsController,
   searchPermitsController,
   upsertPermitController
@@ -32,9 +31,6 @@ router.delete(
   permitValidator.deletePermit,
   deletePermitController
 );
-
-/** Get a list of permit types */
-router.get('/types', hasAuthorization(Resource.PERMIT, Action.READ), getPermitTypesController);
 
 /** Get a list of permits based on search criteria */
 router.get(

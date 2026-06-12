@@ -14,7 +14,6 @@ import {
   TEST_PERMIT_1,
   TEST_PERMIT_LIST,
   TEST_PERMIT_TYPE_1,
-  TEST_PERMIT_TYPE_LIST,
   TEST_EMAIL_RESPONSE,
   TEST_PERMIT_NOTE_UPDATE
 } from '../data/index.ts';
@@ -24,7 +23,6 @@ import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import {
   deletePermitController,
   getPermitController,
-  getPermitTypesController,
   listPermitsController,
   searchPermitsController,
   upsertPermitController,
@@ -118,29 +116,6 @@ describe('getPermitController', () => {
     expect(getSpy).toHaveBeenCalledWith(prismaTxMock, '1381438d-0c7a-46bf-8ae2-d1febbf27066');
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_1);
-  });
-});
-
-describe('getPermitTypesController', () => {
-  const permitTypesSpy = vi.spyOn(permitService, 'getPermitTypes');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
-      query: { initiative: Initiative.HOUSING }
-    };
-
-    permitTypesSpy.mockResolvedValue(TEST_PERMIT_TYPE_LIST);
-
-    await getPermitTypesController(
-      req as unknown as Request<never, never, never, { initiative: Initiative }>,
-      res as unknown as Response
-    );
-
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_TYPE_LIST);
   });
 });
 

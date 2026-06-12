@@ -6,7 +6,6 @@ import type {
   Permit,
   PermitBase,
   PermitSearchParams,
-  PermitType,
   SearchPermitsOptions
 } from '../types/index.ts';
 
@@ -45,41 +44,6 @@ export const getPermit = async (tx: PrismaTransactionClient, permitId: string): 
   });
 
   return result;
-};
-
-/**
- * Gets all Permit types for the given initiative
- * @param tx Prisma transaction client
- * @param initiative Initiative code
- * @returns A Promise that resolves to an array of permit types for a certain initiative
- */
-export const getPermitTypes = async (tx: PrismaTransactionClient, initiative: Initiative): Promise<PermitType[]> => {
-  const initiativeResult = await tx.initiative.findFirstOrThrow({
-    where: {
-      code: initiative
-    },
-    include: {
-      permitTypeInitiativeXref: {
-        include: {
-          permitType: true
-        },
-        orderBy: [
-          {
-            permitType: {
-              businessDomain: 'asc'
-            }
-          },
-          {
-            permitType: {
-              name: 'asc'
-            }
-          }
-        ]
-      }
-    }
-  });
-
-  return initiativeResult.permitTypeInitiativeXref.map((y) => y.permitType);
 };
 
 /**

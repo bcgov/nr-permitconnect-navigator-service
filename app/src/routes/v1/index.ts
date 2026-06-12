@@ -12,6 +12,7 @@ import electrification from './electrification.ts';
 import general from './general.ts';
 import housing from './housing.ts';
 import peach from './peach.ts';
+import permitType from './permitType.ts';
 import reporting from './reporting.ts';
 import sso from './sso.ts';
 import sourceSystemKind from './sourceSystemKind.ts';
@@ -34,6 +35,7 @@ router.get('/', (_req, res) => {
       '/general',
       '/housing',
       '/peach',
+      '/permit-type',
       '/reporting',
       '/sso',
       '/source-system-kind',
@@ -52,6 +54,7 @@ router.use('/electrification', electrification);
 router.use('/general', general);
 router.use('/housing', housing);
 router.use('/peach', peach);
+router.use('/permit-type', permitType);
 router.use('/reporting', reporting);
 router.use('/sso', sso);
 router.use('/source-system-kind', sourceSystemKind);

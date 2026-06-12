@@ -42,43 +42,6 @@ describe('getPermit', () => {
   });
 });
 
-describe('getPermitTypes', () => {
-  it('calls initiative.findFirstOrThrow and returns result', async () => {
-    prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce({
-      permitTypeInitiativeXref: [{ permitType: { permitTypeId: 'ABC' } }]
-    } as never);
-
-    const response = await permitService.getPermitTypes(prismaTxMock, Initiative.HOUSING);
-
-    expect(prismaTxMock.initiative.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.initiative.findFirstOrThrow).toHaveBeenCalledWith({
-      where: {
-        code: Initiative.HOUSING
-      },
-      include: {
-        permitTypeInitiativeXref: {
-          include: {
-            permitType: true
-          },
-          orderBy: [
-            {
-              permitType: {
-                businessDomain: 'asc'
-              }
-            },
-            {
-              permitType: {
-                name: 'asc'
-              }
-            }
-          ]
-        }
-      }
-    });
-    expect(response).toStrictEqual([{ permitTypeId: 'ABC' }]);
-  });
-});
-
 describe('listPermits', () => {
   it('calls permit.findMany and returns result', async () => {
     prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);

@@ -8,14 +8,7 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
-import {
-  deletePermit,
-  getPermit,
-  getPermitTypes,
-  listPermits,
-  searchPermitsPaginated,
-  upsertPermit
-} from '../services/permit.ts';
+import { deletePermit, getPermit, listPermits, searchPermitsPaginated, upsertPermit } from '../services/permit.ts';
 import { createPermitNote } from '../services/permitNote.ts';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
@@ -39,7 +32,6 @@ import type {
   ListPermitsOptions,
   Permit,
   PermitTracking,
-  PermitType,
   PermitUpdateEmailParams,
   SearchPermitsOptions,
   SourceSystemKind
@@ -69,16 +61,6 @@ export const deletePermitController = async (req: Request<{ permitId: string }>,
 export const getPermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   const response = await transactionWrapper<Permit>(async (tx: PrismaTransactionClient) => {
     return await getPermit(tx, req.params.permitId);
-  });
-  res.status(200).json(response);
-};
-
-export const getPermitTypesController = async (
-  req: Request<never, never, never, { initiative: Initiative }>,
-  res: Response
-) => {
-  const response = await transactionWrapper<PermitType[]>(async (tx: PrismaTransactionClient) => {
-    return await getPermitTypes(tx, req.query.initiative);
   });
   res.status(200).json(response);
 };
