@@ -1,0 +1,13 @@
+# Refer for explanation to following link: https://lefthook.dev/configuration/
+assert_lefthook_installed: true
+colors: false
+
+commit-msg:
+  commands:
+    lint-commit:
+      run: node_modules/.bin/commitlint --config commitlint.config.ts --edit {1}
+
+pre-push:
+  commands:
+    lint-branch:
+      run: cd app && ./node_modules/.bin/tsx branch.helper.ts
