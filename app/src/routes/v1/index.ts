@@ -36,7 +36,7 @@ router.get('/', (_req, res) => {
       '/peach',
       '/reporting',
       '/sso',
-      '/sourceSystemKind',
+      '/source-system-kind',
       '/user',
       '/yars'
     ]
@@ -54,7 +54,7 @@ router.use('/housing', housing);
 router.use('/peach', peach);
 router.use('/reporting', reporting);
 router.use('/sso', sso);
-router.use('/sourceSystemKind', sourceSystemKind);
+router.use('/source-system-kind', sourceSystemKind);
 router.use('/user', user);
 router.use('/yars', yars);
 

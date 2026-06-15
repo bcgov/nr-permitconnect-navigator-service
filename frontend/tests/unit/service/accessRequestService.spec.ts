@@ -51,7 +51,7 @@ describe('accessRequestService', () => {
 
       const result = await createAccessRequest(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('housing/accessRequest', request, undefined);
+      expect(mockPost).toHaveBeenCalledWith('housing/access-request', request, undefined);
 
       expect(result).toEqual(accessRequest);
     });
@@ -85,7 +85,7 @@ describe('accessRequestService', () => {
       const result = await processAccessRequest(request as never);
 
       expect(mockPost).toHaveBeenCalledWith(
-        'housing/accessRequest/access-request-1',
+        'housing/access-request/access-request-1',
         {
           status: 'Approved',
           comments: 'Approved by admin'
@@ -107,7 +107,7 @@ describe('accessRequestService', () => {
       } as never);
 
       expect(mockPost).toHaveBeenCalledWith(
-        'housing/accessRequest/access-request-1',
+        'housing/access-request/access-request-1',
         {
           status: 'Denied'
         },
@@ -145,7 +145,7 @@ describe('accessRequestService', () => {
 
       const result = await listAccessRequests();
 
-      expect(mockGet).toHaveBeenCalledWith('housing/accessRequest', undefined);
+      expect(mockGet).toHaveBeenCalledWith('housing/access-request', undefined);
 
       expect(result).toEqual(accessRequests);
     });

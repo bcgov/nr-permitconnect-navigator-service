@@ -115,7 +115,7 @@ describe('noteHistory service', () => {
 
       const result = await listBringForwards(request as never);
 
-      expect(mockGet).toHaveBeenCalledWith('housing/note/bringForward', {
+      expect(mockGet).toHaveBeenCalledWith('housing/note/bring-forward', {
         params: {
           bringForwardState: 'OPEN'
         }

@@ -35,7 +35,7 @@ describe('sourceSystemKind service', () => {
 
       const result = await listSourceSystemKinds();
 
-      expect(mockGet).toHaveBeenCalledWith('sourceSystemKind', undefined);
+      expect(mockGet).toHaveBeenCalledWith('source-system-kind', undefined);
 
       expect(result).toEqual(sourceSystemKinds);
     });

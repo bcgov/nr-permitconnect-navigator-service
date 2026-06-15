@@ -43,7 +43,7 @@ router.delete(
 );
 
 /** Get a list of bring forward note histories */
-router.get('/bringForward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardController);
+router.get('/bring-forward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardController);
 
 /** Get a list of note histories */
 router.get(

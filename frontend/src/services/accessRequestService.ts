@@ -8,7 +8,7 @@ import type { AccessRequest, CreateAccessRequestRequest, ProcessAccessRequestReq
  * Routes should be referenced through this object rather than
  * constructing endpoint paths directly within service methods.
  */
-const accessRequestRoute = createInitiativeRouteBuilder('accessRequest');
+const accessRequestRoute = createInitiativeRouteBuilder('access-request');
 
 const accessRequestRoutes = {
   root: () => accessRequestRoute(),

@@ -18,21 +18,21 @@ router.use(requireSomeGroup);
 
 /** Get all electrification project and permit data for csv download */
 router.get(
-  '/electrificationProject/permit',
+  '/electrification-project/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
   getElectrificationProjectPermitDataController
 );
 
 /** Get all general project and permit data for csv download */
 router.get(
-  '/generalProject/permit',
+  '/general-project/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
   getGeneralProjectPermitDataController
 );
 
 /** Get all housing project and permit data for csv download */
 router.get(
-  '/housingProject/permit',
+  '/housing-project/permit',
   hasAuthorization(Resource.REPORTING, Action.READ),
   getHousingProjectPermitDataController
 );
