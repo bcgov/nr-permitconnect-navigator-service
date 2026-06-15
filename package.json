@@ -1,0 +1,12 @@
+{
+  "name": "nr-permitconnect-navigator-service-tools",
+  "private": true,
+  "scripts": {
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "21.0.2",
+    "@commitlint/config-conventional": "21.0.2",
+    "lefthook": "2.1.9"
+  }
+}
