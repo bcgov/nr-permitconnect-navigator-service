@@ -58,11 +58,8 @@ export default class AuthService {
    * Initializes the AuthService singleton
    * @returns {Promise<AuthService>} An instance of AuthService
    */
-  public static async init(): Promise<AuthService> {
-    return new Promise((resolve) => {
-      const authService = new AuthService();
-      resolve(authService);
-    });
+  public static init(): AuthService {
+    return new AuthService();
   }
 
   /**

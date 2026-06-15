@@ -116,7 +116,7 @@ useFormErrorWatcher(formRef, 'AppliedPermitsCard', tab);
                     :options="getInitiativePermitTypes"
                     :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                     option-value="permitTypeId"
-                    :loading="getInitiativePermitTypes === undefined"
+                    :loading="getInitiativePermitTypes.length === 0"
                   />
                 </div>
                 <InputText

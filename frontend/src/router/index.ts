@@ -1,25 +1,25 @@
-import { storeToRefs } from 'pinia';
 import { createRouter, createWebHistory } from 'vue-router';
 
 import externalRoutes from '@/router/external';
 import internalRoutes from '@/router/internal';
 import oidcRoutes from '@/router/oidc';
 import contactRoutes from '@/router/contact';
-import { AuthService, contactService, permitTypeService, yarsService } from '@/services';
+import { AuthService } from '@/services';
 import {
   useAppStore,
   useAuthNStore,
   useAuthZStore,
-  useContactStore,
+  useCodeStore,
+  useConfigStore,
   useEnquiryStore,
   usePermitStore,
   useProjectStore
 } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
 import { Initiative, RouteName, StorageKey, Zone } from '@/utils/enums/application';
+import { loadAuthenticatedContext } from '@/utils/bootstrap';
 
 import type { LocationQuery, RouteLocationNormalizedGeneric, RouteParamsGeneric, RouteRecordRaw } from 'vue-router';
-import type { Contact } from '@/types';
 
 /**
  * Checks for user access to the requested route and redirect if necessary
@@ -39,26 +39,22 @@ export function accessHandler(to: RouteLocationNormalizedGeneric) {
 
 /**
  * Obtains any information that should be loaded only once on hard navigation
- * @returns A Vue route
  */
-export async function bootstrap() {
+async function bootstrap() {
+  const appStore = useAppStore();
   const authnStore = useAuthNStore();
-  const authzStore = useAuthZStore();
-  const contactStore = useContactStore();
-  const permitStore = usePermitStore();
+  const codeStore = useCodeStore();
+  const configStore = useConfigStore();
 
-  const { getIsAuthenticated } = storeToRefs(authnStore);
+  appStore.beginDeterminateLoading();
 
-  if (getIsAuthenticated.value) {
-    if (!authzStore.getGroups.length) {
-      const authorizationContext = await yarsService.getAuthorizationContext();
-      authzStore.setAuthorizationContext(authorizationContext);
-      const contact: Contact = await contactService.getCurrentUserContact();
-      contactStore.setContact(contact);
-    }
-    const permitTypes = await permitTypeService.listPermitTypes({});
-    permitStore.setPermitTypes(permitTypes);
-  }
+  await configStore.init();
+  await authnStore.init();
+  await codeStore.init();
+
+  await loadAuthenticatedContext();
+
+  appStore.endDeterminateLoading();
 }
 
 /**

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Mutex } from 'async-mutex';
 import { storeToRefs } from 'pinia';
-import { inject, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Column, DataTable, DatePicker, IconField, InputIcon, InputText, Select } from '@/lib/primevue';
@@ -44,6 +44,14 @@ const searchTag: Ref<string | undefined> = ref(undefined);
 const selection: Ref<Permit | undefined> = ref(undefined);
 const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const totalRecords: Ref<number> = ref(0);
+
+const getPermitTrackingOptions = computed(() =>
+  authorizationType.value
+    ? sourceSystemKinds.value.filter(
+        (ssk) => authorizationType.value && ssk.permitTypeIds.includes(authorizationType.value.permitTypeId)
+      )
+    : undefined
+);
 
 // Actions
 function getLocation(streetAddress: string | undefined, locality: string | undefined, province: string | undefined) {
@@ -159,13 +167,7 @@ onBeforeMount(async () => {
             <Select
               v-model="authorizationTracking"
               :placeholder="t('authorization.common.selectId')"
-              :options="
-                authorizationType
-                  ? sourceSystemKinds.filter(
-                      (ssk) => authorizationType && ssk.permitTypeIds.includes(authorizationType.permitTypeId)
-                    )
-                  : undefined
-              "
+              :options="getPermitTrackingOptions"
               :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
               :disabled="!authorizationType"
               show-clear

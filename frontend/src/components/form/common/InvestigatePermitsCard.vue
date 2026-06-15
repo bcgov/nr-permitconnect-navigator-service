@@ -76,7 +76,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                       :options="getInitiativePermitTypes"
                       :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                       option-value="permitTypeId"
-                      :loading="getInitiativePermitTypes === undefined"
+                      :loading="getInitiativePermitTypes.length === 0"
                     />
                     <div class="flex items-center ml-2 mb-6">
                       <Button

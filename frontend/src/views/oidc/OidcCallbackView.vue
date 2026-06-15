@@ -3,28 +3,20 @@ import { onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 
 import { Spinner } from '@/components/layout';
-import { useAuthNStore, useAuthZStore, useContactStore } from '@/store';
+import { useAuthNStore } from '@/store';
 import { StorageKey } from '@/utils/enums/application';
-import { storeToRefs } from 'pinia';
-import { contactService, yarsService } from '@/services';
+import { loadAuthenticatedContext } from '@/utils/bootstrap';
 
-import type { Contact } from '@/types';
-
-const authnStore = useAuthNStore();
-const contactStore = useContactStore();
+// Composables
 const router = useRouter();
 
-const { getIsAuthenticated } = storeToRefs(useAuthNStore());
-
+// Actions
 onMounted(async () => {
+  const authnStore = useAuthNStore();
+
   await authnStore.loginCallback();
 
-  if (getIsAuthenticated.value) {
-    const authorizationContext = await yarsService.getAuthorizationContext();
-    useAuthZStore().setAuthorizationContext(authorizationContext);
-    const contact: Contact = await contactService.getCurrentUserContact();
-    contactStore.setContact(contact);
-  }
+  await loadAuthenticatedContext();
 
   // Return user back to original login entrypoint if specified
   const entrypoint = globalThis.sessionStorage.getItem(StorageKey.AUTH);
