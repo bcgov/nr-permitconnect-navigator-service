@@ -14,7 +14,7 @@ router.use(requireSomeGroup);
 /** Get a list of permit types */
 router.get(
   '/',
-  hasAuthorization(Resource.PERMIT, Action.READ),
+  hasAuthorization(Resource.PERMIT_TYPE, Action.READ),
   permitTypeValidator.listPermitTypes,
   listPermitTypesController
 );

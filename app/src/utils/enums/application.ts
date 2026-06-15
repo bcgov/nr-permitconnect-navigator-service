@@ -63,6 +63,7 @@ export enum Resource {
   NOTE = 'NOTE',
   PEACH = 'PEACH',
   PERMIT = 'PERMIT',
+  PERMIT_TYPE = 'PERMIT_TYPE',
   REPORTING = 'REPORTING',
   ROADMAP = 'ROADMAP',
   SSO = 'SSO',
