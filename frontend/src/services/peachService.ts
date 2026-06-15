@@ -1,18 +1,26 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { GetPeachSummaryRequest, GetPeachSummaryResponse } from '@/types';
 
-const PATH = 'peach';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const peachRoute = createRouteBuilder('peach');
+
+const peachRoutes = {
+  record: () => peachRoute('record')
+} as const;
 
 /**
  * Get peach summary for permit tracking records.
  * @param req - The permit tracking payload.
  * @returns A promise resolving to the peach summary.
  */
-export async function getPeachSummary(req: GetPeachSummaryRequest): Promise<GetPeachSummaryResponse> {
-  const { data } = await appAxios().post<GetPeachSummaryResponse>(`${PATH}/record`, req);
-
-  return data;
+export function getPeachSummary(req: GetPeachSummaryRequest): Promise<GetPeachSummaryResponse> {
+  return api.post<GetPeachSummaryResponse>(peachRoutes.record(), req);
 }
 
 /**

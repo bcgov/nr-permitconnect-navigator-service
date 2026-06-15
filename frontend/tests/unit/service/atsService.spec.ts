@@ -137,7 +137,7 @@ describe('ats service', () => {
 
       const result = await createAtsClient(request);
 
-      expect(mockPost).toHaveBeenCalledWith('ats/client', request);
+      expect(mockPost).toHaveBeenCalledWith('ats/client', request, undefined);
 
       expect(result).toEqual({
         status: 201,
@@ -177,7 +177,7 @@ describe('ats service', () => {
 
       const result = await createAtsEnquiry(request);
 
-      expect(mockPost).toHaveBeenCalledWith('ats/enquiry', request);
+      expect(mockPost).toHaveBeenCalledWith('ats/enquiry', request, undefined);
 
       expect(result).toEqual({
         status: 201,

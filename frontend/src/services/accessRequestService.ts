@@ -1,8 +1,19 @@
-import type { AccessRequest, CreateAccessRequestRequest, ProcessAccessRequestRequest } from '@/types';
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { api } from './apiClient';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 
-const PATH = 'accessRequest';
+import type { AccessRequest, CreateAccessRequestRequest, ProcessAccessRequestRequest } from '@/types';
+
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const accessRequestRoute = createInitiativeRouteBuilder('accessRequest');
+
+const accessRequestRoutes = {
+  root: () => accessRequestRoute(),
+  byId: (id: string) => accessRequestRoute(id)
+} as const;
 
 /**
  * Creates a new access request.
@@ -10,9 +21,7 @@ const PATH = 'accessRequest';
  * @returns A promise resolving to the created AccessRequest resource.
  */
 export async function createAccessRequest(req: CreateAccessRequestRequest): Promise<AccessRequest> {
-  const { data } = await appAxios().post<AccessRequest>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, req);
-
-  return data;
+  return api.post<AccessRequest>(accessRequestRoutes.root(), req);
 }
 
 /**
@@ -20,9 +29,7 @@ export async function createAccessRequest(req: CreateAccessRequestRequest): Prom
  * @returns A promise resolving to an array of AccessRequest resources.
  */
 export async function listAccessRequests(): Promise<AccessRequest[]> {
-  const { data } = await appAxios().get<AccessRequest[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
-
-  return data;
+  return api.get<AccessRequest[]>(accessRequestRoutes.root());
 }
 
 /**
@@ -35,12 +42,7 @@ export async function listAccessRequests(): Promise<AccessRequest[]> {
 export async function processAccessRequest(req: ProcessAccessRequestRequest): Promise<AccessRequest> {
   const { accessRequestId, ...body } = req;
 
-  const { data } = await appAxios().post<AccessRequest>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${accessRequestId}`,
-    body
-  );
-
-  return data;
+  return api.post<AccessRequest>(accessRequestRoutes.byId(accessRequestId), body);
 }
 
 /**

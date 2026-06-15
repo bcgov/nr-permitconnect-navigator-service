@@ -48,7 +48,7 @@ describe('peach service', () => {
 
       const result = await getPeachSummary(request);
 
-      expect(mockPost).toHaveBeenCalledWith('peach/record', request);
+      expect(mockPost).toHaveBeenCalledWith('peach/record', request, undefined);
 
       expect(result).toEqual(response);
     });
@@ -69,7 +69,7 @@ describe('peach service', () => {
 
       const result = await getPeachSummary(request);
 
-      expect(mockPost).toHaveBeenCalledWith('peach/record', request);
+      expect(mockPost).toHaveBeenCalledWith('peach/record', request, undefined);
 
       expect(result).toEqual(response);
     });

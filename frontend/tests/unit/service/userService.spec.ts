@@ -39,7 +39,7 @@ describe('user service', () => {
 
       const result = await listUsers(filters as never);
 
-      expect(mockPost).toHaveBeenCalledWith('user', filters);
+      expect(mockPost).toHaveBeenCalledWith('user', filters, undefined);
       expect(result).toEqual(users);
     });
 
@@ -50,7 +50,7 @@ describe('user service', () => {
 
       const result = await listUsers({} as never);
 
-      expect(mockPost).toHaveBeenCalledWith('user', {});
+      expect(mockPost).toHaveBeenCalledWith('user', {}, undefined);
       expect(result).toEqual([]);
     });
 

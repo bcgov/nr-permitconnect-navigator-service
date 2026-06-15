@@ -1,22 +1,31 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { CancelToken } from 'axios';
 import type { ListIdirUsersRequest, ListIdirUsersResponse } from '@/types';
+
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const idirRoute = createRouteBuilder('sso/idir');
+
+const idirRoutes = {
+  users: () => idirRoute('users')
+} as const;
 
 /**
  * List idir users using the supplied filters.
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching users.
  */
-export async function listIdirUsers(
-  req: ListIdirUsersRequest,
-  cancelToken?: CancelToken
-): Promise<ListIdirUsersResponse[]> {
-  const { data } = await appAxios().get('sso/idir/users', { params: req, cancelToken: cancelToken });
-
-  return data;
+export function listIdirUsers(req: ListIdirUsersRequest, cancelToken?: CancelToken): Promise<ListIdirUsersResponse[]> {
+  return api.get<ListIdirUsersResponse[]>(idirRoutes.users(), {
+    params: req,
+    cancelToken
+  });
 }
-
 /**
  * Backward compatibility layer for legacy default-export service usage.
  *

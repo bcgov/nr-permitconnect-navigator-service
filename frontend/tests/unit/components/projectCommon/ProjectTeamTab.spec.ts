@@ -467,8 +467,6 @@ describe('ProjectTeamTab.vue', () => {
 
   describe('Revoke User Interactions (@project-team-table:revoke-user)', () => {
     it('triggers confirm dialog and executes accept callback successfully', async () => {
-      vi.mocked(activityContactService.deleteActivityContact).mockResolvedValue(mockActivityContact);
-
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
 
       const table = wrapper.findComponent({ name: 'ProjectTeamTable' });

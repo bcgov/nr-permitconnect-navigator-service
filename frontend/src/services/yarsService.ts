@@ -1,18 +1,29 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { DeleteSubjectGroupRequest, ListGroupsRequest, GetAuthorizationContextResponse, Group } from '@/types';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const yarsRoute = createRouteBuilder('yars');
 
-const PATH = 'yars';
+const yarsRoutes = {
+  subjectGroup: () => yarsRoute('subject', 'group'),
+  permissions: () => yarsRoute('permissions'),
+  groups: () => yarsRoute('groups')
+} as const;
 
 /**
  * Delete a subject group.
  * @param req - The request payload.
  * @returns A promise resolving when deletion is complete.
  */
-export async function deleteSubjectGroup(req: DeleteSubjectGroupRequest): Promise<void> {
+export function deleteSubjectGroup(req: DeleteSubjectGroupRequest): Promise<void> {
   const { sub, groupId } = req;
 
-  await appAxios().delete<void>(`${PATH}/subject/group`, {
+  return api.delete(yarsRoutes.subjectGroup(), {
     data: { sub, groupId }
   });
 }
@@ -21,10 +32,8 @@ export async function deleteSubjectGroup(req: DeleteSubjectGroupRequest): Promis
  * Get authorization context (groups + permissions) for the current context.
  * @returns A promise resolving to permissions data.
  */
-export async function getAuthorizationContext(): Promise<GetAuthorizationContextResponse> {
-  const { data } = await appAxios().get<GetAuthorizationContextResponse>(`${PATH}/permissions`);
-
-  return data;
+export function getAuthorizationContext(): Promise<GetAuthorizationContextResponse> {
+  return api.get<GetAuthorizationContextResponse>(yarsRoutes.permissions());
 }
 
 /**
@@ -32,14 +41,12 @@ export async function getAuthorizationContext(): Promise<GetAuthorizationContext
  * @param req - The request payload.
  * @returns A promise resolving to an array of groups.
  */
-export async function listGroups(req: ListGroupsRequest): Promise<Group[]> {
+export function listGroups(req: ListGroupsRequest): Promise<Group[]> {
   const { initiative } = req;
 
-  const { data } = await appAxios().get<Group[]>(`${PATH}/groups`, {
+  return api.get<Group[]>(yarsRoutes.groups(), {
     params: { initiative }
   });
-
-  return data;
 }
 
 /**

@@ -1,17 +1,25 @@
-import { appAxios } from './interceptors';
+import { api } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
 import type { SourceSystemKind } from '@/types';
 
-const PATH = 'sourceSystemKind';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const sourceSystemKindRoute = createRouteBuilder('sourceSystemKind');
+
+const sourceSystemKindRoutes = {
+  root: () => sourceSystemKindRoute()
+} as const;
 
 /**
  * Retrieves all source system kinds.
  * @returns A promise resolving to the list of source system kinds.
  */
-export async function listSourceSystemKinds(): Promise<SourceSystemKind[]> {
-  const { data } = await appAxios().get<SourceSystemKind[]>(PATH);
-
-  return data;
+export function listSourceSystemKinds(): Promise<SourceSystemKind[]> {
+  return api.get<SourceSystemKind[]>(sourceSystemKindRoutes.root());
 }
 
 /**

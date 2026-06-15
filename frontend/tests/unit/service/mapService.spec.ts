@@ -39,7 +39,7 @@ describe('map service', () => {
         projectId: 'project-123'
       } as never);
 
-      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123');
+      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123', undefined);
 
       expect(result).toEqual(response);
     });
@@ -53,7 +53,7 @@ describe('map service', () => {
         projectId: 'project-123'
       } as never);
 
-      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123');
+      expect(mockGet).toHaveBeenCalledWith('housing/map/pids/project-123', undefined);
 
       expect(result).toEqual('');
     });

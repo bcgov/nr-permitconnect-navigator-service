@@ -1,3 +1,7 @@
+import { comsAxios } from './interceptors';
+import { createRouteBuilder } from './routeBuilder';
+import { setDispositionHeader } from '@/utils/utils';
+
 import type {
   CreateObjectRequest,
   CreateObjectResponse,
@@ -5,10 +9,18 @@ import type {
   DownloadObjectRequest,
   GetObjectRequest
 } from '@/types';
-import { comsAxios } from './interceptors';
-import { setDispositionHeader } from '@/utils/utils';
 
-const PATH = 'object';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const comsRoute = createRouteBuilder('object');
+
+const comsRoutes = {
+  root: () => comsRoute(),
+  byId: (objectId: string) => comsRoute(objectId)
+} as const;
 
 /**
  * Creates an object in COMS.
@@ -40,7 +52,7 @@ export async function createObject(req: CreateObjectRequest): Promise<CreateObje
     config.params.tagset = Object.fromEntries(tagset.map(({ key, value }) => [key, value]));
   }
 
-  const { data } = await comsAxios(axiosOptions).put<CreateObjectResponse>(PATH, file, config);
+  const { data } = await comsAxios(axiosOptions).put<CreateObjectResponse>(comsRoutes.root(), file, config);
 
   return data;
 }
@@ -53,7 +65,7 @@ export async function createObject(req: CreateObjectRequest): Promise<CreateObje
 export async function deleteObject(req: DeleteObjectRequest): Promise<void> {
   const { objectId, versionId } = req;
 
-  await comsAxios().delete(`${PATH}/${objectId}`, {
+  await comsAxios().delete(comsRoutes.byId(objectId), {
     params: {
       versionId
     }
@@ -70,7 +82,7 @@ export async function getObject(req: GetObjectRequest): Promise<ArrayBuffer> {
 
   const { data } = await comsAxios({
     responseType: 'arraybuffer'
-  }).get<ArrayBuffer>(`${PATH}/${objectId}`, {
+  }).get<ArrayBuffer>(comsRoutes.byId(objectId), {
     params: {
       versionId,
       download: 'proxy'

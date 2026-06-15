@@ -95,7 +95,7 @@ describe('contactService', () => {
 
       const result = await getCurrentUserContact();
 
-      expect(mockGet).toHaveBeenCalledWith('contact');
+      expect(mockGet).toHaveBeenCalledWith('contact', undefined);
 
       expect(result).toEqual(contact);
     });
@@ -117,7 +117,7 @@ describe('contactService', () => {
         contactId: 'contact-1'
       } as never);
 
-      expect(mockDelete).toHaveBeenCalledWith('contact/contact-1');
+      expect(mockDelete).toHaveBeenCalledWith('contact/contact-1', undefined);
     });
 
     it('propagates errors', async () => {
@@ -147,7 +147,7 @@ describe('contactService', () => {
 
       const result = await matchContacts(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('contact/match', request);
+      expect(mockPost).toHaveBeenCalledWith('contact/match', request, undefined);
 
       expect(result).toEqual(contacts);
     });
@@ -175,7 +175,7 @@ describe('contactService', () => {
 
       const result = await searchContacts(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('contact/search', request);
+      expect(mockPost).toHaveBeenCalledWith('contact/search', request, undefined);
 
       expect(result).toEqual(contacts);
     });
@@ -207,7 +207,7 @@ describe('contactService', () => {
 
       const result = await putContact(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith('contact', request);
+      expect(mockPut).toHaveBeenCalledWith('contact', request, undefined);
 
       expect(result).toEqual(contact);
     });

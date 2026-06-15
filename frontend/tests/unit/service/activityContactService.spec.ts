@@ -46,7 +46,7 @@ describe('activity contact service', () => {
         role: 'PRIMARY'
       } as never);
 
-      expect(mockPost).toHaveBeenCalledWith('activity/activity-1/contact/contact-1', { role: 'PRIMARY' });
+      expect(mockPost).toHaveBeenCalledWith('activity/activity-1/contact/contact-1', { role: 'PRIMARY' }, undefined);
 
       expect(result).toEqual(response);
     });
@@ -68,23 +68,14 @@ describe('activity contact service', () => {
 
   describe('deleteActivityContact', () => {
     it('deletes an activity contact', async () => {
-      const response = {
-        id: 'ac-1',
-        role: 'PRIMARY'
-      };
+      mockDelete.mockResolvedValue({});
 
-      mockDelete.mockResolvedValue({
-        data: response
-      });
-
-      const result = await deleteActivityContact({
+      await deleteActivityContact({
         activityId: 'activity-1',
         contactId: 'contact-1'
       } as never);
 
-      expect(mockDelete).toHaveBeenCalledWith('activity/activity-1/contact/contact-1');
-
-      expect(result).toEqual(response);
+      expect(mockDelete).toHaveBeenCalledWith('activity/activity-1/contact/contact-1', undefined);
     });
 
     it('propagates errors', async () => {
@@ -116,7 +107,7 @@ describe('activity contact service', () => {
         activityId: 'activity-1'
       } as never);
 
-      expect(mockGet).toHaveBeenCalledWith('activity/activity-1/contact');
+      expect(mockGet).toHaveBeenCalledWith('activity/activity-1/contact', undefined);
 
       expect(result).toEqual(response);
     });
@@ -163,7 +154,11 @@ describe('activity contact service', () => {
         role: 'PRIMARY_UPDATED'
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith('activity/activity-1/contact/contact-1', { role: 'PRIMARY_UPDATED' });
+      expect(mockPut).toHaveBeenCalledWith(
+        'activity/activity-1/contact/contact-1',
+        { role: 'PRIMARY_UPDATED' },
+        undefined
+      );
 
       expect(result).toEqual(response);
     });

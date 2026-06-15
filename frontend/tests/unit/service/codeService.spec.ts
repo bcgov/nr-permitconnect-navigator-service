@@ -44,7 +44,7 @@ describe('code service', () => {
 
       const result = await getCodeTables();
 
-      expect(mockGet).toHaveBeenCalledWith('code');
+      expect(mockGet).toHaveBeenCalledWith('code', undefined);
       expect(result).toEqual(response);
     });
 

@@ -62,7 +62,7 @@ describe('yars service', () => {
 
       const result = await getAuthorizationContext();
 
-      expect(mockGet).toHaveBeenCalledWith('yars/permissions');
+      expect(mockGet).toHaveBeenCalledWith('yars/permissions', undefined);
       expect(result).toEqual(response);
     });
 

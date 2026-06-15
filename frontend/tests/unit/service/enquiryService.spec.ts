@@ -61,7 +61,7 @@ describe('enquiryService', () => {
 
       const result = await createEnquiry(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('housing/enquiry', request);
+      expect(mockPost).toHaveBeenCalledWith('housing/enquiry', request, undefined);
 
       expect(result).toEqual(enquiry);
     });
@@ -83,7 +83,7 @@ describe('enquiryService', () => {
         enquiryId: 'enquiry-1'
       });
 
-      expect(mockDelete).toHaveBeenCalledWith('housing/enquiry/enquiry-1');
+      expect(mockDelete).toHaveBeenCalledWith('housing/enquiry/enquiry-1', undefined);
     });
 
     it('propagates errors', async () => {
@@ -113,7 +113,7 @@ describe('enquiryService', () => {
         enquiryId: 'enquiry-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/enquiry-1');
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/enquiry-1', undefined);
 
       expect(result).toEqual(enquiry);
     });
@@ -141,7 +141,7 @@ describe('enquiryService', () => {
 
       const result = await listEnquiries();
 
-      expect(mockGet).toHaveBeenCalledWith('housing/enquiry');
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry', undefined);
 
       expect(result).toEqual(enquiries);
     });
@@ -167,7 +167,7 @@ describe('enquiryService', () => {
         activityId: 'activity-1'
       });
 
-      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/list/activity-1');
+      expect(mockGet).toHaveBeenCalledWith('housing/enquiry/list/activity-1', undefined);
 
       expect(result).toEqual(enquiries);
     });
@@ -199,7 +199,7 @@ describe('enquiryService', () => {
 
       const result = await searchEnquiries(request as never);
 
-      expect(mockPost).toHaveBeenCalledWith('housing/enquiry/search', request);
+      expect(mockPost).toHaveBeenCalledWith('housing/enquiry/search', request, undefined);
 
       expect(result).toEqual(enquiries);
     });
@@ -231,9 +231,13 @@ describe('enquiryService', () => {
 
       const result = await patchEnquiry(request as never);
 
-      expect(mockPatch).toHaveBeenCalledWith('housing/enquiry/enquiry-1', {
-        status: 'Closed'
-      });
+      expect(mockPatch).toHaveBeenCalledWith(
+        'housing/enquiry/enquiry-1',
+        {
+          status: 'Closed'
+        },
+        undefined
+      );
 
       expect(result).toEqual(enquiry);
     });

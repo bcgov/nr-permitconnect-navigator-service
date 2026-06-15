@@ -1,5 +1,5 @@
-import { appAxios } from './interceptors';
-import { useAppStore } from '@/store';
+import { api } from './apiClient';
+import { createInitiativeRouteBuilder } from './routeBuilder';
 
 import type {
   CreateEnquiryRequest,
@@ -11,19 +11,30 @@ import type {
   SearchEnquiriesRequest
 } from '@/types';
 
-const PATH = 'enquiry';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const enquiryRoute = createInitiativeRouteBuilder('enquiry');
+
+const enquiryRoutes = {
+  root: () => enquiryRoute(),
+  byId: (id: string) => enquiryRoute(id),
+
+  listRelated: (activityId: string) => enquiryRoute('list', activityId),
+  search: () => enquiryRoute('search')
+} as const;
 
 /**
  * Creates a new enquiry.
  * @param req - The request payload containing the enquiry data to create.
  * @returns A promise resolving to the created `Enquiry` resource.
  */
-export async function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry> {
+export function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry> {
   const { ...body } = req;
 
-  const { data } = await appAxios().post<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`, body);
-
-  return data;
+  return api.post<Enquiry>(enquiryRoutes.root(), body);
 }
 
 /**
@@ -31,10 +42,10 @@ export async function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry>
  * @param req - The request payload containing the enquiry ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
+export function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
   const { enquiryId } = req;
 
-  await appAxios().delete<void>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
+  return api.delete(enquiryRoutes.byId(enquiryId));
 }
 
 /**
@@ -42,22 +53,18 @@ export async function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
  * @param req - The request payload containing the enquiry ID.
  * @returns A promise resolving to the requested `Enquiry` resource.
  */
-export async function getEnquiry(req: GetEnquiryRequest): Promise<Enquiry> {
+export function getEnquiry(req: GetEnquiryRequest): Promise<Enquiry> {
   const { enquiryId } = req;
 
-  const { data } = await appAxios().get<Enquiry>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`);
-
-  return data;
+  return api.get<Enquiry>(enquiryRoutes.byId(enquiryId));
 }
 
 /**
  * Retrieves all enquiries.
  * @returns A promise resolving to an array of `Enquiry` resources.
  */
-export async function listEnquiries(): Promise<Enquiry[]> {
-  const { data } = await appAxios().get<Enquiry[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}`);
-
-  return data;
+export function listEnquiries(): Promise<Enquiry[]> {
+  return api.get<Enquiry[]>(enquiryRoutes.root());
 }
 
 /**
@@ -65,14 +72,10 @@ export async function listEnquiries(): Promise<Enquiry[]> {
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to an array of `Enquiry` resources.
  */
-export async function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Promise<Enquiry[]> {
+export function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Promise<Enquiry[]> {
   const { activityId } = req;
 
-  const { data } = await appAxios().get<Enquiry[]>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/list/${activityId}`
-  );
-
-  return data;
+  return api.get<Enquiry[]>(enquiryRoutes.listRelated(activityId));
 }
 
 /**
@@ -80,10 +83,8 @@ export async function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Pr
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `Enquiry` resources.
  */
-export async function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enquiry[]> {
-  const { data } = await appAxios().post<Enquiry[]>(`${useAppStore().getInitiative.toLowerCase()}/${PATH}/search`, req);
-
-  return data;
+export function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enquiry[]> {
+  return api.post<Enquiry[]>(enquiryRoutes.search(), req);
 }
 
 /**
@@ -91,15 +92,10 @@ export async function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enqu
  * @param req - The request payload containing the enquiry ID and updated fields.
  * @returns A promise resolving to the updated `Enquiry` resource.
  */
-export async function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
+export function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
   const { enquiryId, ...body } = req;
 
-  const { data } = await appAxios().patch<Enquiry>(
-    `${useAppStore().getInitiative.toLowerCase()}/${PATH}/${enquiryId}`,
-    body
-  );
-
-  return data;
+  return api.patch<Enquiry>(enquiryRoutes.byId(enquiryId), body);
 }
 
 /**

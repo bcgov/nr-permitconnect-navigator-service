@@ -1,9 +1,21 @@
-import type { AxiosResponse } from 'axios';
-import { appAxios } from './interceptors';
+import { apiRaw } from './apiClient';
+import { createRouteBuilder } from './routeBuilder';
 
+import type { AxiosResponse } from 'axios';
 import type { AtsClientResource, AtsClientsResource, AtsEnquiryResource, SearchAtsUsersRequest } from '@/types';
 
-const PATH = 'ats';
+/**
+ * Base route builder and endpoint definitions for this resource.
+ * Routes should be referenced through this object rather than
+ * constructing endpoint paths directly within service methods.
+ */
+const atsRoute = createRouteBuilder('ats');
+
+const atsRoutes = {
+  client: () => atsRoute('client'),
+  clients: () => atsRoute('clients'),
+  enquiry: () => atsRoute('enquiry')
+} as const;
 
 // TODO: As part of the ATS refactor, these services should return the resource directly
 
@@ -12,10 +24,8 @@ const PATH = 'ats';
  * @param req - The ATS client creation payload.
  * @returns A promise resolving to the created ATS client.
  */
-export async function createAtsClient(req: AtsClientResource): Promise<AxiosResponse<AtsClientResource>> {
-  const response = await appAxios().post<AtsClientResource>(`${PATH}/client`, req);
-
-  return response;
+export function createAtsClient(req: AtsClientResource): Promise<AxiosResponse<AtsClientResource>> {
+  return apiRaw.post<AtsClientResource>(atsRoutes.client(), req);
 }
 
 /**
@@ -23,10 +33,8 @@ export async function createAtsClient(req: AtsClientResource): Promise<AxiosResp
  * @param req - The ATS enquiry creation payload.
  * @returns A promise resolving to the created ATS enquiry.
  */
-export async function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosResponse<AtsEnquiryResource>> {
-  const response = await appAxios().post<AtsEnquiryResource>(`${PATH}/enquiry`, req);
-
-  return response;
+export function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosResponse<AtsEnquiryResource>> {
+  return apiRaw.post<AtsEnquiryResource>(atsRoutes.enquiry(), req);
 }
 
 /**
@@ -34,14 +42,12 @@ export async function createAtsEnquiry(req: AtsEnquiryResource): Promise<AxiosRe
  * @param req - The search request payload.
  * @returns A promise resolving to ATS user search results.
  */
-export async function searchAtsUsers(req: SearchAtsUsersRequest): Promise<AxiosResponse<AtsClientsResource>> {
+export function searchAtsUsers(req: SearchAtsUsersRequest): Promise<AxiosResponse<AtsClientsResource>> {
   const { ...params } = req;
 
-  const response = await appAxios().get<AtsClientsResource>(`${PATH}/clients`, {
+  return apiRaw.get<AtsClientsResource>(atsRoutes.clients(), {
     params
   });
-
-  return response;
 }
 
 /**
