@@ -4,7 +4,6 @@ import {
   deletePermit,
   getPermit,
   listPermits,
-  listPermitTypes,
   searchPermits,
   upsertPermit
 } from '@/services/permitService';
@@ -83,40 +82,6 @@ describe('permit service', () => {
       mockGet.mockRejectedValue(error);
 
       await expect(getPermit({ permitId: 'permit-123' })).rejects.toThrow(error);
-    });
-  });
-
-  describe('listPermitTypes', () => {
-    it('returns permit types', async () => {
-      const permitTypes = [{ code: 'TYPE1' }, { code: 'TYPE2' }];
-
-      mockGet.mockResolvedValue({
-        data: permitTypes
-      });
-
-      const result = await listPermitTypes({
-        initiative: Initiative.HOUSING
-      });
-
-      expect(mockGet).toHaveBeenCalledWith('housing/permit/types', {
-        params: {
-          initiative: Initiative.HOUSING
-        }
-      });
-
-      expect(result).toEqual(permitTypes);
-    });
-
-    it('propagates errors', async () => {
-      const error = new Error('types failed');
-
-      mockGet.mockRejectedValue(error);
-
-      await expect(
-        listPermitTypes({
-          initiative: Initiative.HOUSING
-        })
-      ).rejects.toThrow(error);
     });
   });
 
@@ -243,7 +208,6 @@ describe('permit service', () => {
       deletePermit,
       getPermit,
       listPermits,
-      listPermitTypes,
       searchPermits,
       upsertPermit
     });

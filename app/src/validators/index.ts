@@ -11,5 +11,6 @@ export { default as noteHistoryValidator } from './noteHistory.ts';
 export { default as peachValidator } from './peach.ts';
 export { default as permitValidator } from './permit.ts';
 export { default as permitNoteValidator } from './permitNote.ts';
+export { default as permitTypeValidator } from './permitType.ts';
 export { default as roadmapValidator } from './roadmap.ts';
 export { default as userValidator } from './user.ts';

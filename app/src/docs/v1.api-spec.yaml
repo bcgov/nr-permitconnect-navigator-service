@@ -869,27 +869,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /electrification/permit/types:
-    get:
-      summary: Get all permit types
-      operationId: getElectrificationPermitTypes
-      tags:
-        - Electrification Permit
-      responses:
-        '200':
-          description: A list of all permit types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
   /electrification/permit/search:
     get:
       summary: Search permits
@@ -1866,27 +1845,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /general/permit/types:
-    get:
-      summary: Get all permit types
-      operationId: getGeneralPermitTypes
-      tags:
-        - General Permit
-      responses:
-        '200':
-          description: A list of all permit types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
   /general/project:
     get:
       summary: Get a list of general projects
@@ -2782,27 +2740,6 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-  /housing/permit/types:
-    get:
-      summary: Get all permit types
-      operationId: getHousingPermitTypes
-      tags:
-        - Housing Permit
-      responses:
-        '200':
-          description: A list of all permit types
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/DB-PermitType'
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        '403':
-          $ref: '#/components/responses/Forbidden'
-        default:
-          $ref: '#/components/responses/Error'
   /housing/permit/search:
     get:
       summary: Search permits
@@ -3222,6 +3159,34 @@ paths:
           $ref: '#/components/responses/Forbidden'
         "422":
           $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+  /permit-type:
+    get:
+      summary: Get all permit types
+      operationId: getPermitTypes
+      tags:
+        - Permit Type
+      parameters:
+        - in: query
+          name: initiative
+          required: false
+          schema:
+            type: string
+            description: Initiative code to filter on
+      responses:
+        '200':
+          description: A list of all permit types
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DB-PermitType'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
         default:
           $ref: '#/components/responses/Error'
   /reporting/electrification-project/permit:

@@ -9,13 +9,13 @@ import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 import { default as i18n } from '@/i18n';
 import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
 import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
-import { contactService, permitService } from '@/services';
+import { contactService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, StorageKey } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { Contact, PermitType } from '@/types';
+import type { Contact } from '@/types';
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({
@@ -30,50 +30,7 @@ vi.mock('vue-router', () => ({
   onBeforeRouteUpdate: vi.fn()
 }));
 
-const listPermitTypesSpy = vi.spyOn(permitService, 'listPermitTypes');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-
-const testPermitTypeData = [
-  {
-    permitTypeId: 1,
-    agency: 'Water, Land and Resource Stewardship',
-    division: 'Forest Resiliency and Archaeology',
-    branch: 'Archaeology',
-    businessDomain: 'Archaeology',
-    type: 'Alteration',
-    name: 'Site Alteration Permit',
-    acronym: 'SAP',
-    trackedInATS: false,
-    sourceSystem: 'Archaeology Permit Tracking System',
-    sourceSystemAcronym: 'APTS'
-  },
-  {
-    permitTypeId: 2,
-    agency: 'Water, Land and Resource Stewardship',
-    division: 'Forest Resiliency and Archaeology',
-    branch: 'Archaeology',
-    businessDomain: 'Archaeology',
-    type: 'Inspection',
-    name: 'Heritage Inspection Permit',
-    acronym: 'HIP',
-    trackedInATS: false,
-    sourceSystem: 'Archaeology Permit Tracking System',
-    sourceSystemAcronym: 'APTS'
-  },
-  {
-    permitTypeId: 3,
-    agency: 'Water, Land and Resource Stewardship',
-    division: 'Forest Resiliency and Archaeology',
-    branch: 'Archaeology',
-    businessDomain: 'Archaeology',
-    type: 'Investigation',
-    name: 'Investigation Permit',
-    acronym: null,
-    trackedInATS: false,
-    sourceSystem: 'Archaeology Permit Tracking System',
-    sourceSystemAcronym: 'APTS'
-  }
-] as PermitType[];
 
 const sampleContact: Contact = {
   contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
@@ -129,8 +86,6 @@ beforeEach(() => {
   );
 
   vi.clearAllMocks();
-
-  listPermitTypesSpy.mockResolvedValue(testPermitTypeData);
 });
 
 afterEach(() => {

@@ -2,12 +2,10 @@
 import { storeToRefs } from 'pinia';
 import { FieldArray } from 'vee-validate';
 import { useI18n } from 'vue-i18n';
-import { onBeforeMount } from 'vue';
 
 import { Checkbox, InputText, Select } from '@/components/form';
 import { Button, Panel } from '@/lib/primevue';
-import { permitService } from '@/services';
-import { useAppStore, useCodeStore, usePermitStore } from '@/store';
+import { useCodeStore, usePermitStore } from '@/store';
 
 import type { SourceSystemKind } from '@/types';
 
@@ -27,15 +25,7 @@ const permitStore = usePermitStore();
 
 // Store
 const { codeDisplay } = codeStore;
-const { getPermitTypes } = storeToRefs(permitStore);
-
-// Actions
-onBeforeMount(async () => {
-  if (getPermitTypes.value.length === 0) {
-    const permitTypes = await permitService.listPermitTypes({ initiative: useAppStore().getInitiative });
-    permitStore.setPermitTypes(permitTypes);
-  }
-});
+const { getInitiativePermitTypes } = storeToRefs(permitStore);
 </script>
 
 <template>
@@ -48,7 +38,7 @@ onBeforeMount(async () => {
         name="authorizationType"
         :label="t('authorization.common.authorization')"
         :placeholder="t('authorization.authorizationCardIntake.selectAuthorization')"
-        :options="getPermitTypes"
+        :options="getInitiativePermitTypes"
         :option-label="(e) => `${e.businessDomain}: ${e.name}`"
         required
         :disabled="!editable"

@@ -5,9 +5,7 @@ import type {
   DeletePermitRequest,
   GetPermitRequest,
   ListPermitsRequest,
-  ListPermitTypesRequest,
   Permit,
-  PermitType,
   SearchPermitsResponse,
   UpsertPermitRequest
 } from '@/types';
@@ -46,19 +44,6 @@ export function getPermit(req: GetPermitRequest): Promise<Permit> {
   const { permitId } = req;
 
   return api.get<Permit>(permitRoutes.byId(permitId));
-}
-
-/**
- * Retrieves available permit types for an initiative.
- * @param req - The request payload containing the initiative.
- * @returns A promise resolving to the available permit types.
- */
-export function listPermitTypes(req: ListPermitTypesRequest): Promise<PermitType[]> {
-  const { initiative } = req;
-
-  return api.get<PermitType[]>(permitRoutes.types(), {
-    params: { initiative }
-  });
 }
 
 /**
@@ -104,7 +89,6 @@ export const permitService = {
   deletePermit,
   getPermit,
   listPermits,
-  listPermitTypes,
   searchPermits,
   upsertPermit
 };

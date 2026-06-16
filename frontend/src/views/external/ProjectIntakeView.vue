@@ -13,7 +13,7 @@ import {
   housingProjectService,
   permitService
 } from '@/services';
-import { useAppStore, useFormStore, usePermitStore, useProjectStore } from '@/store';
+import { useAppStore, useFormStore, useProjectStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
@@ -144,8 +144,6 @@ onBeforeMount(async () => {
 
     // Clear certain store data on load
     projectStore.setDocuments([]);
-
-    usePermitStore().setPermitTypes(await permitService.listPermitTypes({ initiative: getInitiative.value }));
 
     if (draftId) {
       await loadDraft();

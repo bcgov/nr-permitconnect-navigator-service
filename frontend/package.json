@@ -18,7 +18,6 @@
     "prelint": "npm run typecheck",
     "prelint:fix": "npm run typecheck",
     "pretest": "npm run lint",
-    "postinstall": "npm --prefix .. run prepare",
     "posttest": "node ./lcov-fix.mjs",
     "purge": "rimraf node_modules",
     "rebuild": "npm run clean && npm run build",

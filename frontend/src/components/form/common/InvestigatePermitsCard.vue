@@ -25,7 +25,7 @@ const { t } = useI18n();
 // Store
 const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
-const { getPermitTypes } = storeToRefs(usePermitStore());
+const { getInitiativePermitTypes } = storeToRefs(usePermitStore());
 
 // State
 const formRef: Ref<ComponentPublicInstance | null> = ref(null);
@@ -73,10 +73,10 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
                       :disabled="!getEditable"
                       :name="`permits.investigatePermits[${idx}].permitTypeId`"
                       :placeholder="t('investigatePermitsCard.placeholders.permitTypeId')"
-                      :options="getPermitTypes"
+                      :options="getInitiativePermitTypes"
                       :option-label="(e: PermitType) => `${e.businessDomain}: ${e.name}`"
                       option-value="permitTypeId"
-                      :loading="getPermitTypes === undefined"
+                      :loading="getInitiativePermitTypes.length === 0"
                     />
                     <div class="flex items-center ml-2 mb-6">
                       <Button

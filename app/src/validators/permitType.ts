@@ -1,5 +1,8 @@
 import Joi from 'joi';
 
+import { validate } from '../middleware/validation.ts';
+import { Initiative } from '../utils/enums/application';
+
 export const permitTypeSchema = Joi.object({
   permitTypeId: Joi.number().max(255).required(),
   agency: Joi.string().max(255).required(),
@@ -16,3 +19,17 @@ export const permitTypeSchema = Joi.object({
   sourceSystem: Joi.string().max(255).allow(null),
   sourceSystemAcronym: Joi.string().max(255).allow(null)
 });
+
+const schema = {
+  listPermitTypes: {
+    query: Joi.object({
+      initiative: Joi.string()
+        .valid(...Object.keys(Initiative))
+        .allow(null)
+    })
+  }
+};
+
+export default {
+  listPermitTypes: validate(schema.listPermitTypes)
+};

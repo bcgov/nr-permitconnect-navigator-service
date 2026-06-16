@@ -28,7 +28,6 @@
     "postbuild:all": "npm run build",
     "postbuild": "tsx ./deploy-utils.ts docs",
     "postclean:all": "npm run clean",
-    "postinstall": "npm --prefix .. run prepare",
     "postprisma:case": "npm run prisma:sync",
     "postprisma:migrate:rollback": "npm run prisma:sync",
     "postprisma:migrate:down": "npm run prisma:sync",

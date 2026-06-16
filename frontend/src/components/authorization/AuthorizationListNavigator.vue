@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { Mutex } from 'async-mutex';
 import { storeToRefs } from 'pinia';
-import { inject, onBeforeMount, ref } from 'vue';
+import { computed, inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Column, DataTable, DatePicker, IconField, InputIcon, InputText, Select } from '@/lib/primevue';
 import { permitService, sourceSystemKindService } from '@/services';
-import { useAppStore, useCodeStore } from '@/store';
+import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { formatDateOnly } from '@/utils/formatters';
 import { projectAuthorizationRouteNameKey } from '@/utils/keys';
@@ -26,6 +26,7 @@ const { t } = useI18n();
 const { getInitiative } = storeToRefs(useAppStore());
 const codeStore = useCodeStore();
 const { codeDisplay } = codeStore;
+const { getInitiativePermitTypes } = storeToRefs(usePermitStore());
 
 // State
 const authorizationTracking: Ref<PermitTracking | undefined> = ref(undefined);
@@ -39,11 +40,18 @@ const pagination: Ref<Pagination> = ref({
   page: 0
 });
 const permits: Ref<Permit[]> = ref([]);
-const permitTypes: Ref<PermitType[]> = ref([]);
 const searchTag: Ref<string | undefined> = ref(undefined);
 const selection: Ref<Permit | undefined> = ref(undefined);
 const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const totalRecords: Ref<number> = ref(0);
+
+const getPermitTrackingOptions = computed(() =>
+  authorizationType.value
+    ? sourceSystemKinds.value.filter(
+        (ssk) => authorizationType.value && ssk.permitTypeIds.includes(authorizationType.value.permitTypeId)
+      )
+    : undefined
+);
 
 // Actions
 function getLocation(streetAddress: string | undefined, locality: string | undefined, province: string | undefined) {
@@ -99,7 +107,6 @@ function shouldDisplayLocation() {
 
 onBeforeMount(async () => {
   searchPermits();
-  permitTypes.value = await permitService.listPermitTypes({ initiative: useAppStore().getInitiative });
   const kinds = await sourceSystemKindService.listSourceSystemKinds();
   sourceSystemKinds.value = kinds.sort((a: SourceSystemKind, b: SourceSystemKind) =>
     (codeDisplay.SourceSystem[a.sourceSystem] || '').localeCompare(codeDisplay.SourceSystem[b.sourceSystem] || '')
@@ -152,7 +159,7 @@ onBeforeMount(async () => {
               name="authorizationType"
               :label="t('authorization.common.authorization')"
               :placeholder="t('authorization.common.authorizationType')"
-              :options="permitTypes"
+              :options="getInitiativePermitTypes"
               :option-label="(e) => `${e.businessDomain}: ${e.name}`"
               show-clear
               @change="searchPermits"
@@ -160,11 +167,7 @@ onBeforeMount(async () => {
             <Select
               v-model="authorizationTracking"
               :placeholder="t('authorization.common.selectId')"
-              :options="
-                authorizationType
-                  ? sourceSystemKinds.filter((ssk) => ssk.permitTypeIds.includes(authorizationType!.permitTypeId))
-                  : undefined
-              "
+              :options="getPermitTrackingOptions"
               :option-label="(e) => `${e.description}, ${codeDisplay.SourceSystem[e.sourceSystem]}`"
               :disabled="!authorizationType"
               show-clear

@@ -30,8 +30,7 @@ import type {
   Document,
   NoteHistory,
   Enquiry,
-  Permit,
-  PermitType
+  Permit
 } from '@/types';
 import ProjectInformationTab from '@/components/projectCommon/ProjectInformationTab.vue';
 import ProjectFilesTab from '@/components/projectCommon/ProjectFilesTab.vue';
@@ -176,7 +175,6 @@ beforeEach(() => {
   vi.mocked(documentService.listDocuments).mockResolvedValue([{ documentId: '123', filename: 'foo' } as Document]);
   vi.mocked(noteHistoryService.listNoteHistories).mockResolvedValue([{ noteHistoryId: '123' }] as NoteHistory[]);
   vi.mocked(permitService.listPermits).mockResolvedValue([{ permitId: '123' }] as Permit[]);
-  vi.mocked(permitService.listPermitTypes).mockResolvedValue([{ permitTypeId: 123 }] as PermitType[]);
   vi.mocked(enquiryService.listRelatedEnquiries).mockResolvedValue([{ enquiryId: '123' }] as Enquiry[]);
   vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('some note text');
 });

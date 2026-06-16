@@ -1,34 +1,19 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
-import { onBeforeMount, onErrorCaptured, ref } from 'vue';
+import { onErrorCaptured } from 'vue';
 import { RouterView, useRoute } from 'vue-router';
 
 import Breadcrumb from './components/common/Breadcrumb.vue';
 import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
-import { useAppStore, useAuthNStore, useCodeStore, useConfigStore } from '@/store';
+import { useAppStore, useConfigStore } from '@/store';
 import { ToastTimeout } from '@/utils/enums/application';
-
-import type { Ref } from 'vue';
 
 // Store
 const appStore = useAppStore();
 const route = useRoute();
 const { getIsLoading } = storeToRefs(appStore);
 const { getConfig } = storeToRefs(useConfigStore());
-
-// State
-const ready: Ref<boolean> = ref(false);
-
-// Actions
-onBeforeMount(async () => {
-  appStore.beginDeterminateLoading();
-  await useConfigStore().init();
-  await useAuthNStore().init();
-  await useCodeStore().init();
-  appStore.endDeterminateLoading();
-  ready.value = true;
-});
 
 // Top level error handler
 onErrorCaptured((e: Error) => {
@@ -55,7 +40,7 @@ onErrorCaptured((e: Error) => {
         {{ getConfig?.notificationBanner }}
       </Message>
       <Breadcrumb />
-      <RouterView v-if="ready" />
+      <RouterView />
     </template>
   </AppLayout>
 </template>
