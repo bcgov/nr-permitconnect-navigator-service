@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { PermitStage } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper';
 import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils';
-import { getObject } from '../services/coms';
+import { getObject, searchObject } from '../services/coms';
 import { email } from '../services/email';
 import { createNote } from '../services/note';
 import { createNoteHistory } from '../services/noteHistory';
@@ -44,9 +44,10 @@ export const sendRoadmapController = async (
       // If succesful it is converted to base64 encoding and added to the attachment list
       const objectPromises = req.body.selectedFileIds.map(async (id) => {
         const { status, headers, data } = await getObject(req.currentContext.bearerToken!, id);
+        const searchResponse = await searchObject(req.currentContext.bearerToken!, id);
 
-        if (status === 200) {
-          const filename = headers['x-amz-meta-name'] as string;
+        if (status === 200 && searchResponse.data[0]) {
+          const filename = searchResponse.data[0].name;
           if (filename) {
             attachments.push({
               content: Buffer.from(data).toString('base64'),
@@ -55,7 +56,7 @@ export const sendRoadmapController = async (
               filename: filename
             });
           } else {
-            throw new Problem(status, { detail: `Unable to obtain filename for file ${id}` });
+            throw new Problem(500, { detail: `Unable to obtain filename for file ${id}` });
           }
         }
       });

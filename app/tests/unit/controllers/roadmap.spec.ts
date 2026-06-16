@@ -8,6 +8,7 @@ import * as noteService from '../../../src/services/note.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
+import type { InternalAxiosRequestConfig } from 'axios';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type { Email, Note, NoteHistory } from '../../../src/types';
@@ -34,6 +35,7 @@ afterEach(() => {
 describe('send', () => {
   const emailSpy = vi.spyOn(emailService, 'email');
   const getObjectSpy = vi.spyOn(comsService, 'getObject');
+  const searchObjectSpy = vi.spyOn(comsService, 'searchObject');
   const createNoteSpy = vi.spyOn(noteService, 'createNote');
   const createHistorySpy = vi.spyOn(noteHistoryService, 'createNoteHistory');
 
@@ -142,7 +144,7 @@ describe('send', () => {
     const req = {
       body: {
         activityId: 'ACTI1234',
-        selectedFileIds: ['123', '456'],
+        selectedFileIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
         emailData: {
           body: 'Some message text',
           bodyType: 'text',
@@ -178,6 +180,14 @@ describe('send', () => {
       status: 200
     };
 
+    const searchObjectResponse = {
+      data: [{ name: 'foo' }],
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as InternalAxiosRequestConfig
+    };
+
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
       type: 'Roadmap',
@@ -192,6 +202,7 @@ describe('send', () => {
     createHistorySpy.mockResolvedValue(createdHistory);
     createNoteSpy.mockResolvedValue(createdNote);
     getObjectSpy.mockResolvedValue(getObjectResponse);
+    searchObjectSpy.mockResolvedValue(searchObjectResponse);
     emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
 
     await sendRoadmapController(
@@ -212,7 +223,7 @@ describe('send', () => {
     const req = {
       body: {
         activityId: 'ACTI1234',
-        selectedFileIds: ['123', '456'],
+        selectedFileIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
         emailData: {
           body: 'Some message text',
           bodyType: 'text',
@@ -270,7 +281,7 @@ describe('send', () => {
     const req = {
       body: {
         activityId: 'ACTI1234',
-        selectedFileIds: ['123', '456'],
+        selectedFileIds: ['550e8400-e29b-41d4-a716-446655440001', '550e8400-e29b-41d4-a716-446655440002'],
         emailData: {
           body: 'Some message text',
           bodyType: 'text',
@@ -315,8 +326,24 @@ describe('send', () => {
       status: 200
     };
 
-    const note1Name = `${getObjectResponse1.headers['x-amz-meta-name']}`;
-    const note2Name = `${getObjectResponse2.headers['x-amz-meta-name']}`;
+    const searchObjectResponse1 = {
+      data: [{ name: 'foo' }],
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as InternalAxiosRequestConfig
+    };
+
+    const searchObjectResponse2 = {
+      data: [{ name: 'bar' }],
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      config: {} as InternalAxiosRequestConfig
+    };
+
+    const note1Name = `${searchObjectResponse1.data[0].name}`;
+    const note2Name = `${searchObjectResponse2.data[0].name}`;
 
     const createdHistory: NoteHistory = {
       ...TEST_NOTE_HISTORY_1,
@@ -334,6 +361,8 @@ describe('send', () => {
     emailSpy.mockResolvedValue(TEST_EMAIL_RESPONSE);
     getObjectSpy.mockResolvedValueOnce(getObjectResponse1);
     getObjectSpy.mockResolvedValueOnce(getObjectResponse2);
+    searchObjectSpy.mockResolvedValueOnce(searchObjectResponse1);
+    searchObjectSpy.mockResolvedValueOnce(searchObjectResponse2);
 
     await sendRoadmapController(
       req as unknown as Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,

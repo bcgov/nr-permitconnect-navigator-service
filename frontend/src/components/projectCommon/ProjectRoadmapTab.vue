@@ -135,7 +135,7 @@ watch(
       from: navigator.email,
       to: [contact?.email],
       cc: undefined,
-      bcc: [bcc],
+      bcc: bcc ? delimitEmails(bcc) : undefined,
       subject: `Here is your ${initiative} project's Permit Roadmap`,
       bodyType: 'text',
       body: projectStore.roadmapNote
