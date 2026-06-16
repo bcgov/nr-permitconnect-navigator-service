@@ -3,11 +3,12 @@ import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import {
   deleteSubjectGroupController,
   getGroupsController,
-  getPermissionsController
+  listPermissionsController,
+  listSubjectPermissionsController
 } from '../../../src/controllers/yars.ts';
 import * as comsService from '../../../src/services/coms.ts';
 import * as yarsService from '../../../src/services/yars.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
@@ -55,7 +56,33 @@ describe('getGroupsController', () => {
   });
 });
 
-describe('getPermissionsController', () => {
+describe('listPermissionsController', () => {
+  const getGroupsSpy = vi.spyOn(yarsService, 'getGroups');
+  const getGroupPermissionsSpy = vi.spyOn(yarsService, 'getGroupPermissions');
+
+  const query = { initiative: Initiative.PCNS, groupName: GroupName.NAVIGATOR };
+
+  it('returns groups and flattened permissions', async () => {
+    const groups = [{ groupId: 1, name: GroupName.NAVIGATOR }] as never;
+    getGroupsSpy.mockResolvedValueOnce(groups);
+    getGroupPermissionsSpy.mockResolvedValueOnce([{ action: 'READ' }] as never);
+
+    await listPermissionsController(
+      { query, currentContext: ctxWithSub } as unknown as Request<never, never, never, typeof query>,
+      res as unknown as Response
+    );
+
+    expect(getGroupsSpy).toHaveBeenCalledWith(prismaTxMock, query.initiative);
+    expect(getGroupPermissionsSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith({
+      groups,
+      permissions: [{ action: 'READ' }]
+    });
+  });
+});
+
+describe('listSubjectPermissionsController', () => {
   const getSubjectGroupsSpy = vi.spyOn(yarsService, 'getSubjectGroups');
   const getGroupPermissionsSpy = vi.spyOn(yarsService, 'getGroupPermissions');
   const assignPermissionsSpy = vi.spyOn(comsService, 'assignPermissions');
@@ -68,7 +95,10 @@ describe('getPermissionsController', () => {
       .mockResolvedValueOnce([{ action: 'CREATE' }] as never);
     assignPermissionsSpy.mockResolvedValueOnce(undefined);
 
-    await getPermissionsController({ currentContext: ctxWithSub } as unknown as Request, res as unknown as Response);
+    await listSubjectPermissionsController(
+      { currentContext: ctxWithSub } as unknown as Request,
+      res as unknown as Response
+    );
 
     expect(getSubjectGroupsSpy).toHaveBeenCalledWith(prismaTxMock, SUB);
     expect(getGroupPermissionsSpy).toHaveBeenCalledTimes(2);
@@ -82,7 +112,7 @@ describe('getPermissionsController', () => {
 
   it('throws 500 when token sub missing', async () => {
     await expect(
-      getPermissionsController(
+      listSubjectPermissionsController(
         { currentContext: { ...TEST_CURRENT_CONTEXT, tokenPayload: undefined } } as unknown as Request,
         res as unknown as Response
       )

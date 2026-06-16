@@ -8,7 +8,7 @@ import {
   removeGroup,
   subjectHasGroupName
 } from '../services/yars.ts';
-import { Initiative } from '../utils/enums/application.ts';
+import { GroupName, Initiative } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
 
@@ -27,7 +27,23 @@ export const getGroupsController = async (
   res.status(200).json(response);
 };
 
-export const getPermissionsController = async (req: Request, res: Response) => {
+export const listPermissionsController = async (
+  req: Request<never, never, never, { initiative: Initiative; groupName: GroupName }>,
+  res: Response
+) => {
+  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
+    const groups = await getGroups(tx, req.query.initiative);
+    const filteredGroups = groups.filter((x) => x.name === req.query.groupName);
+    const permissions = await Promise.all(
+      filteredGroups.filter((x) => x.name === req.query.groupName).map((x) => getGroupPermissions(tx, x.groupId))
+    ).then((x) => x.flat());
+
+    return { groups: filteredGroups, permissions };
+  });
+  res.status(200).json({ groups: response.groups, permissions: response.permissions });
+};
+
+export const listSubjectPermissionsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
     if (!req.currentContext.tokenPayload?.sub) throw new Problem(500, { detail: 'Unable to read token sub' });
 

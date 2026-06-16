@@ -1,5 +1,11 @@
 import { appAxios } from '@/services/interceptors';
-import { deleteSubjectGroup, getAuthorizationContext, listGroups, yarsService } from '@/services/yarsService';
+import {
+  deleteSubjectGroup,
+  getAuthorizationContext,
+  listGroups,
+  listPermissions,
+  yarsService
+} from '@/services/yarsService';
 
 vi.mock('@/services/interceptors', () => ({
   appAxios: vi.fn()
@@ -62,7 +68,7 @@ describe('yars service', () => {
 
       const result = await getAuthorizationContext();
 
-      expect(mockGet).toHaveBeenCalledWith('yars/permissions', undefined);
+      expect(mockGet).toHaveBeenCalledWith('yars/subject/permissions', undefined);
       expect(result).toEqual(response);
     });
 
@@ -124,11 +130,65 @@ describe('yars service', () => {
     });
   });
 
+  describe('listPermissions', () => {
+    it('returns groups for initiative', async () => {
+      const response = {
+        canEdit: true,
+        canDelete: false
+      };
+
+      mockGet.mockResolvedValue({
+        data: response
+      });
+
+      const result = await listPermissions({
+        initiative: 'TEST_INITIATIVE',
+        groupName: 'TEST_GROUP'
+      } as never);
+
+      expect(mockGet).toHaveBeenCalledWith('yars/permissions', {
+        params: {
+          initiative: 'TEST_INITIATIVE',
+          groupName: 'TEST_GROUP'
+        }
+      });
+
+      expect(result).toEqual(response);
+    });
+
+    it('returns empty array when no permissions exist', async () => {
+      mockGet.mockResolvedValue({
+        data: []
+      });
+
+      const result = await listPermissions({
+        initiative: 'TEST_INITIATIVE',
+        groupName: 'TEST_GROUP'
+      } as never);
+
+      expect(result).toEqual([]);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('network error');
+
+      mockGet.mockRejectedValue(error);
+
+      await expect(
+        listPermissions({
+          initiative: 'TEST_INITIATIVE',
+          groupName: 'TEST_GROUP'
+        } as never)
+      ).rejects.toThrow(error);
+    });
+  });
+
   it('exports all service functions', () => {
     expect(yarsService).toEqual({
       deleteSubjectGroup,
       getAuthorizationContext,
-      listGroups
+      listGroups,
+      listPermissions
     });
   });
 });
