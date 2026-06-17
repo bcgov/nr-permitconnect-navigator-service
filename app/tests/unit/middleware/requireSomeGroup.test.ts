@@ -11,8 +11,8 @@ import type Problem from '../../../src/utils/problem.ts';
 
 function buildApp(currentContext: unknown) {
   const app = express();
-  app.use((req, _res, next) => {
-    (req as Request).currentContext = currentContext as Request['currentContext'];
+  app.use((_req, res, next) => {
+    res.locals.currentContext = currentContext;
     next();
   });
   app.get('/ok', requireSomeGroup, (_req, res) => res.status(200).json({ ok: true }));

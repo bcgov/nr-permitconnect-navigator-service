@@ -10,8 +10,14 @@ import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 import type { NextFunction, Request, Response } from 'express';
 import type Problem from '../../../src/utils/problem.ts';
 
-function buildApp() {
+function buildApp(locals?: Record<string, unknown>) {
   const app = express();
+
+  app.use((req, res, next) => {
+    Object.assign(res.locals, locals);
+    next();
+  });
+
   // Body parsers
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
@@ -33,20 +39,25 @@ function buildApp() {
   return app;
 }
 
+beforeEach(() => {
+  vi.clearAllMocks();
+});
+
 describe('requireActivityAdmin middleware', () => {
   let app: express.Express;
 
   const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
   const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
 
-  beforeEach(() => {
-    app = buildApp();
-    app.request.currentContext = TEST_CURRENT_CONTEXT;
-  });
-
   describe('scope:all', () => {
     beforeEach(() => {
-      app.request.currentAuthorization = { attributes: ['scope:all'], groups: [] };
+      app = buildApp({
+        currentContext: TEST_CURRENT_CONTEXT,
+        currentAuthorization: {
+          attributes: ['scope:all'],
+          groups: []
+        }
+      });
     });
 
     it('immediately calls next', async () => {
@@ -67,7 +78,13 @@ describe('requireActivityAdmin middleware', () => {
 
   describe('scope:self', () => {
     beforeEach(() => {
-      app.request.currentAuthorization = { attributes: ['scope:self'], groups: [] };
+      app = buildApp({
+        currentContext: TEST_CURRENT_CONTEXT,
+        currentAuthorization: {
+          attributes: ['scope:self'],
+          groups: []
+        }
+      });
     });
 
     it('allows PRIMARY through', async () => {

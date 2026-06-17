@@ -6,9 +6,12 @@ import type { Mock } from 'vitest';
 import type { IdirSearchParameters } from '../../../src/types/index.ts';
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 

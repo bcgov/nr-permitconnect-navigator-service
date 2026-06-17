@@ -8,10 +8,10 @@ export const createATSClientController = async (
   req: Request<never, never, ATSClientResource, never>,
   res: Response
 ) => {
-  const identityProvider = req.currentContext?.tokenPayload?.identity_provider.toUpperCase();
+  const identityProvider = res.locals.currentContext?.tokenPayload?.identity_provider.toUpperCase();
   const atsClient = req.body;
   // Set the createdBy field to current user with \\ as the separator for the domain and username to match ATS DB
-  atsClient.createdBy = `${identityProvider}\\${getCurrentUsername(req.currentContext)}`;
+  atsClient.createdBy = `${identityProvider}\\${getCurrentUsername(res.locals.currentContext)}`;
   const response = await createATSClient(atsClient);
   res.status(response.status).json(response.data);
 };
@@ -20,10 +20,10 @@ export const createATSEnquiryController = async (
   req: Request<never, never, ATSEnquiryResource, never>,
   res: Response
 ) => {
-  const identityProvider = req.currentContext?.tokenPayload?.identity_provider.toUpperCase();
+  const identityProvider = res.locals.currentContext?.tokenPayload?.identity_provider.toUpperCase();
   const atsEnquiry = req.body;
   // Set the createdBy field to current user with \\ as the separator for the domain and username to match ATS DB
-  atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(req.currentContext)}`;
+  atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(res.locals.currentContext)}`;
   const response = await createATSEnquiry(atsEnquiry);
   res.status(response.status).json(response.data);
 };

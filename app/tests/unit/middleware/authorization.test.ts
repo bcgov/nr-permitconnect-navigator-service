@@ -18,14 +18,14 @@ const CONTACT_ID = 'contact-1';
 
 function buildAppForHasAuthorization(currentContext: unknown) {
   const app = express();
-  app.use((req, _res, next) => {
-    (req as Request).currentContext = currentContext as Request['currentContext'];
+  app.use((_req, res, next) => {
+    res.locals.currentContext = currentContext;
     next();
   });
   app.get('/test', hasAuthorization('document', 'read'), (req: Request, res: Response) => {
     res.status(200).json({
-      attributes: req.currentAuthorization?.attributes,
-      groupCount: req.currentAuthorization?.groups.length
+      attributes: res.locals.currentAuthorization?.attributes,
+      groupCount: res.locals.currentAuthorization?.groups.length
     });
   });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -37,9 +37,9 @@ function buildAppForHasAuthorization(currentContext: unknown) {
 
 function buildAppForHasAccess(currentAuthorization: unknown, currentContext: unknown, route = '/d/:documentId') {
   const app = express();
-  app.use((req, _res, next) => {
-    (req as Request).currentContext = currentContext as Request['currentContext'];
-    (req as Request).currentAuthorization = currentAuthorization as Request['currentAuthorization'];
+  app.use((_req, res, next) => {
+    res.locals.currentContext = currentContext;
+    res.locals.currentAuthorization = currentAuthorization;
     next();
   });
   app.get(route, hasAccess(route.includes(':documentId') ? 'documentId' : 'activityId'), (_req, res) => {

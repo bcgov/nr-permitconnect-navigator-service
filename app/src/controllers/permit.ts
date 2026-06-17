@@ -132,11 +132,11 @@ export const searchPermitsController = async (
   const response = await transactionWrapper<{ permits: Permit[]; totalRecords: number }>(
     async (tx: PrismaTransactionClient) => {
       // Validate it's not PCNS
-      if (req.currentContext.initiative === Initiative.PCNS) {
+      if (res.locals.currentContext.initiative === Initiative.PCNS) {
         throw new Problem(400, { detail: 'Invalid initiative' });
       }
 
-      return await searchPermitsPaginated(tx, req.currentContext.initiative!, req.query); // nosonar
+      return await searchPermitsPaginated(tx, res.locals.currentContext.initiative!, req.query); // nosonar
     }
   );
   res.status(200).json(response);
@@ -246,8 +246,8 @@ export const sendPermitUpdateNotifications = async (
 
 export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {
   const response = await transactionWrapper<Permit>(async (tx: PrismaTransactionClient) => {
-    const createStamps = generateCreateStamps(req.currentContext);
-    const updateStamps = generateUpdateStamps(req.currentContext);
+    const createStamps = generateCreateStamps(res.locals.currentContext);
+    const updateStamps = generateUpdateStamps(res.locals.currentContext);
 
     // Add permit ID and stamp data if necessary
     const permitData: Permit = {

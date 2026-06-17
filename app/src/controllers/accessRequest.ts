@@ -70,10 +70,10 @@ export const createUserAccessRequestController = async (
     const { accessRequest, user } = req.body;
 
     // Check if the requestee is an admin
-    const isAdmin = await isUserAdmin(tx, req.currentContext.initiative, req.currentAuthorization.groups);
+    const isAdmin = await isUserAdmin(tx, res.locals.currentContext.initiative, res.locals.currentAuthorization.groups);
 
     // Get all the groups for the current initiative
-    const groups = await getGroups(tx, req.currentContext.initiative);
+    const groups = await getGroups(tx, res.locals.currentContext.initiative);
 
     // Groups the current user can modify
     const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
@@ -123,7 +123,7 @@ export const createUserAccessRequestController = async (
 
     if (isGroupUpdate) {
       // Remove current initiative groups
-      await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
+      await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, accessUserGroups);
 
       // Assign new groups
       await assignGroup(tx, userResponse.sub, accessRequest.groupId);
@@ -155,7 +155,7 @@ export const createUserAccessRequestController = async (
         };
       } else {
         // Remove current initiative groups
-        await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, accessUserGroups);
+        await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, accessUserGroups);
       }
 
       updateComsPerms = true;
@@ -169,7 +169,7 @@ export const createUserAccessRequestController = async (
     // Assign new COMS permissions
     if (updateComsPerms) {
       try {
-        await assignPermissions(tx, req.currentContext, userResponse.sub);
+        await assignPermissions(tx, res.locals.currentContext, userResponse.sub);
       } catch (e) {
         if (e instanceof Error) log.warn(e.message);
         if (e instanceof Problem) log.warn(e.detail);
@@ -187,7 +187,7 @@ export const processUserAccessRequestController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const accessRequest = await getAccessRequest(tx, req.currentContext.initiative, req.params.accessRequestId);
+    const accessRequest = await getAccessRequest(tx, res.locals.currentContext.initiative, req.params.accessRequestId);
 
     if (accessRequest) {
       const userResponse = await readUser(tx, accessRequest.userId);
@@ -214,14 +214,14 @@ export const processUserAccessRequestController = async (
             await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
           } else {
             // Remove all user groups for the initiative
-            await removeUserGroups(tx, userResponse.sub, req.currentContext.initiative, userGroups);
+            await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, userGroups);
           }
 
           // Update access request status
           await updateAccessRequest(tx, { status: AccessRequestStatus.APPROVED }, accessRequest.accessRequestId);
 
           // Assign new COMS permissions
-          await assignPermissions(tx, req.currentContext, userResponse.sub);
+          await assignPermissions(tx, res.locals.currentContext, userResponse.sub);
         } else {
           await updateAccessRequest(tx, { status: AccessRequestStatus.REJECTED }, accessRequest.accessRequestId);
         }
@@ -236,7 +236,7 @@ export const processUserAccessRequestController = async (
 
 export const getAccessRequestsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper<AccessRequest[]>(async (tx: PrismaTransactionClient) => {
-    return await getAccessRequests(tx, req.currentContext.initiative);
+    return await getAccessRequests(tx, res.locals.currentContext.initiative);
   });
   res.status(200).json(response);
 };

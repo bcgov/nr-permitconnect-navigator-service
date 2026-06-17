@@ -74,14 +74,14 @@ export const createActivityContactController = async (
   const response = await transactionWrapper<ActivityContact>(async (tx: PrismaTransactionClient) => {
     // If the PRIMARY role is being given to another user, make any pre adjustments
     if (req.body.role === ActivityContactRole.PRIMARY)
-      await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
+      await verifyPrimaryChange(tx, req.params.activityId, res.locals.currentAuthorization, res.locals.currentContext);
 
     const newContact = await createActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
-      req.currentContext.initiative,
-      req.currentContext.userId,
+      res.locals.currentContext.initiative,
+      res.locals.currentContext.userId,
       req.params.activityId,
       newContact.contact!
     );
@@ -126,8 +126,8 @@ export const deleteActivityContactController = async (
 
     const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
       tx,
-      req.currentContext.initiative,
-      req.currentContext.userId,
+      res.locals.currentContext.initiative,
+      res.locals.currentContext.userId,
       req.params.activityId,
       ac.contact!
     );
@@ -171,15 +171,20 @@ export const updateActivityContactController = async (
       // If the PRIMARY role is being given to another user, make any pre adjustments
       let demoted: ActivityContact | undefined;
       if (req.body.role === ActivityContactRole.PRIMARY) {
-        demoted = await verifyPrimaryChange(tx, req.params.activityId, req.currentAuthorization, req.currentContext);
+        demoted = await verifyPrimaryChange(
+          tx,
+          req.params.activityId,
+          res.locals.currentAuthorization,
+          res.locals.currentContext
+        );
       }
 
       const updated = await updateActivityContact(tx, req.params.activityId, req.params.contactId, req.body.role);
 
       const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
         tx,
-        req.currentContext.initiative,
-        req.currentContext.userId,
+        res.locals.currentContext.initiative,
+        res.locals.currentContext.userId,
         req.params.activityId,
         updated.contact!
       );

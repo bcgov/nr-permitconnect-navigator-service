@@ -10,7 +10,7 @@ import type { NextFunction, Request, Response } from 'express';
  */
 export const hasIdentity = (identityKind: IdentityProviderKind) => {
   return async (req: Request, res: Response, next: NextFunction) => {
-    if (!hasIdentityUtil(identityKind, req.currentContext)) {
+    if (!hasIdentityUtil(identityKind, res.locals.currentContext)) {
       throw new Problem(403, { detail: 'Invalid user identity' });
     }
     return next();

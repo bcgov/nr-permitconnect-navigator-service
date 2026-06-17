@@ -39,12 +39,12 @@ export const sendRoadmapController = async (
   if (req.body.selectedFileIds?.length) {
     const attachments: EmailAttachment[] = [];
 
-    if (req.currentContext?.bearerToken) {
+    if (res.locals.currentContext?.bearerToken) {
       // Attempt to get the requested documents from COMS
       // If succesful it is converted to base64 encoding and added to the attachment list
       const objectPromises = req.body.selectedFileIds.map(async (id) => {
-        const { status, headers, data } = await getObject(req.currentContext.bearerToken!, id);
-        const searchResponse = await searchObject(req.currentContext.bearerToken!, id);
+        const { status, headers, data } = await getObject(res.locals.currentContext.bearerToken!, id);
+        const searchResponse = await searchObject(res.locals.currentContext.bearerToken!, id);
 
         if (status === 200 && searchResponse.data[0]) {
           const filename = searchResponse.data[0].name;
@@ -93,7 +93,7 @@ export const sendRoadmapController = async (
         escalateToDirector: false,
         escalationType: null,
         shownToProponent: false,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
@@ -102,7 +102,7 @@ export const sendRoadmapController = async (
         noteId: uuidv4(),
         noteHistoryId: noteHistory.noteHistoryId,
         note: noteBody,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });

@@ -33,13 +33,16 @@ import type {
   Enquiry,
   GeneralProject,
   HousingProject,
+  LocalContext,
   NoteHistory
 } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
@@ -49,6 +52,7 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -56,6 +60,7 @@ afterEach(() => {
 });
 
 const CURRENT_AUTHORIZATION = {
+  groups: [],
   attributes: [] as string[]
 };
 
@@ -67,8 +72,7 @@ describe('createNoteHistoryController', () => {
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...TEST_NOTE_HISTORY_1, note: 'Some text' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_NOTE_HISTORY_1, note: 'Some text' }
     };
 
     createHistorySpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
@@ -84,7 +88,7 @@ describe('createNoteHistoryController', () => {
       ...TEST_NOTE_HISTORY_1,
       noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId
+      createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
@@ -92,7 +96,7 @@ describe('createNoteHistoryController', () => {
       noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
       note: req.body.note,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId,
+      createdBy: TEST_CURRENT_CONTEXT.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
     });
@@ -106,8 +110,7 @@ describe('deleteNoteHistoryController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1' }
     };
 
     deleteHistorySpy.mockResolvedValue();
@@ -117,7 +120,7 @@ describe('deleteNoteHistoryController', () => {
     expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
     expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
       deletedAt: expect.any(Date) as Date,
-      deletedBy: req.currentContext.userId
+      deletedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
@@ -136,8 +139,7 @@ describe('listBringForwardController', () => {
     const req = {
       query: {
         bringForwardState: BringForwardType.UNRESOLVED
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const NOTE_HISTORY_LIST: NoteHistory[] = [
@@ -195,9 +197,7 @@ describe('listNoteHistoryController', () => {
   const listNoteHistorySpy = vi.spyOn(noteHistoryService, 'listNoteHistory');
 
   const req = {
-    params: { activityId: 'ACTI1234' },
-    currentAuthorization: CURRENT_AUTHORIZATION,
-    currentContext: TEST_CURRENT_CONTEXT
+    params: { activityId: 'ACTI1234' }
   };
 
   it('should call services and respond with 200 and result', async () => {
@@ -214,7 +214,8 @@ describe('listNoteHistoryController', () => {
   });
 
   it('should filter results if scope:self and shownToProponent = true', async () => {
-    req.currentAuthorization.attributes.push('scope:self');
+    (res.locals as unknown as LocalContext).currentAuthorization = CURRENT_AUTHORIZATION;
+    (res.locals as unknown as LocalContext).currentAuthorization.attributes.push('scope:self');
 
     const NOTE_HISTORY_LIST: NoteHistory[] = [TEST_NOTE_HISTORY_1, TEST_NOTE_HISTORY_2];
 
@@ -239,7 +240,7 @@ describe('updateNoteHistoryController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       body: { ...UPDATED_HISTORY },
-      currentContext: TEST_CURRENT_CONTEXT,
+
       params: {
         noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
       }
@@ -254,14 +255,14 @@ describe('updateNoteHistoryController', () => {
         never,
         NoteHistory & { note: string | undefined; resource: Resource }
       >,
-      res as unknown as Response
+      res as unknown as Response<NoteHistory, LocalContext>
     );
 
     expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(updateNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
       ...UPDATED_HISTORY,
       updatedAt: expect.any(Date) as Date,
-      updatedBy: req.currentContext.userId
+      updatedBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(getNoteHistorySpy).toHaveBeenCalledTimes(1);
     expect(getNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId);
@@ -272,7 +273,6 @@ describe('updateNoteHistoryController', () => {
   it('creates a new note if given', async () => {
     const req = {
       body: { ...UPDATED_HISTORY, note: 'Some text' },
-      currentContext: TEST_CURRENT_CONTEXT,
       params: {
         noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
       }
@@ -287,7 +287,7 @@ describe('updateNoteHistoryController', () => {
         never,
         NoteHistory & { note: string | undefined; resource: Resource }
       >,
-      res as unknown as Response
+      res as unknown as Response<NoteHistory, LocalContext>
     );
 
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
@@ -296,7 +296,7 @@ describe('updateNoteHistoryController', () => {
       noteHistoryId: req.params.noteHistoryId,
       note: req.body.note,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId,
+      createdBy: TEST_CURRENT_CONTEXT.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
     });

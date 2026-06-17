@@ -11,15 +11,15 @@ import type { PrismaTransactionClient } from '../db/database.ts';
  * Attempt to assign proponent groups to users with external IDPs
  * Rejects the request if user has no assigned group
  * @param req Express request object
- * @param _res Express response object
+ * @param res Express response object
  * @param next The next callback function
  * @returns Express middleware function
  * @throws {Problem} The error encountered upon failure
  */
-export const requireSomeGroup = async (req: Request, _res: Response, next: NextFunction) => {
+export const requireSomeGroup = async (req: Request, res: Response, next: NextFunction) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const idp = req.currentContext?.tokenPayload?.identity_provider;
-    const sub = req.currentContext?.tokenPayload?.sub;
+    const idp = res.locals.currentContext?.tokenPayload?.identity_provider;
+    const sub = res.locals.currentContext?.tokenPayload?.sub;
 
     if (!sub) {
       throw new Problem(403, {
@@ -47,7 +47,7 @@ export const requireSomeGroup = async (req: Request, _res: Response, next: NextF
         groups = await getSubjectGroups(tx, sub);
 
         // Assign COMS permissions
-        await assignPermissions(tx, req.currentContext, sub);
+        await assignPermissions(tx, res.locals.currentContext, sub);
       }
     }
 

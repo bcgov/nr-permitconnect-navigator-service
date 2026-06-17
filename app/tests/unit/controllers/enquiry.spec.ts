@@ -33,16 +33,19 @@ import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters }
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: Mock; json?: Mock; end?: Mock };
+let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -63,8 +66,7 @@ describe('createEnquiryController', () => {
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: TEST_ENQUIRY_INTAKE,
-      currentContext: TEST_CURRENT_CONTEXT
+      body: TEST_ENQUIRY_INTAKE
     };
 
     const PROJECT_WITH_PROJECTID = {
@@ -122,8 +124,7 @@ describe('deleteEnquiryController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' }
     };
 
     getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
@@ -152,10 +153,7 @@ describe('getEnquiriesController', () => {
   const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
 
   it('should call services and respond with 200 and result', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
-      currentAuthorization: { attributes: [] }
-    } as unknown as Request;
+    const req = {} as unknown as Request;
 
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     getEnquiriesSpy.mockResolvedValue(enquiries);
@@ -173,8 +171,7 @@ describe('getEnquiryController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' }
     } as unknown as Request<{ enquiryId: string }>;
 
     getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
@@ -211,9 +208,7 @@ describe('searchEnquiriesController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'], includeUser: true },
-      currentContext: TEST_CURRENT_CONTEXT,
-      currentAuthorization: { attributes: [] }
+      body: { enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'], includeUser: true }
     } as unknown as Request<never, never, EnquirySearchParameters, never>;
 
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
@@ -240,7 +235,6 @@ describe('updateEnquiryController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       body: { ...TEST_ENQUIRY_1 },
-      currentContext: TEST_CURRENT_CONTEXT,
       params: { enquiryId: TEST_ENQUIRY_1.enquiryId }
     };
 

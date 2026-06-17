@@ -314,13 +314,13 @@ export const createHousingProjectController = async (
     const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
       tx,
       req.body,
-      req.currentContext
+      res.locals.currentContext
     );
 
     // Create new housing project
     const data = await createHousingProject(tx, {
       ...housingProject,
-      ...generateCreateStamps(req.currentContext)
+      ...generateCreateStamps(res.locals.currentContext)
     });
 
     // Create each permit and tracking IDs
@@ -345,8 +345,8 @@ export const createHousingProjectController = async (
 export const deleteHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const project = await getHousingProject(tx, req.params.housingProjectId);
-    await deleteHousingProject(tx, req.params.housingProjectId, generateDeleteStamps(req.currentContext));
-    await deleteActivity(tx, project.activityId, generateDeleteStamps(req.currentContext));
+    await deleteHousingProject(tx, req.params.housingProjectId, generateDeleteStamps(res.locals.currentContext));
+    await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
   });
 
   res.status(204).end();
@@ -420,13 +420,13 @@ export const submitHousingProjectDraftController = async (
       const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
         tx,
         req.body,
-        req.currentContext
+        res.locals.currentContext
       );
 
       // Create new housing project
       const data = await createHousingProject(tx, {
         ...housingProject,
-        ...generateCreateStamps(req.currentContext)
+        ...generateCreateStamps(res.locals.currentContext)
       });
 
       // Create each permit and tracking IDs
@@ -447,7 +447,7 @@ export const submitHousingProjectDraftController = async (
 
       // Update the contact
       const contactResponse = await upsertContacts(tx, [
-        { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+        { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
       ]);
 
       return { ...data, contact: contactResponse[0] };
@@ -465,11 +465,11 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
       // Update draft
       return await updateDraft(tx, {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       });
     } else {
       // Create new draft
-      const activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(req.currentContext)))
+      const activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(res.locals.currentContext)))
         ?.activityId;
 
       const draft = await createDraft(tx, {
@@ -477,13 +477,13 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
         activityId: activityId,
         draftCode: DraftCode.HOUSING_PROJECT,
         data: req.body.data,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
 
       // Link contact to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
+      const contacts = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
       if (contacts[0]) {
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
       }
@@ -510,7 +510,7 @@ export const updateHousingProjectController = async (
           req.body.financiallySupportedNonProfit,
           req.body.financiallySupportedHousingCoop
         ].includes(BasicResponse.YES),
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       },
       req.params.housingProjectId
     );

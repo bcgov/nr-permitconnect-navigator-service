@@ -20,7 +20,7 @@ export const filterActivityResponseByScope = async (req: Request, res: Response,
     // Store the original res.json function
     const originalJson = res.json;
 
-    const contact = await searchContacts(prisma, { userId: [req.currentContext.userId as string] });
+    const contact = await searchContacts(prisma, { userId: [res.locals.currentContext.userId as string] });
 
     // Override res.json to intercept the response data
     type unknownType = unknown & { activity?: Activity };
@@ -28,7 +28,7 @@ export const filterActivityResponseByScope = async (req: Request, res: Response,
       let filtered = data;
 
       // Check scope and filter as necessary
-      if (req.currentAuthorization?.attributes.includes('scope:self')) {
+      if (res.locals.currentAuthorization?.attributes.includes('scope:self')) {
         if (Array.isArray(data)) {
           filtered = data.filter((x: unknown & { activity?: Activity }) =>
             x.activity?.activityContact?.some((ac) => ac.contactId === contact[0].contactId)

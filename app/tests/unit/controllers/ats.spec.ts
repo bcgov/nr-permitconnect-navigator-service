@@ -13,16 +13,19 @@ import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } f
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -48,8 +51,7 @@ describe('createATSClientController', () => {
         surName: 'Bates',
         regionName: 'HOUSING',
         optOutOfBCStatSurveyInd: 'NO'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const created = {
@@ -104,8 +106,7 @@ describe('createATSEnquiryController', () => {
         notes: 'dsdsa',
         enquiryTypeCodes: ['Project Intake'],
         createdBy: 'IDIR\\DONNY'
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const created = {
@@ -146,8 +147,7 @@ describe('searchATSUsersController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { firstName: 'John' },
-      currentContext: TEST_CURRENT_CONTEXT
+      query: { firstName: 'John' }
     };
 
     const atsUsers = {

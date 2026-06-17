@@ -23,7 +23,7 @@ export const createDocumentController = async (
       req.body.filename,
       req.body.mimeType,
       req.body.filesize,
-      generateCreateStamps(req.currentContext)
+      generateCreateStamps(res.locals.currentContext)
     );
 
     let createdByFullName: string | undefined;

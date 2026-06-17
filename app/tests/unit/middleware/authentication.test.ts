@@ -74,7 +74,9 @@ describe('authentication middleware', () => {
 
     beforeEach(() => {
       req = { originalUrl: '/test' };
-      res = {};
+      res = {
+        locals: {}
+      };
       next = vi.fn();
     });
 
@@ -84,7 +86,7 @@ describe('authentication middleware', () => {
       const middleware = hasAuthentication(INITIATIVE);
       await middleware(req as Request, res as Response, next);
 
-      expect(req.currentContext).toEqual({
+      expect(res.locals?.currentContext).toEqual({
         authType: AuthType.NONE,
         initiative: INITIATIVE
       });
@@ -105,7 +107,7 @@ describe('authentication middleware', () => {
       const middleware = hasAuthentication(INITIATIVE);
       await middleware(req as Request, res as Response, next);
 
-      expect(req.currentContext).toEqual({
+      expect(res.locals?.currentContext).toEqual({
         authType: AuthType.BEARER,
         initiative: INITIATIVE,
         bearerToken: token,

@@ -7,11 +7,16 @@ import * as contactService from '../../../src/services/contact.ts';
 
 import type { Request, Response } from 'express';
 
-function buildApp() {
+function buildApp(currentAuthorization = { attributes: [] as string[], groups: [] }) {
   const app = express();
   // Body parsers
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+  app.use((_req, res, next) => {
+    res.locals.currentAuthorization = currentAuthorization;
+    res.locals.currentContext = TEST_CURRENT_CONTEXT;
+    next();
+  });
   app.use(filterActivityResponseByScope);
 
   // Endpoints
@@ -58,17 +63,12 @@ describe('filterActivityResponseByScope middleware', () => {
 
   const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
-  beforeEach(() => {
-    app = buildApp();
-    app.request.currentContext = TEST_CURRENT_CONTEXT;
-  });
-
   describe('scope:self attribute present', () => {
     it('filters array response', async () => {
-      app.request.currentAuthorization = {
+      app = buildApp({
         attributes: ['scope:self'],
         groups: []
-      };
+      });
 
       searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -89,10 +89,10 @@ describe('filterActivityResponseByScope middleware', () => {
     });
 
     it('filters object response', async () => {
-      app.request.currentAuthorization = {
+      app = buildApp({
         attributes: ['scope:self'],
         groups: []
-      };
+      });
 
       searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -105,10 +105,10 @@ describe('filterActivityResponseByScope middleware', () => {
 
   describe('scope:all attribute present', () => {
     it('does not filter response', async () => {
-      app.request.currentAuthorization = {
+      app = buildApp({
         attributes: ['scope:all'],
         groups: []
-      };
+      });
 
       searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -139,10 +139,10 @@ describe('filterActivityResponseByScope middleware', () => {
   });
 
   it('returns 403 when an error happens', async () => {
-    app.request.currentAuthorization = {
-      attributes: ['scope:self'],
+    app = buildApp({
+      attributes: ['scope:all'],
       groups: []
-    };
+    });
 
     searchContactsSpy.mockImplementationOnce(() => {
       throw new Error('boom');

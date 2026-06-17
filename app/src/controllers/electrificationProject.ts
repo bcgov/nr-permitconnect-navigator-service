@@ -149,12 +149,12 @@ export const createElectrificationProjectController = async (
   } as ElectrificationProjectIntake;
 
   const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
-    const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
+    const electrificationProject = await generateElectrificationProjectData(tx, req.body, res.locals.currentContext);
 
     // Create new electrification project
     return await createElectrificationProject(tx, {
       ...electrificationProject,
-      ...generateCreateStamps(req.currentContext)
+      ...generateCreateStamps(res.locals.currentContext)
     });
   });
 
@@ -170,9 +170,9 @@ export const deleteElectrificationProjectController = async (
     await deleteElectrificationProject(
       tx,
       req.params.electrificationProjectId,
-      generateDeleteStamps(req.currentContext)
+      generateDeleteStamps(res.locals.currentContext)
     );
-    await deleteActivity(tx, project.activityId, generateDeleteStamps(req.currentContext));
+    await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
   });
   res.status(204).end();
 };
@@ -246,12 +246,12 @@ export const submitElectrificationProjectDraftController = async (
 ) => {
   const result = await transactionWrapper<ElectrificationProject & { contact: Contact }>(
     async (tx: PrismaTransactionClient) => {
-      const electrificationProject = await generateElectrificationProjectData(tx, req.body, req.currentContext);
+      const electrificationProject = await generateElectrificationProjectData(tx, req.body, res.locals.currentContext);
 
       // Create new electrification project
       const data = await createElectrificationProject(tx, {
         ...electrificationProject,
-        ...generateCreateStamps(req.currentContext)
+        ...generateCreateStamps(res.locals.currentContext)
       });
 
       // Delete old draft
@@ -259,7 +259,7 @@ export const submitElectrificationProjectDraftController = async (
 
       // Update the contact
       const contactResponse = await upsertContacts(tx, [
-        { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+        { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
       ]);
 
       return { ...data, contact: contactResponse[0] };
@@ -277,12 +277,12 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
       // Update draft
       return await updateDraft(tx, {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       });
     } else {
       // Create new draft
       const activityId = (
-        await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(req.currentContext))
+        await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(res.locals.currentContext))
       )?.activityId;
 
       const draft = await createDraft(tx, {
@@ -290,13 +290,13 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
         activityId: activityId,
         draftCode: DraftCode.ELECTRIFICATION_PROJECT,
         data: req.body.data,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
 
       // Update the contact and link to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
+      const contacts = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
       if (contacts[0])
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
 
@@ -320,7 +320,7 @@ export const updateElectrificationProjectController = async (
       tx,
       {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       },
       req.params.electrificationProjectId
     );

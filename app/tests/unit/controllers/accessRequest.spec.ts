@@ -73,17 +73,16 @@ const mockSubjectHasGroupName = subjectHasGroupName as Mock;
 const mockRemoveGroup = removeGroup as Mock;
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: Mock; json?: Mock; end?: Mock };
-beforeEach(() => {
-  res = mockResponse();
-});
+let res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock };
 
 afterEach(() => {
   /*
@@ -95,6 +94,15 @@ afterEach(() => {
 });
 
 describe('createUserAccessRequestController', () => {
+  beforeEach(() => {
+    res = mockResponse();
+
+    res.locals.currentContext = TEST_CURRENT_CONTEXT;
+    res.locals.currentAuthorization = {
+      groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
+    };
+  });
+
   it('automatically updates user group', async () => {
     const req = {
       body: {
@@ -147,6 +155,15 @@ describe('createUserAccessRequestController', () => {
   });
 
   describe('admin', () => {
+    beforeEach(() => {
+      res = mockResponse();
+
+      res.locals.currentContext = TEST_CURRENT_CONTEXT;
+      res.locals.currentAuthorization = {
+        groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
+      };
+    });
+
     it('automatically grants access', async () => {
       const req = {
         body: {
@@ -158,13 +175,6 @@ describe('createUserAccessRequestController', () => {
           user: {
             userId: 'u1'
           }
-        },
-        currentContext: TEST_CURRENT_CONTEXT,
-        currentAuthorization: {
-          groups: [
-            // Makes isUserAdmin return true
-            { name: GroupName.ADMIN, initiativeId: 'i1' }
-          ]
         }
       };
 
@@ -210,10 +220,6 @@ describe('createUserAccessRequestController', () => {
           user: {
             userId: 'u1'
           }
-        },
-        currentContext: TEST_CURRENT_CONTEXT,
-        currentAuthorization: {
-          groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
         }
       };
 
@@ -244,6 +250,15 @@ describe('createUserAccessRequestController', () => {
   });
 
   describe('supervisor', () => {
+    beforeEach(() => {
+      res = mockResponse();
+
+      res.locals.currentContext = TEST_CURRENT_CONTEXT;
+      res.locals.currentAuthorization = {
+        groups: [{ name: GroupName.SUPERVISOR, initiativeId: 'i1' }]
+      };
+    });
+
     it('creates access request', async () => {
       const req = {
         body: {
@@ -256,10 +271,6 @@ describe('createUserAccessRequestController', () => {
             sub: 'sub-123',
             idp: IdentityProviderKind.AZUREIDIR
           }
-        },
-        currentContext: TEST_CURRENT_CONTEXT,
-        currentAuthorization: {
-          groups: [{ name: GroupName.SUPERVISOR, initiativeId: 'i1' }]
         }
       };
 
@@ -303,6 +314,12 @@ describe('createUserAccessRequestController', () => {
 });
 
 describe('processUserAccessRequestController', () => {
+  beforeEach(() => {
+    res = mockResponse();
+
+    res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  });
+
   it('approves and grants access', async () => {
     const req = {
       params: { accessRequestId: 'ar-1' },
@@ -348,8 +365,7 @@ describe('processUserAccessRequestController', () => {
   it('approves and removes access', async () => {
     const req = {
       params: { accessRequestId: 'ar-1' },
-      body: { approve: true },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { approve: true }
     };
 
     mockGetAccessRequest.mockResolvedValue({
@@ -390,8 +406,7 @@ describe('processUserAccessRequestController', () => {
   it('rejects access request', async () => {
     const req = {
       params: { accessRequestId: 'ar-1' },
-      body: { approve: false },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { approve: false }
     };
 
     mockGetAccessRequest.mockResolvedValue({
@@ -425,10 +440,14 @@ describe('processUserAccessRequestController', () => {
 });
 
 describe('getAccessRequestsController', () => {
+  beforeEach(() => {
+    res = mockResponse();
+
+    res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  });
+
   it('returns access requests with 200', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT
-    };
+    const req = {};
 
     const mockData = [{ accessRequestId: 'ar-1' }, { accessRequestId: 'ar-2' }];
 

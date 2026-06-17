@@ -8,7 +8,9 @@ import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
@@ -16,9 +18,9 @@ const mockResponse = () => {
 };
 
 let res = mockResponse();
-
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -30,7 +32,6 @@ describe('getPermitTypesController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
       query: { initiative: Initiative.HOUSING }
     };
 

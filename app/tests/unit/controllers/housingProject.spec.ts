@@ -65,16 +65,19 @@ const PROJECT_WITH_PROJECTID = {
 };
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: Mock; json?: Mock; end?: Mock };
+let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -232,8 +235,7 @@ describe('createHousingProjectController', () => {
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_HOUSING_PROJECT_INTAKE }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -302,8 +304,7 @@ describe('createHousingProjectController', () => {
           appliedPermits: [permit1NoTracking, permit2NoTracking],
           investigatePermits: [TEST_PERMIT_3]
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -385,8 +386,7 @@ describe('deleteHousingProjectController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
     getHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
@@ -420,8 +420,7 @@ describe('deleteHousingProjectDraftController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
     };
 
     getDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
@@ -445,9 +444,7 @@ describe('getHousingProjectActivityIdsController', () => {
   const getHousingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
 
   it('should call services and respond with 200 and result', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT
-    };
+    const req = {};
 
     getHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
@@ -465,8 +462,7 @@ describe('getHousingProjectDraftController', () => {
 
   it('should call services and respond with 200', async () => {
     const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
     };
 
     getDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
@@ -484,9 +480,7 @@ describe('getHousingProjectDraftsController', () => {
   const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
 
   it('should call services and respond with 200', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT
-    };
+    const req = {};
 
     getDraftsSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
 
@@ -509,8 +503,7 @@ describe('getHousingProjectStatisticsController', () => {
         dateTo: '',
         monthYear: '',
         userId: ''
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const statistics: HousingProjectStatistics[] = [
@@ -559,8 +552,7 @@ describe('getHousingProjectController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
     housingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
@@ -583,7 +575,6 @@ describe('getHousingProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
       query: {}
     };
 
@@ -603,8 +594,7 @@ describe('searchHousingProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false }
     };
 
     searchHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
@@ -636,8 +626,7 @@ describe('submitHousingProjectDraftController', () => {
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_HOUSING_PROJECT_INTAKE }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -693,8 +682,7 @@ describe('submitHousingProjectDraftController', () => {
 
   it('should delete associated draft if it exists', async () => {
     const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_HOUSING_PROJECT_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -724,8 +712,7 @@ describe('submitHousingProjectDraftController', () => {
           appliedPermits: [permit1NoTracking, permit2NoTracking],
           investigatePermits: [TEST_PERMIT_3]
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -825,8 +812,7 @@ describe('updateHousingProjectDraftController', () => {
             hasAppliedProvincialPermits: true
           }
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
@@ -883,8 +869,7 @@ describe('updateHousingProjectDraftController', () => {
             hasAppliedProvincialPermits: true
           }
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     updateDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
@@ -922,7 +907,6 @@ describe('updateHousingProjectController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       body: TEST_HOUSING_PROJECT_UPDATE,
-      currentContext: TEST_CURRENT_CONTEXT,
       params: {
         housingProjectId
       }

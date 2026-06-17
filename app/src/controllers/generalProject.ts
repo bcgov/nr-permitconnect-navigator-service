@@ -246,13 +246,13 @@ export const createGeneralProjectController = async (
     const { generalProject, appliedPermits, investigatePermits } = await generateGeneralProjectData(
       tx,
       req.body,
-      req.currentContext
+      res.locals.currentContext
     );
 
     // Create new general project
     const data = await createGeneralProject(tx, {
       ...generalProject,
-      ...generateCreateStamps(req.currentContext)
+      ...generateCreateStamps(res.locals.currentContext)
     });
 
     // Create each permit and tracking IDs
@@ -277,8 +277,8 @@ export const createGeneralProjectController = async (
 export const deleteGeneralProjectController = async (req: Request<{ generalProjectId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const project = await getGeneralProject(tx, req.params.generalProjectId);
-    await deleteGeneralProject(tx, req.params.generalProjectId, generateDeleteStamps(req.currentContext));
-    await deleteActivity(tx, project.activityId, generateDeleteStamps(req.currentContext));
+    await deleteGeneralProject(tx, req.params.generalProjectId, generateDeleteStamps(res.locals.currentContext));
+    await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
   });
 
   res.status(204).end();
@@ -352,13 +352,13 @@ export const submitGeneralProjectDraftController = async (
       const { generalProject, appliedPermits, investigatePermits } = await generateGeneralProjectData(
         tx,
         req.body,
-        req.currentContext
+        res.locals.currentContext
       );
 
       // Create new general project
       const data = await createGeneralProject(tx, {
         ...generalProject,
-        ...generateCreateStamps(req.currentContext)
+        ...generateCreateStamps(res.locals.currentContext)
       });
 
       // Create each permit and tracking IDs
@@ -379,7 +379,7 @@ export const submitGeneralProjectDraftController = async (
 
       // Update the contact
       const contactResponse = await upsertContacts(tx, [
-        { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+        { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
       ]);
 
       return { ...data, contact: contactResponse[0] };
@@ -398,11 +398,11 @@ export const upsertGeneralProjectDraftController = async (req: Request<never, ne
       // Update draft
       return await updateDraft(tx, {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       });
     } else {
       // Create new draft
-      const activityId = (await createActivity(tx, Initiative.GENERAL, generateCreateStamps(req.currentContext)))
+      const activityId = (await createActivity(tx, Initiative.GENERAL, generateCreateStamps(res.locals.currentContext)))
         ?.activityId;
 
       const draft = await createDraft(tx, {
@@ -410,13 +410,13 @@ export const upsertGeneralProjectDraftController = async (req: Request<never, ne
         activityId: activityId,
         draftCode: DraftCode.GENERAL_PROJECT,
         data: req.body.data,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
 
       // Link contact to activity
-      const contacts = await searchContacts(tx, { userId: [req.currentContext.userId!] });
+      const contacts = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
       if (contacts[0]) {
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
       }
@@ -437,7 +437,7 @@ export const updateGeneralProjectController = async (
       tx,
       {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       },
       req.params.generalProjectId
     );

@@ -89,6 +89,11 @@ export interface ContactSearchParameters {
   includeActivities?: boolean;
 }
 
+export interface LocalContext {
+  currentAuthorization: CurrentAuthorization;
+  currentContext: CurrentContext;
+}
+
 export interface CurrentAuthorization {
   attributes: string[];
   groups: Group[];

@@ -12,16 +12,19 @@ import type { Mock } from 'vitest';
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: Mock; json?: Mock; end?: Mock };
+let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -38,8 +41,7 @@ describe('getElectrificationProjectPermitDataController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: {},
-      currentContext: TEST_CURRENT_CONTEXT
+      query: {}
     };
 
     const mockData = [
@@ -100,8 +102,7 @@ describe('getHousingProjectPermitDataController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: {},
-      currentContext: TEST_CURRENT_CONTEXT
+      query: {}
     };
 
     const mockData = [

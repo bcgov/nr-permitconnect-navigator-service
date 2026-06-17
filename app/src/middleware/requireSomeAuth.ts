@@ -14,7 +14,7 @@ import type { NextFunction, Request, Response } from 'express';
  * @returns Express middleware next function.
  */
 export const requireSomeAuth = (req: Request, res: Response, next: NextFunction) => {
-  const authType: string | undefined = req.currentContext ? req.currentContext.authType : undefined;
+  const authType: string | undefined = res.locals.currentContext ? res.locals.currentContext.authType : undefined;
 
   if (!authType || authType === AuthType.NONE) {
     const audience: string = config.get('server.oidc.audience');
