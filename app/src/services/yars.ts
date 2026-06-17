@@ -254,6 +254,7 @@ export const getGroups = async (tx: PrismaTransactionClient, initiative: Initiat
   });
 
   return result.map((x) => ({
+    initiativeCode: i.code,
     groupId: x.groupId,
     initiativeId: x.initiativeId,
     name: x.name as GroupName,

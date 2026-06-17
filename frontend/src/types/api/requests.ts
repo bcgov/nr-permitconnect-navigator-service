@@ -425,6 +425,11 @@ export interface ListGroupsRequest {
   initiative: Initiative;
 }
 
+export interface ListPermissionsRequest {
+  initiative: Initiative;
+  groupName: GroupName;
+}
+
 export interface GetPeachSummaryRequest {
   data: PermitTracking[];
 }

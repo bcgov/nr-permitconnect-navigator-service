@@ -324,6 +324,7 @@ describe('getGroups', () => {
     expect(response).toStrictEqual([
       {
         groupId: 1,
+        initiativeCode: Initiative.HOUSING,
         initiativeId: 'init-1',
         name: GroupName.NAVIGATOR,
         label: 'Group Label'

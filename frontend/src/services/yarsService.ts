@@ -1,7 +1,13 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { DeleteSubjectGroupRequest, ListGroupsRequest, GetAuthorizationContextResponse, Group } from '@/types';
+import type {
+  DeleteSubjectGroupRequest,
+  GetAuthorizationContextResponse,
+  Group,
+  ListGroupsRequest,
+  ListPermissionsRequest
+} from '@/types';
 /**
  * Base route builder and endpoint definitions for this resource.
  * Routes should be referenced through this object rather than
@@ -10,8 +16,9 @@ import type { DeleteSubjectGroupRequest, ListGroupsRequest, GetAuthorizationCont
 const yarsRoute = createRouteBuilder('yars');
 
 const yarsRoutes = {
-  subjectGroup: () => yarsRoute('subject', 'group'),
   permissions: () => yarsRoute('permissions'),
+  subjectGroup: () => yarsRoute('subject', 'group'),
+  subjectPermissions: () => yarsRoute('subject', 'permissions'),
   groups: () => yarsRoute('groups')
 } as const;
 
@@ -30,10 +37,10 @@ export function deleteSubjectGroup(req: DeleteSubjectGroupRequest): Promise<void
 
 /**
  * Get authorization context (groups + permissions) for the current context.
- * @returns A promise resolving to permissions data.
+ * @returns A promise resolving to authorization context.
  */
 export function getAuthorizationContext(): Promise<GetAuthorizationContextResponse> {
-  return api.get<GetAuthorizationContextResponse>(yarsRoutes.permissions());
+  return api.get<GetAuthorizationContextResponse>(yarsRoutes.subjectPermissions());
 }
 
 /**
@@ -50,6 +57,19 @@ export function listGroups(req: ListGroupsRequest): Promise<Group[]> {
 }
 
 /**
+ * Lists permissions for a given initiative and group.
+ * @param req - The request payload.
+ * @returns A promise resolving to authorization context.
+ */
+export function listPermissions(req: ListPermissionsRequest): Promise<GetAuthorizationContextResponse> {
+  const { initiative, groupName } = req;
+
+  return api.get<GetAuthorizationContextResponse>(yarsRoutes.permissions(), {
+    params: { initiative, groupName }
+  });
+}
+
+/**
  * Backward compatibility layer for legacy default-export service usage.
  *
  * This object preserves the previous pattern:
@@ -60,5 +80,6 @@ export function listGroups(req: ListGroupsRequest): Promise<Group[]> {
 export const yarsService = {
   deleteSubjectGroup,
   getAuthorizationContext,
-  listGroups
+  listGroups,
+  listPermissions
 };

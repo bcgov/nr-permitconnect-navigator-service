@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { DevelopmentRoleOverride, Header, Footer } from '@/components/layout';
 import { useAuthNStore, useAuthZStore } from '@/store';
-import { NavigationPermission } from '@/store/authzStore';
 
 // Store
 const authnStore = useAuthNStore();
@@ -12,14 +11,7 @@ const authzStore = useAuthZStore();
   <div class="flex flex-col h-screen">
     <!-- Header/Nav -->
     <div class="layout-head">
-      <DevelopmentRoleOverride
-        v-if="
-          authnStore.getIsAuthenticated &&
-          authzStore.canNavigate(NavigationPermission.DEVELOPER, false) &&
-          authzStore.getGroupOverride &&
-          authzStore.getInitiativeOverride
-        "
-      />
+      <DevelopmentRoleOverride v-if="authnStore.getIsAuthenticated && authzStore.isImpersonating" />
       <Header />
       <slot name="nav" />
     </div>

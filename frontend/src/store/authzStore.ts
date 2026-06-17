@@ -1,7 +1,8 @@
 import { defineStore } from 'pinia';
-import { computed, ref } from 'vue';
+import { computed, ref, watch } from 'vue';
 
 import useAppStore from './appStore';
+import { yarsService } from '@/services';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 import type { Ref } from 'vue';
@@ -159,6 +160,8 @@ export interface AuthZStoreState {
   permissions: Ref<Permission[]>;
   groupOverride: Ref<GroupName | undefined>;
   initiativeOverride: Ref<Initiative | undefined>;
+  groupsImpersonation: Ref<Group[] | undefined>;
+  permissionsImpersonation: Ref<Permission[] | undefined>;
 }
 
 export const useAuthZStore = defineStore('authz', () => {
@@ -167,37 +170,46 @@ export const useAuthZStore = defineStore('authz', () => {
     groups: ref([]),
     permissions: ref([]),
     groupOverride: ref(undefined),
-    initiativeOverride: ref(undefined)
+    initiativeOverride: ref(undefined),
+    groupsImpersonation: ref(undefined),
+    permissionsImpersonation: ref(undefined)
   };
 
   // Getters
   const getters = {
     can: computed(
       () =>
-        (initiative: Initiative, resource: Resource | undefined = undefined, action: Action, group?: GroupName) =>
-          state.permissions.value.some(
-            (x) =>
-              initiative === x.initiative &&
-              x.resource === resource &&
-              x.action === action &&
-              (group ? x.group === group : true)
-          ) || getters.isInGroup.value([GroupName.DEVELOPER])
+        (initiative: Initiative, resource: Resource | undefined = undefined, action: Action, group?: GroupName) => {
+          const permissions = state.permissionsImpersonation.value ?? state.permissions.value;
+
+          return (
+            permissions.some(
+              (x) =>
+                initiative === x.initiative &&
+                x.resource === resource &&
+                x.action === action &&
+                (group ? x.group === group : true)
+            ) ||
+            (!getters.isImpersonating.value && getters.isInGroup.value([GroupName.DEVELOPER]))
+          );
+        }
     ),
     canNavigate: computed(() => (navPerm: NavigationPermission | NavigationPermission[], allowGroupOverride = true) => {
       const currentInitiative = useAppStore().getInitiative;
       const bypassInitiative = currentInitiative === Initiative.PCNS;
 
       const groups =
-        allowGroupOverride && state.groupOverride.value && state.initiativeOverride.value
-          ? [{ initiativeCode: state.initiativeOverride.value, name: state.groupOverride.value } as Group]
-          : state.groups.value;
+        allowGroupOverride && state.groupsImpersonation.value ? state.groupsImpersonation.value : state.groups.value;
       const requiredPerms = Array.isArray(navPerm) ? navPerm : [navPerm];
       const perms = NavigationAuthorizationMap.filter((p) =>
         groups?.some((g) => g.initiativeCode === p.initiative && g.name === p.group)
       )
         .filter((p) => bypassInitiative || p.initiative === currentInitiative)
         .flatMap((p) => p.permissions);
-      return groups?.some((g) => g.name === GroupName.DEVELOPER) || !!perms.some((p) => requiredPerms?.includes(p));
+      return (
+        !!perms.some((p) => requiredPerms?.includes(p)) ||
+        (!getters.isImpersonating.value && getters.isInGroup.value([GroupName.DEVELOPER]))
+      );
     }),
     getGroups: computed(() => state.groups.value),
     getGroupOverride: computed(() => state.groupOverride.value),
@@ -208,7 +220,8 @@ export const useAuthZStore = defineStore('authz', () => {
         state.groups.value.some((x) =>
           group.some((g) => x.initiativeCode === useAppStore().getInitiative && g === x.name)
         )
-    )
+    ),
+    isImpersonating: computed(() => !!(state.groupsImpersonation.value && state.permissionsImpersonation.value))
   };
 
   // Actions
@@ -224,6 +237,39 @@ export const useAuthZStore = defineStore('authz', () => {
   function setInitiativeOverride(code: Initiative | undefined) {
     state.initiativeOverride.value = code;
   }
+
+  watch(
+    () => [state.groupOverride.value, state.initiativeOverride.value] as const,
+    async ([group, initiative], _prev, onInvalidate) => {
+      if (!group || !initiative) {
+        state.groupsImpersonation.value = undefined;
+        state.permissionsImpersonation.value = undefined;
+        return;
+      }
+
+      let cancelled = false;
+      onInvalidate(() => {
+        cancelled = true;
+      });
+
+      try {
+        const response = await yarsService.listPermissions({
+          initiative: initiative,
+          groupName: group
+        });
+
+        if (cancelled) return;
+
+        state.groupsImpersonation.value = response.groups;
+        state.permissionsImpersonation.value = response.permissions;
+      } catch {
+        if (cancelled) return;
+
+        state.groupsImpersonation.value = undefined;
+        state.permissionsImpersonation.value = undefined;
+      }
+    }
+  );
 
   return {
     // State
