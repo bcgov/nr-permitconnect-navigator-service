@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 // Prisma operations to exclude from filtering
-const excludeOperations: readonly string[] = ['create', 'createMany', 'createManyAndReturn'];
+const excludeOperations = new Set(['create', 'createMany', 'createManyAndReturn']);
 
 /*
  * Many eslint-disable lines as working with the prisma dynamic typing is basically impossible so its
@@ -10,7 +10,7 @@ const excludeOperations: readonly string[] = ['create', 'createMany', 'createMan
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function filterColumn(operation: string, args: any) {
-  if (excludeOperations.includes(operation)) return args;
+  if (excludeOperations.has(operation)) return args;
 
   if (!args.where) args = { ...args, where: {} };
   args.where = { ...args.where, deletedAt: null };
