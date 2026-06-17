@@ -1,391 +1,126 @@
-/* TODO: Create group policy details type and set explicit return types */
+import { assignPermissions } from './coms.ts';
+import { unitOfWork } from '../repository/uow.ts';
 import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { getLogger } from '../utils/log.ts';
+import Problem from '../utils/problem.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Group } from '../types/index.ts';
+import type { CurrentContext, Group } from '../types/index.ts';
+import { assignGroup, getCorrespondingGlobalGroup, getGroups } from './helpers/yars.ts';
+
+const log = getLogger(module.filename);
 
 /**
  * Assigns an identity to the given group
  * Assigns permissions to COMS based on the given group
- * @param tx Prisma transaction client
  * @param sub Subject of the authorized user
  * @param groupId The group ID to add the user to
  * @returns A Promise that resolve to an object with a subject and role id
  */
-export const assignGroup = async (
-  tx: PrismaTransactionClient,
-  sub: string,
-  groupId: number
-): Promise<{ sub: string; roleId: number }> => {
-  const groupResult = await tx.group.findFirstOrThrow({
-    where: {
-      groupId
-    }
+export const assignGroupService = async (sub: string, groupId: number): Promise<{ sub: string; roleId: number }> => {
+  return await unitOfWork.execute(async ({ group, subjectGroup }) => {
+    return await assignGroup({ group, subjectGroup }, sub, groupId);
   });
-
-  const exists = await subjectHasGroup(tx, sub, groupId);
-  if (exists) return { sub, roleId: groupId };
-
-  const result = await tx.subject_group.create({
-    data: {
-      sub: sub,
-      groupId: groupResult.groupId
-    }
-  });
-
-  return { sub: result.sub, roleId: result.groupId };
 };
 
-/**
- * Get the corresponding global permission for a group ID
- * @param tx Prisma transaction client
- * @param groupId Group ID to find corresponding global permission ID for
- * @returns A Promise that resolves to a group
- */
-export const getCorrespondingGlobalGroup = async (tx: PrismaTransactionClient, groupId: number): Promise<Group> => {
-  const group = await tx.group.findFirstOrThrow({
-    where: {
-      groupId
-    }
+export const getCorrespondingGlobalGroupService = async (groupId: number): Promise<Group> => {
+  return unitOfWork.execute(async (repos) => {
+    return getCorrespondingGlobalGroup(repos, groupId);
   });
-
-  const globalInitiative = await tx.initiative.findFirstOrThrow({
-    where: {
-      code: Initiative.PCNS
-    }
-  });
-
-  const result = await tx.group.findFirstOrThrow({
-    where: {
-      initiativeId: globalInitiative.initiativeId,
-      name: group.name
-    }
-  });
-
-  return {
-    initiativeCode: globalInitiative.code,
-    initiativeId: globalInitiative.initiativeId,
-    groupId: result.groupId,
-    name: result.name as GroupName,
-    label: result.label
-  } satisfies Group;
-};
-
-/**
- * Gets groups for the specified identity
- * @param tx Prisma transaction client
- * @param sub Subject to search
- * @returns A Promise that resolves into an array of groups
- */
-export const getSubjectGroups = async (tx: PrismaTransactionClient, sub: string): Promise<Group[]> => {
-  const result = await tx.subject_group.findMany({
-    where: {
-      sub: sub
-    },
-    include: {
-      group: {
-        include: {
-          initiative: true
-        }
-      }
-    }
-  });
-
-  return result.map((x) => ({
-    initiativeCode: x.group.initiative.code,
-    initiativeId: x.group.initiativeId,
-    groupId: x.groupId,
-    name: x.group.name as GroupName,
-    label: x.group.label
-  })) as Group[];
-};
-
-/**
- * Gets initiatives for the specified identity
- * @param tx Prisma transaction client
- * @param sub Subject to search
- * @returns A Promise that resolves into an array of initiative IDs and codes
- */
-export const getSubjectInitiatives = async (
-  tx: PrismaTransactionClient,
-  sub: string
-): Promise<{ code: string; initiativeId: string }[]> => {
-  const result = await tx.subject_group.findMany({
-    select: {
-      group: {
-        select: {
-          initiativeId: true,
-          initiative: {
-            select: {
-              code: true
-            }
-          }
-        }
-      }
-    },
-    where: {
-      sub: sub,
-      NOT: {
-        group: {
-          initiative: {
-            code: Initiative.PCNS
-          }
-        }
-      }
-    }
-  });
-
-  return result.map((x) => ({
-    code: x.group.initiative.code,
-    initiativeId: x.group.initiativeId
-  }));
-};
-
-/**
- * Gets a list of group/role/policy/resource/action matching the given parameters
- * @param tx Prisma transaction client
- * @param groupId Group ID to match on
- * @param resourceName Resource name to match on
- * @param actionName Action name to match on
- * @param initiative Optional initiative code to match on
- * @returns A Promise that resolves into an array of group policy details
- */
-export const getGroupPolicyDetails = async (
-  tx: PrismaTransactionClient,
-  groupId: number,
-  resourceName: string,
-  actionName: string,
-  initiative?: Initiative
-  // ): Promise<GroupPolicyDetails[]> => {
-) => {
-  const result = await tx.group_role_policy_vw.findMany({
-    where: {
-      groupId: groupId,
-      resourceName: resourceName,
-      actionName: actionName,
-      initiativeCode: initiative
-    }
-  });
-
-  return result.map((x) => ({
-    groupId: x.groupId,
-    initiativeCode: x.initiativeCode,
-    groupName: x.groupName,
-    roleName: x.roleName,
-    policyId: x.policyId,
-    resourceName: x.resourceName,
-    actionName: x.actionName
-  }));
-};
-
-/**
- * Gets a list of group/role/policy/resource/action matching the given parameters for the PCNS initiative
- * @param tx Prisma transaction client
- * @param groupName Group name to match on
- * @param resourceName Resource name to match on
- * @param actionName Action name to match on
- * @returns A Promise that resolves into an array of group policy details
- */
-export const getPCNSGroupPolicyDetails = async (
-  tx: PrismaTransactionClient,
-  groupName: string,
-  resourceName: string,
-  actionName: string
-  // ): Promise<GroupPolicyDetails[]> => {
-) => {
-  const result = await tx.group_role_policy_vw.findMany({
-    where: {
-      initiativeCode: Initiative.PCNS,
-      groupName: groupName,
-      resourceName: resourceName,
-      actionName: actionName
-    }
-  });
-
-  return result.map((x) => ({
-    groupId: x.groupId,
-    initiativeCode: x.initiativeCode,
-    groupName: x.groupName,
-    roleName: x.roleName,
-    policyId: x.policyId,
-    resourceName: x.resourceName,
-    actionName: x.actionName
-  }));
-};
-
-/**
- * Gets a list of resource/actions associated with the given groupId
- * @param tx Prisma transaction client
- * @param groupId Group ID to search
- * @returns A Promise that resolves to array of permissions
- */
-export const getGroupPermissions = async (tx: PrismaTransactionClient, groupId: number) => {
-  const result = await tx.group_role_policy_vw.findMany({
-    where: {
-      groupId
-    }
-  });
-
-  return result.map((x) => ({
-    group: x.groupName,
-    initiative: x.initiativeCode,
-    resource: x.resourceName,
-    action: x.actionName
-  }));
 };
 
 /**
  * Gets a list of groups for the given initiativeId
- * @param tx Prisma transaction client
- * @param initiative Initiative code to search
+ * @param initiativeCode Initiative code to search
  * @returns A Promise that resolves to an array of groups
  */
-export const getGroups = async (tx: PrismaTransactionClient, initiative: Initiative | undefined) => {
-  const i = await tx.initiative.findFirstOrThrow({
-    where: {
-      code: initiative
-    }
+export const getGroupsService = async (initiativeCode: Initiative | undefined) => {
+  return await unitOfWork.execute(async ({ group, initiative }) => {
+    return await getGroups({ group, initiative }, initiativeCode);
   });
-
-  const result = await tx.group.findMany({
-    where: {
-      initiativeId: i.initiativeId
-    }
-  });
-
-  return result.map((x) => ({
-    initiativeCode: i.code,
-    groupId: x.groupId,
-    initiativeId: x.initiativeId,
-    name: x.name as GroupName,
-    label: x.label
-  }));
 };
 
-/**
- * Gets a list of attributes associated with the given policyId
- * @param tx Prisma transaction client
- * @param policyId Policy ID to search
- * @returns A Promise that resolves to an array of policy attributes
- */
-export const getPolicyAttributes = async (tx: PrismaTransactionClient, policyId: number) => {
-  const result = await tx.policy_attribute.findMany({
-    where: {
-      policyId
-    },
-    include: {
-      attribute: {
-        include: {
-          attributeGroup: true
-        }
+export const listPermissionsService = async (initiativeCode: Initiative, groupName: GroupName) => {
+  return await unitOfWork.execute(async ({ group, groupRolePolicyVw, initiative }) => {
+    const i = await initiative.findFirstOrThrow({
+      where: {
+        code: initiativeCode
       }
-    }
-  });
+    });
 
-  return result.map((x) => ({
-    attributeId: x.attribute.attributeId,
-    attributeName: x.attribute.name,
-    groupId: x.attribute.attributeGroup.map((x) => x.groupId)
-  }));
+    const groups = await group.findMany({
+      where: {
+        initiativeId: i.initiativeId,
+        name: groupName
+      }
+    });
+
+    const permissions = await Promise.all(
+      groups.filter((x) => x.name === groupName).map((x) => groupRolePolicyVw.getGroupPermissions(x.groupId))
+    ).then((x) => x.flat());
+
+    return {
+      groups: groups.map((x) => ({
+        initiativeCode: i.code,
+        groupId: x.groupId,
+        initiativeId: x.initiativeId,
+        name: x.name as GroupName,
+        label: x.label
+      })),
+      permissions
+    };
+  });
 };
 
-/**
- * @param tx Prisma transaction client
- * @param sub The subject of the current user
- * @param groupId The ID of the group to remove
- * @returns A Promise that resolves to the result of the delete operation
- */
-export const removeGroup = async (tx: PrismaTransactionClient, sub: string, groupId: number) => {
-  const result = await tx.subject_group.delete({
-    where: {
+export const listSubjectPermissionsService = async (currentContext: CurrentContext) => {
+  return await unitOfWork.execute(async ({ groupRolePolicyVw, subjectGroup }) => {
+    if (!currentContext.tokenPayload?.sub) throw new Problem(500, { detail: 'Unable to read token sub' });
+
+    const groups = await subjectGroup.getSubjectGroups(currentContext.tokenPayload.sub);
+    const permissions = await Promise.all(groups.map((x) => groupRolePolicyVw.getGroupPermissions(x.groupId))).then(
+      (x) => x.flat()
+    );
+
+    // Double check correct COMS permissions.
+    // This endpoint is called on client bootstrap, so it's a good place to verify
+    //   COMS permissions without adding COMS calls to every API request.
+    await assignPermissions(currentContext, currentContext.tokenPayload.sub, groups);
+
+    return { groups, permissions };
+  });
+};
+
+export const deleteSubjectGroupService = async (currentContext: CurrentContext, sub: string, groupId: number) => {
+  return await unitOfWork.execute(async ({ group, initiative, subjectGroup }) => {
+    const groups = await subjectGroup.getSubjectGroups(sub);
+    const grp = groups.find((x) => x.groupId === groupId);
+    if (grp?.initiativeCode === Initiative.PCNS)
+      throw new Problem(422, { detail: 'Cannot delete a global group directly' });
+
+    await subjectGroup.delete({
       sub_groupId: {
         sub: sub,
         groupId: groupId
       }
-    }
-  });
+    });
 
-  return { sub: result.sub, roleId: result.groupId };
-};
-
-/**
- * Check if a subject belongs to a specific group ID
- * @param tx Prisma transaction client
- * @param sub The subject of the current user
- * @param groupId The ID of the group to check
- * @returns A Promise that resolves to a boolean
- */
-export const subjectHasGroup = async (tx: PrismaTransactionClient, sub: string, groupId: number) => {
-  const count = await tx.subject_group.count({
-    where: {
-      sub,
-      groupId
-    }
-  });
-
-  return count > 0;
-};
-
-/**
- * Check if a subject belongs to a specific group name, excluding the global group
- * @param tx Prisma transaction client
- * @param sub The subject of the current user
- * @param groupName The name of the group to check
- * @returns A Promise that resolves to a boolean
- */
-export const subjectHasGroupName = async (
-  tx: PrismaTransactionClient,
-  sub: string,
-  groupName: GroupName | undefined
-) => {
-  if (!groupName) return false;
-
-  const count = await tx.subject_group.count({
-    where: {
-      sub: sub,
-      group: {
-        name: groupName
-      },
-      NOT: {
-        group: {
-          initiative: {
-            code: Initiative.PCNS
-          }
+    // Only remove global perm if user has no groups of the same type assigned in other initiatives
+    if (!(await subjectGroup.subjectHasGroupName(sub, grp?.name))) {
+      const correspondingGlobalGroup = await getCorrespondingGlobalGroup({ group, initiative }, groupId);
+      await subjectGroup.delete({
+        sub_groupId: {
+          sub: sub,
+          groupId: correspondingGlobalGroup.groupId
         }
-      }
+      });
+    }
+
+    // Assign new COMS permissions
+    try {
+      const groupsAfterRmv = await subjectGroup.getSubjectGroups(sub);
+      await assignPermissions(currentContext, sub, groupsAfterRmv);
+    } catch (e) {
+      if (e instanceof Error) log.warn(e.message);
+      if (e instanceof Problem) log.warn(e.detail);
     }
   });
-
-  return count > 0;
-};
-
-/**
- * Check if a subject belongs to a specific set of group names within an initiative
- * @param tx Prisma transaction client
- * @param sub The subject of the current user
- * @param initiativeCode Initiative the groups belong to
- * @param groupNames Array of group names to check
- * @returns A Promise that resolves to a boolean
- */
-export const subjectHasInitiativeGroupName = async (
-  tx: PrismaTransactionClient,
-  sub: string,
-  initiativeCode: Initiative,
-  groupNames: (GroupName | undefined)[]
-) => {
-  const groupArray: GroupName[] = groupNames.filter(Boolean) as GroupName[];
-
-  if (groupNames.length === 0) return false;
-
-  const count = await tx.subject_group.count({
-    where: {
-      sub: sub,
-      group: {
-        name: { in: groupArray },
-        initiative: { code: initiativeCode }
-      }
-    }
-  });
-
-  return count > 0;
 };

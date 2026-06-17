@@ -1,6 +1,5 @@
 import { generateCreateStamps } from '../db/utils/utils.ts';
 import { createDocument, deleteDocument, listDocuments } from '../services/document.ts';
-import { readUser } from '../services/user.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 
 import type { Request, Response } from 'express';
@@ -28,7 +27,11 @@ export const createDocumentController = async (
 
     let createdByFullName: string | undefined;
     if (created.createdBy) {
-      const user = await readUser(tx, created.createdBy);
+      const user = await tx.user.findUnique({
+        where: {
+          userId: created.createdBy
+        }
+      });
       createdByFullName = user ? (user.fullName ?? '') : '';
     }
 
@@ -52,7 +55,11 @@ export const listDocumentsController = async (req: Request<{ activityId: string 
     const documentsWithNames: Document[] = await Promise.all(
       documents.map(async (doc) => {
         if (!doc.createdBy) return doc;
-        const user = await readUser(tx, doc.createdBy);
+        const user = await await tx.user.findUnique({
+          where: {
+            userId: doc.createdBy
+          }
+        });
         return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
       })
     );

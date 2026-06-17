@@ -1,6 +1,5 @@
 import { PrismaTransactionClient } from '../db/database';
 import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
 import { LocalContext } from '../types';
 import { Problem } from '../utils';
 
@@ -25,8 +24,10 @@ export const filterActivityResponseByScope = async <T extends ActivityScopeFilte
     return data;
   }
 
-  const [contact] = await searchContacts(tx, {
-    userId: [locals.currentContext.userId as string]
+  const [contact] = await tx.contact.findMany({
+    where: {
+      userId: { in: [locals.currentContext.userId as string] }
+    }
   });
 
   if (!contact) {

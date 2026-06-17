@@ -1,27 +1,24 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { generateUpdateStamps } from '../db/utils/utils.ts';
 import {
-  deleteContact,
-  getContact,
-  matchContacts,
-  matchContactsExact,
-  searchContacts,
-  upsertContacts
+  deleteContactService,
+  getContactService,
+  matchContactsService,
+  matchContactsExactService,
+  searchContactsService,
+  upsertContactsService
 } from '../services/contact.ts';
 import { IdentityProviderKind } from '../utils/enums/application.ts';
 import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, ContactSearchParameters, LocalContext } from '../types/index.ts';
 
-export const deleteContactController = async (req: Request<{ contactId: string }>, res: Response) => {
-  const contactId = req.params.contactId;
-  await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    await deleteContact(tx, contactId);
-  });
+export const deleteContactController = async (
+  req: Request<{ contactId: string }>,
+  res: Response<never, LocalContext>
+) => {
+  await deleteContactService(req.params.contactId, res.locals.currentContext.userId);
   res.status(204).end();
 };
 
@@ -29,20 +26,14 @@ export const getContactController = async (
   req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
   res: Response<Contact>
 ) => {
-  const response = await transactionWrapper<Contact>(async (tx: PrismaTransactionClient) => {
-    const contactId = req.params.contactId;
-    const includeActivities = isTruthy(req.query.includeActivities) ?? false;
-    return await getContact(tx, contactId, includeActivities);
-  });
+  const response = await getContactService(req.params.contactId, isTruthy(req.query.includeActivities) ?? false);
   res.status(200).json(response);
 };
 
 // Get current user's contact information
 export const getCurrentUserContactController = async (req: Request, res: Response<Contact, LocalContext>) => {
-  const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    return await searchContacts(tx, {
-      userId: [res.locals.currentContext.userId!]
-    });
+  const response = await searchContactsService({
+    userId: [res.locals.currentContext.userId!]
   });
   res.status(200).json(response[0]);
 };
@@ -51,11 +42,11 @@ export const matchContactsController = async (
   req: Request<never, never, ContactSearchParameters, never>,
   res: Response<Contact[], LocalContext>
 ) => {
-  const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    if (hasIdentity(IdentityProviderKind.AZUREIDIR, res.locals.currentContext))
-      return await matchContacts(tx, req.body);
-    return await matchContactsExact(tx, req.body);
-  });
+  let response: Contact[];
+  if (hasIdentity(IdentityProviderKind.AZUREIDIR, res.locals.currentContext))
+    response = await matchContactsService(req.body);
+  else response = await matchContactsExactService(req.body);
+
   res.status(200).json(response);
 };
 
@@ -65,19 +56,19 @@ export const searchContactsController = async (
 ) => {
   const contactIds = mixedQueryToArray(req.body?.contactId);
   const userIds = mixedQueryToArray(req.body?.userId);
-  const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    return await searchContacts(tx, {
-      userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
-      contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
-      email: req.body?.email,
-      firstName: req.body?.firstName,
-      lastName: req.body?.lastName,
-      contactApplicantRelationship: req.body?.contactApplicantRelationship,
-      phoneNumber: req.body?.phoneNumber,
-      initiative: req.body?.initiative,
-      includeActivities: isTruthy(req.body?.includeActivities)
-    });
+
+  const response = await searchContactsService({
+    userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
+    contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
+    email: req.body?.email,
+    firstName: req.body?.firstName,
+    lastName: req.body?.lastName,
+    contactApplicantRelationship: req.body?.contactApplicantRelationship,
+    phoneNumber: req.body?.phoneNumber,
+    initiative: req.body?.initiative,
+    includeActivities: isTruthy(req.body?.includeActivities)
   });
+
   res.status(200).json(response);
 };
 
@@ -86,8 +77,6 @@ export const upsertContactController = async (
   res: Response<Contact, LocalContext>
 ) => {
   const contact = { ...req.body, contactId: req.body.contactId ?? uuidv4() };
-  const response = await transactionWrapper<Contact[]>(async (tx: PrismaTransactionClient) => {
-    return await upsertContacts(tx, [{ ...contact, ...generateUpdateStamps(res.locals.currentContext) }]);
-  });
+  const response = await upsertContactsService([contact]);
   res.status(200).json(response[0]);
 };

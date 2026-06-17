@@ -13,7 +13,7 @@ import {
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
-import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
 import { email } from '../services/email.ts';
 import {
@@ -92,7 +92,7 @@ const generateElectrificationProjectData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
       ?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
+    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -266,7 +266,7 @@ export const submitElectrificationProjectDraftController = async (
       if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
 
       // Update the contact
-      const contactResponse = await upsertContacts(tx, [
+      const contactResponse = await upsertContactsService([
         { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
       ]);
 
@@ -304,7 +304,7 @@ export const upsertElectrificationProjectDraftController = async (req: Request<n
       });
 
       // Update the contact and link to activity
-      const contacts = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
+      const contacts = await searchContactsService({ userId: [res.locals.currentContext.userId!] });
       if (contacts[0])
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
 

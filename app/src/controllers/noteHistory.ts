@@ -24,9 +24,8 @@ import {
   updateNoteHistory
 } from '../services/noteHistory.ts';
 import { getProjectByActivityId } from '../services/project.ts';
-import { searchUsers } from '../services/user.ts';
-import { getUsersWithGroups } from './user.ts';
 import { Problem } from '../utils';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
 import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 import { BringForwardType, NoteType } from '../utils/enums/projectCommon.ts';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
@@ -107,11 +106,24 @@ export const listBringForwardController = async (
         })
       ]);
 
-      const users = await searchUsers(tx, {
-        userId: history
-          .map((x) => x.createdBy)
-          .filter((x) => !!x)
-          .map((x) => x!)
+      const users = await tx.user.findMany({
+        where: {
+          AND: [
+            {
+              userId: {
+                in: history
+                  .map((x) => x.createdBy)
+                  .filter((x) => !!x)
+                  .map((x) => x!)
+              }
+            }
+          ],
+          NOT: [
+            {
+              userId: SYSTEM_ID
+            }
+          ]
+        }
       });
 
       const enquiries = (
@@ -226,11 +238,21 @@ async function emailBringForwardNotification(noteHistory: NoteHistory, initiativ
   if (noteHistory.type !== NoteType.BRING_FORWARD || !noteHistory.escalateToSupervisor) return;
 
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const allUsers = await searchUsers(tx, { active: true });
+    const subGrps = await tx.subject_group.findMany({
+      where: {
+        group: {
+          name: GroupName.SUPERVISOR,
+          initiative: {
+            code: initiative
+          }
+        }
+      }
+    });
 
-    const supervisors = await getUsersWithGroups(tx, allUsers, {
-      group: [GroupName.SUPERVISOR],
-      initiative: [initiative]
+    const supervisors = await tx.user.findMany({
+      where: {
+        AND: [{ sub: { in: subGrps.map((x) => x.sub) } }, { active: true }]
+      }
     });
 
     const supervisorsEmails = supervisors.flatMap((user: User) => (user.email ? [user.email] : []));

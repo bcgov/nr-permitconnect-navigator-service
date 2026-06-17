@@ -1,13 +1,15 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { listActivityContacts } from '../services/activityContact.ts';
-import { searchContacts } from '../services/contact.ts';
-import { subjectHasInitiativeGroupName } from '../services/yars.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
+import { searchContacts } from '../services/helpers/contact.ts';
+import { SubjectGroupRepository } from '../repository/yars/subjectGroup.ts';
+import { LocalContext } from '../types/stuff';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity
@@ -20,7 +22,7 @@ import type { PrismaTransactionClient } from '../db/database.ts';
  */
 export const requireActivityAdmin = async (
   req: Request<{ activityId: string; contactId: string }>,
-  res: Response,
+  res: Response<unknown, LocalContext>,
   next: NextFunction
 ) => {
   try {
@@ -31,10 +33,11 @@ export const requireActivityAdmin = async (
       let isActivityAdmin = false;
       let isGroupAdmin = false;
 
+      const subjectGroupRepo = SubjectGroupRepository.create(tx, res.locals.currentContext.userId ?? SYSTEM_ID);
+
       // Navigator group check
       if (res.locals.currentContext.tokenPayload?.sub)
-        isGroupAdmin = await subjectHasInitiativeGroupName(
-          tx,
+        isGroupAdmin = await subjectGroupRepo.subjectHasInitiativeGroupName(
           res.locals.currentContext.tokenPayload?.sub,
           res.locals.currentContext.initiative,
           [GroupName.SUPERVISOR, GroupName.NAVIGATOR]

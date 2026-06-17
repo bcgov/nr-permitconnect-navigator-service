@@ -1,24 +1,21 @@
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
-import { searchContacts, upsertContacts } from './contact.ts';
+import { unitOfWork } from '../repository/uow.ts';
 import { SYSTEM_ID } from '../utils/constants/application.ts';
 import { IdentityProviderKind } from '../utils/enums/application.ts';
-import { generateCreateStamps, generateNullDeleteStamps, generateNullUpdateStamps } from '../db/utils/utils.ts';
-import { Problem } from '../utils/index.ts';
+import { isTruthy, Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Contact, IdentityProvider, User } from '../types/models.ts';
-import type { UserSearchParameters } from '../types/stuff.ts';
+import type { Contact, User } from '../types/models.ts';
+import type { Group, UserSearchParameters } from '../types/stuff.ts';
+import { createUser } from './helpers/user.ts';
 
-/**
- * The User DB Service
- */
+export type UserWithGroup = User & { groups?: Group[] };
 
 /**
  * An equivalent User model object without timestamp information
  */
-interface JwtUser {
+export interface JwtUser {
   active: boolean;
   bceidBusinessName: string | null;
   email: string | null;
@@ -49,190 +46,95 @@ const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
 };
 
 /**
- * Create an identity provider record
- * @param tx Prisma transaction client
- * @param idp The identity provider code
- * @returns A Promise that resolves into the created identity provider
- */
-export const createIdp = async (tx: PrismaTransactionClient, idp: string): Promise<IdentityProvider> => {
-  const obj = {
-    idp: idp,
-    active: true,
-    createdBy: SYSTEM_ID
-  };
-
-  const response = await tx.identity_provider.create({ data: obj });
-
-  return response;
-};
-
-/**
  * Create a user DB record
- * @param tx Prisma transaction client
  * @param data Incoming user data
- * @returns A Promise that resolves into the created user
+ * @returns A Promise that resolves to the created user
  */
-export const createUser = async (tx: PrismaTransactionClient, data: JwtUser): Promise<User> => {
-  const exists = await tx.user.findFirst({
-    where: {
-      sub: data.sub
-    }
-  });
-
-  if (exists) return exists;
-
-  if (data.idp) {
-    const identityProvider = await readIdp(tx, data.idp);
-    if (!identityProvider) await createIdp(tx, data.idp);
-  }
-
-  const newUser = {
-    bceidBusinessName: data.bceidBusinessName,
-    userId: uuidv4(),
-    sub: data.sub,
-    fullName: data.fullName,
-    email: data.email,
-    firstName: data.firstName,
-    lastName: data.lastName,
-    idp: data.idp,
-    active: true,
-    ...generateCreateStamps(undefined)
-  };
-
-  return await tx.user.create({ data: newUser });
-};
-
-/**
- * Gets userId (primary identifier of a user in db) of currentContext.
- * @param tx Prisma transaction client
- * @param sub The subject of the current user
- * @param defaultValue Optional default return value. Defaults to `undefined`
- * @returns A Promise that resolves to the current userId if applicable, or `defaultValue`
- */
-export const getCurrentUserId = async (
-  tx: PrismaTransactionClient,
-  sub: string,
-  defaultValue: string | undefined = undefined
-): Promise<string | undefined> => {
-  const user = await tx.user.findFirst({
-    where: {
-      sub: sub
-    }
-  });
-
-  return user?.userId ?? defaultValue;
-};
-
-/**
- * Lists all known identity providers
- * @param tx Prisma transaction client
- * @param active Boolean on identity_provider active status
- * @returns A Promise that resolves to an array of identity providers
- */
-export const listIdps = async (tx: PrismaTransactionClient, active: boolean): Promise<IdentityProvider[]> => {
-  return await tx.identity_provider.findMany({
-    where: {
-      active: active
-    }
+export const createUserService = async (data: JwtUser): Promise<User> => {
+  return await unitOfWork.execute(async ({ identityProvider, user }) => {
+    return await createUser({ identityProvider, user }, data);
   });
 };
 
 /**
  * Parse the user token and update the user table if necessary
  * Create a contact entry if necessary
- * @param tx Prisma transaction client
  * @param token The decoded JWT token payload
  * @returns A Promise that resolves to the logged in user
  */
-export const login = async (tx: PrismaTransactionClient, token: jwt.JwtPayload): Promise<User> => {
+export const login = async (token: jwt.JwtPayload): Promise<User> => {
   const newUser = _tokenToUser(token);
 
-  const oldUser = await tx.user.findFirst({
-    where: {
-      sub: newUser.sub
-    }
+  const oldUser = await unitOfWork.execute(async ({ user }) => {
+    return await user.findFirst({
+      where: {
+        sub: newUser.sub
+      }
+    });
   });
 
-  const response = oldUser ? await updateUser(tx, oldUser.userId, newUser) : await createUser(tx, newUser);
+  const response = oldUser ? await updateUserService(oldUser.userId, newUser) : await createUserService(newUser);
 
   // Create initial contact entry
   if (response) {
-    const oldContact: Contact[] = await searchContacts(tx, {
-      userId: [response.userId]
-    });
-    if (!oldContact.length) {
-      // BCeID crams the entire name into firstName
-      // Parse first word into first name and rest into last name
-      // This does not guarantee name correctness, but a null last name breaks ATS
-      let firstNameOverride: string | null = null,
-        lastNameOverride: string | null = null;
-      if (
-        [IdentityProviderKind.BCEID, IdentityProviderKind.BCEIDBUSINESS].includes(newUser.idp as IdentityProviderKind)
-      ) {
-        const split = newUser.firstName?.indexOf(' ');
-        if (newUser.firstName && split && split > 0) {
-          firstNameOverride = newUser.firstName.substring(0, split);
-          lastNameOverride = newUser.firstName.substring(split + 1);
-        } else {
-          firstNameOverride = newUser.firstName;
+    await unitOfWork.execute(async ({ contact }) => {
+      const oldContact: Contact[] = await contact.findMany({
+        where: {
+          userId: { in: [response.userId] }
         }
-      }
+      });
 
-      const newContact: Contact = {
-        contactId: uuidv4(),
-        userId: response.userId,
-        firstName: firstNameOverride ?? newUser.firstName,
-        lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options
-        email: newUser.email,
-        phoneNumber: null,
-        contactApplicantRelationship: null,
-        contactPreference: null,
-        ...generateCreateStamps(undefined),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      };
-      await upsertContacts(tx, [newContact]);
-    }
+      if (!oldContact.length) {
+        // BCeID crams the entire name into firstName
+        // Parse first word into first name and rest into last name
+        // This does not guarantee name correctness, but a null last name breaks ATS
+        let firstNameOverride: string | null = null,
+          lastNameOverride: string | null = null;
+        if (
+          [IdentityProviderKind.BCEID, IdentityProviderKind.BCEIDBUSINESS].includes(newUser.idp as IdentityProviderKind)
+        ) {
+          const split = newUser.firstName?.indexOf(' ');
+          if (newUser.firstName && split && split > 0) {
+            firstNameOverride = newUser.firstName.substring(0, split);
+            lastNameOverride = newUser.firstName.substring(split + 1);
+          } else {
+            firstNameOverride = newUser.firstName;
+          }
+        }
+
+        const newContact = {
+          contactId: uuidv4(),
+          userId: response.userId,
+          firstName: firstNameOverride ?? newUser.firstName,
+          lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options
+          email: newUser.email,
+          phoneNumber: null,
+          contactApplicantRelationship: null,
+          contactPreference: null
+        };
+        await contact.upsert({ contactId: newContact.contactId }, newContact, newContact);
+      }
+    });
   }
 
   return response;
 };
 
 /**
- * Gets an identity provider record
- * @param tx Prisma transaction client
- * @param code The identity provider code
- * @returns A Promise that resolves into the unique identity provider or null if not found
- */
-export const readIdp = async (tx: PrismaTransactionClient, code: string): Promise<IdentityProvider | null> => {
-  const response = await tx.identity_provider.findUnique({
-    where: {
-      idp: code
-    }
-  });
-
-  return response;
-};
-
-/**
  * Gets a user record
- * @param tx Prisma transaction client
  * @param userId The userId uuid
  * @returns A Promise that resolves into the unique user or null if not found
  */
-export const readUser = async (tx: PrismaTransactionClient, userId: string): Promise<User | null> => {
-  const response = await tx.user.findUnique({
-    where: {
+export const getUserService = async (userId: string): Promise<User | null> => {
+  return await unitOfWork.execute(async ({ user }) => {
+    return await user.findUnique({
       userId
-    }
+    });
   });
-
-  return response;
 };
 
 /**
  * Search and filter for specific users
- * @param tx Prisma transaction client
  * @param params Optional filtering parameters
  * @param params.userId Optional array of uuids representing the user subject
  * @param params.idp Optional array of identity providers
@@ -244,79 +146,133 @@ export const readUser = async (tx: PrismaTransactionClient, userId: string): Pro
  * @param params.active Optional boolean on user active status
  * @returns A Promise that resolves into a list of users from search params
  */
-export const searchUsers = async (tx: PrismaTransactionClient, params: UserSearchParameters): Promise<User[]> => {
-  const response = await tx.user.findMany({
-    where: {
-      AND: [
-        {
-          userId: { in: params.userId }
-        },
-        {
-          idp: { in: params.idp, mode: 'insensitive' }
-        },
-        {
-          sub: { contains: params.sub, mode: 'insensitive' }
-        },
-        {
-          email: { contains: params.email, mode: 'insensitive' }
-        },
-        {
-          firstName: { contains: params.firstName, mode: 'insensitive' }
-        },
-        {
-          fullName: { contains: params.fullName, mode: 'insensitive' }
-        },
-        {
-          lastName: { contains: params.lastName, mode: 'insensitive' }
-        },
-        {
-          active: params.active
+export const searchUsersService = async (params: UserSearchParameters): Promise<User[]> => {
+  const users = await unitOfWork.execute(async ({ initiative, subjectGroup, user }) => {
+    const users = await user.findMany({
+      where: {
+        AND: [
+          {
+            userId: { in: params.userId }
+          },
+          {
+            idp: { in: params.idp, mode: 'insensitive' }
+          },
+          {
+            sub: { contains: params.sub, mode: 'insensitive' }
+          },
+          {
+            email: { contains: params.email, mode: 'insensitive' }
+          },
+          {
+            firstName: { contains: params.firstName, mode: 'insensitive' }
+          },
+          {
+            fullName: { contains: params.fullName, mode: 'insensitive' }
+          },
+          {
+            lastName: { contains: params.lastName, mode: 'insensitive' }
+          },
+          {
+            active: params.active
+          }
+        ],
+        NOT: [
+          {
+            userId: SYSTEM_ID
+          }
+        ]
+      }
+    });
+
+    // Inject found users with their groups if necessary
+    let userWithGroups: UserWithGroup[] = users;
+
+    if (params.group?.length || isTruthy(params.includeUserGroups)) {
+      for (const user of userWithGroups) {
+        user.groups = await subjectGroup.getSubjectGroups(user.sub);
+      }
+
+      // Filters users based on groups
+      if (params.group?.length) {
+        userWithGroups = userWithGroups.filter((user) =>
+          params.group?.some((g) => user.groups?.some((ug) => ug.name === g))
+        );
+      }
+
+      // Filters user groups based on initiative
+      if (params.initiative?.length) {
+        const initiativeResult = (
+          await Promise.all(
+            params.initiative.map((i) =>
+              initiative.findFirstOrThrow({
+                where: {
+                  code: i
+                }
+              })
+            )
+          )
+        ).flatMap((r) => r);
+        userWithGroups.forEach((user) => {
+          if (user.groups)
+            user.groups = user.groups.filter((ug) => initiativeResult.some((i) => ug.initiativeId === i.initiativeId));
+        });
+      }
+
+      // Remove groups if not requested
+      if (!isTruthy(params.includeUserGroups)) {
+        for (const user of userWithGroups) {
+          delete user.groups;
         }
-      ]
+      }
     }
+
+    return userWithGroups;
   });
 
-  return response.filter((x) => x.userId !== SYSTEM_ID);
+  return users;
 };
 
 /**
  * Updates a user record only if there are changed values
- * @param tx Prisma transaction client
  * @param userId The userId uuid
  * @param data Incoming user data
  * @returns A Promise that resolves into the updated user
  */
-export const updateUser = async (tx: PrismaTransactionClient, userId: string, data: JwtUser): Promise<User> => {
-  // Check if any user values have changed
-  const oldUser = await readUser(tx, userId);
-  const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
-
-  if (diff) {
-    // Patch existing user
-    if (data.idp) {
-      const identityProvider = await readIdp(tx, data.idp);
-      if (!identityProvider) await createIdp(tx, data.idp);
-    }
-
-    const obj = {
-      bceidBusinessName: data.bceidBusinessName,
-      sub: data.sub,
-      fullName: data.fullName,
-      email: data.email,
-      firstName: data.firstName,
-      lastName: data.lastName,
-      idp: data.idp,
-      active: data.active
-    };
-
-    return await tx.user.update({
-      data: obj,
-      where: {
-        userId
-      }
+export const updateUserService = async (userId: string, data: JwtUser): Promise<User> => {
+  return await unitOfWork.execute(async ({ identityProvider, user }) => {
+    // Check if any user values have changed
+    const oldUser = await user.findUnique({
+      userId
     });
-  } else if (oldUser) {
-    // Nothing to update
-    return oldUser;
-  } else throw new Problem(404, { detail: 'User not found' });
+    const diff = Object.entries(data).some(([key, value]) => oldUser && oldUser[key as keyof JwtUser] !== value);
+
+    if (diff) {
+      if (data.idp) {
+        const idp = await identityProvider.findFirst({
+          where: {
+            idp: data.idp
+          }
+        });
+
+        if (!idp) await identityProvider.create({ idp: data.idp });
+      }
+
+      // Patch existing user
+      const obj = {
+        bceidBusinessName: data.bceidBusinessName,
+        sub: data.sub,
+        fullName: data.fullName,
+        email: data.email,
+        firstName: data.firstName,
+        lastName: data.lastName,
+        idp: data.idp,
+        active: data.active
+      };
+
+      return await user.update({ userId }, obj);
+    } else if (oldUser) {
+      // Nothing to update
+      return oldUser;
+    } else throw new Problem(404, { detail: 'User not found' });
+  });
 };

@@ -1,6 +1,6 @@
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { unitOfWork } from '../repository/uow.ts';
 import { listActivityContacts } from '../services/activityContact.ts';
-import { searchContacts } from '../services/contact.ts';
 import { getDocument } from '../services/document.ts';
 import { getDraft } from '../services/draft.ts';
 import { getElectrificationProject } from '../services/electrificationProject.ts';
@@ -9,14 +9,8 @@ import { getGeneralProject } from '../services/generalProject.ts';
 import { getHousingProject } from '../services/housingProject.ts';
 import { getNoteHistory } from '../services/noteHistory.ts';
 import { getPermit } from '../services/permit.ts';
-import { getCurrentUserId } from '../services/user.ts';
-import {
-  getGroupPolicyDetails,
-  getPCNSGroupPolicyDetails,
-  getPolicyAttributes,
-  getSubjectGroups
-} from '../services/yars.ts';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { searchContacts } from '../services/helpers/contact.ts';
+
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getCurrentSubject } from '../utils/utils.ts';
@@ -38,14 +32,18 @@ import type { CurrentAuthorization } from '../types/index.ts';
 export const hasAuthorization = (resource: string, action: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await transactionWrapper(async (tx: PrismaTransactionClient) => {
+      await unitOfWork.execute(async ({ groupRolePolicyVw, policyAttribute, subjectGroup, user }) => {
         const currentAuthorization: CurrentAuthorization = {
           attributes: [],
           groups: []
         };
 
         if (res.locals.currentContext) {
-          const userId = await getCurrentUserId(tx, getCurrentSubject(res.locals.currentContext), SYSTEM_ID);
+          const userId = await user.findFirst({
+            where: {
+              sub: getCurrentSubject(res.locals.currentContext)
+            }
+          });
 
           if (!userId) {
             throw new Error('Invalid user');
@@ -57,7 +55,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             throw new Error('No subject');
           }
 
-          const groups = await getSubjectGroups(tx, sub);
+          const groups = await subjectGroup.getSubjectGroups(sub);
 
           if (groups.length === 0) {
             throw new Error('Invalid group(s)');
@@ -71,13 +69,18 @@ export const hasAuthorization = (resource: string, action: string) => {
               const groupNames = Array.from(new Set(groups.map((x) => x.name)));
               policyDetails = await Promise.all(
                 groupNames.map((x) => {
-                  return getPCNSGroupPolicyDetails(tx, x, resource, action);
+                  return groupRolePolicyVw.getPCNSGroupPolicyDetails(x, resource, action);
                 })
               ).then((x) => x.flat());
             } else {
               policyDetails = await Promise.all(
                 groups.map((x) => {
-                  return getGroupPolicyDetails(tx, x.groupId, resource, action, res.locals.currentContext?.initiative);
+                  return groupRolePolicyVw.getGroupPolicyDetails(
+                    x.groupId,
+                    resource,
+                    action,
+                    res.locals.currentContext?.initiative
+                  );
                 })
               ).then((x) => x.flat());
             }
@@ -89,7 +92,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             // Inject policy attributes at global level and matching users groups
             const policyAttributes = await Promise.all(
               policyDetails.map((x) => {
-                return getPolicyAttributes(tx, x.policyId!);
+                return policyAttribute.getPolicyAttributes(x.policyId!);
               })
             ).then((x) => x.flat());
 

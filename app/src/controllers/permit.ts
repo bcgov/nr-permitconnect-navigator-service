@@ -15,7 +15,6 @@ import { createPermitNote } from '../services/permitNote.ts';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
 import { getSourceSystemKinds } from '../services/sourceSystemKind.ts';
-import { readUser } from '../services/user.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { PermitNeeded } from '../utils/enums/permit.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
@@ -175,7 +174,11 @@ export const sendPermitUpdateNotifications = async (
       // Add navigator update email to email jobs
       let navigatorName = 'Navigator';
       if (navigatorId) {
-        const navigator = await readUser(tx, navigatorId);
+        const navigator = await tx.user.findUnique({
+          where: {
+            userId: navigatorId
+          }
+        });
         navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
       }
       const navEmail: string = config.get('server.pcns.navEmail');

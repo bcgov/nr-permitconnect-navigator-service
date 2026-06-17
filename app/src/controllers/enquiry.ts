@@ -11,7 +11,7 @@ import {
 } from '../db/utils/utils.ts';
 import { createActivity, deleteActivity } from '../services/activity.ts';
 import { createActivityContact, listActivityContacts } from '../services/activityContact.ts';
-import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { email } from '../services/email.ts';
 import {
   createEnquiry,
@@ -55,7 +55,7 @@ const generateEnquiryData = async (
   if (!activityId) {
     activityId = (await createActivity(tx, currentContext.initiative, generateCreateStamps(currentContext)))
       ?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
+    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -92,13 +92,13 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     });
 
     // Update the contact
-    const contactResponse = await upsertContacts(tx, [
+    const contactResponse = await upsertContactsService([
       { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
     ]);
 
     // Create additional activity_contact links if the enquiry is related to a project
     if (data.relatedActivityId) {
-      const currentContact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
+      const currentContact = await searchContactsService({ userId: [res.locals.currentContext.userId!] });
 
       const relatedContacts = (await listActivityContacts(tx, [data.relatedActivityId])).filter(
         (x) => x.contactId != currentContact[0].contactId

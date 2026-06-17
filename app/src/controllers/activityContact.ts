@@ -9,7 +9,7 @@ import {
   listActivityContacts,
   updateActivityContact
 } from '../services/activityContact.ts';
-import { searchContacts } from '../services/contact.ts';
+import { searchContactsService } from '../services/contact.ts';
 import { email } from '../services/email.ts';
 import { searchEnquiries } from '../services/enquiry.ts';
 import { verifyPrimaryChange } from '../services/helpers/activityContact.ts';
@@ -36,7 +36,7 @@ const getTeamMemberEmailTemplateData = async (
 ) => {
   let adminContact: Contact[] = [];
   if (currentUserId) {
-    adminContact = await searchContacts(tx, {
+    adminContact = await searchContactsService({
       userId: [currentUserId]
     });
   }

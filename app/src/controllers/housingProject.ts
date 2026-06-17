@@ -14,7 +14,7 @@ import {
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
-import { searchContacts, upsertContacts } from '../services/contact.ts';
+import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
 import { email } from '../services/email.ts';
 import {
@@ -137,7 +137,7 @@ const generateHousingProjectData = async (
   // Create activity and link contact if required
   if (!activityId) {
     activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
-    const contacts = await searchContacts(tx, { userId: [currentContext.userId!] });
+    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
     if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
   }
 
@@ -451,7 +451,7 @@ export const submitHousingProjectDraftController = async (
       if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
 
       // Update the contact
-      const contactResponse = await upsertContacts(tx, [
+      const contactResponse = await upsertContactsService([
         { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
       ]);
 
@@ -488,7 +488,7 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
       });
 
       // Link contact to activity
-      const contacts = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
+      const contacts = await searchContactsService({ userId: [res.locals.currentContext.userId!] });
       if (contacts[0]) {
         await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
       }

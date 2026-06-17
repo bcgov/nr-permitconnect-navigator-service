@@ -1,5 +1,5 @@
 import { listActivityContacts, updateActivityContact } from '../activityContact';
-import { searchContacts } from '../contact';
+import { searchContactsService } from '../contact';
 import { PrismaTransactionClient } from '../../db/database';
 import { Problem } from '../../utils';
 import { GroupName } from '../../utils/enums/application';
@@ -30,7 +30,7 @@ export const verifyPrimaryChange = async (
 
   // Current user scope check
   if (!currentAuthorization.attributes.includes('scope:all')) {
-    const currentUserContact = await searchContacts(tx, { userId: [currentContext.userId as string] });
+    const currentUserContact = await searchContactsService({ userId: [currentContext.userId as string] });
     const currentUserActivityContact = activityContacts.find((ac) => ac.contactId === currentUserContact[0].contactId);
 
     // Check if current user is a primary contact or navigator.
