@@ -46,6 +46,7 @@ import type {
   ListPermitsOptions,
   Permit,
   PermitUpdateEmailParams,
+  PermitWithActivityProject,
   SearchPermitsOptions
 } from '../../../src/types/index.ts';
 
@@ -181,6 +182,14 @@ describe('listPermitsController', () => {
 describe('searchPermitsController', () => {
   const searchSpy = vi.spyOn(permitService, 'searchPermitsPaginated');
 
+  const TEST_PERMIT_WITH_HOUSING_PROJECT: PermitWithActivityProject = {
+    ...TEST_PERMIT_1,
+    activity: {
+      ...TEST_ACTIVITY_HOUSING,
+      project: TEST_HOUSING_PROJECT_1
+    }
+  };
+
   it('should call services and respond with 200 and paginated results', async () => {
     const req = {
       query: {
@@ -199,7 +208,7 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: TEST_PERMIT_LIST,
+      permits: [TEST_PERMIT_WITH_HOUSING_PROJECT],
       totalRecords: 25
     };
 
@@ -259,7 +268,7 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: [TEST_PERMIT_1],
+      permits: [TEST_PERMIT_WITH_HOUSING_PROJECT],
       totalRecords: 1
     };
 

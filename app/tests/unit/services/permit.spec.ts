@@ -59,6 +59,11 @@ describe('listPermits', () => {
         }
       },
       include: {
+        activity: {
+          include: {
+            activityContact: true
+          }
+        },
         permitType: true,
         permitNote: false,
         permitTracking: {
@@ -245,6 +250,7 @@ describe('searchPermitsPaginated', () => {
         },
         activity: {
           include: {
+            activityContact: true,
             housingProject: true
           }
         }
@@ -293,6 +299,7 @@ describe('searchPermitsPaginated', () => {
           },
           activity: {
             include: {
+              activityContact: true,
               electrificationProject: true
             }
           }

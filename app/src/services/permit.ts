@@ -6,6 +6,7 @@ import type {
   Permit,
   PermitBase,
   PermitSearchParams,
+  PermitWithActivityProject,
   SearchPermitsOptions
 } from '../types/index.ts';
 
@@ -65,6 +66,11 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
       }
     },
     include: {
+      activity: {
+        include: {
+          activityContact: true
+        }
+      },
       permitType: true,
       permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
       permitTracking: {
@@ -148,7 +154,7 @@ export const searchPermitsPaginated = async (
   tx: PrismaTransactionClient,
   initiative: Exclude<Initiative, Initiative.PCNS>,
   options: SearchPermitsOptions
-): Promise<{ permits: Permit[]; totalRecords: number }> => {
+): Promise<{ permits: PermitWithActivityProject[]; totalRecords: number }> => {
   // Determine project table based on initiative, exclude PCNS
   const projectTableMap: Record<Exclude<Initiative, Initiative.PCNS>, string> = {
     [Initiative.ELECTRIFICATION]: 'electrificationProject',
@@ -252,6 +258,7 @@ export const searchPermitsPaginated = async (
       },
       activity: {
         include: {
+          activityContact: true,
           [projectTable]: true
         }
       }
@@ -268,7 +275,7 @@ export const searchPermitsPaginated = async (
         ...activityData,
         project: projectData
       }
-    };
+    } as unknown as PermitWithActivityProject;
   });
 
   return { permits: permitsWithProjectAlias, totalRecords };

@@ -8,7 +8,11 @@ export type AccessRequestPatch = Omit<Prisma.access_requestUpdateInput, 'accessR
 
 const activityBase = Prisma.validator<Prisma.activityDefaultArgs>()({});
 export type ActivityBase = Prisma.activityGetPayload<typeof activityBase>;
-export type Activity = ActivityBase & { activityContact?: ActivityContact[]; initiative?: Initiative };
+export type Activity = ActivityBase & {
+  activityContact?: ActivityContact[];
+  initiative?: Initiative;
+  project?: ElectrificationProject | GeneralProject | HousingProject | null;
+};
 
 const activityContactBase = Prisma.validator<Prisma.activity_contactDefaultArgs>()({});
 export type ActivityContactBase = Prisma.activity_contactGetPayload<typeof activityContactBase>;
@@ -107,6 +111,7 @@ const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
 export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & Record<PermitDateTimeKeys, string | null>;
 export type Permit = PermitBase & {
+  activity?: Activity;
   permitNote?: PermitNote[];
   permitTracking?: PermitTracking[];
   permitType?: PermitType;

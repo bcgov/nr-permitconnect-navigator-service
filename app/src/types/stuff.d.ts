@@ -8,6 +8,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.
 
 import type {
   AccessRequest,
+  Activity,
   Contact,
   ElectrificationProject,
   GeneralProject,
@@ -396,6 +397,12 @@ export interface PermitUpdateEmailParams {
   projectId: string;
   toEmails: string[];
   emailTemplate: EmailTemplate;
+}
+
+export interface PermitWithActivityProject extends Permit {
+  activity: Activity & {
+    project: ElectrificationProject | GeneralProject | HousingProject | null;
+  };
 }
 
 export interface UpdatedPermitWithNote {

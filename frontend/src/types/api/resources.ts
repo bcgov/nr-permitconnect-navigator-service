@@ -373,12 +373,19 @@ interface PermitBase extends AuditFields {
 }
 
 interface PermitRelations {
+  activity: Activity;
   permitNote: PermitNote[];
   permitTracking: PermitTracking[];
   permitType: PermitType;
 }
 
 export type Permit = PermitBase & Partial<PermitRelations>;
+
+export interface PermitWithActivityProject extends Permit {
+  activity: Activity & {
+    project: ElectrificationProject | GeneralProject | HousingProject | null;
+  };
+}
 
 /**
  * Permit Note
