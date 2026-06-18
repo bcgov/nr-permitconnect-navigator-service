@@ -21,7 +21,7 @@ const INITIATIVE_RESOURCE_MAP = new Map<Initiative, Resource>([
 router.get(
   '/pids/:projectId',
   async (req: Request, res: Response, next: NextFunction) => {
-    const resource = INITIATIVE_RESOURCE_MAP.get(req.currentContext.initiative);
+    const resource = INITIATIVE_RESOURCE_MAP.get(res.locals.currentContext.initiative);
     if (!resource) {
       throw new Error('No resource');
     }

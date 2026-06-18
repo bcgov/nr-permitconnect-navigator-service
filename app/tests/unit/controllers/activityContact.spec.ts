@@ -51,8 +51,12 @@ let app: express.Express;
 beforeEach(() => {
   app = express();
   app.use(express.json());
-  app.request.currentAuthorization = { attributes: [], groups: [] };
-  app.request.currentContext = TEST_CURRENT_CONTEXT;
+  app.use((_req, res, next) => {
+    res.locals.currentAuthorization = { attributes: [], groups: [] };
+    res.locals.currentContext = TEST_CURRENT_CONTEXT;
+    next();
+  });
+
   app.get('/activity/:activityId/contact', listActivityContactController);
   app.delete('/activity/:activityId/contact/:contactId', deleteActivityContactController);
   app.post('/activity/:activityId/contact/:contactId', createActivityContactController);

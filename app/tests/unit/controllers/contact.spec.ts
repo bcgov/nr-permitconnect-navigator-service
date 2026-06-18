@@ -11,12 +11,14 @@ import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Contact, ContactSearchParameters } from '../../../src/types/index.ts';
+import type { Contact, ContactSearchParameters, LocalContext } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
@@ -26,6 +28,7 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -37,8 +40,7 @@ describe('deleteContactController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' }
     } as unknown as Request;
 
     deleteContactSpy.mockResolvedValue();
@@ -58,8 +60,7 @@ describe('getContactController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
-      query: { includeActivities: false },
-      currentContext: TEST_CURRENT_CONTEXT
+      query: { includeActivities: false }
     } as unknown as Request;
 
     getContactSpy.mockResolvedValue(TEST_CONTACT_1);
@@ -78,8 +79,7 @@ describe('getContactController', () => {
   it('should call services and respond with 200 and result with activity contact if found', async () => {
     const req = {
       params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
-      query: { includeActivities: true },
-      currentContext: TEST_CURRENT_CONTEXT
+      query: { includeActivities: true }
     } as unknown as Request;
 
     getContactSpy.mockResolvedValue(TEST_CONTACT_WITH_ACTIVITY_1);
@@ -101,8 +101,7 @@ describe('searchContactsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' }
     } as unknown as Request;
 
     const contacts = [TEST_CONTACT_1];
@@ -130,8 +129,7 @@ describe('searchContactsController', () => {
 
   it('adds dashes to user IDs', async () => {
     const req = {
-      body: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' }
     } as unknown as Request;
 
     const contacts = [TEST_CONTACT_1];
@@ -157,8 +155,7 @@ describe('searchContactsController', () => {
 
   it('adds dashes to contact IDs', async () => {
     const req = {
-      body: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' }
     } as unknown as Request;
 
     const contacts = [TEST_CONTACT_1];
@@ -194,15 +191,14 @@ describe('updateContactController', () => {
           email: 'first.last@gov.bc.ca',
           firstName: 'First',
           lastName: 'Last'
-        },
-        currentContext: TEST_CURRENT_CONTEXT
+        }
       } as unknown as Request;
 
       upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
       await upsertContactController(
         req as unknown as Request<never, never, Contact, never>,
-        res as unknown as Response
+        res as unknown as Response<Contact, LocalContext>
       );
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
@@ -227,15 +223,14 @@ describe('updateContactController', () => {
           email: 'first.last@gov.bc.ca',
           firstName: 'First',
           lastName: 'Last'
-        },
-        currentContext: TEST_CURRENT_CONTEXT
+        }
       } as unknown as Request;
 
       upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
 
       await upsertContactController(
         req as unknown as Request<never, never, Contact, never>,
-        res as unknown as Response
+        res as unknown as Response<Contact, LocalContext>
       );
 
       expect(upsertContactsSpy).toHaveBeenCalledTimes(1);

@@ -38,7 +38,7 @@ function buildApp(kind: IdentityProviderKind, contextPayloadOverride?: CurrentCo
   app.use(express.json());
 
   app.use((req: Request, res: Response, next: NextFunction) => {
-    req.currentContext = {
+    res.locals.currentContext = {
       ...TEST_CURRENT_CONTEXT,
       ...contextPayloadOverride
     };

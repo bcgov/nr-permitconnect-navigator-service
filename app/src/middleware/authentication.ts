@@ -22,8 +22,8 @@ export const jwtPayloadCache = new LRUCache<string, jwt.JwtPayload>({
 });
 
 /**
- * Authenticates incoming request and injects the current context into request.
- * Subsequent logic should check `req.currentContext.authType` for authentication method if needed.
+ * Authenticates incoming request and injects the current context into response locals.
+ * Subsequent logic should check `res.locals.currentContext.authType` for authentication method if needed.
  * @param initiative The initiative associated with the request.
  * @returns A middleware function.
  * @throws {Problem} The error encountered upon failure.
@@ -34,7 +34,7 @@ export const hasAuthentication = (initiative: Initiative) => {
       const authHeader = getAuthHeader(req, res);
 
       if (authHeader === undefined) {
-        req.currentContext = Object.freeze({
+        res.locals.currentContext = Object.freeze({
           authType: AuthType.NONE,
           initiative
         });
@@ -47,7 +47,7 @@ export const hasAuthentication = (initiative: Initiative) => {
 
         if (!user?.userId) throw new Problem(500, { detail: 'Failed to log user in', instance: req.originalUrl });
 
-        req.currentContext = Object.freeze({
+        res.locals.currentContext = Object.freeze({
           authType: AuthType.BEARER,
           initiative,
           bearerToken: token,

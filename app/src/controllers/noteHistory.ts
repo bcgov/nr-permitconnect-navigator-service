@@ -33,7 +33,7 @@ import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificatio
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { BringForward, Note, NoteHistory, User } from '../types/index.ts';
+import type { BringForward, LocalContext, Note, NoteHistory, User } from '../types/index.ts';
 
 /**
  * Create a new note history and add the given note to it
@@ -51,14 +51,14 @@ export const createNoteHistoryController = async (
       const historyRes = await createNoteHistory(tx, {
         ...history,
         noteHistoryId: uuidv4(),
-        ...generateCreateStamps(req.currentContext)
+        ...generateCreateStamps(res.locals.currentContext)
       });
 
       const noteRes = await createNote(tx, {
         noteId: uuidv4(),
         noteHistoryId: historyRes.noteHistoryId,
         note: note,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
@@ -77,7 +77,7 @@ export const createNoteHistoryController = async (
  */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deleteNoteHistory(tx, req.params.noteHistoryId, generateDeleteStamps(req.currentContext));
+    await deleteNoteHistory(tx, req.params.noteHistoryId, generateDeleteStamps(res.locals.currentContext));
   });
 
   res.status(204).end();
@@ -90,7 +90,7 @@ export const listBringForwardController = async (
   const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
     const history: NoteHistory[] = await listBringForward(
       tx,
-      req.currentContext.initiative,
+      res.locals.currentContext.initiative,
       req.query.bringForwardState
     );
 
@@ -176,7 +176,7 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
   });
 
   // Only return notes flagged as shown when called by proponent
-  if (req.currentAuthorization?.attributes.includes('scope:self')) {
+  if (res.locals.currentAuthorization?.attributes.includes('scope:self')) {
     const filtered = response.filter((x) => x.shownToProponent);
     res.status(200).json(filtered);
   } else {
@@ -192,14 +192,14 @@ export const listNoteHistoryController = async (req: Request<{ activityId: strin
  */
 export const updateNoteHistoryController = async (
   req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: Resource }>,
-  res: Response
+  res: Response<NoteHistory, LocalContext>
 ) => {
   const { note, resource, ...history } = req.body;
   const response = await transactionWrapper<NoteHistory>(async (tx: PrismaTransactionClient) => {
     await updateNoteHistory(tx, {
       ...history,
       noteHistoryId: req.params.noteHistoryId,
-      ...generateUpdateStamps(req.currentContext)
+      ...generateUpdateStamps(res.locals.currentContext)
     });
 
     if (note) {
@@ -207,7 +207,7 @@ export const updateNoteHistoryController = async (
         noteHistoryId: req.params.noteHistoryId,
         noteId: uuidv4(),
         note: note,
-        ...generateCreateStamps(req.currentContext),
+        ...generateCreateStamps(res.locals.currentContext),
         ...generateNullUpdateStamps(),
         ...generateNullDeleteStamps()
       });
@@ -216,8 +216,8 @@ export const updateNoteHistoryController = async (
     return await getNoteHistory(tx, req.params.noteHistoryId);
   });
 
-  const isNavigator = !!req.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
-  if (isNavigator) await emailBringForwardNotification(response, req.currentContext.initiative, resource);
+  const isNavigator = !!res.locals.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
+  if (isNavigator) await emailBringForwardNotification(response, res.locals.currentContext.initiative, resource);
 
   res.status(200).json(response);
 };

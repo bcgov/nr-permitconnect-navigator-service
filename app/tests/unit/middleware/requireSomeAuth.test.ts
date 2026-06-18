@@ -14,8 +14,8 @@ const mockedConfig = config as Mocked<typeof config>;
 
 function buildApp(currentContext: unknown) {
   const app = express();
-  app.use((req, _res, next) => {
-    (req as Request).currentContext = currentContext as Request['currentContext'];
+  app.use((_req, res, next) => {
+    res.locals.currentContext = currentContext;
     next();
   });
   app.use(requireSomeAuth);

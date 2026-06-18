@@ -45,15 +45,15 @@ export const listPermissionsController = async (
 
 export const listSubjectPermissionsController = async (req: Request, res: Response) => {
   const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    if (!req.currentContext.tokenPayload?.sub) throw new Problem(500, { detail: 'Unable to read token sub' });
+    if (!res.locals.currentContext.tokenPayload?.sub) throw new Problem(500, { detail: 'Unable to read token sub' });
 
-    const groups = await getSubjectGroups(tx, req.currentContext.tokenPayload.sub);
+    const groups = await getSubjectGroups(tx, res.locals.currentContext.tokenPayload.sub);
     const permissions = await Promise.all(groups.map((x) => getGroupPermissions(tx, x.groupId))).then((x) => x.flat());
 
     // Double check correct COMS permissions.
     // This endpoint is called on client bootstrap, so it's a good place to verify
     //   COMS permissions without adding COMS calls to every API request.
-    await assignPermissions(tx, req.currentContext, req.currentContext.tokenPayload.sub);
+    await assignPermissions(tx, res.locals.currentContext, res.locals.currentContext.tokenPayload.sub);
 
     return { groups, permissions };
   });
@@ -80,7 +80,7 @@ export const deleteSubjectGroupController = async (
 
     // Assign new COMS permissions
     try {
-      await assignPermissions(tx, req.currentContext, req.body.sub);
+      await assignPermissions(tx, res.locals.currentContext, req.body.sub);
     } catch (e) {
       if (e instanceof Error) log.warn(e.message);
       if (e instanceof Problem) log.warn(e.detail);

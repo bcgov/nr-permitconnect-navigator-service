@@ -14,20 +14,23 @@ import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-const SUB = 'cd90c6bf44074872a7116f4dd4f3a45b@azureidir';
-const ctxWithSub = { ...TEST_CURRENT_CONTEXT, tokenPayload: { sub: SUB } };
-
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
+
+const SUB = 'cd90c6bf44074872a7116f4dd4f3a45b@azureidir';
+const ctxWithSub = { ...TEST_CURRENT_CONTEXT, tokenPayload: { sub: SUB } };
 
 afterEach(() => {
   vi.resetAllMocks();
@@ -88,6 +91,8 @@ describe('listSubjectPermissionsController', () => {
   const assignPermissionsSpy = vi.spyOn(comsService, 'assignPermissions');
 
   it('returns groups and flattened permissions', async () => {
+    res.locals.currentContext = ctxWithSub;
+
     const groups = [{ groupId: 1 }, { groupId: 2 }] as never;
     getSubjectGroupsSpy.mockResolvedValueOnce(groups);
     getGroupPermissionsSpy
@@ -130,6 +135,8 @@ describe('deleteSubjectGroupController', () => {
   const body = { sub: SUB, groupId: 7 };
 
   it('removes group + corresponding global group when no other initiative has the same group name', async () => {
+    res.locals.currentContext = ctxWithSub;
+
     getSubjectGroupsSpy.mockResolvedValueOnce([
       { groupId: 7, name: 'NAVIGATOR', initiativeCode: Initiative.HOUSING }
     ] as never);
@@ -140,7 +147,7 @@ describe('deleteSubjectGroupController', () => {
     assignPermissionsSpy.mockResolvedValueOnce(undefined);
 
     await deleteSubjectGroupController(
-      { body, currentContext: ctxWithSub } as unknown as Request<never, never, typeof body>,
+      { body } as unknown as Request<never, never, typeof body>,
       res as unknown as Response
     );
 

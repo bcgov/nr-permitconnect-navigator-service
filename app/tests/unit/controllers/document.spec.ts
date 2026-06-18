@@ -14,7 +14,9 @@ import type { Mock } from 'vitest';
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
@@ -24,6 +26,7 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -42,8 +45,7 @@ describe('createDocumentController', () => {
         filename: 'testfile',
         mimeType: 'imgjpg',
         filesize: 1234567
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createSpy.mockResolvedValue(TEST_DOCUMENT_1);
@@ -79,8 +81,7 @@ describe('createDocumentController', () => {
         filename: 'testfile',
         mimeType: 'imgjpg',
         filesize: 1234567
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };
@@ -119,8 +120,7 @@ describe('deleteDocumentController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d' }
     };
 
     deleteSpy.mockResolvedValue();
@@ -140,8 +140,7 @@ describe('listDocumentsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { activityId: 'ACTI1234' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { activityId: 'ACTI1234' }
     };
 
     listSpy.mockResolvedValue([TEST_DOCUMENT_1]);
@@ -156,8 +155,7 @@ describe('listDocumentsController', () => {
 
   it('adds createdByFullName', async () => {
     const req = {
-      params: { activityId: 'ACTI1234' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { activityId: 'ACTI1234' }
     };
 
     const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };

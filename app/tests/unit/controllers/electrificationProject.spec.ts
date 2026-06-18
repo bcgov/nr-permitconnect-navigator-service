@@ -51,16 +51,19 @@ import type {
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
-let res: { status?: Mock; json?: Mock; end?: Mock };
+let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -91,8 +94,7 @@ describe('createElectrificationProjectController', () => {
           projectType: null,
           bcHydroNumber: null
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
@@ -150,8 +152,7 @@ describe('deleteElectrificationProjectController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
     getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
@@ -185,8 +186,7 @@ describe('deleteElectrificationProjectDraftController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
     };
 
     getDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
@@ -210,9 +210,7 @@ describe('getElectrificationProjectActivityIdsController', () => {
   const getElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
 
   it('should call services and respond with 200 and result', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT
-    };
+    const req = {};
 
     getElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
 
@@ -230,8 +228,7 @@ describe('getElectrificationProjectDraftController', () => {
 
   it('should call services and respond with 200', async () => {
     const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
     };
 
     getDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
@@ -252,9 +249,7 @@ describe('getElectrificationProjectDraftsController', () => {
   const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
 
   it('should call services and respond with 200', async () => {
-    const req = {
-      currentContext: TEST_CURRENT_CONTEXT
-    };
+    const req = {};
 
     getDraftsSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
 
@@ -277,8 +272,7 @@ describe('getElectrificationProjectStatistics', () => {
         dateTo: '',
         monthYear: '',
         userId: ''
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const statistics: ElectrificationProjectStatistics[] = [
@@ -323,8 +317,7 @@ describe('getElectrificationProjectController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
     getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
@@ -347,7 +340,6 @@ describe('getElectrificationProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
       query: {}
     };
 
@@ -367,8 +359,7 @@ describe('searchElectrificationProjectsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false }
     };
 
     searchElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
@@ -398,8 +389,7 @@ describe('submitElectrificationProjectDraftController', () => {
 
   it('should call services and respond with 201 and result', async () => {
     const req = {
-      body: { ...TEST_ELECTRIFICATION_INTAKE },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_ELECTRIFICATION_INTAKE }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
@@ -452,8 +442,7 @@ describe('submitElectrificationProjectDraftController', () => {
 
   it('should delete associated draft if it exists', async () => {
     const req = {
-      body: { ...TEST_ELECTRIFICATION_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { ...TEST_ELECTRIFICATION_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
@@ -488,8 +477,7 @@ describe('updateElectrificationProjectDraftController', () => {
             lastName: 'person'
           }
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
@@ -540,8 +528,7 @@ describe('updateElectrificationProjectDraftController', () => {
             lastName: 'person'
           }
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     updateDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
@@ -582,7 +569,7 @@ describe('updateElectrificationProjectController', () => {
   it('should call services and respond with 200 and result', async () => {
     const req = {
       body: TEST_ELECTRIFICATION_PROJECT_UPDATE,
-      currentContext: TEST_CURRENT_CONTEXT,
+
       params: {
         electrificationProjectId
       }

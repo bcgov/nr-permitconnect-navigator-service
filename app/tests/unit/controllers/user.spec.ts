@@ -13,16 +13,19 @@ import type { Group, User, UserSearchParameters } from '../../../src/types/index
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -36,8 +39,7 @@ describe('searchUsersController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      body: { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] },
-      currentContext: TEST_CURRENT_CONTEXT
+      body: { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] }
     };
 
     searchUsersSpy.mockResolvedValue(TEST_USER_LIST);

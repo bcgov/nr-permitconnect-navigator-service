@@ -44,14 +44,14 @@ export const hasAuthorization = (resource: string, action: string) => {
           groups: []
         };
 
-        if (req.currentContext) {
-          const userId = await getCurrentUserId(tx, getCurrentSubject(req.currentContext), SYSTEM_ID);
+        if (res.locals.currentContext) {
+          const userId = await getCurrentUserId(tx, getCurrentSubject(res.locals.currentContext), SYSTEM_ID);
 
           if (!userId) {
             throw new Error('Invalid user');
           }
 
-          const sub = req.currentContext?.tokenPayload?.sub;
+          const sub = res.locals.currentContext?.tokenPayload?.sub;
 
           if (!sub) {
             throw new Error('No subject');
@@ -67,7 +67,7 @@ export const hasAuthorization = (resource: string, action: string) => {
           if (!groups.find((x) => x.name === GroupName.DEVELOPER)) {
             let policyDetails;
 
-            if (req.currentContext.initiative === Initiative.PCNS) {
+            if (res.locals.currentContext.initiative === Initiative.PCNS) {
               const groupNames = Array.from(new Set(groups.map((x) => x.name)));
               policyDetails = await Promise.all(
                 groupNames.map((x) => {
@@ -77,7 +77,7 @@ export const hasAuthorization = (resource: string, action: string) => {
             } else {
               policyDetails = await Promise.all(
                 groups.map((x) => {
-                  return getGroupPolicyDetails(tx, x.groupId, resource, action, req.currentContext?.initiative);
+                  return getGroupPolicyDetails(tx, x.groupId, resource, action, res.locals.currentContext?.initiative);
                 })
               ).then((x) => x.flat());
             }
@@ -111,7 +111,7 @@ export const hasAuthorization = (resource: string, action: string) => {
 
           // Update current authorization and freeze
           currentAuthorization.groups = groups;
-          req.currentAuthorization = Object.freeze(currentAuthorization);
+          res.locals.currentAuthorization = Object.freeze(currentAuthorization);
         } else {
           throw new Error('No current user');
         }
@@ -155,7 +155,7 @@ export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-        if (req.currentAuthorization?.attributes.includes('scope:self')) {
+        if (res.locals.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
           if (Array.isArray(id)) {
             throw new TypeError('Parameter must be a string, not an array');
@@ -169,7 +169,7 @@ export const hasAccess = (param: string) => {
 
           // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
           const activityId: string = data?.activityId ?? id;
-          const contact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
+          const contact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
           const activityContacts = await listActivityContacts(tx, activityId);
 
           if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {

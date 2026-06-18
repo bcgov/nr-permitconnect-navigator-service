@@ -62,7 +62,9 @@ vi.mock('../../../src/utils/templates.ts', async (importOriginal) => {
 });
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
   res.end = vi.fn().mockReturnValue(res);
@@ -70,9 +72,9 @@ const mockResponse = () => {
 };
 
 let res = mockResponse();
-
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -84,8 +86,7 @@ describe('deletePermitController', () => {
 
   it('should call services and respond with 204', async () => {
     const req = {
-      params: { permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066' },
-      currentContext: TEST_CURRENT_CONTEXT
+      params: { permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066' }
     };
 
     deleteSpy.mockResolvedValue();
@@ -104,7 +105,6 @@ describe('getPermitController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      currentContext: TEST_CURRENT_CONTEXT,
       params: { permitId: '1381438d-0c7a-46bf-8ae2-d1febbf27066' }
     };
 
@@ -124,8 +124,7 @@ describe('listPermitsController', () => {
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
-      query: { activityId: 'ACTI1234' },
-      currentContext: TEST_CURRENT_CONTEXT
+      query: { activityId: 'ACTI1234' }
     };
 
     listSpy.mockResolvedValue(TEST_PERMIT_LIST);
@@ -144,8 +143,7 @@ describe('listPermitsController', () => {
   it('should include notes if requested', async () => {
     const now = new Date();
     const req = {
-      query: { activityId: 'ACTI1234', includeNotes: 'true' },
-      currentContext: TEST_CURRENT_CONTEXT
+      query: { activityId: 'ACTI1234', includeNotes: 'true' }
     };
 
     const permitList = [
@@ -220,11 +218,12 @@ describe('searchPermitsController', () => {
 
   it('should handle empty query parameters', async () => {
     const req = {
-      query: {},
-      currentContext: {
-        ...TEST_CURRENT_CONTEXT,
-        initiative: Initiative.ELECTRIFICATION
-      }
+      query: {}
+    };
+
+    res.locals.currentContext = {
+      ...TEST_CURRENT_CONTEXT,
+      initiative: Initiative.ELECTRIFICATION
     };
 
     const mockResponse = {
@@ -251,11 +250,12 @@ describe('searchPermitsController', () => {
         permitTypeId: '456',
         skip: '10',
         take: '20'
-      },
-      currentContext: {
-        ...TEST_CURRENT_CONTEXT,
-        initiative: Initiative.HOUSING
       }
+    };
+
+    res.locals.currentContext = {
+      ...TEST_CURRENT_CONTEXT,
+      initiative: Initiative.HOUSING
     };
 
     const mockResponse = {
@@ -280,11 +280,12 @@ describe('searchPermitsController', () => {
     const req = {
       query: {
         permitTypeId: '123'
-      },
-      currentContext: {
-        ...TEST_CURRENT_CONTEXT,
-        initiative: Initiative.PCNS
       }
+    };
+
+    res.locals.currentContext = {
+      ...TEST_CURRENT_CONTEXT,
+      initiative: Initiative.PCNS
     };
 
     await expect(
@@ -316,8 +317,7 @@ describe('upsertPermitController', () => {
         stage: PermitStage.PRE_SUBMISSION,
         submittedDate: now,
         decisionDate: now
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     upsertSpy.mockResolvedValue(TEST_PERMIT_1);

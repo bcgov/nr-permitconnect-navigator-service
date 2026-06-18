@@ -11,21 +11,24 @@ import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 import type { InternalAxiosRequestConfig } from 'axios';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Email, Note, NoteHistory } from '../../../src/types';
+import type { CurrentContext, Email, Note, NoteHistory } from '../../../src/types';
 
 vi.mock('config');
 
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock; end?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
-
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
 afterEach(() => {
@@ -50,8 +53,7 @@ describe('send', () => {
           to: 'hello@gov.bc.ca',
           subject: 'Unit tests'
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const createdHistory: NoteHistory = {
@@ -92,8 +94,7 @@ describe('send', () => {
           to: 'hello@gov.bc.ca',
           subject: 'Unit tests'
         }
-      },
-      currentContext: TEST_CURRENT_CONTEXT
+      }
     };
 
     const createdHistory: NoteHistory = {
@@ -124,7 +125,7 @@ describe('send', () => {
       ...createdHistory,
       noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId
+      createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
@@ -132,7 +133,7 @@ describe('send', () => {
       noteHistoryId: createdNote.noteHistoryId,
       note: createdNote.note,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId,
+      createdBy: TEST_CURRENT_CONTEXT.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
     });
@@ -167,9 +168,10 @@ describe('send', () => {
           ]
         }
       },
-      currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' },
       headers: {}
     };
+
+    res.locals.currentContext = { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' };
 
     const getObjectResponse = {
       data: 'foo',
@@ -211,8 +213,16 @@ describe('send', () => {
     );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(
+      1,
+      (res.locals.currentContext as unknown as CurrentContext).bearerToken,
+      req.body.selectedFileIds[0]
+    );
+    expect(getObjectSpy).toHaveBeenNthCalledWith(
+      2,
+      (res.locals.currentContext as unknown as CurrentContext).bearerToken,
+      req.body.selectedFileIds[1]
+    );
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(res.status).toHaveBeenCalledWith(201);
@@ -304,9 +314,10 @@ describe('send', () => {
           ]
         }
       },
-      currentContext: { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' },
       headers: {}
     };
+
+    res.locals.currentContext = { ...TEST_CURRENT_CONTEXT, bearerToken: 'token' };
 
     const getObjectResponse1 = {
       data: 'foo',
@@ -370,8 +381,16 @@ describe('send', () => {
     );
 
     expect(getObjectSpy).toHaveBeenCalledTimes(2);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(1, req.currentContext.bearerToken, req.body.selectedFileIds[0]);
-    expect(getObjectSpy).toHaveBeenNthCalledWith(2, req.currentContext.bearerToken, req.body.selectedFileIds[1]);
+    expect(getObjectSpy).toHaveBeenNthCalledWith(
+      1,
+      (res.locals.currentContext as unknown as CurrentContext).bearerToken,
+      req.body.selectedFileIds[0]
+    );
+    expect(getObjectSpy).toHaveBeenNthCalledWith(
+      2,
+      (res.locals.currentContext as unknown as CurrentContext).bearerToken,
+      req.body.selectedFileIds[1]
+    );
     expect(emailSpy).toHaveBeenCalledTimes(1);
     expect(emailSpy).toHaveBeenCalledWith(req.body.emailData);
     expect(createHistorySpy).toHaveBeenCalledTimes(1);
@@ -379,7 +398,7 @@ describe('send', () => {
       ...createdHistory,
       noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId
+      createdBy: TEST_CURRENT_CONTEXT.userId
     });
     expect(createNoteSpy).toHaveBeenCalledTimes(1);
     expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
@@ -387,7 +406,7 @@ describe('send', () => {
       noteHistoryId: createdNote.noteHistoryId,
       note: createdNote.note,
       createdAt: expect.any(Date) as Date,
-      createdBy: req.currentContext.userId,
+      createdBy: TEST_CURRENT_CONTEXT.userId,
       ...generateNullUpdateStamps(),
       ...generateNullDeleteStamps()
     });

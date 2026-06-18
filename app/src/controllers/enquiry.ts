@@ -69,7 +69,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
   req.body ??= {} as EnquiryIntake;
 
   const result = await transactionWrapper<Enquiry & { contact: Contact }>(async (tx: PrismaTransactionClient) => {
-    const enquiry = await generateEnquiryData(tx, req.body, req.currentContext);
+    const enquiry = await generateEnquiryData(tx, req.body, res.locals.currentContext);
 
     // Create new enquiry
     const data = await createEnquiry(tx, {
@@ -79,18 +79,18 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
       atsClientId: null,
       atsEnquiryId: null,
       submittedMethod: EnquirySubmittedMethod.PCNS,
-      ...generateCreateStamps(req.currentContext),
+      ...generateCreateStamps(res.locals.currentContext),
       ...generateNullUpdateStamps()
     });
 
     // Update the contact
     const contactResponse = await upsertContacts(tx, [
-      { ...req.body.contact, ...generateUpdateStamps(req.currentContext) }
+      { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
     ]);
 
     // Create additional activity_contact links if the enquiry is related to a project
     if (data.relatedActivityId) {
-      const currentContact = await searchContacts(tx, { userId: [req.currentContext.userId!] });
+      const currentContact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
 
       const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
         (x) => x.contactId != currentContact[0].contactId
@@ -106,7 +106,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     return { ...data, contact: contactResponse[0] };
   });
 
-  await emailEnquiryConfirmation(result, req.currentContext.initiative, req.body.relatedActivityId);
+  await emailEnquiryConfirmation(result, res.locals.currentContext.initiative, req.body.relatedActivityId);
   res.status(201).json(result);
 };
 
@@ -172,8 +172,8 @@ async function emailEnquiryConfirmation(
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     const enquiry = await getEnquiry(tx, req.params.enquiryId);
-    await deleteEnquiry(tx, req.params.enquiryId, generateDeleteStamps(req.currentContext));
-    await deleteActivity(tx, enquiry.activityId, generateDeleteStamps(req.currentContext));
+    await deleteEnquiry(tx, req.params.enquiryId, generateDeleteStamps(res.locals.currentContext));
+    await deleteActivity(tx, enquiry.activityId, generateDeleteStamps(res.locals.currentContext));
   });
   res.status(204).end();
 };
@@ -211,7 +211,7 @@ export const searchEnquiriesController = async (
         ...req.body,
         includeUser: isTruthy(req.body?.includeUser)
       },
-      req.currentContext.initiative
+      res.locals.currentContext.initiative
     );
   });
 
@@ -227,7 +227,7 @@ export const updateEnquiryController = async (
       tx,
       {
         ...req.body,
-        ...generateUpdateStamps(req.currentContext)
+        ...generateUpdateStamps(res.locals.currentContext)
       },
       req.params.enquiryId
     );
