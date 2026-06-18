@@ -35,11 +35,11 @@ export function createContactCardNavFormSchema({ t }: CreateSchemaOptions) {
         .label(t('validators.contactCardNavForm.contactEmail')),
       firstName: requiredText(255).label(t('validators.contactCardNavForm.contactFirstName')),
       lastName: optionalText(255).label(t('validators.contactCardNavForm.contactLastName')).nullable(),
-      phoneNumber: requiredText().label(t('validators.contactCardNavForm.contactPhoneNumber')),
-      contactApplicantRelationship: requiredText()
+      phoneNumber: optionalText().label(t('validators.contactCardNavForm.contactPhoneNumber')),
+      contactApplicantRelationship: optionalText()
         .oneOf(PROJECT_RELATIONSHIP_LIST)
         .label(t('validators.contactCardNavForm.contactApplicantRelationship')),
-      contactPreference: requiredText()
+      contactPreference: optionalText()
         .oneOf(CONTACT_PREFERENCE_LIST)
         .label(t('validators.contactCardNavForm.contactPreference')),
       userId: optionalText()
