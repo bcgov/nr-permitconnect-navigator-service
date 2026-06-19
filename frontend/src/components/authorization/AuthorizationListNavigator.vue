@@ -211,7 +211,7 @@ onBeforeMount(async () => {
             <router-link
               :to="{
                 name: projectAuthorizationRouteName,
-                params: { permitId: data.permitId, projectId: data.activity.project?.projectId }
+                params: { permitId: data.permitId, projectId: data.project?.projectId }
               }"
             >
               {{ data.permitType.businessDomain }} : {{ data.permitType.name }}
@@ -276,7 +276,7 @@ onBeforeMount(async () => {
         style="min-width: 150px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.projectName }}
+          {{ data.project?.projectName }}
         </template>
       </Column>
       <Column
@@ -285,7 +285,7 @@ onBeforeMount(async () => {
         style="min-width: 120px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.activityId }}
+          {{ data.activityId }}
         </template>
       </Column>
       <Column
@@ -294,7 +294,7 @@ onBeforeMount(async () => {
         style="min-width: 200px"
       >
         <template #body="{ data }">
-          {{ data.activity.project?.companyNameRegistered }}
+          {{ data.project?.companyNameRegistered }}
         </template>
       </Column>
       <Column
@@ -304,13 +304,7 @@ onBeforeMount(async () => {
         style="min-width: 150px"
       >
         <template #body="{ data }">
-          {{
-            getLocation(
-              data.activity.project?.streetAddress,
-              data.activity.project?.locality,
-              data.activity.project?.province
-            )
-          }}
+          {{ getLocation(data.project?.streetAddress, data.project?.locality, data.project?.province) }}
         </template>
       </Column>
     </DataTable>

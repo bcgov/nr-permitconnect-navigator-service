@@ -46,8 +46,8 @@ import type {
   ListPermitsOptions,
   Permit,
   PermitUpdateEmailParams,
-  PermitWithActivityProject,
-  SearchPermitsOptions
+  SearchPermitsOptions,
+  SearchPermitsResponse
 } from '../../../src/types/index.ts';
 
 vi.mock('config');
@@ -180,15 +180,19 @@ describe('listPermitsController', () => {
 });
 
 describe('searchPermitsController', () => {
-  const searchSpy = vi.spyOn(permitService, 'searchPermitsPaginated');
+  const searchSpy = vi.spyOn(permitService, 'searchPermits');
 
-  const TEST_PERMIT_WITH_HOUSING_PROJECT: PermitWithActivityProject = {
-    ...TEST_PERMIT_1,
-    activity: {
-      ...TEST_ACTIVITY_HOUSING,
-      project: TEST_HOUSING_PROJECT_1
+  const permitResponse = {
+    permitId: '123',
+    activityId: 'abc',
+    permitType: {
+      businessDomain: 'dom',
+      name: 'foo'
+    },
+    project: {
+      projectId: '456'
     }
-  };
+  } as SearchPermitsResponse['permits'][number];
 
   it('should call services and respond with 200 and paginated results', async () => {
     const req = {
@@ -208,7 +212,7 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: [TEST_PERMIT_WITH_HOUSING_PROJECT],
+      permits: [permitResponse],
       totalRecords: 25
     };
 
@@ -268,7 +272,7 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: [TEST_PERMIT_WITH_HOUSING_PROJECT],
+      permits: [permitResponse],
       totalRecords: 1
     };
 

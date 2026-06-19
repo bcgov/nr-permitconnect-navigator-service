@@ -8,7 +8,7 @@ import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
-import { deletePermit, getPermit, listPermits, searchPermitsPaginated, upsertPermit } from '../services/permit.ts';
+import { deletePermit, getPermit, listPermits, searchPermits, upsertPermit } from '../services/permit.ts';
 import { createPermitNote } from '../services/permitNote.ts';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
@@ -34,6 +34,7 @@ import type {
   PermitTracking,
   PermitUpdateEmailParams,
   SearchPermitsOptions,
+  SearchPermitsResponse,
   SourceSystemKind
 } from '../types/index.ts';
 import { codeTable } from '../db/codes/cache.ts';
@@ -138,7 +139,9 @@ export const searchPermitsController = async (
 
       return await searchPermitsPaginated(tx, res.locals.currentContext.initiative!, req.query); // nosonar
     }
-  );
+
+    return await searchPermits(tx, req.currentContext.initiative!, req.query); // nosonar
+  });
   res.status(200).json(response);
 };
 

@@ -23,9 +23,12 @@ export const usePermitStore = defineStore('permit', () => {
     getPermit: computed(() => state.permit.value),
     getAllPermitTypes: computed(() => state.permitTypes.value),
     getInitiativePermitTypes: computed(() =>
-      state.permitTypes.value.filter((permit) =>
-        permit.permitTypeInitiativeXref?.some((xref) => xref.initiative.code === useAppStore().getInitiative)
-      )
+      state.permitTypes.value
+        .filter((permit) =>
+          permit.permitTypeInitiativeXref?.some((xref) => xref.initiative.code === useAppStore().getInitiative)
+        )
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .map(({ permitTypeInitiativeXref, ...permit }) => permit)
     )
   };
 
