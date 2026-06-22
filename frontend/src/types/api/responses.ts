@@ -1,5 +1,5 @@
 import type { BasicResponse } from '@/utils/enums/application';
-import type { ActivityContact, Group, Permit } from './resources';
+import type { ActivityContact, Group } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import type { CodeTableName } from '../common';
@@ -76,7 +76,28 @@ export interface ListIdirUsersResponse {
 }
 
 export interface SearchPermitsResponse {
-  permits: Permit[];
+  permits: {
+    permitId: string;
+    activityId: string;
+    permitTypeId: number;
+    decisionDate: string | null;
+    stage: string;
+    state: string;
+    statusLastChanged: string | null;
+    submittedDate: string | null;
+    permitType: {
+      businessDomain: string;
+      name: string;
+    };
+    project: {
+      projectId: string;
+      projectName: string | null;
+      companyNameRegistered: string | null;
+      streetAddress?: string | null;
+      locality?: string | null;
+      province?: string | null;
+    } | null;
+  }[];
   totalRecords: number;
 }
 

@@ -5,8 +5,8 @@ import type {
   ListPermitsOptions,
   Permit,
   PermitBase,
-  PermitSearchParams,
-  SearchPermitsOptions
+  SearchPermitsOptions,
+  SearchPermitsResponse
 } from '../types/index.ts';
 
 /**
@@ -65,6 +65,11 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
       }
     },
     include: {
+      activity: {
+        include: {
+          activityContact: true
+        }
+      },
       permitType: true,
       permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
       permitTracking: {
@@ -79,59 +84,20 @@ export const listPermits = async (tx: PrismaTransactionClient, options?: ListPer
 };
 
 /**
- * Retrieve permits matching the given params
+ * Retrieve permits and trackers that are PEACH integrated
  * @param tx Prisma transaction client
- * @param params Search params
  * @returns A Promise that resolves to a list of permits matching the search params
  */
-export const searchPermits = async (tx: PrismaTransactionClient, params: PermitSearchParams): Promise<Permit[]> => {
-  let permitTrackingInclude: object = {};
-  const {
-    permitId,
-    activityId,
-    permitTypeId,
-    stage,
-    state,
-    sourceSystems,
-    includePermitNotes,
-    includePermitTracking,
-    includePermitType,
-    onlyPeachIntegratedTrackings
-  } = params;
-
-  // Build permitTracking filter/include
-  if (includePermitTracking) {
-    const sourceSystemAndClause = sourceSystems ? { sourceSystemKind: { sourceSystem: { in: sourceSystems } } } : {};
-    const peachIntegratedAndClause = onlyPeachIntegratedTrackings ? { sourceSystemKind: { integrated: true } } : {};
-    const permitTrackingWhere =
-      sourceSystems || onlyPeachIntegratedTrackings
-        ? { AND: [sourceSystemAndClause, peachIntegratedAndClause] }
-        : undefined;
-
-    permitTrackingInclude = {
-      permitTracking: {
-        ...(permitTrackingWhere ? { where: permitTrackingWhere } : {}),
-        include: { sourceSystemKind: true }
-      }
-    };
-  }
-
+export const listPeachIntegratedTrackings = async (tx: PrismaTransactionClient): Promise<Permit[]> => {
   const response = await tx.permit.findMany({
     where: {
-      AND: [
-        permitId ? { permitId: { in: permitId } } : {},
-        activityId ? { activityId: { in: activityId } } : {},
-        permitTypeId ? { permitTypeId: { in: permitTypeId } } : {},
-        stage ? { stage: { in: stage } } : {},
-        state ? { state: { in: state } } : {},
-        sourceSystems ? { permitType: { sourceSystem: { in: sourceSystems } } } : {},
-        onlyPeachIntegratedTrackings ? { permitTracking: { some: { sourceSystemKind: { integrated: true } } } } : {}
-      ]
+      AND: [{ permitTracking: { some: { sourceSystemKind: { integrated: true } } } }]
     },
     include: {
-      ...(includePermitType ? { permitType: true } : {}),
-      ...(includePermitNotes ? { permitNote: true } : {}),
-      ...permitTrackingInclude
+      permitTracking: {
+        where: { AND: [{ sourceSystemKind: { integrated: true } }] },
+        include: { sourceSystemKind: true }
+      }
     }
   });
   return response;
@@ -144,17 +110,17 @@ export const searchPermits = async (tx: PrismaTransactionClient, params: PermitS
  * @param options Search and filter options
  * @returns A Promise that resolves to an object with permits array and total count
  */
-export const searchPermitsPaginated = async (
+export const searchPermits = async (
   tx: PrismaTransactionClient,
   initiative: Exclude<Initiative, Initiative.PCNS>,
   options: SearchPermitsOptions
-): Promise<{ permits: Permit[]; totalRecords: number }> => {
+): Promise<SearchPermitsResponse> => {
   // Determine project table based on initiative, exclude PCNS
-  const projectTableMap: Record<Exclude<Initiative, Initiative.PCNS>, string> = {
+  const projectTableMap = {
     [Initiative.ELECTRIFICATION]: 'electrificationProject',
     [Initiative.GENERAL]: 'generalProject',
     [Initiative.HOUSING]: 'housingProject'
-  };
+  } as const;
 
   const projectTable = projectTableMap[initiative];
 
@@ -243,16 +209,50 @@ export const searchPermitsPaginated = async (
     take: options?.take ? Number.parseInt(options.take) : 10,
     where: whereClause,
     orderBy: orderBy,
-    include: {
-      permitType: true,
-      permitTracking: {
-        include: {
-          sourceSystemKind: true
+    select: {
+      permitId: true,
+      activityId: true,
+      permitTypeId: true,
+      decisionDate: true,
+      stage: true,
+      state: true,
+      statusLastChanged: true,
+      submittedDate: true,
+      permitType: {
+        select: {
+          businessDomain: true,
+          name: true
         }
       },
       activity: {
-        include: {
-          [projectTable]: true
+        select: {
+          electrificationProject: {
+            select: {
+              projectId: true,
+              projectName: true,
+              companyNameRegistered: true
+            }
+          },
+          generalProject: {
+            select: {
+              projectId: true,
+              projectName: true,
+              companyNameRegistered: true,
+              streetAddress: true,
+              locality: true,
+              province: true
+            }
+          },
+          housingProject: {
+            select: {
+              projectId: true,
+              projectName: true,
+              companyNameRegistered: true,
+              streetAddress: true,
+              locality: true,
+              province: true
+            }
+          }
         }
       }
     }
@@ -260,14 +260,20 @@ export const searchPermitsPaginated = async (
 
   // Map the results to alias the project table as 'project'
   const permitsWithProjectAlias = permits.map((permit) => {
-    const { [projectTable]: projectData, ...activityData } = permit.activity;
+    const project =
+      permit.activity.housingProject ?? permit.activity.generalProject ?? permit.activity.electrificationProject;
 
     return {
-      ...permit,
-      activity: {
-        ...activityData,
-        project: projectData
-      }
+      permitId: permit.permitId,
+      activityId: permit.activityId,
+      permitTypeId: permit.permitTypeId,
+      decisionDate: permit.decisionDate,
+      stage: permit.stage,
+      state: permit.state,
+      statusLastChanged: permit.statusLastChanged,
+      submittedDate: permit.submittedDate,
+      permitType: permit.permitType,
+      project
     };
   });
 

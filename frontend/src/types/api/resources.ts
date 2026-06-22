@@ -373,6 +373,7 @@ interface PermitBase extends AuditFields {
 }
 
 interface PermitRelations {
+  activity: Activity;
   permitNote: PermitNote[];
   permitTracking: PermitTracking[];
   permitType: PermitType;

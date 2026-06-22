@@ -10,6 +10,7 @@ import {
   generateNullUpdateStamps,
   generateUpdateStamps
 } from '../db/utils/utils.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContacts, upsertContacts } from '../services/contact.ts';
@@ -39,6 +40,7 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
+  LocalContext,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -193,9 +195,10 @@ export const getElectrificationProjectDraftController = async (req: Request<{ dr
   res.status(200).json(response);
 };
 
-export const getElectrificationProjectDraftsController = async (req: Request, res: Response) => {
+export const getElectrificationProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
   const response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    return await getDrafts(tx, DraftCode.ELECTRIFICATION_PROJECT);
+    const drafts = await getDrafts(tx, DraftCode.ELECTRIFICATION_PROJECT);
+    return await filterActivityResponseByScope(tx, res.locals, drafts);
   });
   res.status(200).json(response);
 };
@@ -220,22 +223,27 @@ export const getElectrificationProjectController = async (
   res.status(200).json(response);
 };
 
-export const getElectrificationProjectsController = async (req: Request, res: Response) => {
+export const getElectrificationProjectsController = async (
+  req: Request,
+  res: Response<ElectrificationProject[], LocalContext>
+) => {
   const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getElectrificationProjects(tx);
+    const projects = await getElectrificationProjects(tx);
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };
 
 export const searchElectrificationProjectsController = async (
   req: Request<never, never, ElectrificationProjectSearchParameters | undefined, never>,
-  res: Response
+  res: Response<ElectrificationProject[], LocalContext>
 ) => {
   const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
-    return await searchElectrificationProjects(tx, {
+    const projects = await searchElectrificationProjects(tx, {
       ...req.body,
       includeUser: isTruthy(req.body?.includeUser)
     });
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };

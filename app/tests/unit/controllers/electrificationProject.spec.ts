@@ -26,6 +26,7 @@ import {
   updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
 } from '../../../src/controllers/electrificationProject.ts';
+import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
@@ -45,6 +46,7 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
+  LocalContext,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -247,16 +249,23 @@ describe('getElectrificationProjectDraftController', () => {
 
 describe('getElectrificationProjectDraftsController', () => {
   const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200', async () => {
     const req = {};
 
     getDraftsSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
+    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
 
-    await getElectrificationProjectDraftsController(req as unknown as Request, res as unknown as Response);
+    await getElectrificationProjectDraftsController(
+      req as unknown as Request,
+      res as unknown as Response<Draft[], LocalContext>
+    );
 
     expect(getDraftsSpy).toHaveBeenCalledTimes(1);
     expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.ELECTRIFICATION_PROJECT);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_ELECTRIFICATION_DRAFT]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_DRAFT]);
   });
@@ -337,6 +346,7 @@ describe('getElectrificationProjectController', () => {
 
 describe('getElectrificationProjectsController', () => {
   const electrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -344,8 +354,12 @@ describe('getElectrificationProjectsController', () => {
     };
 
     electrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
 
-    await getElectrificationProjectsController(req as unknown as Request, res as unknown as Response);
+    await getElectrificationProjectsController(
+      req as unknown as Request,
+      res as unknown as Response<ElectrificationProject[], LocalContext>
+    );
 
     expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
     expect(electrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
@@ -356,6 +370,7 @@ describe('getElectrificationProjectsController', () => {
 
 describe('searchElectrificationProjectsController', () => {
   const searchElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -363,10 +378,11 @@ describe('searchElectrificationProjectsController', () => {
     };
 
     searchElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
 
     await searchElectrificationProjectsController(
       req as unknown as Request<never, never, ElectrificationProjectSearchParameters, never>,
-      res as unknown as Response
+      res as unknown as Response<ElectrificationProject[], LocalContext>
     );
 
     expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
@@ -374,6 +390,8 @@ describe('searchElectrificationProjectsController', () => {
       activityId: ['ACTI1234', 'ACTI5678'],
       includeUser: false
     });
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_ELECTRIFICATION_PROJECT_1]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
   });

@@ -18,7 +18,6 @@ import {
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
 import { Action, Resource } from '../../utils/enums/application.ts';
 import { housingProjectValidator } from '../../validators/index.ts';
 
@@ -27,18 +26,12 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of housing projects */
-router.get(
-  '/',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  filterActivityResponseByScope,
-  getHousingProjectsController
-);
+router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectsController);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  filterActivityResponseByScope,
   getHousingProjectActivityIdsController
 );
 
@@ -47,7 +40,6 @@ router.post(
   '/search',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
   housingProjectValidator.searchHousingProjects,
-  filterActivityResponseByScope,
   searchHousingProjectsController
 );
 
@@ -68,12 +60,7 @@ router.get(
 );
 
 /** Gets a list of housing project drafts */
-router.get(
-  '/draft',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  filterActivityResponseByScope,
-  getHousingProjectDraftsController
-);
+router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
 router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), upsertHousingProjectDraftController);

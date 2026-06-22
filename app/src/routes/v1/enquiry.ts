@@ -12,7 +12,6 @@ import {
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
 import { Action, Resource } from '../../utils/enums/application.ts';
 import { enquiryValidator } from '../../validators/index.ts';
 
@@ -25,7 +24,6 @@ router.get(
   '/list/:activityId',
   hasAuthorization(Resource.ENQUIRY, Action.READ),
   hasAccess('activityId'),
-  filterActivityResponseByScope,
   listRelatedEnquiriesController
 );
 
@@ -34,7 +32,6 @@ router.post(
   '/search',
   hasAuthorization(Resource.ENQUIRY, Action.READ),
   enquiryValidator.searchEnquiries,
-  filterActivityResponseByScope,
   searchEnquiriesController
 );
 
@@ -47,7 +44,7 @@ router.get(
 );
 
 /** Gets a list of enquiries */
-router.get('/', hasAuthorization(Resource.ENQUIRY, Action.READ), filterActivityResponseByScope, getEnquiriesController);
+router.get('/', hasAuthorization(Resource.ENQUIRY, Action.READ), getEnquiriesController);
 
 /** Creates an enquiry and set status to Submitted */
 router.post(

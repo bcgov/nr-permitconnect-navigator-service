@@ -150,7 +150,7 @@ export const deleteActivityContactController = async (
 
 export const listActivityContactController = async (req: Request<{ activityId: string }>, res: Response) => {
   const response = await transactionWrapper<ActivityContact[]>(async (tx: PrismaTransactionClient) => {
-    return await listActivityContacts(tx, req.params.activityId);
+    return await listActivityContacts(tx, [req.params.activityId]);
   });
 
   res.status(200).json(response);

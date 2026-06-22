@@ -2,13 +2,15 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { findPriorityPermitTracking } from './peach.ts';
+import { codeTable } from '../db/codes/cache.ts';
 import { PermitStage } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
-import { deletePermit, getPermit, listPermits, searchPermitsPaginated, upsertPermit } from '../services/permit.ts';
+import { deletePermit, getPermit, listPermits, searchPermits, upsertPermit } from '../services/permit.ts';
 import { createPermitNote } from '../services/permitNote.ts';
 import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
@@ -30,13 +32,14 @@ import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   ListPermitsOptions,
+  LocalContext,
   Permit,
   PermitTracking,
   PermitUpdateEmailParams,
   SearchPermitsOptions,
+  SearchPermitsResponse,
   SourceSystemKind
 } from '../types/index.ts';
-import { codeTable } from '../db/codes/cache.ts';
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
   const sourceSystemKind = sourceSystemKinds.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
@@ -67,7 +70,7 @@ export const getPermitController = async (req: Request<{ permitId: string }>, re
 
 export const listPermitsController = async (
   req: Request<never, never, never, Partial<ListPermitsOptions>>,
-  res: Response
+  res: Response<Permit[], LocalContext>
 ) => {
   const response = await transactionWrapper<Permit[]>(async (tx: PrismaTransactionClient) => {
     const options: ListPermitsOptions = {
@@ -75,7 +78,8 @@ export const listPermitsController = async (
       includeNotes: isTruthy(req.query.includeNotes)
     };
 
-    return await listPermits(tx, options);
+    const permits = await listPermits(tx, options);
+    return await filterActivityResponseByScope(tx, res.locals, permits);
   });
   res.status(200).json(response);
 };
@@ -120,25 +124,28 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
 
 /**
  * Searches for permits based on provided query parameters
- * @param req - Express request containing search options in query parameters
- * @param res - Express response object
  * @returns Promise resolving to permits array and total record count
  * @throws {Problem} 400 error if initiative is PCNS (invalid for this search)
  */
+
 export const searchPermitsController = async (
   req: Request<never, never, never, SearchPermitsOptions>,
-  res: Response
+  res: Response<SearchPermitsResponse, LocalContext>
 ) => {
-  const response = await transactionWrapper<{ permits: Permit[]; totalRecords: number }>(
-    async (tx: PrismaTransactionClient) => {
-      // Validate it's not PCNS
-      if (res.locals.currentContext.initiative === Initiative.PCNS) {
-        throw new Problem(400, { detail: 'Invalid initiative' });
-      }
-
-      return await searchPermitsPaginated(tx, res.locals.currentContext.initiative!, req.query); // nosonar
+  const response = await transactionWrapper<SearchPermitsResponse>(async (tx: PrismaTransactionClient) => {
+    // Validate it's not PCNS
+    if (res.locals.currentContext.initiative === Initiative.PCNS) {
+      throw new Problem(400, { detail: 'Invalid initiative' });
     }
-  );
+
+    const permits = await searchPermits(tx, res.locals.currentContext.initiative!, req.query); // nosonar
+    const filteredPermits = await filterActivityResponseByScope(tx, res.locals, permits.permits);
+    // TODO: totalRecords will be incorrect as its based on all permits
+    // TBH we probably need filtering at the prisma level somehow
+    // Not an immediate priority as pagination is currently internal only and Navs always see full results
+    // Will need to be addressed when pagination goes to the proponent side
+    return { permits: filteredPermits, totalRecords: permits.totalRecords };
+  });
   res.status(200).json(response);
 };
 

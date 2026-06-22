@@ -59,6 +59,11 @@ describe('listPermits', () => {
         }
       },
       include: {
+        activity: {
+          include: {
+            activityContact: true
+          }
+        },
         permitType: true,
         permitNote: false,
         permitTracking: {
@@ -72,50 +77,16 @@ describe('listPermits', () => {
   });
 });
 
-describe('searchPermits', () => {
-  it('calls permit.findMany with no filters or includes and returns result', async () => {
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
-
-    const response = await permitService.searchPermits(prismaTxMock, {});
-
-    expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [{}, {}, {}, {}, {}, {}, {}]
-      },
-      include: {}
-    });
-    expect(response).toStrictEqual([TEST_PERMIT_1]);
-  });
-
+describe('listPeachIntegratedTrackings', () => {
   it('calls permit.findMany with full filters and integrated tracking and returns result', async () => {
     prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
 
-    const params = {
-      permitId: ['PERMIT-1'],
-      activityId: ['ACTIVITY-1'],
-      permitTypeId: [123],
-      stage: ['Technical review'],
-      state: ['In progress'],
-      sourceSystems: ['ITSM-6072'],
-      includePermitNotes: true,
-      includePermitTracking: true,
-      includePermitType: true,
-      onlyPeachIntegratedTrackings: true
-    };
-
-    const response = await permitService.searchPermits(prismaTxMock, params);
+    const response = await permitService.listPeachIntegratedTrackings(prismaTxMock);
 
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
       where: {
         AND: [
-          { permitId: { in: ['PERMIT-1'] } },
-          { activityId: { in: ['ACTIVITY-1'] } },
-          { permitTypeId: { in: [123] } },
-          { stage: { in: ['Technical review'] } },
-          { state: { in: ['In progress'] } },
-          { permitType: { sourceSystem: { in: ['ITSM-6072'] } } },
           {
             permitTracking: {
               some: {
@@ -128,18 +99,9 @@ describe('searchPermits', () => {
         ]
       },
       include: {
-        permitType: true,
-        permitNote: true,
         permitTracking: {
           where: {
             AND: [
-              {
-                sourceSystemKind: {
-                  sourceSystem: {
-                    in: ['ITSM-6072']
-                  }
-                }
-              },
               {
                 sourceSystemKind: {
                   integrated: true
@@ -153,49 +115,22 @@ describe('searchPermits', () => {
     });
     expect(response).toStrictEqual([TEST_PERMIT_1]);
   });
-
-  it('calls permit.findMany with includePermitTracking but no filters and returns result', async () => {
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1]);
-
-    const params = {
-      includePermitTracking: true
-    };
-
-    const response = await permitService.searchPermits(prismaTxMock, params);
-
-    expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.permit.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [{}, {}, {}, {}, {}, {}, {}]
-      },
-      include: {
-        permitTracking: {
-          include: {
-            sourceSystemKind: true
-          }
-        }
-      }
-    });
-    expect(response).toStrictEqual([TEST_PERMIT_1]);
-  });
 });
 
-describe('searchPermitsPaginated', () => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const mockPermit: any = {
-    ...TEST_PERMIT_1,
-    activity: {
-      activityId: 'ACT123',
-      housingProject: [{ housingProjectId: 'HP1', projectName: 'Test Housing' }],
-      electrificationProject: [{ electrificationProjectId: 'EP1', projectName: 'Test Electrification' }]
-    }
-  };
-
+describe('searchPermits', () => {
   it('calls permit.count and permit.findMany with default options for HOUSING initiative', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(5);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        housingProject: { projectId: 'HP1', projectName: 'Test Housing' }
+      }
+    };
 
-    const response = await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {});
+    prismaTxMock.permit.count.mockResolvedValueOnce(5);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    const response = await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {});
 
     expect(prismaTxMock.permit.count).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.permit.count).toHaveBeenCalledWith({
@@ -236,16 +171,50 @@ describe('searchPermitsPaginated', () => {
         ]
       },
       orderBy: undefined,
-      include: {
-        permitType: true,
-        permitTracking: {
-          include: {
-            sourceSystemKind: true
+      select: {
+        permitId: true,
+        activityId: true,
+        permitTypeId: true,
+        decisionDate: true,
+        stage: true,
+        state: true,
+        statusLastChanged: true,
+        submittedDate: true,
+        permitType: {
+          select: {
+            businessDomain: true,
+            name: true
           }
         },
         activity: {
-          include: {
-            housingProject: true
+          select: {
+            electrificationProject: {
+              select: {
+                projectId: true,
+                projectName: true,
+                companyNameRegistered: true
+              }
+            },
+            generalProject: {
+              select: {
+                projectId: true,
+                projectName: true,
+                companyNameRegistered: true,
+                streetAddress: true,
+                locality: true,
+                province: true
+              }
+            },
+            housingProject: {
+              select: {
+                projectId: true,
+                projectName: true,
+                companyNameRegistered: true,
+                streetAddress: true,
+                locality: true,
+                province: true
+              }
+            }
           }
         }
       }
@@ -254,16 +223,22 @@ describe('searchPermitsPaginated', () => {
     expect(response.totalRecords).toBe(5);
     expect(response.permits).toHaveLength(1);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((response.permits[0] as any).activity.project).toEqual([
-      { housingProjectId: 'HP1', projectName: 'Test Housing' }
-    ]);
+    expect((response.permits[0] as any).project).toEqual({ projectId: 'HP1', projectName: 'Test Housing' });
   });
 
   it('calls permit.count and permit.findMany with default options for ELECTRIFICATION initiative', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(3);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    const response = await permitService.searchPermitsPaginated(prismaTxMock, Initiative.ELECTRIFICATION, {});
+    prismaTxMock.permit.count.mockResolvedValueOnce(3);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    const response = await permitService.searchPermits(prismaTxMock, Initiative.ELECTRIFICATION, {});
 
     expect(prismaTxMock.permit.count).toHaveBeenCalledTimes(1);
     expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
@@ -284,16 +259,50 @@ describe('searchPermitsPaginated', () => {
             {}
           ]
         },
-        include: {
-          permitType: true,
-          permitTracking: {
-            include: {
-              sourceSystemKind: true
+        select: {
+          permitId: true,
+          activityId: true,
+          permitTypeId: true,
+          decisionDate: true,
+          stage: true,
+          state: true,
+          statusLastChanged: true,
+          submittedDate: true,
+          permitType: {
+            select: {
+              businessDomain: true,
+              name: true
             }
           },
           activity: {
-            include: {
-              electrificationProject: true
+            select: {
+              electrificationProject: {
+                select: {
+                  projectId: true,
+                  projectName: true,
+                  companyNameRegistered: true
+                }
+              },
+              generalProject: {
+                select: {
+                  projectId: true,
+                  projectName: true,
+                  companyNameRegistered: true,
+                  streetAddress: true,
+                  locality: true,
+                  province: true
+                }
+              },
+              housingProject: {
+                select: {
+                  projectId: true,
+                  projectName: true,
+                  companyNameRegistered: true,
+                  streetAddress: true,
+                  locality: true,
+                  province: true
+                }
+              }
             }
           }
         }
@@ -302,16 +311,22 @@ describe('searchPermitsPaginated', () => {
 
     expect(response.totalRecords).toBe(3);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((response.permits[0] as any).activity.project).toEqual([
-      { electrificationProjectId: 'EP1', projectName: 'Test Electrification' }
-    ]);
+    expect((response.permits[0] as any).project).toEqual({ projectId: 'EP1', projectName: 'Test Electrification' });
   });
 
   it('applies pagination with skip and take', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(100);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(100);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       skip: '20',
       take: '25'
     });
@@ -325,10 +340,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies sorting by submittedDate ascending', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(10);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(10);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       sortField: 'submittedDate',
       sortOrder: '1'
     });
@@ -341,10 +364,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies sorting by decisionDate descending', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(10);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(10);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       sortField: 'decisionDate',
       sortOrder: '0'
     });
@@ -357,10 +388,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies sorting by stage', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(10);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(10);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       sortField: 'stage',
       sortOrder: '1'
     });
@@ -373,13 +412,21 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies dateRange filter', async () => {
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
+
     prismaTxMock.permit.count.mockResolvedValueOnce(5);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
 
     const startDate = new Date('2024-01-01');
     const endDate = new Date('2024-12-31');
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       dateRange: [startDate, endDate]
     });
 
@@ -411,10 +458,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies permitTypeId filter', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(2);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(2);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       permitTypeId: '123'
     });
 
@@ -440,10 +495,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies sourceSystemKindId filter', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(4);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(4);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       sourceSystemKindId: '456'
     });
 
@@ -475,10 +538,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies searchTag filter for HOUSING initiative', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(1);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(1);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       searchTag: 'test'
     });
 
@@ -532,10 +603,18 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies searchTag filter for ELECTRIFICATION initiative without location fields', async () => {
-    prismaTxMock.permit.count.mockResolvedValueOnce(1);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
 
-    await permitService.searchPermitsPaginated(prismaTxMock, Initiative.ELECTRIFICATION, {
+    prismaTxMock.permit.count.mockResolvedValueOnce(1);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
+
+    await permitService.searchPermits(prismaTxMock, Initiative.ELECTRIFICATION, {
       searchTag: 'test'
     });
 
@@ -553,13 +632,21 @@ describe('searchPermitsPaginated', () => {
   });
 
   it('applies multiple filters combined', async () => {
+    const mockRes = {
+      ...TEST_PERMIT_1,
+      activity: {
+        activityId: 'ACT123',
+        electrificationProject: { projectId: 'EP1', projectName: 'Test Electrification' }
+      }
+    };
+
     prismaTxMock.permit.count.mockResolvedValueOnce(2);
-    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockPermit]);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([mockRes]);
 
     const startDate = new Date('2024-01-01');
     const endDate = new Date('2024-12-31');
 
-    const response = await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    const response = await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       dateRange: [startDate, endDate],
       permitTypeId: '123',
       searchTag: 'test',
@@ -610,7 +697,7 @@ describe('searchPermitsPaginated', () => {
     prismaTxMock.permit.count.mockResolvedValueOnce(0);
     prismaTxMock.permit.findMany.mockResolvedValueOnce([]);
 
-    const response = await permitService.searchPermitsPaginated(prismaTxMock, Initiative.HOUSING, {
+    const response = await permitService.searchPermits(prismaTxMock, Initiative.HOUSING, {
       searchTag: 'nonexistent'
     });
 

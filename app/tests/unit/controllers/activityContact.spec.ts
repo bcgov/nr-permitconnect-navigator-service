@@ -81,7 +81,7 @@ describe('GET /activity/:activityId/contact', () => {
     const res = await request(app).get(`/activity/${TEST_ACTIVITY_CONTACT_1.activityId}/contact`).expect(200);
 
     expect(listActivityContactsSpy).toHaveBeenCalledTimes(1);
-    expect(listActivityContactsSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ACTIVITY_CONTACT_1.activityId);
+    expect(listActivityContactsSpy).toHaveBeenCalledWith(prismaTxMock, [TEST_ACTIVITY_CONTACT_1.activityId]);
     expect(res.body).toEqual([TEST_ACTIVITY_CONTACT_1]);
   });
 });

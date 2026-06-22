@@ -178,14 +178,14 @@ describe('getPeachSummaryController', () => {
 });
 
 describe('syncPeachRecords', () => {
-  const searchSpy = vi.spyOn(permitService, 'searchPermits');
+  const listPeachIntSpy = vi.spyOn(permitService, 'listPeachIntegratedTrackings');
   const upsertSpy = vi.spyOn(permitService, 'upsertPermit');
   const getRecSpy = vi.spyOn(peachService, 'getPeachRecord');
   const parseSpy = vi.spyOn(parser, 'parsePeachRecords');
   const stampsSpy = vi.spyOn(stamps, 'generateUpdateStamps');
 
   it('fetches from PEACH and upserts when differences are detected', async () => {
-    searchSpy.mockResolvedValueOnce([TEST_PERMIT_1]);
+    listPeachIntSpy.mockResolvedValueOnce([TEST_PERMIT_1]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     parseSpy.mockReturnValueOnce({
@@ -197,8 +197,8 @@ describe('syncPeachRecords', () => {
 
     await syncPeachRecords();
 
-    expect(searchSpy).toHaveBeenCalledTimes(1);
-    expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, expect.objectContaining({ includePermitTracking: true }));
+    expect(listPeachIntSpy).toHaveBeenCalledTimes(1);
+    expect(listPeachIntSpy).toHaveBeenCalledWith(prismaTxMock);
 
     expect(getRecSpy).toHaveBeenCalledTimes(1);
     expect(getRecSpy).toHaveBeenCalledWith('REC-SUB', PeachIntegratedSystem.VFCBC);
@@ -228,7 +228,7 @@ describe('syncPeachRecords', () => {
   });
 
   it('does not upsert when parsed values are equal (no diffs)', async () => {
-    searchSpy.mockResolvedValueOnce([TEST_PERMIT_2]);
+    listPeachIntSpy.mockResolvedValueOnce([TEST_PERMIT_2]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     const sameDate = TEST_PERMIT_2.submittedDate!;
@@ -254,7 +254,7 @@ describe('syncPeachRecords', () => {
 
   it('generates applicant request note when on-hold code changes to APPLICANT_REQUEST', async () => {
     const permit = { ...TEST_PERMIT_2, onHoldCode: null };
-    searchSpy.mockResolvedValueOnce([permit]);
+    listPeachIntSpy.mockResolvedValueOnce([permit]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     const fixedNow = new Date('2024-02-04T12:00:00.000Z');
@@ -296,7 +296,7 @@ describe('syncPeachRecords', () => {
   });
 
   it('logs failures but continues when some PEACH fetches reject', async () => {
-    searchSpy.mockResolvedValueOnce([TEST_PERMIT_1, TEST_PERMIT_2]);
+    listPeachIntSpy.mockResolvedValueOnce([TEST_PERMIT_1, TEST_PERMIT_2]);
 
     getRecSpy.mockRejectedValueOnce(new Error('boom')).mockResolvedValueOnce(TEST_PEACH_RECORD_2);
 
@@ -325,7 +325,7 @@ describe('syncPeachRecords', () => {
   });
 
   it('ignores permits without a integrated tracking', async () => {
-    searchSpy.mockResolvedValueOnce([TEST_PERMIT_4, TEST_PERMIT_3]);
+    listPeachIntSpy.mockResolvedValueOnce([TEST_PERMIT_4, TEST_PERMIT_3]);
 
     await syncPeachRecords();
 
@@ -395,7 +395,7 @@ describe('syncPeachRecords', () => {
       permitTracking: [trackingNoSource, trackingWrongName, trackingTantalis, trackingVfcbc]
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithMultipleTrackings]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithMultipleTrackings]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     parseSpy.mockReturnValueOnce({
@@ -440,7 +440,7 @@ describe('syncPeachRecords', () => {
       ]
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithMissingTrackingId]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithMissingTrackingId]);
 
     await syncPeachRecords();
 
@@ -456,7 +456,7 @@ describe('syncPeachRecords', () => {
       statusLastVerified: '2024-01-20'
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithVerifiedLater]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithVerifiedLater]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     const peachStatusChanged = '2024-01-10';
@@ -510,7 +510,7 @@ describe('syncPeachRecords', () => {
       ]
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithMissingSourceSystem]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithMissingSourceSystem]);
 
     await syncPeachRecords();
 
@@ -526,7 +526,7 @@ describe('syncPeachRecords', () => {
       permitTracking: undefined
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithoutTrackingProp]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithoutTrackingProp]);
 
     await syncPeachRecords();
 
@@ -547,7 +547,7 @@ describe('syncPeachRecords', () => {
       ]
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithNoSourceSystemKind]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithNoSourceSystemKind]);
 
     await syncPeachRecords();
 
@@ -572,7 +572,7 @@ describe('syncPeachRecords', () => {
       ]
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithUnknownSource]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithUnknownSource]);
 
     await syncPeachRecords();
 
@@ -592,7 +592,7 @@ describe('syncPeachRecords', () => {
       statusLastChanged: baseDate
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithDecision]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithDecision]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     const summary = {
@@ -660,7 +660,7 @@ describe('syncPeachRecords', () => {
       statusLastVerifiedTime: statusLastChangedTime
     };
 
-    searchSpy.mockResolvedValueOnce([permitWithSplitFields]);
+    listPeachIntSpy.mockResolvedValueOnce([permitWithSplitFields]);
     getRecSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1);
 
     parseSpy.mockReturnValueOnce({

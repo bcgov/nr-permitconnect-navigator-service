@@ -5,7 +5,7 @@ import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { parsePeachRecords, summarizePeachRecord } from '../parsers/peach.ts';
 import { getPeachRecord } from '../services/peach.ts';
-import { searchPermits, upsertPermit } from '../services/permit.ts';
+import { listPeachIntegratedTrackings, upsertPermit } from '../services/permit.ts';
 import { combineDateTime, compareDates, omit, Problem } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 import { PeachIntegratedSystem } from '../utils/enums/permit.ts';
@@ -91,10 +91,7 @@ export const syncPeachRecords = async (): Promise<UpdatedPermitWithNote[]> => {
   const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
     // Only fetch permits that have a peach integrated system permit type
-    const peachIntegratedPermits: Permit[] = await searchPermits(tx, {
-      includePermitTracking: true,
-      onlyPeachIntegratedTrackings: true
-    });
+    const peachIntegratedPermits = await listPeachIntegratedTrackings(tx);
 
     // Find permits that have a permit tracking from a PEACH integrataed system
     for (const permit of peachIntegratedPermits) {

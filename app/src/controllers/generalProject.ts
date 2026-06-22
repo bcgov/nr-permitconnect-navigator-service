@@ -12,6 +12,7 @@ import {
   generateUpdateStamps,
   jsonToPrismaInputJson
 } from '../db/utils/utils.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContacts, upsertContacts } from '../services/contact.ts';
@@ -44,6 +45,7 @@ import type {
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
   GeneralProjectStatistics,
+  LocalContext,
   Permit,
   StatisticsFilters
 } from '../types/index.ts';
@@ -299,9 +301,10 @@ export const getGeneralProjectDraftController = async (req: Request<{ draftId: s
   res.status(200).json(response);
 };
 
-export const getGeneralProjectDraftsController = async (req: Request, res: Response) => {
+export const getGeneralProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
   const response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    return await getDrafts(tx, DraftCode.GENERAL_PROJECT);
+    const drafts = await getDrafts(tx, DraftCode.GENERAL_PROJECT);
+    return await filterActivityResponseByScope(tx, res.locals, drafts);
   });
   res.status(200).json(response);
 };
@@ -323,22 +326,24 @@ export const getGeneralProjectController = async (req: Request<{ generalProjectI
   res.status(200).json(response);
 };
 
-export const getGeneralProjectsController = async (req: Request, res: Response) => {
+export const getGeneralProjectsController = async (req: Request, res: Response<GeneralProject[], LocalContext>) => {
   const response = await transactionWrapper<GeneralProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getGeneralProjects(tx);
+    const projects = await getGeneralProjects(tx);
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };
 
 export const searchGeneralProjectsController = async (
   req: Request<never, never, GeneralProjectSearchParameters | undefined, never>,
-  res: Response
+  res: Response<GeneralProject[], LocalContext>
 ) => {
   const response = await transactionWrapper<GeneralProject[]>(async (tx: PrismaTransactionClient) => {
-    return await searchGeneralProjects(tx, {
+    const projects = await searchGeneralProjects(tx, {
       ...req.body,
       includeUser: isTruthy(req.body?.includeUser)
     });
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };

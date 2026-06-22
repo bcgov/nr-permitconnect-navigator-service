@@ -29,6 +29,7 @@ import {
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
 } from '../../../src/controllers/permit.ts';
+import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as emailService from '../../../src/services/email.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
@@ -44,9 +45,11 @@ import type { Request, Response } from 'express';
 import type { Mock, MockInstance } from 'vitest';
 import type {
   ListPermitsOptions,
+  LocalContext,
   Permit,
   PermitUpdateEmailParams,
-  SearchPermitsOptions
+  SearchPermitsOptions,
+  SearchPermitsResponse
 } from '../../../src/types/index.ts';
 
 vi.mock('config');
@@ -121,6 +124,7 @@ describe('getPermitController', () => {
 
 describe('listPermitsController', () => {
   const listSpy = vi.spyOn(permitService, 'listPermits');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -128,14 +132,17 @@ describe('listPermitsController', () => {
     };
 
     listSpy.mockResolvedValue(TEST_PERMIT_LIST);
+    filterSpy.mockResolvedValue(TEST_PERMIT_LIST);
 
     await listPermitsController(
       req as unknown as Request<never, never, never, Partial<ListPermitsOptions>>,
-      res as unknown as Response
+      res as unknown as Response<Permit[], LocalContext>
     );
 
     expect(listSpy).toHaveBeenCalledTimes(1);
     expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, TEST_PERMIT_LIST);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_LIST);
   });
@@ -162,10 +169,11 @@ describe('listPermitsController', () => {
     ];
 
     listSpy.mockResolvedValue(permitList);
+    filterSpy.mockResolvedValue(permitList);
 
     await listPermitsController(
       req as unknown as Request<never, never, never, Partial<ListPermitsOptions>>,
-      res as unknown as Response
+      res as unknown as Response<Permit[], LocalContext>
     );
 
     expect(listSpy).toHaveBeenCalledTimes(1);
@@ -179,7 +187,20 @@ describe('listPermitsController', () => {
 });
 
 describe('searchPermitsController', () => {
-  const searchSpy = vi.spyOn(permitService, 'searchPermitsPaginated');
+  const searchSpy = vi.spyOn(permitService, 'searchPermits');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+
+  const permitResponse = {
+    permitId: '123',
+    activityId: 'abc',
+    permitType: {
+      businessDomain: 'dom',
+      name: 'foo'
+    },
+    project: {
+      projectId: '456'
+    }
+  } as SearchPermitsResponse['permits'][number];
 
   it('should call services and respond with 200 and paginated results', async () => {
     const req = {
@@ -199,19 +220,22 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: TEST_PERMIT_LIST,
+      permits: [permitResponse],
       totalRecords: 25
     };
 
     searchSpy.mockResolvedValue(mockResponse);
+    filterSpy.mockResolvedValue(mockResponse.permits);
 
     await searchPermitsController(
       req as unknown as Request<never, never, never, SearchPermitsOptions>,
-      res as unknown as Response
+      res as unknown as Response<SearchPermitsResponse, LocalContext>
     );
 
     expect(searchSpy).toHaveBeenCalledTimes(1);
     expect(searchSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, req.query);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, mockResponse.permits);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(mockResponse);
   });
@@ -232,10 +256,11 @@ describe('searchPermitsController', () => {
     };
 
     searchSpy.mockResolvedValue(mockResponse);
+    filterSpy.mockResolvedValue([]);
 
     await searchPermitsController(
       req as unknown as Request<never, never, never, SearchPermitsOptions>,
-      res as unknown as Response
+      res as unknown as Response<SearchPermitsResponse, LocalContext>
     );
 
     expect(searchSpy).toHaveBeenCalledTimes(1);
@@ -259,15 +284,16 @@ describe('searchPermitsController', () => {
     };
 
     const mockResponse = {
-      permits: [TEST_PERMIT_1],
+      permits: [permitResponse],
       totalRecords: 1
     };
 
     searchSpy.mockResolvedValue(mockResponse);
+    filterSpy.mockResolvedValue([permitResponse]);
 
     await searchPermitsController(
       req as unknown as Request<never, never, never, SearchPermitsOptions>,
-      res as unknown as Response
+      res as unknown as Response<SearchPermitsResponse, LocalContext>
     );
 
     expect(searchSpy).toHaveBeenCalledTimes(1);
@@ -291,7 +317,7 @@ describe('searchPermitsController', () => {
     await expect(
       searchPermitsController(
         req as unknown as Request<never, never, never, SearchPermitsOptions>,
-        res as unknown as Response
+        res as unknown as Response<SearchPermitsResponse, LocalContext>
       )
     ).rejects.toThrow();
 

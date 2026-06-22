@@ -26,7 +26,7 @@ export const verifyPrimaryChange = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<ActivityContact | undefined> => {
-  const activityContacts = await listActivityContacts(tx, activityId);
+  const activityContacts = await listActivityContacts(tx, [activityId]);
 
   // Current user scope check
   if (!currentAuthorization.attributes.includes('scope:all')) {
