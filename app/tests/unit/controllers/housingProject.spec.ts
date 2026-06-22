@@ -32,6 +32,7 @@ import {
   upsertHousingProjectDraftController
 } from '../../../src/controllers/housingProject.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
@@ -54,6 +55,7 @@ import type {
   HousingProjectIntake,
   HousingProjectSearchParameters,
   HousingProjectStatistics,
+  LocalContext,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -478,16 +480,23 @@ describe('getHousingProjectDraftController', () => {
 
 describe('getHousingProjectDraftsController', () => {
   const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200', async () => {
     const req = {};
 
     getDraftsSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
+    filterSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
 
-    await getHousingProjectDraftsController(req as unknown as Request, res as unknown as Response);
+    await getHousingProjectDraftsController(
+      req as unknown as Request,
+      res as unknown as Response<Draft[], LocalContext>
+    );
 
     expect(getDraftsSpy).toHaveBeenCalledTimes(1);
     expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.HOUSING_PROJECT);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_HOUSING_DRAFT]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_DRAFT]);
   });
@@ -572,6 +581,7 @@ describe('getHousingProjectController', () => {
 
 describe('getHousingProjectsController', () => {
   const housingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -579,8 +589,12 @@ describe('getHousingProjectsController', () => {
     };
 
     housingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
+    filterSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
-    await getHousingProjectsController(req as unknown as Request, res as unknown as Response);
+    await getHousingProjectsController(
+      req as unknown as Request,
+      res as unknown as Response<HousingProject[], LocalContext>
+    );
 
     expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
     expect(housingProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
@@ -591,6 +605,7 @@ describe('getHousingProjectsController', () => {
 
 describe('searchHousingProjectsController', () => {
   const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -598,10 +613,11 @@ describe('searchHousingProjectsController', () => {
     };
 
     searchHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
+    filterSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
 
     await searchHousingProjectsController(
       req as unknown as Request<never, never, HousingProjectSearchParameters, never>,
-      res as unknown as Response
+      res as unknown as Response<HousingProject[], LocalContext>
     );
 
     expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
@@ -609,6 +625,8 @@ describe('searchHousingProjectsController', () => {
       activityId: ['ACTI1234', 'ACTI5678'],
       includeUser: false
     });
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [PROJECT_WITH_PROJECTID]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([PROJECT_WITH_PROJECTID]);
   });

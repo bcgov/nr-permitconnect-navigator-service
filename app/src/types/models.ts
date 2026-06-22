@@ -11,7 +11,6 @@ export type ActivityBase = Prisma.activityGetPayload<typeof activityBase>;
 export type Activity = ActivityBase & {
   activityContact?: ActivityContact[];
   initiative?: Initiative;
-  project?: ElectrificationProject | GeneralProject | HousingProject | null;
 };
 
 const activityContactBase = Prisma.validator<Prisma.activity_contactDefaultArgs>()({});

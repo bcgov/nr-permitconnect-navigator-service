@@ -11,6 +11,7 @@ import {
   generateNullUpdateStamps,
   generateUpdateStamps
 } from '../db/utils/utils.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContacts, upsertContacts } from '../services/contact.ts';
@@ -44,6 +45,7 @@ import type {
   HousingProjectIntake,
   HousingProjectSearchParameters,
   HousingProjectStatistics,
+  LocalContext,
   Permit,
   StatisticsFilters
 } from '../types/index.ts';
@@ -367,9 +369,10 @@ export const getHousingProjectDraftController = async (req: Request<{ draftId: s
   res.status(200).json(response);
 };
 
-export const getHousingProjectDraftsController = async (req: Request, res: Response) => {
+export const getHousingProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
   const response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    return await getDrafts(tx, DraftCode.HOUSING_PROJECT);
+    const drafts = await getDrafts(tx, DraftCode.HOUSING_PROJECT);
+    return await filterActivityResponseByScope(tx, res.locals, drafts);
   });
   res.status(200).json(response);
 };
@@ -391,22 +394,24 @@ export const getHousingProjectController = async (req: Request<{ housingProjectI
   res.status(200).json(response);
 };
 
-export const getHousingProjectsController = async (req: Request, res: Response) => {
+export const getHousingProjectsController = async (req: Request, res: Response<HousingProject[], LocalContext>) => {
   const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getHousingProjects(tx);
+    const projects = await getHousingProjects(tx);
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };
 
 export const searchHousingProjectsController = async (
   req: Request<never, never, HousingProjectSearchParameters | undefined, never>,
-  res: Response
+  res: Response<HousingProject[], LocalContext>
 ) => {
   const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    return await searchHousingProjects(tx, {
+    const projects = await searchHousingProjects(tx, {
       ...req.body,
       includeUser: isTruthy(req.body?.includeUser)
     });
+    return await filterActivityResponseByScope(tx, res.locals, projects);
   });
   res.status(200).json(response);
 };

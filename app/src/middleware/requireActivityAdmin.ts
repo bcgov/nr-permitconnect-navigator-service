@@ -43,7 +43,7 @@ export const requireActivityAdmin = async (
       if (!isGroupAdmin) {
         // Proponent team member role check
         const contact = await searchContacts(tx, { userId: [res.locals.currentContext.userId as string] });
-        const activityContacts = await listActivityContacts(tx, req.params.activityId);
+        const activityContacts = await listActivityContacts(tx, [req.params.activityId]);
         const activityContact = activityContacts.find((ac) => ac.contactId === contact[0].contactId);
 
         isActivityAdmin =

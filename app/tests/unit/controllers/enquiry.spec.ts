@@ -18,6 +18,7 @@ import {
   searchEnquiriesController,
   updateEnquiryController
 } from '../../../src/controllers/enquiry.ts';
+import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
@@ -28,7 +29,13 @@ import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { ActivityContact, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../../../src/types/index.ts';
+import type {
+  ActivityContact,
+  Enquiry,
+  EnquiryIntake,
+  EnquirySearchParameters,
+  LocalContext
+} from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -151,16 +158,20 @@ describe('deleteEnquiryController', () => {
 
 describe('getEnquiriesController', () => {
   const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {} as unknown as Request;
 
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     getEnquiriesSpy.mockResolvedValue(enquiries);
+    filterSpy.mockResolvedValue(enquiries);
 
-    await getEnquiriesController(req, res as unknown as Response);
+    await getEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
 
     expect(getEnquiriesSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, enquiries);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(enquiries);
   });
@@ -186,6 +197,7 @@ describe('getEnquiryController', () => {
 
 describe('listRelatedEnquiriesController', () => {
   const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -194,10 +206,16 @@ describe('listRelatedEnquiriesController', () => {
 
     const relatedEnquiries: Enquiry[] = [TEST_ENQUIRY_1];
     getRelatedEnquiriesSpy.mockResolvedValue(relatedEnquiries);
+    filterSpy.mockResolvedValue(relatedEnquiries);
 
-    await listRelatedEnquiriesController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
+    await listRelatedEnquiriesController(
+      req as unknown as Request<{ activityId: string }>,
+      res as unknown as Response<Enquiry[], LocalContext>
+    );
 
     expect(getRelatedEnquiriesSpy).toHaveBeenCalledWith(prismaTxMock, 'ACTI1234');
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, relatedEnquiries);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(relatedEnquiries);
   });
@@ -205,6 +223,7 @@ describe('listRelatedEnquiriesController', () => {
 
 describe('searchEnquiriesController', () => {
   const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -213,8 +232,9 @@ describe('searchEnquiriesController', () => {
 
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
     searchEnquiriesSpy.mockResolvedValue(enquiries);
+    filterSpy.mockResolvedValue(enquiries);
 
-    await searchEnquiriesController(req, res as unknown as Response);
+    await searchEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
 
     expect(searchEnquiriesSpy).toHaveBeenCalledWith(
       prismaTxMock,
@@ -224,6 +244,8 @@ describe('searchEnquiriesController', () => {
       },
       Initiative.ELECTRIFICATION
     );
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, enquiries);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(enquiries);
   });

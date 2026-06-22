@@ -212,6 +212,6 @@ describe('hasAccess middleware', () => {
     ).get('/a/act-99');
 
     expect(res.status).toBe(200);
-    expect(listActivityContactsSpy).toHaveBeenCalledWith(expect.anything(), 'act-99');
+    expect(listActivityContactsSpy).toHaveBeenCalledWith(expect.anything(), ['act-99']);
   });
 });

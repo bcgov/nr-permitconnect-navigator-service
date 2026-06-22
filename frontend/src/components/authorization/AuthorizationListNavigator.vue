@@ -14,7 +14,7 @@ import { generalErrorHandler } from '@/utils/utils';
 
 import type { DataTableSortEvent } from 'primevue/datatable';
 import type { Ref } from 'vue';
-import type { Pagination, Permit, PermitTracking, PermitType, SourceSystemKind } from '@/types';
+import type { Pagination, Permit, PermitTracking, PermitType, SearchPermitsResponse, SourceSystemKind } from '@/types';
 
 // Injections
 const projectAuthorizationRouteName = inject(projectAuthorizationRouteNameKey);
@@ -39,11 +39,10 @@ const pagination: Ref<Pagination> = ref({
   field: 'submittedDate',
   page: 0
 });
-const permits: Ref<Permit[]> = ref([]);
+const searchResponse: Ref<SearchPermitsResponse> = ref({ permits: [], totalRecords: 0 });
 const searchTag: Ref<string | undefined> = ref(undefined);
 const selection: Ref<Permit | undefined> = ref(undefined);
 const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
-const totalRecords: Ref<number> = ref(0);
 
 const getPermitTrackingOptions = computed(() =>
   authorizationType.value
@@ -88,8 +87,7 @@ async function searchPermits() {
             sortOrder: pagination.value.order
           })
           .then((res) => {
-            permits.value = res.permits;
-            totalRecords.value = res.totalRecords;
+            searchResponse.value = res;
           })
           .finally(() => {
             loading.value = false;
@@ -120,7 +118,7 @@ onBeforeMount(async () => {
     <DataTable
       v-model:selection="selection"
       lazy
-      :value="permits"
+      :value="searchResponse.permits"
       data-key="permitId"
       removable-sort
       :loading="loading"
@@ -129,7 +127,7 @@ onBeforeMount(async () => {
       responsive-layout="scroll"
       :paginator="true"
       :rows="pagination.rows"
-      :total-records="totalRecords"
+      :total-records="searchResponse.totalRecords"
       :sort-field="pagination.field"
       :sort-order="pagination.order"
       paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "

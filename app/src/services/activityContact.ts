@@ -72,16 +72,16 @@ export const getActivityContact = async (
 /**
  * Gets activity_contact records that match the provided activityId
  * @param tx Prisma transaction client
- * @param activityId The activity ID
+ * @param activityIds The activity IDs
  * @returns A Promise that resolves to an array of ActivityContacts
  */
 export const listActivityContacts = async (
   tx: PrismaTransactionClient,
-  activityId: string
+  activityIds: string[]
 ): Promise<ActivityContact[]> => {
   return await tx.activity_contact.findMany({
     where: {
-      activityId: activityId
+      activityId: { in: activityIds }
     },
     include: { contact: true }
   });

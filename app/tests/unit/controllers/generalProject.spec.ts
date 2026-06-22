@@ -31,6 +31,7 @@ import {
   upsertGeneralProjectDraftController
 } from '../../../src/controllers/generalProject.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as activityService from '../../../src/services/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
@@ -53,6 +54,7 @@ import type {
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
   GeneralProjectStatistics,
+  LocalContext,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -334,16 +336,23 @@ describe('getGeneralProjectDraftController', () => {
 
 describe('getGeneralProjectDraftsController', () => {
   const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200', async () => {
     const req = {};
 
     getDraftsSpy.mockResolvedValue([TEST_GENERAL_DRAFT]);
+    filterSpy.mockResolvedValue([TEST_GENERAL_DRAFT]);
 
-    await getGeneralProjectDraftsController(req as unknown as Request, res as unknown as Response);
+    await getGeneralProjectDraftsController(
+      req as unknown as Request,
+      res as unknown as Response<Draft[], LocalContext>
+    );
 
     expect(getDraftsSpy).toHaveBeenCalledTimes(1);
     expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.GENERAL_PROJECT);
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_GENERAL_DRAFT]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_DRAFT]);
   });
@@ -424,6 +433,7 @@ describe('getGeneralProjectController', () => {
 
 describe('getGeneralProjectsController', () => {
   const generalProjectsSpy = vi.spyOn(generalProjectService, 'getGeneralProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -431,8 +441,12 @@ describe('getGeneralProjectsController', () => {
     };
 
     generalProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
+    filterSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
 
-    await getGeneralProjectsController(req as unknown as Request, res as unknown as Response);
+    await getGeneralProjectsController(
+      req as unknown as Request,
+      res as unknown as Response<GeneralProject[], LocalContext>
+    );
 
     expect(generalProjectsSpy).toHaveBeenCalledTimes(1);
     expect(generalProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
@@ -443,6 +457,7 @@ describe('getGeneralProjectsController', () => {
 
 describe('searchGeneralProjectsController', () => {
   const searchGeneralProjectsSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
+  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
 
   it('should call services and respond with 200 and result', async () => {
     const req = {
@@ -450,10 +465,11 @@ describe('searchGeneralProjectsController', () => {
     };
 
     searchGeneralProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
+    filterSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
 
     await searchGeneralProjectsController(
       req as unknown as Request<never, never, GeneralProjectSearchParameters, never>,
-      res as unknown as Response
+      res as unknown as Response<GeneralProject[], LocalContext>
     );
 
     expect(searchGeneralProjectsSpy).toHaveBeenCalledTimes(1);
@@ -461,6 +477,8 @@ describe('searchGeneralProjectsController', () => {
       activityId: ['ACTI1234', 'ACTI5678'],
       includeUser: false
     });
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_GENERAL_PROJECT_1]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_PROJECT_1]);
   });

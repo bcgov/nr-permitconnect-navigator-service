@@ -10,7 +10,6 @@ import {
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
 import { Action, Resource } from '../../utils/enums/application.ts';
 import { permitValidator } from '../../validators/index.ts';
 
@@ -19,13 +18,7 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Get a list of permits */
-router.get(
-  '/',
-  hasAuthorization(Resource.PERMIT, Action.READ),
-  permitValidator.listPermits,
-  filterActivityResponseByScope,
-  listPermitsController
-);
+router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);
 
 /** Create or update a permit */
 router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, upsertPermitController);
@@ -44,7 +37,6 @@ router.get(
   '/search',
   hasAuthorization(Resource.PERMIT, Action.READ),
   permitValidator.searchPermits,
-  filterActivityResponseByScope,
   searchPermitsController
 );
 

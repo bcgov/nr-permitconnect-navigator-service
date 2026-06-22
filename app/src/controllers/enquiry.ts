@@ -34,7 +34,15 @@ import { getCurrentUsername, isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Contact, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '../types/index.ts';
+import type {
+  Contact,
+  CurrentContext,
+  Enquiry,
+  EnquiryIntake,
+  EnquirySearchParameters,
+  LocalContext
+} from '../types/index.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 
 const generateEnquiryData = async (
   tx: PrismaTransactionClient,
@@ -92,7 +100,7 @@ export const createEnquiryController = async (req: Request<never, never, Enquiry
     if (data.relatedActivityId) {
       const currentContact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
 
-      const relatedContacts = (await listActivityContacts(tx, data.relatedActivityId)).filter(
+      const relatedContacts = (await listActivityContacts(tx, [data.relatedActivityId])).filter(
         (x) => x.contactId != currentContact[0].contactId
       );
 
@@ -178,10 +186,11 @@ export const deleteEnquiryController = async (req: Request<{ enquiryId: string }
   res.status(204).end();
 };
 
-export const getEnquiriesController = async (req: Request, res: Response) => {
+export const getEnquiriesController = async (req: Request, res: Response<Enquiry[], LocalContext>) => {
   // Pull from PCNS database
   const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
-    return await getEnquiries(tx);
+    const enquiries = await getEnquiries(tx);
+    return await filterActivityResponseByScope(tx, res.locals, enquiries);
   });
   res.status(200).json(response);
 };
@@ -193,19 +202,23 @@ export const getEnquiryController = async (req: Request<{ enquiryId: string }>, 
   res.status(200).json(response);
 };
 
-export const listRelatedEnquiriesController = async (req: Request<{ activityId: string }>, res: Response) => {
+export const listRelatedEnquiriesController = async (
+  req: Request<{ activityId: string }>,
+  res: Response<Enquiry[], LocalContext>
+) => {
   const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
-    return await getRelatedEnquiries(tx, req.params.activityId);
+    const enquiries = await getRelatedEnquiries(tx, req.params.activityId);
+    return await filterActivityResponseByScope(tx, res.locals, enquiries);
   });
   res.status(200).json(response);
 };
 
 export const searchEnquiriesController = async (
   req: Request<never, never, EnquirySearchParameters | undefined, never>,
-  res: Response
+  res: Response<Enquiry[], LocalContext>
 ) => {
   const response = await transactionWrapper<Enquiry[]>(async (tx: PrismaTransactionClient) => {
-    return await searchEnquiries(
+    const enquiries = await searchEnquiries(
       tx,
       {
         ...req.body,
@@ -213,6 +226,7 @@ export const searchEnquiriesController = async (
       },
       res.locals.currentContext.initiative
     );
+    return await filterActivityResponseByScope(tx, res.locals, enquiries);
   });
 
   res.status(200).json(response);

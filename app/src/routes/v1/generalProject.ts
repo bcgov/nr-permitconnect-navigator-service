@@ -18,7 +18,6 @@ import {
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { filterActivityResponseByScope } from '../../middleware/responseFiltering.ts';
 import { Action, Resource } from '../../utils/enums/application.ts';
 import { generalProjectValidator } from '../../validators/index.ts';
 
@@ -27,18 +26,12 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of general projects */
-router.get(
-  '/',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  filterActivityResponseByScope,
-  getGeneralProjectsController
-);
+router.get('/', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectsController);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  filterActivityResponseByScope,
   getGeneralProjectActivityIdsController
 );
 
@@ -47,7 +40,6 @@ router.post(
   '/search',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
   generalProjectValidator.searchGeneralProjects,
-  filterActivityResponseByScope,
   searchGeneralProjectsController
 );
 
@@ -68,12 +60,7 @@ router.get(
 );
 
 /** Gets a list of general project drafts */
-router.get(
-  '/draft',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  filterActivityResponseByScope,
-  getGeneralProjectDraftsController
-);
+router.get('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
 router.put('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE), upsertGeneralProjectDraftController);

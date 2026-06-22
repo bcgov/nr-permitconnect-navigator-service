@@ -45,10 +45,9 @@ describe('getActivityContact', () => {
 describe('listActivityContacts', () => {
   it('calls activity_contact.findMany', async () => {
     prismaTxMock.activity_contact.findMany.mockResolvedValueOnce([TEST_ACTIVITY_CONTACT_1]);
-    const response = await activityContactService.listActivityContacts(
-      prismaTxMock,
+    const response = await activityContactService.listActivityContacts(prismaTxMock, [
       TEST_ACTIVITY_CONTACT_1.activityId
-    );
+    ]);
 
     expect(prismaTxMock.activity_contact.findMany).toHaveBeenCalledTimes(1);
     expect(response).toStrictEqual([TEST_ACTIVITY_CONTACT_1]);

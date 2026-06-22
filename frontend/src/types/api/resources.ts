@@ -381,12 +381,6 @@ interface PermitRelations {
 
 export type Permit = PermitBase & Partial<PermitRelations>;
 
-export interface PermitWithActivityProject extends Permit {
-  activity: Activity & {
-    project: ElectrificationProject | GeneralProject | HousingProject | null;
-  };
-}
-
 /**
  * Permit Note
  */

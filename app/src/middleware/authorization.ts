@@ -170,7 +170,7 @@ export const hasAccess = (param: string) => {
           // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
           const activityId: string = data?.activityId ?? id;
           const contact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
-          const activityContacts = await listActivityContacts(tx, activityId);
+          const activityContacts = await listActivityContacts(tx, [activityId]);
 
           if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
             throw new Error();
