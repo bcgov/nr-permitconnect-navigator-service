@@ -19,12 +19,8 @@ export class PolicyAttributeRepository extends BaseRepository<
   Prisma.policy_attributeFindManyArgs,
   PrismaTransactionClient['policy_attribute']
 > {
-  private constructor(model: PrismaTransactionClient['policy_attribute'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): PolicyAttributeRepository {
-    return new PolicyAttributeRepository(tx.policy_attribute, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.policy_attribute, principal);
   }
 
   /**

@@ -8,7 +8,7 @@ import type { Group } from '../../types/stuff';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const subject_group = Prisma.validator<Prisma.subject_groupDefaultArgs>()({});
-export type SubjectGroupBase = Prisma.subject_groupGetPayload<typeof subject_group>;
+type SubjectGroupBase = Prisma.subject_groupGetPayload<typeof subject_group>;
 
 export class SubjectGroupRepository extends BaseRepository<
   SubjectGroupBase,
@@ -21,12 +21,8 @@ export class SubjectGroupRepository extends BaseRepository<
   Prisma.subject_groupFindManyArgs,
   PrismaTransactionClient['subject_group']
 > {
-  private constructor(model: PrismaTransactionClient['subject_group'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): SubjectGroupRepository {
-    return new SubjectGroupRepository(tx.subject_group, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.subject_group, principal);
   }
 
   /**

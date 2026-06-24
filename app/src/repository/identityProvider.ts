@@ -16,11 +16,7 @@ export class IdentityProviderRepository extends BaseRepository<
   Prisma.identity_providerFindManyArgs,
   PrismaTransactionClient['identity_provider']
 > {
-  private constructor(model: PrismaTransactionClient['identity_provider'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): IdentityProviderRepository {
-    return new IdentityProviderRepository(tx.identity_provider, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.identity_provider, principal);
   }
 }

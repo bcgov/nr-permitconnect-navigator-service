@@ -10,7 +10,7 @@ export interface SoftDeleteFields {
   deletedBy?: string | null;
 }
 
-export interface PrismaDelegate<
+interface PrismaDelegate<
   TModel,
   TCreateInput,
   TUpdateInput,
@@ -53,15 +53,15 @@ export abstract class BaseRepository<
   protected principal: string;
   protected softDeleteEnabled: boolean;
 
-  protected constructor(model: TDelegate, principal: string, softDeleteEnabled: boolean) {
+  protected constructor(model: TDelegate, principal: string, softDeleteEnabled = false) {
     this.model = model;
     this.principal = principal;
     this.softDeleteEnabled = softDeleteEnabled;
   }
 
-  // ------------------------
+  //-------------------------
   // Audit
-  // ------------------------
+  //-------------------------
 
   protected withCreateAudit(data: TCreateInput): TCreateInput & AuditFields {
     const now = new Date();
@@ -88,9 +88,9 @@ export abstract class BaseRepository<
     };
   }
 
-  // ------------------------
+  //-------------------------
   // Query Helpers
-  // ------------------------
+  //-------------------------
 
   protected applyNotDeletedFilter(
     args: TFindManyArgs | TFindFirstArgs | undefined,
@@ -111,9 +111,9 @@ export abstract class BaseRepository<
     };
   }
 
-  // ------------------------
+  //-------------------------
   // CRUD
-  // ------------------------
+  //-------------------------
 
   async create(data: TCreateInput): Promise<TModel> {
     return this.model.create({
@@ -136,18 +136,18 @@ export abstract class BaseRepository<
     });
   }
 
-  async delete(where: TWhereUniqueInput): Promise<TModel> {
-    if (!this.softDeleteEnabled) {
-      return this.model.delete({ where: where });
+  async delete(where: TWhereUniqueInput, options?: { hard?: boolean }): Promise<TModel> {
+    if (this.softDeleteEnabled && !options?.hard) {
+      return this.model.update({
+        where: where,
+        data: {
+          ...this.withUpdateAudit({} as TUpdateInput),
+          ...this.withSoftDelete()
+        }
+      });
     }
 
-    return this.model.update({
-      where: where,
-      data: {
-        ...this.withUpdateAudit({} as TUpdateInput),
-        ...this.withSoftDelete()
-      }
-    });
+    return this.model.delete({ where: where });
   }
 
   /*

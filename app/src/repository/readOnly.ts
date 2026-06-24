@@ -1,4 +1,4 @@
-export interface PrismaDelegate<TModel, TFindUniqueArgs, TFindFirstArgs, TFindManyArgs> {
+interface PrismaDelegate<TModel, TFindUniqueArgs, TFindFirstArgs, TFindManyArgs> {
   findUnique(args: TFindUniqueArgs): Promise<TModel | null>;
   findUniqueOrThrow(args: TFindUniqueArgs): Promise<TModel>;
   findFirst(args: TFindFirstArgs): Promise<TModel | null>;
@@ -21,9 +21,9 @@ export abstract class ReadOnlyRepository<
     this.model = model;
   }
 
-  // ------------------------
+  //-------------------------
   // Query Helpers
-  // ------------------------
+  //-------------------------
 
   protected applyNotDeletedFilter(
     args: TFindManyArgs | TFindFirstArgs | undefined,
@@ -43,6 +43,7 @@ export abstract class ReadOnlyRepository<
       }
     };
   }
+
   /*
    * For soft-delete support, you cannot safely use Prisma's findUnique
    * directly because findUnique only accepts unique fields.

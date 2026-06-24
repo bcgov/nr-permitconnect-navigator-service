@@ -16,11 +16,7 @@ export class InitiativeRepository extends BaseRepository<
   Prisma.initiativeFindManyArgs,
   PrismaTransactionClient['initiative']
 > {
-  private constructor(model: PrismaTransactionClient['initiative'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): InitiativeRepository {
-    return new InitiativeRepository(tx.initiative, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.initiative, principal);
   }
 }

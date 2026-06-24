@@ -6,7 +6,7 @@ import type { PrismaTransactionClient } from '../../db/database.ts';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const group = Prisma.validator<Prisma.groupDefaultArgs>()({});
-export type GroupBase = Prisma.groupGetPayload<typeof group>;
+type GroupBase = Prisma.groupGetPayload<typeof group>;
 
 export class GroupRepository extends BaseRepository<
   GroupBase,
@@ -19,11 +19,7 @@ export class GroupRepository extends BaseRepository<
   Prisma.groupFindManyArgs,
   PrismaTransactionClient['group']
 > {
-  private constructor(model: PrismaTransactionClient['group'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): GroupRepository {
-    return new GroupRepository(tx.group, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.group, principal);
   }
 }

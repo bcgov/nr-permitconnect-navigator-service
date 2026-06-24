@@ -1,9 +1,11 @@
 import { Prisma } from '@prisma/client';
 
 import { BaseRepository } from './base.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
 import type { User } from '../types/models.ts';
+import type { UserSearchParameters } from '../types/stuff';
 
 export class UserRepository extends BaseRepository<
   User,
@@ -16,11 +18,45 @@ export class UserRepository extends BaseRepository<
   Prisma.userFindManyArgs,
   PrismaTransactionClient['user']
 > {
-  private constructor(model: PrismaTransactionClient['user'], principal: string) {
-    super(model, principal, false);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.user, principal);
   }
 
-  static create(tx: PrismaTransactionClient, principal: string): UserRepository {
-    return new UserRepository(tx.user, principal);
+  async search(params: UserSearchParameters) {
+    return await this.model.findMany({
+      where: {
+        AND: [
+          {
+            userId: { in: params.userId }
+          },
+          {
+            idp: { in: params.idp, mode: 'insensitive' }
+          },
+          {
+            sub: { contains: params.sub, mode: 'insensitive' }
+          },
+          {
+            email: { contains: params.email, mode: 'insensitive' }
+          },
+          {
+            firstName: { contains: params.firstName, mode: 'insensitive' }
+          },
+          {
+            fullName: { contains: params.fullName, mode: 'insensitive' }
+          },
+          {
+            lastName: { contains: params.lastName, mode: 'insensitive' }
+          },
+          {
+            active: params.active
+          }
+        ],
+        NOT: [
+          {
+            userId: SYSTEM_ID
+          }
+        ]
+      }
+    });
   }
 }

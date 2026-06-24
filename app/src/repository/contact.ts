@@ -16,11 +16,7 @@ export class ContactRepository extends BaseRepository<
   Prisma.contactFindManyArgs,
   PrismaTransactionClient['contact']
 > {
-  private constructor(model: PrismaTransactionClient['contact'], principal: string) {
-    super(model, principal, false);
-  }
-
-  static create(tx: PrismaTransactionClient, principal: string): ContactRepository {
-    return new ContactRepository(tx.contact, principal);
+  constructor(tx: PrismaTransactionClient, principal: string) {
+    super(tx.contact, principal);
   }
 }

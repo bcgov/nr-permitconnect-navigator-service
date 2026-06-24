@@ -7,7 +7,7 @@ import { Initiative } from '../../utils/enums/application.ts';
 
 /* eslint-disable-next-line @typescript-eslint/no-unused-vars */
 const grp_vw = Prisma.validator<Prisma.group_role_policy_vwDefaultArgs>()({});
-export type grp_vwBase = Prisma.group_role_policy_vwGetPayload<typeof grp_vw>;
+type grp_vwBase = Prisma.group_role_policy_vwGetPayload<typeof grp_vw>;
 
 export class GroupRolePolicyVwRepository extends ReadOnlyRepository<
   grp_vwBase,
@@ -18,12 +18,8 @@ export class GroupRolePolicyVwRepository extends ReadOnlyRepository<
   Prisma.group_role_policy_vwFindManyArgs,
   PrismaTransactionClient['group_role_policy_vw']
 > {
-  private constructor(model: PrismaTransactionClient['group_role_policy_vw']) {
-    super(model);
-  }
-
-  static create(tx: PrismaTransactionClient): GroupRolePolicyVwRepository {
-    return new GroupRolePolicyVwRepository(tx.group_role_policy_vw);
+  constructor(tx: PrismaTransactionClient) {
+    super(tx.group_role_policy_vw);
   }
 
   /**
