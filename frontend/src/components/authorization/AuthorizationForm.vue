@@ -179,7 +179,7 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
         sourceSystemKind: omit(found, ['permitTypeIds']) as SourceSystemKind
       };
     });
-    const peachSummary = await peachService.getPeachSummary({ data });
+    const peachSummary = await peachService.getPeachSummary({ permitTrackings: data });
     return peachSummary;
   } catch (e) {
     if (isAxiosError(e)) {

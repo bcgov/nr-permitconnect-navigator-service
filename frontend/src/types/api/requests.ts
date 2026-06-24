@@ -431,7 +431,7 @@ export interface ListPermissionsRequest {
 }
 
 export interface GetPeachSummaryRequest {
-  data: PermitTracking[];
+  permitTrackings: PermitTracking[];
 }
 
 export interface GetPidsRequest {

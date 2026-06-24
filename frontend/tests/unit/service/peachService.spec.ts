@@ -21,7 +21,7 @@ describe('peach service', () => {
   describe('getPeachSummary', () => {
     it('returns a peach summary', async () => {
       const request: GetPeachSummaryRequest = {
-        data: [
+        permitTrackings: [
           {
             permitTrackingId: 'tracking-1' as never,
             permitId: 'permit-1' as never,
@@ -55,7 +55,7 @@ describe('peach service', () => {
 
     it('returns an empty summary when no permit tracking records are provided', async () => {
       const request: GetPeachSummaryRequest = {
-        data: []
+        permitTrackings: []
       };
 
       const response = {
@@ -76,7 +76,7 @@ describe('peach service', () => {
 
     it('propagates errors', async () => {
       const request: GetPeachSummaryRequest = {
-        data: [
+        permitTrackings: [
           {
             shownToProponent: true,
             trackingId: 'TRACK-001'

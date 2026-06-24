@@ -57,14 +57,16 @@ describe('getPeachSummaryController', () => {
 
   it('should call service, summarize, and respond with 200 and summary', async () => {
     const req = {
-      body: TEST_PERMIT_1.permitTracking
+      body: {
+        permitTrackings: TEST_PERMIT_1.permitTracking
+      }
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
     await getPeachSummaryController(
-      req as unknown as Request<never, never, PermitTracking[], never>,
+      req as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>,
       res as unknown as Response
     );
 
@@ -88,7 +90,7 @@ describe('getPeachSummaryController', () => {
 
     await expect(
       getPeachSummaryController(
-        req as unknown as Request<never, never, PermitTracking[], never>,
+        req as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>,
         res as unknown as Response
       )
     ).rejects.toBeInstanceOf(Problem);
@@ -96,22 +98,24 @@ describe('getPeachSummaryController', () => {
 
   it('throws Problem(422) when summarizePeachRecord returns null-ish', async () => {
     const req = {
-      body: [
-        {
-          trackingId: TEST_PEACH_RECORD_1.record_id,
-          sourceSystemKind: {
-            sourceSystem: TEST_PEACH_RECORD_1.system_id,
-            integrated: true
+      body: {
+        permitTrackings: [
+          {
+            trackingId: TEST_PEACH_RECORD_1.record_id,
+            sourceSystemKind: {
+              sourceSystem: TEST_PEACH_RECORD_1.system_id,
+              integrated: true
+            }
           }
-        }
-      ]
+        ]
+      }
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(null);
 
     const error = await getPeachSummaryController(
-      req as unknown as Request<never, never, PermitTracking[], never>,
+      req as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>,
       res as unknown as Response
     ).catch((e) => e);
 
@@ -122,20 +126,22 @@ describe('getPeachSummaryController', () => {
 
   it('throws Problem(422) when permitTracking exists but trackingId is missing', async () => {
     const req = {
-      body: [
-        {
-          sourceSystemKind: {
-            sourceSystem: TEST_PEACH_RECORD_1.system_id
+      body: {
+        permitTrackings: [
+          {
+            sourceSystemKind: {
+              sourceSystem: TEST_PEACH_RECORD_1.system_id
+            }
           }
-        }
-      ]
+        ]
+      }
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
     const error = await getPeachSummaryController(
-      req as unknown as Request<never, never, PermitTracking[], never>,
+      req as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>,
       res as unknown as Response
     ).catch((e) => e);
 
@@ -151,18 +157,20 @@ describe('getPeachSummaryController', () => {
 
   it('throws Problem(422) when permitTracking exists but sourceSystemKind.sourceSystem is missing', async () => {
     const req = {
-      body: [
-        {
-          trackingId: TEST_PEACH_RECORD_1.record_id
-        }
-      ]
+      body: {
+        permitTrackings: [
+          {
+            trackingId: TEST_PEACH_RECORD_1.record_id
+          }
+        ]
+      }
     };
 
     getPeachRecordSpy.mockResolvedValue(TEST_PEACH_RECORD_1);
     summarizeSpy.mockReturnValue(TEST_PEACH_SUMMARY);
 
     const error = await getPeachSummaryController(
-      req as unknown as Request<never, never, PermitTracking[], never>,
+      req as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>,
       res as unknown as Response
     ).catch((e) => e);
 

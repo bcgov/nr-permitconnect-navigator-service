@@ -67,8 +67,11 @@ export const findPriorityPermitTracking = (
  * @param req Express Request object
  * @param res Express Response object
  */
-export const getPeachSummaryController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
-  const permitTracking = findPriorityPermitTracking(req.body);
+export const getPeachSummaryController = async (
+  req: Request<never, never, { permitTrackings: PermitTracking[] }, never>,
+  res: Response
+) => {
+  const permitTracking = findPriorityPermitTracking(req.body.permitTrackings);
 
   if (!permitTracking?.trackingId || !permitTracking?.sourceSystemKind?.sourceSystem) {
     throw new Problem(422, { detail: 'No PEACH-integrated tracking ID and/or system were found in the request body.' });
