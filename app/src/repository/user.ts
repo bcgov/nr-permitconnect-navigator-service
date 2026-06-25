@@ -1,23 +1,10 @@
-import { Prisma } from '@prisma/client';
-
-import { BaseRepository } from './base.ts';
+import { WritableRepository } from './writable.ts';
 import { SYSTEM_ID } from '../utils/constants/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { User } from '../types/models.ts';
 import type { UserSearchParameters } from '../types/stuff';
 
-export class UserRepository extends BaseRepository<
-  User,
-  Prisma.userCreateInput,
-  Prisma.userUpdateInput,
-  Prisma.userWhereUniqueInput,
-  Prisma.userWhereInput,
-  Prisma.userFindUniqueArgs,
-  Prisma.userFindFirstArgs,
-  Prisma.userFindManyArgs,
-  PrismaTransactionClient['user']
-> {
+export class UserRepository extends WritableRepository<PrismaTransactionClient['user']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.user, principal);
   }

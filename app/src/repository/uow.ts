@@ -11,6 +11,11 @@ import { InitiativeRepository } from './initiative';
 import { GroupRolePolicyVwRepository } from './yars/groupRolePolicyVw';
 import { AccessRequestRepository } from './accessRequest';
 import { PolicyAttributeRepository } from './yars/policyAttribute';
+import { HousingProjectRepository } from './housingProject';
+import { PermitRepository } from './permit';
+import { ActivityRepository } from './activity';
+import { ActivityContactRepository } from './activityContact';
+import { DraftRepository } from './draft';
 
 /**
  * Collection of repositories available within a unit-of-work scope.
@@ -20,9 +25,14 @@ import { PolicyAttributeRepository } from './yars/policyAttribute';
  */
 export interface Repositories {
   accessRequest: AccessRequestRepository;
+  activity: ActivityRepository;
+  activityContact: ActivityContactRepository;
   contact: ContactRepository;
+  draft: DraftRepository;
+  housingProject: HousingProjectRepository;
   identityProvider: IdentityProviderRepository;
   initiative: InitiativeRepository;
+  permit: PermitRepository;
   user: UserRepository;
 
   // YARS
@@ -58,8 +68,24 @@ class RepositoryProvider implements Repositories {
     return this.getOrCreate('accessRequest', () => new AccessRequestRepository(this.tx, this.principal));
   }
 
+  get activity(): ActivityRepository {
+    return this.getOrCreate('activity', () => new ActivityRepository(this.tx, this.principal));
+  }
+
+  get activityContact(): ActivityContactRepository {
+    return this.getOrCreate('activityContact', () => new ActivityContactRepository(this.tx, this.principal));
+  }
+
   get contact(): ContactRepository {
     return this.getOrCreate('contact', () => new ContactRepository(this.tx, this.principal));
+  }
+
+  get draft(): DraftRepository {
+    return this.getOrCreate('draft', () => new DraftRepository(this.tx, this.principal));
+  }
+
+  get housingProject(): HousingProjectRepository {
+    return this.getOrCreate('houisingProject', () => new HousingProjectRepository(this.tx, this.principal));
   }
 
   get identityProvider(): IdentityProviderRepository {
@@ -68,6 +94,10 @@ class RepositoryProvider implements Repositories {
 
   get initiative(): InitiativeRepository {
     return this.getOrCreate('initiative', () => new InitiativeRepository(this.tx, this.principal));
+  }
+
+  get permit(): PermitRepository {
+    return this.getOrCreate('permit', () => new PermitRepository(this.tx, this.principal));
   }
 
   get user(): UserRepository {

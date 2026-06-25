@@ -1,78 +1,81 @@
 import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import { unitOfWork } from '../repository/uow.ts';
 import { DraftCode } from '../utils/enums/projectCommon.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Draft, DraftBase } from '../types/index.ts';
+import type { CurrentAuthorization, CurrentContext, Draft, DraftBase } from '../types/index.ts';
 
 /**
  * Create a draft
- * @param tx Prisma transaction client
  * @param data Draft data
  * @returns A Promise that resolves to the created draft
  */
-export const createDraft = async (tx: PrismaTransactionClient, data: DraftBase): Promise<Draft> => {
-  const result = await tx.draft.create({
-    data: {
+export const createDraftService = async (data: DraftBase): Promise<Draft> => {
+  return await unitOfWork.execute(async ({ draft }) => {
+    return draft.create({
       draftId: data.draftId,
-      activityId: data.activityId,
-      draftCode: data.draftCode,
-      data: jsonToPrismaInputJson(data.data),
-      createdAt: data.createdAt,
-      createdBy: data.createdBy
-    }
+      activity: { connect: { activityId: data.activityId } },
+      draftCodeDraftDraftCodeTodraftCode: { connect: { draftCode: data.draftCode } },
+      data: jsonToPrismaInputJson(data.data)
+    });
   });
+};
 
-  return result;
+export const deleteDraftService = async (draftId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ activity, draft }) => {
+    const dft = await draft.findUniqueOrThrow({ draftId });
+    await activity.delete({ activityId: dft?.activityId }, { hard: true });
+  });
 };
 
 /**
- * Deletes the draft
- * @param tx Prisma transaction client
- * @param draftId Draft ID
- */
-export const deleteDraft = async (tx: PrismaTransactionClient, draftId: string): Promise<void> => {
-  await tx.draft.delete({ where: { draftId } });
-};
-
-/**
- * Gets a specific draft from the PCNS database
- * @param tx Prisma transaction client
- * @param draftId Draft ID
+ * Gets a specific draft
+ * @param draftId - Draft ID
  * @returns A Promise that resolves to the draft
  */
-export const getDraft = async (tx: PrismaTransactionClient, draftId: string): Promise<Draft> => {
-  const result = await tx.draft.findFirstOrThrow({
-    where: { draftId },
-    include: { activity: { include: { activityContact: true } } }
+export const getDraftService = async (draftId: string): Promise<Draft> => {
+  return await unitOfWork.execute(async ({ draft }) => {
+    return await draft.findFirstOrThrow({
+      where: { draftId },
+      include: { activity: { include: { activityContact: true } } }
+    });
   });
-  return result;
 };
 
 /**
- * Gets a list of drafts
- * @param tx Prisma transaction client
- * @param draftCode Optional draft code to filter on
+ * Get a list of drafts
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
+ * @param draftCode - Optional draft code to filter on
  * @returns A Promise that resolves to an array of drafts
  */
-export const getDrafts = async (tx: PrismaTransactionClient, draftCode?: DraftCode): Promise<Draft[]> => {
-  const result = await tx.draft.findMany({
-    where: { draftCode },
-    include: { activity: { include: { activityContact: true } } }
+export const listDraftsService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
+  draftCode?: DraftCode
+): Promise<Draft[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, draft }) => {
+    const result = await draft.findMany({
+      where: { draftCode },
+      include: { activity: { include: { activityContact: true } } }
+    });
+
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
   });
-  return result;
 };
 
 /**
  * Updates a specific draft
- * @param tx Prisma transaction client
- * @param data Draft data
+ * @param data - Draft data
  * @returns A Promise that resolves to the updated draft
  */
-export const updateDraft = async (tx: PrismaTransactionClient, data: DraftBase): Promise<Draft> => {
-  const result = await tx.draft.update({
-    data: { ...data, data: jsonToPrismaInputJson(data.data) },
-    where: { draftId: data.draftId }
+export const updateDraft = async (data: DraftBase): Promise<Draft> => {
+  return await unitOfWork.execute(async ({ draft }) => {
+    return await draft.update({ draftId: data.draftId }, { ...data, data: jsonToPrismaInputJson(data.data) });
   });
-
-  return result;
 };

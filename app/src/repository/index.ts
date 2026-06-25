@@ -1,9 +1,9 @@
 export * from './accessRequest.ts';
-export * from './base.ts';
+export * from './writable.ts';
 export * from './contact.ts';
 export * from './identityProvider.ts';
 export * from './initiative.ts';
-export * from './readOnly.ts';
+export * from './readable.ts';
 export * from './user.ts';
 
 export * from './yars/group.ts';

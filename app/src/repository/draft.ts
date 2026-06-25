@@ -2,8 +2,8 @@ import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
 
-export class ContactRepository extends WritableRepository<PrismaTransactionClient['contact']> {
+export class DraftRepository extends WritableRepository<PrismaTransactionClient['draft']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
-    super(tx.contact, principal);
+    super(tx.draft, principal);
   }
 }

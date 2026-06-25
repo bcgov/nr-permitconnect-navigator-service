@@ -1,32 +1,13 @@
 import { assignPermissions } from './coms.ts';
+import { getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
 import { unitOfWork } from '../repository/uow.ts';
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
 
-import type { CurrentContext, Group } from '../types/index.ts';
-import { assignGroup, getCorrespondingGlobalGroup, getGroups } from './helpers/yars.ts';
+import type { CurrentContext } from '../types/index.ts';
 
 const log = getLogger(module.filename);
-
-/**
- * Assigns an identity to the given group
- * Assigns permissions to COMS based on the given group
- * @param sub Subject of the authorized user
- * @param groupId The group ID to add the user to
- * @returns A Promise that resolve to an object with a subject and role id
- */
-export const assignGroupService = async (sub: string, groupId: number): Promise<{ sub: string; roleId: number }> => {
-  return await unitOfWork.execute(async ({ group, subjectGroup }) => {
-    return await assignGroup({ group, subjectGroup }, sub, groupId);
-  });
-};
-
-export const getCorrespondingGlobalGroupService = async (groupId: number): Promise<Group> => {
-  return unitOfWork.execute(async (repos) => {
-    return getCorrespondingGlobalGroup(repos, groupId);
-  });
-};
 
 /**
  * Gets a list of groups for the given initiativeId

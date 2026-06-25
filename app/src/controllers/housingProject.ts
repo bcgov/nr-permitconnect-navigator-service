@@ -1,45 +1,46 @@
-import config from 'config';
 import { Prisma } from '@prisma/client';
 import { v4 as uuidv4 } from 'uuid';
 
-import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
   generateCreateStamps,
-  generateDeleteStamps,
   generateNullDeleteStamps,
   generateNullUpdateStamps,
   generateUpdateStamps
 } from '../db/utils/utils.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivity } from '../services/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContactsService, upsertContactsService } from '../services/contact.ts';
-import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
-import { email } from '../services/email.ts';
 import {
-  createHousingProject,
-  deleteHousingProject,
-  getHousingProject,
-  getHousingProjects,
-  getHousingProjectStatistics,
+  createDraft,
+  deleteDraftService,
+  getDraft,
+  getDrafts,
+  getDraftService,
+  listDraftsService,
+  updateDraft
+} from '../services/draft.ts';
+import {
+  createHousingProjectService,
+  deleteHousingProjectService,
+  getHousingProjectService,
+  getHousingProjectStatisticsService,
+  listHousingProjectActivityIdsService,
+  listHousingProjectsService,
   searchHousingProjects,
-  updateHousingProject
+  updateHousingProjectService
 } from '../services/housingProject.ts';
 import { upsertPermit } from '../services/permit.ts';
 import { upsertPermitTracking } from '../services/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
-import { NumResidentialUnits } from '../utils/enums/housing.ts';
-import { PermitNeeded } from '../utils/enums/permit.ts';
-import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
-import { confirmationTemplateHousingSubmission } from '../utils/templates';
-import { getCurrentUsername, isTruthy, omit, toTitleCase } from '../utils/utils.ts';
+import { ActivityContactRole, DraftCode } from '../utils/enums/projectCommon.ts';
+import { isTruthy, omit } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
   Contact,
-  CurrentContext,
   Draft,
   HousingProject,
   HousingProjectIntake,
@@ -50,355 +51,45 @@ import type {
   StatisticsFilters
 } from '../types/index.ts';
 
-/**
- * Assigns a priority level to a housing project based on given criteria
- * Criteria defined below
- * @param housingProject Housing data
- */
-export const assignPriority = (housingProject: Partial<HousingProject>) => {
-  const matchesPriorityOneCriteria = // Priority 1 Criteria:
-    // 1. More than 50 units (any)
-    housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    housingProject.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    // 2. Supports Rental Units
-    housingProject.hasRentalUnits === 'Yes' ||
-    // 3. Social Housing
-    housingProject.financiallySupportedBc === 'Yes' ||
-    // 4. Indigenous Led
-    housingProject.financiallySupportedIndigenous === 'Yes';
-
-  const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-    // 1. Single Family >= 10 Units
-    housingProject.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    // 2. Has 1 or more MultiFamily Units
-    housingProject.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
-    // 3. Has 1 or more Other Units
-    housingProject.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    housingProject.otherUnits === NumResidentialUnits.ONE_TO_NINE;
-
-  if (matchesPriorityOneCriteria) {
-    housingProject.queuePriority = 1;
-  } else if (matchesPriorityTwoCriteria) {
-    housingProject.queuePriority = 2;
-  } else {
-    // Prioriy 3 Criteria:
-    housingProject.queuePriority = 3; // Everything Else
-  }
-};
-
-/**
- * Generates and sends a templated email with the given data
- * @param projectWithContact Email data
- */
-async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const body = confirmationTemplateHousingSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.HOUSING),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.housingProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Project Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
-
-/**
- * Transforms intake data to match DB schema
- * @param tx Prismas transaction client
- * @param data Intake data
- * @param currentContext The current context of the Express request
- * @returns Transformed project and permit data
- */
-const generateHousingProjectData = async (
-  tx: PrismaTransactionClient,
-  data: HousingProjectIntake,
-  currentContext: CurrentContext
-) => {
-  let activityId = data.activityId;
-
-  // Create activity and link contact if required
-  if (!activityId) {
-    activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
-    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
-  }
-
-  let basic, housing, location, permits;
-  let appliedPermits: Permit[] = [],
-    investigatePermits: Permit[] = [];
-
-  if (data.basic) {
-    basic = {
-      consentToFeedback: data.basic.consentToFeedback ?? false,
-      projectApplicantType: data.basic.projectApplicantType,
-      companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName,
-      projectName: data.basic.projectName,
-      projectDescription: data.basic.projectDescription
-    };
-  }
-
-  if (data.housing) {
-    housing = {
-      singleFamilyUnits: data.housing.singleFamilyUnits,
-      multiFamilyUnits: data.housing.multiFamilyUnits,
-      otherUnitsDescription: data.housing.otherUnitsDescription,
-      otherUnits: data.housing.otherUnits,
-      hasRentalUnits: data.housing.hasRentalUnits,
-      financiallySupportedBc: data.housing.financiallySupportedBc,
-      financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
-      financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
-      financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-      rentalUnits: data.housing.rentalUnits,
-      indigenousDescription: data.housing.indigenousDescription,
-      nonProfitDescription: data.housing.nonProfitDescription,
-      housingCoopDescription: data.housing.housingCoopDescription
-    };
-  }
-
-  if (data.location) {
-    location = {
-      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
-      projectLocation: data.location.projectLocation,
-      projectLocationDescription: data.location.projectLocationDescription,
-      geomarkUrl: data.location.geomarkUrl,
-      locationPids: data.location.ltsaPidLookup,
-      latitude: data.location.latitude,
-      longitude: data.location.longitude,
-      locality: data.location.locality,
-      province: data.location.province,
-      streetAddress: data.location.streetAddress
-    };
-  }
-
-  if (data.permits) {
-    permits = {
-      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-    };
-
-    if (data.permits.appliedPermits?.length) {
-      appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
-        permitId: x.permitId ?? uuidv4(),
-        permitTypeId: x.permitTypeId,
-        activityId: activityId,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        needed: PermitNeeded.YES,
-        statusLastChanged: null,
-        statusLastChangedTime: null,
-        statusLastVerified: null,
-        statusLastVerifiedTime: null,
-        issuedPermitId: null,
-        state: PermitState.IN_PROGRESS,
-        onHoldCode: null,
-        submittedDate: x.submittedDate,
-        submittedTime: x.submittedTime,
-        decisionDate: null,
-        decisionTime: null,
-        targetDate: null,
-        targetDateDescription: null,
-        permitTracking: x.permitTracking?.map((pt) => ({
-          ...pt,
-          ...generateCreateStamps(currentContext)
-        })),
-        ...generateCreateStamps(currentContext),
-        ...generateUpdateStamps(currentContext),
-        ...generateNullDeleteStamps()
-      }));
-    }
-
-    if (data.permits.investigatePermits?.length) {
-      investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
-        permitId: x.permitId ?? uuidv4(),
-        permitTypeId: x.permitTypeId,
-        activityId: activityId,
-        stage: PermitStage.PRE_SUBMISSION,
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastChanged: null,
-        statusLastChangedTime: null,
-        statusLastVerified: null,
-        statusLastVerifiedTime: null,
-        issuedPermitId: null,
-        state: PermitState.NONE,
-        onHoldCode: null,
-        submittedDate: null,
-        submittedTime: x.submittedTime,
-        decisionDate: null,
-        decisionTime: null,
-        targetDate: null,
-        targetDateDescription: null,
-        ...generateCreateStamps(currentContext),
-        ...generateUpdateStamps(currentContext),
-        ...generateNullDeleteStamps()
-      }));
-    }
-  }
-
-  // Put new housing project together
-  const housingProjectData = {
-    housingProject: {
-      ...basic,
-      ...housing,
-      ...location,
-      ...permits,
-      housingProjectId: uuidv4(),
-      activityId: activityId,
-      submittedAt: new Date(),
-      submittedBy: getCurrentUsername(currentContext),
-      applicationStatus: ApplicationStatus.NEW,
-      submissionType: SubmissionType.GUIDANCE,
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null,
-      aaiUpdated: false,
-      assignedUserId: null,
-      queuePriority: null,
-      relatedPermits: null,
-      astNotes: null,
-      astUpdated: false,
-      addedToAts: false,
-      atsClientId: null,
-      ltsaCompleted: false,
-      bcOnlineCompleted: false,
-      financiallySupported: [
-        data.housing?.financiallySupportedBc,
-        data.housing?.financiallySupportedIndigenous,
-        data.housing?.financiallySupportedNonProfit,
-        data.housing?.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES),
-      checkProvincialPermits: null,
-      atsEnquiryId: null
-    } as HousingProject,
-    appliedPermits,
-    investigatePermits
-  };
-
-  assignPriority(housingProjectData.housingProject);
-
-  return housingProjectData;
-};
-
-export const getHousingProjectActivityIdsController = async (req: Request, res: Response) => {
-  const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getHousingProjects(tx);
-  });
-  res.status(200).json(response.map((x) => x.activityId));
-};
-
 export const createHousingProjectController = async (
   req: Request<never, never, HousingProjectIntake>,
-  res: Response
+  res: Response<HousingProject, LocalContext>
 ) => {
   // Provide an empty body if POST body is given undefined
   req.body ??= {} as HousingProjectIntake;
 
-  const result = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
-    const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
-      tx,
-      req.body,
-      res.locals.currentContext
-    );
-
-    // Create new housing project
-    const data = await createHousingProject(tx, {
-      ...housingProject,
-      ...generateCreateStamps(res.locals.currentContext)
-    });
-
-    // Create each permit and tracking IDs
-    await Promise.all(
-      appliedPermits.map(async (p: Permit) => {
-        await upsertPermit(tx, omit(p, ['permitTracking']));
-      })
-    );
-    await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-    await Promise.all(
-      appliedPermits
-        .filter((p: Permit) => !!p.permitTracking)
-        .map(async (p: Permit) => await upsertPermitTracking(tx, p))
-    );
-
-    return data;
-  });
-
+  const result = await createHousingProjectService(req.body, res.locals.currentContext);
   res.status(201).json(result);
 };
 
 export const deleteHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const project = await getHousingProject(tx, req.params.housingProjectId);
-    await deleteHousingProject(tx, req.params.housingProjectId, generateDeleteStamps(res.locals.currentContext));
-    await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
-  });
-
+  await deleteHousingProjectService(req.params.housingProjectId);
   res.status(204).end();
 };
 
-export const deleteHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const draft = await getDraft(tx, req.params.draftId);
-    await deleteActivityHard(tx, draft.activityId);
-  });
-  res.status(204).end();
-};
-
-export const getHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
-    return await getDraft(tx, req.params.draftId);
-  });
-  res.status(200).json(response);
-};
-
-export const getHousingProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
-  const response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    const drafts = await getDrafts(tx, DraftCode.HOUSING_PROJECT);
-    return await filterActivityResponseByScope(tx, res.locals, drafts);
-  });
+export const getHousingProjectController = async (
+  req: Request<{ housingProjectId: string }>,
+  res: Response<HousingProject>
+) => {
+  const response = await getHousingProjectService(req.params.housingProjectId);
   res.status(200).json(response);
 };
 
 export const getHousingProjectStatisticsController = async (
   req: Request<never, never, never, StatisticsFilters>,
-  res: Response
+  res: Response<HousingProjectStatistics>
 ) => {
-  const response = await transactionWrapper<HousingProjectStatistics[]>(async (tx: PrismaTransactionClient) => {
-    return await getHousingProjectStatistics(tx, req.query);
-  });
+  const response = await getHousingProjectStatisticsService(req.query);
   res.status(200).json(response[0]);
 };
 
-export const getHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
-  const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
-    return await getHousingProject(tx, req.params.housingProjectId);
-  });
+export const listHousingProjectActivityIdsController = async (req: Request, res: Response) => {
+  const response = await listHousingProjectActivityIdsService();
   res.status(200).json(response);
 };
 
-export const getHousingProjectsController = async (req: Request, res: Response<HousingProject[], LocalContext>) => {
-  const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    const projects = await getHousingProjects(tx);
-    return await filterActivityResponseByScope(tx, res.locals, projects);
-  });
+export const listHousingProjectsController = async (_req: Request, res: Response<HousingProject[], LocalContext>) => {
+  const response = await listHousingProjectsService(res.locals.currentAuthorization, res.locals.currentContext);
   res.status(200).json(response);
 };
 
@@ -406,13 +97,53 @@ export const searchHousingProjectsController = async (
   req: Request<never, never, HousingProjectSearchParameters | undefined, never>,
   res: Response<HousingProject[], LocalContext>
 ) => {
-  const response = await transactionWrapper<HousingProject[]>(async (tx: PrismaTransactionClient) => {
-    const projects = await searchHousingProjects(tx, {
-      ...req.body,
-      includeUser: isTruthy(req.body?.includeUser)
-    });
-    return await filterActivityResponseByScope(tx, res.locals, projects);
+  const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
+    ...req.body,
+    includeUser: isTruthy(req.body?.includeUser)
   });
+  res.status(200).json(response);
+};
+
+export const updateHousingProjectController = async (
+  req: Request<{ housingProjectId: string }, never, Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>>,
+  res: Response
+) => {
+  const response = await updateHousingProjectService(
+    {
+      ...req.body,
+      financiallySupported: [
+        req.body.financiallySupportedBc,
+        req.body.financiallySupportedIndigenous,
+        req.body.financiallySupportedNonProfit,
+        req.body.financiallySupportedHousingCoop
+      ].includes(BasicResponse.YES)
+    },
+    req.params.housingProjectId
+  );
+
+  res.status(200).json(response);
+};
+
+//--------------------------------------------------------------------------------
+// Drafts
+//--------------------------------------------------------------------------------
+
+export const deleteHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+  await deleteDraftService(req.params.draftId);
+  res.status(204).end();
+};
+
+export const getHousingProjectDraftController = async (req: Request<{ draftId: string }>, res: Response<Draft>) => {
+  const response = await getDraftService(req.params.draftId);
+  res.status(200).json(response);
+};
+
+export const getHousingProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
+  const response = await listDraftsService(
+    res.locals.currentAuthorization,
+    res.locals.currentContext,
+    DraftCode.HOUSING_PROJECT
+  );
   res.status(200).json(response);
 };
 
@@ -498,28 +229,4 @@ export const upsertHousingProjectDraftController = async (req: Request<never, ne
   });
 
   res.status(update ? 200 : 201).json(response);
-};
-
-export const updateHousingProjectController = async (
-  req: Request<{ housingProjectId: string }, never, Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>>,
-  res: Response
-) => {
-  const response = await transactionWrapper<HousingProject>(async (tx: PrismaTransactionClient) => {
-    return await updateHousingProject(
-      tx,
-      {
-        ...req.body,
-        financiallySupported: [
-          req.body.financiallySupportedBc,
-          req.body.financiallySupportedIndigenous,
-          req.body.financiallySupportedNonProfit,
-          req.body.financiallySupportedHousingCoop
-        ].includes(BasicResponse.YES),
-        ...generateUpdateStamps(res.locals.currentContext)
-      },
-      req.params.housingProjectId
-    );
-  });
-
-  res.status(200).json(response);
 };

@@ -1,14 +1,18 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { assignPermissions } from './coms.ts';
+
+import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
+import { createUser } from '../domains/user.ts';
+import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
+import { unitOfWork } from '../repository/uow.ts';
 import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
+import Problem from '../utils/problem.ts';
 
 import type { AccessRequest, CurrentAuthorization, CurrentContext, Group, User } from '../types/index.ts';
-import { assignGroup, getCorrespondingGlobalGroup, getGroups } from './helpers/yars.ts';
-import { Repositories, unitOfWork } from '../repository/uow.ts';
-import Problem from '../utils/problem.ts';
-import { createUser } from './helpers/user.ts';
-import { assignPermissions } from './coms.ts';
+
+const log = getLogger(module.filename);
 
 /**
  * Retrieve all access requests
@@ -32,104 +36,6 @@ export const getAccessRequestsService = async (initiative: Initiative): Promise<
 
     return response;
   });
-};
-
-// /**
-//  * Update an access request
-//  * @param tx Prisma transaction client
-//  * @param data - The access request object to update
-//  * @param accessRequestId ID of the access request to update
-//  * @returns A Promise that resolves to the updated resource
-//  */
-// export const updateAccessRequest = async (
-//   tx: PrismaTransactionClient,
-//   data: AccessRequestPatch,
-//   accessRequestId: string
-// ): Promise<AccessRequest> => {
-// const result = await tx.access_request.update({
-//   data: { ...data, updatedAt: data.updatedAt, updatedBy: data.updatedBy },
-//   where: {
-//     accessRequestId
-//   },
-//   include: {
-//     group: true
-//   }
-// });
-
-// return result;
-// };
-
-const log = getLogger(module.filename);
-
-const isUserAdmin = async (
-  repositories: Pick<Repositories, 'initiative'>,
-  currentInitiative: Initiative,
-  userGroups: Group[]
-): Promise<boolean> => {
-  const initiative = await repositories.initiative.findFirstOrThrow({
-    where: {
-      code: currentInitiative
-    }
-  });
-  return userGroups.some(
-    (group: Group) =>
-      group.name === GroupName.DEVELOPER ||
-      (group.name === GroupName.ADMIN && group.initiativeId === initiative.initiativeId)
-  );
-};
-
-const removeUserGroups = async (
-  repositories: Pick<Repositories, 'group' | 'initiative' | 'subjectGroup'>,
-  sub: string,
-  currentInitiative: Initiative,
-  userGroups: Group[]
-) => {
-  // Get the current initiative
-  const currentInitiativeId = (
-    await repositories.initiative.findFirstOrThrow({
-      where: {
-        code: currentInitiative
-      }
-    })
-  ).initiativeId;
-
-  // Remove current initiative groups
-  const currentInitiativeGroups = userGroups.filter((x) => x.initiativeId === currentInitiativeId);
-  await Promise.all(
-    currentInitiativeGroups.map(
-      async (x) =>
-        await repositories.subjectGroup.delete({
-          sub_groupId: {
-            sub: sub,
-            groupId: x.groupId
-          }
-        })
-    )
-  );
-
-  // Only remove global perm if user has no groups of the same type assigned in other initiatives
-  if (!(await repositories.subjectGroup.subjectHasGroupName(sub, currentInitiativeGroups[0]?.name))) {
-    const correspondingGlobalGroups = await Promise.all(
-      currentInitiativeGroups.map(
-        async (x) =>
-          await getCorrespondingGlobalGroup(
-            { group: repositories.group, initiative: repositories.initiative },
-            x.groupId
-          )
-      )
-    );
-    await Promise.all(
-      correspondingGlobalGroups.map(
-        async (x) =>
-          await repositories.subjectGroup.delete({
-            sub_groupId: {
-              sub: sub,
-              groupId: x.groupId
-            }
-          })
-      )
-    );
-  }
 };
 
 export const createAccessRequestService = async (

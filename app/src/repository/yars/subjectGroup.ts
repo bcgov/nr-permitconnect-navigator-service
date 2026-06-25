@@ -1,26 +1,10 @@
-import { Prisma } from '@prisma/client';
-
-import { BaseRepository } from '../base.ts';
+import { WritableRepository } from '../writable.ts';
 import { GroupName, Initiative } from '../../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../../db/database.ts';
 import type { Group } from '../../types/stuff';
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-const subject_group = Prisma.validator<Prisma.subject_groupDefaultArgs>()({});
-type SubjectGroupBase = Prisma.subject_groupGetPayload<typeof subject_group>;
-
-export class SubjectGroupRepository extends BaseRepository<
-  SubjectGroupBase,
-  Prisma.subject_groupCreateInput,
-  Prisma.subject_groupUpdateInput,
-  Prisma.subject_groupWhereUniqueInput,
-  Prisma.subject_groupWhereInput,
-  Prisma.subject_groupFindUniqueArgs,
-  Prisma.subject_groupFindFirstArgs,
-  Prisma.subject_groupFindManyArgs,
-  PrismaTransactionClient['subject_group']
-> {
+export class SubjectGroupRepository extends WritableRepository<PrismaTransactionClient['subject_group']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.subject_group, principal);
   }

@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 import { LRUCache } from 'lru-cache';
 
 import { getAuthHeader, getBearerToken, getJwksClient, setAuthHeader } from './providers/oidc.ts';
-import { login } from '../services/user.ts';
+import { loginService } from '../services/login.ts';
 import { AuthType, Initiative } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
@@ -39,7 +39,7 @@ export const hasAuthentication = (initiative: Initiative) => {
       } else {
         const token = getBearerToken(authHeader, req, res);
         const payload = await getVerifiedPayload(token, req, res);
-        const user = await login(payload);
+        const user = await loginService(payload);
 
         if (!user?.userId) throw new Problem(500, { detail: 'Failed to log user in', instance: req.originalUrl });
 

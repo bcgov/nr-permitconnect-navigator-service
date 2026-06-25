@@ -1,23 +1,9 @@
-import { Prisma } from '@prisma/client';
-
-import { ReadOnlyRepository } from '../readOnly.ts';
+import { ReadableRepository } from '../readable.ts';
 
 import type { PrismaTransactionClient } from '../../db/database.ts';
 import { Initiative } from '../../utils/enums/application.ts';
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-const grp_vw = Prisma.validator<Prisma.group_role_policy_vwDefaultArgs>()({});
-type grp_vwBase = Prisma.group_role_policy_vwGetPayload<typeof grp_vw>;
-
-export class GroupRolePolicyVwRepository extends ReadOnlyRepository<
-  grp_vwBase,
-  Prisma.group_role_policy_vwWhereUniqueInput,
-  Prisma.group_role_policy_vwWhereInput,
-  Prisma.group_role_policy_vwFindUniqueArgs,
-  Prisma.group_role_policy_vwFindFirstArgs,
-  Prisma.group_role_policy_vwFindManyArgs,
-  PrismaTransactionClient['group_role_policy_vw']
-> {
+export class GroupRolePolicyVwRepository extends ReadableRepository<PrismaTransactionClient['group_role_policy_vw']> {
   constructor(tx: PrismaTransactionClient) {
     super(tx.group_role_policy_vw);
   }

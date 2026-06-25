@@ -298,6 +298,7 @@ export interface HousingProjectIntake {
   };
   location: {
     geomarkUrl: string | null;
+    geoJson: Prisma.JsonValue;
     latitude: number | null;
     locality: string;
     longitude: number | null;

@@ -1,24 +1,8 @@
-import { Prisma } from '@prisma/client';
-
-import { BaseRepository } from '../base.ts';
+import { WritableRepository } from '../writable.ts';
 
 import type { PrismaTransactionClient } from '../../db/database.ts';
 
-/* eslint-disable-next-line @typescript-eslint/no-unused-vars */
-const policy_attribute = Prisma.validator<Prisma.policy_attributeDefaultArgs>()({});
-type PolicyAttributeBase = Prisma.policy_attributeGetPayload<typeof policy_attribute>;
-
-export class PolicyAttributeRepository extends BaseRepository<
-  PolicyAttributeBase,
-  Prisma.policy_attributeCreateInput,
-  Prisma.policy_attributeUpdateInput,
-  Prisma.policy_attributeWhereUniqueInput,
-  Prisma.policy_attributeWhereInput,
-  Prisma.policy_attributeFindUniqueArgs,
-  Prisma.policy_attributeFindFirstArgs,
-  Prisma.policy_attributeFindManyArgs,
-  PrismaTransactionClient['policy_attribute']
-> {
+export class PolicyAttributeRepository extends WritableRepository<PrismaTransactionClient['policy_attribute']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.policy_attribute, principal);
   }

@@ -16,9 +16,10 @@ import {
   upsertHousingProjectDraftController
 } from '../../controllers/housingProject.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
+import { hasIdentity } from '../../middleware/identity.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
+import { Action, IdentityProviderKind, Resource } from '../../utils/enums/application.ts';
 import { housingProjectValidator } from '../../validators/index.ts';
 
 const router = express.Router();
@@ -76,6 +77,7 @@ router.put(
 /** Creates a blank housing project */
 router.post(
   '/',
+  hasIdentity(IdentityProviderKind.AZUREIDIR),
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.createHousingProject,
   createHousingProjectController
