@@ -16,6 +16,7 @@ import { PermitRepository } from './permit';
 import { ActivityRepository } from './activity';
 import { ActivityContactRepository } from './activityContact';
 import { DraftRepository } from './draft';
+import { PermitTrackingRepository } from './permitTracking';
 
 /**
  * Collection of repositories available within a unit-of-work scope.
@@ -33,6 +34,7 @@ export interface Repositories {
   identityProvider: IdentityProviderRepository;
   initiative: InitiativeRepository;
   permit: PermitRepository;
+  permitTracking: PermitTrackingRepository;
   user: UserRepository;
 
   // YARS
@@ -98,6 +100,10 @@ class RepositoryProvider implements Repositories {
 
   get permit(): PermitRepository {
     return this.getOrCreate('permit', () => new PermitRepository(this.tx, this.principal));
+  }
+
+  get permitTracking(): PermitTrackingRepository {
+    return this.getOrCreate('permitTracking', () => new PermitTrackingRepository(this.tx, this.principal));
   }
 
   get user(): UserRepository {

@@ -1,94 +1,57 @@
 import { Prisma } from '@prisma/client';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
+import prisma from '../db/database.ts';
+import { emailProjectConfirmation, generateHousingProjectData } from '../domains/housingProject.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import { unitOfWork } from '../repository/uow.ts';
+
 import type {
+  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   HousingProject,
-  HousingProjectBase,
   HousingProjectIntake,
   HousingProjectSearchParameters,
   HousingProjectStatistics,
-  Permit
+  Nullable
 } from '../types/index.ts';
-import { unitOfWork } from '../repository/uow.ts';
-import { generateHousingProjectData } from '../domains/housingProject.ts';
-import prisma from '../db/database.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-
-/**
- * Creates a new housing project
- * @param tx Prisma transaction client
- * @param data The housing project data to create
- * @returns A Promise that resolves to the created housing project
- */
-// export const createHousingProject = async (
-//   tx: PrismaTransactionClient,
-//   data: HousingProjectBase
-// ): Promise<HousingProject> => {
-//   const response = await tx.housing_project.create({
-//     data: {
-//       ...data,
-//       geoJson: data.geoJson as Prisma.InputJsonValue
-//     },
-//     include: {
-//       activity: {
-//         include: {
-//           activityContact: {
-//             include: {
-//               contact: true
-//             }
-//           }
-//         }
-//       }
-//     }
-//   });
-//   return response;
-// };
-
-//--------------------------------------------------------------------------------
-// Housing Project
-//--------------------------------------------------------------------------------
 
 export const createHousingProjectService = async (
   data: HousingProjectIntake,
   currentContext: CurrentContext
 ): Promise<HousingProject> => {
-  return await unitOfWork.execute(async ({ housingProject, permit }) => {
-    const {
-      housingProject: project,
-      appliedPermits,
-      investigatePermits
-    } = await generateHousingProjectData({ housingProject }, data, currentContext);
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, housingProject, initiative, permit, permitTracking }) => {
+      const {
+        housingProject: project,
+        appliedPermits,
+        investigatePermits,
+        appliedPermitTrackers
+      } = await generateHousingProjectData(
+        { activity, activityContact, contact, housingProject, initiative },
+        data,
+        currentContext
+      );
 
-    // Create new housing project
-    const response = await housingProject.create({
-      ...project,
-      geoJson: project.geoJson as Prisma.InputJsonValue
-    });
+      // Create new housing project
+      const response = await housingProject.create({
+        ...project,
+        geoJson: project.geoJson as Prisma.InputJsonValue
+      });
 
-    // Create each permit and tracking IDs
-    await Promise.all(
-      appliedPermits.map(async (p: Permit) => {
-        permit.upsert({ permitId: p.permitId }, p, p);
-      })
-    );
-    // await Promise.all(
-    //   appliedPermits.map(async (p: Permit) => {
-    //     await upsertPermit(tx, omit(p, ['permitTracking']));
-    //   })
-    // );
+      // Create each permit and tracking IDs
+      await Promise.all(
+        appliedPermits.map(async (p) => {
+          permit.upsert({ permitId: p.permitId }, p, p);
+        })
+      );
+      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
 
-    await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-    await Promise.all(
-      appliedPermits
-        .filter((p: Permit) => !!p.permitTracking)
-        .map(async (p: Permit) => await upsertPermitTracking(tx, p))
-    );
-
-    return response;
-  });
+      return response;
+    }
+  );
 };
 
 export const deleteHousingProjectService = async (housingProjectId: string): Promise<void> => {
@@ -101,8 +64,8 @@ export const deleteHousingProjectService = async (housingProjectId: string): Pro
 
 export const listHousingProjectActivityIdsService = async (): Promise<string[]> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
-    const projects = await housingProject.findMany({ select: { activityId: true } });
-    return projects.map((x) => x.activityId);
+    const ids = await housingProject.findMany({ select: { activityId: true } });
+    return ids.map((x) => x.activityId);
   });
 };
 
@@ -230,6 +193,53 @@ export const searchHousingProjects = async (
       result
     );
   });
+};
+
+export const submitHousingProjectDraftService = async (
+  draftId: Nullable<string>,
+  data: HousingProjectIntake,
+  contactData: ContactBase,
+  currentContext: CurrentContext
+): Promise<HousingProject> => {
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, draft, housingProject, initiative, permit, permitTracking }) => {
+      const {
+        housingProject: project,
+        appliedPermits,
+        investigatePermits,
+        appliedPermitTrackers
+      } = await generateHousingProjectData(
+        { activity, activityContact, contact, housingProject, initiative },
+        data,
+        currentContext
+      );
+
+      // Create new housing project
+      const response = await housingProject.create({
+        ...project,
+        geoJson: project.geoJson as Prisma.InputJsonValue
+      });
+
+      // Create each permit and tracking IDs
+      await Promise.all(
+        appliedPermits.map(async (p) => {
+          permit.upsert({ permitId: p.permitId }, p, p);
+        })
+      );
+      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+
+      // Delete old draft
+      if (draftId) await draft.delete({ draftId });
+
+      // Update the contact
+      const contactResponse = await contact.upsert({ contactId: contactData.contactId }, contactData, contactData);
+
+      await emailProjectConfirmation({ ...response, contact: contactResponse });
+
+      return response;
+    }
+  );
 };
 
 /**

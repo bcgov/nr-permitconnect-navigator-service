@@ -150,13 +150,9 @@ export const createAccessRequestService = async (
         const newAccessRequest = {
           accessRequestId: uuidv4(),
           grant: accessReq.grant,
-          group: {
-            connect: { groupId: accessReq.groupId }
-          },
+          groupId: accessReq.groupId,
           status: AccessRequestStatus.PENDING,
-          user: {
-            connect: { userId: accessReq.userId }
-          }
+          userId: accessReq.userId
         };
 
         await accessRequest.create(newAccessRequest);

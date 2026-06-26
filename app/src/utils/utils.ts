@@ -394,15 +394,6 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * Converts a UUDI to an activity ID
- * @param id The ID to convert
- * @returns A truncated version of the given ID
- */
-export function uuidToActivityId(id: string): string {
-  return id.substring(0, 8).toUpperCase();
-}
-
-/**
  * Validates a UUID and checks if it is version 4
  * @param uuid The UUID to validate
  * @returns True if the UUID is valid and is version 4

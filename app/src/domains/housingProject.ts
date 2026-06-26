@@ -3,15 +3,26 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { NumResidentialUnits } from '../utils/enums/housing';
 
-import type { CurrentContext, HousingProject, HousingProjectIntake, Permit } from '../types';
+import type {
+  Contact,
+  CurrentContext,
+  HousingProject,
+  HousingProjectBase,
+  HousingProjectIntake,
+  Permit,
+  PermitTracking
+} from '../types';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { getCurrentUsername, toTitleCase } from '../utils';
 import { confirmationTemplateHousingSubmission } from '../utils/templates';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { PermitNeeded } from '../utils/enums/permit';
-import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { Repositories } from '../repository/uow';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
+import { UpsertPermitRequest } from '../types/requests';
+import { email } from '../services/email';
+import { createActivity } from './activity';
 
 /**
  * Assigns a priority level to a housing project based on given criteria
@@ -85,13 +96,13 @@ export async function emailProjectConfirmation(projectWithContact: HousingProjec
 
 /**
  * Transforms intake data to match DB schema
- * @param tx Prismas transaction client
- * @param data Intake data
- * @param currentContext The current context of the Express request
+ * @param repositories - The required repositories
+ * @param data - Intake data
+ * @param currentContext - The current context of the request
  * @returns Transformed project and permit data
  */
 export const generateHousingProjectData = async (
-  repositories: Pick<Repositories, 'housingProject'>,
+  repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'housingProject' | 'initiative'>,
   data: HousingProjectIntake,
   currentContext: CurrentContext
 ) => {
@@ -99,14 +110,26 @@ export const generateHousingProjectData = async (
 
   // Create activity and link contact if required
   if (!activityId) {
-    activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(currentContext)))?.activityId;
-    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
+    activityId = (
+      await createActivity({ activity: repositories.activity, initiative: repositories.initiative }, Initiative.HOUSING)
+    )?.activityId;
+
+    const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
+    if (contacts[0]) {
+      await repositories.activityContact.create({
+        activityId,
+        contactId: contacts[0].contactId,
+        role: ActivityContactRole.PRIMARY
+      });
+    }
   }
 
+  if (!activityId) throw new Error('Failed to generate activity ID');
+
   let basic, housing, location, permits;
-  let appliedPermits: Permit[] = [],
-    investigatePermits: Permit[] = [];
+  let appliedPermits: UpsertPermitRequest[] = [],
+    investigatePermits: UpsertPermitRequest[] = [];
+  const appliedPermitTrackers: PermitTracking[] = [];
 
   if (data.basic) {
     basic = {
@@ -159,33 +182,33 @@ export const generateHousingProjectData = async (
     };
 
     if (data.permits.appliedPermits?.length) {
-      appliedPermits = data.permits.appliedPermits.map((x: Permit) => ({
-        permitId: x.permitId ?? uuidv4(),
-        permitTypeId: x.permitTypeId,
-        activityId: activityId,
-        stage: PermitStage.APPLICATION_SUBMISSION,
-        needed: PermitNeeded.YES,
-        statusLastChanged: null,
-        statusLastChangedTime: null,
-        statusLastVerified: null,
-        statusLastVerifiedTime: null,
-        issuedPermitId: null,
-        state: PermitState.IN_PROGRESS,
-        onHoldCode: null,
-        submittedDate: x.submittedDate,
-        submittedTime: x.submittedTime,
-        decisionDate: null,
-        decisionTime: null,
-        targetDate: null,
-        targetDateDescription: null,
-        permitTracking: x.permitTracking?.map((pt) => ({
-          ...pt,
-          ...generateCreateStamps(currentContext)
-        })),
-        ...generateCreateStamps(currentContext),
-        ...generateUpdateStamps(currentContext),
-        ...generateNullDeleteStamps()
-      }));
+      appliedPermits = data.permits.appliedPermits.map((x: Permit) => {
+        const permitId = x.permitId ?? uuidv4();
+
+        // Add each tracker for this permit with the proper permitId
+        x.permitTracking?.forEach((pt) => appliedPermitTrackers.push({ ...pt, permitId }));
+
+        return {
+          permitId,
+          permitTypeId: x.permitTypeId,
+          activityId: activityId,
+          stage: PermitStage.APPLICATION_SUBMISSION,
+          needed: PermitNeeded.YES,
+          statusLastChanged: null,
+          statusLastChangedTime: null,
+          statusLastVerified: null,
+          statusLastVerifiedTime: null,
+          issuedPermitId: null,
+          state: PermitState.IN_PROGRESS,
+          onHoldCode: null,
+          submittedDate: x.submittedDate,
+          submittedTime: x.submittedTime,
+          decisionDate: null,
+          decisionTime: null,
+          targetDate: null,
+          targetDateDescription: null
+        };
+      });
     }
 
     if (data.permits.investigatePermits?.length) {
@@ -207,10 +230,7 @@ export const generateHousingProjectData = async (
         decisionDate: null,
         decisionTime: null,
         targetDate: null,
-        targetDateDescription: null,
-        ...generateCreateStamps(currentContext),
-        ...generateUpdateStamps(currentContext),
-        ...generateNullDeleteStamps()
+        targetDateDescription: null
       }));
     }
   }
@@ -252,9 +272,10 @@ export const generateHousingProjectData = async (
       ].includes(BasicResponse.YES),
       checkProvincialPermits: null,
       atsEnquiryId: null
-    } as HousingProject,
+    } as HousingProjectBase,
     appliedPermits,
-    investigatePermits
+    investigatePermits,
+    appliedPermitTrackers
   };
 
   assignPriority(housingProjectData.housingProject);

@@ -32,14 +32,14 @@ import {
 } from '../../../src/controllers/generalProject.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/services/activity.ts';
+import * as activityService from '../../../src/domains/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as draftService from '../../../src/services/draft.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
 import * as permitService from '../../../src/services/permit.ts';
-import * as permitTrackingService from '../../../src/services/permitTracking.ts';
+import * as permitTrackingService from '../../../src/domains/permitTracking.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';

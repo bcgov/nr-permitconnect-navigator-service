@@ -9,7 +9,7 @@ import {
   generateNullUpdateStamps,
   generateUpdateStamps
 } from '../db/utils/utils.ts';
-import { createActivity, deleteActivity } from '../services/activity.ts';
+import { createActivity, deleteActivity } from '../domains/activity.ts';
 import { createActivityContact, listActivityContacts } from '../services/activityContact.ts';
 import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { email } from '../services/email.ts';

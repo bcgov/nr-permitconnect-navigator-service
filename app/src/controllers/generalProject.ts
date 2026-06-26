@@ -13,7 +13,7 @@ import {
   jsonToPrismaInputJson
 } from '../db/utils/utils.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivity, deleteActivity, deleteActivityHard } from '../domains/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
@@ -28,7 +28,7 @@ import {
   updateGeneralProject
 } from '../services/generalProject.ts';
 import { upsertPermit } from '../services/permit.ts';
-import { upsertPermitTracking } from '../services/permitTracking.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
 import { PermitNeeded } from '../utils/enums/permit.ts';
 import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';

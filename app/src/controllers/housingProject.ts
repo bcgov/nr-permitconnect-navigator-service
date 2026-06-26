@@ -1,26 +1,6 @@
 import { Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import {
-  generateCreateStamps,
-  generateNullDeleteStamps,
-  generateNullUpdateStamps,
-  generateUpdateStamps
-} from '../db/utils/utils.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { createActivity } from '../services/activity.ts';
-import { createActivityContact } from '../services/activityContact.ts';
-import { searchContactsService, upsertContactsService } from '../services/contact.ts';
-import {
-  createDraft,
-  deleteDraftService,
-  getDraft,
-  getDrafts,
-  getDraftService,
-  listDraftsService,
-  updateDraft
-} from '../services/draft.ts';
+import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '../services/draft.ts';
 import {
   createHousingProjectService,
   deleteHousingProjectService,
@@ -29,25 +9,21 @@ import {
   listHousingProjectActivityIdsService,
   listHousingProjectsService,
   searchHousingProjects,
+  submitHousingProjectDraftService,
   updateHousingProjectService
 } from '../services/housingProject.ts';
-import { upsertPermit } from '../services/permit.ts';
-import { upsertPermitTracking } from '../services/permitTracking.ts';
 import { BasicResponse, Initiative } from '../utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../utils/enums/projectCommon.ts';
-import { isTruthy, omit } from '../utils/utils.ts';
+import { DraftCode } from '../utils/enums/projectCommon.ts';
+import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
-  Contact,
   Draft,
   HousingProject,
   HousingProjectIntake,
   HousingProjectSearchParameters,
   HousingProjectStatistics,
   LocalContext,
-  Permit,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -149,84 +125,28 @@ export const getHousingProjectDraftsController = async (req: Request, res: Respo
 
 export const submitHousingProjectDraftController = async (
   req: Request<never, never, HousingProjectIntake>,
-  res: Response
+  res: Response<HousingProject, LocalContext>
 ) => {
-  const result = await transactionWrapper<HousingProject & { contact: Contact }>(
-    async (tx: PrismaTransactionClient) => {
-      const { housingProject, appliedPermits, investigatePermits } = await generateHousingProjectData(
-        tx,
-        req.body,
-        res.locals.currentContext
-      );
-
-      // Create new housing project
-      const data = await createHousingProject(tx, {
-        ...housingProject,
-        ...generateCreateStamps(res.locals.currentContext)
-      });
-
-      // Create each permit and tracking IDs
-      await Promise.all(
-        appliedPermits.map(async (p: Permit) => {
-          await upsertPermit(tx, omit(p, ['permitTracking']));
-        })
-      );
-      await Promise.all(investigatePermits.map(async (p: Permit) => await upsertPermit(tx, p)));
-      await Promise.all(
-        appliedPermits
-          .filter((p: Permit) => !!p.permitTracking)
-          .map(async (p: Permit) => await upsertPermitTracking(tx, p))
-      );
-
-      // Delete old draft
-      if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
-
-      // Update the contact
-      const contactResponse = await upsertContactsService([
-        { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
-      ]);
-
-      return { ...data, contact: contactResponse[0] };
-    }
+  const response = await submitHousingProjectDraftService(
+    req.body.draftId,
+    req.body,
+    req.body.contact,
+    res.locals.currentContext
   );
-  await emailProjectConfirmation(result);
-  res.status(201).json({ ...result, contact: result.contact });
+  res.status(201).json(response);
 };
 
-export const upsertHousingProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
+export const upsertHousingProjectDraftController = async (
+  req: Request<never, never, Draft>,
+  res: Response<Draft, LocalContext>
+) => {
   const update = !!req.body.draftId;
-
-  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
-    if (update) {
-      // Update draft
-      return await updateDraft(tx, {
-        ...req.body,
-        ...generateUpdateStamps(res.locals.currentContext)
-      });
-    } else {
-      // Create new draft
-      const activityId = (await createActivity(tx, Initiative.HOUSING, generateCreateStamps(res.locals.currentContext)))
-        ?.activityId;
-
-      const draft = await createDraft(tx, {
-        draftId: uuidv4(),
-        activityId: activityId,
-        draftCode: DraftCode.HOUSING_PROJECT,
-        data: req.body.data,
-        ...generateCreateStamps(res.locals.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      });
-
-      // Link contact to activity
-      const contacts = await searchContactsService({ userId: [res.locals.currentContext.userId!] });
-      if (contacts[0]) {
-        await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
-      }
-
-      return draft;
-    }
-  });
-
+  const response = await upsertDraftService(
+    req.body.draftId,
+    req.body,
+    Initiative.HOUSING,
+    DraftCode.HOUSING_PROJECT,
+    res.locals.currentContext
+  );
   res.status(update ? 200 : 201).json(response);
 };

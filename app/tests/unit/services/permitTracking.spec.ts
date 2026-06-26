@@ -1,6 +1,6 @@
 import { TEST_PERMIT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import * as permitTrackingService from '../../../src/services/permitTracking.ts';
+import * as permitTrackingService from '../../../src/domains/permitTracking.ts';
 
 import type { PermitTracking } from '../../../src/types/index.ts';
 

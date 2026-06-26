@@ -11,7 +11,7 @@ import {
   generateUpdateStamps
 } from '../db/utils/utils.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { createActivity, deleteActivity, deleteActivityHard } from '../services/activity.ts';
+import { createActivity, deleteActivity, deleteActivityHard } from '../domains/activity.ts';
 import { createActivityContact } from '../services/activityContact.ts';
 import { searchContactsService, upsertContactsService } from '../services/contact.ts';
 import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';

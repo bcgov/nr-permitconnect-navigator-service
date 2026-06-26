@@ -18,6 +18,9 @@ export interface ReadableModelDelegate<D> {
   findMany<A extends Prisma.Args<D, 'findMany'>>(
     args?: Prisma.SelectSubset<A, Prisma.Args<D, 'findMany'>>
   ): Promise<Prisma.Result<D, A, 'findMany'>>;
+  findUnique<A extends Prisma.Args<D, 'findUnique'>>(
+    args: Prisma.SelectSubset<A, Prisma.Args<D, 'findUnique'>>
+  ): Promise<Prisma.Result<D, A, 'findUnique'>>;
 }
 
 export abstract class ReadableRepository<TDelegate> {
@@ -33,16 +36,17 @@ export abstract class ReadableRepository<TDelegate> {
   // Query Helpers
   //-------------------------
 
-  // Merges `deletedAt: null` into `where` while preserving the args type `A`.
   private withNotDeleted<A>(args: A, includeDeleted: boolean): A {
     if (!this.softDeleteEnabled || includeDeleted) {
       return args;
     }
 
+    const base = (args ?? {}) as { where?: object };
+
     return {
-      ...args,
+      ...base,
       where: {
-        ...(args as { where?: object }).where,
+        ...base.where,
         deletedAt: null
       }
     } as A; // Contained assertion: object spread widens, re-pin to `A`
@@ -80,22 +84,11 @@ export abstract class ReadableRepository<TDelegate> {
     return this.model.findFirstOrThrow(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  /*
-   * findUnique is routed through findFirst so the soft-delete filter applies.
-   * The unique-where is a valid findFirst-where, but the *operation* differs,
-   * so the args/result are re-pinned to the findUnique shape.
-   */
   async findUnique<A extends Prisma.Args<TDelegate, 'findUnique'>>(
     args: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findUnique'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'findUnique'>> {
-    const finalArgs = this.withNotDeleted(args, options?.includeDeleted === true);
-
-    const result = await this.model.findFirst(
-      finalArgs as unknown as Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findFirst'>>
-    );
-
-    return result as Prisma.Result<TDelegate, A, 'findUnique'>;
+    return this.model.findUnique(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
   async findUniqueOrThrow<A extends Prisma.Args<TDelegate, 'findUnique'>>(

@@ -1,4 +1,6 @@
-import { generateUniqueActivityId } from '../db/utils/utils.ts';
+import { v4 as uuidv4 } from 'uuid';
+
+import { Repositories } from '../repository/uow.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
@@ -7,25 +9,31 @@ import type { Activity } from '../types/index.ts';
 
 /**
  * Create an activity for the given initiative with a unique identifier
- * @param tx Prisma transaction client
- * @param initiative The initiative ID
- * @param createStamp The creation stamps
+ * @param repositories - The required repositories
+ * @param initiative - The initiative code the activity will belong to
  * @returns A Promise that resolves to the created activity
  */
 export const createActivity = async (
-  tx: PrismaTransactionClient,
-  initiative: Initiative,
-  createStamp: Partial<IStamps>
+  repositories: Pick<Repositories, 'activity' | 'initiative'>,
+  initiative: Initiative
 ): Promise<Activity> => {
-  const initiativeResult = await tx.initiative.findFirstOrThrow({ where: { code: initiative } });
+  // Generate a new unique activity ID
+  let id, queryResult;
 
-  const response = await tx.activity.create({
-    data: {
-      activityId: await generateUniqueActivityId(tx),
-      initiativeId: initiativeResult.initiativeId,
-      createdAt: createStamp.createdAt,
-      createdBy: createStamp.createdBy
-    }
+  do {
+    id = uuidv4().substring(0, 8).toUpperCase();
+    queryResult = await repositories.activity.findUnique({
+      where: { activityId: id },
+      select: { activityId: true }
+    });
+  } while (queryResult);
+
+  // Create the activity
+  const initiativeResult = await repositories.initiative.findFirstOrThrow({ where: { code: initiative } });
+
+  const response = await repositories.activity.create({
+    activityId: id,
+    initiativeId: initiativeResult.initiativeId
   });
 
   return response;

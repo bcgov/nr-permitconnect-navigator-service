@@ -19,7 +19,7 @@ export const assignGroup = async (
 
   const result = await repositories.subjectGroup.create({
     sub: sub,
-    group: { connect: { groupId: groupResult.groupId } }
+    groupId: groupResult.groupId
   });
 
   return { sub: result.sub, roleId: result.groupId };

@@ -9,6 +9,7 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.
 import type {
   AccessRequest,
   Contact,
+  ContactBase,
   ElectrificationProject,
   GeneralProject,
   HousingProject,
@@ -279,7 +280,7 @@ export interface HousingProjectIntake {
     registeredId: string | null;
     registeredName: string | null;
   };
-  contact: Contact;
+  contact: ContactBase;
   draftId: string | null;
   housing: {
     singleFamilyUnits: string;

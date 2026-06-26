@@ -4,12 +4,12 @@ import {
   createHousingProjectController,
   deleteHousingProjectController,
   deleteHousingProjectDraftController,
-  getHousingProjectActivityIdsController,
   getHousingProjectController,
-  getHousingProjectsController,
   getHousingProjectDraftController,
   getHousingProjectDraftsController,
   getHousingProjectStatisticsController,
+  listHousingProjectActivityIdsController,
+  listHousingProjectsController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectController,
@@ -27,13 +27,13 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of housing projects */
-router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectsController);
+router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), listHousingProjectsController);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  getHousingProjectActivityIdsController
+  listHousingProjectActivityIdsController
 );
 
 /** Search housing projects */

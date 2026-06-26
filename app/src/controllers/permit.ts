@@ -12,7 +12,7 @@ import { email } from '../services/email.ts';
 import { getPeachRecord } from '../services/peach.ts';
 import { deletePermit, getPermit, listPermits, searchPermits, upsertPermit } from '../services/permit.ts';
 import { createPermitNote } from '../services/permitNote.ts';
-import { deleteManyPermitTracking, upsertPermitTracking } from '../services/permitTracking.ts';
+import { deleteManyPermitTracking, upsertPermitTracking } from '../domains/permitTracking.ts';
 import { getProjectByActivityId } from '../services/project.ts';
 import { getSourceSystemKinds } from '../services/sourceSystemKind.ts';
 import { Initiative } from '../utils/enums/application.ts';
