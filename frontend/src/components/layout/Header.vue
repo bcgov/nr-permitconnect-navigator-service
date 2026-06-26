@@ -2,6 +2,7 @@
 import { useI18n } from 'vue-i18n';
 
 import HeaderMenu from '@/components/common/HeaderMenu.vue';
+import { AppDrawer } from '@/components/layout';
 
 // Actions
 const { t } = useI18n();
@@ -29,6 +30,7 @@ const { t } = useI18n();
         </div>
         <div class="flex justify-end lg:mr-12">
           <HeaderMenu />
+          <AppDrawer />
         </div>
       </div>
     </nav>

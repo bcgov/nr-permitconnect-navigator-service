@@ -1,3 +1,4 @@
+export { default as AppDrawer } from './AppDrawer.vue';
 export { default as AppLayout } from './AppLayout.vue';
 export { default as DevelopmentRoleOverride } from './DevelopmentRoleOverride.vue';
 export { default as Footer } from './Footer.vue';

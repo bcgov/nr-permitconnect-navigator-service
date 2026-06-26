@@ -58,11 +58,11 @@ const toggle = (event: Event) => {
       aria-controls="overlay-menu"
       @click="toggle"
     >
-      {{ getProfile?.name ?? getProfile?.display_name }}
       <font-awesome-icon
-        icon="fa-solid fa-bars"
+        icon="fa-solid fa-user"
         class="ml-2 app-primary-color no-click"
       />
+      {{ getProfile?.name ?? getProfile?.display_name }}
     </Button>
     <Menu
       id="overlay-menu"

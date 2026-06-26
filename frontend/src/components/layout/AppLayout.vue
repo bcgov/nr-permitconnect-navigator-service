@@ -13,6 +13,7 @@ const authzStore = useAuthZStore();
     <div class="layout-head">
       <DevelopmentRoleOverride v-if="authnStore.getIsAuthenticated && authzStore.isImpersonating" />
       <Header />
+      <slot name="drawer" />
       <slot name="nav" />
     </div>
 
