@@ -1,40 +1,23 @@
-import config from 'config';
 import { Prisma } from '@prisma/client';
-import { v4 as uuidv4 } from 'uuid';
 
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '../services/draft.ts';
 import {
-  generateCreateStamps,
-  generateDeleteStamps,
-  generateNullDeleteStamps,
-  generateNullUpdateStamps,
-  generateUpdateStamps
-} from '../db/utils/utils.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { createActivity, deleteActivity, deleteActivityHard } from '../domains/activity.ts';
-import { createActivityContact } from '../services/activityContact.ts';
-import { searchContactsService, upsertContactsService } from '../services/contact.ts';
-import { createDraft, deleteDraft, getDraft, getDrafts, updateDraft } from '../services/draft.ts';
-import { email } from '../services/email.ts';
-import {
-  createElectrificationProject,
-  deleteElectrificationProject,
-  getElectrificationProject,
-  getElectrificationProjects,
-  getElectrificationProjectStatistics,
+  createElectrificationProjectService,
+  deleteElectrificationProjectService,
+  getElectrificationProjectService,
+  getElectrificationProjectStatisticsService,
+  listElectrificationProjectActivityIdsService,
+  listElectrificationProjectsService,
   searchElectrificationProjects,
-  updateElectrificationProject
+  submitElectrificationProjectDraftService,
+  updateElectrificationProjectService
 } from '../services/electrificationProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
-import { ActivityContactRole, ApplicationStatus, DraftCode, SubmissionType } from '../utils/enums/projectCommon.ts';
-import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
-import { isTruthy, toTitleCase } from '../utils/utils.ts';
+import { DraftCode } from '../utils/enums/projectCommon.ts';
+import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
-  Contact,
-  CurrentContext,
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
@@ -44,122 +27,14 @@ import type {
   StatisticsFilters
 } from '../types/index.ts';
 
-/**
- * Generates and sends a templated email with the given data
- * @param projectWithContact Email data
- */
-async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-  const subject = 'Confirmation of Project Submission';
-
-  const body = confirmationTemplateElectrificationSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.ELECTRIFICATION),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.electrificationProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: subject,
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
-
-/**
- * Handles creating a project from intake data
- * @param tx Prisma transaction client
- * @param data Electrification project data
- * @param currentContext context data of current request
- * @returns Maniplated electrification data
- */
-const generateElectrificationProjectData = async (
-  tx: PrismaTransactionClient,
-  data: ElectrificationProjectIntake,
-  currentContext: CurrentContext
-) => {
-  let activityId = data.activityId;
-
-  // Create activity and link contact if required
-  if (!activityId) {
-    activityId = (await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(currentContext)))
-      ?.activityId;
-    const contacts = await searchContactsService({ userId: [currentContext.userId!] });
-    if (contacts[0]) await createActivityContact(tx, activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
-  }
-
-  // Put new electrification project together
-  const UUID = uuidv4();
-
-  const electrificationProjectData: ElectrificationProject = {
-    companyIdRegistered: data.basic?.registeredId ?? null,
-    companyNameRegistered: data.basic?.registeredName ?? null,
-    projectName: data.basic?.projectName,
-    projectDescription: data.basic?.projectDescription,
-    bcHydroNumber: data.project?.bcHydroNumber ?? null,
-    projectType: data.project?.projectType ?? null,
-    electrificationProjectId: UUID,
-    activityId: activityId,
-    submittedAt: new Date(),
-    submissionType: SubmissionType.GUIDANCE,
-    applicationStatus: ApplicationStatus.NEW,
-    aaiUpdated: false,
-    addedToAts: false,
-    projectCategory: null,
-    locationDescription: null,
-    hasEpa: null,
-    megawatts: null,
-    bcEnvironmentAssessNeeded: null,
-    assignedUserId: null,
-    astNotes: null,
-    queuePriority: null,
-    atsClientId: null,
-    atsEnquiryId: null,
-    createdBy: null,
-    createdAt: null,
-    updatedBy: null,
-    updatedAt: null,
-    deletedBy: null,
-    deletedAt: null
-  };
-
-  return electrificationProjectData;
-};
-
-export const getElectrificationProjectActivityIdsController = async (req: Request, res: Response) => {
-  const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
-    return await getElectrificationProjects(tx);
-  });
-  res.status(200).json(response.map((x) => x.activityId));
-};
-
 export const createElectrificationProjectController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
-  res: Response
+  res: Response<ElectrificationProject, LocalContext>
 ) => {
   // Provide an empty body if POST body is given undefined
-  req.body ??= {
-    project: {}
-  } as ElectrificationProjectIntake;
+  req.body ??= {} as ElectrificationProjectIntake;
 
-  const result = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
-    const electrificationProject = await generateElectrificationProjectData(tx, req.body, res.locals.currentContext);
-
-    // Create new electrification project
-    return await createElectrificationProject(tx, {
-      ...electrificationProject,
-      ...generateCreateStamps(res.locals.currentContext)
-    });
-  });
-
+  const result = await createElectrificationProjectService(req.body, res.locals.currentContext);
   res.status(201).json(result);
 };
 
@@ -167,70 +42,36 @@ export const deleteElectrificationProjectController = async (
   req: Request<{ electrificationProjectId: string }>,
   res: Response
 ) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const project = await getElectrificationProject(tx, req.params.electrificationProjectId);
-    await deleteElectrificationProject(
-      tx,
-      req.params.electrificationProjectId,
-      generateDeleteStamps(res.locals.currentContext)
-    );
-    await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
-  });
+  await deleteElectrificationProjectService(req.params.electrificationProjectId);
   res.status(204).end();
 };
 
-export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const draft = await getDraft(tx, req.params.draftId);
-    await deleteActivityHard(tx, draft.activityId);
-  });
-  res.status(204).end();
-};
-
-export const getElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
-  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
-    return await getDraft(tx, req.params.draftId);
-  });
-
-  res.status(200).json(response);
-};
-
-export const getElectrificationProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
-  const response = await transactionWrapper<Draft[]>(async (tx: PrismaTransactionClient) => {
-    const drafts = await getDrafts(tx, DraftCode.ELECTRIFICATION_PROJECT);
-    return await filterActivityResponseByScope(tx, res.locals, drafts);
-  });
+export const getElectrificationProjectController = async (
+  req: Request<{ electrificationProjectId: string }>,
+  res: Response<ElectrificationProject>
+) => {
+  const response = await getElectrificationProjectService(req.params.electrificationProjectId);
   res.status(200).json(response);
 };
 
 export const getElectrificationProjectStatisticsController = async (
   req: Request<never, never, never, StatisticsFilters>,
-  res: Response
+  res: Response<ElectrificationProjectStatistics>
 ) => {
-  const response = await transactionWrapper<ElectrificationProjectStatistics[]>(async (tx: PrismaTransactionClient) => {
-    return await getElectrificationProjectStatistics(tx, req.query);
-  });
+  const response = await getElectrificationProjectStatisticsService(req.query);
   res.status(200).json(response[0]);
 };
 
-export const getElectrificationProjectController = async (
-  req: Request<{ electrificationProjectId: string }>,
-  res: Response
-) => {
-  const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
-    return await getElectrificationProject(tx, req.params.electrificationProjectId);
-  });
+export const listElectrificationProjectActivityIdsController = async (_req: Request, res: Response) => {
+  const response = await listElectrificationProjectActivityIdsService();
   res.status(200).json(response);
 };
 
-export const getElectrificationProjectsController = async (
-  req: Request,
+export const listElectrificationProjectsController = async (
+  _req: Request,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
-  const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
-    const projects = await getElectrificationProjects(tx);
-    return await filterActivityResponseByScope(tx, res.locals, projects);
-  });
+  const response = await listElectrificationProjectsService(res.locals.currentAuthorization, res.locals.currentContext);
   res.status(200).json(response);
 };
 
@@ -238,81 +79,11 @@ export const searchElectrificationProjectsController = async (
   req: Request<never, never, ElectrificationProjectSearchParameters | undefined, never>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
-  const response = await transactionWrapper<ElectrificationProject[]>(async (tx: PrismaTransactionClient) => {
-    const projects = await searchElectrificationProjects(tx, {
-      ...req.body,
-      includeUser: isTruthy(req.body?.includeUser)
-    });
-    return await filterActivityResponseByScope(tx, res.locals, projects);
+  const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
+    ...req.body,
+    includeUser: isTruthy(req.body?.includeUser)
   });
   res.status(200).json(response);
-};
-
-export const submitElectrificationProjectDraftController = async (
-  req: Request<never, never, ElectrificationProjectIntake>,
-  res: Response
-) => {
-  const result = await transactionWrapper<ElectrificationProject & { contact: Contact }>(
-    async (tx: PrismaTransactionClient) => {
-      const electrificationProject = await generateElectrificationProjectData(tx, req.body, res.locals.currentContext);
-
-      // Create new electrification project
-      const data = await createElectrificationProject(tx, {
-        ...electrificationProject,
-        ...generateCreateStamps(res.locals.currentContext)
-      });
-
-      // Delete old draft
-      if (req.body.draftId) await deleteDraft(tx, req.body.draftId);
-
-      // Update the contact
-      const contactResponse = await upsertContactsService([
-        { ...req.body.contact, ...generateUpdateStamps(res.locals.currentContext) }
-      ]);
-
-      return { ...data, contact: contactResponse[0] };
-    }
-  );
-  await emailProjectConfirmation(result);
-  res.status(201).json({ ...result, contact: result.contact });
-};
-
-export const upsertElectrificationProjectDraftController = async (req: Request<never, never, Draft>, res: Response) => {
-  const update = !!req.body.draftId;
-
-  const response = await transactionWrapper<Draft>(async (tx: PrismaTransactionClient) => {
-    if (update) {
-      // Update draft
-      return await updateDraft(tx, {
-        ...req.body,
-        ...generateUpdateStamps(res.locals.currentContext)
-      });
-    } else {
-      // Create new draft
-      const activityId = (
-        await createActivity(tx, Initiative.ELECTRIFICATION, generateCreateStamps(res.locals.currentContext))
-      )?.activityId;
-
-      const draft = await createDraft(tx, {
-        draftId: uuidv4(),
-        activityId: activityId,
-        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
-        data: req.body.data,
-        ...generateCreateStamps(res.locals.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      });
-
-      // Update the contact and link to activity
-      const contacts = await searchContactsService({ userId: [res.locals.currentContext.userId!] });
-      if (contacts[0])
-        await createActivityContact(tx, draft.activityId, contacts[0].contactId, ActivityContactRole.PRIMARY);
-
-      return draft;
-    }
-  });
-
-  res.status(update ? 200 : 201).json(response);
 };
 
 export const updateElectrificationProjectController = async (
@@ -323,16 +94,65 @@ export const updateElectrificationProjectController = async (
   >,
   res: Response
 ) => {
-  const response = await transactionWrapper<ElectrificationProject>(async (tx: PrismaTransactionClient) => {
-    return await updateElectrificationProject(
-      tx,
-      {
-        ...req.body,
-        ...generateUpdateStamps(res.locals.currentContext)
-      },
-      req.params.electrificationProjectId
-    );
-  });
-
+  const response = await updateElectrificationProjectService(
+    {
+      ...req.body
+    },
+    req.params.electrificationProjectId
+  );
   res.status(200).json(response);
+};
+
+//--------------------------------------------------------------------------------
+// Drafts
+//--------------------------------------------------------------------------------
+
+export const deleteElectrificationProjectDraftController = async (req: Request<{ draftId: string }>, res: Response) => {
+  await deleteDraftService(req.params.draftId);
+  res.status(204).end();
+};
+
+export const getElectrificationProjectDraftController = async (
+  req: Request<{ draftId: string }>,
+  res: Response<Draft>
+) => {
+  const response = await getDraftService(req.params.draftId);
+  res.status(200).json(response);
+};
+
+export const getElectrificationProjectDraftsController = async (req: Request, res: Response<Draft[], LocalContext>) => {
+  const response = await listDraftsService(
+    res.locals.currentAuthorization,
+    res.locals.currentContext,
+    DraftCode.ELECTRIFICATION_PROJECT
+  );
+  res.status(200).json(response);
+};
+
+export const submitElectrificationProjectDraftController = async (
+  req: Request<never, never, ElectrificationProjectIntake>,
+  res: Response<ElectrificationProject, LocalContext>
+) => {
+  const response = await submitElectrificationProjectDraftService(
+    req.body.draftId,
+    req.body,
+    req.body.contact,
+    res.locals.currentContext
+  );
+  res.status(201).json(response);
+};
+
+export const upsertElectrificationProjectDraftController = async (
+  req: Request<never, never, Draft>,
+  res: Response<Draft, LocalContext>
+) => {
+  const update = !!req.body.draftId;
+  const response = await upsertDraftService(
+    req.body.draftId,
+    req.body,
+    Initiative.ELECTRIFICATION,
+    DraftCode.ELECTRIFICATION_PROJECT,
+    res.locals.currentContext
+  );
+  res.status(update ? 200 : 201).json(response);
 };

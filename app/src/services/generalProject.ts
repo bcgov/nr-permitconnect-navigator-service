@@ -1,79 +1,129 @@
 import { Prisma } from '@prisma/client';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
+import prisma from '../db/database.ts';
+import { emailProjectConfirmation, generateGeneralProjectData } from '../domains/generalProject.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import { unitOfWork } from '../repository/uow.ts';
+
 import type {
+  ContactBase,
+  CurrentAuthorization,
+  CurrentContext,
   GeneralProject,
-  GeneralProjectBase,
+  GeneralProjectIntake,
   GeneralProjectSearchParameters,
-  GeneralProjectStatistics
+  GeneralProjectStatistics,
+  Maybe
 } from '../types/index.ts';
 
-/**
- * Creates a new general project
- * @param tx Prisma transaction client
- * @param data The general project data to create
- * @returns A Promise that resolves to the created general project
- */
-export const createGeneralProject = async (
-  tx: PrismaTransactionClient,
-  data: GeneralProjectBase
+export const createGeneralProjectService = async (
+  data: GeneralProjectIntake,
+  currentContext: CurrentContext
 ): Promise<GeneralProject> => {
-  const response = await tx.general_project.create({
-    data: {
-      ...data,
-      geoJson: data.geoJson as Prisma.InputJsonValue
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, generalProject, initiative, permit, permitTracking }) => {
+      const {
+        generalProject: project,
+        appliedPermits,
+        investigatePermits,
+        appliedPermitTrackers
+      } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+
+      // Create new general project
+      const response = await generalProject.create({
+        ...project,
+        geoJson: project.geoJson as Prisma.InputJsonValue
+      });
+
+      // Create each permit and tracking IDs
+      await Promise.all(
+        appliedPermits.map(async (p) => {
+          permit.upsert({ permitId: p.permitId }, p, p);
+        })
+      );
+      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+
+      return response;
+    }
+  );
+};
+
+export const deleteGeneralProjectService = async (generalProjectId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ activity, generalProject }) => {
+    const project = await generalProject.findUniqueOrThrow({ where: { generalProjectId } });
+    await generalProject.delete({ generalProjectId });
+    await activity.delete({ activityId: project?.activityId });
+  });
+};
+
+export const listGeneralProjectActivityIdsService = async (): Promise<string[]> => {
+  return await unitOfWork.execute(async ({ generalProject }) => {
+    const ids = await generalProject.findMany({ select: { activityId: true } });
+    return ids.map((x) => x.activityId);
+  });
+};
+
+export const getGeneralProjectService = async (generalProjectId: string): Promise<GeneralProject> => {
+  return await unitOfWork.execute(async ({ generalProject }) => {
+    return generalProject.findFirstOrThrow({
+      where: {
+        generalProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       }
-    }
-  });
-  return response;
-};
-
-/**
- * Delete a general project
- * @param tx Prisma transaction client
- * @param generalProjectId Unique general project ID
- * @param deleteStamp Timestamp information of the delete
- */
-export const deleteGeneralProject = async (
-  tx: PrismaTransactionClient,
-  generalProjectId: string,
-  deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.general_project.update({
-    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
-    where: { generalProjectId }
+    });
   });
 };
 
-/**
- * @param tx Prisma transaction client
- * @param filters The filters to apply to the statistics
- * @param filters.dateFrom Beginning date
- * @param filters.dateTo End date
- * @param filters.monthYear Month/Year to search
- * @param filters.userId User ID
- * @returns A Promise that resolves to the general project statistics
- */
-export const getGeneralProjectStatistics = async (
-  tx: PrismaTransactionClient,
-  filters: {
-    dateFrom: string;
-    dateTo: string;
-    monthYear: string;
-    userId: string;
-  }
-): Promise<GeneralProjectStatistics[]> => {
+export const listGeneralProjectsService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext
+): Promise<GeneralProject[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
+    const result = await generalProject.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        },
+        user: true
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
+
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
+};
+
+export const getGeneralProjectStatisticsService = async (filters: {
+  dateFrom: string;
+  dateTo: string;
+  monthYear: string;
+  userId: string;
+}): Promise<GeneralProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
   const val = (value: string) => (value ? `'${value}'` : null);
 
@@ -82,8 +132,8 @@ export const getGeneralProjectStatistics = async (
   const month_year = val(filters.monthYear);
   const user_id = filters.userId?.length ? filters.userId : null;
 
-  const response =
-    await tx.$queryRaw`select * from get_general_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+  const response = // eslint-disable-next-line max-len
+    await prisma.$queryRaw`select * from get_general_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
 
   // count() returns BigInt
   // JSON.stringify() doesn't know how to serialize BigInt
@@ -94,139 +144,110 @@ export const getGeneralProjectStatistics = async (
 };
 
 /**
- * Gets a specific general project from the PCNS database
- * @param tx Prisma transaction client
- * @param generalProjectId PCNS general project ID
- * @returns A Promise that resolves to the specific general project
- */
-export const getGeneralProject = async (
-  tx: PrismaTransactionClient,
-  generalProjectId: string
-): Promise<GeneralProject> => {
-  const result = await tx.general_project.findFirstOrThrow({
-    where: {
-      generalProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  return result;
-};
-
-/**
- * Gets a list of general projects
- * @param tx Prisma transaction client
- * @returns A Promise that resolves to an array of general projects
- */
-export const getGeneralProjects = async (tx: PrismaTransactionClient): Promise<GeneralProject[]> => {
-  const result = await tx.general_project.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      },
-      user: true
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
-
-  return result;
-};
-
-/**
  * Search and filter for specific general projects
- * @param tx Prisma transaction client
- * @param params Optional filtering parameters
- * @param params.activityId Optional array of uuids representing the activity ID
- * @param params.createdBy Optional array of uuids representing users who created general projects
- * @param params.generalProjectId Optional array of uuids representing the general project ID
- * @param params.submissionType Optional array of strings representing the general submission type
- * @param params.includeUser Optional boolean representing whether the linked user should be included
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
+ * @param params - Optional filtering parameters
+ * @param params.activityId - Optional array of uuids representing the activity ID
+ * @param params.createdBy - Optional array of uuids representing users who created general projects
+ * @param params.generalProjectId - Optional array of uuids representing the general project ID
+ * @param params.submissionType - Optional array of strings representing the general submission type
+ * @param params.includeUser - Optional boolean representing whether the linked user should be included
  * @returns A Promise that resolves to an array of general projects from search params
  */
 export const searchGeneralProjects = async (
-  tx: PrismaTransactionClient,
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
   params: GeneralProjectSearchParameters
 ): Promise<GeneralProject[]> => {
-  const result = await tx.general_project.findMany({
-    where: {
-      AND: [
-        {
-          activityId: { in: params.activityId }
-        },
-        {
-          createdBy: { in: params.createdBy }
-        },
-        {
-          generalProjectId: { in: params.generalProjectId }
-        },
-        {
-          submissionType: { in: params.submissionType }
-        }
-      ]
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      },
-      user: params.includeUser
-    }
-  });
+  return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
+    const result = await generalProject.search(params);
 
-  return result;
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
+};
+
+export const submitGeneralProjectDraftService = async (
+  draftId: Maybe<string>,
+  data: GeneralProjectIntake,
+  contactData: ContactBase,
+  currentContext: CurrentContext
+): Promise<GeneralProject> => {
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, draft, generalProject, initiative, permit, permitTracking }) => {
+      const {
+        generalProject: project,
+        appliedPermits,
+        investigatePermits,
+        appliedPermitTrackers
+      } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+
+      // Create new general project
+      const response = await generalProject.create({
+        ...project,
+        geoJson: project.geoJson as Prisma.InputJsonValue
+      });
+
+      // Create each permit and tracking IDs
+      await Promise.all(
+        appliedPermits.map(async (p) => {
+          permit.upsert({ permitId: p.permitId }, p, p);
+        })
+      );
+      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+
+      // Delete old draft
+      if (draftId) await draft.delete({ draftId });
+
+      // Update the contact
+      const contactResponse = await contact.upsert({ contactId: contactData.contactId }, contactData, contactData);
+
+      await emailProjectConfirmation({ ...response, contact: contactResponse });
+
+      return response;
+    }
+  );
 };
 
 /**
  * Updates a specific general project
- * @param tx Prisma transaction client
- * @param data General project data to update
+ * @param data General project to update
  * @param generalProjectId ID of the project to update
  * @returns A Promise that resolves to the updated general project
  */
-export const updateGeneralProject = async (
-  tx: PrismaTransactionClient,
+export const updateGeneralProjectService = async (
   data: Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>,
   generalProjectId: string
 ): Promise<GeneralProject> => {
-  const result = await tx.general_project.update({
-    data,
-    where: {
-      generalProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+  return await unitOfWork.execute(async ({ generalProject }) => {
+    await generalProject.update(
+      {
+        generalProjectId
+      },
+      data
+    );
+
+    return await generalProject.findFirstOrThrow({
+      where: {
+        generalProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       }
-    }
+    });
   });
-  return result;
 };

@@ -59,7 +59,7 @@ export const getHousingProjectStatisticsController = async (
   res.status(200).json(response[0]);
 };
 
-export const listHousingProjectActivityIdsController = async (req: Request, res: Response) => {
+export const listHousingProjectActivityIdsController = async (_req: Request, res: Response) => {
   const response = await listHousingProjectActivityIdsService();
   res.status(200).json(response);
 };
@@ -96,7 +96,6 @@ export const updateHousingProjectController = async (
     },
     req.params.housingProjectId
   );
-
   res.status(200).json(response);
 };
 

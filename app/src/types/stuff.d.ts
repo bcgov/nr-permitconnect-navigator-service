@@ -16,6 +16,7 @@ import type {
   Permit,
   User
 } from './models';
+import type { Maybe } from './util.ts';
 import type { IPaginationOptions } from '../interfaces/IPaginationOptions.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { EmailTemplate } from '../utils/templates';
@@ -117,7 +118,7 @@ export interface ElectrificationProjectIntake {
     registeredName?: string;
   };
   contact: Contact;
-  draftId?: string;
+  draftId: Maybe<string>;
   project: {
     bcHydroNumber?: string;
     projectType?: string;
@@ -196,7 +197,7 @@ export interface EnquirySearchParameters {
 
 export interface GeneralProjectIntake {
   activityId: string | null;
-  draftId: string | null;
+  draftId: Maybe<string>;
   submittedAt: string | null;
   applicationStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
@@ -281,7 +282,7 @@ export interface HousingProjectIntake {
     registeredName: string | null;
   };
   contact: ContactBase;
-  draftId: string | null;
+  draftId: Maybe<string>;
   housing: {
     singleFamilyUnits: string;
     multiFamilyUnits: string;

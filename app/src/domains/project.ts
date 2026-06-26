@@ -1,7 +1,7 @@
+import { Repositories } from '../repository/uow';
 import { Problem } from '../utils/index.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Project } from '../types/index.ts';
+import type { Project } from '../types';
 
 /**
  * Helper object for prisma include
@@ -19,21 +19,24 @@ const ACTIVITY_INCLUDE = {
 
 /**
  * Gets a specific project from the PCNS database by given ActivityId
- * @param tx Prisma transaction client
- * @param activityId PCNS project Activity ID
+ * @param repositories - The required repositories
+ * @param activityId - PCNS project Activity ID
  * @returns A Promise that resolves to the specific project
  */
-export const getProjectByActivityId = async (tx: PrismaTransactionClient, activityId: string): Promise<Project> => {
+export const getProjectByActivityId = async (
+  repositories: Pick<Repositories, 'electrificationProject' | 'generalProject' | 'housingProject'>,
+  activityId: string
+): Promise<Project> => {
   const [electrificationResult, generalResult, housingResult] = await Promise.all([
-    tx.electrification_project.findFirst({
+    repositories.electrificationProject.findFirst({
       where: { activityId },
       include: ACTIVITY_INCLUDE
     }),
-    tx.general_project.findFirst({
+    repositories.generalProject.findFirst({
       where: { activityId },
       include: ACTIVITY_INCLUDE
     }),
-    tx.housing_project.findFirst({
+    repositories.housingProject.findFirst({
       where: { activityId },
       include: ACTIVITY_INCLUDE
     })
@@ -54,21 +57,24 @@ export const getProjectByActivityId = async (tx: PrismaTransactionClient, activi
 
 /**
  * Gets a specific project from the PCNS database by given projectId
- * @param tx Prisma transaction client
- * @param projectId PCNS project ID
+ * @param repositories - The required repositories
+ * @param projectId - PCNS project ID
  * @returns A Promise that resolves to the specific project
  */
-export const getProjectByProjectId = async (tx: PrismaTransactionClient, projectId: string): Promise<Project> => {
+export const getProjectByProjectId = async (
+  repositories: Pick<Repositories, 'electrificationProject' | 'generalProject' | 'housingProject'>,
+  projectId: string
+): Promise<Project> => {
   const [electrificationResult, generalResult, housingResult] = await Promise.all([
-    tx.electrification_project.findFirst({
+    repositories.electrificationProject.findFirst({
       where: { electrificationProjectId: projectId },
       include: ACTIVITY_INCLUDE
     }),
-    tx.general_project.findFirst({
+    repositories.generalProject.findFirst({
       where: { generalProjectId: projectId },
       include: ACTIVITY_INCLUDE
     }),
-    tx.housing_project.findFirst({
+    repositories.housingProject.findFirst({
       where: { housingProjectId: projectId },
       include: ACTIVITY_INCLUDE
     })

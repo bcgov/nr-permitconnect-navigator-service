@@ -14,7 +14,7 @@ import type {
   HousingProjectIntake,
   HousingProjectSearchParameters,
   HousingProjectStatistics,
-  Nullable
+  Maybe
 } from '../types/index.ts';
 
 export const createHousingProjectService = async (
@@ -28,11 +28,7 @@ export const createHousingProjectService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateHousingProjectData(
-        { activity, activityContact, contact, housingProject, initiative },
-        data,
-        currentContext
-      );
+      } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new housing project
       const response = await housingProject.create({
@@ -62,13 +58,6 @@ export const deleteHousingProjectService = async (housingProjectId: string): Pro
   });
 };
 
-export const listHousingProjectActivityIdsService = async (): Promise<string[]> => {
-  return await unitOfWork.execute(async ({ housingProject }) => {
-    const ids = await housingProject.findMany({ select: { activityId: true } });
-    return ids.map((x) => x.activityId);
-  });
-};
-
 /**
  * Gets a specific housing project from the PCNS database
  * @param housingProjectId PCNS housing project ID
@@ -92,6 +81,46 @@ export const getHousingProjectService = async (housingProjectId: string): Promis
         }
       }
     });
+  });
+};
+
+/**
+ * @param filters The filters to apply to the statistics
+ * @param filters.dateFrom Beginning date
+ * @param filters.dateTo End date
+ * @param filters.monthYear Month/Year to search
+ * @param filters.userId User ID
+ * @returns A Promise that resolves to the housing project statistics
+ */
+export const getHousingProjectStatisticsService = async (filters: {
+  dateFrom: string;
+  dateTo: string;
+  monthYear: string;
+  userId: string;
+}): Promise<HousingProjectStatistics[]> => {
+  // Return a single quoted string or null for the given value
+  const val = (value: string) => (value ? `'${value}'` : null);
+
+  const date_from = val(filters.dateFrom);
+  const date_to = val(filters.dateTo);
+  const month_year = val(filters.monthYear);
+  const user_id = filters.userId?.length ? filters.userId : null;
+
+  const response = // eslint-disable-next-line max-len
+    await prisma.$queryRaw`select * from get_housing_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
+
+  // count() returns BigInt
+  // JSON.stringify() doesn't know how to serialize BigInt
+  // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
+  return JSON.parse(
+    JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : (value as unknown)))
+  ) as HousingProjectStatistics[];
+};
+
+export const listHousingProjectActivityIdsService = async (): Promise<string[]> => {
+  return await unitOfWork.execute(async ({ housingProject }) => {
+    const ids = await housingProject.findMany({ select: { activityId: true } });
+    return ids.map((x) => x.activityId);
   });
 };
 
@@ -134,39 +163,6 @@ export const listHousingProjectsService = async (
 };
 
 /**
- * @param filters The filters to apply to the statistics
- * @param filters.dateFrom Beginning date
- * @param filters.dateTo End date
- * @param filters.monthYear Month/Year to search
- * @param filters.userId User ID
- * @returns A Promise that resolves to the housing project statistics
- */
-export const getHousingProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<HousingProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
-
-  const date_from = val(filters.dateFrom);
-  const date_to = val(filters.dateTo);
-  const month_year = val(filters.monthYear);
-  const user_id = filters.userId?.length ? filters.userId : null;
-
-  const response = // eslint-disable-next-line max-len
-    await prisma.$queryRaw`select * from get_housing_statistics(${date_from}, ${date_to}, ${month_year}, ${user_id}::uuid)`;
-
-  // count() returns BigInt
-  // JSON.stringify() doesn't know how to serialize BigInt
-  // https://github.com/GoogleChromeLabs/jsbi/issues/30#issuecomment-521460510
-  return JSON.parse(
-    JSON.stringify(response, (_key, value) => (typeof value === 'bigint' ? Number(value) : (value as unknown)))
-  ) as HousingProjectStatistics[];
-};
-
-/**
  * Search and filter for specific housing projects
  * @param currentAuthorization - Authorizations assigned to the current authorized user
  * @param currentContext - Context data of current request
@@ -196,7 +192,7 @@ export const searchHousingProjects = async (
 };
 
 export const submitHousingProjectDraftService = async (
-  draftId: Nullable<string>,
+  draftId: Maybe<string>,
   data: HousingProjectIntake,
   contactData: ContactBase,
   currentContext: CurrentContext
@@ -208,11 +204,7 @@ export const submitHousingProjectDraftService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateHousingProjectData(
-        { activity, activityContact, contact, housingProject, initiative },
-        data,
-        currentContext
-      );
+      } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new housing project
       const response = await housingProject.create({

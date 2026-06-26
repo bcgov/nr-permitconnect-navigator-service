@@ -1,20 +1,18 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
-import { NumResidentialUnits } from '../utils/enums/housing';
-
 import type {
   Contact,
   CurrentContext,
-  HousingProject,
-  HousingProjectBase,
-  HousingProjectIntake,
+  GeneralProject,
+  GeneralProjectBase,
+  GeneralProjectIntake,
   Permit,
   PermitTracking
 } from '../types';
 import { BasicResponse, Initiative } from '../utils/enums/application';
-import { getCurrentUsername, toTitleCase } from '../utils';
-import { confirmationTemplateHousingSubmission } from '../utils/templates';
+import { toTitleCase } from '../utils';
+import { confirmationTemplateGeneralSubmission } from '../utils/templates';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
@@ -25,61 +23,20 @@ import { email } from '../services/email';
 import { createActivity } from './activity';
 
 /**
- * Assigns a priority level to a housing project based on given criteria
- * Criteria defined below
- * @param housingProject Housing data
- */
-export const assignPriority = (housingProject: Partial<HousingProject>) => {
-  const matchesPriorityOneCriteria = // Priority 1 Criteria:
-    // 1. More than 50 units (any)
-    housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.singleFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    housingProject.otherUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
-    housingProject.otherUnits === NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED ||
-    // 2. Supports Rental Units
-    housingProject.hasRentalUnits === 'Yes' ||
-    // 3. Social Housing
-    housingProject.financiallySupportedBc === 'Yes' ||
-    // 4. Indigenous Led
-    housingProject.financiallySupportedIndigenous === 'Yes';
-
-  const matchesPriorityTwoCriteria = // Priority 2 Criteria:
-    // 1. Single Family >= 10 Units
-    housingProject.singleFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    // 2. Has 1 or more MultiFamily Units
-    housingProject.multiFamilyUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    housingProject.multiFamilyUnits === NumResidentialUnits.ONE_TO_NINE ||
-    // 3. Has 1 or more Other Units
-    housingProject.otherUnits === NumResidentialUnits.TEN_TO_FOURTY_NINE ||
-    housingProject.otherUnits === NumResidentialUnits.ONE_TO_NINE;
-
-  if (matchesPriorityOneCriteria) {
-    housingProject.queuePriority = 1;
-  } else if (matchesPriorityTwoCriteria) {
-    housingProject.queuePriority = 2;
-  } else {
-    // Prioriy 3 Criteria:
-    housingProject.queuePriority = 3; // Everything Else
-  }
-};
-
-/**
  * Generates and sends a templated email with the given data
  * @param projectWithContact Email data
  */
-export async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
+export async function emailProjectConfirmation(projectWithContact: GeneralProject & { contact: Contact }) {
   const configCC = config.get<string>('server.ches.submission.cc');
 
-  const body = confirmationTemplateHousingSubmission({
+  const body = confirmationTemplateGeneralSubmission({
     contactName:
       projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
         ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
         : '',
-    initiative: toTitleCase(Initiative.HOUSING),
+    initiative: toTitleCase(Initiative.GENERAL),
     activityId: projectWithContact.activityId,
-    projectId: projectWithContact.housingProjectId
+    projectId: projectWithContact.generalProjectId
   });
 
   const emailData = {
@@ -101,9 +58,9 @@ export async function emailProjectConfirmation(projectWithContact: HousingProjec
  * @param currentContext - The current context of the request
  * @returns Transformed project and permit data
  */
-export const generateHousingProjectData = async (
+export const generateGeneralProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
-  data: HousingProjectIntake,
+  data: GeneralProjectIntake,
   currentContext: CurrentContext
 ) => {
   let activityId = data.activityId;
@@ -111,7 +68,7 @@ export const generateHousingProjectData = async (
   // Create activity and link contact if required
   if (!activityId) {
     activityId = (
-      await createActivity({ activity: repositories.activity, initiative: repositories.initiative }, Initiative.HOUSING)
+      await createActivity({ activity: repositories.activity, initiative: repositories.initiative }, Initiative.GENERAL)
     )?.activityId;
 
     const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
@@ -126,37 +83,19 @@ export const generateHousingProjectData = async (
 
   if (!activityId) throw new Error('Failed to generate activity ID');
 
-  let basic, housing, location, permits;
+  let basic, location, permits;
   let appliedPermits: UpsertPermitRequest[] = [],
     investigatePermits: UpsertPermitRequest[] = [];
   const appliedPermitTrackers: PermitTracking[] = [];
 
   if (data.basic) {
     basic = {
-      consentToFeedback: data.basic.consentToFeedback ?? false,
       projectApplicantType: data.basic.projectApplicantType,
       companyIdRegistered: data.basic.registeredId,
       companyNameRegistered: data.basic.registeredName,
       projectName: data.basic.projectName,
+      projectNumber: data.basic.projectNumber,
       projectDescription: data.basic.projectDescription
-    };
-  }
-
-  if (data.housing) {
-    housing = {
-      singleFamilyUnits: data.housing.singleFamilyUnits,
-      multiFamilyUnits: data.housing.multiFamilyUnits,
-      otherUnitsDescription: data.housing.otherUnitsDescription,
-      otherUnits: data.housing.otherUnits,
-      hasRentalUnits: data.housing.hasRentalUnits,
-      financiallySupportedBc: data.housing.financiallySupportedBc,
-      financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
-      financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
-      financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-      rentalUnits: data.housing.rentalUnits,
-      indigenousDescription: data.housing.indigenousDescription,
-      nonProfitDescription: data.housing.nonProfitDescription,
-      housingCoopDescription: data.housing.housingCoopDescription
     };
   }
 
@@ -170,9 +109,9 @@ export const generateHousingProjectData = async (
       locationPids: data.location.ltsaPidLookup,
       latitude: data.location.latitude,
       longitude: data.location.longitude,
+      streetAddress: data.location.streetAddress,
       locality: data.location.locality,
-      province: data.location.province,
-      streetAddress: data.location.streetAddress
+      province: data.location.province
     };
   }
 
@@ -235,19 +174,17 @@ export const generateHousingProjectData = async (
     }
   }
 
-  // Put new housing project together
-  const housingProjectData = {
-    housingProject: {
+  // Put new general project together
+  const generalProjectData = {
+    generalProject: {
       ...basic,
-      ...housing,
       ...location,
       ...permits,
-      housingProjectId: uuidv4(),
+      generalProjectId: uuidv4(),
       activityId: activityId,
-      submittedAt: new Date(),
-      submittedBy: getCurrentUsername(currentContext),
-      applicationStatus: ApplicationStatus.NEW,
-      submissionType: SubmissionType.GUIDANCE,
+      submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
+      applicationStatus: data.applicationStatus ?? ApplicationStatus.NEW,
+      submissionType: data?.submissionType ?? SubmissionType.GUIDANCE,
       createdAt: null,
       createdBy: null,
       updatedAt: null,
@@ -259,26 +196,18 @@ export const generateHousingProjectData = async (
       queuePriority: null,
       relatedPermits: null,
       astNotes: null,
-      astUpdated: false,
-      addedToAts: false,
       atsClientId: null,
-      ltsaCompleted: false,
-      bcOnlineCompleted: false,
-      financiallySupported: [
-        data.housing?.financiallySupportedBc,
-        data.housing?.financiallySupportedIndigenous,
-        data.housing?.financiallySupportedNonProfit,
-        data.housing?.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES),
       checkProvincialPermits: null,
-      atsEnquiryId: null
-    } as HousingProjectBase,
+      atsEnquiryId: null,
+      region: null,
+      area: null,
+      activityType: null,
+      businessArea: null
+    } as GeneralProjectBase,
     appliedPermits,
     investigatePermits,
     appliedPermitTrackers
   };
 
-  assignPriority(housingProjectData.housingProject);
-
-  return housingProjectData;
+  return generalProjectData;
 };

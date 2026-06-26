@@ -17,6 +17,9 @@ import { ActivityRepository } from './activity';
 import { ActivityContactRepository } from './activityContact';
 import { DraftRepository } from './draft';
 import { PermitTrackingRepository } from './permitTracking';
+import { ElectrificationProjectRepository } from './electrificationProject';
+import { GeneralProjectRepository } from './generalProject';
+import { EnquiryRepository } from './enquiry';
 
 /**
  * Collection of repositories available within a unit-of-work scope.
@@ -30,6 +33,9 @@ export interface Repositories {
   activityContact: ActivityContactRepository;
   contact: ContactRepository;
   draft: DraftRepository;
+  electrificationProject: ElectrificationProjectRepository;
+  enquiry: EnquiryRepository;
+  generalProject: GeneralProjectRepository;
   housingProject: HousingProjectRepository;
   identityProvider: IdentityProviderRepository;
   initiative: InitiativeRepository;
@@ -86,8 +92,23 @@ class RepositoryProvider implements Repositories {
     return this.getOrCreate('draft', () => new DraftRepository(this.tx, this.principal));
   }
 
+  get electrificationProject(): ElectrificationProjectRepository {
+    return this.getOrCreate(
+      'electrificationProject',
+      () => new ElectrificationProjectRepository(this.tx, this.principal)
+    );
+  }
+
+  get enquiry(): EnquiryRepository {
+    return this.getOrCreate('enquiry', () => new EnquiryRepository(this.tx, this.principal));
+  }
+
+  get generalProject(): GeneralProjectRepository {
+    return this.getOrCreate('generalProject', () => new GeneralProjectRepository(this.tx, this.principal));
+  }
+
   get housingProject(): HousingProjectRepository {
-    return this.getOrCreate('houisingProject', () => new HousingProjectRepository(this.tx, this.principal));
+    return this.getOrCreate('housingProject', () => new HousingProjectRepository(this.tx, this.principal));
   }
 
   get identityProvider(): IdentityProviderRepository {

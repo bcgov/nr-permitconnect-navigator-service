@@ -1,108 +1,217 @@
-import { Prisma } from '@prisma/client';
+import { emailEnquiryConfirmation, generateEnquiryData } from '../domains/enquiry.ts';
+import { unitOfWork } from '../repository/uow.ts';
+import { ActivityContactRole, EnquirySubmittedMethod } from '../utils/enums/projectCommon.ts';
 
+import type {
+  CurrentAuthorization,
+  CurrentContext,
+  Enquiry,
+  EnquiryIntake,
+  EnquirySearchParameters
+} from '../types/index.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { Initiative } from '../utils/enums/application.ts';
-
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
-import type { Enquiry, EnquiryBase, EnquirySearchParameters } from '../types/index.ts';
+import { Prisma } from '@prisma/client';
 
 /**
  * Creates a new enquiry
- * @param tx Prisma transaction client
- * @param data The enquiry data to create
+ * @param currentContext - Context data of current request
+ * @param intakeData - The enquiry data to create
  * @returns A Promise that resolves to the created enquiry
  */
-export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBase): Promise<Enquiry> => {
-  const response = await tx.enquiry.create({
-    data: data,
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+export const createEnquiryService = async (
+  currentContext: CurrentContext,
+  intakeData: EnquiryIntake
+): Promise<Enquiry> => {
+  return await unitOfWork.execute(
+    async ({
+      activity,
+      activityContact,
+      contact,
+      electrificationProject,
+      enquiry,
+      generalProject,
+      housingProject,
+      initiative
+    }) => {
+      const enquiryData = await generateEnquiryData(
+        { activity, activityContact, contact, initiative },
+        intakeData,
+        currentContext
+      );
+
+      // Create new enquiry
+      const result = await enquiry.create({
+        ...enquiryData,
+        assignedUserId: null,
+        addedToAts: false,
+        atsClientId: null,
+        atsEnquiryId: null,
+        submittedMethod: EnquirySubmittedMethod.PCNS
+      });
+
+      // Update the contact
+      const contactResponse = await contact.upsert(
+        { contactId: intakeData.contact.contactId },
+        intakeData.contact,
+        intakeData.contact
+      );
+
+      // Create additional activity_contact links if the enquiry is related to a project
+      if (intakeData.relatedActivityId) {
+        const currentContact = await contact.search({ userId: [currentContext.userId!] });
+
+        const relatedContacts = await activityContact.findMany({
+          where: {
+            activityId: intakeData.relatedActivityId,
+            NOT: {
+              contactId: currentContact[0].contactId
+            }
+          }
+        });
+
+        await Promise.all(
+          relatedContacts.map(async (x) =>
+            activityContact.create({
+              activityId: result.activityId,
+              contactId: x.contactId,
+              role: ActivityContactRole.MEMBER
+            })
+          )
+        );
+      }
+
+      await emailEnquiryConfirmation(
+        {
+          electrificationProject,
+          generalProject,
+          housingProject
+        },
+        { ...result, contact: contactResponse },
+        currentContext.initiative,
+        intakeData.relatedActivityId
+      );
+
+      return { ...result, contact: contactResponse };
+    }
+  );
+};
+
+export const deleteEnquiryService = async (enquiryId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ activity, enquiry }) => {
+    const e = await enquiry.findFirstOrThrow({ where: { enquiryId } });
+    await enquiry.delete({ enquiryId });
+    await activity.delete({ activityId: e?.activityId });
+  });
+};
+
+/**
+ * Gets a specific enquiry from the PCNS database
+ * @param enquiryId - ID of the enquiry to obtain
+ * @returns A Promise that resolves into the specific enquiry
+ */
+export const getEnquiryService = async (enquiryId: string): Promise<Enquiry> => {
+  return await unitOfWork.execute(async ({ enquiry }) => {
+    return await enquiry.findFirstOrThrow({
+      where: {
+        enquiryId: enquiryId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       }
-    }
-  });
-
-  return response;
-};
-
-/**
- * Delete an enquiry
- * @param tx Prisma transaction client
- * @param enquiryId Unique enquiry ID
- * @param deleteStamp Timestamp information of the delete
- */
-export const deleteEnquiry = async (
-  tx: PrismaTransactionClient,
-  enquiryId: string,
-  deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.enquiry.update({
-    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
-    where: { enquiryId }
+    });
   });
 };
 
 /**
  * Gets a list of enquiries
- * @param tx Prisma transaction client
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
  * @returns A Promise that resolves to an array of enquiries
  */
-export const getEnquiries = async (tx: PrismaTransactionClient): Promise<Enquiry[]> => {
-  // fetch all enquiries with activity not deleted
-  const result = await tx.enquiry.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+export const listEnquiriesService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext
+): Promise<Enquiry[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
+    const result = await enquiry.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
+            }
+          }
+        },
+        user: true
+      }
+    });
+
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
+};
+
+/**
+ * Gets a list of enquiries related to the given activityId
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
+ * @param activityId Activity ID
+ * @returns A Promise that resolves to an array of related enquiries
+ */
+export const listRelatedEnquiriesService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
+  activityId: string
+): Promise<Enquiry[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
+    const result = await enquiry.findMany({
+      where: {
+        relatedActivityId: activityId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       },
-      user: true
-    }
-  });
-
-  return result;
-};
-
-/**
- * Gets a specific enquiry from the PCNS database
- * @param tx Prisma transaction client
- * @param enquiryId Enquiry ID
- * @returns A Promise that resolves into the specific enquiry
- */
-export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string): Promise<Enquiry> => {
-  const result = await tx.enquiry.findFirstOrThrow({
-    where: {
-      enquiryId: enquiryId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
+      orderBy: {
+        createdAt: 'asc'
       }
-    }
-  });
+    });
 
-  return result;
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
 };
 
 /**
  * Search and filter for specific enquiries
- * @param tx Prisma transaction client
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
  * @param params Optional filtering parameters
  * @param params.activityId Optional array of uuids representing the activity ID
  * @param params.createdBy Optional array of uuids representing users who created enquiries
@@ -111,109 +220,35 @@ export const getEnquiry = async (tx: PrismaTransactionClient, enquiryId: string)
  * @param initiative Initiative to search in
  * @returns A Promise that resolves to an array of enquiries from search params
  */
-export const searchEnquiries = async (
-  tx: PrismaTransactionClient,
+export const searchEnquiriesService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
   params: EnquirySearchParameters,
   initiative: Initiative
 ): Promise<Enquiry[]> => {
-  const result = await tx.enquiry.findMany({
-    where: {
-      AND: [
-        {
-          activity: {
-            initiative: {
-              code: initiative !== Initiative.PCNS ? initiative : undefined
-            }
-          }
-        },
-        {
-          activityId: { in: params.activityId }
-        },
-        {
-          createdBy: { in: params.createdBy }
-        },
-        {
-          enquiryId: { in: params.enquiryId }
-        }
-      ]
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          },
-          initiative: true
-        }
-      },
-      user: params.includeUser
-    }
+  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
+    const result = await enquiry.search(params, initiative);
+
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
   });
-
-  return result;
-};
-
-/**
- * Gets a list of enquiries related to the given activityId
- * @param tx Prisma transaction client
- * @param activityId Activity ID
- * @returns A Promise that resolves to an array of related enquiries
- */
-export const getRelatedEnquiries = async (tx: PrismaTransactionClient, activityId: string): Promise<Enquiry[]> => {
-  const result = await tx.enquiry.findMany({
-    where: {
-      relatedActivityId: activityId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    },
-    orderBy: {
-      createdAt: 'asc'
-    }
-  });
-
-  return result;
 };
 
 /**
  * Updates a specific enquiry
- * @param tx Prisma transaction client
  * @param data Enquiry to update
  * @param enquiryId ID of the enquiry to update
  * @returns A Promise that resolves to the updated enquiry
  */
-export const updateEnquiry = async (
-  tx: PrismaTransactionClient,
+export const updateEnquiryService = async (
   data: Omit<Prisma.enquiryUpdateInput, 'enquiryId'>,
   enquiryId: string
 ): Promise<Enquiry> => {
-  const result = await tx.enquiry.update({
-    data: data,
-    where: {
-      enquiryId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
+  return await unitOfWork.execute(async ({ enquiry }) => {
+    return enquiry.update({ enquiryId }, data);
   });
-
-  return result;
 };
