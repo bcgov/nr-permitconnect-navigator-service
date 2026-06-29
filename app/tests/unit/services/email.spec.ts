@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import { prismaMock } from '../../__mocks__/prismaMock.ts';
-import * as emailService from '../../../src/services/email.ts';
+import * as emailService from '../../../src/external/ches.ts';
 
 import type { Mocked } from 'vitest';
 import type { Email } from '../../../src/types/index.ts';

@@ -2,7 +2,7 @@ import type { Mocked } from 'vitest';
 import axios from 'axios';
 import config from 'config';
 
-import * as ssoService from '../../../src/services/sso.ts';
+import * as ssoService from '../../../src/external/sso.ts';
 
 vi.mock('config');
 let mockedConfig = config as Mocked<typeof config>;

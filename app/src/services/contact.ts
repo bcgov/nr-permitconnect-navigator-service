@@ -1,18 +1,16 @@
-import { PrismaTransactionClient } from '../db/database.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 
 import type { Contact, ContactBase, ContactSearchParameters } from '../types/index.ts';
 
 /**
  * Deletes a specific contact from the PCNS database.
  * @param contactId - ID of the Contact to delete.
- * @param principal - The authenticated identity performing the operation.
  * @returns A Promise that resolves when the operation is complete.
  */
-export const deleteContactService = async (contactId: string, principal?: string): Promise<void> => {
+export const deleteContactService = async (contactId: string): Promise<void> => {
   return await unitOfWork.execute(async ({ contact }) => {
     await contact.delete({ contactId });
-  }, principal);
+  });
 };
 
 /**
@@ -157,20 +155,4 @@ export const upsertContactsService = async (data: ContactBase[]): Promise<Contac
   return await unitOfWork.execute(async ({ contact }) => {
     return await Promise.all(data.map(async (x: ContactBase) => contact.upsert({ contactId: x.contactId }, x, x)));
   });
-};
-
-/**
- * TODO: Remove
- * Backwards compatability for the time being
- */
-export const upsertContactsTx = async (tx: PrismaTransactionClient, data: ContactBase[]): Promise<Contact[]> => {
-  return await Promise.all(
-    data.map(async (x: ContactBase) => {
-      return await tx.contact.upsert({
-        where: { contactId: x.contactId },
-        update: x,
-        create: x
-      });
-    })
-  );
 };

@@ -2,8 +2,8 @@ import { TEST_CURRENT_CONTEXT, TEST_EMAIL_RESPONSE, TEST_NOTE_1, TEST_NOTE_HISTO
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { sendRoadmapController } from '../../../src/controllers/roadmap.ts';
 import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
-import * as comsService from '../../../src/services/coms.ts';
-import * as emailService from '../../../src/services/email.ts';
+import * as comsService from '../../../src/external/coms.ts';
+import * as emailService from '../../../src/external/ches.ts';
 import * as noteService from '../../../src/services/note.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
 import { uuidv4Pattern } from '../../../src/utils/regexp.ts';

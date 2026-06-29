@@ -1,6 +1,6 @@
-import { email } from './email.ts';
+import { email } from '../external/ches.ts';
 import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '../domains/activityContact.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 import Problem from '../utils/problem.ts';
 import {

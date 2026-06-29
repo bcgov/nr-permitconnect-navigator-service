@@ -1,5 +1,5 @@
 import { emailEnquiryConfirmation, generateEnquiryData } from '../domains/enquiry.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { ActivityContactRole, EnquirySubmittedMethod } from '../utils/enums/projectCommon.ts';
 
 import type {
@@ -249,6 +249,10 @@ export const updateEnquiryService = async (
   enquiryId: string
 ): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
-    return enquiry.update({ enquiryId }, data);
+    await enquiry.update({ enquiryId }, data);
+    return await enquiry.findFirstOrThrow({
+      where: { enquiryId },
+      include: { activity: { include: { activityContact: { include: { contact: true } } } } }
+    });
   });
 };

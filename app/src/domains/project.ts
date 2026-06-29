@@ -1,4 +1,4 @@
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork.ts';
 import { Problem } from '../utils/index.ts';
 
 import type { Project } from '../types';

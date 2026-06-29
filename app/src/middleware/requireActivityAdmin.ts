@@ -1,15 +1,10 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { listActivityContacts } from '../services/activityContact.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import { searchContacts } from '../services/helpers/contact.ts';
-import { SubjectGroupRepository } from '../repository/yars/subjectGroup.ts';
-import { LocalContext } from '../types/stuff';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
+import type { LocalContext } from '../types/stuff';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity
@@ -29,15 +24,13 @@ export const requireActivityAdmin = async (
     // Skip if user has scope:all
     if (res.locals.currentAuthorization.attributes.includes('scope:all')) return next();
 
-    await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+    await unitOfWork.execute(async ({ activityContact, contact, subjectGroup }) => {
       let isActivityAdmin = false;
       let isGroupAdmin = false;
 
-      const subjectGroupRepo = SubjectGroupRepository.create(tx, res.locals.currentContext.userId ?? SYSTEM_ID);
-
       // Navigator group check
       if (res.locals.currentContext.tokenPayload?.sub)
-        isGroupAdmin = await subjectGroupRepo.subjectHasInitiativeGroupName(
+        isGroupAdmin = await subjectGroup.subjectHasInitiativeGroupName(
           res.locals.currentContext.tokenPayload?.sub,
           res.locals.currentContext.initiative,
           [GroupName.SUPERVISOR, GroupName.NAVIGATOR]
@@ -45,14 +38,19 @@ export const requireActivityAdmin = async (
 
       if (!isGroupAdmin) {
         // Proponent team member role check
-        const contact = await searchContacts(tx, { userId: [res.locals.currentContext.userId as string] });
-        const activityContacts = await listActivityContacts(tx, [req.params.activityId]);
-        const activityContact = activityContacts.find((ac) => ac.contactId === contact[0].contactId);
+        const contactRes = await contact.search({ userId: [res.locals.currentContext.userId as string] });
+        const activityContactsRes = await activityContact.findMany({
+          where: {
+            activityId: req.params.activityId
+          },
+          include: { contact: true }
+        });
+        const activityContactRes = activityContactsRes.find((ac) => ac.contactId === contactRes[0].contactId);
 
         isActivityAdmin =
-          !!activityContact &&
+          !!activityContactRes &&
           [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(
-            activityContact.role as ActivityContactRole
+            activityContactRes.role as ActivityContactRole
           );
       }
 

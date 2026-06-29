@@ -18,7 +18,7 @@ export const deleteContactController = async (
   req: Request<{ contactId: string }>,
   res: Response<never, LocalContext>
 ) => {
-  await deleteContactService(req.params.contactId, res.locals.currentContext.userId);
+  await deleteContactService(req.params.contactId);
   res.status(204).end();
 };
 

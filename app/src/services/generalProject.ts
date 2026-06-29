@@ -3,8 +3,9 @@ import { Prisma } from '@prisma/client';
 import prisma from '../db/database.ts';
 import { emailProjectConfirmation, generateGeneralProjectData } from '../domains/generalProject.ts';
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
+
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 
 import type {
   ContactBase,

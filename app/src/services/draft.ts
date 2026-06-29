@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 import { createActivity } from '../domains/activity.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { ActivityContactRole, DraftCode } from '../utils/enums/projectCommon.ts';
 

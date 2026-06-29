@@ -10,7 +10,7 @@ import type {
   ElectrificationProjectStatistics,
   Maybe
 } from '../types/index.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { emailProjectConfirmation, generateElectrificationProjectData } from '../domains/electrificationProject.ts';
 import prisma from '../db/database.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';

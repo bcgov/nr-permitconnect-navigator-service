@@ -1,11 +1,11 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { assignPermissions } from './coms.ts';
+import { assignPermissions } from '../external/coms.ts';
 
 import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
 import { createUser } from '../domains/user.ts';
 import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
-import { unitOfWork } from '../repository/uow.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
@@ -69,7 +69,9 @@ export const createAccessRequestService = async (
       if (!existingUser) userResponse = await createUser({ identityProvider, user }, accessUser);
       else {
         userResponse = await user.findUnique({
-          userId: accessUser.userId
+          where: {
+            userId: accessUser.userId
+          }
         });
       }
 
@@ -185,17 +187,21 @@ export const processAccessRequestService = async (
 ) => {
   return await unitOfWork.execute(async ({ accessRequest, group, initiative, subjectGroup, user }) => {
     const accessReq = await accessRequest.findUniqueOrThrow({
-      accessRequestId: accessReqId,
-      group: {
-        initiative: {
-          code: currentContext.initiative
+      where: {
+        accessRequestId: accessReqId,
+        group: {
+          initiative: {
+            code: currentContext.initiative
+          }
         }
       }
     });
 
     if (accessReq) {
       const userResponse = await user.findUnique({
-        userId: accessReq.userId
+        where: {
+          userId: accessReq.userId
+        }
       });
 
       if (userResponse) {

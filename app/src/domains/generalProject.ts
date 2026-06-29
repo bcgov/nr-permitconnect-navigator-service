@@ -8,7 +8,7 @@ import type {
   GeneralProjectBase,
   GeneralProjectIntake,
   Permit,
-  PermitTracking
+  PermitTrackingBase
 } from '../types';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { toTitleCase } from '../utils';
@@ -16,10 +16,10 @@ import { confirmationTemplateGeneralSubmission } from '../utils/templates';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
 import { UpsertPermitRequest } from '../types/requests';
-import { email } from '../services/email';
+import { email } from '../external/ches';
 import { createActivity } from './activity';
 
 /**
@@ -86,7 +86,7 @@ export const generateGeneralProjectData = async (
   let basic, location, permits;
   let appliedPermits: UpsertPermitRequest[] = [],
     investigatePermits: UpsertPermitRequest[] = [];
-  const appliedPermitTrackers: PermitTracking[] = [];
+  const appliedPermitTrackers: PermitTrackingBase[] = [];
 
   if (data.basic) {
     basic = {

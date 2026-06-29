@@ -19,8 +19,20 @@ import sourceSystemKind from './sourceSystemKind.ts';
 import user from './user.ts';
 import yars from './yars.ts';
 
+import { requestContext } from '../../types/context.ts';
+
 const router = express.Router();
 router.use(hasAuthentication(Initiative.PCNS));
+
+// Populate the node AsyncLocalStorage for the repositories
+router.use((_req, res, next) => {
+  requestContext.run(
+    {
+      principal: res.locals.currentContext.userId
+    },
+    next
+  );
+});
 
 // Base v1 Responder
 router.get('/', (_req, res) => {

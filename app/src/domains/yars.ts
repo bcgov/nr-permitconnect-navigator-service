@@ -1,4 +1,4 @@
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork';
 import { GroupName, Initiative } from '../utils/enums/application';
 
 import type { Group } from '../types';

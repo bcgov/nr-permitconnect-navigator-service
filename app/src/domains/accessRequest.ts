@@ -1,4 +1,4 @@
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork';
 import { getCorrespondingGlobalGroup } from '../domains/yars';
 import { GroupName, Initiative } from '../utils/enums/application';
 

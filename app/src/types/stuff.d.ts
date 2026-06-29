@@ -33,7 +33,7 @@ interface AddressResource {
   email: string;
 }
 
-export interface ATSClientResource {
+export interface AtsClientResource {
   '@type': string;
   address: AddressResource;
   firstName: string;
@@ -43,7 +43,7 @@ export interface ATSClientResource {
   createdBy: string;
 }
 
-export interface ATSEnquiryResource {
+export interface AtsEnquiryResource {
   '@type': string;
   clientId: number;
   contactFirstName: string;
@@ -58,7 +58,7 @@ export interface ATSEnquiryResource {
   enquiryFileNumbers: string[];
 }
 
-export interface ATSUserSearchParameters extends ParsedQs {
+export interface AtsUserSearchParameters extends ParsedQs {
   clientId?: string | number | null;
   email?: string;
   firstName?: string;
@@ -185,7 +185,7 @@ export interface EnquiryIntake {
   submit?: boolean;
   relatedActivityId?: string;
   enquiryDescription?: string;
-  contact: Contact;
+  contact: ContactBase;
 }
 
 export interface EnquirySearchParameters {

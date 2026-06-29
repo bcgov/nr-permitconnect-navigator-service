@@ -1,10 +1,6 @@
-import { generateCreateStamps } from '../db/utils/utils.ts';
-import { createDocument, deleteDocument, listDocuments } from '../services/document.ts';
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
+import { createDocumentService, deleteDocumentService, listDocumentsService } from '../services/document.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { Document } from '../types/index.ts';
 
 export const createDocumentController = async (
   req: Request<
@@ -14,58 +10,22 @@ export const createDocumentController = async (
   >,
   res: Response
 ) => {
-  const result = await transactionWrapper<Document>(async (tx: PrismaTransactionClient) => {
-    const created = await createDocument(
-      tx,
-      req.body.documentId,
-      req.body.activityId,
-      req.body.filename,
-      req.body.mimeType,
-      req.body.filesize,
-      generateCreateStamps(res.locals.currentContext)
-    );
-
-    let createdByFullName: string | undefined;
-    if (created.createdBy) {
-      const user = await tx.user.findUnique({
-        where: {
-          userId: created.createdBy
-        }
-      });
-      createdByFullName = user ? (user.fullName ?? '') : '';
-    }
-
-    return { ...created, ...(createdByFullName ? { createdByFullName } : {}) };
-  });
-
-  res.status(201).json(result);
+  const response = await createDocumentService(
+    req.body.documentId,
+    req.body.activityId,
+    req.body.filename,
+    req.body.mimeType,
+    req.body.filesize
+  );
+  res.status(201).json(response);
 };
 
 export const deleteDocumentController = async (req: Request<{ documentId: string }>, res: Response) => {
-  await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    await deleteDocument(tx, req.params.documentId);
-  });
+  await deleteDocumentService(req.params.documentId);
   res.status(204).end();
 };
 
 export const listDocumentsController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response = await transactionWrapper<Document[]>(async (tx: PrismaTransactionClient) => {
-    const documents: Document[] = await listDocuments(tx, req.params.activityId);
-
-    const documentsWithNames: Document[] = await Promise.all(
-      documents.map(async (doc) => {
-        if (!doc.createdBy) return doc;
-        const user = await await tx.user.findUnique({
-          where: {
-            userId: doc.createdBy
-          }
-        });
-        return { ...doc, createdByFullName: user ? `${user.fullName}` : '' };
-      })
-    );
-
-    return documentsWithNames;
-  });
-
+  const response = await listDocumentsService(req.params.activityId);
   res.status(200).json(response);
 };

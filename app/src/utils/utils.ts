@@ -383,6 +383,19 @@ export function splitDateTime(value: Date): DateTimeStrings {
 }
 
 /**
+ * Converts a string to pascal case
+ * @param str The string to convert
+ * @returns The input string converted to title case
+ */
+export function toPascalCase(str: string) {
+  return str
+    .replace(/_code$/, '')
+    .split('_')
+    .map((p) => p[0].toUpperCase() + p.slice(1))
+    .join('');
+}
+
+/**
  * Converts a string to title case
  * @param str The string to convert
  * @returns The input string converted to title case

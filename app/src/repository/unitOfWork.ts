@@ -20,6 +20,13 @@ import { PermitTrackingRepository } from './permitTracking';
 import { ElectrificationProjectRepository } from './electrificationProject';
 import { GeneralProjectRepository } from './generalProject';
 import { EnquiryRepository } from './enquiry';
+import { DocumentRepository } from './document';
+import { NoteRepository } from './note';
+import { NoteHistoryRepository } from './noteHistory';
+import { PermitTypeRepository } from './permitType';
+import { SourceSystemKindRepository } from './sourceSystemKind';
+import { PermitNoteRepository } from './permitNote';
+import { requestContext } from '../types/context';
 
 /**
  * Collection of repositories available within a unit-of-work scope.
@@ -32,6 +39,7 @@ export interface Repositories {
   activity: ActivityRepository;
   activityContact: ActivityContactRepository;
   contact: ContactRepository;
+  document: DocumentRepository;
   draft: DraftRepository;
   electrificationProject: ElectrificationProjectRepository;
   enquiry: EnquiryRepository;
@@ -39,8 +47,13 @@ export interface Repositories {
   housingProject: HousingProjectRepository;
   identityProvider: IdentityProviderRepository;
   initiative: InitiativeRepository;
+  note: NoteRepository;
+  noteHistory: NoteHistoryRepository;
   permit: PermitRepository;
+  permitNote: PermitNoteRepository;
   permitTracking: PermitTrackingRepository;
+  permitType: PermitTypeRepository;
+  sourceSystemKind: SourceSystemKindRepository;
   user: UserRepository;
 
   // YARS
@@ -88,6 +101,10 @@ class RepositoryProvider implements Repositories {
     return this.getOrCreate('contact', () => new ContactRepository(this.tx, this.principal));
   }
 
+  get document(): DocumentRepository {
+    return this.getOrCreate('document', () => new DocumentRepository(this.tx, this.principal));
+  }
+
   get draft(): DraftRepository {
     return this.getOrCreate('draft', () => new DraftRepository(this.tx, this.principal));
   }
@@ -119,12 +136,32 @@ class RepositoryProvider implements Repositories {
     return this.getOrCreate('initiative', () => new InitiativeRepository(this.tx, this.principal));
   }
 
+  get note(): NoteRepository {
+    return this.getOrCreate('note', () => new NoteRepository(this.tx, this.principal));
+  }
+
+  get noteHistory(): NoteHistoryRepository {
+    return this.getOrCreate('noteHistory', () => new NoteHistoryRepository(this.tx, this.principal));
+  }
+
   get permit(): PermitRepository {
     return this.getOrCreate('permit', () => new PermitRepository(this.tx, this.principal));
   }
 
+  get permitNote(): PermitNoteRepository {
+    return this.getOrCreate('permitNote', () => new PermitNoteRepository(this.tx, this.principal));
+  }
+
   get permitTracking(): PermitTrackingRepository {
     return this.getOrCreate('permitTracking', () => new PermitTrackingRepository(this.tx, this.principal));
+  }
+
+  get permitType(): PermitTypeRepository {
+    return this.getOrCreate('permitType', () => new PermitTypeRepository(this.tx, this.principal));
+  }
+
+  get sourceSystemKind(): SourceSystemKindRepository {
+    return this.getOrCreate('sourceSystemKind', () => new SourceSystemKindRepository(this.tx, this.principal));
   }
 
   get user(): UserRepository {
@@ -205,12 +242,52 @@ class UnitOfWork {
    * transaction context.
    * @template T - Result type returned by the callback.
    * @param fn - Transactional work to execute.
+   * @param opts - Transaction configuration options.
+   * @param principal - Optional override of the principal of the unit of work.
+   * @returns Result returned by the callback.
+   */
+  async execute<T>(
+    fn: (repos: RepositoryProvider, tx: PrismaTransactionClient) => Promise<T>,
+    opts: TxOpts = {},
+    principal?: string
+  ): Promise<T> {
+    const { isolationLevel = Prisma.TransactionIsolationLevel.ReadCommitted, maxWait = 2000, timeout = 10000 } = opts;
+    const txPrincipal = principal ?? requestContext.getStore()?.principal ?? SYSTEM_ID;
+
+    return this.prisma.$transaction(
+      async (tx) => {
+        return fn(new RepositoryProvider(tx, txPrincipal), tx);
+      },
+      { isolationLevel, maxWait, timeout }
+    );
+  }
+
+  /**
+   * Executes a function within a Prisma transaction and exposes the raw transaction client.
+   *
+   * This is an escape hatch from the Unit of Work abstraction. Unlike `execute`,
+   * this method does NOT provide repositories and instead exposes the underlying
+   * Prisma transaction client directly.
+   *
+   * IMPORTANT:
+   * This method should be avoided when possible.
+   * Prefer `execute()` with RepositoryProvider to ensure:
+   * - consistent data access patterns
+   * - reduced coupling to Prisma
+   * - better testability and maintainability
+   *
+   * Use this only when:
+   * - repository abstractions are insufficient or overly restrictive
+   * - performing bulk operations or raw queries (`$queryRaw`, `$executeRaw`)
+   * - leveraging Prisma transaction capabilities not exposed via repositories
+   * @template T - Result type returned by the callback.
+   * @param fn - Transactional work receiving the raw Prisma transaction client.
    * @param principal - Acting user or system identifier.
    * @param opts - Transaction configuration options.
    * @returns Result returned by the callback.
    */
-  async execute<T>(
-    fn: (repos: RepositoryProvider) => Promise<T>,
+  async executeRaw<T>(
+    fn: (tx: PrismaTransactionClient, principal: string) => Promise<T>,
     principal: string = SYSTEM_ID,
     opts: TxOpts = {}
   ): Promise<T> {
@@ -218,7 +295,7 @@ class UnitOfWork {
 
     return this.prisma.$transaction(
       async (tx) => {
-        return fn(new RepositoryProvider(tx, principal));
+        return fn(tx, principal);
       },
       { isolationLevel, maxWait, timeout }
     );
@@ -226,33 +303,3 @@ class UnitOfWork {
 }
 
 export const unitOfWork = new UnitOfWork(prisma);
-
-/*
-
-src/
-├── controllers/          # Entry point (HTTP requests & responses)
-│   └── user.ts
-│
-├── services/             # Orchestration / Workflows
-│   └── user.ts
-│
-├── domains/              # Pure domain logic & validations
-│   └── user.ts
-│
-├── repositories/         # Pure data access layer
-│   ├── base.ts
-│   ├── user.ts
-│   └── unit-of-work.ts
-
-[ Controller ]
-      │
-      ▼
- [ Service ]   ◄─── (Manages Unit of Work transactions)
-   │       │
-   │       ▼
-   │   [ Domain ]   (Atomic, reusable business rules)
-   │       │
-   ▼       ▼
-[ Repository ]      (Isolated DB queries)
-
-*/

@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork';
 import { JwtUser } from '../services/login';
 import { Problem } from '../utils';
 

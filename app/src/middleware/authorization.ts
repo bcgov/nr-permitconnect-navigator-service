@@ -1,16 +1,4 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { unitOfWork } from '../repository/uow.ts';
-import { listActivityContacts } from '../services/activityContact.ts';
-import { getDocument } from '../services/document.ts';
-import { getDraft } from '../services/draft.ts';
-import { getElectrificationProject } from '../services/electrificationProject.ts';
-import { getEnquiry } from '../services/enquiry.ts';
-import { getGeneralProject } from '../services/generalProject.ts';
-import { getHousingProject } from '../services/housingProject.ts';
-import { getNoteHistory } from '../services/noteHistory.ts';
-import { getPermit } from '../services/permit.ts';
-import { searchContacts } from '../services/helpers/contact.ts';
-
+import { unitOfWork } from '../repository/unitOfWork.ts';
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getCurrentSubject } from '../utils/utils.ts';
@@ -135,14 +123,17 @@ export const hasAuthorization = (resource: string, action: string) => {
 // Maps a param key to a callback function
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => any>([
-  ['documentId', getDocument],
-  ['draftId', getDraft],
-  ['enquiryId', getEnquiry],
-  ['housingProjectId', getHousingProject],
-  ['electrificationProjectId', getElectrificationProject],
-  ['generalProjectId', getGeneralProject],
-  ['noteHistoryId', getNoteHistory],
-  ['permitId', getPermit]
+  ['documentId', (tx, id) => tx.document.findFirst({ where: { documentId: id } })],
+  ['draftId', (tx, id) => tx.draft.findFirst({ where: { draftId: id } })],
+  ['enquiryId', (tx, id) => tx.enquiry.findFirst({ where: { enquiryId: id } })],
+  ['housingProjectId', (tx, id) => tx.housing_project.findFirst({ where: { housingProjectId: id } })],
+  [
+    'electrificationProjectId',
+    (tx, id) => tx.electrification_project.findFirst({ where: { electrificationProjectId: id } })
+  ],
+  ['generalProjectId', (tx, id) => tx.general_project.findFirst({ where: { generalProjectId: id } })],
+  ['noteHistoryId', (tx, id) => tx.note_history.findFirst({ where: { noteHistoryId: id } })],
+  ['permitId', (tx, id) => tx.permit.findFirst({ where: { permitId: id } })]
 ]);
 
 /**
@@ -157,7 +148,7 @@ const paramMap = new Map<string, (tx: PrismaTransactionClient, id: string) => an
 export const hasAccess = (param: string) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+      await unitOfWork.executeRaw(async (tx) => {
         if (res.locals.currentAuthorization?.attributes.includes('scope:self')) {
           const id = req.params[param];
           if (Array.isArray(id)) {
@@ -172,10 +163,15 @@ export const hasAccess = (param: string) => {
 
           // @ts-expect-error Data could be one of may different types. Can this be destructured somehow?
           const activityId: string = data?.activityId ?? id;
-          const contact = await searchContacts(tx, { userId: [res.locals.currentContext.userId!] });
-          const activityContacts = await listActivityContacts(tx, [activityId]);
+          const contactRes = await tx.contact.findMany({ where: { userId: res.locals.currentContext.userId! } });
+          const activityContacts = await tx.activity_contact.findMany({
+            where: {
+              activityId
+            },
+            include: { contact: true }
+          });
 
-          if (!activityContacts?.some((ac) => ac.contactId === contact[0].contactId)) {
+          if (!activityContacts?.some((ac) => ac.contactId === contactRes[0].contactId)) {
             throw new Error();
           }
         }

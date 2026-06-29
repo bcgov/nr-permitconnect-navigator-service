@@ -1,7 +1,7 @@
 import config from 'config';
 
 import { getProjectByActivityId } from './project';
-import { Repositories } from '../repository/uow';
+import { Repositories } from '../repository/unitOfWork';
 import { Problem } from '../utils';
 import { GroupName, Initiative } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';

@@ -1,296 +1,58 @@
-import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
-
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
-  generateCreateStamps,
-  generateDeleteStamps,
-  generateNullDeleteStamps,
-  generateNullUpdateStamps,
-  generateUpdateStamps
-} from '../db/utils/utils.ts';
-import { searchElectrificationProjects } from '../services/electrificationProject.ts';
-import { email } from '../services/email.ts';
-import { searchEnquiries } from '../services/enquiry.ts';
-import { searchGeneralProjects } from '../services/generalProject.ts';
-import { searchHousingProjects } from '../services/housingProject.ts';
-import { createNote } from '../services/note.ts';
-import {
-  createNoteHistory,
-  deleteNoteHistory,
-  getNoteHistory,
-  listBringForward,
-  listNoteHistory,
-  updateNoteHistory
+  createNoteHistoryService,
+  deleteNoteHistoryService,
+  listBringForwardsService,
+  listNoteHistoriesService,
+  updateNoteHistoryService
 } from '../services/noteHistory.ts';
-import { getProjectByActivityId } from '../services/project.ts';
-import { Problem } from '../utils';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
-import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
-import { BringForwardType, NoteType } from '../utils/enums/projectCommon.ts';
-import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
+
+import { Resource } from '../utils/enums/application.ts';
+import { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { BringForward, LocalContext, Note, NoteHistory, User } from '../types/index.ts';
+import type { BringForward, LocalContext, NoteHistory } from '../types/index.ts';
 
-/**
- * Create a new note history and add the given note to it
- * @param req Express Request object
- * @param res Express Response object
- */
 export const createNoteHistoryController = async (
   req: Request<never, never, NoteHistory & { note: string }>,
   res: Response
 ) => {
   const { note, ...history } = req.body;
-
-  const response = await transactionWrapper<{ historyRes: NoteHistory; noteRes: Note }>(
-    async (tx: PrismaTransactionClient) => {
-      const historyRes = await createNoteHistory(tx, {
-        ...history,
-        noteHistoryId: uuidv4(),
-        ...generateCreateStamps(res.locals.currentContext)
-      });
-
-      const noteRes = await createNote(tx, {
-        noteId: uuidv4(),
-        noteHistoryId: historyRes.noteHistoryId,
-        note: note,
-        ...generateCreateStamps(res.locals.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      });
-
-      return { historyRes, noteRes };
-    }
-  );
-
-  res.status(201).json({ ...response.historyRes, note: [response.noteRes] });
+  const response = createNoteHistoryService(history, note);
+  res.status(201).json(response);
 };
 
-/**
- * Delete the given note history
- * @param req Express Request object
- * @param res Express Response object
- */
 export const deleteNoteHistoryController = async (req: Request<{ noteHistoryId: string }>, res: Response) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deleteNoteHistory(tx, req.params.noteHistoryId, generateDeleteStamps(res.locals.currentContext));
-  });
-
+  await deleteNoteHistoryService(req.params.noteHistoryId);
   res.status(204).end();
 };
 
-export const listBringForwardController = async (
+export const listBringForwardsController = async (
   req: Request<never, never, never, { bringForwardState?: BringForwardType }>,
-  res: Response
+  res: Response<BringForward[], LocalContext>
 ) => {
-  const response = await transactionWrapper<BringForward[]>(async (tx: PrismaTransactionClient) => {
-    const history: NoteHistory[] = await listBringForward(
-      tx,
-      res.locals.currentContext.initiative,
-      req.query.bringForwardState
-    );
-
-    if (history.length) {
-      const [elecProj, generalProj, housingProj] = await Promise.all([
-        searchElectrificationProjects(tx, {
-          activityId: history.map((x) => x.activityId)
-        }),
-        searchGeneralProjects(tx, {
-          activityId: history.map((x) => x.activityId)
-        }),
-        searchHousingProjects(tx, {
-          activityId: history.map((x) => x.activityId)
-        })
-      ]);
-
-      const users = await tx.user.findMany({
-        where: {
-          AND: [
-            {
-              userId: {
-                in: history
-                  .map((x) => x.createdBy)
-                  .filter((x) => !!x)
-                  .map((x) => x!)
-              }
-            }
-          ],
-          NOT: [
-            {
-              userId: SYSTEM_ID
-            }
-          ]
-        }
-      });
-
-      const enquiries = (
-        await Promise.all([
-          searchEnquiries(
-            tx,
-            {
-              activityId: history.map((x) => x.activityId)
-            },
-            Initiative.ELECTRIFICATION
-          ),
-          searchEnquiries(
-            tx,
-            {
-              activityId: history.map((x) => x.activityId)
-            },
-            Initiative.GENERAL
-          ),
-          searchEnquiries(
-            tx,
-            {
-              activityId: history.map((x) => x.activityId)
-            },
-            Initiative.HOUSING
-          )
-        ])
-      ).flatMap((x) => x);
-
-      return history.map((h) => ({
-        activityId: h.activityId,
-        noteId: h.noteHistoryId,
-        electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
-        generalProjectId: generalProj.find((s) => s.activityId === h.activityId)?.generalProjectId,
-        housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
-        enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
-        title: h.title,
-        projectName:
-          elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
-          generalProj.find((s) => s.activityId === h.activityId)?.projectName ??
-          housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
-          null,
-        createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
-        bringForwardDate: h.bringForwardDate?.toISOString(),
-        escalateToSupervisor: h.escalateToSupervisor,
-        escalateToDirector: h.escalateToDirector
-      }));
-    } else {
-      return [];
-    }
-  });
+  const response = await listBringForwardsService(res.locals.currentContext.initiative, req.query.bringForwardState);
   res.status(200).json(response);
 };
 
-/**
- * Get a list of all note histories for the given activityId
- * @param req Express Request object
- * @param res Express Response object
- */
-export const listNoteHistoryController = async (req: Request<{ activityId: string }>, res: Response) => {
-  const response = await transactionWrapper<NoteHistory[]>(async (tx: PrismaTransactionClient) => {
-    return await listNoteHistory(tx, req.params.activityId);
-  });
-
-  // Only return notes flagged as shown when called by proponent
-  if (res.locals.currentAuthorization?.attributes.includes('scope:self')) {
-    const filtered = response.filter((x) => x.shownToProponent);
-    res.status(200).json(filtered);
-  } else {
-    res.status(200).json(response);
-  }
+export const listNoteHistoriesController = async (
+  req: Request<{ activityId: string }>,
+  res: Response<NoteHistory[], LocalContext>
+) => {
+  const response = await listNoteHistoriesService(res.locals.currentAuthorization, req.params.activityId);
+  res.status(200).json(response);
 };
 
-/**
- * Updates a note history
- * Adds a new note to an existing history if one was given
- * @param req Express Request object
- * @param res Express Response object
- */
 export const updateNoteHistoryController = async (
   req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: Resource }>,
   res: Response<NoteHistory, LocalContext>
 ) => {
   const { note, resource, ...history } = req.body;
-  const response = await transactionWrapper<NoteHistory>(async (tx: PrismaTransactionClient) => {
-    await updateNoteHistory(tx, {
-      ...history,
-      noteHistoryId: req.params.noteHistoryId,
-      ...generateUpdateStamps(res.locals.currentContext)
-    });
-
-    if (note) {
-      await createNote(tx, {
-        noteHistoryId: req.params.noteHistoryId,
-        noteId: uuidv4(),
-        note: note,
-        ...generateCreateStamps(res.locals.currentContext),
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      });
-    }
-
-    return await getNoteHistory(tx, req.params.noteHistoryId);
-  });
-
-  const isNavigator = !!res.locals.currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
-  if (isNavigator) await emailBringForwardNotification(response, res.locals.currentContext.initiative, resource);
-
+  const response = await updateNoteHistoryService(
+    res.locals.currentAuthorization,
+    res.locals.currentContext,
+    history,
+    note,
+    resource
+  );
   res.status(200).json(response);
 };
-
-async function emailBringForwardNotification(noteHistory: NoteHistory, initiative: Initiative, resource: Resource) {
-  if (noteHistory.type !== NoteType.BRING_FORWARD || !noteHistory.escalateToSupervisor) return;
-
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const subGrps = await tx.subject_group.findMany({
-      where: {
-        group: {
-          name: GroupName.SUPERVISOR,
-          initiative: {
-            code: initiative
-          }
-        }
-      }
-    });
-
-    const supervisors = await tx.user.findMany({
-      where: {
-        AND: [{ sub: { in: subGrps.map((x) => x.sub) } }, { active: true }]
-      }
-    });
-
-    const supervisorsEmails = supervisors.flatMap((user: User) => (user.email ? [user.email] : []));
-
-    if (supervisorsEmails.length === 0) return;
-
-    let body: string;
-
-    if (resource === Resource.ENQUIRY) {
-      body = bringForwardEnquiryNotificationTemplate({
-        activityId: noteHistory.activityId
-      });
-    } else if (
-      [Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, resource === Resource.HOUSING_PROJECT].includes(
-        resource
-      )
-    ) {
-      const project = await getProjectByActivityId(tx, noteHistory.activityId);
-
-      if (!project) return;
-
-      body = bringForwardProjectNotificationTemplate({
-        projectName: project.projectName,
-        activityId: noteHistory.activityId
-      });
-    } else {
-      throw new Problem(422, { detail: 'Invalid resource type for bring forward notification' });
-    }
-
-    const configCC = config.get<string>('server.ches.submission.cc');
-
-    const emailData = {
-      from: configCC,
-      to: supervisorsEmails,
-      subject: 'New escalation in PCNS',
-      bodyType: 'html',
-      body: body
-    };
-    await email(emailData);
-  });
-}

@@ -2,7 +2,7 @@ import express from 'express';
 import request from 'supertest';
 
 import { requireSomeGroup } from '../../../src/middleware/requireSomeGroup.ts';
-import * as comsService from '../../../src/services/coms.ts';
+import * as comsService from '../../../src/external/coms.ts';
 import * as yarsService from '../../../src/services/yars.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 

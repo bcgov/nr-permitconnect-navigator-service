@@ -16,7 +16,8 @@ export interface SoftDeleteFields {
 
 type CreateData<D> = Prisma.Args<D, 'create'>['data'];
 type UpdateData<D> = Prisma.Args<D, 'update'>['data'];
-type WhereUnique<D> = Prisma.Args<D, 'delete'>['where'];
+type WhereUnique<D> = Prisma.Args<D, 'findUnique'>['where'];
+type DeleteManyUnique<D> = Prisma.Args<D, 'deleteMany'>['where'];
 
 /** The default (all-scalars, no-relations) record shape for a delegate. */
 type DefaultModel<D> = Prisma.Result<D, object, 'findUniqueOrThrow'>;
@@ -29,6 +30,7 @@ interface WritableModelDelegate<D> extends ReadableModelDelegate<D> {
   update(args: { where: WhereUnique<D>; data: UpdateData<D> }): Promise<DefaultModel<D>>;
   upsert(args: { where: WhereUnique<D>; create: CreateData<D>; update: UpdateData<D> }): Promise<DefaultModel<D>>;
   delete(args: { where: WhereUnique<D> }): Promise<DefaultModel<D>>;
+  deleteMany(args: { where: DeleteManyUnique<D> }): Promise<DefaultModel<D>>;
 }
 
 export abstract class WritableRepository<TDelegate> extends ReadableRepository<TDelegate> {
@@ -89,5 +91,16 @@ export abstract class WritableRepository<TDelegate> extends ReadableRepository<T
     }
 
     return this.model.delete({ where });
+  }
+
+  async deleteMany(where: DeleteManyUnique<TDelegate>, options?: { hard?: boolean }): Promise<DefaultModel<TDelegate>> {
+    if (this.softDeleteEnabled && !options?.hard) {
+      return this.model.update({
+        where,
+        data: { ...this.withUpdateAudit({}), ...this.withSoftDelete() }
+      });
+    }
+
+    return this.model.deleteMany({ where });
   }
 }

@@ -1,10 +1,10 @@
-import { unitOfWork } from '../repository/uow.ts';
-import { assignPermissions } from '../services/coms.ts';
+import { assignGroup, getGroups } from '../domains/yars.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+import { assignPermissions } from '../external/coms.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import { assignGroup, getGroups } from '../services/helpers/yars.ts';
 
 /**
  * Attempt to assign proponent groups to users with external IDPs

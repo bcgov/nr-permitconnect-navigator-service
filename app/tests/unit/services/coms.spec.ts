@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import * as comsService from '../../../src/services/coms.ts';
+import * as comsService from '../../../src/external/coms.ts';
 import * as yarsService from '../../../src/services/yars.ts';
 import { CurrentContext, Group } from '../../../src/types/stuff';
 import { Action, GroupName } from '../../../src/utils/enums/application.ts';

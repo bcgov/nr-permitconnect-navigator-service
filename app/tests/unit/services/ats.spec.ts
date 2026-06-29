@@ -1,7 +1,7 @@
 import axios, { AxiosError } from 'axios';
 import config from 'config';
 
-import * as atsService from '../../../src/services/ats.ts';
+import * as atsService from '../../../src/external/ats.ts';
 
 import type { InternalAxiosRequestConfig } from 'axios';
 import type { Mocked } from 'vitest';

@@ -3,8 +3,8 @@ import express from 'express';
 import {
   createEnquiryController,
   deleteEnquiryController,
-  getEnquiriesController,
   getEnquiryController,
+  listEnquiriesController,
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
@@ -44,7 +44,7 @@ router.get(
 );
 
 /** Gets a list of enquiries */
-router.get('/', hasAuthorization(Resource.ENQUIRY, Action.READ), getEnquiriesController);
+router.get('/', hasAuthorization(Resource.ENQUIRY, Action.READ), listEnquiriesController);
 
 /** Creates an enquiry and set status to Submitted */
 router.post(

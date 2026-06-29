@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import { getPeachRecord } from '../../../src/services/peach.ts';
+import { getPeachRecord } from '../../../src/external/peach.ts';
 import Problem from '../../../src/utils/problem.ts';
 
 import type { Mocked } from 'vitest';

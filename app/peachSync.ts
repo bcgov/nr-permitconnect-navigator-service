@@ -1,6 +1,7 @@
-import { syncPeachRecords } from './src/controllers/peach.ts';
-import { sendPermitUpdateNotifications } from './src/controllers/permit.ts';
+import { syncPeachRecords } from './src/domains/peach.ts';
+import { sendPermitUpdateNotifications } from './src/domains/permit.ts';
 import { refreshCodeCaches } from './src/db/codes/cache.ts';
+import { unitOfWork } from './src/repository/unitOfWork.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 
@@ -11,33 +12,42 @@ const log = getLogger(module.filename);
 async function syncPeachToPcns() {
   if (!state.features.peach) return;
 
-  const started = Date.now();
-  let updatedPermitsWithNotes: UpdatedPermitWithNote[];
+  await unitOfWork.execute(
+    async ({ electrificationProject, generalProject, housingProject, permit, permitNote, user }) => {
+      const started = Date.now();
+      let updatedPermitsWithNotes: UpdatedPermitWithNote[];
 
-  log.info('PEACH sync job started');
-  try {
-    updatedPermitsWithNotes = await syncPeachRecords();
+      log.info('PEACH sync job started');
+      try {
+        updatedPermitsWithNotes = await syncPeachRecords({ permit });
 
-    log.info('PEACH sync completed', {
-      durationMs: Date.now() - started,
-      updatedCount: updatedPermitsWithNotes.length
-    });
-  } catch (error) {
-    log.error('PEACH sync FAILED during data sync', error);
-    process.exitCode = 1;
-    return;
-  }
+        log.info('PEACH sync completed', {
+          durationMs: Date.now() - started,
+          updatedCount: updatedPermitsWithNotes.length
+        });
+      } catch (error) {
+        log.error('PEACH sync FAILED during data sync', error);
+        process.exitCode = 1;
+        return;
+      }
 
-  if (updatedPermitsWithNotes.length === 0) return;
+      if (updatedPermitsWithNotes.length === 0) return;
 
-  try {
-    for (const permitWithNote of updatedPermitsWithNotes) {
-      const { permit, note } = permitWithNote;
-      await sendPermitUpdateNotifications(permit, true, note);
+      try {
+        for (const permitWithNote of updatedPermitsWithNotes) {
+          const { permit, note } = permitWithNote;
+          await sendPermitUpdateNotifications(
+            { electrificationProject, generalProject, housingProject, permitNote, user },
+            permit,
+            true,
+            note
+          );
+        }
+      } catch (error) {
+        log.warn('PEACH sync completed but sending notifications failed', error);
+      }
     }
-  } catch (error) {
-    log.warn('PEACH sync completed but sending notifications failed', error);
-  }
+  );
 }
 
 async function main() {
