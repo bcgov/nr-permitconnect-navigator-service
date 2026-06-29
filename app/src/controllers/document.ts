@@ -1,4 +1,4 @@
-import { generateCreateStamps } from '../db/utils/utils.ts';
+import { generateCreateStamps, generateDeleteStamps } from '../db/utils/utils.ts';
 import { createDocument, deleteDocument, listDocuments } from '../services/document.ts';
 import { readUser } from '../services/user.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
@@ -40,7 +40,7 @@ export const createDocumentController = async (
 
 export const deleteDocumentController = async (req: Request<{ documentId: string }>, res: Response) => {
   await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    await deleteDocument(tx, req.params.documentId);
+    await deleteDocument(tx, req.params.documentId, generateDeleteStamps(res.locals.currentContext));
   });
   res.status(204).end();
 };

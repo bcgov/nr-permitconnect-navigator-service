@@ -28,7 +28,7 @@ export const createActivityContact = async (
 };
 
 /**
- * Delete an activity_contact record
+ * Hard delete an activity_contact record
  * @param tx Prisma transaction client
  * @param activityId The activity ID the contact is associated to
  * @param contactId The contact ID to remove

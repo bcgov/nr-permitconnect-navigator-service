@@ -40,16 +40,19 @@ export const createElectrificationProject = async (
  * @param tx Prisma transaction client
  * @param electrificationProjectId Unique electrification project ID
  * @param deleteStamp Timestamp information of the delete
+ * @returns A Promise that resolves to the soft deleted electrification project
  */
 export const deleteElectrificationProject = async (
   tx: PrismaTransactionClient,
   electrificationProjectId: string,
   deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.electrification_project.update({
+): Promise<ElectrificationProject> => {
+  const result = await tx.electrification_project.update({
     data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
     where: { electrificationProjectId }
   });
+
+  return result;
 };
 
 /**

@@ -382,7 +382,6 @@ describe('createHousingProjectController', () => {
 });
 
 describe('deleteHousingProjectController', () => {
-  const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
   const deleteHousingProjectSpy = vi.spyOn(housingProjectService, 'deleteHousingProject');
   const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
@@ -391,7 +390,7 @@ describe('deleteHousingProjectController', () => {
       params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
-    getHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
+    deleteHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1);
     deleteActivitySpy.mockResolvedValue();
 
     await deleteHousingProjectController(
@@ -399,8 +398,6 @@ describe('deleteHousingProjectController', () => {
       res as unknown as Response
     );
 
-    expect(getHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
     expect(deleteHousingProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId, {
       deletedAt: expect.any(Date) as Date,

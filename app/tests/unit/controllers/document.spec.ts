@@ -128,7 +128,10 @@ describe('deleteDocumentController', () => {
     await deleteDocumentController(req as unknown as Request<{ documentId: string }>, res as unknown as Response);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.documentId);
+    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.documentId, {
+      deletedAt: expect.any(Date) as Date,
+      deletedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });

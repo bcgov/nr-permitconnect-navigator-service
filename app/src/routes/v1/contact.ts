@@ -55,7 +55,7 @@ router.put(
   upsertContactController
 );
 
-/** Delete a specific contact */
+/** Hard delete a specific contact */
 router.delete(
   '/:contactId',
   hasAuthorization(Resource.CONTACT, Action.DELETE),

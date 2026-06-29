@@ -168,8 +168,7 @@ export const deleteElectrificationProjectController = async (
   res: Response
 ) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const project = await getElectrificationProject(tx, req.params.electrificationProjectId);
-    await deleteElectrificationProject(
+    const project = await deleteElectrificationProject(
       tx,
       req.params.electrificationProjectId,
       generateDeleteStamps(res.locals.currentContext)

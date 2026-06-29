@@ -40,20 +40,23 @@ export const createHousingProject = async (
 };
 
 /**
- * Delete a housing project
+ * Soft delete a housing project
  * @param tx Prisma transaction client
  * @param housingProjectId Unique housing project ID
  * @param deleteStamp Timestamp information of the delete
+ * @returns A Promise that resolves to the soft deleted housing project
  */
 export const deleteHousingProject = async (
   tx: PrismaTransactionClient,
   housingProjectId: string,
   deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.housing_project.update({
+): Promise<HousingProject> => {
+  const result = await tx.housing_project.update({
     data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
     where: { housingProjectId }
   });
+
+  return result;
 };
 
 /**

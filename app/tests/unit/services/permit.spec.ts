@@ -1,22 +1,34 @@
-import { TEST_PERMIT_1 } from '../data/index.ts';
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as permitService from '../../../src/services/permit.ts';
+import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 describe('deletePermit', () => {
-  it('calls permit.delete', async () => {
+  it('calls permit.update', async () => {
     prismaTxMock.permit.update.mockResolvedValueOnce(TEST_PERMIT_1);
 
-    await permitService.deletePermit(prismaTxMock, '1');
+    await permitService.deletePermit(prismaTxMock, '1', generateDeleteStamps(TEST_CURRENT_CONTEXT));
 
-    expect(prismaTxMock.permit.delete).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.permit.delete).toHaveBeenCalledWith({
+    expect(prismaTxMock.permit.delete).not.toHaveBeenCalled();
+    expect(prismaTxMock.permit.update).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit.update).toHaveBeenCalledWith({
+      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
       where: {
         permitId: '1'
-      },
-      include: {
-        permitType: true
       }
+    });
+
+    expect(prismaTxMock.permit_note.updateMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit_note.updateMany).toHaveBeenCalledWith({
+      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      where: { permitId: TEST_PERMIT_1.permitId, deletedAt: null }
+    });
+
+    expect(prismaTxMock.permit_tracking.updateMany).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.permit_tracking.updateMany).toHaveBeenCalledWith({
+      data: { deletedAt: expect.any(Date), deletedBy: TEST_CURRENT_CONTEXT.userId },
+      where: { permitId: TEST_PERMIT_1.permitId, deletedAt: null }
     });
   });
 });

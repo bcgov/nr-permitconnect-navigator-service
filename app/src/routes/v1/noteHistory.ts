@@ -34,7 +34,7 @@ router.put(
   updateNoteHistoryController
 );
 
-/** Delete a note history */
+/** Soft delete a note history */
 router.delete(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.DELETE),

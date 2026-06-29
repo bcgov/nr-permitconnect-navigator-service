@@ -63,7 +63,7 @@ router.patch(
   updateEnquiryController
 );
 
-/** Deletes an enquiry */
+/** Soft deletes an enquiry */
 router.delete(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.DELETE),

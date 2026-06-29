@@ -1,7 +1,7 @@
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import * as documentService from '../../../src/services/document.ts';
-import { generateCreateStamps } from '../../../src/db/utils/utils.ts';
+import { generateCreateStamps, generateDeleteStamps } from '../../../src/db/utils/utils.ts';
 
 import type { Document } from '../../../src/types/index.ts';
 
@@ -40,13 +40,17 @@ describe('createDocument', () => {
 });
 
 describe('deleteDocument', () => {
-  it('calls document.delete', async () => {
-    prismaTxMock.document.delete.mockResolvedValueOnce({} as Document);
+  it('calls document.update', async () => {
+    prismaTxMock.document.update.mockResolvedValueOnce({} as Document);
 
-    await documentService.deleteDocument(prismaTxMock, '1');
+    await documentService.deleteDocument(prismaTxMock, '1', generateDeleteStamps(TEST_CURRENT_CONTEXT));
 
-    expect(prismaTxMock.document.delete).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.document.delete).toHaveBeenCalledWith({ where: { documentId: '1' } });
+    expect(prismaTxMock.document.delete).not.toHaveBeenCalled();
+    expect(prismaTxMock.document.update).toHaveBeenCalledTimes(1);
+    expect(prismaTxMock.document.update).toHaveBeenCalledWith({
+      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
+      where: { documentId: '1' }
+    });
   });
 });
 

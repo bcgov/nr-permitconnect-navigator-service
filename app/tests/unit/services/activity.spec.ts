@@ -29,6 +29,8 @@ describe('createActivity', () => {
 describe('deleteActivity', () => {
   it('calls activity.update', async () => {
     prismaTxMock.activity.update.mockResolvedValueOnce(ACTIVITY);
+    prismaTxMock.note_history.updateManyAndReturn.mockResolvedValueOnce([]);
+    prismaTxMock.permit.updateManyAndReturn.mockResolvedValueOnce([]);
     await activityService.deleteActivity(prismaTxMock, 'ABCD1234', generateDeleteStamps(undefined));
 
     expect(prismaTxMock.activity.update).toHaveBeenCalledTimes(1);

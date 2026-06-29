@@ -23,7 +23,7 @@ router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.
 /** Create or update a permit */
 router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, upsertPermitController);
 
-/** Delete a permit */
+/** Soft delete a permit */
 router.delete(
   '/:permitId',
   hasAuthorization(Resource.PERMIT, Action.DELETE),

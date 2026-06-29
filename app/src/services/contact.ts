@@ -4,7 +4,7 @@ import type { PrismaTransactionClient } from '../db/database.ts';
 import type { Contact, ContactBase, ContactSearchParameters, CurrentContext } from '../types/index.ts';
 
 /**
- * Deletes a specific contact from the PCNS database
+ * Hard deletes a specific contact from the PCNS database
  * @param tx Prisma transaction client
  * @param contactId Contact ID
  */

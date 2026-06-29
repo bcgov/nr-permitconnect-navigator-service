@@ -38,12 +38,20 @@ export const createDocument = async (
 };
 
 /**
- * Delete a document
+ * Soft delete a document
  * @param tx Prisma transaction client
  * @param documentId PCNS Document ID
+ * @param deleteStamp Timestamp information of the delete
  */
-export const deleteDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<void> => {
-  await tx.document.delete({ where: { documentId } });
+export const deleteDocument = async (
+  tx: PrismaTransactionClient,
+  documentId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  await tx.document.update({
+    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
+    where: { documentId }
+  });
 };
 
 /**

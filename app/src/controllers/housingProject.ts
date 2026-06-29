@@ -346,8 +346,11 @@ export const createHousingProjectController = async (
 
 export const deleteHousingProjectController = async (req: Request<{ housingProjectId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const project = await getHousingProject(tx, req.params.housingProjectId);
-    await deleteHousingProject(tx, req.params.housingProjectId, generateDeleteStamps(res.locals.currentContext));
+    const project = await deleteHousingProject(
+      tx,
+      req.params.housingProjectId,
+      generateDeleteStamps(res.locals.currentContext)
+    );
     await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
   });
 

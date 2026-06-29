@@ -26,7 +26,7 @@ export const createDraft = async (tx: PrismaTransactionClient, data: DraftBase):
 };
 
 /**
- * Deletes the draft
+ * Hard deletes the draft
  * @param tx Prisma transaction client
  * @param draftId Draft ID
  */
