@@ -17,7 +17,7 @@ router.use(requireSomeGroup);
 router.post(
   '/record',
   hasAuthorization(Resource.PEACH, Action.READ),
-  peachValidator.permitTrackings,
+  peachValidator.getPeachSummary,
   getPeachSummaryController
 );
 
