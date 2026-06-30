@@ -9,12 +9,14 @@ import { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.
 import type {
   AccessRequest,
   Contact,
+  ContactBase,
   ElectrificationProject,
   GeneralProject,
   HousingProject,
   Permit,
   User
 } from './models';
+import type { Maybe } from './util.ts';
 import type { IPaginationOptions } from '../interfaces/IPaginationOptions.ts';
 import type { IStamps } from '../interfaces/IStamps.ts';
 import type { EmailTemplate } from '../utils/templates';
@@ -31,7 +33,7 @@ interface AddressResource {
   email: string;
 }
 
-export interface ATSClientResource {
+export interface AtsClientResource {
   '@type': string;
   address: AddressResource;
   firstName: string;
@@ -41,7 +43,7 @@ export interface ATSClientResource {
   createdBy: string;
 }
 
-export interface ATSEnquiryResource {
+export interface AtsEnquiryResource {
   '@type': string;
   clientId: number;
   contactFirstName: string;
@@ -56,7 +58,7 @@ export interface ATSEnquiryResource {
   enquiryFileNumbers: string[];
 }
 
-export interface ATSUserSearchParameters extends ParsedQs {
+export interface AtsUserSearchParameters extends ParsedQs {
   clientId?: string | number | null;
   email?: string;
   firstName?: string;
@@ -116,7 +118,7 @@ export interface ElectrificationProjectIntake {
     registeredName?: string;
   };
   contact: Contact;
-  draftId?: string;
+  draftId: Maybe<string>;
   project: {
     bcHydroNumber?: string;
     projectType?: string;
@@ -183,7 +185,7 @@ export interface EnquiryIntake {
   submit?: boolean;
   relatedActivityId?: string;
   enquiryDescription?: string;
-  contact: Contact;
+  contact: ContactBase;
 }
 
 export interface EnquirySearchParameters {
@@ -195,7 +197,7 @@ export interface EnquirySearchParameters {
 
 export interface GeneralProjectIntake {
   activityId: string | null;
-  draftId: string | null;
+  draftId: Maybe<string>;
   submittedAt: string | null;
   applicationStatus?: ApplicationStatus;
   submissionType?: SubmissionType;
@@ -279,8 +281,8 @@ export interface HousingProjectIntake {
     registeredId: string | null;
     registeredName: string | null;
   };
-  contact: Contact;
-  draftId: string | null;
+  contact: ContactBase;
+  draftId: Maybe<string>;
   housing: {
     singleFamilyUnits: string;
     multiFamilyUnits: string;
@@ -298,6 +300,7 @@ export interface HousingProjectIntake {
   };
   location: {
     geomarkUrl: string | null;
+    geoJson: Prisma.JsonValue;
     latitude: number | null;
     locality: string;
     longitude: number | null;

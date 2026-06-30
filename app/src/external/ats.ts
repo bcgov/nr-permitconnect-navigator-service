@@ -1,8 +1,10 @@
 import axios from 'axios';
 import config from 'config';
 
+import { getCurrentUsername } from '../utils/utils.ts';
+
 import type { AxiosInstance } from 'axios';
-import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types/index.ts';
+import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, CurrentContext } from '../types/index.ts';
 
 /**
  * Gets Auth token using ATS client credentials
@@ -47,10 +49,10 @@ function atsAxios(): AxiosInstance {
 
 /**
  * Searches for ATS users
- * @param params The search parameters
+ * @param params - The optional search parameters
  * @returns A Promise that resolves to the response from the external api
  */
-export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
+export const searchAtsUsers = async (params?: AtsUserSearchParameters) => {
   try {
     const { data, status } = await atsAxios().get('/clients', { params: params });
     return { data, status };
@@ -71,11 +73,16 @@ export const searchATSUsers = async (params?: ATSUserSearchParameters) => {
 
 /**
  * Creates a client in ATS
- * @param atsClient The client data
+ * @param atsClient - The client data
+ * @param currentContext - The current context of the request
  * @returns A Promise that resolves to the response from the external api
  */
-export const createATSClient = async (atsClient: ATSClientResource) => {
+export const createAtsClient = async (atsClient: AtsClientResource, currentContext: CurrentContext) => {
   try {
+    const identityProvider = currentContext?.tokenPayload?.identity_provider.toUpperCase();
+    // Set the createdBy field to current user with \\ as the separator for the domain and username to match Ats DB
+    atsClient.createdBy = `${identityProvider}\\${getCurrentUsername(currentContext)}`;
+
     const { data, status } = await atsAxios().post('/clients', atsClient);
     return { data, status };
   } catch (e: unknown) {
@@ -95,11 +102,16 @@ export const createATSClient = async (atsClient: ATSClientResource) => {
 
 /**
  * Creates a enquiry in ATS
- * @param atsEnquiry The client data
+ * @param atsEnquiry - The client data
+   @param currentContext - The current context of the request
  * @returns A Promise that resolves to the response from the external api
  */
-export const createATSEnquiry = async (atsEnquiry: ATSEnquiryResource) => {
+export const createAtsEnquiry = async (atsEnquiry: AtsEnquiryResource, currentContext: CurrentContext) => {
   try {
+    const identityProvider = currentContext?.tokenPayload?.identity_provider.toUpperCase();
+    // Set the createdBy field to current user with \\ as the separator for the domain and username to match Ats DB
+    atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(currentContext)}`;
+
     const { data, status } = await atsAxios().post('/enquiries', atsEnquiry);
     return { data, status };
   } catch (e: unknown) {

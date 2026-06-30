@@ -4,7 +4,7 @@ import {
   createATSEnquiryController,
   searchATSUsersController
 } from '../../../src/controllers/ats.ts';
-import * as atsService from '../../../src/services/ats.ts';
+import * as atsService from '../../../src/external/ats.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

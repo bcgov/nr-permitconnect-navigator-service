@@ -3,11 +3,9 @@ import config from 'config';
 
 import { Action, GroupName } from '../utils/enums/application.ts';
 import { Problem, uuidValidateV4 } from '../utils/index.ts';
-import { getSubjectGroups } from './yars.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { CurrentContext } from '../types/stuff';
+import type { CurrentContext, Group } from '../types/stuff';
 
 /**
  * PCNS Groups to COMS Permission mappings
@@ -167,14 +165,14 @@ export const searchUserBucketPermissions = async (currentContext: CurrentContext
 
 /**
  * Assigns COMS permissions to the current user based on their current groups
- * @param tx Prisma transaction client
  * @param currentContext The current context of the Express request
  * @param sub The subject to be assigned permissions
+ * @param subjectGroups The current groups assigned to the subject
  */
 export const assignPermissions = async (
-  tx: PrismaTransactionClient,
   currentContext: CurrentContext,
-  sub: string
+  sub: string,
+  subjectGroups: Group[]
 ): Promise<void> => {
   if (!sub) {
     throw new Problem(403, {
@@ -182,8 +180,7 @@ export const assignPermissions = async (
     });
   }
 
-  const groups = await getSubjectGroups(tx, sub);
-  const groupNames = new Set(groups.map((x) => x.name));
+  const groupNames = new Set(subjectGroups.map((x) => x.name));
 
   const required = new Set<Action>([...groupNames].flatMap((groupName) => COMS_PERM_MAP.get(groupName) ?? []));
   const {

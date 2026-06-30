@@ -30,7 +30,7 @@ import {
   sendPermitUpdateNotifications
 } from '../../../src/controllers/permit.ts';
 import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as emailService from '../../../src/services/email.ts';
+import * as emailService from '../../../src/external/ches.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import * as permitNoteService from '../../../src/services/permitNote.ts';
 import * as projectService from '../../../src/services/project.ts';

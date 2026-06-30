@@ -1,34 +1,13 @@
-import type { PrismaTransactionClient } from '../db/database.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 
 import type { SourceSystemKind } from '../types/index.ts';
 
 /**
  * Get all source system kinds and include their associated permit type ids
- * @param tx Prisma transaction client
  * @returns A Promise that resolves to an array of source system kinds along with their permit type ids
  */
-export const getSourceSystemKinds = async (tx: PrismaTransactionClient): Promise<SourceSystemKind[]> => {
-  const response = await tx.source_system_kind.findMany({
-    orderBy: {
-      sourceSystem: 'asc'
-    },
-    include: {
-      permitTypeSourceSystemKindXref: {
-        select: {
-          permitTypeId: true
-        }
-      }
-    }
+export const listSourceSystemKindsService = async (): Promise<SourceSystemKind[]> => {
+  return await unitOfWork.execute(async ({ sourceSystemKind }) => {
+    return await sourceSystemKind.list();
   });
-
-  // Transform to flatten permitTypeSourceSystemKindXref to an array of permit type IDs and rename the field
-  const transformedResponse = response.map((item) => {
-    const { permitTypeSourceSystemKindXref, ...rest } = item;
-    return {
-      ...rest,
-      permitTypeIds: permitTypeSourceSystemKindXref?.map((pt) => pt.permitTypeId)
-    };
-  });
-
-  return transformedResponse;
 };

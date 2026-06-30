@@ -11,7 +11,7 @@ import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { syncPeachRecords, getPeachSummaryController } from '../../../src/controllers/peach.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as parser from '../../../src/parsers/peach.ts';
-import * as peachService from '../../../src/services/peach.ts';
+import * as peachService from '../../../src/external/peach.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
 import { splitDateTime, Problem } from '../../../src/utils/index.ts';

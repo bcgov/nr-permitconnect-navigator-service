@@ -19,7 +19,7 @@ import {
   updateEnquiryController
 } from '../../../src/controllers/enquiry.ts';
 import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/services/activity.ts';
+import * as activityService from '../../../src/domains/activity.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';

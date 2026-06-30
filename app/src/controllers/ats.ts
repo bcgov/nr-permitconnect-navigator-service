@@ -1,37 +1,28 @@
-import { createATSClient, createATSEnquiry, searchATSUsers } from '../services/ats.ts';
-import { getCurrentUsername } from '../utils/utils.ts';
+import { createAtsClient, createAtsEnquiry, searchAtsUsers } from '../external/ats.ts';
 
 import type { Request, Response } from 'express';
-import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../types/index.ts';
+import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, LocalContext } from '../types/index.ts';
 
-export const createATSClientController = async (
-  req: Request<never, never, ATSClientResource, never>,
-  res: Response
+export const createAtsClientController = async (
+  req: Request<never, never, AtsClientResource, never>,
+  res: Response<unknown, LocalContext>
 ) => {
-  const identityProvider = res.locals.currentContext?.tokenPayload?.identity_provider.toUpperCase();
-  const atsClient = req.body;
-  // Set the createdBy field to current user with \\ as the separator for the domain and username to match ATS DB
-  atsClient.createdBy = `${identityProvider}\\${getCurrentUsername(res.locals.currentContext)}`;
-  const response = await createATSClient(atsClient);
+  const response = await createAtsClient(req.body, res.locals.currentContext);
   res.status(response.status).json(response.data);
 };
 
-export const createATSEnquiryController = async (
-  req: Request<never, never, ATSEnquiryResource, never>,
-  res: Response
+export const createAtsEnquiryController = async (
+  req: Request<never, never, AtsEnquiryResource, never>,
+  res: Response<unknown, LocalContext>
 ) => {
-  const identityProvider = res.locals.currentContext?.tokenPayload?.identity_provider.toUpperCase();
-  const atsEnquiry = req.body;
-  // Set the createdBy field to current user with \\ as the separator for the domain and username to match ATS DB
-  atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(res.locals.currentContext)}`;
-  const response = await createATSEnquiry(atsEnquiry);
+  const response = await createAtsEnquiry(req.body, res.locals.currentContext);
   res.status(response.status).json(response.data);
 };
 
-export const searchATSUsersController = async (
-  req: Request<never, never, never, ATSUserSearchParameters>,
-  res: Response
+export const searchAtsUsersController = async (
+  req: Request<never, never, never, AtsUserSearchParameters>,
+  res: Response<unknown, LocalContext>
 ) => {
-  const response = await searchATSUsers(req.query);
+  const response = await searchAtsUsers(req.query);
   res.status(response.status).json(response.data);
 };

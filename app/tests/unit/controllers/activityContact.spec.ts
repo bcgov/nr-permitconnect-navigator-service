@@ -17,7 +17,7 @@ import {
 } from '../../../src/controllers/activityContact.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
 import * as contactService from '../../../src/services/contact.ts';
-import * as emailService from '../../../src/services/email.ts';
+import * as emailService from '../../../src/external/ches.ts';
 import * as activityContactHelpers from '../../../src/services/helpers/activityContact.ts';
 import * as projectService from '../../../src/services/project.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';

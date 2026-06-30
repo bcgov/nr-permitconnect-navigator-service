@@ -1,12 +1,12 @@
-import type { PrismaTransactionClient } from '../db/database.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
 
 /**
  * Execute a raw query to get electrification permit reporting data
- * @param tx Prisma transaction client
  * @returns A Promise that resolve to the result of the raw query
  */
-export const getElectrificationProjectPermitData = async (tx: PrismaTransactionClient) => {
-  const result = await tx.$queryRaw`
+export const getElectrificationProjectPermitDataService = async () => {
+  return await unitOfWork.executeRaw(async (tx) => {
+    return await tx.$queryRaw`
     select ep.project_name,
       c.first_name,
       c.last_name,
@@ -49,17 +49,16 @@ export const getElectrificationProjectPermitData = async (tx: PrismaTransactionC
     left join source_system_code ssc on pt.source_system = ssc.code
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by ep.activity_id asc`;
-
-  return result;
+  });
 };
 
 /**
  * Execute a raw query to get general permit reporting data
- * @param tx Prisma transaction client
  * @returns A Promise that resolve to the result of the raw query
  */
-export const getGeneralProjectPermitData = async (tx: PrismaTransactionClient) => {
-  const result = await tx.$queryRaw`
+export const getGeneralProjectPermitDataService = async () => {
+  return await unitOfWork.executeRaw(async (tx) => {
+    return await tx.$queryRaw`
     select ep.project_name,
       c.first_name,
       c.last_name,
@@ -102,17 +101,16 @@ export const getGeneralProjectPermitData = async (tx: PrismaTransactionClient) =
     left join source_system_code ssc on pt.source_system = ssc.code
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by ep.activity_id asc`;
-
-  return result;
+  });
 };
 
 /**
  * Execute a raw query to get housing permit reporting data
- * @param tx Prisma transaction client
  * @returns A Promise that resolve to the result of the raw query
  */
-export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) => {
-  const result = await tx.$queryRaw`
+export const getHousingProjectPermitDataService = async () => {
+  return await unitOfWork.executeRaw(async (tx) => {
+    return await tx.$queryRaw`
     select hp.project_name,
       case
         when hp.consent_to_feedback then 'Yes'
@@ -164,6 +162,5 @@ export const getHousingProjectPermitData = async (tx: PrismaTransactionClient) =
     left join source_system_code ssc on pt.source_system = ssc.code
     left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
     order by hp.activity_id asc`;
-
-  return result;
+  });
 };

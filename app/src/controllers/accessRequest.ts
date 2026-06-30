@@ -1,242 +1,34 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
 import {
-  createUserAccessRequest,
-  getAccessRequest,
-  getAccessRequests,
-  updateAccessRequest
+  createAccessRequestService,
+  getAccessRequestsService,
+  processAccessRequestService
 } from '../services/accessRequest.ts';
-import { assignPermissions } from '../services/coms.ts';
-import { getInitiative } from '../services/initiative.ts';
-import { createUser, readUser } from '../services/user.ts';
-import {
-  assignGroup,
-  getCorrespondingGlobalGroup,
-  getGroups,
-  getSubjectGroups,
-  removeGroup,
-  subjectHasGroupName
-} from '../services/yars.ts';
-import { Problem } from '../utils/index.ts';
-import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
-import { getLogger } from '../utils/log.ts';
 
 import type { Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { AccessRequest, Group, User } from '../types/index.ts';
+import type { AccessRequest, LocalContext, User } from '../types/index.ts';
 
-const log = getLogger(module.filename);
-
-const isUserAdmin = async (
-  tx: PrismaTransactionClient,
-  currentInitiative: Initiative,
-  userGroups: Group[]
-): Promise<boolean> => {
-  const initiative = await getInitiative(tx, currentInitiative);
-  return userGroups.some(
-    (group: Group) =>
-      group.name === GroupName.DEVELOPER ||
-      (group.name === GroupName.ADMIN && group.initiativeId === initiative.initiativeId)
-  );
-};
-
-const removeUserGroups = async (
-  tx: PrismaTransactionClient,
-  sub: string,
-  currentInitiative: Initiative,
-  userGroups: Group[]
-) => {
-  // Get the current initiative
-  const currentInitiativeId = (await getInitiative(tx, currentInitiative)).initiativeId;
-
-  // Remove current initiative groups
-  const currentInitiativeGroups = userGroups.filter((x) => x.initiativeId === currentInitiativeId);
-  await Promise.all(currentInitiativeGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
-
-  // Only remove global perm if user has no groups of the same type assigned in other initiatives
-  if (!(await subjectHasGroupName(tx, sub, currentInitiativeGroups[0]?.name))) {
-    const correspondingGlobalGroups = await Promise.all(
-      currentInitiativeGroups.map(async (x) => await getCorrespondingGlobalGroup(tx, x.groupId))
-    );
-    await Promise.all(correspondingGlobalGroups.map(async (x) => await removeGroup(tx, sub, x.groupId)));
-  }
-};
-
-// Request to create user & access
 export const createUserAccessRequestController = async (
   req: Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
-  res: Response
+  res: Response<unknown, LocalContext>
 ) => {
-  const response = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-    const { accessRequest, user } = req.body;
-
-    // Check if the requestee is an admin
-    const isAdmin = await isUserAdmin(tx, res.locals.currentContext.initiative, res.locals.currentAuthorization.groups);
-
-    // Get all the groups for the current initiative
-    const groups = await getGroups(tx, res.locals.currentContext.initiative);
-
-    // Groups the current user can modify
-    const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
-    if (isAdmin) {
-      userAllowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
-    }
-    const modifiableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
-
-    if (accessRequest.grant && !modifiableGroups.some((x) => x.groupId == accessRequest.groupId)) {
-      throw new Problem(403, { detail: 'Cannot modify requested group' });
-    }
-
-    // Create or get the user that access is being requested for
-    let userResponse;
-    const existingUser = !!user.userId;
-    if (!existingUser) userResponse = await createUser(tx, user);
-    else userResponse = await readUser(tx, user.userId);
-
-    if (!userResponse) throw new Problem(404, { detail: 'User not found' });
-
-    const accessUserGroups = await getSubjectGroups(tx, userResponse.sub);
-
-    const requestedGroup = groups.find((x) => x.groupId === accessRequest.groupId);
-    const userAlreadyInInitiative = accessUserGroups.some((x) => x.initiativeId === requestedGroup?.initiativeId);
-
-    if (accessRequest.grant && !accessRequest.update && userAlreadyInInitiative) {
-      throw new Problem(409, { detail: 'User already exists' });
-    }
-    if (
-      accessRequest.grant &&
-      accessRequest.groupId &&
-      accessUserGroups.some((x) => x.groupId === accessRequest.groupId)
-    ) {
-      throw new Problem(409, { detail: 'User is already assigned this group' });
-    }
-    if (userResponse.idp !== IdentityProviderKind.AZUREIDIR) {
-      throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
-    }
-    if (accessRequest.grant && !accessRequest.groupId) {
-      throw new Problem(422, { detail: 'Must provide a group to grant' });
-    }
-
-    const isGroupUpdate = existingUser && accessRequest.grant && userAlreadyInInitiative;
-    let data;
-
-    let updateComsPerms = false;
-
-    if (isGroupUpdate) {
-      // Remove current initiative groups
-      await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, accessUserGroups);
-
-      // Assign new groups
-      await assignGroup(tx, userResponse.sub, accessRequest.groupId);
-      const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
-      await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
-
-      updateComsPerms = true;
-
-      // Mock an access request for the response
-      data = {
-        userId: userResponse?.userId,
-        grant: accessRequest.grant,
-        groupId: accessRequest.groupId,
-        status: AccessRequestStatus.APPROVED
-      };
-    } else if (isAdmin) {
-      if (accessRequest.grant) {
-        // Assign new groups
-        await assignGroup(tx, userResponse.sub, accessRequest.groupId);
-        const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
-        await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
-
-        // Mock an access request for the response
-        data = {
-          userId: userResponse?.userId,
-          grant: accessRequest.grant,
-          groupId: accessRequest.groupId,
-          status: AccessRequestStatus.APPROVED
-        };
-      } else {
-        // Remove current initiative groups
-        await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, accessUserGroups);
-      }
-
-      updateComsPerms = true;
-    } else {
-      data = await createUserAccessRequest(tx, {
-        ...accessRequest,
-        userId: userResponse?.userId
-      });
-    }
-
-    // Assign new COMS permissions
-    if (updateComsPerms) {
-      try {
-        await assignPermissions(tx, res.locals.currentContext, userResponse.sub);
-      } catch (e) {
-        if (e instanceof Error) log.warn(e.message);
-        if (e instanceof Problem) log.warn(e.detail);
-      }
-    }
-
-    return { isAdmin, data };
-  });
-
+  const response = await createAccessRequestService(
+    res.locals.currentContext,
+    res.locals.currentAuthorization,
+    req.body.accessRequest,
+    req.body.user
+  );
   res.status(response.isAdmin ? 200 : 201).json(response.data);
 };
 
 export const processUserAccessRequestController = async (
   req: Request<{ accessRequestId: string }, never, { approve: boolean }>,
-  res: Response
+  res: Response<unknown, LocalContext>
 ) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const accessRequest = await getAccessRequest(tx, res.locals.currentContext.initiative, req.params.accessRequestId);
-
-    if (accessRequest) {
-      const userResponse = await readUser(tx, accessRequest.userId);
-
-      if (userResponse) {
-        const userGroups: Group[] = await getSubjectGroups(tx, userResponse.sub);
-
-        // If request is approved then grant or remove access
-        if (req.body.approve) {
-          if (accessRequest.grant) {
-            if (!accessRequest.groupId) {
-              throw new Problem(422, { detail: 'Must provide a group to grant' });
-            }
-            if (accessRequest.groupId && userGroups.map((x) => x.groupId).includes(accessRequest.groupId)) {
-              throw new Problem(409, { detail: 'User is already assigned this role' });
-            }
-            if (userResponse.idp !== IdentityProviderKind.AZUREIDIR) {
-              throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this role' });
-            }
-
-            // Assign groups
-            const correspondingGlobalGroup = await getCorrespondingGlobalGroup(tx, accessRequest.groupId);
-            await assignGroup(tx, userResponse.sub, accessRequest.groupId);
-            await assignGroup(tx, userResponse.sub, correspondingGlobalGroup.groupId);
-          } else {
-            // Remove all user groups for the initiative
-            await removeUserGroups(tx, userResponse.sub, res.locals.currentContext.initiative, userGroups);
-          }
-
-          // Update access request status
-          await updateAccessRequest(tx, { status: AccessRequestStatus.APPROVED }, accessRequest.accessRequestId);
-
-          // Assign new COMS permissions
-          await assignPermissions(tx, res.locals.currentContext, userResponse.sub);
-        } else {
-          await updateAccessRequest(tx, { status: AccessRequestStatus.REJECTED }, accessRequest.accessRequestId);
-        }
-      } else {
-        throw new Problem(404, { detail: 'User does not exist' });
-      }
-    }
-  });
-
+  await processAccessRequestService(res.locals.currentContext, req.params.accessRequestId, req.body.approve);
   res.status(204).end();
 };
 
 export const getAccessRequestsController = async (req: Request, res: Response) => {
-  const response = await transactionWrapper<AccessRequest[]>(async (tx: PrismaTransactionClient) => {
-    return await getAccessRequests(tx, res.locals.currentContext.initiative);
-  });
+  const response = await getAccessRequestsService(res.locals.currentContext.initiative);
   res.status(200).json(response);
 };

@@ -1,5 +1,5 @@
 import { searchIdirUsersController } from '../../../src/controllers/sso.ts';
-import * as ssoService from '../../../src/services/sso.ts';
+import * as ssoService from '../../../src/external/sso.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

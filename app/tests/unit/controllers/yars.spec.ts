@@ -6,7 +6,7 @@ import {
   listPermissionsController,
   listSubjectPermissionsController
 } from '../../../src/controllers/yars.ts';
-import * as comsService from '../../../src/services/coms.ts';
+import * as comsService from '../../../src/external/coms.ts';
 import * as yarsService from '../../../src/services/yars.ts';
 import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
 

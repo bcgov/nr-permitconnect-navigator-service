@@ -1,7 +1,5 @@
-import { PrismaTransactionClient } from '../db/database';
-import { listActivityContacts } from '../services/activityContact';
-import { searchContacts } from '../services/contact';
-import { LocalContext } from '../types';
+import { Repositories } from '../repository/unitOfWork';
+import { CurrentAuthorization, CurrentContext } from '../types';
 import { Problem } from '../utils';
 
 interface ActivityScopeFilterable {
@@ -17,16 +15,19 @@ const hasContactAccess = (contacts: { contactId: string }[] | undefined, current
   contacts?.some((c) => c.contactId === currentContactId) ?? false;
 
 export const filterActivityResponseByScope = async <T extends ActivityScopeFilterable>(
-  tx: PrismaTransactionClient,
-  locals: LocalContext,
+  repositories: Pick<Repositories, 'activityContact' | 'contact'>,
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
   data: T[]
 ): Promise<T[]> => {
-  if (!locals.currentAuthorization?.attributes.includes('scope:self')) {
+  if (!currentAuthorization?.attributes.includes('scope:self')) {
     return data;
   }
 
-  const [contact] = await searchContacts(tx, {
-    userId: [locals.currentContext.userId as string]
+  const [contact] = await repositories.contact.findMany({
+    where: {
+      userId: { in: [currentContext.userId as string] }
+    }
   });
 
   if (!contact) {
@@ -45,7 +46,15 @@ export const filterActivityResponseByScope = async <T extends ActivityScopeFilte
     )
   ];
 
-  const activityContacts = activityIds.length > 0 ? await listActivityContacts(tx, activityIds) : [];
+  const activityContacts =
+    activityIds.length > 0
+      ? await repositories.activityContact.findMany({
+          where: {
+            activityId: { in: activityIds }
+          },
+          include: { contact: true }
+        })
+      : [];
 
   const contactsByActivityId = new Map<string, { contactId: string }[]>();
 

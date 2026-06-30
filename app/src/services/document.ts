@@ -1,78 +1,79 @@
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+
 import type { Document } from '../types/index.ts';
 
 /**
  * Creates a link between an activity and a previously existing object in COMS
- * @param tx Prisma transaction client
- * @param documentId COMS ID of an existing object
- * @param activityId Activity ID the document is associated with
- * @param filename Original filename of the document
- * @param mimeType Type of document
- * @param filesize Size of document
- * @param createStamp CreatedAt timestamp
+ * @param documentId - COMS ID of an existing object
+ * @param activityId - Activity ID the document is associated with
+ * @param filename - Original filename of the document
+ * @param mimeType - Type of document
+ * @param filesize - Size of document
  * @returns A Promise that resolves to the created resource
  */
-export const createDocument = async (
-  tx: PrismaTransactionClient,
+export const createDocumentService = async (
   documentId: string,
   activityId: string,
   filename: string,
   mimeType: string,
-  filesize: number,
-  createStamp: Partial<IStamps>
+  filesize: number
 ): Promise<Document> => {
-  const response = await tx.document.create({
-    data: {
-      documentId: documentId,
-      activityId: activityId,
-      filename: filename,
-      mimeType: mimeType,
-      filesize: filesize,
-      createdAt: createStamp.createdAt,
-      createdBy: createStamp.createdBy
-    }
-  });
+  return await unitOfWork.execute(async ({ document, user }) => {
+    const createdDocument = await document.create({ documentId, activityId, filename, mimeType, filesize });
 
-  return response;
+    let createdByFullName: string | undefined;
+    if (createdDocument.createdBy) {
+      const createdBy = await user.findUnique({
+        where: {
+          userId: createdDocument.createdBy
+        }
+      });
+      createdByFullName = createdBy ? (createdBy.fullName ?? '') : '';
+    }
+
+    return { ...createdDocument, ...(createdByFullName ? { createdByFullName } : {}) };
+  });
 };
 
 /**
  * Delete a document
- * @param tx Prisma transaction client
- * @param documentId PCNS Document ID
+ * @param documentId - Document ID
+ * @returns A Promise that resolves when the operation is complete
  */
-export const deleteDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<void> => {
-  await tx.document.delete({ where: { documentId } });
-};
-
-/**
- * Get a document
- * @param tx Prisma transaction client
- * @param documentId Document ID
- * @returns A Promise that resolves to the specific document
- */
-export const getDocument = async (tx: PrismaTransactionClient, documentId: string): Promise<Document> => {
-  const result = await tx.document.findFirstOrThrow({ where: { documentId } });
-
-  return result;
+export const deleteDocumentService = async (documentId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ document }) => {
+    await document.delete({ documentId });
+  });
 };
 
 /**
  * Retrieve a list of documents associated with a given activity
- * @param tx Prisma transaction client
- * @param activityId PCNS Activity ID
+ * @param activityId - Activity ID
  * @returns A Promise that resolves to an array of documents
  */
-export const listDocuments = async (tx: PrismaTransactionClient, activityId: string): Promise<Document[]> => {
-  const response = await tx.document.findMany({
-    where: {
-      activityId
-    },
-    orderBy: {
-      createdAt: 'asc'
-    }
-  });
+export const listDocumentsService = async (activityId: string): Promise<Document[]> => {
+  return await unitOfWork.execute(async ({ document, user }) => {
+    const documents: Document[] = await document.findMany({
+      where: {
+        activityId
+      },
+      orderBy: {
+        createdAt: 'asc'
+      }
+    });
+    const documentsWithNames: Document[] = await Promise.all(
+      documents.map(async (doc) => {
+        if (!doc.createdBy) return doc;
+        const createdBy = await await user.findUnique({
+          where: {
+            userId: doc.createdBy
+          }
+        });
+        const createdByFullName = createdBy ? (createdBy.fullName ?? '') : '';
+        return { ...doc, ...(createdByFullName ? { createdByFullName } : {}) };
+      })
+    );
 
-  return response;
+    return documentsWithNames;
+  });
 };

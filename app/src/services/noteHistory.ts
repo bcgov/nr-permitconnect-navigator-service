@@ -1,131 +1,243 @@
-import { BringForwardType } from '../utils/enums/projectCommon.ts';
-import { Initiative } from '../utils/enums/application.ts';
+import { v4 as uuidv4 } from 'uuid';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
-import type { NoteHistory, NoteHistoryBase } from '../types/index.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
+
+import type {
+  BringForward,
+  CurrentAuthorization,
+  CurrentContext,
+  NoteHistory,
+  NoteHistoryBase
+} from '../types/index.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { emailBringForwardNotification } from '../domains/noteHistory.ts';
 
 /**
  * Create a note history
- * @param tx Prisma transaction client
- * @param data The note history object to create
+ * @param data - The note history object to create
+ * @param noteStr - String to be given as the initial note
  * @returns A Promise that resolves to the created resource
  */
-export const createNoteHistory = async (tx: PrismaTransactionClient, data: NoteHistoryBase): Promise<NoteHistory> => {
-  const response = await tx.note_history.create({
-    data
-  });
+export const createNoteHistoryService = async (data: NoteHistoryBase, noteStr: string): Promise<NoteHistory> => {
+  return await unitOfWork.execute(async ({ note, noteHistory }) => {
+    const historyResult = await noteHistory.create({
+      ...data,
+      noteHistoryId: uuidv4()
+    });
 
-  return response;
+    const noteResult = await note.create({
+      noteId: uuidv4(),
+      noteHistoryId: historyResult.noteHistoryId,
+      note: noteStr
+    });
+
+    return { ...historyResult, note: [noteResult] };
+  });
 };
 
 /**
- * Soft deletes a note history by marking is as deleted
- * @param tx Prisma transaction client
+ * Deletes a note history
  * @param noteHistoryId The ID of the note history to delete
- * @param deleteStamp Deleted timestamp information
+ * @returns A promise that resolves when the operation is complete
  */
-export const deleteNoteHistory = async (
-  tx: PrismaTransactionClient,
-  noteHistoryId: string,
-  deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.note_history.update({
-    where: {
-      noteHistoryId: noteHistoryId
-    },
-    data: {
-      deletedAt: deleteStamp.deletedAt,
-      deletedBy: deleteStamp.deletedBy
-    }
-  });
-};
+export const deleteNoteHistoryService = async (noteHistoryId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ noteHistory, note }) => {
+    await noteHistory.delete({
+      noteHistoryId
+    });
 
-/**
- * Get a note history
- * @param tx Prisma transaction client
- * @param noteHistoryId The ID of the note history to retrieve
- * @returns A Promise that resolves to the created resource
- */
-export const getNoteHistory = async (tx: PrismaTransactionClient, noteHistoryId: string): Promise<NoteHistory> => {
-  const result = await tx.note_history.findFirstOrThrow({
-    where: {
-      noteHistoryId: noteHistoryId
-    },
-    include: {
-      note: { orderBy: { createdAt: 'desc' } }
-    }
+    await note.deleteMany({ noteHistoryId });
   });
-  return result;
 };
 
 /**
  * Retrieve a list of bring forward type note histories by the given state
- * @param tx Prisma transaction client
  * @param initiative The initiative for which the note history belongs to
  * @param state The state to search for
  * @returns A Promise that resolves to the note histories for the given parameters
  */
-export const listBringForward = async (
-  tx: PrismaTransactionClient,
+export const listBringForwardsService = async (
   initiative: Initiative,
   state: BringForwardType = BringForwardType.UNRESOLVED
-): Promise<NoteHistory[]> => {
-  const response = await tx.note_history.findMany({
-    where: {
-      bringForwardState: state,
-      activity: {
-        initiative: {
-          code: initiative
+): Promise<BringForward[]> => {
+  return await unitOfWork.execute(
+    async ({ electrificationProject, enquiry, generalProject, housingProject, noteHistory, user }) => {
+      const history = await noteHistory.findMany({
+        where: {
+          bringForwardState: state,
+          activity: {
+            initiative: {
+              code: initiative
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          note: { orderBy: { createdAt: 'desc' } }
         }
-      }
-    },
-    orderBy: {
-      createdAt: 'desc'
-    },
-    include: {
-      note: { orderBy: { createdAt: 'desc' } }
-    }
-  });
+      });
 
-  return response;
+      if (history.length) {
+        const [elecProj, generalProj, housingProj] = await Promise.all([
+          electrificationProject.search({
+            activityId: history.map((x) => x.activityId)
+          }),
+          generalProject.search({
+            activityId: history.map((x) => x.activityId)
+          }),
+          housingProject.search({
+            activityId: history.map((x) => x.activityId)
+          })
+        ]);
+
+        const users = await user.findMany({
+          where: {
+            AND: [
+              {
+                userId: {
+                  in: history
+                    .map((x) => x.createdBy)
+                    .filter((x) => !!x)
+                    .map((x) => x!)
+                }
+              }
+            ],
+            NOT: [
+              {
+                userId: SYSTEM_ID
+              }
+            ]
+          }
+        });
+
+        const enquiries = (
+          await Promise.all([
+            enquiry.search(
+              {
+                activityId: history.map((x) => x.activityId)
+              },
+              Initiative.ELECTRIFICATION
+            ),
+            enquiry.search(
+              {
+                activityId: history.map((x) => x.activityId)
+              },
+              Initiative.GENERAL
+            ),
+            enquiry.search(
+              {
+                activityId: history.map((x) => x.activityId)
+              },
+              Initiative.HOUSING
+            )
+          ])
+        ).flatMap((x) => x);
+
+        return history.map((h) => ({
+          activityId: h.activityId,
+          noteId: h.noteHistoryId,
+          electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
+          generalProjectId: generalProj.find((s) => s.activityId === h.activityId)?.generalProjectId,
+          housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
+          enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
+          title: h.title,
+          projectName:
+            elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
+            generalProj.find((s) => s.activityId === h.activityId)?.projectName ??
+            housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
+            null,
+          createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
+          bringForwardDate: h.bringForwardDate?.toISOString(),
+          escalateToSupervisor: h.escalateToSupervisor,
+          escalateToDirector: h.escalateToDirector
+        }));
+      } else {
+        return [];
+      }
+    }
+  );
 };
 
 /**
  * Get all note histories for the given activity
- * @param tx Prisma transaction client
- * @param activityId The ID of the activity the note histories belong to
- * @returns A Promise that resolves to the permit types for the given initiative
+ * @param currentAuthorization - The authorization of the current authorized user
+ * @param activityId - The ID of the activity the note histories belong to
+ * @returns A Promise that resolves to a list of note histories
  */
-export const listNoteHistory = async (tx: PrismaTransactionClient, activityId: string): Promise<NoteHistory[]> => {
-  const response = await tx.note_history.findMany({
-    where: {
-      activityId: activityId
-    },
-    orderBy: {
-      createdAt: 'desc'
-    },
-    include: {
-      note: { orderBy: { createdAt: 'desc' } }
+export const listNoteHistoriesService = async (
+  currentAuthorization: CurrentAuthorization,
+  activityId: string
+): Promise<NoteHistory[]> => {
+  return await unitOfWork.execute(async ({ noteHistory }) => {
+    const result = await noteHistory.findMany({
+      where: {
+        activityId: activityId
+      },
+      orderBy: {
+        createdAt: 'desc'
+      },
+      include: {
+        note: { orderBy: { createdAt: 'desc' } }
+      }
+    });
+
+    if (currentAuthorization?.attributes.includes('scope:self')) {
+      return result.filter((x) => x.shownToProponent);
+    } else {
+      return result;
     }
   });
-
-  return response;
 };
 
 /**
  * Update a note history
- * @param tx Prisma transaction client
- * @param data The note history to update
+ * @param currentAuthorization - The authorization of the current authorized user
+ * @param currentContext - Context data of current request
+ * @param data - The note history to update
+ * @param noteStr - Optional string to be added as a note
+ * @param resource - The type of Resource the note history belongs to
  * @returns A Promise that resolves to the updated resource
  */
-export const updateNoteHistory = async (tx: PrismaTransactionClient, data: NoteHistoryBase): Promise<NoteHistory> => {
-  const response = await tx.note_history.update({
-    data: data,
-    where: {
-      noteHistoryId: data.noteHistoryId
-    }
-  });
+export const updateNoteHistoryService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
+  data: NoteHistoryBase,
+  noteStr: string | undefined,
+  resource: Resource
+): Promise<NoteHistory> => {
+  return await unitOfWork.execute(
+    async ({ electrificationProject, generalProject, housingProject, note, noteHistory, subjectGroup, user }) => {
+      await noteHistory.update(
+        {
+          noteHistoryId: data.noteHistoryId
+        },
+        data
+      );
 
-  return response;
+      if (note) {
+        await note.create({
+          noteHistoryId: data.noteHistoryId,
+          noteId: uuidv4(),
+          note: noteStr
+        });
+      }
+
+      const response = await noteHistory.findFirstOrThrow({ where: { noteHistoryId: data.noteHistoryId } });
+
+      const isNavigator = !!currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
+      if (isNavigator)
+        await emailBringForwardNotification(
+          { electrificationProject, generalProject, housingProject, subjectGroup, user },
+          response,
+          currentContext.initiative,
+          resource
+        );
+
+      return response;
+    }
+  );
 };

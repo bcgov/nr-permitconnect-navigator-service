@@ -1,60 +1,70 @@
 import { Prisma } from '@prisma/client';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
+
 import type {
+  ContactBase,
+  CurrentAuthorization,
+  CurrentContext,
   ElectrificationProject,
-  ElectrificationProjectBase,
+  ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
-  ElectrificationProjectStatistics
+  ElectrificationProjectStatistics,
+  Maybe
 } from '../types/index.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+import { emailProjectConfirmation, generateElectrificationProjectData } from '../domains/electrificationProject.ts';
+import prisma from '../db/database.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+
+export const createElectrificationProjectService = async (
+  data: ElectrificationProjectIntake,
+  currentContext: CurrentContext
+): Promise<ElectrificationProject> => {
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, electrificationProject, initiative }) => {
+      const electrificationProjectData = await generateElectrificationProjectData(
+        { activity, activityContact, contact, initiative },
+        data,
+        currentContext
+      );
+
+      // Create new electrification project
+      const response = await electrificationProject.create(electrificationProjectData);
+
+      return response;
+    }
+  );
+};
 
 /**
- *  Creates a new electrification project
- * @param tx Prisma transaction client
- * @param data The electrification project data to create
- * @returns A Promise that resolves to the created electrification project
+ * Gets a specific electrification project from the PCNS database
+ * @param electrificationProjectId PCNS electrification project ID
+ * @returns A Promise that resolves to the specific electrification project
  */
-export const createElectrificationProject = async (
-  tx: PrismaTransactionClient,
-  data: ElectrificationProjectBase
+export const getElectrificationProjectService = async (
+  electrificationProjectId: string
 ): Promise<ElectrificationProject> => {
-  const response = await tx.electrification_project.create({
-    data: data,
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+  return await unitOfWork.execute(async ({ electrificationProject }) => {
+    return electrificationProject.findFirstOrThrow({
+      where: {
+        electrificationProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       }
-    }
-  });
-  return response;
-};
-
-/**
- * Soft delete an electrification project
- * @param tx Prisma transaction client
- * @param electrificationProjectId Unique electrification project ID
- * @param deleteStamp Timestamp information of the delete
- */
-export const deleteElectrificationProject = async (
-  tx: PrismaTransactionClient,
-  electrificationProjectId: string,
-  deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.electrification_project.update({
-    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
-    where: { electrificationProjectId }
+    });
   });
 };
 
 /**
  * Gets a set of electrification project related statistics
- * @param tx Prisma transaction client
  * @param filters The filters to apply to the statistics
  * @param filters.dateFrom Beginning date
  * @param filters.dateTo End date
@@ -62,15 +72,12 @@ export const deleteElectrificationProject = async (
  * @param filters.userId User ID
  * @returns A Promise that resolves to the electrification project statistics
  */
-export const getElectrificationProjectStatistics = async (
-  tx: PrismaTransactionClient,
-  filters: {
-    dateFrom: string;
-    dateTo: string;
-    monthYear: string;
-    userId: string;
-  }
-): Promise<ElectrificationProjectStatistics[]> => {
+export const getElectrificationProjectStatisticsService = async (filters: {
+  dateFrom: string;
+  dateTo: string;
+  monthYear: string;
+  userId: string;
+}): Promise<ElectrificationProjectStatistics[]> => {
   // Return a single quoted string or null for the given value
   const val = (value: string) => (value ? `'${value}'` : null);
 
@@ -79,8 +86,8 @@ export const getElectrificationProjectStatistics = async (
   const monthYear = val(filters.monthYear);
   const userId = filters.userId?.length ? filters.userId : null;
 
-  const response =
-    await tx.$queryRaw`select * from get_electrification_statistics(${dFrom}, ${dTo}, ${monthYear}, ${userId}::uuid)`;
+  const response = // eslint-disable-next-line max-len
+    await prisma.$queryRaw`select * from get_electrification_statistics(${dFrom}, ${dTo}, ${monthYear}, ${userId}::uuid)`;
 
   // count() returns BigInt
   // JSON.stringify() doesn't know how to serialize BigInt
@@ -90,144 +97,143 @@ export const getElectrificationProjectStatistics = async (
   ) as ElectrificationProjectStatistics[];
 };
 
-/**
- * Gets a specific electrification project from the PCNS database
- * @param tx Prisma transaction client
- * @param  electrificationProjectId PCNS electrification project ID
- * @returns A Promise that resolves to the electrification project
- */
-export const getElectrificationProject = async (
-  tx: PrismaTransactionClient,
-  electrificationProjectId: string
-): Promise<ElectrificationProject> => {
-  const result = await tx.electrification_project.findFirstOrThrow({
-    where: {
-      electrificationProjectId: electrificationProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      }
-    }
+export const listElectrificationProjectActivityIdsService = async (): Promise<string[]> => {
+  return await unitOfWork.execute(async ({ electrificationProject }) => {
+    const ids = await electrificationProject.findMany({ select: { activityId: true } });
+    return ids.map((x) => x.activityId);
   });
-
-  return result;
 };
 
 /**
  * Gets a list of electrification projects
- * @param tx Prisma transaction client
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
  * @returns A Promise that resolves to an array of electrification projects
  */
-export const getElectrificationProjects = async (tx: PrismaTransactionClient): Promise<ElectrificationProject[]> => {
-  const result = await tx.electrification_project.findMany({
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+export const listElectrificationProjectsService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext
+): Promise<ElectrificationProject[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
+    const result = await electrificationProject.findMany({
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
-        }
+        },
+        user: true
       },
-      user: true
-    },
-    orderBy: {
-      createdAt: 'desc'
-    }
-  });
+      orderBy: {
+        createdAt: 'desc'
+      }
+    });
 
-  return result;
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
 };
 
 /**
  * Search and filter for specific electrification projects
- * @param tx Prisma transaction client
- * @param params Optional filtering parameters
- * @param params.activityId Optional array of uuids representing the activity ID
- * @param params.createdBy Optional array of uuids representing users who created electrification projects
- * @param params.electrificationProjectId Optional array of uuids representing the electrification project ID
- * @param params.projectType Optional array of strings representing the electrification project type
- * @param params.projectCategory Optional array of strings representing the electrification project category
- * @param params.includeUser Optional boolean representing whether the linked user should be included
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
+ * @param params - Optional filtering parameters
+ * @param params.activityId - Optional array of uuids representing the activity ID
+ * @param params.createdBy - Optional array of uuids representing users who created electrification projects
+ * @param params.electrificationProjectId - Optional array of uuids representing the electrification project ID
+ * @param params.submissionType - Optional array of strings representing the electrification submission type
+ * @param params.includeUser - Optional boolean representing whether the linked user should be included
  * @returns A Promise that resolves to an array of electrification projects from search params
  */
 export const searchElectrificationProjects = async (
-  tx: PrismaTransactionClient,
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
   params: ElectrificationProjectSearchParameters
 ): Promise<ElectrificationProject[]> => {
-  const result = await tx.electrification_project.findMany({
-    where: {
-      AND: [
-        {
-          activityId: { in: params.activityId }
-        },
-        {
-          createdBy: { in: params.createdBy }
-        },
-        {
-          electrificationProjectId: { in: params.electrificationProjectId }
-        },
-        {
-          projectType: { in: params.projectType }
-        },
-        {
-          projectCategory: { in: params.projectCategory }
-        }
-      ]
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
-            }
-          }
-        }
-      },
-      user: params.includeUser
-    }
-  });
+  return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
+    const result = await electrificationProject.search(params);
 
-  return result;
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
+  });
+};
+
+export const submitElectrificationProjectDraftService = async (
+  draftId: Maybe<string>,
+  data: ElectrificationProjectIntake,
+  contactData: ContactBase,
+  currentContext: CurrentContext
+): Promise<ElectrificationProject> => {
+  return await unitOfWork.execute(
+    async ({ activity, activityContact, contact, draft, electrificationProject, initiative }) => {
+      const electrificationProjectData = await generateElectrificationProjectData(
+        { activity, activityContact, contact, initiative },
+        data,
+        currentContext
+      );
+
+      // Create new electrification project
+      const response = await electrificationProject.create(electrificationProjectData);
+
+      // Delete old draft
+      if (draftId) await draft.delete({ draftId });
+
+      // Update the contact
+      const contactResponse = await contact.upsert({ contactId: contactData.contactId }, contactData, contactData);
+
+      await emailProjectConfirmation({ ...response, contact: contactResponse });
+
+      return response;
+    }
+  );
 };
 
 /**
  * Updates a specific electrification project
- * @param tx Prisma transaction client
  * @param data Electrification project to update
  * @param electrificationProjectId ID of the project to update
  * @returns A Promise that resolves to the updated electrification project
  */
-export const updateElectrificationProject = async (
-  tx: PrismaTransactionClient,
+export const updateElectrificationProjectService = async (
   data: Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>,
   electrificationProjectId: string
 ): Promise<ElectrificationProject> => {
-  const result = await tx.electrification_project.update({
-    data: data,
-    where: {
-      electrificationProjectId
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: {
-            include: {
-              contact: true
+  return await unitOfWork.execute(async ({ electrificationProject }) => {
+    await electrificationProject.update(
+      {
+        electrificationProjectId
+      },
+      data
+    );
+
+    return await electrificationProject.findFirstOrThrow({
+      where: {
+        electrificationProjectId
+      },
+      include: {
+        activity: {
+          include: {
+            activityContact: {
+              include: {
+                contact: true
+              }
             }
           }
         }
       }
-    }
+    });
   });
-  return result;
 };

@@ -1,6 +1,6 @@
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { getPIDsController } from '../../../src/controllers/map.ts';
-import * as mapService from '../../../src/services/map.ts';
+import * as mapService from '../../../src/external/openMaps.ts';
 import * as projectService from '../../../src/services/project.ts';
 
 import type { Request, Response } from 'express';

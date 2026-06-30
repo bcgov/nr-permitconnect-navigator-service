@@ -1,7 +1,7 @@
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 
 import { generateCreateStamps, generateDeleteStamps } from '../../../src/db/utils/utils.ts';
-import * as activityService from '../../../src/services/activity.ts';
+import * as activityService from '../../../src/domains/activity.ts';
 import { Initiative as InitiativeE } from '../../../src/utils/enums/application.ts';
 
 import type { Activity, Initiative } from '../../../src/types/index.ts';

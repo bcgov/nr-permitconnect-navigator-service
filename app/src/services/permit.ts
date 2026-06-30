@@ -1,303 +1,280 @@
+import { v4 as uuidv4 } from 'uuid';
+
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
 import type {
+  CurrentAuthorization,
+  CurrentContext,
   ListPermitsOptions,
   Permit,
   PermitBase,
+  PermitNote,
+  PermitTracking,
+  PermitTrackingBase,
+  PermitType,
   SearchPermitsOptions,
-  SearchPermitsResponse
+  SearchPermitsResponse,
+  SourceSystemKind
 } from '../types/index.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import Problem from '../utils/problem.ts';
+import { differential, isEmptyObject } from '../utils/utils.ts';
+import { sendPermitUpdateNotifications } from '../domains/permit.ts';
+import { findPriorityPermitTracking } from '../domains/peach.ts';
+import { getPeachRecord } from '../external/peach.ts';
+import { summarizePeachRecord } from '../parsers/peach.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
+
+function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
+  const sourceSystemKind = sourceSystemKinds.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
+  return !!sourceSystemKind;
+}
+
+const snapshotPermitStatus = (p: Partial<Permit>) => ({
+  state: p.state,
+  stage: p.stage,
+  decisionDate: p.decisionDate,
+  submittedDate: p.submittedDate,
+  statusLastChanged: p.statusLastChanged
+});
 
 /**
- * Delete a specific permit
- * @param tx Prisma transaction client
- * @param permitId Permit ID
+ * Delete a specific permit.
+ * @param permitId - ID of the permit to delete.
+ * @returns A promise that resolves when the operation is complete.
  */
-export const deletePermit = async (tx: PrismaTransactionClient, permitId: string): Promise<void> => {
-  await tx.permit.delete({
-    where: {
-      permitId: permitId
-    },
-    include: {
-      permitType: true
-    }
+export const deletePermitService = async (permitId: string): Promise<void> => {
+  return await unitOfWork.execute(async ({ permit, permitNote, permitTracking }) => {
+    await permit.delete({
+      permitId
+    });
+
+    await permitNote.deleteMany({
+      permitId
+    });
+
+    await permitTracking.deleteMany({
+      permitId
+    });
   });
 };
 
 /**
  * Gets a specific permit
- * @param tx Prisma transaction client
  * @param permitId Permit ID
  * @returns A Promise that resolves to the specific permit
  */
-export const getPermit = async (tx: PrismaTransactionClient, permitId: string): Promise<Permit> => {
-  const result = await tx.permit.findFirstOrThrow({
-    where: {
-      permitId: permitId
-    },
-    include: {
-      permitType: true,
-      permitNote: { orderBy: { createdAt: 'desc' } },
-      permitTracking: { include: { sourceSystemKind: true } }
-    }
+export const getPermitService = async (permitId: string): Promise<Permit> => {
+  return await unitOfWork.execute(async ({ permit }) => {
+    return await permit.findFirstOrThrow({
+      where: {
+        permitId: permitId
+      },
+      include: {
+        permitType: true,
+        permitNote: { orderBy: { createdAt: 'desc' } },
+        permitTracking: { include: { sourceSystemKind: true } }
+      }
+    });
   });
-
-  return result;
 };
 
 /**
  * Retrieve all permits if no activityId is provided, otherwise retrieve permits for a specific activity
- * @param tx Prisma transaction client
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
  * @param options Optional filtering parameters
  * @param options.activityId Optional PCNS Activity ID
  * @param options.includeNotes Optional flag to include permit notes
  * @returns A Promise that resolves to an array of permits
  */
-export const listPermits = async (tx: PrismaTransactionClient, options?: ListPermitsOptions): Promise<Permit[]> => {
-  const response = await tx.permit.findMany({
-    where: {
-      activityId: options?.activityId ?? undefined
-    },
-    orderBy: {
-      permitType: {
-        name: 'asc'
-      }
-    },
-    include: {
-      activity: {
-        include: {
-          activityContact: true
+export const listPermitsService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
+  options?: ListPermitsOptions
+): Promise<Permit[]> => {
+  return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
+    const result = await permit.findMany({
+      where: {
+        activityId: options?.activityId ?? undefined
+      },
+      orderBy: {
+        permitType: {
+          name: 'asc'
         }
       },
-      permitType: true,
-      permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
-      permitTracking: {
-        include: {
-          sourceSystemKind: true
+      include: {
+        activity: {
+          include: {
+            activityContact: true
+          }
+        },
+        permitType: true,
+        permitNote: options?.includeNotes ? { orderBy: { createdAt: 'desc' } } : false,
+        permitTracking: {
+          include: {
+            sourceSystemKind: true
+          }
         }
       }
-    }
-  });
+    });
 
-  return response;
-};
-
-/**
- * Retrieve permits and trackers that are PEACH integrated
- * @param tx Prisma transaction client
- * @returns A Promise that resolves to a list of permits matching the search params
- */
-export const listPeachIntegratedTrackings = async (tx: PrismaTransactionClient): Promise<Permit[]> => {
-  const response = await tx.permit.findMany({
-    where: {
-      AND: [{ permitTracking: { some: { sourceSystemKind: { integrated: true } } } }]
-    },
-    include: {
-      permitTracking: {
-        where: { AND: [{ sourceSystemKind: { integrated: true } }] },
-        include: { sourceSystemKind: true }
-      }
-    }
+    return await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result
+    );
   });
-  return response;
 };
 
 /**
  * Search and retrieve permits with pagination, filtering, and sorting
- * @param tx Prisma transaction client
+ * @param currentAuthorization - Authorizations assigned to the current authorized user
+ * @param currentContext - Context data of current request
  * @param initiative Initiative code (excludes PCNS)
  * @param options Search and filter options
  * @returns A Promise that resolves to an object with permits array and total count
  */
-export const searchPermits = async (
-  tx: PrismaTransactionClient,
+export const searchPermitsService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
   initiative: Exclude<Initiative, Initiative.PCNS>,
   options: SearchPermitsOptions
 ): Promise<SearchPermitsResponse> => {
-  // Determine project table based on initiative, exclude PCNS
-  const projectTableMap = {
-    [Initiative.ELECTRIFICATION]: 'electrificationProject',
-    [Initiative.GENERAL]: 'generalProject',
-    [Initiative.HOUSING]: 'housingProject'
-  } as const;
+  return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
+    const result = await permit.search(initiative, options);
 
-  const projectTable = projectTableMap[initiative];
+    const filtered = await filterActivityResponseByScope(
+      { activityContact, contact },
+      currentAuthorization,
+      currentContext,
+      result.permits
+    );
 
-  const validSortFields = ['decisionDate', 'stage', 'state', 'statusLastChanged', 'submittedDate'];
-
-  let orderBy: Record<string, 'asc' | 'desc'> | undefined;
-
-  if (options?.sortOrder !== '0' && options?.sortField && validSortFields.includes(options.sortField)) {
-    const sortDirection = options.sortOrder === '1' ? 'asc' : 'desc';
-    orderBy = { [options.sortField]: sortDirection };
-  }
-
-  const whereClause = {
-    AND: [
-      {
-        activity: {
-          [projectTable]: { isNot: null }
-        }
-      },
-      options.dateRange
-        ? {
-            OR: [
-              { submittedDate: { gte: options.dateRange[0], lte: options.dateRange[1] } },
-              { decisionDate: { gte: options.dateRange[0], lte: options.dateRange[1] } },
-              { statusLastChanged: { gte: options.dateRange[0], lte: options.dateRange[1] } }
-            ]
-          }
-        : {},
-      options?.permitTypeId ? { permitTypeId: Number.parseInt(options.permitTypeId) } : {},
-      options?.sourceSystemKindId
-        ? {
-            permitTracking: {
-              some: {
-                sourceSystemKindId: Number.parseInt(options.sourceSystemKindId)
-              }
-            }
-          }
-        : {},
-      options?.searchTag
-        ? {
-            OR: [
-              { activityId: { contains: options.searchTag, mode: 'insensitive' as const } },
-              { stage: { contains: options.searchTag, mode: 'insensitive' as const } },
-              { state: { contains: options.searchTag, mode: 'insensitive' as const } },
-              { permitType: { name: { contains: options.searchTag, mode: 'insensitive' as const } } },
-              { permitType: { businessDomain: { contains: options.searchTag, mode: 'insensitive' as const } } },
-              {
-                activity: {
-                  [projectTable]: {
-                    OR: [
-                      { projectName: { contains: options.searchTag, mode: 'insensitive' as const } },
-                      { companyNameRegistered: { contains: options.searchTag, mode: 'insensitive' as const } },
-                      // Only include location fields for initiatives that have them (not ELECTRIFICATION)
-                      ...(initiative === Initiative.ELECTRIFICATION
-                        ? []
-                        : [
-                            { streetAddress: { contains: options.searchTag, mode: 'insensitive' as const } },
-                            { locality: { contains: options.searchTag, mode: 'insensitive' as const } },
-                            { province: { contains: options.searchTag, mode: 'insensitive' as const } }
-                          ])
-                    ]
-                  }
-                }
-              },
-              {
-                permitTracking: {
-                  some: {
-                    trackingId: { contains: options.searchTag, mode: 'insensitive' as const }
-                  }
-                }
-              }
-            ]
-          }
-        : {}
-    ]
-  };
-
-  // Get total count (without pagination)
-  const totalRecords = await tx.permit.count({
-    where: whereClause
+    // TODO: totalRecords will be incorrect as its based on all permits
+    // TBH we probably need filtering at the prisma level somehow
+    // Not an immediate priority as pagination is currently internal only and Navs always see full results
+    // Will need to be addressed when pagination goes to the proponent side
+    return { permits: filtered, totalRecords: result.totalRecords };
   });
-
-  // Get paginated data
-  const permits = await tx.permit.findMany({
-    skip: options?.skip ? Number.parseInt(options.skip) : 0,
-    take: options?.take ? Number.parseInt(options.take) : 10,
-    where: whereClause,
-    orderBy: orderBy,
-    select: {
-      permitId: true,
-      activityId: true,
-      permitTypeId: true,
-      decisionDate: true,
-      stage: true,
-      state: true,
-      statusLastChanged: true,
-      submittedDate: true,
-      permitType: {
-        select: {
-          businessDomain: true,
-          name: true
-        }
-      },
-      activity: {
-        select: {
-          electrificationProject: {
-            select: {
-              projectId: true,
-              projectName: true,
-              companyNameRegistered: true
-            }
-          },
-          generalProject: {
-            select: {
-              projectId: true,
-              projectName: true,
-              companyNameRegistered: true,
-              streetAddress: true,
-              locality: true,
-              province: true
-            }
-          },
-          housingProject: {
-            select: {
-              projectId: true,
-              projectName: true,
-              companyNameRegistered: true,
-              streetAddress: true,
-              locality: true,
-              province: true
-            }
-          }
-        }
-      }
-    }
-  });
-
-  // Map the results to alias the project table as 'project'
-  const permitsWithProjectAlias = permits.map((permit) => {
-    const project =
-      permit.activity.housingProject ?? permit.activity.generalProject ?? permit.activity.electrificationProject;
-
-    return {
-      permitId: permit.permitId,
-      activityId: permit.activityId,
-      permitTypeId: permit.permitTypeId,
-      decisionDate: permit.decisionDate,
-      stage: permit.stage,
-      state: permit.state,
-      statusLastChanged: permit.statusLastChanged,
-      submittedDate: permit.submittedDate,
-      permitType: permit.permitType,
-      project
-    };
-  });
-
-  return { permits: permitsWithProjectAlias, totalRecords };
 };
 
 /**
  * Upsert a Permit
- * @param tx Prisma transaction client
- * @param data Permit object
+ * @param permitData Permit object
+ * @param permitNoteData Permit note array
+ * @param permitTrackingData Permit tracking array
+ * @param permitTypeData Permit type object
  * @returns A Promise that resolves to the created/updated permit
  */
-export const upsertPermit = async (tx: PrismaTransactionClient, data: PermitBase): Promise<Permit> => {
-  const response = await tx.permit.upsert({
-    update: data,
-    create: data,
-    where: {
-      permitId: data.permitId
-    },
-    include: {
-      permitType: true,
-      permitNote: { orderBy: { createdAt: 'desc' } }
-    }
-  });
+export const upsertPermitService = async (
+  permitData: PermitBase,
+  permitNoteData: PermitNote[] | undefined,
+  permitTrackingData: PermitTracking[] | undefined,
+  permitTypeData: PermitType | undefined
+): Promise<Permit> => {
+  return await unitOfWork.execute(
+    async ({
+      electrificationProject,
+      generalProject,
+      housingProject,
+      permit,
+      permitNote,
+      permitTracking,
+      sourceSystemKind,
+      user
+    }) => {
+      // Add permit ID and stamp data if necessary
+      const upsertPermitData: PermitBase = {
+        ...permitData,
+        permitId: permitData.permitId || uuidv4()
+      };
 
-  return response;
+      const sourceSystemKinds = await sourceSystemKind.list();
+      const isPeachIntegratedAuth = checkIfPeachIntegratedAuthType(
+        permitTypeData?.sourceSystem ?? '',
+        sourceSystemKinds
+      );
+      const peachIntegratedTracking = findPriorityPermitTracking(permitTrackingData);
+      let isValidPeachPermit = false;
+
+      if (isPeachIntegratedAuth && !!peachIntegratedTracking) {
+        const peachRecord = await getPeachRecord(
+          peachIntegratedTracking.trackingId!,
+          peachIntegratedTracking.sourceSystemKind!.sourceSystem
+        );
+        const peachSummary = summarizePeachRecord(peachRecord);
+        isValidPeachPermit = !!peachSummary;
+        if (!isValidPeachPermit) throw new Problem(400, { detail: 'Invalid Peach record summary' });
+      }
+
+      // Add data to tracking IDs if necessary
+      permitTrackingData?.forEach((x: PermitTracking) => {
+        x.permitId = x.permitId ?? permitData.permitId;
+        x.shownToProponent = x.shownToProponent ?? false;
+      });
+
+      // Upserting can't have relational information in the data
+      const oldAuthorization = permitData.permitId
+        ? await permit.findFirst({ where: { permitId: permitData.permitId } })
+        : undefined;
+      const data = await permit.upsert(
+        {
+          permitId: upsertPermitData.permitId
+        },
+        upsertPermitData,
+        upsertPermitData
+      );
+
+      await permitTracking.deleteMany({
+        permitId: upsertPermitData.permitId,
+        permitTrackingId: {
+          notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter((x) => x)
+        }
+      });
+
+      if (permitTrackingData?.length) {
+        await Promise.all(
+          permitTrackingData.map(async (p) => {
+            const permitTrackingUpsert = {
+              permitId: data.permitId,
+              permitTrackingId: p.permitTrackingId,
+              trackingId: p.trackingId,
+              shownToProponent: p.shownToProponent,
+              sourceSystemKindId: p.sourceSystemKindId
+            } as PermitTrackingBase;
+
+            return await upsertPermitTracking({ permitTracking }, permitTrackingUpsert);
+          })
+        );
+      }
+
+      const before = snapshotPermitStatus(oldAuthorization ?? {});
+      const after = snapshotPermitStatus(data);
+      const diff = differential(before, after);
+
+      const statusChanged = !isEmptyObject(diff);
+      const permitNoteText = (permitNoteData?.[0].note ?? '').trim();
+      const isEmptyPermitNote = permitNoteText.length === 0;
+
+      // Prevent creating notes and sending an update email if the above call fails
+      if (data?.permitId) {
+        if (!isEmptyPermitNote || (isValidPeachPermit && statusChanged)) {
+          const note = isEmptyPermitNote
+            ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
+            : permitNoteText;
+          await sendPermitUpdateNotifications(
+            { electrificationProject, generalProject, housingProject, permitNote, user },
+            data,
+            false,
+            note
+          );
+        }
+      }
+
+      return data;
+    }
+  );
 };

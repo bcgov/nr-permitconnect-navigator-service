@@ -383,6 +383,19 @@ export function splitDateTime(value: Date): DateTimeStrings {
 }
 
 /**
+ * Converts a string to pascal case
+ * @param str The string to convert
+ * @returns The input string converted to title case
+ */
+export function toPascalCase(str: string) {
+  return str
+    .replace(/_code$/, '')
+    .split('_')
+    .map((p) => p[0].toUpperCase() + p.slice(1))
+    .join('');
+}
+
+/**
  * Converts a string to title case
  * @param str The string to convert
  * @returns The input string converted to title case
@@ -391,15 +404,6 @@ export function toTitleCase(str: string): string {
   if (!str) return str;
 
   return str.charAt(0).toUpperCase() + str.substring(1).toLowerCase();
-}
-
-/**
- * Converts a UUDI to an activity ID
- * @param id The ID to convert
- * @returns A truncated version of the given ID
- */
-export function uuidToActivityId(id: string): string {
-  return id.substring(0, 8).toUpperCase();
 }
 
 /**

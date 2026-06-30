@@ -1,7 +1,7 @@
 import axios from 'axios';
 import config from 'config';
 
-import * as mapService from '../../../src/services/map.ts';
+import * as mapService from '../../../src/external/openMaps.ts';
 
 import type { Mocked } from 'vitest';
 

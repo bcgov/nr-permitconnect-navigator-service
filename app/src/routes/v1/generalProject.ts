@@ -4,12 +4,12 @@ import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
-  getGeneralProjectActivityIdsController,
   getGeneralProjectController,
-  getGeneralProjectsController,
   getGeneralProjectDraftController,
   getGeneralProjectDraftsController,
   getGeneralProjectStatisticsController,
+  listGeneralProjectActivityIdsController,
+  listGeneralProjectsController,
   searchGeneralProjectsController,
   submitGeneralProjectDraftController,
   updateGeneralProjectController,
@@ -26,13 +26,13 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of general projects */
-router.get('/', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectsController);
+router.get('/', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), listGeneralProjectsController);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  getGeneralProjectActivityIdsController
+  listGeneralProjectActivityIdsController
 );
 
 /** Search general projects */

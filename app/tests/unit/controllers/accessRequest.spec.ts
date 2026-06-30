@@ -5,7 +5,7 @@ import {
   getAccessRequestsController,
   processUserAccessRequestController
 } from '../../../src/controllers/accessRequest';
-import { assignPermissions } from '../../../src/services/coms';
+import { assignPermissions } from '../../../src/external/coms';
 import { getInitiative } from '../../../src/services/initiative';
 import { createUser, readUser } from '../../../src/services/user';
 import {

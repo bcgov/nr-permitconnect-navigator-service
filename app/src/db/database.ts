@@ -40,6 +40,7 @@ const prisma = new PrismaClient({
   .$extends(projectIdTransform);
 
 export default prisma;
+export type PrismaClientType = typeof prisma;
 
 /**
  * Checks the health of the database by executing a simple query.

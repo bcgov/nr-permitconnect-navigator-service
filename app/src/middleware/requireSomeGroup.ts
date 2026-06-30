@@ -1,11 +1,10 @@
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { assignPermissions } from '../services/coms.ts';
-import { assignGroup, getGroups, getSubjectGroups } from '../services/yars.ts';
+import { assignGroup, getGroups } from '../domains/yars.ts';
+import { unitOfWork } from '../repository/unitOfWork.ts';
+import { assignPermissions } from '../external/coms.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
 
 /**
  * Attempt to assign proponent groups to users with external IDPs
@@ -17,7 +16,7 @@ import type { PrismaTransactionClient } from '../db/database.ts';
  * @throws {Problem} The error encountered upon failure
  */
 export const requireSomeGroup = async (req: Request, res: Response, next: NextFunction) => {
-  await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
+  await unitOfWork.execute(async ({ group, initiative, subjectGroup }) => {
     const idp = res.locals.currentContext?.tokenPayload?.identity_provider;
     const sub = res.locals.currentContext?.tokenPayload?.sub;
 
@@ -28,7 +27,7 @@ export const requireSomeGroup = async (req: Request, res: Response, next: NextFu
       });
     }
 
-    let groups = await getSubjectGroups(tx, sub);
+    let groups = await subjectGroup.getSubjectGroups(sub);
 
     if (idp !== IdentityProviderKind.AZUREIDIR) {
       const required = [Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING, Initiative.PCNS];
@@ -37,17 +36,17 @@ export const requireSomeGroup = async (req: Request, res: Response, next: NextFu
       if (missing.length) {
         await Promise.all(
           missing.map(async (x) => {
-            const g = await getGroups(tx, x);
+            const g = await getGroups({ group, initiative }, x);
 
             const groupId = g.find((x) => x.name === GroupName.PROPONENT)?.groupId;
-            if (groupId) await assignGroup(tx, sub, groupId);
+            if (groupId) await assignGroup({ group, subjectGroup }, sub, groupId);
           })
         );
 
-        groups = await getSubjectGroups(tx, sub);
+        groups = await subjectGroup.getSubjectGroups(sub);
 
         // Assign COMS permissions
-        await assignPermissions(tx, res.locals.currentContext, sub);
+        await assignPermissions(res.locals.currentContext, sub, groups);
       }
     }
 
