@@ -40,20 +40,23 @@ export const createGeneralProject = async (
 };
 
 /**
- * Delete a general project
+ * Soft delete a general project
  * @param tx Prisma transaction client
  * @param generalProjectId Unique general project ID
  * @param deleteStamp Timestamp information of the delete
+ * @returns A Promise that resolves to the soft deleted general project
  */
 export const deleteGeneralProject = async (
   tx: PrismaTransactionClient,
   generalProjectId: string,
   deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.general_project.update({
+): Promise<GeneralProject> => {
+  const result = await tx.general_project.update({
     data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
     where: { generalProjectId }
   });
+
+  return result;
 };
 
 /**

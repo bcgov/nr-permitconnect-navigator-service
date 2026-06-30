@@ -1,6 +1,7 @@
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
+import type { IStamps } from '../interfaces/IStamps.ts';
 import type {
   ListPermitsOptions,
   Permit,
@@ -10,18 +11,34 @@ import type {
 } from '../types/index.ts';
 
 /**
- * Delete a specific permit
+ * Soft delete a specific permit
  * @param tx Prisma transaction client
  * @param permitId Permit ID
+ * @param deleteStamp Timestamp information of the delete
  */
-export const deletePermit = async (tx: PrismaTransactionClient, permitId: string): Promise<void> => {
-  await tx.permit.delete({
-    where: {
-      permitId: permitId
-    },
-    include: {
-      permitType: true
-    }
+export const deletePermit = async (
+  tx: PrismaTransactionClient,
+  permitId: string,
+  deleteStamp: Partial<IStamps>
+): Promise<void> => {
+  const softDeleteData = {
+    deletedAt: deleteStamp.deletedAt,
+    deletedBy: deleteStamp.deletedBy
+  };
+
+  const deletedPermit = await tx.permit.update({
+    data: softDeleteData,
+    where: { permitId }
+  });
+
+  await tx.permit_note.updateMany({
+    data: softDeleteData,
+    where: { permitId: deletedPermit.permitId, deletedAt: null }
+  });
+
+  await tx.permit_tracking.updateMany({
+    data: softDeleteData,
+    where: { permitId: deletedPermit.permitId, deletedAt: null }
   });
 };
 

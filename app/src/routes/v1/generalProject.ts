@@ -108,7 +108,7 @@ router.patch(
   updateGeneralProjectController
 );
 
-/** Deletes a general project */
+/** Soft deletes a general project */
 router.delete(
   '/:generalProjectId',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.DELETE),

@@ -278,8 +278,11 @@ export const createGeneralProjectController = async (
 
 export const deleteGeneralProjectController = async (req: Request<{ generalProjectId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const project = await getGeneralProject(tx, req.params.generalProjectId);
-    await deleteGeneralProject(tx, req.params.generalProjectId, generateDeleteStamps(res.locals.currentContext));
+    const project = await deleteGeneralProject(
+      tx,
+      req.params.generalProjectId,
+      generateDeleteStamps(res.locals.currentContext)
+    );
     await deleteActivity(tx, project.activityId, generateDeleteStamps(res.locals.currentContext));
   });
 

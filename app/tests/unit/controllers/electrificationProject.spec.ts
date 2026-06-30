@@ -148,7 +148,6 @@ describe('createElectrificationProjectController', () => {
 });
 
 describe('deleteElectrificationProjectController', () => {
-  const getElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProject');
   const deleteElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'deleteElectrificationProject');
   const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
@@ -157,7 +156,7 @@ describe('deleteElectrificationProjectController', () => {
       params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
-    getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
+    deleteElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
     deleteActivitySpy.mockResolvedValue();
 
     await deleteElectrificationProjectController(
@@ -165,8 +164,6 @@ describe('deleteElectrificationProjectController', () => {
       res as unknown as Response
     );
 
-    expect(getElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
     expect(deleteElectrificationProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId, {
       deletedAt: expect.any(Date) as Date,

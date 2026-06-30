@@ -43,7 +43,7 @@ describe('getNoteHistory', () => {
         noteHistoryId: '1'
       },
       include: {
-        note: { orderBy: { createdAt: 'desc' } }
+        note: { orderBy: { createdAt: 'desc' }, where: { deletedAt: null } }
       }
     });
     expect(response).toStrictEqual(TEST_NOTE_HISTORY_1);

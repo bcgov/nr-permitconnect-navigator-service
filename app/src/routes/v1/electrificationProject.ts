@@ -111,7 +111,7 @@ router.patch(
   updateElectrificationProjectController
 );
 
-/** Deletes an electrification project */
+/** Soft deletes an electrification project */
 router.delete(
   '/:electrificationProjectId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.DELETE),

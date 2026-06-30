@@ -32,20 +32,23 @@ export const createEnquiry = async (tx: PrismaTransactionClient, data: EnquiryBa
 };
 
 /**
- * Delete an enquiry
+ * Soft delete an enquiry
  * @param tx Prisma transaction client
  * @param enquiryId Unique enquiry ID
  * @param deleteStamp Timestamp information of the delete
+ * @returns A Promise that resolves to the soft deleted enquiry
  */
 export const deleteEnquiry = async (
   tx: PrismaTransactionClient,
   enquiryId: string,
   deleteStamp: Partial<IStamps>
-): Promise<void> => {
-  await tx.enquiry.update({
+): Promise<Enquiry> => {
+  const result = await tx.enquiry.update({
     data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
     where: { enquiryId }
   });
+
+  return result;
 };
 
 /**

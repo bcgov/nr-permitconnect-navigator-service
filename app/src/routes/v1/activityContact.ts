@@ -45,7 +45,7 @@ router.put(
   updateActivityContactController
 );
 
-/** Delete an activity_contact linkage for an activity */
+/** Hard delete an activity_contact linkage for an activity */
 router.delete(
   '/:contactId',
   hasAuthorization(Resource.ACTIVITY_CONTACT, Action.DELETE),

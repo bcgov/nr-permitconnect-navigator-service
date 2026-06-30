@@ -108,7 +108,7 @@ router.patch(
   updateHousingProjectController
 );
 
-/** Deletes a housing project */
+/** Soft deletes a housing project */
 router.delete(
   '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),

@@ -179,8 +179,7 @@ async function emailEnquiryConfirmation(
 
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    const enquiry = await getEnquiry(tx, req.params.enquiryId);
-    await deleteEnquiry(tx, req.params.enquiryId, generateDeleteStamps(res.locals.currentContext));
+    const enquiry = await deleteEnquiry(tx, req.params.enquiryId, generateDeleteStamps(res.locals.currentContext));
     await deleteActivity(tx, enquiry.activityId, generateDeleteStamps(res.locals.currentContext));
   });
   res.status(204).end();

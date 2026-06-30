@@ -238,7 +238,6 @@ describe('createGeneralProjectController', () => {
 });
 
 describe('deleteGeneralProjectController', () => {
-  const getGeneralProjectSpy = vi.spyOn(generalProjectService, 'getGeneralProject');
   const deleteGeneralProjectSpy = vi.spyOn(generalProjectService, 'deleteGeneralProject');
   const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
@@ -247,7 +246,7 @@ describe('deleteGeneralProjectController', () => {
       params: { generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
     };
 
-    getGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
+    deleteGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
     deleteActivitySpy.mockResolvedValue();
 
     await deleteGeneralProjectController(
@@ -255,8 +254,6 @@ describe('deleteGeneralProjectController', () => {
       res as unknown as Response
     );
 
-    expect(getGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.generalProjectId);
     expect(deleteGeneralProjectSpy).toHaveBeenCalledTimes(1);
     expect(deleteGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.generalProjectId, {
       deletedAt: expect.any(Date) as Date,

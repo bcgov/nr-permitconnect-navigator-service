@@ -30,14 +30,21 @@ export const deleteNoteHistory = async (
   noteHistoryId: string,
   deleteStamp: Partial<IStamps>
 ): Promise<void> => {
-  await tx.note_history.update({
+  const softDeleteData = {
+    deletedAt: deleteStamp.deletedAt,
+    deletedBy: deleteStamp.deletedBy
+  };
+
+  const deletedNoteHistory = await tx.note_history.update({
     where: {
       noteHistoryId: noteHistoryId
     },
-    data: {
-      deletedAt: deleteStamp.deletedAt,
-      deletedBy: deleteStamp.deletedBy
-    }
+    data: softDeleteData
+  });
+
+  await tx.note.updateMany({
+    data: softDeleteData,
+    where: { noteHistoryId: deletedNoteHistory.noteHistoryId, deletedAt: null }
   });
 };
 
@@ -53,7 +60,7 @@ export const getNoteHistory = async (tx: PrismaTransactionClient, noteHistoryId:
       noteHistoryId: noteHistoryId
     },
     include: {
-      note: { orderBy: { createdAt: 'desc' } }
+      note: { orderBy: { createdAt: 'desc' }, where: { deletedAt: null } }
     }
   });
   return result;

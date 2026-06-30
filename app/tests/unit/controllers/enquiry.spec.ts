@@ -125,7 +125,6 @@ describe('createEnquiryController', () => {
 });
 
 describe('deleteEnquiryController', () => {
-  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
   const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
   const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
 
@@ -134,13 +133,11 @@ describe('deleteEnquiryController', () => {
       params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' }
     };
 
-    getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
+    deleteEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
     deleteActivitySpy.mockResolvedValue();
 
     await deleteEnquiryController(req as unknown as Request<{ enquiryId: string }>, res as unknown as Response);
 
-    expect(getEnquirySpy).toHaveBeenCalledTimes(1);
-    expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
     expect(deleteEnquirySpy).toHaveBeenCalledTimes(1);
     expect(deleteEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId, {
       deletedAt: expect.any(Date) as Date,

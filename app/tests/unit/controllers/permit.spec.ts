@@ -97,7 +97,10 @@ describe('deletePermitController', () => {
     await deletePermitController(req as unknown as Request<{ permitId: string }>, res as unknown as Response);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.permitId);
+    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.permitId, {
+      deletedAt: expect.any(Date) as Date,
+      deletedBy: TEST_CURRENT_CONTEXT.userId
+    });
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });

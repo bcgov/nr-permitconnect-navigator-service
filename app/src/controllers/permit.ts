@@ -5,7 +5,7 @@ import { findPriorityPermitTracking } from './peach.ts';
 import { codeTable } from '../db/codes/cache.ts';
 import { PermitStage } from '../db/codes/enums.ts';
 import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { generateCreateStamps, generateUpdateStamps } from '../db/utils/utils.ts';
+import { generateCreateStamps, generateDeleteStamps, generateUpdateStamps } from '../db/utils/utils.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { email } from '../services/email.ts';
@@ -56,7 +56,7 @@ const snapshotPermitStatus = (p: Partial<Permit>) => ({
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await transactionWrapper<void>(async (tx: PrismaTransactionClient) => {
-    await deletePermit(tx, req.params.permitId);
+    await deletePermit(tx, req.params.permitId, generateDeleteStamps(res.locals.currentContext));
   });
   res.status(204).end();
 };

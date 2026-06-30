@@ -23,7 +23,7 @@ router.post(
   createDocumentController
 );
 
-/** Delete a document */
+/** Soft delete a document */
 router.delete(
   '/:documentId',
   hasAuthorization(Resource.DOCUMENT, Action.DELETE),
