@@ -7,7 +7,10 @@ import type { PermitTracking } from '../types/index.ts';
  * @param req Express Request object
  * @param res Express Response object
  */
-export const getPeachSummaryController = async (req: Request<never, never, PermitTracking[], never>, res: Response) => {
-  const response = getPeachSummaryService(req.body);
+export const getPeachSummaryController = async (
+  req: Request<never, never, { permitTrackings: PermitTracking[] }, never>,
+  res: Response
+) => {
+  const response = getPeachSummaryService(req.body.permitTrackings);
   res.status(200).json(response);
 };
