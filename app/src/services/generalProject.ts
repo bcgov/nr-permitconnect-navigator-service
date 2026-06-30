@@ -51,14 +51,6 @@ export const createGeneralProjectService = async (
   );
 };
 
-export const deleteGeneralProjectService = async (generalProjectId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ activity, generalProject }) => {
-    const project = await generalProject.findUniqueOrThrow({ where: { generalProjectId } });
-    await generalProject.delete({ generalProjectId });
-    await activity.delete({ activityId: project?.activityId });
-  });
-};
-
 export const listGeneralProjectActivityIdsService = async (): Promise<string[]> => {
   return await unitOfWork.execute(async ({ generalProject }) => {
     const ids = await generalProject.findMany({ select: { activityId: true } });

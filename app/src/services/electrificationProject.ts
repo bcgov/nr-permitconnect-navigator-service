@@ -35,14 +35,6 @@ export const createElectrificationProjectService = async (
   );
 };
 
-export const deleteElectrificationProjectService = async (electrificationProjectId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ activity, electrificationProject }) => {
-    const project = await electrificationProject.findUniqueOrThrow({ where: { electrificationProjectId } });
-    await electrificationProject.delete({ electrificationProjectId });
-    await activity.delete({ activityId: project?.activityId });
-  });
-};
-
 /**
  * Gets a specific electrification project from the PCNS database
  * @param electrificationProjectId PCNS electrification project ID

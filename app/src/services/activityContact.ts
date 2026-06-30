@@ -85,12 +85,15 @@ export const deleteActivityContactService = async (
       if ((ac.role as ActivityContactRole) === ActivityContactRole.PRIMARY)
         throw new Problem(403, { detail: 'Cannot remove PRIMARY contact' });
 
-      await activityContact.delete({
-        activityId_contactId: {
-          activityId,
-          contactId
-        }
-      });
+      await activityContact.delete(
+        {
+          activityId_contactId: {
+            activityId,
+            contactId
+          }
+        },
+        { hard: true }
+      );
 
       const { templateParams, navEmail } = await getTeamMemberEmailTemplateData(
         { contact, electrificationProject, enquiry, generalProject, housingProject },

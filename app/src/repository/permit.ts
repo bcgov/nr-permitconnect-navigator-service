@@ -6,7 +6,7 @@ import { SearchPermitsOptions } from '../types/stuff';
 
 export class PermitRepository extends WritableRepository<PrismaTransactionClient['permit']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
-    super(tx.permit, principal);
+    super(tx.permit, principal, true);
   }
 
   public async search(initiativeCode: Exclude<Initiative, Initiative.PCNS>, options: SearchPermitsOptions) {

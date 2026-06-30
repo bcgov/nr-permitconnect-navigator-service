@@ -43,10 +43,12 @@ export const createNoteHistoryService = async (data: NoteHistoryBase, noteStr: s
  * @returns A promise that resolves when the operation is complete
  */
 export const deleteNoteHistoryService = async (noteHistoryId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ noteHistory }) => {
+  return await unitOfWork.execute(async ({ noteHistory, note }) => {
     await noteHistory.delete({
       noteHistoryId
     });
+
+    await note.deleteMany({ noteHistoryId });
   });
 };
 

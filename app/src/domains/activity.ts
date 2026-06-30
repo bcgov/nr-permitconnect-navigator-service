@@ -3,8 +3,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { Repositories } from '../repository/unitOfWork.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { IStamps } from '../interfaces/IStamps.ts';
 import type { Activity } from '../types/index.ts';
 
 /**
@@ -40,64 +38,69 @@ export const createActivity = async (
 };
 
 /**
- * Soft delete an activity
- * Use this over a hard delete
- * @param tx Prisma transaction client
- * @param activityId Unique activity ID
- * @param deleteStamp Timestamp information of the delete
+ * Soft or hard delete an activity
+ * Soft delete will cascade soft deletes by manually calling each repository
+ * Hard delete utilizes set DB cascades
+ * @param repositories - The required repositories
+ * @param activityId - Unique activity ID
+ * @param options - Optional delete operation parameters
+ * @param options.hard - Force a hard delete of data in the database
  */
 export const deleteActivity = async (
-  tx: PrismaTransactionClient,
+  repositories: Pick<
+    Repositories,
+    | 'activity'
+    | 'activityContact'
+    | 'document'
+    | 'electrificationProject'
+    | 'enquiry'
+    | 'generalProject'
+    | 'housingProject'
+    | 'note'
+    | 'noteHistory'
+    | 'permit'
+    | 'permitNote'
+    | 'permitTracking'
+  >,
   activityId: string,
-  deleteStamp: Partial<IStamps>
+  options?: { hard?: boolean }
 ): Promise<void> => {
-  await tx.activity.update({
-    data: { deletedAt: deleteStamp.deletedAt, deletedBy: deleteStamp.deletedBy },
-    where: { activityId }
-  });
-};
+  await repositories.activity.delete({ activityId, deletedAt: null }, options);
 
-/**
- * Hard delete an activity
- * Should not be used unless absolutely sure as it will cascade
- * @param tx Prisma transaction client
- * @param activityId Unique activity ID
- */
-export const deleteActivityHard = async (tx: PrismaTransactionClient, activityId: string): Promise<void> => {
-  await tx.activity.delete({
-    where: { activityId }
-  });
-};
+  if (!options?.hard) {
+    await repositories.activityContact.deleteMany({ activityId, deletedAt: null });
+    await repositories.document.deleteMany({ activityId, deletedAt: null });
+    await repositories.electrificationProject.deleteMany({ activityId, deletedAt: null });
+    await repositories.enquiry.deleteMany({ activityId, deletedAt: null });
+    await repositories.generalProject.deleteMany({ activityId, deletedAt: null });
+    await repositories.housingProject.deleteMany({ activityId, deletedAt: null });
+    await repositories.noteHistory.deleteMany({ activityId, deletedAt: null });
+    await repositories.permit.deleteMany({ activityId, deletedAt: null });
 
-/**
- * Get an activity
- * @param tx Prisma transaction client
- * @param activityId Unique activity ID
- * @returns A Promise that resolves to the specific activity or null if not found
- */
-export const getActivity = async (tx: PrismaTransactionClient, activityId: string): Promise<Activity | null> => {
-  const response = await tx.activity.findFirst({ where: { activityId } });
-  return response;
-};
+    const deletedNotes = (
+      await repositories.noteHistory.findMany(
+        { where: { activityId }, select: { noteHistoryId: true } },
+        { includeDeleted: true }
+      )
+    ).map((x) => x.noteHistoryId);
+    const deletedPermits = (
+      await repositories.permit.findMany(
+        { where: { activityId }, select: { permitId: true } },
+        { includeDeleted: true }
+      )
+    ).map((x) => x.permitId);
 
-/**
- * Get a list of activities
- * @param tx Prisma transaction client
- * @param initiative Optional initiative code, if provided, only return activities for that initiative
- * @returns A Promise that resolves to an array of activities
- */
-export const getActivities = async (tx: PrismaTransactionClient, initiative?: Initiative): Promise<Activity[]> => {
-  if (!initiative) {
-    const allActivities = await tx.activity.findMany({});
-    return allActivities;
-  } else {
-    const response = await tx.activity.findMany({
-      where: {
-        initiative: {
-          code: initiative
-        }
-      }
+    await repositories.note.deleteMany({
+      noteHistoryId: { in: deletedNotes },
+      deletedAt: null
     });
-    return response;
+    await repositories.permitNote.deleteMany({
+      permitId: { in: deletedPermits },
+      deletedAt: null
+    });
+    await repositories.permitTracking.deleteMany({
+      permitId: { in: deletedPermits },
+      deletedAt: null
+    });
   }
 };

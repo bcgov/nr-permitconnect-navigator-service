@@ -45,8 +45,16 @@ const snapshotPermitStatus = (p: Partial<Permit>) => ({
  * @returns A promise that resolves when the operation is complete.
  */
 export const deletePermitService = async (permitId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ permit }) => {
+  return await unitOfWork.execute(async ({ permit, permitNote, permitTracking }) => {
     await permit.delete({
+      permitId
+    });
+
+    await permitNote.deleteMany({
+      permitId
+    });
+
+    await permitTracking.deleteMany({
       permitId
     });
   });

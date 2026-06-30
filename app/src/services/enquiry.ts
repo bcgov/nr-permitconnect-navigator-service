@@ -97,14 +97,6 @@ export const createEnquiryService = async (
   );
 };
 
-export const deleteEnquiryService = async (enquiryId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ activity, enquiry }) => {
-    const e = await enquiry.findFirstOrThrow({ where: { enquiryId } });
-    await enquiry.delete({ enquiryId });
-    await activity.delete({ activityId: e?.activityId });
-  });
-};
-
 /**
  * Gets a specific enquiry from the PCNS database
  * @param enquiryId - ID of the enquiry to obtain

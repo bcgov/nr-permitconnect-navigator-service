@@ -50,14 +50,6 @@ export const createHousingProjectService = async (
   );
 };
 
-export const deleteHousingProjectService = async (housingProjectId: string): Promise<void> => {
-  return await unitOfWork.execute(async ({ activity, housingProject }) => {
-    const project = await housingProject.findUniqueOrThrow({ where: { housingProjectId } });
-    await housingProject.delete({ housingProjectId });
-    await activity.delete({ activityId: project?.activityId });
-  });
-};
-
 /**
  * Gets a specific housing project from the PCNS database
  * @param housingProjectId PCNS housing project ID

@@ -1,9 +1,10 @@
 import { Prisma } from '@prisma/client';
 
+import { deleteActivityService } from '../services/activity.ts';
+
 import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '../services/draft.ts';
 import {
   createElectrificationProjectService,
-  deleteElectrificationProjectService,
   getElectrificationProjectService,
   getElectrificationProjectStatisticsService,
   listElectrificationProjectActivityIdsService,
@@ -42,7 +43,8 @@ export const deleteElectrificationProjectController = async (
   req: Request<{ electrificationProjectId: string }>,
   res: Response
 ) => {
-  await deleteElectrificationProjectService(req.params.electrificationProjectId);
+  const project = await getElectrificationProjectService(req.params.electrificationProjectId);
+  await deleteActivityService(project.activityId);
   res.status(204).end();
 };
 

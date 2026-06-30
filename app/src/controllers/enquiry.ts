@@ -1,8 +1,8 @@
 import { Prisma } from '@prisma/client';
 
+import { deleteActivityService } from '../services/activity.ts';
 import {
   createEnquiryService,
-  deleteEnquiryService,
   getEnquiryService,
   listEnquiriesService,
   listRelatedEnquiriesService,
@@ -26,7 +26,8 @@ export const createEnquiryController = async (
 };
 
 export const deleteEnquiryController = async (req: Request<{ enquiryId: string }>, res: Response) => {
-  await deleteEnquiryService(req.params.enquiryId);
+  const project = await getEnquiryService(req.params.enquiryId);
+  await deleteActivityService(project.activityId);
   res.status(204).end();
 };
 
