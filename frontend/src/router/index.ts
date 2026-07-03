@@ -128,7 +128,7 @@ const routes: RouteRecordRaw[] = [
             useAppStore().setZone(Zone.GLOBAL);
           }
         ],
-        meta: { hideBreadcrumb: true, hideAppDrawer: true }
+        meta: { hideBreadcrumb: true }
       },
       {
         path: '/developer',

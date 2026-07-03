@@ -145,23 +145,6 @@ describe('AppDrawer.vue', () => {
     });
   });
 
-  it('triggers click on enter key press', async () => {
-    const wrapper = mount(AppDrawer, mountOptions);
-
-    const mockElement = document.createElement('div');
-    const clickSpy = vi.spyOn(mockElement, 'click');
-
-    const event = new Event('keydown');
-    Object.defineProperty(event, 'currentTarget', {
-      writable: false,
-      value: mockElement
-    });
-
-    (wrapper.vm as any).handleMenuItemKeydown(event); // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    expect(clickSpy).toHaveBeenCalled();
-  });
-
   it('includes help menu items in all initiatives', async () => {
     const wrapper = mount(AppDrawer, mountOptions);
     const appStore = useAppStore();

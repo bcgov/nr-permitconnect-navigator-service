@@ -46,7 +46,14 @@ const authzStore = useAuthZStore();
 const items: Ref<DrawerItem[]> = ref([]);
 
 const permittedItems: ComputedRef<DrawerItem[]> = computed(() =>
-  items.value.filter((item) => item.public || (item.access && authzStore.canNavigate(item.access)))
+  items.value
+    .filter((item) => item.public || (item.access && authzStore.canNavigate(item.access)))
+    .map((item) => ({
+      ...item,
+      items: item.items?.filter(
+        (subItem) => subItem.public || (subItem.access && authzStore.canNavigate(subItem.access))
+      )
+    }))
 );
 
 const visible = ref(false);
@@ -56,12 +63,6 @@ async function createIntake(route: RouteName) {
   router.push({
     name: route
   });
-}
-
-function handleMenuItemKeydown(event: Event) {
-  if (event.currentTarget instanceof HTMLElement) {
-    event.currentTarget.click();
-  }
 }
 
 watchEffect(() => {
@@ -181,7 +182,8 @@ watchEffect(() => {
         items: [
           {
             label: 'User Guide',
-            route: RouteName.EXT_GENERAL_GUIDE
+            route: RouteName.EXT_GENERAL_GUIDE,
+            access: [NavigationPermission.EXT_GENERAL]
           },
           {
             label: 'Report a problem',
@@ -242,7 +244,8 @@ watchEffect(() => {
         items: [
           {
             label: 'User Guide',
-            route: RouteName.EXT_HOUSING_GUIDE
+            route: RouteName.EXT_HOUSING_GUIDE,
+            access: [NavigationPermission.EXT_HOUSING]
           },
           {
             label: 'Report a problem',
@@ -271,9 +274,10 @@ watchEffect(() => {
   <Button
     label="Menu"
     outlined
+    class="hover-color"
     @click="visible = true"
   >
-    Menu
+    <span class="hidden md:inline">Menu</span>
     <font-awesome-icon icon="fa-solid fa-bars" />
   </Button>
   <Drawer
@@ -290,15 +294,16 @@ watchEffect(() => {
               icon="pi pi-times"
               rectangle
               variant="outlined"
+              class="hover-color"
               @click="closeCallback"
             ></Button>
           </span>
         </div>
         <div class="overflow-y-auto">
-          <ul class="list-none p-4 m-0">
+          <ul class="list-none p-4 m-0 pl-0">
             <li>
               <div class="mb-2">
-                <span class="font-bold text-2xl">Menu</span>
+                <span class="font-bold text-2xl ml-4">Menu</span>
               </div>
               <ul class="list-none p-0 m-0">
                 <li
@@ -308,10 +313,10 @@ watchEffect(() => {
                 >
                   <router-link
                     v-slot="{ navigate }"
-                    :to="{ name: item.route }"
+                    :to="{ name: item.route ?? RouteName.HOME }"
                     custom
                   >
-                    <div
+                    <Button
                       v-styleclass="{
                         selector: '@next',
                         enterFromClass: 'hidden',
@@ -319,19 +324,15 @@ watchEffect(() => {
                         leaveToClass: 'hidden',
                         leaveActiveClass: 'animate-slideup'
                       }"
-                      class="no-underline inline-flex items-center gap-2 mt-4 mb-2 cursor-pointer"
+                      text
+                      class="no-underline inline-flex items-center mt-2 cursor-pointer hover-color"
                       role="button"
                       tabindex="0"
                       :aria-expanded="item.items ? 'false' : undefined"
                       @click="
                         () => {
-                          navigate();
+                          if (item.route) navigate();
                           if (!item.items) closeCallback();
-                        }
-                      "
-                      @keydown.enter="
-                        (event) => {
-                          handleMenuItemKeydown(event);
                         }
                       "
                     >
@@ -347,7 +348,7 @@ watchEffect(() => {
                         class="pi pi-chevron-down ml-auto"
                         aria-hidden="true"
                       ></i>
-                    </div>
+                    </Button>
                   </router-link>
 
                   <ul
@@ -359,52 +360,50 @@ watchEffect(() => {
                       :key="subItem.label"
                       class="my-3"
                     >
-                      <a
+                      <Button
                         v-if="subItem.func"
-                        class="no-underline cursor-pointer"
+                        class="no-underline cursor-pointer hover-color"
                         role="button"
                         tabindex="0"
+                        text
                         @click="
                           () => {
                             if (subItem.func) subItem.func();
                             closeCallback();
                           }
                         "
-                        @keydown.enter="
-                          () => {
-                            if (subItem.func) subItem.func();
-                            closeCallback();
-                          }
-                        "
                       >
                         <span class="font-medium">{{ subItem.label }}</span>
-                      </a>
-                      <a
+                      </Button>
+                      <Button
                         v-else-if="subItem.mailTo"
-                        class="no-underline"
+                        class="no-underline hover-color"
                         :href="subItem.mailTo"
+                        text
+                        as="a"
                         @click="closeCallback"
                       >
                         <span class="font-medium">{{ subItem.label }}</span>
-                      </a>
+                      </Button>
                       <router-link
                         v-else
                         v-slot="{ href, navigate }"
-                        :to="{ name: subItem.route }"
+                        :to="{ name: subItem.route ?? RouteName.HOME }"
                         custom
                       >
-                        <a
-                          class="no-underline"
+                        <Button
+                          class="no-underline hover-color"
                           :href="href"
+                          text
                           @click="
                             () => {
-                              navigate();
+                              if (subItem.route) navigate();
                               closeCallback();
                             }
                           "
                         >
                           <span class="font-medium">{{ subItem.label }}</span>
-                        </a>
+                        </Button>
                       </router-link>
                     </li>
                   </ul>
@@ -419,13 +418,7 @@ watchEffect(() => {
 </template>
 
 <style lang="scss" scoped>
-a:hover {
-  text-decoration: none;
-}
-
-:deep(.p-menubar-submenu) {
-  li:first-child {
-    border-top: 2px solid #fcba19;
-  }
+.hover-color.p-button:hover {
+  background-color: var(--p-content-hover-background);
 }
 </style>
