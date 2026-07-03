@@ -1,17 +1,16 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { onErrorCaptured } from 'vue';
-import { RouterView, useRoute } from 'vue-router';
+import { RouterView } from 'vue-router';
 
 import Breadcrumb from './components/common/Breadcrumb.vue';
-import { AppLayout, Navbar, ProgressLoader } from '@/components/layout';
+import { AppLayout, ProgressLoader } from '@/components/layout';
 import { ConfirmDialog, Message, Toast, useToast } from '@/lib/primevue';
 import { useAppStore, useConfigStore } from '@/store';
 import { ToastTimeout } from '@/utils/enums/application';
 
 // Store
 const appStore = useAppStore();
-const route = useRoute();
 const { getIsLoading } = storeToRefs(appStore);
 const { getConfig } = storeToRefs(useConfigStore());
 
@@ -28,9 +27,6 @@ onErrorCaptured((e: Error) => {
   <Toast />
 
   <AppLayout>
-    <template #nav>
-      <Navbar v-if="!route.meta.hideNavbar" />
-    </template>
     <template #main>
       <Message
         v-if="getConfig?.notificationBanner"

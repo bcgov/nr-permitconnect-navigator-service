@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
+import { useRoute } from 'vue-router';
 
 import HeaderMenu from '@/components/common/HeaderMenu.vue';
+import { AppDrawer } from '@/components/layout';
 
 // Actions
 const { t } = useI18n();
+const route = useRoute();
 </script>
 
 <template>
@@ -13,7 +16,7 @@ const { t } = useI18n();
       id="header-branding"
       role="none"
     >
-      <div class="flex flex-row flex-wrap items-center lg:pl-12">
+      <div class="flex flex-row flex-wrap items-center lg:pl-12 py-2">
         <div class="flex flex-none">
           <a href="https://www2.gov.bc.ca">
             <img
@@ -29,6 +32,7 @@ const { t } = useI18n();
         </div>
         <div class="flex justify-end lg:mr-12">
           <HeaderMenu />
+          <AppDrawer v-if="!route.meta?.hideAppDrawer" />
         </div>
       </div>
     </nav>
@@ -41,7 +45,7 @@ const { t } = useI18n();
   color: var(--p-bcblue-950);
   white-space: nowrap;
   // TODO: Reference a surface colour once PrimeVue 4 changes come in
-  border-bottom: 1px solid #d8d8d8;
+  border-bottom: 2px solid var(--p-gold-950);
 }
 
 .bc-logo {
