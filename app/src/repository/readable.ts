@@ -1,5 +1,7 @@
 import { Prisma } from '@prisma/client';
 
+import { NotFoundProblem } from '../db/errors';
+
 /**
  * Typed view of a Prisma model delegate. Each method is generic
  * over its args so the return type is computed from the caller's
@@ -56,49 +58,49 @@ export abstract class ReadableRepository<TDelegate> {
   // Reads
   //-------------------------
 
-  async count<A extends Prisma.Args<TDelegate, 'count'>>(
+  public async count<A extends Prisma.Args<TDelegate, 'count'>>(
     args?: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'count'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'count'>> {
-    return this.model.count(this.withNotDeleted(args, options?.includeDeleted === true));
+    return await this.model.count(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  async findMany<A extends Prisma.Args<TDelegate, 'findMany'>>(
+  public async findMany<A extends Prisma.Args<TDelegate, 'findMany'>>(
     args?: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findMany'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'findMany'>> {
-    return this.model.findMany(this.withNotDeleted(args, options?.includeDeleted === true));
+    return await this.model.findMany(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  async findFirst<A extends Prisma.Args<TDelegate, 'findFirst'>>(
+  public async findFirst<A extends Prisma.Args<TDelegate, 'findFirst'>>(
     args?: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findFirst'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'findFirst'>> {
-    return this.model.findFirst(this.withNotDeleted(args, options?.includeDeleted === true));
+    return await this.model.findFirst(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  async findFirstOrThrow<A extends Prisma.Args<TDelegate, 'findFirstOrThrow'>>(
+  public async findFirstOrThrow<A extends Prisma.Args<TDelegate, 'findFirstOrThrow'>>(
     args?: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findFirstOrThrow'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'findFirstOrThrow'>> {
-    return this.model.findFirstOrThrow(this.withNotDeleted(args, options?.includeDeleted === true));
+    return await this.model.findFirstOrThrow(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  async findUnique<A extends Prisma.Args<TDelegate, 'findUnique'>>(
+  public async findUnique<A extends Prisma.Args<TDelegate, 'findUnique'>>(
     args: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findUnique'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<Prisma.Result<TDelegate, A, 'findUnique'>> {
-    return this.model.findUnique(this.withNotDeleted(args, options?.includeDeleted === true));
+    return await this.model.findUnique(this.withNotDeleted(args, options?.includeDeleted === true));
   }
 
-  async findUniqueOrThrow<A extends Prisma.Args<TDelegate, 'findUnique'>>(
+  public async findUniqueOrThrow<A extends Prisma.Args<TDelegate, 'findUnique'>>(
     args: Prisma.SelectSubset<A, Prisma.Args<TDelegate, 'findUnique'>>,
     options?: { includeDeleted?: boolean }
   ): Promise<NonNullable<Prisma.Result<TDelegate, A, 'findUnique'>>> {
     const entity = await this.findUnique(args, options);
 
     if (!entity) {
-      throw new Error('Entity not found');
+      throw new NotFoundProblem();
     }
 
     return entity as NonNullable<Prisma.Result<TDelegate, A, 'findUnique'>>;
