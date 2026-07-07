@@ -6,7 +6,6 @@ import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
 import { Repositories } from '../repository/unitOfWork';
 import { getCurrentUsername } from '../utils';
-import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';
 
@@ -100,7 +99,7 @@ export const generateEnquiryData = async (
     activityId = (
       await createActivity(
         { activity: repositories.activity, initiative: repositories.initiative },
-        Initiative.ELECTRIFICATION
+        currentContext.initiative
       )
     )?.activityId;
 
