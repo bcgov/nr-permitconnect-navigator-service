@@ -2,7 +2,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { emailBringForwardNotification } from '../domains/noteHistory.ts';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
 import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 
@@ -10,7 +9,6 @@ import type {
   BringForward,
   CurrentAuthorization,
   CurrentContext,
-  Enquiry,
   NoteHistory,
   NoteHistoryBase
 } from '../types/index.ts';
@@ -55,112 +53,46 @@ export const deleteNoteHistoryService = async (noteHistoryId: string): Promise<v
 
 /**
  * Retrieve a list of bring forward type note histories by the given state
- * @param initiative The initiative for which the note history belongs to
+ * @param initiativeCode The initiative for which the note history belongs to
  * @param state The state to search for
  * @returns A Promise that resolves to the note histories for the given parameters
  */
 export const listBringForwardsService = async (
-  initiative: Initiative,
+  initiativeCode: Exclude<Initiative, Initiative.PCNS> | undefined,
   state: BringForwardType = BringForwardType.UNRESOLVED
 ): Promise<BringForward[]> => {
-  return await unitOfWork.execute(
-    async ({ electrificationProject, enquiry, generalProject, housingProject, noteHistory, user }) => {
-      const history = await noteHistory.findMany({
-        where: {
-          bringForwardState: state,
-          activity: {
-            initiative: {
-              code: initiative
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        include: {
-          note: { orderBy: { createdAt: 'desc' } }
-        }
+  return await unitOfWork.execute(async ({ noteHistory, user }) => {
+    const history = await noteHistory.listBringForwards(initiativeCode, state);
+
+    if (history.length) {
+      const users = await user.search({
+        userId: history
+          .map((x) => x.createdBy)
+          .filter((x) => !!x)
+          .map((x) => x!)
       });
 
-      if (history.length) {
-        const [elecProj, generalProj, housingProj] = await Promise.all([
-          electrificationProject.search({
-            activityId: history.map((x) => x.activityId)
-          }),
-          generalProject.search({
-            activityId: history.map((x) => x.activityId)
-          }),
-          housingProject.search({
-            activityId: history.map((x) => x.activityId)
-          })
-        ]);
+      return history.map((h) => {
+        const project = h.activity.housingProject ?? h.activity.generalProject ?? h.activity.electrificationProject;
 
-        const users = await user.findMany({
-          where: {
-            AND: [
-              {
-                userId: {
-                  in: history
-                    .map((x) => x.createdBy)
-                    .filter((x) => !!x)
-                    .map((x) => x!)
-                }
-              }
-            ],
-            NOT: [
-              {
-                userId: SYSTEM_ID
-              }
-            ]
-          }
-        });
-
-        const enquiries: Enquiry[] = (
-          await Promise.all([
-            enquiry.search(
-              {
-                activityId: history.map((x) => x.activityId)
-              },
-              Initiative.ELECTRIFICATION
-            ),
-            enquiry.search(
-              {
-                activityId: history.map((x) => x.activityId)
-              },
-              Initiative.GENERAL
-            ),
-            enquiry.search(
-              {
-                activityId: history.map((x) => x.activityId)
-              },
-              Initiative.HOUSING
-            )
-          ])
-        ).flat();
-
-        return history.map((h) => ({
+        return {
           activityId: h.activityId,
-          noteId: h.noteHistoryId,
-          electrificationProjectId: elecProj.find((s) => s.activityId === h.activityId)?.electrificationProjectId,
-          generalProjectId: generalProj.find((s) => s.activityId === h.activityId)?.generalProjectId,
-          housingProjectId: housingProj.find((s) => s.activityId === h.activityId)?.housingProjectId,
-          enquiryId: enquiries.find((s) => s.activityId === h.activityId)?.enquiryId,
+          noteHistoryId: h.noteHistoryId,
+          projectId: project?.projectId,
+          enquiryId: h.activity.enquiry?.find((e) => e.activityId === h.activityId)?.enquiryId,
+          initiative: initiativeCode,
           title: h.title,
-          projectName:
-            elecProj.find((s) => s.activityId === h.activityId)?.projectName ??
-            generalProj.find((s) => s.activityId === h.activityId)?.projectName ??
-            housingProj.find((s) => s.activityId === h.activityId)?.projectName ??
-            null,
+          projectName: project?.projectName ?? null,
           createdByFullName: users.find((u) => u?.userId === h.createdBy)?.fullName ?? null,
           bringForwardDate: h.bringForwardDate?.toISOString(),
           escalateToSupervisor: h.escalateToSupervisor,
           escalateToDirector: h.escalateToDirector
-        }));
-      } else {
-        return [];
-      }
+        } satisfies BringForward;
+      });
+    } else {
+      return [];
     }
-  );
+  });
 };
 
 /**
@@ -174,17 +106,7 @@ export const listNoteHistoriesService = async (
   activityId: string
 ): Promise<NoteHistory[]> => {
   return await unitOfWork.execute(async ({ noteHistory }) => {
-    const result = await noteHistory.findMany({
-      where: {
-        activityId: activityId
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        note: { orderBy: { createdAt: 'desc' } }
-      }
-    });
+    const result = await noteHistory.listNoteHistories(activityId);
 
     if (currentAuthorization?.attributes.includes('scope:self')) {
       return result.filter((x) => x.shownToProponent);

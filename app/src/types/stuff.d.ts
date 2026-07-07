@@ -68,14 +68,16 @@ export interface AtsUserSearchParameters extends ParsedQs {
 
 export interface BringForward {
   activityId: string;
-  noteId: string;
-  electrificationProjectId?: string;
-  housingProjectId?: string;
+  noteHistoryId: string;
+  projectId?: string;
   enquiryId?: string;
+  initiative?: Initiative;
   title: string;
   projectName: string | null;
   bringForwardDate?: string;
   createdByFullName: string | null;
+  escalateToSupervisor: boolean;
+  escalateToDirector: boolean;
 }
 
 export interface ContactSearchParameters {

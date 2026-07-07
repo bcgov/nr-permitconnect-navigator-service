@@ -2,7 +2,13 @@ import type { GeoJSON } from 'geojson';
 
 import type { UUID } from '../common';
 import type { MaybeUndefined, Nullable } from '../util';
-import type { AccessRequestStatus, BasicResponse, GroupName, IdentityProviderKind } from '@/utils/enums/application';
+import type {
+  AccessRequestStatus,
+  BasicResponse,
+  GroupName,
+  IdentityProviderKind,
+  Initiative as EInitiative
+} from '@/utils/enums/application';
 import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { NumResidentialUnits } from '@/utils/enums/housing';
 import type {
@@ -112,16 +118,15 @@ export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelat
 export interface BringForward {
   activityId: string;
   enquiryId?: string;
-  noteId: string;
-  electrificationProjectId?: string;
-  escalateToDirector?: boolean;
-  escalateToSupervisor?: boolean;
-  generalProjectId?: string;
-  housingProjectId?: string;
+  noteHistoryId: string;
+  projectId?: string;
+  initiative?: EInitiative;
   title: string;
   projectName?: string;
   bringForwardDate: string;
   createdByFullName?: string;
+  escalateToSupervisor: boolean;
+  escalateToDirector: boolean;
 }
 
 /**
