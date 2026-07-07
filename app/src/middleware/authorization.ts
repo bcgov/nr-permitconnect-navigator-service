@@ -27,11 +27,7 @@ export const hasAuthorization = (resource: string, action: string) => {
         };
 
         if (res.locals.currentContext) {
-          const userId = await user.findFirst({
-            where: {
-              sub: getCurrentSubject(res.locals.currentContext)
-            }
-          });
+          const userId = await user.findBySub(getCurrentSubject(res.locals.currentContext));
 
           if (!userId) {
             throw new Error('Invalid user');

@@ -23,11 +23,7 @@ export const createDocumentService = async (
 
     let createdByFullName: string | undefined;
     if (createdDocument.createdBy) {
-      const createdBy = await user.findUnique({
-        where: {
-          userId: createdDocument.createdBy
-        }
-      });
+      const createdBy = await user.findById(createdDocument.createdBy);
       createdByFullName = createdBy ? (createdBy.fullName ?? '') : '';
     }
 
@@ -64,11 +60,7 @@ export const listDocumentsService = async (activityId: string): Promise<Document
     const documentsWithNames: Document[] = await Promise.all(
       documents.map(async (doc) => {
         if (!doc.createdBy) return doc;
-        const createdBy = await await user.findUnique({
-          where: {
-            userId: doc.createdBy
-          }
-        });
+        const createdBy = await user.findById(doc.createdBy);
         const createdByFullName = createdBy ? (createdBy.fullName ?? '') : '';
         return { ...doc, ...(createdByFullName ? { createdByFullName } : {}) };
       })

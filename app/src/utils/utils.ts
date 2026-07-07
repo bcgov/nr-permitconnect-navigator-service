@@ -78,7 +78,7 @@ export function compareDates(a?: Date, b?: Date, desc = false): number {
  * @param comparer The object to be compared against
  * @returns Object containing the non-matching key/value pairs in the source object
  */
-export function differential<T extends Record<PropertyKey, unknown>>(source: T, comparer: Partial<T>): Partial<T> {
+export function differential<T extends object>(source: T, comparer: Partial<T>): Partial<T> {
   return Object.fromEntries(
     (Object.entries(source) as [keyof T, T[keyof T]][]).filter(([key, value]) => comparer[key] !== value)
   ) as Partial<T>;

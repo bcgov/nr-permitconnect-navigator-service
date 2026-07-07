@@ -111,11 +111,7 @@ export const sendPermitUpdateNotifications = async (
     // Add navigator update email to email jobs
     let navigatorName = 'Navigator';
     if (navigatorId) {
-      const navigator = await repositories.user.findUnique({
-        where: {
-          userId: navigatorId
-        }
-      });
+      const navigator = await repositories.user.findById(navigatorId);
       navigatorName = `${navigator?.firstName} ${navigator?.lastName}`;
     }
     const navEmail: string = config.get('server.pcns.navEmail');

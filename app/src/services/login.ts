@@ -29,7 +29,7 @@ export interface JwtUser {
  */
 const _tokenToUser = (token: jwt.JwtPayload): JwtUser => {
   return {
-    bceidBusinessName: token.bceid_business_name,
+    bceidBusinessName: token.bceid_business_name ?? null,
     sub: token.sub ? token.sub : token.preferred_username,
     firstName: token.given_name ?? token.given_names,
     fullName: token.name ?? token.display_name,
@@ -50,11 +50,7 @@ export const loginService = async (token: jwt.JwtPayload): Promise<User> => {
   return await unitOfWork.execute(async ({ contact, identityProvider, user }) => {
     const newUser = _tokenToUser(token);
 
-    const oldUser = await user.findFirst({
-      where: {
-        sub: newUser.sub
-      }
-    });
+    const oldUser = await user.findBySub(newUser.sub);
 
     const response = oldUser
       ? await updateUser({ identityProvider, user }, oldUser.userId, newUser)

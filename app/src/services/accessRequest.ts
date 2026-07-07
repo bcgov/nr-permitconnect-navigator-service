@@ -68,11 +68,7 @@ export const createAccessRequestService = async (
       const existingUser = !!accessUser.userId;
       if (!existingUser) userResponse = await createUser({ identityProvider, user }, accessUser);
       else {
-        userResponse = await user.findUnique({
-          where: {
-            userId: accessUser.userId
-          }
-        });
+        userResponse = await user.findById(accessUser.userId);
       }
 
       if (!userResponse) throw new Problem(404, { detail: 'User not found' });
@@ -198,11 +194,7 @@ export const processAccessRequestService = async (
     });
 
     if (accessReq) {
-      const userResponse = await user.findUnique({
-        where: {
-          userId: accessReq.userId
-        }
-      });
+      const userResponse = await user.findById(accessReq.userId);
 
       if (userResponse) {
         const userGroups: Group[] = await subjectGroup.getSubjectGroups(userResponse.sub);
