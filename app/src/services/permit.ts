@@ -228,12 +228,15 @@ export const upsertPermitService = async (
         upsertPermitData
       );
 
-      await permitTracking.deleteMany({
-        permitId: upsertPermitData.permitId,
-        permitTrackingId: {
-          notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter((x) => x)
-        }
-      });
+      await permitTracking.deleteMany(
+        {
+          permitId: upsertPermitData.permitId,
+          permitTrackingId: {
+            notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter((x) => x)
+          }
+        },
+        { hard: true }
+      );
 
       if (permitTrackingData?.length) {
         await Promise.all(
