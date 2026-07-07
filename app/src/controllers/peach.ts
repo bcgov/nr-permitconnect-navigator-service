@@ -80,8 +80,15 @@ export const getPeachSummaryController = async (
   const response = await getPeachRecord(permitTracking.trackingId, permitTracking.sourceSystemKind.sourceSystem);
   const peachSummary = summarizePeachRecord(response);
 
-  if (!peachSummary)
-    throw new Problem(422, { detail: 'No status data could be derived from the PEACH record that was found.' });
+  if (!peachSummary) {
+    log.error('No status data could be derived from the PEACH record that was found.', {
+      status: 422,
+      recordId: permitTracking.trackingId,
+      systemId: permitTracking.sourceSystemKind.sourceSystem,
+      peachRecord: response
+    });
+    throw new Problem(500, { detail: 'No status data could be derived from the PEACH record that was found.' });
+  }
 
   res.status(200).json(peachSummary);
 };
