@@ -6,7 +6,7 @@ import {
   updateNoteHistoryService
 } from '../services/noteHistory.ts';
 
-import { Resource } from '../utils/enums/application.ts';
+import { Initiative, Resource } from '../utils/enums/application.ts';
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
@@ -30,7 +30,11 @@ export const listBringForwardsController = async (
   req: Request<never, never, never, { bringForwardState?: BringForwardType }>,
   res: Response<BringForward[], LocalContext>
 ) => {
-  const response = await listBringForwardsService(res.locals.currentContext.initiative, req.query.bringForwardState);
+  const initiativeCode = res.locals.currentContext.initiative;
+  const response = await listBringForwardsService(
+    initiativeCode !== Initiative.PCNS ? initiativeCode : undefined,
+    req.query.bringForwardState
+  );
   res.status(200).json(response);
 };
 
@@ -50,7 +54,7 @@ export const updateNoteHistoryController = async (
   const response = await updateNoteHistoryService(
     res.locals.currentAuthorization,
     res.locals.currentContext,
-    history,
+    { ...history, noteHistoryId: req.params.noteHistoryId },
     note,
     resource
   );

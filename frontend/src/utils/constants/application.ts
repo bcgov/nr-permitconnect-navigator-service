@@ -2,13 +2,41 @@
  * Shared application wide constants
  */
 
-import { AccessRequestStatus, BasicResponse, GroupName, Initiative, UserSearchParams } from '../enums/application';
+import {
+  AccessRequestStatus,
+  BasicResponse,
+  GroupName,
+  Initiative,
+  RouteName,
+  UserSearchParams
+} from '../enums/application';
 
 export const ACCESS_REQUEST_STATUS = [
   AccessRequestStatus.APPROVED,
   AccessRequestStatus.PENDING,
   AccessRequestStatus.REJECTED
 ];
+
+export const BRING_FORWARD_ROUTE_MAP = {
+  [Initiative.ELECTRIFICATION]: {
+    project: RouteName.INT_ELECTRIFICATION_PROJECT_NOTE,
+    enquiry: RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE
+  },
+  [Initiative.GENERAL]: {
+    project: RouteName.INT_GENERAL_PROJECT_NOTE,
+    enquiry: RouteName.INT_GENERAL_ENQUIRY_NOTE
+  },
+  [Initiative.HOUSING]: {
+    project: RouteName.INT_HOUSING_PROJECT_NOTE,
+    enquiry: RouteName.INT_HOUSING_ENQUIRY_NOTE
+  }
+} satisfies Record<
+  Exclude<Initiative, Initiative.PCNS>,
+  {
+    project: RouteName;
+    enquiry: RouteName;
+  }
+>;
 
 export const DELIMITER = '/';
 

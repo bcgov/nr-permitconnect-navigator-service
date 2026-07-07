@@ -4,7 +4,8 @@ import { ref, watchEffect } from 'vue';
 
 import { Column, DataTable, ToggleSwitch } from '@/lib/primevue';
 import { useAppStore, useAuthNStore } from '@/store';
-import { Initiative, RouteName } from '@/utils/enums/application';
+import { BRING_FORWARD_ROUTE_MAP } from '@/utils/constants/application';
+import { Initiative } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 
@@ -25,56 +26,43 @@ const bringForwards: Ref<BringForward[]> = ref(bringForward);
 const filterToUser: Ref<boolean> = ref(false);
 
 // Actions
-watchEffect(() => {
-  bringForwards.value = bringForward;
-});
-
-function getNameObject(bf: BringForward) {
-  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
-  if (bf.generalProjectId) return RouteName.INT_GENERAL_PROJECT_NOTE;
-  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
-  if (bf.enquiryId) {
-    switch (useAppStore().getInitiative) {
-      case Initiative.ELECTRIFICATION:
-        return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
-      case Initiative.GENERAL:
-        return RouteName.INT_GENERAL_ENQUIRY_NOTE;
-      case Initiative.HOUSING:
-        return RouteName.INT_HOUSING_ENQUIRY_NOTE;
-    }
-  }
+function filterForMyBringForwards(bf: BringForward): boolean {
+  return bf.createdByFullName === getProfile.value?.name || myAssignedTo.has(bf.projectId ?? '');
 }
 
-function getParamObject(bf: BringForward) {
-  if (bf.electrificationProjectId) {
-    return {
-      projectId: bf.electrificationProjectId,
-      noteHistoryId: bf.noteId
-    };
+function getBfRouteName(bf: BringForward) {
+  const initiative = useAppStore().getInitiative;
+
+  if (initiative === Initiative.PCNS) {
+    return undefined;
   }
-  if (bf.generalProjectId) {
+
+  const routes = BRING_FORWARD_ROUTE_MAP[initiative];
+
+  if (bf.projectId) return routes.project;
+  if (bf.enquiryId) return routes.enquiry;
+
+  return undefined;
+}
+
+function getBfRouteParams(bf: BringForward) {
+  if (bf.projectId) {
     return {
-      projectId: bf.generalProjectId,
-      noteHistoryId: bf.noteId
-    };
-  }
-  if (bf.housingProjectId) {
-    return {
-      projectId: bf.housingProjectId,
-      noteHistoryId: bf.noteId
+      projectId: bf.projectId,
+      noteHistoryId: bf.noteHistoryId
     };
   }
   if (bf.enquiryId) {
     return {
       enquiryId: bf.enquiryId,
-      noteHistoryId: bf.noteId
+      noteHistoryId: bf.noteHistoryId
     };
   }
 }
 
-function filterForMyBringForwards(bf: BringForward): boolean {
-  return bf.createdByFullName === getProfile.value?.name || myAssignedTo.has(bf.housingProjectId ?? '');
-}
+watchEffect(() => {
+  bringForwards.value = bringForward;
+});
 </script>
 
 <template>
@@ -89,13 +77,8 @@ function filterForMyBringForwards(bf: BringForward): boolean {
       </div>
       <DataTable
         class="text-left w-full"
-        :value="
-          bringForwards.filter((x) => {
-            // return x.createdByFullName === getProfile?.name;
-            return filterToUser ? filterForMyBringForwards(x) : x;
-          })
-        "
-        data-key="noteId"
+        :value="filterToUser ? bringForwards.filter(filterForMyBringForwards) : bringForwards"
+        data-key="noteHistoryId"
         removable-sort
         scrollable
         responsive-layout="scroll"
@@ -111,9 +94,9 @@ function filterForMyBringForwards(bf: BringForward): boolean {
             <div :data-activityId="data.activityId">
               <router-link
                 :to="{
-                  name: getNameObject(data),
-                  params: getParamObject(data),
-                  hash: `#${data.noteId}`
+                  name: getBfRouteName(data),
+                  params: getBfRouteParams(data),
+                  hash: `#${data.noteHistoryId}`
                 }"
               >
                 {{ data.title }}

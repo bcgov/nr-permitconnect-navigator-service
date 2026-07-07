@@ -22,15 +22,8 @@ import {
   useToast
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
-import {
-  Action,
-  BasicResponse,
-  GroupName,
-  Initiative,
-  Resource,
-  RouteName,
-  StorageKey
-} from '@/utils/enums/application';
+import { BRING_FORWARD_ROUTE_MAP } from '@/utils/constants/application';
+import { Action, BasicResponse, GroupName, Initiative, Resource, StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
@@ -126,45 +119,32 @@ function getBringForwardStyling(bf: BringForward) {
   return undefined;
 }
 
-function getNameObject(bf: BringForward) {
-  if (bf.electrificationProjectId) return RouteName.INT_ELECTRIFICATION_PROJECT_NOTE;
-  if (bf.generalProjectId) return RouteName.INT_GENERAL_PROJECT_NOTE;
-  if (bf.housingProjectId) return RouteName.INT_HOUSING_PROJECT_NOTE;
-  if (bf.enquiryId) {
-    switch (useAppStore().getInitiative) {
-      case Initiative.ELECTRIFICATION:
-        return RouteName.INT_ELECTRIFICATION_ENQUIRY_NOTE;
-      case Initiative.GENERAL:
-        return RouteName.INT_GENERAL_ENQUIRY_NOTE;
-      case Initiative.HOUSING:
-        return RouteName.INT_HOUSING_ENQUIRY_NOTE;
-    }
+function getBfRouteName(bf: BringForward) {
+  const initiative = useAppStore().getInitiative;
+
+  if (initiative === Initiative.PCNS) {
+    return undefined;
   }
+
+  const routes = BRING_FORWARD_ROUTE_MAP[initiative];
+
+  if (bf.projectId) return routes.project;
+  if (bf.enquiryId) return routes.enquiry;
+
+  return undefined;
 }
 
-function getParamObject(bf: BringForward) {
-  if (bf.electrificationProjectId) {
+function getBfRouteParams(bf: BringForward) {
+  if (bf.projectId) {
     return {
-      projectId: bf.electrificationProjectId,
-      noteHistoryId: bf.noteId
-    };
-  }
-  if (bf.generalProjectId) {
-    return {
-      projectId: bf.generalProjectId,
-      noteHistoryId: bf.noteId
-    };
-  }
-  if (bf.housingProjectId) {
-    return {
-      projectId: bf.housingProjectId,
-      noteHistoryId: bf.noteId
+      projectId: bf.projectId,
+      noteHistoryId: bf.noteHistoryId
     };
   }
   if (bf.enquiryId) {
     return {
       enquiryId: bf.enquiryId,
-      noteHistoryId: bf.noteId
+      noteHistoryId: bf.noteHistoryId
     };
   }
 }
@@ -240,9 +220,7 @@ watchEffect(() => {
   const filteredBringForwards = bringForward.value.filter((x) => {
     const { pastOrToday, withinMonth } = getBringForwardInterval(x);
     const assignedAndWithinMonth =
-      (x.createdByFullName === getProfile.value?.name ||
-        myAssignedTo.value.has(x.electrificationProjectId ?? '') ||
-        myAssignedTo.value.has(x.housingProjectId ?? '')) &&
+      (x.createdByFullName === getProfile.value?.name || myAssignedTo.value.has(x.projectId ?? '')) &&
       (pastOrToday || withinMonth);
     const escalated = authzStore.isInGroup([GroupName.SUPERVISOR]) && x.escalateToSupervisor;
     return assignedAndWithinMonth || escalated;
@@ -291,8 +269,8 @@ watchEffect(() => {
                     Bring forward {{ formatDate(bf.bringForwardDate) }}:
                     <router-link
                       :to="{
-                        name: getNameObject(bf),
-                        params: getParamObject(bf)
+                        name: getBfRouteName(bf),
+                        params: getBfRouteParams(bf)
                       }"
                     >
                       {{ bf.title }}, {{ bf.projectName ?? NoteType.BRING_FORWARD }}

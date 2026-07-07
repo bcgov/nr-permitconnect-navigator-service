@@ -20,8 +20,8 @@ const currentDate = new Date().toISOString();
 
 const bringForward: BringForward[] = [
   {
-    noteId: '327eda7d-3d4c-42e9-aa94-3de04cd23d55',
-    housingProjectId: '123',
+    noteHistoryId: '327eda7d-3d4c-42e9-aa94-3de04cd23d55',
+    projectId: '123',
     title: 'test title',
     projectName: 'test project name',
     bringForwardDate: currentDate,
