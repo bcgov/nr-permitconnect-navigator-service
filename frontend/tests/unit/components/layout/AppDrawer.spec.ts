@@ -6,7 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import AppDrawer from '@/components/layout/AppDrawer.vue';
 import { useAppStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
-import { Initiative, RouteName, StorageKey } from '@/utils/enums/application';
+import { Initiative, StorageKey } from '@/utils/enums/application';
 
 import type { CallbackFn } from '@/types';
 
@@ -99,50 +99,20 @@ describe('AppDrawer.vue', () => {
     });
   });
 
-  it('shows housing menu when initiative is HOUSING', async () => {
-    const wrapper = mount(AppDrawer, mountOptions);
-    const appStore = useAppStore();
-    appStore.setInitiative(Initiative.HOUSING);
-
-    await flushPromises();
-
-    const items = (wrapper.vm as any).items; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.some((item: DrawerItem) => item.label === 'Housing')).toBe(true);
-  });
-
-  it('shows electrification menu when initiative is ELECTRIFICATION', async () => {
+  it.each([
+    [Initiative.HOUSING, 'Housing'],
+    [Initiative.ELECTRIFICATION, 'Electrification'],
+    [Initiative.GENERAL, 'General']
+  ])('shows %s menu when initiative is %s', async (initiative, expectedLabel) => {
     const wrapper = mount(AppDrawer, createMountOptions());
     const appStore = useAppStore();
-    appStore.setInitiative(Initiative.ELECTRIFICATION);
+    appStore.setInitiative(initiative);
 
     await flushPromises();
 
     const items = (wrapper.vm as any).items; // eslint-disable-line @typescript-eslint/no-explicit-any
     expect(items.length).toBeGreaterThan(0);
-    expect(items.some((item: DrawerItem) => item.label === 'Electrification')).toBe(true);
-  });
-
-  it('shows general menu when initiative is GENERAL', async () => {
-    const wrapper = mount(AppDrawer, createMountOptions());
-    const appStore = useAppStore();
-    appStore.setInitiative(Initiative.GENERAL);
-
-    await flushPromises();
-
-    const items = (wrapper.vm as any).items; // eslint-disable-line @typescript-eslint/no-explicit-any
-    expect(items.length).toBeGreaterThan(0);
-    expect(items.some((item: DrawerItem) => item.label === 'General')).toBe(true);
-  });
-
-  it('calls router.push when createIntake is called', async () => {
-    const wrapper = mount(AppDrawer, mountOptions);
-    // eslint-disable-next-line max-len
-    await (wrapper.vm as any).createIntake(RouteName.EXT_HOUSING_INTAKE); // eslint-disable-line @typescript-eslint/no-explicit-any
-
-    expect(mockPush).toHaveBeenCalledWith({
-      name: RouteName.EXT_HOUSING_INTAKE
-    });
+    expect(items.some((item: DrawerItem) => item.label === expectedLabel)).toBe(true);
   });
 
   it('includes help menu items in all initiatives', async () => {

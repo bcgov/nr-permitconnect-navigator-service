@@ -44,7 +44,6 @@ const route = useRoute();
   background-color: white;
   color: var(--p-bcblue-950);
   white-space: nowrap;
-  // TODO: Reference a surface colour once PrimeVue 4 changes come in
   border-bottom: 2px solid var(--p-gold-950);
 }
 
