@@ -94,12 +94,12 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
     };
 
     // Get total count (without pagination)
-    const totalRecords = await this.model.count({
+    const totalRecords = await this.count({
       where: whereClause
     });
 
     // Get paginated data
-    const permits = await this.model.findMany({
+    const permits = await this.findMany({
       skip: options?.skip ? Number.parseInt(options.skip) : 0,
       take: options?.take ? Number.parseInt(options.take) : 10,
       where: whereClause,

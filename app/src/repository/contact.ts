@@ -9,7 +9,7 @@ export class ContactRepository extends WritableRepository<PrismaTransactionClien
   }
 
   public async search(params: ContactSearchParameters) {
-    return await this.model.findMany({
+    return await this.findMany({
       where: {
         AND: [
           {

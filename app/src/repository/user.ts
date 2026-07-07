@@ -9,8 +9,24 @@ export class UserRepository extends WritableRepository<PrismaTransactionClient['
     super(tx.user, principal);
   }
 
-  async search(params: UserSearchParameters) {
-    return await this.model.findMany({
+  public async findById(id: string) {
+    return await this.findUnique({
+      where: {
+        userId: id
+      }
+    });
+  }
+
+  public async findBySub(sub: string) {
+    return await this.findUnique({
+      where: {
+        sub
+      }
+    });
+  }
+
+  public async search(params: UserSearchParameters) {
+    return await this.findMany({
       where: {
         AND: [
           {

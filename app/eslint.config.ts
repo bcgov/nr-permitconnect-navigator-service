@@ -37,5 +37,27 @@ export default defineConfig([
       quotes: ['error', 'single'],
       semi: ['error', 'always']
     }
+  },
+  // Entity repositories must go through inherited query/mutation methods,
+  // never touch `this.model` directly — that's only for readable.ts/writable.ts
+  // to implement the base methods themselves.
+  {
+    files: ['src/repository/**/*.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: "MemberExpression[object.type='ThisExpression'][property.name='model']",
+          message:
+            'Use inherited query methods (this.findMany, this.create, etc.) instead of this.model directly. Only readable.ts/writable.ts may access this.model.'
+        }
+      ]
+    }
+  },
+  {
+    files: ['src/repository/readable.ts', 'src/repository/writable.ts'],
+    rules: {
+      'no-restricted-syntax': 'off'
+    }
   }
 ]);

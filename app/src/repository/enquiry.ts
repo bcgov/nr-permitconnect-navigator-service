@@ -1,22 +1,22 @@
 import { WritableRepository } from './writable.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import { EnquirySearchParameters } from '../types/stuff';
-import { Initiative } from '../utils/enums/application.ts';
+import type { EnquirySearchParameters } from '../types/stuff';
 
 export class EnquiryRepository extends WritableRepository<PrismaTransactionClient['enquiry']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.enquiry, principal, true);
   }
 
-  public async search(params: EnquirySearchParameters, initiative: Initiative) {
-    return await this.model.findMany({
+  public async search(params: EnquirySearchParameters, initiativeCode?: Initiative) {
+    return await this.findMany({
       where: {
         AND: [
           {
             activity: {
               initiative: {
-                code: initiative !== Initiative.PCNS ? initiative : undefined
+                code: initiativeCode !== Initiative.PCNS ? initiativeCode : undefined
               }
             }
           },

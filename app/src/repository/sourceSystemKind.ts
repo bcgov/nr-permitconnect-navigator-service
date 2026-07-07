@@ -8,7 +8,7 @@ export class SourceSystemKindRepository extends WritableRepository<PrismaTransac
   }
 
   public async list() {
-    const result = await this.model.findMany({
+    const result = await this.findMany({
       orderBy: {
         sourceSystem: 'asc'
       },

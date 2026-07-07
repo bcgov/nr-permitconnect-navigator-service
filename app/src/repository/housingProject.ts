@@ -9,8 +9,8 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
     super(tx.housing_project, principal, true);
   }
 
-  async search(params: HousingProjectSearchParameters): Promise<HousingProject[]> {
-    return await this.model.findMany({
+  public async search(params: HousingProjectSearchParameters): Promise<HousingProject[]> {
+    return await this.findMany({
       where: {
         AND: [
           {

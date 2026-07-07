@@ -9,8 +9,8 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
     super(tx.general_project, principal, true);
   }
 
-  async search(params: GeneralProjectSearchParameters): Promise<GeneralProject[]> {
-    return await this.model.findMany({
+  public async search(params: GeneralProjectSearchParameters): Promise<GeneralProject[]> {
+    return await this.findMany({
       where: {
         AND: [
           {

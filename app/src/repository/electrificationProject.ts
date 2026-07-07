@@ -11,8 +11,8 @@ export class ElectrificationProjectRepository extends WritableRepository<
     super(tx.electrification_project, principal, true);
   }
 
-  async search(params: ElectrificationProjectSearchParameters): Promise<ElectrificationProject[]> {
-    return await this.model.findMany({
+  public async search(params: ElectrificationProjectSearchParameters): Promise<ElectrificationProject[]> {
+    return await this.findMany({
       where: {
         AND: [
           {
