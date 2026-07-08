@@ -1,15 +1,16 @@
 import express from 'express';
 import request from 'supertest';
 
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { requireSomeGroup } from '../../../src/middleware/requireSomeGroup.ts';
 import * as comsService from '../../../src/external/coms.ts';
-import * as yarsService from '../../../src/services/yars.ts';
+import * as yarsDomain from '../../../src/domains/yars.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type Problem from '../../../src/utils/problem.ts';
 
-function buildApp(currentContext: unknown) {
+function buildAppForRequireSomeGroup(currentContext: unknown) {
   const app = express();
   app.use((_req, res, next) => {
     res.locals.currentContext = currentContext;
@@ -24,28 +25,29 @@ function buildApp(currentContext: unknown) {
   return app;
 }
 
-const getSubjectGroupsSpy = vi.spyOn(yarsService, 'getSubjectGroups');
-const getGroupsSpy = vi.spyOn(yarsService, 'getGroups');
-const assignGroupSpy = vi.spyOn(yarsService, 'assignGroup');
+const getGroupsSpy = vi.spyOn(yarsDomain, 'getGroups');
+const assignGroupSpy = vi.spyOn(yarsDomain, 'assignGroup');
 const assignPermissionsSpy = vi.spyOn(comsService, 'assignPermissions');
 
 afterEach(() => {
-  vi.resetAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('requireSomeGroup middleware', () => {
   it('responds with 403 when token sub is missing', async () => {
-    const res = await request(buildApp({ tokenPayload: {} })).get('/ok');
+    const res = await request(buildAppForRequireSomeGroup({ tokenPayload: {} })).get('/ok');
 
     expect(res.status).toBe(403);
     expect(res.body.detail).toBe('Unable to obtain token sub');
   });
 
   it('passes through for AZUREIDIR users that already have groups', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([{ groupId: 1 }] as never);
+    mockRepos.subjectGroup.getSubjectGroups.mockResolvedValueOnce([{ groupId: 1 }] as never);
 
     const res = await request(
-      buildApp({ tokenPayload: { sub: 'idir-sub', identity_provider: IdentityProviderKind.AZUREIDIR } })
+      buildAppForRequireSomeGroup({
+        tokenPayload: { sub: 'idir-sub', identity_provider: IdentityProviderKind.AZUREIDIR }
+      })
     ).get('/ok');
 
     expect(res.status).toBe(200);
@@ -53,10 +55,12 @@ describe('requireSomeGroup middleware', () => {
   });
 
   it('returns 403 for AZUREIDIR users with no groups', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([] as never);
+    mockRepos.subjectGroup.getSubjectGroups.mockResolvedValueOnce([] as never);
 
     const res = await request(
-      buildApp({ tokenPayload: { sub: 'idir-sub', identity_provider: IdentityProviderKind.AZUREIDIR } })
+      buildAppForRequireSomeGroup({
+        tokenPayload: { sub: 'idir-sub', identity_provider: IdentityProviderKind.AZUREIDIR }
+      })
     ).get('/ok');
 
     expect(res.status).toBe(403);
@@ -65,26 +69,26 @@ describe('requireSomeGroup middleware', () => {
 
   it('assigns missing proponent groups for non-IDIR users and assigns COMS permissions', async () => {
     // First read: user has no groups; second read after assignment: has proponent groups
-    getSubjectGroupsSpy
+    mockRepos.subjectGroup.getSubjectGroups
       .mockResolvedValueOnce([] as never)
       .mockResolvedValueOnce([{ groupId: 10, name: GroupName.PROPONENT, initiativeCode: Initiative.HOUSING }] as never);
     getGroupsSpy.mockResolvedValue([{ groupId: 10, name: GroupName.PROPONENT }] as never);
-    assignGroupSpy.mockResolvedValue(undefined as unknown as { sub: string; roleId: number });
+    assignGroupSpy.mockResolvedValue(undefined as unknown as { sub: string; roleId: number } as never);
     assignPermissionsSpy.mockResolvedValue(undefined);
 
     const res = await request(
-      buildApp({ tokenPayload: { sub: 'bceid-sub', identity_provider: IdentityProviderKind.BCEID } })
+      buildAppForRequireSomeGroup({ tokenPayload: { sub: 'bceid-sub', identity_provider: IdentityProviderKind.BCEID } })
     ).get('/ok');
 
     expect(res.status).toBe(200);
     // 4 missing initiatives: ELECTRIFICATION, GENERAL, HOUSING, PCNS
     expect(getGroupsSpy).toHaveBeenCalledTimes(4);
     expect(assignGroupSpy).toHaveBeenCalledTimes(4);
-    expect(assignPermissionsSpy).toHaveBeenCalledWith(expect.anything(), expect.anything(), 'bceid-sub');
+    expect(assignPermissionsSpy).toHaveBeenCalledWith(expect.anything(), 'bceid-sub', expect.anything());
   });
 
   it('skips assignment for non-IDIR users that already have all required initiative groups', async () => {
-    getSubjectGroupsSpy.mockResolvedValue([
+    mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue([
       { groupId: 1, initiativeCode: Initiative.ELECTRIFICATION },
       { groupId: 2, initiativeCode: Initiative.GENERAL },
       { groupId: 3, initiativeCode: Initiative.HOUSING },
@@ -92,7 +96,7 @@ describe('requireSomeGroup middleware', () => {
     ] as never);
 
     const res = await request(
-      buildApp({ tokenPayload: { sub: 'bceid-sub', identity_provider: IdentityProviderKind.BCEID } })
+      buildAppForRequireSomeGroup({ tokenPayload: { sub: 'bceid-sub', identity_provider: IdentityProviderKind.BCEID } })
     ).get('/ok');
 
     expect(res.status).toBe(200);

@@ -1,29 +1,30 @@
 import jwt from 'jsonwebtoken';
 
-import { transactionWrapper } from '../../../src/db/utils/transactionWrapper';
-import { getVerifiedPayload, hasAuthentication, jwtPayloadCache } from '../../../src/middleware/authentication';
-import * as oidcProviders from '../../../src/middleware/providers/oidc';
-import { login } from '../../../src/services/user';
-import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application';
-import { Problem } from '../../../src/utils/index';
+import { getVerifiedPayload, hasAuthentication, jwtPayloadCache } from '../../../src/middleware/authentication.ts';
+import * as oidcProviders from '../../../src/middleware/providers/oidc.ts';
+import { loginService } from '../../../src/services/login.ts';
+import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
+import { Problem } from '../../../src/utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { Mock } from 'vitest';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 const AUTHORITY = 'https://auth.example.com';
 const INITIATIVE = Initiative.PCNS;
 
-vi.mock('config', () => {
-  const mock = {
-    has: vi.fn(),
-    get: vi.fn().mockImplementation((key: string) => {
-      if (key === 'server.oidc.audience') return AUDIENCE;
-      if (key === 'server.oidc.authority') return AUTHORITY;
-      else return '';
-    })
+vi.mock('config', async () => {
+  const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');
+  return {
+    default: {
+      ...actual,
+      get: vi.fn((key: string) => {
+        if (key === 'server.oidc.audience') return AUDIENCE;
+        if (key === 'server.oidc.authority') return AUTHORITY;
+        return actual.get(key);
+      }),
+      has: vi.fn(() => false)
+    }
   };
-  return { default: mock, ...mock };
 });
 
 vi.mock('jsonwebtoken', () => {
@@ -45,22 +46,18 @@ vi.mock('../../../src/middleware/providers/oidc', () => ({
   setAuthHeader: vi.fn()
 }));
 
-vi.mock('../../../src/db/utils/transactionWrapper', () => ({
-  transactionWrapper: vi.fn((cb) => cb({}))
-}));
-
-vi.mock('../../../src/services/user', () => ({
-  login: vi.fn()
+vi.mock('../../../src/services/login', () => ({
+  loginService: vi.fn()
 }));
 
 describe('authentication middleware', () => {
-  const mockedJwtDecode = jwt.decode as Mock;
-  const mockedJwtVerify = jwt.verify as Mock;
-  const mockedGetAuthHeader = oidcProviders.getAuthHeader as Mock;
-  const mockedGetBearerToken = oidcProviders.getBearerToken as Mock;
-  const mockedGetJwksClient = oidcProviders.getJwksClient as Mock;
-  const mockedSetAuthHeader = oidcProviders.setAuthHeader as Mock;
-  const mockedLogin = login as Mock;
+  const mockedJwtDecode = vi.mocked(jwt.decode);
+  const mockedJwtVerify = vi.mocked(jwt.verify);
+  const mockedGetAuthHeader = vi.mocked(oidcProviders.getAuthHeader);
+  const mockedGetBearerToken = vi.mocked(oidcProviders.getBearerToken);
+  const mockedGetJwksClient = vi.mocked(oidcProviders.getJwksClient);
+  const mockedSetAuthHeader = vi.mocked(oidcProviders.setAuthHeader);
+  const mockedLogin = vi.mocked(loginService);
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -102,7 +99,7 @@ describe('authentication middleware', () => {
       mockedGetBearerToken.mockReturnValue(token);
 
       jwtPayloadCache.set(token, payload);
-      mockedLogin.mockResolvedValue(user);
+      mockedLogin.mockResolvedValue(user as never);
 
       const middleware = hasAuthentication(INITIATIVE);
       await middleware(req as Request, res as Response, next);
@@ -114,7 +111,6 @@ describe('authentication middleware', () => {
         tokenPayload: payload,
         userId: user.userId
       });
-      expect(transactionWrapper).toHaveBeenCalledTimes(1);
       expect(mockedLogin).toHaveBeenCalledTimes(1);
       expect(next).toHaveBeenCalledWith();
     });
@@ -125,7 +121,7 @@ describe('authentication middleware', () => {
       mockedGetAuthHeader.mockReturnValue(`Bearer ${token}`);
       mockedGetBearerToken.mockReturnValue(token);
       jwtPayloadCache.set(token, { sub: 'user123', identity_provider: IdentityProviderKind.AZUREIDIR });
-      mockedLogin.mockResolvedValue(null);
+      mockedLogin.mockResolvedValue(null as never);
 
       const middleware = hasAuthentication(INITIATIVE);
       await middleware(req as Request, res as Response, next);
@@ -219,10 +215,10 @@ describe('authentication middleware', () => {
     it('throws a 401 Problem if jwt.verify throws an error', async () => {
       const token = 'invalid-signature-token';
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } } as never);
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
-      });
+      } as never);
       mockedJwtVerify.mockImplementation(() => {
         throw new Error('jwt expired');
       });
@@ -237,11 +233,11 @@ describe('authentication middleware', () => {
     it('throws a 401 Problem if jwt.verify returns a string payload', async () => {
       const token = 'string-payload-token';
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } } as never);
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
-      });
-      mockedJwtVerify.mockReturnValue('this-is-just-a-string-not-json');
+      } as never);
+      mockedJwtVerify.mockReturnValue('this-is-just-a-string-not-json' as never);
 
       const action = getVerifiedPayload(token, req as Request, res as Response);
 
@@ -258,11 +254,11 @@ describe('authentication middleware', () => {
       const futureExp = Math.floor(Date.now() / 1000) + 3600;
       const validPayload = { sub: 'user-456', exp: futureExp };
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } } as never);
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
-      });
-      mockedJwtVerify.mockReturnValue(validPayload);
+      } as never);
+      mockedJwtVerify.mockReturnValue(validPayload as never);
 
       const result = await getVerifiedPayload(token, req as Request, res as Response);
 
@@ -285,11 +281,11 @@ describe('authentication middleware', () => {
       const pastExp = Math.floor(Date.now() / 1000) - 3600;
       const invalidPayload = { sub: 'user-789', exp: pastExp };
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } } as never);
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
-      });
-      mockedJwtVerify.mockReturnValue(invalidPayload);
+      } as never);
+      mockedJwtVerify.mockReturnValue(invalidPayload as never);
 
       const result = await getVerifiedPayload(token, req as Request, res as Response);
 
@@ -301,11 +297,11 @@ describe('authentication middleware', () => {
       const token = 'no-exp-token';
       const noExpPayload = { sub: 'user-789' };
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'key-id' } } as never);
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockResolvedValue({ getPublicKey: () => 'public-key' })
-      });
-      mockedJwtVerify.mockReturnValue(noExpPayload);
+      } as never);
+      mockedJwtVerify.mockReturnValue(noExpPayload as never);
 
       const result = await getVerifiedPayload(token, req as Request, res as Response);
 
@@ -316,7 +312,7 @@ describe('authentication middleware', () => {
     it('throws a 401 Problem if the token header is missing a kid (Key ID)', async () => {
       const token = 'missing-kid-token';
 
-      mockedJwtDecode.mockReturnValue({ header: { alg: 'RS256' } });
+      mockedJwtDecode.mockReturnValue({ header: { alg: 'RS256' } } as never);
 
       const action = getVerifiedPayload(token, req as Request, res as Response);
 
@@ -328,11 +324,11 @@ describe('authentication middleware', () => {
     it('throws a 401 Problem if jwksClient fails to find the signing key (invalid kid)', async () => {
       const token = 'unknown-kid-token';
 
-      mockedJwtDecode.mockReturnValue({ header: { kid: 'unknown-key-id' } });
+      mockedJwtDecode.mockReturnValue({ header: { kid: 'unknown-key-id' } } as never);
 
       mockedGetJwksClient.mockResolvedValue({
         getSigningKey: vi.fn().mockRejectedValue(new Error('Signing key not found'))
-      });
+      } as never);
 
       const action = getVerifiedPayload(token, req as Request, res as Response);
 
