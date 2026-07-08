@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
-import filterDeletedTransform from '../../../../src/db/extensions/filterDeleted.ts';
+
 import { captureExtension } from './captureExtension.ts';
-import { describe, it, expect, vi } from 'vitest';
+import filterDeletedTransform from '../../../../src/db/extensions/filterDeleted.ts';
 
 const ext = captureExtension(filterDeletedTransform);
 
@@ -251,7 +251,7 @@ describe('filterDeleted extension', () => {
 
       // Verify that include is preserved in output
       const callArgs = query.mock.calls[0][0];
-      expect(callArgs.where.deletedAt).toEqual(null);
+      expect(callArgs.where.deletedAt).toBeNull();
       expect(callArgs.include).toBeDefined();
     });
 

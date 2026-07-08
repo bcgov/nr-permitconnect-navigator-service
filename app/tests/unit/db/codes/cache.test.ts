@@ -3,7 +3,6 @@ vi.unmock('../../../../src/db/codes/cache.ts');
 
 import { codeTable, refreshCodeCaches } from '../../../../src/db/codes/cache.ts';
 import { CODE_TABLES } from '../../../../src/db/codes/tables.ts';
-import * as txWrapper from '../../../../src/db/utils/transactionWrapper.ts';
 import * as codeService from '../../../../src/services/code.ts';
 import { getLogger } from '../../../../src/utils/log.ts';
 
@@ -26,16 +25,13 @@ vi.mock('../../../../src/utils/log.ts', () => {
 const mockLogger = getLogger();
 
 describe('codeTable cache', () => {
-  const listAllCodeTablesSpy = vi.spyOn(codeService, 'listAllCodeTables');
-  const txWrapperSpy = vi.spyOn(txWrapper, 'transactionWrapper');
+  const listAllCodeTablesSpy = vi.spyOn(codeService, 'listCodeTablesService');
 
   beforeEach(async () => {
     vi.clearAllMocks();
 
     // Reset the module's in-memory cache state before each test
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    txWrapperSpy.mockImplementation(async (fn) => fn('tx' as any));
-    listAllCodeTablesSpy.mockResolvedValue(undefined as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+    listAllCodeTablesSpy.mockResolvedValue(undefined as never);
     await refreshCodeCaches();
   });
 
@@ -61,7 +57,7 @@ describe('codeTable cache', () => {
         ])
       );
 
-      listAllCodeTablesSpy.mockResolvedValue(fakeRows as any); // eslint-disable-line @typescript-eslint/no-explicit-any
+      listAllCodeTablesSpy.mockResolvedValue(fakeRows as never);
 
       const result = await refreshCodeCaches();
 
@@ -75,7 +71,7 @@ describe('codeTable cache', () => {
     });
 
     it('should log error and return false if refresh fails', async () => {
-      txWrapperSpy.mockRejectedValueOnce(new Error('fail'));
+      listAllCodeTablesSpy.mockRejectedValueOnce(new Error('fail'));
 
       const result = await refreshCodeCaches();
 
