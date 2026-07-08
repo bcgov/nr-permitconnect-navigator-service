@@ -1,98 +1,82 @@
-import axios from 'axios';
-import config from 'config';
-
-import { getPeachRecord } from '../../../src/external/peach.ts';
+import * as peachService from '../../../src/services/peach.ts';
+import * as peachDomain from '../../../src/domains/peach.ts';
+import * as peachExternal from '../../../src/external/peach.ts';
+import * as peachParser from '../../../src/parsers/peach.ts';
 import Problem from '../../../src/utils/problem.ts';
 
-import type { Mocked } from 'vitest';
+import type { PermitTracking } from '../../../src/types/index.ts';
 
-vi.mock('config');
-let mockedConfig = config as Mocked<typeof config>;
+const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
+const getPeachRecordSpy = vi.spyOn(peachExternal, 'getPeachRecord');
+const summarizePeachRecordSpy = vi.spyOn(peachParser, 'summarizePeachRecord');
 
-vi.mock('axios');
-let mockedAxios = axios as Mocked<typeof axios>;
+describe('peach service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
 
-beforeEach(() => {
-  mockedConfig = config as Mocked<typeof config>;
-  mockedAxios = axios as Mocked<typeof axios>;
+  describe('getPeachSummaryService', () => {
+    it('throws 422 if no priority permit tracking is found', async () => {
+      findPriorityPermitTrackingSpy.mockReturnValueOnce(undefined);
 
-  // Replace any instances with the mocked instance
-  mockedAxios.create.mockImplementation(() => mockedAxios);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => cfg);
-});
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
-
-describe('getPeachRecord', () => {
-  it('calls GET /records with record_id/system_id params and returns data', async () => {
-    mockedConfig.get.mockReturnValue('https://example.com');
-    const expected = { record_id: 'rec-1', system_id: 'sys-1' };
-    mockedAxios.get.mockResolvedValueOnce({ data: expected });
-
-    const result = await getPeachRecord('rec-1', 'sys-1');
-
-    expect(mockedAxios.get).toHaveBeenCalledWith('/records', {
-      params: { record_id: 'rec-1', system_id: 'sys-1' }
+      await expect(peachService.getPeachSummaryService([])).rejects.toThrow(
+        new Problem(422, { detail: 'No PEACH-integrated tracking ID and/or system were found in the request body.' })
+      );
     });
-    expect(result).toStrictEqual(expected);
-  });
 
-  it('omits systemId by passing undefined when not provided', async () => {
-    mockedConfig.get.mockReturnValue('https://example.com');
-    mockedAxios.get.mockResolvedValueOnce({ data: { record_id: 'rec-2' } });
+    it('throws 422 if tracking ID is missing', async () => {
+      const invalidTracking = {
+        sourceSystemKind: { sourceSystem: 'VFCBC' }
+      } as PermitTracking;
+      findPriorityPermitTrackingSpy.mockReturnValueOnce(invalidTracking);
 
-    await getPeachRecord('rec-2');
-
-    expect(mockedAxios.get).toHaveBeenCalledWith('/records', {
-      params: { record_id: 'rec-2', system_id: undefined }
+      await expect(peachService.getPeachSummaryService([invalidTracking])).rejects.toThrow(
+        new Problem(422, { detail: 'No PEACH-integrated tracking ID and/or system were found in the request body.' })
+      );
     });
-  });
 
-  it('throws a Problem with the response status and detail when axios returns an AxiosError', async () => {
-    mockedConfig.get.mockReturnValue('https://example.com');
+    it('throws 422 if source system is missing', async () => {
+      const invalidTracking = {
+        trackingId: 'TRACK-123',
+        sourceSystemKind: {}
+      } as PermitTracking;
+      findPriorityPermitTrackingSpy.mockReturnValueOnce(invalidTracking);
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mockedAxios.isAxiosError as unknown as Mocked<any>).mockReturnValue(true);
-
-    const axiosError = {
-      response: {
-        status: 404,
-        data: { detail: 'not found' }
-      }
-    };
-    mockedAxios.get.mockRejectedValueOnce(axiosError);
-
-    await expect(getPeachRecord('rec-x')).rejects.toMatchObject({
-      status: 404,
-      detail: 'not found'
+      await expect(peachService.getPeachSummaryService([invalidTracking])).rejects.toThrow(
+        new Problem(422, { detail: 'No PEACH-integrated tracking ID and/or system were found in the request body.' })
+      );
     });
-  });
 
-  it('throws a Problem with status 500 when AxiosError has no response', async () => {
-    mockedConfig.get.mockReturnValue('https://example.com');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mockedAxios.isAxiosError as unknown as Mocked<any>).mockReturnValue(true);
+    it('throws 422 if PEACH summary cannot be derived', async () => {
+      const validTracking = {
+        trackingId: 'TRACK-123',
+        sourceSystemKind: { sourceSystem: 'VFCBC' }
+      } as PermitTracking;
 
-    mockedAxios.get.mockRejectedValueOnce({ response: undefined });
+      findPriorityPermitTrackingSpy.mockReturnValueOnce(validTracking);
+      getPeachRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePeachRecordSpy.mockReturnValueOnce(undefined as never);
 
-    await expect(getPeachRecord('rec-y')).rejects.toBeInstanceOf(Problem);
-    await expect(getPeachRecord('rec-y')).rejects.toMatchObject({ status: 500 });
-  });
+      await expect(peachService.getPeachSummaryService([validTracking])).rejects.toThrow(
+        new Problem(422, { detail: 'No status data could be derived from the PEACH record that was found.' })
+      );
+    });
 
-  it('throws a generic 500 Problem when the error is not an AxiosError', async () => {
-    mockedConfig.get.mockReturnValue('https://example.com');
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (mockedAxios.isAxiosError as unknown as Mocked<any>).mockReturnValue(false);
+    it('returns PEACH summary on success', async () => {
+      const validTracking = {
+        trackingId: 'TRACK-123',
+        sourceSystemKind: { sourceSystem: 'VFCBC' }
+      } as PermitTracking;
+      const mockSummary = { status: 'APPROVED' };
 
-    mockedAxios.get.mockRejectedValueOnce(new Error('boom'));
+      findPriorityPermitTrackingSpy.mockReturnValueOnce(validTracking);
+      getPeachRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePeachRecordSpy.mockReturnValueOnce(mockSummary as never);
 
-    await expect(getPeachRecord('rec-z')).rejects.toMatchObject({
-      status: 500,
-      detail: 'Server Error'
+      const result = await peachService.getPeachSummaryService([validTracking]);
+
+      expect(getPeachRecordSpy).toHaveBeenCalledWith('TRACK-123', 'VFCBC');
+      expect(result).toStrictEqual(mockSummary);
     });
   });
 });

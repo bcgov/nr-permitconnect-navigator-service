@@ -1,121 +1,279 @@
-import { TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import { mockReset } from 'vitest-mock-extended';
+
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import {
+  TEST_ACTIVITY_HOUSING,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT,
+  TEST_NOTE_HISTORY_1,
+  TEST_NOTE_HISTORY_2,
+  TEST_IDIR_USER_1,
+  TEST_GENERAL_PROJECT_1,
+  TEST_HOUSING_PROJECT_1,
+  TEST_ENQUIRY_1
+} from '../data/index.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import * as noteHistoryDomain from '../../../src/domains/noteHistory.ts';
+import { Initiative, Resource, GroupName } from '../../../src/utils/enums/application.ts';
 import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
+import { CurrentAuthorization } from '../../../src/types/index.ts';
 
-describe('createNoteHistory', () => {
-  it('calls note_history.create and returns result', async () => {
-    prismaTxMock.note_history.create.mockResolvedValueOnce(TEST_NOTE_HISTORY_1);
+vi.mock('config');
 
-    const response = await noteHistoryService.createNoteHistory(prismaTxMock, TEST_NOTE_HISTORY_1);
+const emailBringForwardNotificationSpy = vi.spyOn(noteHistoryDomain, 'emailBringForwardNotification');
 
-    expect(prismaTxMock.note_history.create).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual(TEST_NOTE_HISTORY_1);
+describe('noteHistory service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
-});
 
-describe('deleteNoteHistory', () => {
-  it('calls note_history.update', async () => {
-    prismaTxMock.note_history.update.mockResolvedValueOnce(TEST_NOTE_HISTORY_1);
+  describe('createNoteHistoryService', () => {
+    it('creates noteHistory and note, returns combined result', async () => {
+      const noteStr = 'This is a test note';
+      mockRepos.noteHistory.create.mockResolvedValueOnce(TEST_NOTE_HISTORY_1 as never);
+      mockRepos.note.create.mockResolvedValueOnce({ noteId: 'note-1', note: noteStr } as never);
 
-    await noteHistoryService.deleteNoteHistory(prismaTxMock, '1', generateDeleteStamps(TEST_CURRENT_CONTEXT));
+      const response = await noteHistoryService.createNoteHistoryService(TEST_NOTE_HISTORY_1, noteStr);
 
-    expect(prismaTxMock.note_history.delete).not.toHaveBeenCalled();
-    expect(prismaTxMock.note_history.update).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.note_history.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
-      where: { noteHistoryId: '1' }
+      expect(mockRepos.noteHistory.create).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ...TEST_NOTE_HISTORY_1,
+          noteHistoryId: expect.any(String)
+        })
+      );
+      expect(mockRepos.note.create).toHaveBeenCalledTimes(1);
+      expect(mockRepos.note.create).toHaveBeenCalledWith({
+        noteId: expect.any(String),
+        noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
+        note: noteStr
+      });
+      expect(response).toStrictEqual({
+        ...TEST_NOTE_HISTORY_1,
+        note: [{ noteId: 'note-1', note: noteStr }]
+      });
     });
   });
-});
 
-describe('getNoteHistory', () => {
-  it('calls note_history.findFirstOrThrow and returns result', async () => {
-    prismaTxMock.note_history.findFirstOrThrow.mockResolvedValueOnce(TEST_NOTE_HISTORY_1);
+  describe('deleteNoteHistoryService', () => {
+    it('deletes noteHistory and related notes', async () => {
+      mockRepos.noteHistory.delete.mockResolvedValueOnce({} as never);
+      mockRepos.note.deleteMany.mockResolvedValueOnce({} as never);
 
-    const response = await noteHistoryService.getNoteHistory(prismaTxMock, '1');
+      await noteHistoryService.deleteNoteHistoryService(TEST_NOTE_HISTORY_1.noteHistoryId);
 
-    expect(prismaTxMock.note_history.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.note_history.findFirstOrThrow).toHaveBeenCalledWith({
-      where: {
-        noteHistoryId: '1'
-      },
-      include: {
-        note: { orderBy: { createdAt: 'desc' } }
-      }
-    });
-    expect(response).toStrictEqual(TEST_NOTE_HISTORY_1);
-  });
-});
-
-describe('listBringForward', () => {
-  it('calls note_history.findMany and returns result', async () => {
-    prismaTxMock.note_history.findMany.mockResolvedValueOnce([TEST_NOTE_HISTORY_1]);
-
-    const response = await noteHistoryService.listBringForward(
-      prismaTxMock,
-      Initiative.HOUSING,
-      BringForwardType.UNRESOLVED
-    );
-
-    expect(prismaTxMock.note_history.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.note_history.findMany).toHaveBeenCalledWith({
-      where: {
-        bringForwardState: BringForwardType.UNRESOLVED,
-        activity: {
-          initiative: {
-            code: Initiative.HOUSING
-          }
-        }
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        note: { orderBy: { createdAt: 'desc' } }
-      }
-    });
-    expect(response).toStrictEqual([TEST_NOTE_HISTORY_1]);
-  });
-});
-
-describe('listNoteHistory', () => {
-  it('calls note_history.findMany and returns result', async () => {
-    prismaTxMock.note_history.findMany.mockResolvedValueOnce([TEST_NOTE_HISTORY_1]);
-
-    const response = await noteHistoryService.listNoteHistory(prismaTxMock, '1');
-
-    expect(prismaTxMock.note_history.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.note_history.findMany).toHaveBeenCalledWith({
-      where: {
-        activityId: '1'
-      },
-      orderBy: {
-        createdAt: 'desc'
-      },
-      include: {
-        note: { orderBy: { createdAt: 'desc' } }
-      }
-    });
-    expect(response).toStrictEqual([TEST_NOTE_HISTORY_1]);
-  });
-});
-
-describe('updateNoteHistory', () => {
-  it('calls note_history.update with correct data and returns result', async () => {
-    prismaTxMock.note_history.update.mockResolvedValueOnce(TEST_NOTE_HISTORY_1);
-
-    const response = await noteHistoryService.updateNoteHistory(prismaTxMock, TEST_NOTE_HISTORY_1);
-
-    expect(prismaTxMock.note_history.update).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.note_history.update).toHaveBeenCalledWith({
-      data: TEST_NOTE_HISTORY_1,
-      where: {
+      expect(mockRepos.noteHistory.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.delete).toHaveBeenCalledWith({
         noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId
-      }
+      });
+      expect(mockRepos.note.deleteMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.note.deleteMany).toHaveBeenCalledWith({
+        noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId
+      });
     });
-    expect(response).toStrictEqual(TEST_NOTE_HISTORY_1);
+  });
+
+  describe('listBringForwardsService', () => {
+    it('fetches unresolved bring forwards with projects and user details', async () => {
+      const mockHistories = [TEST_NOTE_HISTORY_1];
+      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
+      mockRepos.electrificationProject.search.mockResolvedValueOnce([] as never);
+      mockRepos.generalProject.search.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1] as never);
+      mockRepos.housingProject.search.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1] as never);
+      mockRepos.user.findMany.mockResolvedValueOnce([TEST_IDIR_USER_1] as never);
+      mockRepos.enquiry.search.mockResolvedValueOnce([TEST_ENQUIRY_1] as never);
+      mockRepos.enquiry.search.mockResolvedValueOnce([] as never);
+      mockRepos.enquiry.search.mockResolvedValueOnce([] as never);
+
+      const response = await noteHistoryService.listBringForwardsService(Initiative.GENERAL);
+
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith({
+        where: {
+          bringForwardState: BringForwardType.UNRESOLVED,
+          activity: {
+            initiative: {
+              code: Initiative.GENERAL
+            }
+          }
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          note: { orderBy: { createdAt: 'desc' } }
+        }
+      });
+      expect(response).toHaveLength(1);
+      expect(response[0]).toHaveProperty('activityId', TEST_NOTE_HISTORY_1.activityId);
+      expect(response[0]).toHaveProperty('noteId', TEST_NOTE_HISTORY_1.noteHistoryId);
+      expect(response[0]).toHaveProperty('title', TEST_NOTE_HISTORY_1.title);
+    });
+
+    it('returns empty array when no histories found', async () => {
+      mockRepos.noteHistory.findMany.mockResolvedValueOnce([] as never);
+
+      const response = await noteHistoryService.listBringForwardsService(Initiative.HOUSING, BringForwardType.RESOLVED);
+
+      expect(response).toStrictEqual([]);
+    });
+
+    it('fetches bring forwards with custom state', async () => {
+      mockRepos.noteHistory.findMany.mockResolvedValueOnce([] as never);
+
+      await noteHistoryService.listBringForwardsService(Initiative.ELECTRIFICATION, BringForwardType.RESOLVED);
+
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            bringForwardState: BringForwardType.RESOLVED,
+            activity: {
+              initiative: {
+                code: Initiative.ELECTRIFICATION
+              }
+            }
+          }
+        })
+      );
+    });
+  });
+
+  describe('listNoteHistoriesService', () => {
+    it('returns all note histories when user has no scope:self attribute', async () => {
+      const mockHistories = [TEST_NOTE_HISTORY_1, TEST_NOTE_HISTORY_2];
+      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
+
+      const response = await noteHistoryService.listNoteHistoriesService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_ACTIVITY_HOUSING.activityId
+      );
+
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith({
+        where: {
+          activityId: TEST_ACTIVITY_HOUSING.activityId
+        },
+        orderBy: {
+          createdAt: 'desc'
+        },
+        include: {
+          note: { orderBy: { createdAt: 'desc' } }
+        }
+      });
+      expect(response).toHaveLength(2);
+    });
+
+    it('filters to only shownToProponent=true when user has scope:self attribute', async () => {
+      const mockHistories = [
+        { ...TEST_NOTE_HISTORY_1, shownToProponent: true },
+        { ...TEST_NOTE_HISTORY_2, shownToProponent: false }
+      ];
+      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
+      const proponentAuthContext: CurrentAuthorization = {
+        ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        attributes: ['scope:self']
+      };
+
+      const response = await noteHistoryService.listNoteHistoriesService(
+        proponentAuthContext,
+        TEST_ACTIVITY_HOUSING.activityId
+      );
+
+      expect(response).toHaveLength(1);
+      expect(response[0].shownToProponent).toBe(true);
+    });
+  });
+
+  describe('updateNoteHistoryService', () => {
+    it('updates noteHistory, creates note if provided, returns updated record', async () => {
+      const noteStr = 'Updated note content';
+      const updatedData = { ...TEST_NOTE_HISTORY_1, title: 'Updated Title' };
+      mockRepos.noteHistory.update.mockResolvedValueOnce(undefined as never);
+      mockRepos.note.create.mockResolvedValueOnce({ noteId: 'note-2', note: noteStr } as never);
+      mockRepos.noteHistory.findFirstOrThrow.mockResolvedValueOnce(updatedData as never);
+      emailBringForwardNotificationSpy.mockResolvedValueOnce(undefined as never);
+
+      const response = await noteHistoryService.updateNoteHistoryService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        updatedData,
+        noteStr,
+        Resource.GENERAL_PROJECT
+      );
+
+      expect(mockRepos.noteHistory.update).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.update).toHaveBeenCalledWith(
+        { noteHistoryId: updatedData.noteHistoryId },
+        updatedData
+      );
+      expect(mockRepos.note.create).toHaveBeenCalledTimes(1);
+      expect(mockRepos.note.create).toHaveBeenCalledWith({
+        noteHistoryId: updatedData.noteHistoryId,
+        noteId: expect.any(String),
+        note: noteStr
+      });
+      expect(response).toStrictEqual(updatedData);
+    });
+
+    it('calls emailBringForwardNotification when navigator updates note', async () => {
+      const updatedData = { ...TEST_NOTE_HISTORY_1, title: 'Updated Title' };
+      mockRepos.noteHistory.update.mockResolvedValueOnce(undefined as never);
+      mockRepos.note.create.mockResolvedValueOnce({ noteId: 'note-3', note: 'note' } as never);
+      mockRepos.noteHistory.findFirstOrThrow.mockResolvedValueOnce(updatedData as never);
+      emailBringForwardNotificationSpy.mockResolvedValueOnce(undefined as never);
+
+      await noteHistoryService.updateNoteHistoryService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        updatedData,
+        'test note',
+        Resource.ENQUIRY
+      );
+
+      expect(emailBringForwardNotificationSpy).toHaveBeenCalledTimes(1);
+      expect(emailBringForwardNotificationSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          electrificationProject: mockRepos.electrificationProject,
+          generalProject: mockRepos.generalProject,
+          housingProject: mockRepos.housingProject,
+          subjectGroup: mockRepos.subjectGroup,
+          user: mockRepos.user
+        }),
+        updatedData,
+        TEST_CURRENT_CONTEXT.initiative,
+        Resource.ENQUIRY
+      );
+    });
+
+    it('skips emailBringForwardNotification when user is not navigator', async () => {
+      const updatedData = { ...TEST_NOTE_HISTORY_1, title: 'Updated Title' };
+      mockRepos.noteHistory.update.mockResolvedValueOnce(undefined as never);
+      mockRepos.note.create.mockResolvedValueOnce({ noteId: 'note-4', note: 'note' } as never);
+      mockRepos.noteHistory.findFirstOrThrow.mockResolvedValueOnce(updatedData as never);
+      const adminAuthContext: CurrentAuthorization = {
+        attributes: [],
+        groups: [
+          {
+            groupId: 2,
+            initiativeCode: Initiative.HOUSING,
+            initiativeId: '123',
+            name: GroupName.ADMIN,
+            label: 'Admin'
+          }
+        ]
+      };
+
+      await noteHistoryService.updateNoteHistoryService(
+        adminAuthContext,
+        TEST_CURRENT_CONTEXT,
+        updatedData,
+        'test note',
+        Resource.HOUSING_PROJECT
+      );
+
+      expect(emailBringForwardNotificationSpy).not.toHaveBeenCalled();
+    });
   });
 });

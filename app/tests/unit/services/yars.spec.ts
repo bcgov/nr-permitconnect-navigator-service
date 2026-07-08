@@ -1,525 +1,397 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import * as yarsService from '../../../src/services/yars.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+import { mockReset } from 'vitest-mock-extended';
 
-const createTimeStamps = (overrides = {}) => ({
-  createdBy: null,
-  createdAt: null,
-  updatedBy: null,
-  updatedAt: null,
-  deletedBy: null,
-  deletedAt: null,
-  ...overrides
-});
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import {
+  getGroupsService,
+  listPermissionsService,
+  listSubjectPermissionsService,
+  deleteSubjectGroupService
+} from '../../../src/services/yars.ts';
+import * as yarsDomain from '../../../src/domains/yars.ts';
+import * as comsExternal from '../../../src/external/coms.ts';
+import { Initiative, GroupName } from '../../../src/utils/enums/application.ts';
+import { TEST_IDIR_USER_1, TEST_CURRENT_CONTEXT, TEST_GROUP_1 } from '../data/index.ts';
+import Problem from '../../../src/utils/problem.ts';
 
-const createMockGroup = (overrides = {}) => ({
-  groupId: 1,
-  name: GroupName.NAVIGATOR,
-  label: 'Group Label',
-  initiativeId: 'init-1',
-  ...createTimeStamps(),
-  ...overrides
-});
+import type { CurrentContext } from '../../../src/types/index.ts';
+import type { JwtPayload } from 'jsonwebtoken';
 
-const createMockInitiative = (overrides = {}) => ({
-  initiativeId: 'init-1',
-  code: Initiative.HOUSING,
-  label: 'Housing Initiative',
-  ...createTimeStamps(),
+vi.mock('config');
 
-  ...overrides
-});
+const getGroupsSpy = vi.spyOn(yarsDomain, 'getGroups');
+const getCorrespondingGlobalGroupSpy = vi.spyOn(yarsDomain, 'getCorrespondingGlobalGroup');
+const assignPermissionsSpy = vi.spyOn(comsExternal, 'assignPermissions');
 
-const createMockGlobalInitiative = (overrides = {}) => ({
-  initiativeId: 'init-global',
-  code: Initiative.PCNS,
-  label: 'Global Initiative',
-  ...createTimeStamps(),
-  ...overrides
-});
-
-const createMockSubjectGroup = (overrides = {}) => ({
-  sub: 'sub',
-  groupId: 1,
-  ...createTimeStamps(),
-  ...overrides
-});
-
-const createMockGroupRolePolicy = (overrides = {}) => ({
-  rowNumber: BigInt(1),
-  groupId: 1,
-  initiativeCode: Initiative.HOUSING,
-  groupName: GroupName.NAVIGATOR,
-  roleName: 'role-name',
-  policyId: 123,
-  resourceName: 'resource',
-  actionName: 'action',
-  attributeName: null,
-  ...overrides
-});
-
-const createMockPolicyAttribute = (overrides = {}) => ({
-  policyId: 1,
-  attributeId: 1,
-  ...createTimeStamps(),
-  attribute: {
-    attributeId: 1,
-    name: 'attr',
-    description: 'attr-desc',
-    ...createTimeStamps(),
-    attributeGroup: [createMockGroup()]
-  },
-  ...overrides
-});
-
-beforeEach(() => {
-  vi.clearAllMocks();
-});
-
-describe('assignGroup', () => {
-  it('calls subject_group.create and returns result', async () => {
-    prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(createMockGroup());
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
-    prismaTxMock.subject_group.create.mockResolvedValueOnce(createMockSubjectGroup());
-
-    const response = await yarsService.assignGroup(prismaTxMock, 'sub', 1);
-
-    expect(prismaTxMock.subject_group.create).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.subject_group.create).toHaveBeenCalledWith({
-      data: {
-        sub: 'sub',
-        groupId: 1
-      }
-    });
-    expect(response).toStrictEqual({ sub: 'sub', roleId: 1 });
+describe('yars service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
 
-  it('returns group if already assigned', async () => {
-    prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(createMockGroup());
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
-
-    const response = await yarsService.assignGroup(prismaTxMock, 'sub', 1);
-
-    expect(prismaTxMock.subject_group.create).not.toHaveBeenCalled();
-    expect(response).toStrictEqual({ sub: 'sub', roleId: 1 });
-  });
-});
-
-describe('getCorrespondingGlobalGroup', () => {
-  it('returns corresponding global group', async () => {
-    prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(createMockGroup());
-    prismaTxMock.group.findFirstOrThrow.mockResolvedValueOnce(
-      createMockGroup({
-        groupId: 99,
-        name: 'global-group',
-        label: 'Global Label',
-        initiativeId: 'init-global'
-      })
-    );
-
-    prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce(createMockGlobalInitiative());
-
-    const response = await yarsService.getCorrespondingGlobalGroup(prismaTxMock, 1);
-
-    expect(prismaTxMock.group.findFirstOrThrow).toHaveBeenNthCalledWith(1, {
-      where: { groupId: 1 }
-    });
-    expect(prismaTxMock.initiative.findFirstOrThrow).toHaveBeenCalledWith({
-      where: { code: Initiative.PCNS }
-    });
-    expect(prismaTxMock.group.findFirstOrThrow).toHaveBeenNthCalledWith(2, {
-      where: {
-        initiativeId: 'init-global',
-        name: GroupName.NAVIGATOR
-      }
-    });
-
-    expect(response).toStrictEqual({
-      initiativeCode: Initiative.PCNS,
-      initiativeId: 'init-global',
-      groupId: 99,
-      name: 'global-group',
-      label: 'Global Label'
-    });
-  });
-});
-
-describe('getSubjectGroups', () => {
-  it('returns mapped subject groups', async () => {
-    prismaTxMock.subject_group.findMany.mockResolvedValueOnce([
-      {
-        ...createMockSubjectGroup({ group: createMockGroup({ initiative: createMockInitiative() }) })
-      }
-    ]);
-
-    const response = await yarsService.getSubjectGroups(prismaTxMock, 'sub');
-
-    expect(prismaTxMock.subject_group.findMany).toHaveBeenCalledWith({
-      where: { sub: 'sub' },
-      include: {
-        group: {
-          include: {
-            initiative: true
-          }
+  describe('getGroupsService', () => {
+    it('delegates to domain getGroups with initiative code', async () => {
+      const groups = [
+        {
+          initiativeCode: Initiative.HOUSING,
+          groupId: TEST_GROUP_1.groupId,
+          initiativeId: TEST_GROUP_1.initiativeId,
+          name: TEST_GROUP_1.name,
+          label: TEST_GROUP_1.label!
         }
-      }
+      ];
+
+      getGroupsSpy.mockResolvedValue(groups as never);
+
+      const result = await getGroupsService(Initiative.HOUSING);
+
+      expect(getGroupsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          group: mockRepos.group,
+          initiative: mockRepos.initiative
+        }),
+        Initiative.HOUSING
+      );
+      expect(result).toEqual(groups);
     });
 
-    expect(response).toStrictEqual([
-      {
-        initiativeCode: Initiative.HOUSING,
+    it('delegates to domain getGroups with undefined initiative', async () => {
+      const groups = [
+        {
+          initiativeCode: Initiative.HOUSING,
+          groupId: TEST_GROUP_1.groupId,
+          initiativeId: TEST_GROUP_1.initiativeId,
+          name: TEST_GROUP_1.name,
+          label: TEST_GROUP_1.label!
+        }
+      ];
+
+      getGroupsSpy.mockResolvedValue(groups as never);
+
+      const result = await getGroupsService(undefined);
+
+      expect(getGroupsSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          group: mockRepos.group,
+          initiative: mockRepos.initiative
+        }),
+        undefined
+      );
+      expect(result).toEqual(groups);
+    });
+
+    it('returns empty array when no groups exist', async () => {
+      getGroupsSpy.mockResolvedValue([] as never);
+
+      const result = await getGroupsService(Initiative.HOUSING);
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('listPermissionsService', () => {
+    it('returns groups and their permissions for given initiative and group name', async () => {
+      const initiative = {
         initiativeId: 'init-1',
-        groupId: 1,
-        name: GroupName.NAVIGATOR,
-        label: 'Group Label'
-      }
-    ]);
-  });
-});
-
-describe('getSubjectInitiatives', () => {
-  it('returns mapped initiatives excluding PCNS', async () => {
-    prismaTxMock.subject_group.findMany.mockResolvedValueOnce([
-      {
-        ...createMockSubjectGroup({ group: createMockGroup({ initiative: createMockInitiative() }) })
-      }
-    ]);
-
-    const response = await yarsService.getSubjectInitiatives(prismaTxMock, 'sub');
-
-    expect(prismaTxMock.subject_group.findMany).toHaveBeenCalledWith({
-      select: {
-        group: {
-          select: {
-            initiativeId: true,
-            initiative: {
-              select: {
-                code: true
-              }
-            }
-          }
-        }
-      },
-      where: {
-        sub: 'sub',
-        NOT: {
-          group: {
-            initiative: {
-              code: Initiative.PCNS
-            }
-          }
-        }
-      }
-    });
-
-    expect(response).toStrictEqual([
-      {
         code: Initiative.HOUSING,
-        initiativeId: 'init-1'
-      }
-    ]);
-  });
-});
+        name: 'Housing',
+        label: 'Housing Initiative',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      };
 
-describe('getGroupPolicyDetails', () => {
-  it('returns mapped policy details with initiative filter', async () => {
-    prismaTxMock.group_role_policy_vw.findMany.mockResolvedValueOnce([createMockGroupRolePolicy()]);
+      const groups = [TEST_GROUP_1];
 
-    const response = await yarsService.getGroupPolicyDetails(prismaTxMock, 1, 'resource', 'action', Initiative.HOUSING);
+      const permissions = [
+        {
+          rowNumber: BigInt(1),
+          groupId: TEST_GROUP_1.groupId,
+          initiativeCode: Initiative.HOUSING,
+          groupName: GroupName.NAVIGATOR,
+          roleName: 'role-1',
+          policyId: 1,
+          resourceName: 'resource-1',
+          actionName: 'action-1',
+          attributeName: null
+        }
+      ];
 
-    expect(prismaTxMock.group_role_policy_vw.findMany).toHaveBeenCalledWith({
-      where: {
-        groupId: 1,
-        resourceName: 'resource',
-        actionName: 'action',
-        initiativeCode: Initiative.HOUSING
-      }
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue(initiative as never);
+      mockRepos.group.findMany.mockResolvedValue(groups as never);
+      mockRepos.groupRolePolicyVw.getGroupPermissions.mockResolvedValue(permissions as never);
+
+      const result = await listPermissionsService(Initiative.HOUSING, GroupName.NAVIGATOR);
+
+      expect(mockRepos.initiative.findFirstOrThrow).toHaveBeenCalledWith({
+        where: { code: Initiative.HOUSING }
+      });
+      expect(mockRepos.group.findMany).toHaveBeenCalledWith({
+        where: {
+          initiativeId: initiative.initiativeId,
+          name: GroupName.NAVIGATOR
+        }
+      });
+      expect(mockRepos.groupRolePolicyVw.getGroupPermissions).toHaveBeenCalledWith(TEST_GROUP_1.groupId);
+      expect(result).toEqual({
+        groups: [
+          {
+            initiativeCode: Initiative.HOUSING,
+            groupId: TEST_GROUP_1.groupId,
+            initiativeId: TEST_GROUP_1.initiativeId,
+            name: GroupName.NAVIGATOR,
+            label: TEST_GROUP_1.label
+          }
+        ],
+        permissions
+      });
     });
-    expect(response).toStrictEqual([
-      {
-        groupId: 1,
-        initiativeCode: Initiative.HOUSING,
-        groupName: GroupName.NAVIGATOR,
-        roleName: 'role-name',
-        policyId: 123,
-        resourceName: 'resource',
-        actionName: 'action'
-      }
-    ]);
-  });
-});
 
-describe('getPCNSGroupPolicyDetails', () => {
-  it('returns mapped policy details for PCNS initiative', async () => {
-    prismaTxMock.group_role_policy_vw.findMany.mockResolvedValueOnce([createMockGroupRolePolicy()]);
-
-    const response = await yarsService.getPCNSGroupPolicyDetails(
-      prismaTxMock,
-      GroupName.NAVIGATOR,
-      'resource',
-      'action'
-    );
-
-    expect(prismaTxMock.group_role_policy_vw.findMany).toHaveBeenCalledWith({
-      where: {
-        groupName: GroupName.NAVIGATOR,
-        resourceName: 'resource',
-        actionName: 'action',
-        initiativeCode: Initiative.PCNS
-      }
-    });
-    expect(response).toStrictEqual([
-      {
-        groupId: 1,
-        initiativeCode: Initiative.HOUSING,
-        groupName: GroupName.NAVIGATOR,
-        roleName: 'role-name',
-        policyId: 123,
-        resourceName: 'resource',
-        actionName: 'action'
-      }
-    ]);
-  });
-});
-
-describe('getGroupPermissions', () => {
-  it('returns mapped group permissions', async () => {
-    prismaTxMock.group_role_policy_vw.findMany.mockResolvedValueOnce([createMockGroupRolePolicy()]);
-
-    const response = await yarsService.getGroupPermissions(prismaTxMock, 1);
-
-    expect(prismaTxMock.group_role_policy_vw.findMany).toHaveBeenCalledWith({
-      where: {
-        groupId: 1
-      }
-    });
-    expect(response).toStrictEqual([
-      {
-        group: GroupName.NAVIGATOR,
-        initiative: Initiative.HOUSING,
-        resource: 'resource',
-        action: 'action'
-      }
-    ]);
-  });
-});
-
-describe('getGroups', () => {
-  it('returns mapped groups for the initiative', async () => {
-    prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce(createMockInitiative());
-    prismaTxMock.group.findMany.mockResolvedValueOnce([createMockGroup()]);
-
-    const response = await yarsService.getGroups(prismaTxMock, Initiative.HOUSING);
-
-    expect(prismaTxMock.initiative.findFirstOrThrow).toHaveBeenCalledWith({
-      where: {
-        code: Initiative.HOUSING
-      }
-    });
-    expect(prismaTxMock.group.findMany).toHaveBeenCalledWith({
-      where: {
-        initiativeId: 'init-1'
-      }
-    });
-    expect(response).toStrictEqual([
-      {
-        groupId: 1,
-        initiativeCode: Initiative.HOUSING,
+    it('handles empty results when no matching group names found', async () => {
+      const initiative = {
         initiativeId: 'init-1',
+        code: Initiative.HOUSING,
+        name: 'Housing',
+        label: 'Housing Initiative',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      };
+
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue(initiative as never);
+      mockRepos.group.findMany.mockResolvedValue([] as never);
+
+      const result = await listPermissionsService(Initiative.HOUSING, GroupName.ADMIN);
+
+      expect(mockRepos.group.findMany).toHaveBeenCalledWith({
+        where: {
+          initiativeId: initiative.initiativeId,
+          name: GroupName.ADMIN
+        }
+      });
+      expect(result.groups).toHaveLength(0);
+      expect(result.permissions).toEqual([]);
+    });
+  });
+
+  describe('listSubjectPermissionsService', () => {
+    it('returns groups and permissions for current subject', async () => {
+      const groups = [TEST_GROUP_1];
+      const permissions = [
+        {
+          rowNumber: BigInt(1),
+          groupId: TEST_GROUP_1.groupId,
+          policyId: 1
+        }
+      ];
+
+      const currentContext: CurrentContext = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
+        } as JwtPayload
+      };
+
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue(groups as never);
+      mockRepos.groupRolePolicyVw.getGroupPermissions.mockResolvedValue(permissions as never);
+      assignPermissionsSpy.mockResolvedValue(undefined as never);
+
+      const result = await listSubjectPermissionsService(currentContext);
+
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      expect(mockRepos.groupRolePolicyVw.getGroupPermissions).toHaveBeenCalledWith(TEST_GROUP_1.groupId);
+      expect(assignPermissionsSpy).toHaveBeenCalledWith(currentContext, TEST_IDIR_USER_1.sub, groups);
+      expect(result).toEqual({
+        groups,
+        permissions
+      });
+    });
+
+    it('throws error if tokenPayload.sub is missing', async () => {
+      const currentContext: CurrentContext = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: undefined,
+          identity_provider: 'bceid'
+        } as JwtPayload
+      };
+
+      await expect(listSubjectPermissionsService(currentContext)).rejects.toThrow(
+        new Problem(500, { detail: 'Unable to read token sub' })
+      );
+    });
+
+    it('still returns permissions even if assignPermissions call fails', async () => {
+      const groups = [TEST_GROUP_1];
+      const permissions = [{ rowNumber: BigInt(1), groupId: TEST_GROUP_1.groupId, policyId: 1 }];
+
+      const currentContext: CurrentContext = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
+        } as JwtPayload
+      };
+
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue(groups as never);
+      mockRepos.groupRolePolicyVw.getGroupPermissions.mockResolvedValue(permissions as never);
+      assignPermissionsSpy.mockRejectedValue(new Error('COMS error'));
+
+      const result = await listSubjectPermissionsService(currentContext);
+
+      expect(result).toBeDefined();
+      expect(result.groups).toEqual(groups);
+      expect(result.permissions).toEqual(permissions);
+    });
+  });
+
+  describe('deleteSubjectGroupService', () => {
+    it('deletes group assignment and corresponding global group if no other groups with same name exist', async () => {
+      const currentContext: Partial<CurrentContext> = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
+        }
+      };
+
+      const groups = [TEST_GROUP_1];
+      const globalGroup = {
+        groupId: 100,
+        initiativeId: 'init-global',
+        initiativeCode: Initiative.PCNS,
         name: GroupName.NAVIGATOR,
-        label: 'Group Label'
-      }
-    ]);
-  });
-});
+        label: 'Global Navigator',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      };
 
-describe('getPolicyAttributes', () => {
-  it('returns mapped attributes for the policy', async () => {
-    prismaTxMock.policy_attribute.findMany.mockResolvedValueOnce([createMockPolicyAttribute()]);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValueOnce(groups as never).mockResolvedValueOnce([] as never);
+      mockRepos.subjectGroup.subjectHasGroupName.mockResolvedValue(false as never);
+      mockRepos.subjectGroup.delete.mockResolvedValue({} as never);
+      getCorrespondingGlobalGroupSpy.mockResolvedValue(globalGroup as never);
+      assignPermissionsSpy.mockResolvedValue(undefined as never);
 
-    const response = await yarsService.getPolicyAttributes(prismaTxMock, 1);
+      await deleteSubjectGroupService(currentContext as CurrentContext, TEST_IDIR_USER_1.sub, TEST_GROUP_1.groupId);
 
-    expect(prismaTxMock.policy_attribute.findMany).toHaveBeenCalledWith({
-      where: {
-        policyId: 1
-      },
-      include: {
-        attribute: {
-          include: {
-            attributeGroup: true
-          }
-        }
-      }
-    });
-
-    expect(response).toStrictEqual([
-      {
-        attributeId: 1,
-        attributeName: 'attr',
-        groupId: [1]
-      }
-    ]);
-  });
-});
-
-describe('removeGroup', () => {
-  it('calls subject_group.delete and returns deleted group', async () => {
-    prismaTxMock.subject_group.delete.mockResolvedValueOnce(createMockSubjectGroup());
-
-    const response = await yarsService.removeGroup(prismaTxMock, 'sub', 1);
-
-    expect(prismaTxMock.subject_group.delete).toHaveBeenCalledWith({
-      where: {
+      expect(mockRepos.subjectGroup.delete).toHaveBeenCalledTimes(2);
+      expect(mockRepos.subjectGroup.delete).toHaveBeenNthCalledWith(1, {
         sub_groupId: {
-          sub: 'sub',
-          groupId: 1
+          sub: TEST_IDIR_USER_1.sub,
+          groupId: TEST_GROUP_1.groupId
         }
-      }
-    });
-
-    expect(response).toStrictEqual({ sub: 'sub', roleId: 1 });
-  });
-});
-
-describe('subjectHasGroup', () => {
-  it('calls subject_group.count and returns true if count > 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
-
-    const response = await yarsService.subjectHasGroup(prismaTxMock, 'sub', 1);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        groupId: 1
-      }
-    });
-
-    expect(response).toStrictEqual(true);
-  });
-
-  it('calls subject_group.count and returns false if count <= 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
-
-    const response = await yarsService.subjectHasGroup(prismaTxMock, 'sub', 1);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        groupId: 1
-      }
-    });
-
-    expect(response).toStrictEqual(false);
-  });
-});
-
-describe('subjectHasGroupName', () => {
-  it('calls subject_group.count and returns true if count > 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
-
-    const response = await yarsService.subjectHasGroupName(prismaTxMock, 'sub', GroupName.NAVIGATOR);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        group: {
-          name: GroupName.NAVIGATOR
-        },
-        NOT: {
-          group: {
-            initiative: {
-              code: Initiative.PCNS
-            }
-          }
+      });
+      expect(mockRepos.subjectGroup.delete).toHaveBeenNthCalledWith(2, {
+        sub_groupId: {
+          sub: TEST_IDIR_USER_1.sub,
+          groupId: globalGroup.groupId
         }
-      }
+      });
+      expect(assignPermissionsSpy).toHaveBeenCalled();
     });
 
-    expect(response).toStrictEqual(true);
-  });
-
-  it('calls subject_group.count and returns false if count <= 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
-
-    const response = await yarsService.subjectHasGroupName(prismaTxMock, 'sub', GroupName.NAVIGATOR);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        group: {
-          name: GroupName.NAVIGATOR
-        },
-        NOT: {
-          group: {
-            initiative: {
-              code: Initiative.PCNS
-            }
-          }
+    it('throws error when trying to delete PCNS global group', async () => {
+      const currentContext: Partial<CurrentContext> = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
         }
-      }
+      };
+
+      const globalGroup = {
+        groupId: 1,
+        initiativeId: 'init-global',
+        initiativeCode: Initiative.PCNS,
+        name: GroupName.ADMIN,
+        label: 'Global Admin',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      };
+
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue([globalGroup] as never);
+
+      await expect(
+        deleteSubjectGroupService(currentContext as CurrentContext, TEST_IDIR_USER_1.sub, 1)
+      ).rejects.toThrow(new Problem(422, { detail: 'Cannot delete a global group directly' }));
     });
 
-    expect(response).toStrictEqual(false);
-  });
-});
-
-describe('subjectHasInitiativeGroupName', () => {
-  it('calls subject_group.count and returns true if count > 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
-
-    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
-      GroupName.NAVIGATOR
-    ]);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        group: {
-          name: { in: [GroupName.NAVIGATOR] },
-          initiative: { code: Initiative.HOUSING }
+    it('skips global group deletion if user still has groups with same name in other initiatives', async () => {
+      const currentContext: Partial<CurrentContext> = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
         }
-      }
+      };
+
+      const groups = [TEST_GROUP_1];
+
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValueOnce(groups as never);
+      mockRepos.subjectGroup.subjectHasGroupName.mockResolvedValue(true as never);
+      mockRepos.subjectGroup.delete.mockResolvedValue({} as never);
+      assignPermissionsSpy.mockResolvedValue(undefined as never);
+
+      await deleteSubjectGroupService(currentContext as CurrentContext, TEST_IDIR_USER_1.sub, TEST_GROUP_1.groupId);
+
+      expect(mockRepos.subjectGroup.delete).toHaveBeenCalledTimes(1);
+      expect(getCorrespondingGlobalGroupSpy).not.toHaveBeenCalled();
     });
 
-    expect(response).toStrictEqual(true);
-  });
-
-  it('calls subject_group.count and returns false if count <= 0', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(0);
-
-    const response = await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
-      GroupName.NAVIGATOR
-    ]);
-
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        group: {
-          name: { in: [GroupName.NAVIGATOR] },
-          initiative: { code: Initiative.HOUSING }
+    it('handles COMS assignPermissions error gracefully', async () => {
+      const currentContext: Partial<CurrentContext> = {
+        ...TEST_CURRENT_CONTEXT,
+        tokenPayload: {
+          ...TEST_CURRENT_CONTEXT.tokenPayload,
+          sub: TEST_IDIR_USER_1.sub,
+          identity_provider: 'bceid'
         }
-      }
-    });
+      };
 
-    expect(response).toStrictEqual(false);
-  });
+      const groups = [TEST_GROUP_1];
 
-  it('filters out undefined', async () => {
-    prismaTxMock.subject_group.count.mockResolvedValueOnce(1);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValueOnce(groups as never).mockResolvedValueOnce([] as never);
+      mockRepos.subjectGroup.subjectHasGroupName.mockResolvedValue(false as never);
+      mockRepos.subjectGroup.delete.mockResolvedValue({} as never);
+      getCorrespondingGlobalGroupSpy.mockResolvedValue({
+        groupId: 100,
+        initiativeId: 'init-global',
+        initiativeCode: Initiative.PCNS,
+        name: GroupName.NAVIGATOR,
+        label: 'Global Navigator',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      } as never);
 
-    await yarsService.subjectHasInitiativeGroupName(prismaTxMock, 'sub', Initiative.HOUSING, [
-      GroupName.NAVIGATOR,
-      undefined
-    ]);
+      assignPermissionsSpy.mockRejectedValue(new Error('COMS error'));
 
-    expect(prismaTxMock.subject_group.count).toHaveBeenCalledWith({
-      where: {
-        sub: 'sub',
-        group: {
-          name: { in: [GroupName.NAVIGATOR] },
-          initiative: { code: Initiative.HOUSING }
-        }
-      }
+      await deleteSubjectGroupService(currentContext as CurrentContext, TEST_IDIR_USER_1.sub, TEST_GROUP_1.groupId);
+
+      expect(mockRepos.subjectGroup.delete).toHaveBeenCalledTimes(2);
     });
   });
 });

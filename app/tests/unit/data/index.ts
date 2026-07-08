@@ -172,6 +172,11 @@ export const TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR: CurrentAuthorization = {
   groups: [{ initiativeCode: Initiative.HOUSING, name: GroupName.NAVIGATOR } as Group]
 };
 
+export const TEST_CURRENT_AUTH_CONTEXT_ADMIN: CurrentAuthorization = {
+  attributes: [],
+  groups: [{ initiativeCode: Initiative.HOUSING, name: GroupName.ADMIN } as Group]
+};
+
 export const TEST_CURRENT_CONTEXT: CurrentContext = {
   authType: AuthType.BEARER,
   initiative: Initiative.HOUSING,

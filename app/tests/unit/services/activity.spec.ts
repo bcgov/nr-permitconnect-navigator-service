@@ -1,73 +1,39 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_ACTIVITY_HOUSING } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import * as activityDomain from '../../../src/domains/activity.ts';
+import { deleteActivityService } from '../../../src/services/activity.ts';
 
-import { generateCreateStamps, generateDeleteStamps } from '../../../src/db/utils/utils.ts';
-import * as activityService from '../../../src/domains/activity.ts';
-import { Initiative as InitiativeE } from '../../../src/utils/enums/application.ts';
+vi.mock('config');
 
-import type { Activity, Initiative } from '../../../src/types/index.ts';
+const deleteActivitySpy = vi.spyOn(activityDomain, 'deleteActivity');
 
-const ACTIVITY = {
-  activityId: 'ABCD1234'
-} as Activity;
+beforeEach(() => {
+  vi.clearAllMocks();
+});
 
-describe('createActivity', () => {
-  it('calls activity.create and returns result', async () => {
-    prismaTxMock.activity.create.mockResolvedValueOnce(ACTIVITY);
-    prismaTxMock.initiative.findFirstOrThrow.mockResolvedValueOnce({ initiativeId: '1' } as Initiative);
-    const response = await activityService.createActivity(
-      prismaTxMock,
-      InitiativeE.HOUSING,
-      generateCreateStamps(undefined)
+describe('deleteActivityService', () => {
+  it('calls deleteActivity domain with correct repos and activityId', async () => {
+    deleteActivitySpy.mockResolvedValue(undefined);
+
+    await deleteActivityService(TEST_ACTIVITY_HOUSING.activityId);
+
+    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
+    expect(deleteActivitySpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        activity: mockRepos.activity,
+        activityContact: mockRepos.activityContact,
+        document: mockRepos.document,
+        electrificationProject: mockRepos.electrificationProject,
+        enquiry: mockRepos.enquiry,
+        generalProject: mockRepos.generalProject,
+        housingProject: mockRepos.housingProject,
+        note: mockRepos.note,
+        noteHistory: mockRepos.noteHistory,
+        permit: mockRepos.permit,
+        permitNote: mockRepos.permitNote,
+        permitTracking: mockRepos.permitTracking
+      }),
+      TEST_ACTIVITY_HOUSING.activityId
     );
-
-    expect(prismaTxMock.initiative.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.activity.create).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual(ACTIVITY);
-  });
-});
-
-describe('deleteActivity', () => {
-  it('calls activity.update', async () => {
-    prismaTxMock.activity.update.mockResolvedValueOnce(ACTIVITY);
-    await activityService.deleteActivity(prismaTxMock, 'ABCD1234', generateDeleteStamps(undefined));
-
-    expect(prismaTxMock.activity.update).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('deleteActivityHard', () => {
-  it('calls activity.delete', async () => {
-    prismaTxMock.activity.delete.mockResolvedValueOnce(ACTIVITY);
-    await activityService.deleteActivityHard(prismaTxMock, 'ABCD1234');
-
-    expect(prismaTxMock.activity.delete).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe('getActivity', () => {
-  it('calls activity.findFirst and returns result', async () => {
-    prismaTxMock.activity.findFirst.mockResolvedValueOnce(ACTIVITY);
-    const response = await activityService.getActivity(prismaTxMock, 'ABCD1234');
-
-    expect(prismaTxMock.activity.findFirst).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual(ACTIVITY);
-  });
-});
-
-describe('getActivities', () => {
-  it('calls activity.findMany with parameter and returns result', async () => {
-    prismaTxMock.activity.findMany.mockResolvedValueOnce([ACTIVITY]);
-    const response = await activityService.getActivities(prismaTxMock, InitiativeE.HOUSING);
-
-    expect(prismaTxMock.activity.findMany).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([ACTIVITY]);
-  });
-
-  it('calls activity.findMany without parameter and returns result', async () => {
-    prismaTxMock.activity.findMany.mockResolvedValueOnce([ACTIVITY]);
-    const response = await activityService.getActivities(prismaTxMock);
-
-    expect(prismaTxMock.activity.findMany).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([ACTIVITY]);
   });
 });

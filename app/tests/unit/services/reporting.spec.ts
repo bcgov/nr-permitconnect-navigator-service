@@ -1,24 +1,93 @@
+import { mockReset } from 'vitest-mock-extended';
+
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import * as reportingService from '../../../src/services/reporting.ts';
+import '../../__mocks__/unitOfWorkMock.ts';
 
-describe('getElectrificationProjectPermitData', () => {
-  it('calls $queryRaw and returns result', async () => {
-    prismaTxMock.$queryRaw.mockResolvedValueOnce([{ data: 'fake' }]);
+import {
+  getElectrificationProjectPermitDataService,
+  getGeneralProjectPermitDataService,
+  getHousingProjectPermitDataService
+} from '../../../src/services/reporting.ts';
 
-    const response = await reportingService.getElectrificationProjectPermitData(prismaTxMock);
+vi.mock('config');
 
-    expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([{ data: 'fake' }]);
+describe('reporting service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(prismaTxMock);
   });
-});
 
-describe('getHousingProjectPermitData', () => {
-  it('calls $queryRaw and returns result', async () => {
-    prismaTxMock.$queryRaw.mockResolvedValueOnce([{ data: 'fake' }]);
+  describe('getElectrificationProjectPermitDataService', () => {
+    it('should execute raw query and return electrification project permit data', async () => {
+      const mockData = [
+        {
+          project_name: 'Test Electrification Project',
+          first_name: 'John',
+          last_name: 'Doe',
+          phone_number: '555-0100',
+          email: 'john@example.com',
+          activity_id: 'activity-1',
+          permit_type: 'Electrical'
+        }
+      ];
 
-    const response = await reportingService.getHousingProjectPermitData(prismaTxMock);
+      prismaTxMock.$queryRaw.mockResolvedValueOnce(mockData as never);
 
-    expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([{ data: 'fake' }]);
+      const result = await getElectrificationProjectPermitDataService();
+
+      expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getGeneralProjectPermitDataService', () => {
+    it('should execute raw query and return general project permit data', async () => {
+      const mockData = [
+        {
+          project_name: 'Test General Project',
+          first_name: 'Jane',
+          last_name: 'Smith',
+          phone_number: '555-0101',
+          email: 'jane@example.com',
+          activity_id: 'activity-2',
+          permit_type: 'Building'
+        }
+      ];
+
+      prismaTxMock.$queryRaw.mockResolvedValueOnce(mockData as never);
+
+      const result = await getGeneralProjectPermitDataService();
+
+      expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockData);
+    });
+  });
+
+  describe('getHousingProjectPermitDataService', () => {
+    it('should execute raw query and return housing project permit data', async () => {
+      const mockData = [
+        {
+          project_name: 'Test Housing Project',
+          first_name: 'Bob',
+          last_name: 'Johnson',
+          consent_to_feedback: 'Yes',
+          phone_number: '555-0102',
+          email: 'bob@example.com',
+          activity_id: 'activity-3',
+          street_address: '123 Main St',
+          locality: 'Victoria',
+          latitude: '48.4',
+          longitude: '-123.4',
+          permit_type: 'Housing'
+        }
+      ];
+
+      prismaTxMock.$queryRaw.mockResolvedValueOnce(mockData as never);
+
+      const result = await getHousingProjectPermitDataService();
+
+      expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockData);
+    });
   });
 });

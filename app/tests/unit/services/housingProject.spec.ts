@@ -1,243 +1,326 @@
-import { TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { mockReset } from 'vitest-mock-extended';
+
+import {
+  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT,
+  TEST_HOUSING_PROJECT_1,
+  TEST_HOUSING_PROJECT_CREATE,
+  TEST_HOUSING_PROJECT_INTAKE
+} from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
-import { generateDeleteStamps } from '../../../src/db/utils/utils.ts';
+import * as housingProjectDomain from '../../../src/domains/housingProject.ts';
+import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
+import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+import prisma from '../../../src/db/database.ts';
 
-import type { InputJsonValue } from '@prisma/client/runtime/library';
+vi.mock('config');
+vi.mock('../../../src/db/database.ts', () => ({
+  default: {
+    $queryRaw: vi.fn()
+  }
+}));
 
-beforeEach(() => {
-  vi.resetAllMocks();
-});
+const generateDataSpy = vi.spyOn(housingProjectDomain, 'generateHousingProjectData');
+const emailSpy = vi.spyOn(housingProjectDomain, 'emailProjectConfirmation');
+const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
+const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
-const FAKE_PROJECT = {
-  ...TEST_HOUSING_PROJECT_1,
-  projectId: '1'
-};
-
-describe('createHousingProject', () => {
-  it('calls housing_project.create and returns result', async () => {
-    prismaTxMock.housing_project.create.mockResolvedValueOnce(FAKE_PROJECT);
-
-    const response = await housingProjectService.createHousingProject(prismaTxMock, TEST_HOUSING_PROJECT_1);
-
-    expect(prismaTxMock.housing_project.create).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.create).toHaveBeenCalledWith({
-      data: TEST_HOUSING_PROJECT_1,
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
-              }
-            }
-          }
-        }
-      }
-    });
-    expect(response).toStrictEqual(FAKE_PROJECT);
+describe('housingProject service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
-});
 
-describe('deleteHousingProject', () => {
-  it('calls housing_project.update', async () => {
-    prismaTxMock.housing_project.update.mockResolvedValueOnce(FAKE_PROJECT);
+  describe('createHousingProjectService', () => {
+    it('calls generateHousingProjectData domain, creates project and permits, and returns result', async () => {
+      const projectData = { ...TEST_HOUSING_PROJECT_CREATE, geoJson: JSON.stringify({}) };
+      const generatedData = {
+        housingProject: projectData,
+        appliedPermits: [{ permitId: 'p1' }],
+        investigatePermits: [{ permitId: 'p2' }],
+        appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
+      };
 
-    await housingProjectService.deleteHousingProject(prismaTxMock, '1', generateDeleteStamps(TEST_CURRENT_CONTEXT));
+      generateDataSpy.mockResolvedValueOnce(generatedData as never);
+      mockRepos.housingProject.create.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
+      mockRepos.permit.upsert.mockResolvedValue({} as never);
+      upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
-    expect(prismaTxMock.housing_project.delete).not.toHaveBeenCalled();
-    expect(prismaTxMock.housing_project.update).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.update).toHaveBeenCalledWith({
-      data: { deletedAt: expect.any(Date) as Date, deletedBy: TEST_CURRENT_CONTEXT.userId },
-      where: { housingProjectId: '1' }
+      const response = await housingProjectService.createHousingProjectService(
+        TEST_HOUSING_PROJECT_INTAKE,
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(generateDataSpy).toHaveBeenCalledTimes(1);
+      expect(generateDataSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activity: mockRepos.activity,
+          activityContact: mockRepos.activityContact,
+          contact: mockRepos.contact,
+          initiative: mockRepos.initiative
+        }),
+        TEST_HOUSING_PROJECT_INTAKE,
+        TEST_CURRENT_CONTEXT
+      );
+      expect(mockRepos.housingProject.create).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.create).toHaveBeenCalledWith(projectData);
+      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
+      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
+      expect(response).toStrictEqual(TEST_HOUSING_PROJECT_1);
     });
   });
-});
 
-describe('getHousingProjectStatistics', () => {
-  it('calls $queryRaw and returns result', async () => {
-    prismaTxMock.$queryRaw.mockResolvedValueOnce([FAKE_PROJECT]);
+  describe('getHousingProjectService', () => {
+    it('fetches housing project with includes', async () => {
+      mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
 
-    const response = await housingProjectService.getHousingProjectStatistics(prismaTxMock, {
-      dateFrom: '02/02/2025',
-      dateTo: '04/04/2025',
-      monthYear: '03/2025',
-      userId: TEST_CURRENT_CONTEXT.userId!
-    });
+      const response = await housingProjectService.getHousingProjectService(TEST_HOUSING_PROJECT_1.housingProjectId);
 
-    expect(prismaTxMock.$queryRaw).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([{ ...FAKE_PROJECT, submittedAt: expect.any(String) as string }]);
-  });
-});
-
-describe('getHousingProject', () => {
-  it('calls housing_project.findFirstOrThrow and returns result', async () => {
-    prismaTxMock.housing_project.findFirstOrThrow.mockResolvedValueOnce(FAKE_PROJECT);
-
-    const response = await housingProjectService.getHousingProject(prismaTxMock, '1');
-
-    expect(prismaTxMock.housing_project.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.findFirstOrThrow).toHaveBeenCalledWith({
-      where: {
-        housingProjectId: '1'
-      },
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
-              }
-            }
-          }
-        }
-      }
-    });
-    expect(response).toStrictEqual(FAKE_PROJECT);
-  });
-});
-
-describe('getHousingProjects', () => {
-  it('calls housing_project.findMany and returns result', async () => {
-    prismaTxMock.housing_project.findMany.mockResolvedValueOnce([FAKE_PROJECT]);
-
-    const response = await housingProjectService.getHousingProjects(prismaTxMock);
-
-    expect(prismaTxMock.housing_project.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.findMany).toHaveBeenCalledWith({
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
-              }
-            }
-          }
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledWith({
+        where: {
+          housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId
         },
-        user: true
-      },
-      orderBy: {
-        createdAt: 'desc'
-      }
-    });
-    expect(response).toStrictEqual([FAKE_PROJECT]);
-  });
-});
-
-describe('searchHousingProjects', () => {
-  it('calls housing_project.findMany and returns result', async () => {
-    prismaTxMock.housing_project.findMany.mockResolvedValueOnce([FAKE_PROJECT] as (typeof FAKE_PROJECT)[]);
-
-    const response = await housingProjectService.searchHousingProjects(prismaTxMock, {});
-
-    expect(prismaTxMock.housing_project.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [
-          {
-            activityId: { in: undefined }
-          },
-          {
-            createdBy: { in: undefined }
-          },
-          {
-            housingProjectId: { in: undefined }
-          },
-          {
-            submissionType: { in: undefined }
-          }
-        ]
-      },
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
+        include: {
+          activity: {
+            include: {
+              activityContact: {
+                include: {
+                  contact: true
+                }
               }
             }
           }
         }
-      }
+      });
+      expect(response).toStrictEqual(TEST_HOUSING_PROJECT_1);
     });
-    expect(response).toStrictEqual([FAKE_PROJECT]);
   });
 
-  it('passes parameters', async () => {
-    prismaTxMock.housing_project.findMany.mockResolvedValueOnce([FAKE_PROJECT] as (typeof FAKE_PROJECT)[]);
+  describe('getHousingProjectStatisticsService', () => {
+    it('executes raw query and transforms BigInt to Number', async () => {
+      const mockDbResponse = [{ count: 5n, status: 'NEW' }];
+      vi.mocked(prisma.$queryRaw).mockResolvedValueOnce(mockDbResponse as never);
 
-    const params = {
-      activityId: ['123'],
-      createdBy: ['456'],
-      housingProjectId: ['789'],
-      submissionType: ['TYPE'],
-      includeUser: true
-    };
+      const filters = {
+        dateFrom: '2024-01-01',
+        dateTo: '2024-12-31',
+        monthYear: '2024-01',
+        userId: 'user-123'
+      };
 
-    await housingProjectService.searchHousingProjects(prismaTxMock, params);
+      const response = await housingProjectService.getHousingProjectStatisticsService(filters);
 
-    expect(prismaTxMock.housing_project.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [
-          {
-            activityId: { in: params.activityId }
-          },
-          {
-            createdBy: { in: params.createdBy }
-          },
-          {
-            housingProjectId: { in: params.housingProjectId }
-          },
-          {
-            submissionType: { in: params.submissionType }
-          }
-        ]
-      },
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
+      expect(prisma.$queryRaw).toHaveBeenCalledTimes(1);
+      expect(response).toEqual([{ count: 5, status: 'NEW' }]);
+    });
+  });
+
+  describe('listHousingProjectActivityIdsService', () => {
+    it('returns array of activity IDs', async () => {
+      const mockIds = [{ activityId: 'id-1' }, { activityId: 'id-2' }];
+      mockRepos.housingProject.findMany.mockResolvedValueOnce(mockIds as never);
+
+      const response = await housingProjectService.listHousingProjectActivityIdsService();
+
+      expect(mockRepos.housingProject.findMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.findMany).toHaveBeenCalledWith({ select: { activityId: true } });
+      expect(response).toStrictEqual(['id-1', 'id-2']);
+    });
+  });
+
+  describe('listHousingProjectsService', () => {
+    it('fetches projects with includes and applies filtering', async () => {
+      const mockProjects = [TEST_HOUSING_PROJECT_1];
+      mockRepos.housingProject.findMany.mockResolvedValueOnce(mockProjects as never);
+      filterSpy.mockResolvedValueOnce(mockProjects as never);
+
+      const response = await housingProjectService.listHousingProjectsService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(mockRepos.housingProject.findMany).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.findMany).toHaveBeenCalledWith({
+        include: {
+          activity: {
+            include: {
+              activityContact: {
+                include: {
+                  contact: true
+                }
               }
             }
-          }
+          },
+          user: true
         },
-        user: params.includeUser
-      }
+        orderBy: {
+          createdAt: 'desc'
+        }
+      });
+      expect(filterSpy).toHaveBeenCalledTimes(1);
+      expect(filterSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activityContact: mockRepos.activityContact,
+          contact: mockRepos.contact
+        }),
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        mockProjects
+      );
+      expect(response).toStrictEqual(mockProjects);
     });
   });
-});
 
-describe('updateHousingProject', () => {
-  it('calls housing_project.update with correct data and returns result', async () => {
-    prismaTxMock.housing_project.update.mockResolvedValueOnce(FAKE_PROJECT);
+  describe('searchHousingProjects', () => {
+    it('searches projects and applies filtering', async () => {
+      const mockProjects = [TEST_HOUSING_PROJECT_1];
+      const searchParams = { activityId: ['id-1'] };
+      mockRepos.housingProject.search.mockResolvedValueOnce(mockProjects as never);
+      filterSpy.mockResolvedValueOnce(mockProjects as never);
 
-    const response = await housingProjectService.updateHousingProject(
-      prismaTxMock,
-      { ...FAKE_PROJECT, geoJson: FAKE_PROJECT.geoJson as InputJsonValue },
-      FAKE_PROJECT.housingProjectId
-    );
+      const response = await housingProjectService.searchHousingProjects(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        searchParams
+      );
 
-    expect(prismaTxMock.housing_project.update).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.housing_project.update).toHaveBeenCalledWith({
-      data: FAKE_PROJECT,
-      where: {
-        housingProjectId: FAKE_PROJECT.housingProjectId
-      },
-      include: {
-        activity: {
-          include: {
-            activityContact: {
-              include: {
-                contact: true
+      expect(mockRepos.housingProject.search).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.search).toHaveBeenCalledWith(searchParams);
+      expect(filterSpy).toHaveBeenCalledTimes(1);
+      expect(filterSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activityContact: mockRepos.activityContact,
+          contact: mockRepos.contact
+        }),
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        mockProjects
+      );
+      expect(response).toStrictEqual(mockProjects);
+    });
+  });
+
+  describe('submitHousingProjectDraftService', () => {
+    it('creates project from draft, creates permits, deletes draft, upserts contact, and sends email', async () => {
+      const draftId = 'draft-123';
+      const projectData = { ...TEST_HOUSING_PROJECT_CREATE, geoJson: JSON.stringify({}) };
+      const generatedData = {
+        housingProject: projectData,
+        appliedPermits: [{ permitId: 'p1' }],
+        investigatePermits: [{ permitId: 'p2' }],
+        appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
+      };
+      const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
+      const projectResponse = { ...TEST_HOUSING_PROJECT_1, contact: contactResponse };
+
+      generateDataSpy.mockResolvedValueOnce(generatedData as never);
+      mockRepos.housingProject.create.mockResolvedValueOnce(projectResponse as never);
+      mockRepos.permit.upsert.mockResolvedValue({} as never);
+      upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
+      mockRepos.draft.delete.mockResolvedValueOnce({} as never);
+      mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
+      emailSpy.mockResolvedValueOnce(undefined);
+
+      const response = await housingProjectService.submitHousingProjectDraftService(
+        draftId,
+        TEST_HOUSING_PROJECT_INTAKE,
+        TEST_CONTACT_1,
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(generateDataSpy).toHaveBeenCalledTimes(1);
+      expect(generateDataSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          activity: mockRepos.activity,
+          activityContact: mockRepos.activityContact,
+          contact: mockRepos.contact,
+          initiative: mockRepos.initiative
+        }),
+        TEST_HOUSING_PROJECT_INTAKE,
+        TEST_CURRENT_CONTEXT
+      );
+      expect(mockRepos.housingProject.create).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.create).toHaveBeenCalledWith(projectData);
+      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
+      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
+      expect(mockRepos.draft.delete).toHaveBeenCalledTimes(1);
+      expect(mockRepos.draft.delete).toHaveBeenCalledWith({ draftId });
+      expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(1);
+      expect(mockRepos.contact.upsert).toHaveBeenCalledWith(
+        { contactId: TEST_CONTACT_1.contactId },
+        TEST_CONTACT_1,
+        TEST_CONTACT_1
+      );
+      expect(emailSpy).toHaveBeenCalledTimes(1);
+      expect(emailSpy).toHaveBeenCalledWith(projectResponse);
+      expect(response).toStrictEqual(projectResponse);
+    });
+
+    it('skips draft deletion when draftId is null', async () => {
+      const projectData = { ...TEST_HOUSING_PROJECT_CREATE, geoJson: JSON.stringify({}) };
+      const generatedData = {
+        housingProject: projectData,
+        appliedPermits: [],
+        investigatePermits: [],
+        appliedPermitTrackers: []
+      };
+      const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
+      const projectResponse = { ...TEST_HOUSING_PROJECT_1, contact: contactResponse };
+
+      generateDataSpy.mockResolvedValueOnce(generatedData as never);
+      mockRepos.housingProject.create.mockResolvedValueOnce(projectResponse as never);
+      mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
+      emailSpy.mockResolvedValueOnce(undefined);
+
+      const response = await housingProjectService.submitHousingProjectDraftService(
+        null,
+        TEST_HOUSING_PROJECT_INTAKE,
+        TEST_CONTACT_1,
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(mockRepos.draft.delete).not.toHaveBeenCalled();
+      expect(response).toStrictEqual(projectResponse);
+    });
+  });
+
+  describe('updateHousingProjectService', () => {
+    it('updates project and returns refetched project', async () => {
+      const updateData = { submittedAt: new Date() };
+      mockRepos.housingProject.update.mockResolvedValueOnce({} as never);
+      mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
+
+      const response = await housingProjectService.updateHousingProjectService(
+        updateData,
+        TEST_HOUSING_PROJECT_1.housingProjectId
+      );
+
+      expect(mockRepos.housingProject.update).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.update).toHaveBeenCalledWith(
+        { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId },
+        updateData
+      );
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledWith({
+        where: {
+          housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId
+        },
+        include: {
+          activity: {
+            include: {
+              activityContact: {
+                include: {
+                  contact: true
+                }
               }
             }
           }
         }
-      }
+      });
+      expect(response).toStrictEqual(TEST_HOUSING_PROJECT_1);
     });
-    expect(response).toStrictEqual(FAKE_PROJECT);
   });
 });

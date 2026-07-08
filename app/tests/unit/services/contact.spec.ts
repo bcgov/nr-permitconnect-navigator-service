@@ -1,321 +1,186 @@
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import * as contactService from '../../../src/services/contact.ts';
+import { mockReset } from 'vitest-mock-extended';
+
+import { TEST_CONTACT_1 } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import {
+  deleteContactService,
+  getContactService,
+  createContactsService,
+  matchContactsService,
+  matchContactsExactService,
+  searchContactsService,
+  upsertContactsService
+} from '../../../src/services/contact.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ContactPreference, ProjectRelationship } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { Contact } from '../../../src/types/index.ts';
+import type { ContactSearchParameters } from '../../../src/types/stuff';
 
-beforeEach(() => {
-  vi.resetAllMocks();
-});
-
-describe('deleteContact', () => {
-  it('calls contact.delete', async () => {
-    prismaTxMock.contact.delete.mockResolvedValueOnce({} as Contact);
-
-    await contactService.deleteContact(prismaTxMock, '1');
-
-    expect(prismaTxMock.contact.delete).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.delete).toHaveBeenCalledWith({ where: { contactId: '1' } });
+describe('contact service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
-});
 
-describe('getContact', () => {
-  it('calls contact.findFirstOrThrow and returns result', async () => {
-    prismaTxMock.contact.findFirstOrThrow.mockResolvedValueOnce({ contactId: '1' } as Contact);
+  describe('deleteContactService', () => {
+    it('should delete a contact by id', async () => {
+      mockRepos.contact.delete.mockResolvedValueOnce(TEST_CONTACT_1 as never);
 
-    const response = await contactService.getContact(prismaTxMock, '1', true);
+      await deleteContactService('contact-123');
 
-    expect(prismaTxMock.contact.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.findFirstOrThrow).toHaveBeenCalledWith({
-      where: { contactId: '1' },
-      include: {
-        activityContact: {
-          include: {
-            activity: true
-          }
+      expect(mockRepos.contact.delete).toHaveBeenCalledWith({
+        contactId: 'contact-123'
+      });
+    });
+  });
+
+  describe('getContactService', () => {
+    it('should get a contact without activities', async () => {
+      mockRepos.contact.findFirstOrThrow.mockResolvedValueOnce(TEST_CONTACT_1 as never);
+
+      const result = await getContactService('contact-123', false);
+
+      expect(mockRepos.contact.findFirstOrThrow).toHaveBeenCalledWith({
+        where: { contactId: 'contact-123' },
+        include: {}
+      });
+      expect(result).toEqual(TEST_CONTACT_1);
+    });
+
+    it('should get a contact with activities included', async () => {
+      mockRepos.contact.findFirstOrThrow.mockResolvedValueOnce(TEST_CONTACT_1 as never);
+
+      await getContactService('contact-123', true);
+
+      expect(mockRepos.contact.findFirstOrThrow).toHaveBeenCalledWith({
+        where: { contactId: 'contact-123' },
+        include: { activityContact: { include: { activity: true } } }
+      });
+    });
+  });
+
+  describe('createContactsService', () => {
+    it('should create multiple contacts', async () => {
+      mockRepos.contact.create.mockResolvedValue(TEST_CONTACT_1 as never);
+
+      const payload = [TEST_CONTACT_1, TEST_CONTACT_1];
+      const result = await createContactsService(payload);
+
+      expect(mockRepos.contact.create).toHaveBeenCalledTimes(2);
+      expect(result).toHaveLength(2);
+    });
+  });
+
+  describe('matchContactsService', () => {
+    it('should return contacts matching any of the search parameters', async () => {
+      mockRepos.contact.findMany.mockResolvedValueOnce([TEST_CONTACT_1] as never);
+
+      const params = {
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        userId: ['user-1']
+      } as ContactSearchParameters;
+
+      const result = await matchContactsService(params);
+
+      expect(mockRepos.contact.findMany).toHaveBeenCalledWith({
+        where: {
+          OR: [
+            { email: { contains: 'test@example.com', mode: 'insensitive' } },
+            { firstName: { contains: 'John', mode: 'insensitive' } },
+            { lastName: { contains: 'Doe', mode: 'insensitive' } },
+            { phoneNumber: { contains: '1234567890', mode: 'insensitive' } },
+            { userId: { in: ['user-1'] } }
+          ]
         }
-      }
-    });
-    expect(response).toStrictEqual({ contactId: '1' });
-  });
-
-  it('does not include activities if includeActivities = false', async () => {
-    prismaTxMock.contact.findFirstOrThrow.mockResolvedValueOnce({ contactId: '1' } as Contact);
-
-    const response = await contactService.getContact(prismaTxMock, '1', false);
-
-    expect(prismaTxMock.contact.findFirstOrThrow).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.findFirstOrThrow).toHaveBeenCalledWith({
-      where: { contactId: '1' },
-      include: {}
-    });
-    expect(response).toStrictEqual({ contactId: '1' });
-  });
-});
-
-describe('insertContacts', () => {
-  it('calls contact.create with correct data and returns result', async () => {
-    prismaTxMock.contact.create.mockResolvedValueOnce({ contactId: '1' } as Contact);
-
-    const response = await contactService.insertContacts(
-      prismaTxMock,
-      [{ contactId: '1' }] as Contact[],
-      TEST_CURRENT_CONTEXT
-    );
-
-    expect(prismaTxMock.contact.create).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.create).toHaveBeenCalledWith({
-      data: {
-        contactId: '1',
-        createdAt: expect.any(Date) as Date,
-        createdBy: TEST_CURRENT_CONTEXT.userId
-      }
-    });
-    expect(response).toStrictEqual([{ contactId: '1' }]);
-  });
-});
-
-describe('matchContacts', () => {
-  it('calls contact.findMany and returns result', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
-
-    const response = await contactService.matchContacts(prismaTxMock, {});
-
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            email: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            firstName: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            lastName: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            phoneNumber: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            userId: { in: undefined }
-          }
-        ]
-      }
-    });
-    expect(response).toStrictEqual([{ contactId: '1' }]);
-  });
-
-  it('passes parameters', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
-
-    await contactService.matchContacts(prismaTxMock, {
-      email: 'email',
-      firstName: 'first',
-      lastName: 'last',
-      phoneNumber: '1234567890',
-      userId: ['1234']
-    });
-
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            email: { contains: 'email', mode: 'insensitive' }
-          },
-          {
-            firstName: { contains: 'first', mode: 'insensitive' }
-          },
-          {
-            lastName: { contains: 'last', mode: 'insensitive' }
-          },
-          {
-            phoneNumber: { contains: '1234567890', mode: 'insensitive' }
-          },
-          {
-            userId: { in: ['1234'] }
-          }
-        ]
-      }
+      });
+      expect(result).toEqual([TEST_CONTACT_1]);
     });
   });
-});
 
-describe('matchContactsExact', () => {
-  it('calls contact.findMany and returns result', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
+  describe('matchContactsExactService', () => {
+    it('should return contacts exactly matching search parameters with user included', async () => {
+      mockRepos.contact.findMany.mockResolvedValueOnce([TEST_CONTACT_1] as never);
 
-    const response = await contactService.matchContactsExact(prismaTxMock, {});
+      const params = {
+        email: 'test@example.com',
+        userId: ['user-1'],
+        contactId: ['contact-1']
+      } as ContactSearchParameters;
 
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            contactId: { in: undefined }
-          },
-          {
-            userId: { in: undefined }
-          },
-          {
-            email: { in: undefined, mode: 'insensitive' }
-          }
-        ],
-        userId: { not: null }
-      },
-      include: {
-        user: true
-      }
-    });
-    expect(response).toStrictEqual([{ contactId: '1' }]);
-  });
+      const result = await matchContactsExactService(params);
 
-  it('passes parameters', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
-
-    const params = {
-      contactId: ['123'],
-      userId: ['456'],
-      email: 'test@test.com'
-    };
-
-    await contactService.matchContactsExact(prismaTxMock, params);
-
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        OR: [
-          {
-            contactId: { in: params.contactId }
-          },
-          {
-            userId: { in: params.userId }
-          },
-          {
-            email: params.email
-          }
-        ],
-        userId: { not: null }
-      },
-      include: {
-        user: true
-      }
+      expect(mockRepos.contact.findMany).toHaveBeenCalledWith({
+        where: {
+          OR: [{ contactId: { in: ['contact-1'] } }, { userId: { in: ['user-1'] } }, { email: 'test@example.com' }],
+          userId: { not: null }
+        },
+        include: {
+          user: true
+        }
+      });
+      expect(result).toEqual([TEST_CONTACT_1]);
     });
   });
-});
 
-describe('searchContacts', () => {
-  it('calls contact.findMany and returns result', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
+  describe('searchContactsService', () => {
+    it('should search contacts including initiative and activities', async () => {
+      mockRepos.contact.findMany.mockResolvedValueOnce([TEST_CONTACT_1] as never);
 
-    const response = await contactService.searchContacts(prismaTxMock, {});
+      const params = {
+        contactId: ['contact-1'],
+        userId: ['user-1'],
+        contactApplicantRelationship: 'spouse',
+        contactPreference: 'email',
+        email: 'test@example.com',
+        firstName: 'Jane',
+        lastName: 'Doe',
+        phoneNumber: '1234567890',
+        initiative: Initiative.HOUSING,
+        includeActivities: true
+      } as ContactSearchParameters;
 
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [
-          {
-            contactId: { in: undefined }
-          },
-          {
-            userId: { in: undefined }
-          },
-          {
-            contactApplicantRelationship: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            contactPreference: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            email: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            firstName: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            lastName: { contains: undefined, mode: 'insensitive' }
-          },
-          {
-            phoneNumber: { contains: undefined, mode: 'insensitive' }
-          }
-        ]
-      },
-      include: {
-        user: true
-      }
-    });
-    expect(response).toStrictEqual([{ contactId: '1' }]);
-  });
+      const result = await searchContactsService(params);
 
-  it('passes parameters', async () => {
-    prismaTxMock.contact.findMany.mockResolvedValueOnce([{ contactId: '1' }] as Contact[]);
-
-    const params = {
-      contactId: ['123'],
-      userId: ['456'],
-      contactApplicantRelationship: ProjectRelationship.OWNER,
-      contactPreference: ContactPreference.EITHER,
-      email: 'test@test.com',
-      firstName: 'Joe',
-      lastName: 'Smith',
-      phoneNumber: '1234567890',
-      initiative: Initiative.HOUSING,
-      includeActivities: true
-    };
-
-    await contactService.searchContacts(prismaTxMock, params);
-
-    expect(prismaTxMock.contact.findMany).toHaveBeenCalledWith({
-      where: {
-        AND: [
-          {
-            contactId: { in: params.contactId }
-          },
-          {
-            userId: { in: params.userId }
-          },
-          {
-            contactApplicantRelationship: { contains: params.contactApplicantRelationship, mode: 'insensitive' }
-          },
-          {
-            contactPreference: { contains: params.contactPreference, mode: 'insensitive' }
-          },
-          {
-            email: { contains: params.email, mode: 'insensitive' }
-          },
-          {
-            firstName: { contains: params.firstName, mode: 'insensitive' }
-          },
-          {
-            lastName: { contains: params.lastName, mode: 'insensitive' }
-          },
-          {
-            phoneNumber: { contains: params.phoneNumber, mode: 'insensitive' }
-          },
-          { activityContact: { some: { activity: { initiative: { code: params.initiative } } } } }
-        ]
-      },
-      include: {
-        user: true,
-        activityContact: { include: { activity: true } }
-      }
+      expect(mockRepos.contact.findMany).toHaveBeenCalledWith({
+        where: {
+          AND: [
+            { contactId: { in: ['contact-1'] } },
+            { userId: { in: ['user-1'] } },
+            { contactApplicantRelationship: { contains: 'spouse', mode: 'insensitive' } },
+            { contactPreference: { contains: 'email', mode: 'insensitive' } },
+            { email: { contains: 'test@example.com', mode: 'insensitive' } },
+            { firstName: { contains: 'Jane', mode: 'insensitive' } },
+            { lastName: { contains: 'Doe', mode: 'insensitive' } },
+            { phoneNumber: { contains: '1234567890', mode: 'insensitive' } },
+            { activityContact: { some: { activity: { initiative: { code: Initiative.HOUSING } } } } }
+          ]
+        },
+        include: {
+          user: true,
+          activityContact: { include: { activity: true } }
+        }
+      });
+      expect(result).toEqual([TEST_CONTACT_1]);
     });
   });
-});
 
-describe('upsertContacts', () => {
-  it('calls contact.upsert with correct data and returns result', async () => {
-    prismaTxMock.contact.upsert.mockResolvedValueOnce({ contactId: '1' } as Contact);
+  describe('upsertContactsService', () => {
+    it('should upsert multiple contacts', async () => {
+      mockRepos.contact.upsert.mockResolvedValue(TEST_CONTACT_1 as never);
 
-    const response = await contactService.upsertContacts(prismaTxMock, [{ contactId: '1' }] as Contact[]);
+      const payload = [
+        { contactId: 'contact-1', firstName: 'John' },
+        { contactId: 'contact-2', firstName: 'Jane' }
+      ];
 
-    expect(prismaTxMock.contact.upsert).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.contact.upsert).toHaveBeenCalledWith({
-      where: { contactId: '1' },
-      update: { contactId: '1' },
-      create: { contactId: '1' }
+      const result = await upsertContactsService(payload as never);
+
+      expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(2);
+      expect(mockRepos.contact.upsert).toHaveBeenNthCalledWith(1, { contactId: 'contact-1' }, payload[0], payload[0]);
+      expect(mockRepos.contact.upsert).toHaveBeenNthCalledWith(2, { contactId: 'contact-2' }, payload[1], payload[1]);
+      expect(result).toHaveLength(2);
     });
-    expect(response).toStrictEqual([{ contactId: '1' }]);
   });
 });

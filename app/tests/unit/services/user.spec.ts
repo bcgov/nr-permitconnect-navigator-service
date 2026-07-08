@@ -1,427 +1,186 @@
-import { v4 as uuidv4 } from 'uuid';
+import { mockReset } from 'vitest-mock-extended';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
-import * as contactService from '../../../src/services/contact.ts';
-import * as userService from '../../../src/services/user.ts';
-import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
-import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { searchUsersService } from '../../../src/services/user.ts';
+import { Initiative, GroupName } from '../../../src/utils/enums/application.ts';
+import { TEST_IDIR_USER_1, TEST_GROUP_1, TEST_GROUP_2_ADMIN } from '../data/index.ts';
 
-import type { MockInstance } from 'vitest';
-import type { IdentityProvider, User } from '../../../src/types/index.ts';
+import type { UserSearchParameters } from '../../../src/types/stuff.ts';
 
-const idirIdentityProvider: IdentityProvider = {
-  idp: IdentityProviderKind.AZUREIDIR,
-  active: true,
-  createdAt: new Date(),
-  createdBy: SYSTEM_ID,
-  updatedAt: null,
-  updatedBy: null,
-  deletedBy: null,
-  deletedAt: null
-};
+vi.mock('config');
 
-const bceidUser: User = {
-  bceidBusinessName: null,
-  userId: uuidv4(),
-  idp: IdentityProviderKind.BCEID,
-  sub: 'sub',
-  email: 'test@email.com',
-  firstName: 'BCeID User',
-  fullName: 'BCeID User',
-  lastName: null,
-  active: true,
-  createdAt: new Date(),
-  createdBy: SYSTEM_ID,
-  updatedAt: null,
-  updatedBy: null,
-  deletedBy: null,
-  deletedAt: null
-};
-
-const idirUser: User = {
-  bceidBusinessName: null,
-  userId: uuidv4(),
-  idp: IdentityProviderKind.AZUREIDIR,
-  sub: 'sub',
-  email: 'test@email.com',
-  firstName: 'Test',
-  fullName: 'Test User',
-  lastName: 'User',
-  active: true,
-  createdAt: new Date(),
-  createdBy: SYSTEM_ID,
-  updatedAt: null,
-  updatedBy: null,
-  deletedBy: null,
-  deletedAt: null
-};
-
-const bceidToken = {
-  sub: bceidUser.sub,
-  given_name: bceidUser.firstName,
-  name: bceidUser.fullName,
-  family_name: bceidUser.lastName,
-  email: bceidUser.email,
-  identity_provider: bceidUser.idp!
-};
-
-const idirToken = {
-  sub: idirUser.sub,
-  given_name: idirUser.firstName,
-  name: idirUser.fullName,
-  family_name: idirUser.lastName,
-  email: idirUser.email,
-  identity_provider: idirUser.idp!
-};
-
-afterEach(() => {
-  vi.resetAllMocks();
-  vi.restoreAllMocks();
-});
-
-describe('createIdp', () => {
-  it('creates the idp', async () => {
-    prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
-    const response = await userService.createIdp(prismaTxMock, IdentityProviderKind.AZUREIDIR);
-
-    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(idirIdentityProvider);
-  });
-});
-
-describe('createUser', () => {
-  it('searches for and returns an existing user', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    const response = await userService.createUser(prismaTxMock, idirUser);
-
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(idirUser);
-  });
-
-  it('creates new idp if not existing', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(null);
-    prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
-
-    await userService.createUser(prismaTxMock, { ...idirUser });
-
-    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
-  });
-
-  it('creates new user if not existing', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
-
-    const response = await userService.createUser(prismaTxMock, { ...idirUser });
-
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(0);
-    expect(prismaTxMock.user.create).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(
-      expect.objectContaining({
-        ...idirUser,
-        userId: expect.stringMatching(uuidv4Pattern) as string
-      })
-    );
-  });
-
-  it('uses existing transaction if provided', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
-
-    await userService.createUser(prismaTxMock, { ...idirUser });
-  });
-});
-
-describe('getCurrentUserId', () => {
-  it('should return user id if found', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    const response = await userService.getCurrentUserId(prismaTxMock, 'sub');
-
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(idirUser.userId);
-  });
-
-  it('should return defaultValue if user not found', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(null);
-    const response = await userService.getCurrentUserId(prismaTxMock, 'test');
-
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(undefined);
-  });
-});
-
-describe('listIdps', () => {
-  it('calls identity_provider.findMany', async () => {
-    prismaTxMock.identity_provider.findMany.mockResolvedValueOnce([idirIdentityProvider]);
-    const response = await userService.listIdps(prismaTxMock, true);
-
-    expect(prismaTxMock.identity_provider.findMany).toHaveBeenCalledTimes(1);
-    expect(response).toStrictEqual([idirIdentityProvider]);
-  });
-});
-
-describe('login', () => {
-  let searchContactsSpy: MockInstance<typeof contactService.searchContacts>;
-  let upsertContactsSpy: MockInstance<typeof contactService.upsertContacts>;
-
+describe('user service', () => {
   beforeEach(() => {
-    searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-    upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
 
-  it('searches for and returns an existing user', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    // updateUser path: readUser -> findUnique; identity_provider.findUnique; user.update
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
+  describe('searchUsersService', () => {
+    it('returns users from search without group filtering when no group params provided', async () => {
+      const users = [{ ...TEST_IDIR_USER_1 }];
 
-    await userService.login(prismaTxMock, idirToken);
+      mockRepos.user.search.mockResolvedValue(users as never);
 
-    expect(prismaTxMock.user.findFirst).toHaveBeenCalledTimes(1);
-  });
+      const params: UserSearchParameters = {
+        email: 'john@example.com'
+      };
 
-  it('calls createUser if existing user not found', async () => {
-    // login.findFirst and createUser.findFirst both see null
-    prismaTxMock.user.findFirst.mockResolvedValue(null);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.create.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce([]);
+      const result = await searchUsersService(params);
 
-    await userService.login(prismaTxMock, idirToken);
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(result).toEqual(users);
+    });
 
-    expect(prismaTxMock.user.create).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.user.update).not.toHaveBeenCalled();
-  });
+    it('includes user groups when includeUserGroups is true', async () => {
+      const users = [{ ...TEST_IDIR_USER_1 }];
+      const groups = [TEST_GROUP_1];
 
-  it('calls updateUser if existing user found', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce([]);
+      mockRepos.user.search.mockResolvedValue(users as never);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue(groups as never);
 
-    await userService.login(prismaTxMock, idirToken);
+      const params: UserSearchParameters = {
+        includeUserGroups: true
+      };
 
-    expect(prismaTxMock.user.create).not.toHaveBeenCalled();
-    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
-  });
+      const result = await searchUsersService(params);
 
-  it('creates contact entry if not existing', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce([]);
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      expect(result).toEqual([
+        {
+          ...TEST_IDIR_USER_1,
+          groups
+        }
+      ]);
+    });
 
-    await userService.login(prismaTxMock, idirToken);
+    it('filters users by group names when provided', async () => {
+      const user1 = { ...TEST_IDIR_USER_1 };
+      const user2 = { ...TEST_IDIR_USER_1, userId: 'user-2', sub: 'sub-2' };
+      const searchResults = [user1, user2];
 
-    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-  });
+      const navigatorGroup = TEST_GROUP_1;
+      const adminGroup = TEST_GROUP_2_ADMIN;
 
-  it('splits the BCeID first name into first/last for contact', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(bceidUser);
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(bceidUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(bceidUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce([]);
+      mockRepos.user.search.mockResolvedValue(searchResults as never);
+      mockRepos.subjectGroup.getSubjectGroups
+        .mockResolvedValueOnce([navigatorGroup] as never)
+        .mockResolvedValueOnce([adminGroup] as never);
 
-    await userService.login(prismaTxMock, bceidToken);
+      const params: UserSearchParameters = {
+        group: [GroupName.NAVIGATOR]
+      };
 
-    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-      {
-        contactId: expect.stringMatching(uuidv4Pattern) as string,
-        userId: bceidUser.userId,
-        firstName: 'BCeID',
-        lastName: 'User',
-        email: bceidUser.email,
-        phoneNumber: null,
-        contactApplicantRelationship: null,
-        contactPreference: null,
-        createdAt: expect.any(Date) as Date,
-        createdBy: expect.stringMatching(uuidv4Pattern) as string,
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      }
-    ]);
-  });
+      const result = await searchUsersService(params);
 
-  it('defaults contact lastName to a single whitespace', async () => {
-    const blankNameUser = { ...bceidUser };
-    blankNameUser.firstName = 'Blank';
-    blankNameUser.lastName = null;
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledTimes(2);
+      // Only user1 should be in result (has NAVIGATOR group, not ADMIN)
+      expect(result).toEqual([user1]);
+    });
 
-    const blankToken = { ...bceidToken };
-    blankToken.given_name = 'Blank';
-    blankToken.family_name = null;
+    it('filters users by initiative when provided', async () => {
+      const users = [{ ...TEST_IDIR_USER_1 }];
+      const groups = [
+        {
+          ...TEST_GROUP_1,
+          groupId: 1,
+          initiativeId: 'init-1',
+          initiativeCode: Initiative.HOUSING
+        },
+        {
+          ...TEST_GROUP_1,
+          groupId: 2,
+          initiativeId: 'init-2',
+          initiativeCode: Initiative.ELECTRIFICATION
+        }
+      ];
 
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(blankNameUser);
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(blankNameUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(blankNameUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
-    upsertContactsSpy.mockResolvedValueOnce([]);
+      mockRepos.user.search.mockResolvedValue(users as never);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue(groups as never);
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue({
+        initiativeId: 'init-1',
+        code: Initiative.HOUSING,
+        name: 'Housing',
+        label: 'Housing Initiative',
+        createdAt: null,
+        createdBy: null,
+        updatedAt: null,
+        updatedBy: null,
+        deletedBy: null,
+        deletedAt: null
+      } as never);
 
-    await userService.login(prismaTxMock, blankToken);
+      const params: UserSearchParameters = {
+        includeUserGroups: true,
+        initiative: [Initiative.HOUSING]
+      };
 
-    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-      {
-        contactId: expect.stringMatching(uuidv4Pattern) as string,
-        userId: bceidUser.userId,
-        firstName: 'Blank',
-        lastName: ' ',
-        email: bceidUser.email,
-        phoneNumber: null,
-        contactApplicantRelationship: null,
-        contactPreference: null,
-        createdAt: expect.any(Date) as Date,
-        createdBy: expect.stringMatching(uuidv4Pattern) as string,
-        ...generateNullUpdateStamps(),
-        ...generateNullDeleteStamps()
-      }
-    ]);
-  });
+      const result = await searchUsersService(params);
 
-  it('returns the user', async () => {
-    prismaTxMock.user.findFirst.mockResolvedValueOnce(idirUser);
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce(idirUser);
-    searchContactsSpy.mockResolvedValueOnce([]);
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      expect(mockRepos.initiative.findFirstOrThrow).toHaveBeenCalledTimes(1);
+      // User should be returned with only groups from HOUSING initiative
+      expect(result).toEqual([
+        {
+          ...TEST_IDIR_USER_1,
+          groups: [groups[0]]
+        }
+      ]);
+    });
 
-    const response = await userService.login(prismaTxMock, idirToken);
+    it('excludes groups when includeUserGroups is not set even if groups were fetched', async () => {
+      const users = [{ ...TEST_IDIR_USER_1 }];
+      const groups = [TEST_GROUP_1];
 
-    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(idirUser);
-  });
-});
+      mockRepos.user.search.mockResolvedValue(users as never);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue(groups as never);
 
-describe('readIdp', () => {
-  it('calls identity_provider.findUnique', async () => {
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    await userService.readIdp(prismaTxMock, IdentityProviderKind.AZUREIDIR);
+      const params: UserSearchParameters = {
+        group: [GroupName.NAVIGATOR]
+      };
 
-    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
-  });
+      const result = await searchUsersService(params);
 
-  it('converts prisma model to application model', async () => {
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    const response = await userService.readIdp(prismaTxMock, IdentityProviderKind.AZUREIDIR);
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      // Groups should be fetched for filtering but not included in result
+      expect(result).toEqual([{ ...TEST_IDIR_USER_1 }]);
+    });
 
-    expect(response).toStrictEqual(idirIdentityProvider);
-  });
-});
+    it('handles users with no groups', async () => {
+      const users = [{ ...TEST_IDIR_USER_1 }];
 
-describe('readUser', () => {
-  it('calls user.findUnique', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    await userService.readUser(prismaTxMock, idirUser.userId);
+      mockRepos.user.search.mockResolvedValue(users as never);
+      mockRepos.subjectGroup.getSubjectGroups.mockResolvedValue([] as never);
 
-    expect(prismaTxMock.user.findUnique).toHaveBeenCalledTimes(1);
-  });
+      const params: UserSearchParameters = {
+        includeUserGroups: true
+      };
 
-  it('converts prisma model to application model', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    const response = await userService.readUser(prismaTxMock, idirUser.userId);
+      const result = await searchUsersService(params);
 
-    expect(response).toStrictEqual(idirUser);
-  });
+      expect(mockRepos.subjectGroup.getSubjectGroups).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      expect(result).toEqual([
+        {
+          ...TEST_IDIR_USER_1,
+          groups: []
+        }
+      ]);
+    });
 
-  it('returns null if user not found', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(null);
-    const response = await userService.readUser(prismaTxMock, 'badId');
+    it('returns empty array when no users match search', async () => {
+      mockRepos.user.search.mockResolvedValue([] as never);
 
-    expect(response).toEqual(null);
-  });
-});
+      const params: UserSearchParameters = {
+        email: 'nonexistent@example.com'
+      };
 
-describe('searchUsers', () => {
-  it('calls user.findMany', async () => {
-    prismaTxMock.user.findMany.mockResolvedValueOnce([idirUser]);
-    await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId] });
+      const result = await searchUsersService(params);
 
-    expect(prismaTxMock.user.findMany).toHaveBeenCalledTimes(1);
-  });
-
-  it('converts prisma model to application model', async () => {
-    prismaTxMock.user.findMany.mockResolvedValueOnce([idirUser]);
-    const response = await userService.searchUsers(prismaTxMock, { userId: [idirUser.userId] });
-
-    expect(response).toStrictEqual([idirUser]);
-  });
-
-  it('filters SYTSTEM_ID userIds', async () => {
-    const systemUser: User = { ...idirUser, userId: SYSTEM_ID };
-    prismaTxMock.user.findMany.mockResolvedValueOnce([systemUser]);
-    const response = await userService.searchUsers(prismaTxMock, {});
-
-    expect(response).toEqual([]);
-  });
-});
-
-describe('updateUser', () => {
-  it('returns same user if no data changes', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-
-    const response = await userService.updateUser(prismaTxMock, idirUser.userId, idirUser);
-
-    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(0);
-    expect(response).toEqual(idirUser);
-  });
-
-  it('creates new idp if not existing', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(null);
-    prismaTxMock.identity_provider.create.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
-
-    const changedUser = { ...idirUser, firstName: 'Changed' };
-    await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
-
-    expect(prismaTxMock.identity_provider.findUnique).toHaveBeenCalledTimes(1);
-    expect(prismaTxMock.identity_provider.create).toHaveBeenCalledTimes(1);
-  });
-
-  it('updates the user', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
-
-    const changedUser = { ...idirUser, firstName: 'Changed' };
-    const response = await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
-
-    expect(prismaTxMock.user.update).toHaveBeenCalledTimes(1);
-    expect(response).toEqual(
-      expect.objectContaining({
-        ...changedUser
-      })
-    );
-  });
-
-  it('uses existing transaction if provided', async () => {
-    prismaTxMock.user.findUnique.mockResolvedValueOnce(idirUser);
-    prismaTxMock.identity_provider.findUnique.mockResolvedValueOnce(idirIdentityProvider);
-    prismaTxMock.user.update.mockResolvedValueOnce({ ...idirUser, firstName: 'Changed' });
-
-    const changedUser = { ...idirUser, firstName: 'Changed' };
-
-    await userService.updateUser(prismaTxMock, changedUser.userId, changedUser);
+      expect(mockRepos.user.search).toHaveBeenCalledWith(params);
+      expect(result).toEqual([]);
+    });
   });
 });

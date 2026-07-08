@@ -1,85 +1,64 @@
-import axios from 'axios';
-import config from 'config';
+import { mockReset } from 'vitest-mock-extended';
 
-import * as mapService from '../../../src/external/openMaps.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import * as mapService from '../../../src/services/map.ts';
+import * as projectDomain from '../../../src/domains/project.ts';
+import * as openMapsExternal from '../../../src/external/openMaps.ts';
 
-import type { Mocked } from 'vitest';
+const getProjectByProjectIdSpy = vi.spyOn(projectDomain, 'getProjectByProjectId');
+const getPidsSpy = vi.spyOn(openMapsExternal, 'getPids');
 
-vi.mock('config');
-let mockedConfig = config as Mocked<typeof config>;
-
-vi.mock('axios');
-let mockedAxios = axios as Mocked<typeof axios>;
-
-const FAKE_GEOJSON = {
-  type: 'Feature',
-  geometry: {
-    type: 'Polygon',
-    coordinates: [
-      [
-        [-80.724878, 35.265454],
-        [-80.721359, 35.267276],
-        [-80.724878, 35.265454]
-      ]
-    ]
-  },
-  properties: {
-    name: 'Place Park'
-  }
-};
-
-const FAKE_RESPONSE = {
-  type: 'FeatureCollection',
-  features: [
-    {
-      type: 'Feature',
-      geometry: {
-        type: 'Polygon',
-        coordinates: [
-          [
-            [-80.724878, 35.265454],
-            [-80.721359, 35.267276],
-            [-80.724878, 35.265454]
-          ]
-        ]
-      },
-      properties: {
-        name: 'Place Park',
-        PID_FORMATTED: '1234567890'
-      }
-    }
-  ]
-};
-
-beforeEach(() => {
-  mockedConfig = config as Mocked<typeof config>;
-  mockedAxios = axios as Mocked<typeof axios>;
-
-  // Replace any instances with the mocked instance
-  mockedAxios.create.mockImplementation(() => mockedAxios);
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (mockedAxios.interceptors.request.use as any).mockImplementation((cfg: any) => {
-    return cfg;
+describe('map service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
   });
-});
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+  describe('getPidsService', () => {
+    it('fetches PIDs using geoJson when a project has geoJson data', async () => {
+      const projectId = 'proj-1';
+      const mockGeoJson = { type: 'FeatureCollection', features: [] };
 
-describe('getPolygonArray', () => {
-  it('calls GET /geo/pub/wfs with correct query and returns result', async () => {
-    mockedConfig.get.mockImplementation(() => '');
+      getProjectByProjectIdSpy.mockResolvedValueOnce({ geoJson: mockGeoJson } as never);
+      getPidsSpy.mockResolvedValueOnce('123,456' as never);
 
-    mockedAxios.get.mockResolvedValueOnce({ data: FAKE_RESPONSE });
+      const result = await mapService.getPidsService(projectId);
 
-    const response = await mapService.getPIDs(FAKE_GEOJSON);
+      expect(getProjectByProjectIdSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          electrificationProject: mockRepos.electrificationProject,
+          generalProject: mockRepos.generalProject,
+          housingProject: mockRepos.housingProject
+        }),
+        projectId
+      );
+      expect(getPidsSpy).toHaveBeenCalledWith(mockGeoJson);
+      expect(result).toBe('123,456');
+    });
 
-    expect(mockedAxios.get).toHaveBeenCalledWith(
-      // eslint-disable-next-line max-len
-      '/geo/pub/wfs?SERVICE=WFS&VERSION=2.0.0&REQUEST=GetFeature&outputFormat=json&typeName=WHSE_CADASTRE.PMBC_PARCEL_FABRIC_POLY_SVW&CQL_FILTER=INTERSECTS(SHAPE, POLYGON ((4991035.28473842 263875.18893329985, 4991185.762581227 264229.81923595816, 4991035.28473842 263875.18893329985)))'
-    );
-    expect(response).toStrictEqual('1234567890');
+    it('returns undefined when project is found but has no geoJson property', async () => {
+      const projectId = 'proj-2';
+
+      // Simulating a project structure that lacks the geoJson property
+      getProjectByProjectIdSpy.mockResolvedValueOnce({ projectName: 'No GeoJson Project' } as never);
+
+      const result = await mapService.getPidsService(projectId);
+
+      expect(getProjectByProjectIdSpy).toHaveBeenCalledTimes(1);
+      expect(getPidsSpy).not.toHaveBeenCalled();
+      expect(result).toBeUndefined();
+    });
+
+    it('returns undefined when project is not found', async () => {
+      const projectId = 'proj-3';
+
+      getProjectByProjectIdSpy.mockResolvedValueOnce(undefined as never);
+
+      const result = await mapService.getPidsService(projectId);
+
+      expect(getProjectByProjectIdSpy).toHaveBeenCalledTimes(1);
+      expect(getPidsSpy).not.toHaveBeenCalled();
+      expect(result).toBeUndefined();
+    });
   });
 });

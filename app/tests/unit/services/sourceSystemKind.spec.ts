@@ -1,10 +1,19 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { getSourceSystemKinds } from '../../../src/services/sourceSystemKind.ts';
+import { mockReset } from 'vitest-mock-extended';
 
-describe('sourceSystemKind', () => {
-  describe('getSourceSystemKinds', () => {
-    it('should return source system kinds with permit type IDs', async () => {
-      const mockResponse = [
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { listSourceSystemKindsService } from '../../../src/services/sourceSystemKind.ts';
+
+vi.mock('config');
+
+describe('sourceSystemKind service', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockReset(mockRepos);
+  });
+
+  describe('listSourceSystemKindsService', () => {
+    it('delegates to repo.list() and returns result', async () => {
+      const mockResult = [
         {
           sourceSystemKindId: 1,
           kind: null,
@@ -17,7 +26,7 @@ describe('sourceSystemKind', () => {
           updatedAt: null,
           deletedBy: null,
           deletedAt: null,
-          permitTypeSourceSystemKindXref: [{ permitTypeId: 10 }, { permitTypeId: 20 }, { permitTypeId: 30 }]
+          permitTypeIds: [10, 20, 30]
         },
         {
           sourceSystemKindId: 2,
@@ -31,60 +40,20 @@ describe('sourceSystemKind', () => {
           updatedAt: null,
           deletedBy: null,
           deletedAt: null,
-          permitTypeSourceSystemKindXref: [{ permitTypeId: 5 }]
+          permitTypeIds: [5]
         }
       ];
 
-      prismaTxMock.source_system_kind.findMany.mockResolvedValue(mockResponse);
+      mockRepos.sourceSystemKind.list.mockResolvedValue(mockResult as never);
 
-      const result = await getSourceSystemKinds(prismaTxMock);
+      const result = await listSourceSystemKindsService();
 
-      expect(prismaTxMock.source_system_kind.findMany).toHaveBeenCalledWith({
-        orderBy: {
-          sourceSystem: 'asc'
-        },
-        include: {
-          permitTypeSourceSystemKindXref: {
-            select: {
-              permitTypeId: true
-            }
-          }
-        }
-      });
-
-      expect(result).toHaveLength(2);
-      expect(result[0]).toEqual({
-        sourceSystemKindId: 1,
-        kind: null,
-        description: 'File Number',
-        sourceSystem: 'ITSM-6197',
-        integrated: false,
-        createdBy: 'system',
-        createdAt: new Date('2025-01-01'),
-        updatedBy: null,
-        updatedAt: null,
-        deletedBy: null,
-        deletedAt: null,
-        permitTypeIds: [10, 20, 30]
-      });
-      expect(result[1]).toEqual({
-        sourceSystemKindId: 2,
-        kind: null,
-        description: 'Authorization Number',
-        sourceSystem: 'ITSM-5939',
-        integrated: true,
-        createdBy: 'system',
-        createdAt: new Date('2025-01-01'),
-        updatedBy: null,
-        updatedAt: null,
-        deletedBy: null,
-        deletedAt: null,
-        permitTypeIds: [5]
-      });
+      expect(mockRepos.sourceSystemKind.list).toHaveBeenCalledTimes(1);
+      expect(result).toEqual(mockResult);
     });
 
-    it('should return source system kinds with empty permitTypeIds when no xref exists', async () => {
-      const mockResponse = [
+    it('returns result with empty permitTypeIds when no xref exists', async () => {
+      const mockResult = [
         {
           sourceSystemKindId: 3,
           kind: null,
@@ -97,28 +66,28 @@ describe('sourceSystemKind', () => {
           updatedAt: null,
           deletedBy: null,
           deletedAt: null,
-          permitTypeSourceSystemKindXref: []
+          permitTypeIds: []
         }
       ];
 
-      prismaTxMock.source_system_kind.findMany.mockResolvedValue(mockResponse);
+      mockRepos.sourceSystemKind.list.mockResolvedValue(mockResult as never);
 
-      const result = await getSourceSystemKinds(prismaTxMock);
+      const result = await listSourceSystemKindsService();
 
       expect(result).toHaveLength(1);
       expect(result[0].permitTypeIds).toEqual([]);
     });
 
-    it('should return empty array when no source system kinds exist', async () => {
-      prismaTxMock.source_system_kind.findMany.mockResolvedValue([]);
+    it('returns empty array when no source system kinds exist', async () => {
+      mockRepos.sourceSystemKind.list.mockResolvedValue([] as never);
 
-      const result = await getSourceSystemKinds(prismaTxMock);
+      const result = await listSourceSystemKindsService();
 
       expect(result).toEqual([]);
     });
 
-    it('should order results by sourceSystem ascending', async () => {
-      const mockResponse = [
+    it('returns multiple source system kinds in expected order', async () => {
+      const mockResult = [
         {
           sourceSystemKindId: 1,
           kind: null,
@@ -131,7 +100,7 @@ describe('sourceSystemKind', () => {
           updatedAt: null,
           deletedBy: null,
           deletedAt: null,
-          permitTypeSourceSystemKindXref: []
+          permitTypeIds: []
         },
         {
           sourceSystemKindId: 2,
@@ -145,21 +114,16 @@ describe('sourceSystemKind', () => {
           updatedAt: null,
           deletedBy: null,
           deletedAt: null,
-          permitTypeSourceSystemKindXref: []
+          permitTypeIds: []
         }
       ];
 
-      prismaTxMock.source_system_kind.findMany.mockResolvedValue(mockResponse);
+      mockRepos.sourceSystemKind.list.mockResolvedValue(mockResult as never);
 
-      await getSourceSystemKinds(prismaTxMock);
+      const result = await listSourceSystemKindsService();
 
-      expect(prismaTxMock.source_system_kind.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          orderBy: {
-            sourceSystem: 'asc'
-          }
-        })
-      );
+      expect(result).toHaveLength(2);
+      expect(result).toEqual(mockResult);
     });
   });
 });
