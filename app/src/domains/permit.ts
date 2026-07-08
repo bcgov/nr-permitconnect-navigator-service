@@ -5,7 +5,7 @@ import { email } from '../external/ches';
 import { Repositories } from '../repositories/unitOfWork';
 import { formatDateOnly } from '../utils';
 
-import type { Permit, PermitUpdateEmailParams } from '../types';
+import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys } from '../types';
 import { getProjectByActivityId } from './project';
 import { Initiative } from '../utils/enums/application';
 import {
@@ -20,7 +20,7 @@ import { PermitNeeded } from '../utils/enums/permit';
 import { PermitStage } from '../db/codes/enums';
 
 /**
- * Retrieve permits and trackers that are PEACH integrated
+ * Retrieve permits and trackings that are PEACH integrated
  * @param repositories - The required repositories
  * @returns A Promise that resolves to a list of permits matching the search params
  */
@@ -84,10 +84,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
  * @param note A permit note to be used in permit note creation, if given
  */
 export const sendPermitUpdateNotifications = async (
-  repositories: Pick<
-    Repositories,
-    'electrificationProject' | 'generalProject' | 'housingProject' | 'permitNote' | 'user'
-  >,
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'user'>,
   permit: Permit,
   fromPeachSync: boolean,
   note?: string

@@ -59,6 +59,10 @@ export const createAccessRequestService = async (
       }
       const modifiableGroups = groups.filter((x) => userAllowedGroups.includes(x.name));
 
+      if (accessReq.grant && !accessReq.groupId) {
+        throw new Problem(422, { detail: 'Must provide a group to grant' });
+      }
+
       if (accessReq.grant && !modifiableGroups.some((x) => x.groupId == accessReq.groupId)) {
         throw new Problem(403, { detail: 'Cannot modify requested group' });
       }
@@ -86,9 +90,6 @@ export const createAccessRequestService = async (
       }
       if (userResponse.idp !== IdentityProviderKind.AZUREIDIR) {
         throw new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' });
-      }
-      if (accessReq.grant && !accessReq.groupId) {
-        throw new Problem(422, { detail: 'Must provide a group to grant' });
       }
 
       const isGroupUpdate = existingUser && accessReq.grant && userAlreadyInInitiative;

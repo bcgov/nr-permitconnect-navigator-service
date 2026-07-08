@@ -9,10 +9,10 @@ import { getCurrentUsername } from '../utils';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';
 
-import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake } from '../types';
+import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '../types';
 
 export async function emailEnquiryConfirmation(
-  repositories: Pick<Repositories, 'electrificationProject' | 'generalProject' | 'housingProject'>,
+  repositories: Pick<Repositories, ProjectRepositoryKeys>,
   enquiryWithContact: Enquiry & { contact: ContactBase },
   initiative: string,
   relatedActivityId?: string

@@ -6,13 +6,10 @@ import { Problem } from '../utils';
 import { GroupName, Initiative } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 
-import type { ActivityContact, Contact, CurrentAuthorization, CurrentContext } from '../types';
+import type { ActivityContact, Contact, CurrentAuthorization, CurrentContext, ProjectRepositoryKeys } from '../types';
 
 export const getTeamMemberEmailTemplateData = async (
-  repositories: Pick<
-    Repositories,
-    'contact' | 'electrificationProject' | 'generalProject' | 'housingProject' | 'enquiry'
-  >,
+  repositories: Pick<Repositories, 'contact' | ProjectRepositoryKeys | 'enquiry'>,
   initiative: Initiative,
   currentUserId: string | undefined,
   activityId: string,

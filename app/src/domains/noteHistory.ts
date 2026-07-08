@@ -8,13 +8,10 @@ import { GroupName, Initiative, Resource } from '../utils/enums/application';
 import { NoteType } from '../utils/enums/projectCommon';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
 
-import type { NoteHistory, User } from '../types';
+import type { NoteHistory, ProjectRepositoryKeys, User } from '../types';
 
 export async function emailBringForwardNotification(
-  repositories: Pick<
-    Repositories,
-    'electrificationProject' | 'generalProject' | 'housingProject' | 'subjectGroup' | 'user'
-  >,
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'subjectGroup' | 'user'>,
   noteHistory: NoteHistory,
   initiative: Initiative,
   resource: Resource

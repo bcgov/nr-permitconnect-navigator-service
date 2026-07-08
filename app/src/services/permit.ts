@@ -27,8 +27,10 @@ import { summarizePeachRecord } from '../parsers/peach.ts';
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
-  const sourceSystemKind = sourceSystemKinds.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
-  return !!sourceSystemKind;
+  const hasIntegratedSourceSystemKind = sourceSystemKinds.some(
+    (ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem
+  );
+  return hasIntegratedSourceSystemKind;
 }
 
 const snapshotPermitStatus = (p: Partial<Permit>) => ({
@@ -232,7 +234,7 @@ export const upsertPermitService = async (
         {
           permitId: upsertPermitData.permitId,
           permitTrackingId: {
-            notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter((x) => x)
+            notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter(Boolean)
           }
         },
         { hard: true }

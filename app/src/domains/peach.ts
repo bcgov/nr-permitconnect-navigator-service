@@ -10,7 +10,7 @@ import { PeachIntegratedSystem } from '../utils/enums/permit';
 import { combineDateTime, compareDates, omit } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
-import type { PeachSummary, Permit, PermitTracking, Record as PeachRecord, UpdatedPermitWithNote } from '../types';
+import type { PeachSummary, PermitTracking, Record as PeachRecord, UpdatedPermitWithNote } from '../types';
 
 const log = getLogger(module.filename);
 const limit = pLimit(5);
@@ -62,32 +62,18 @@ export const findPriorityPermitTracking = (
 export const syncPeachRecords = async (
   repositories: Pick<Repositories, 'permit'>
 ): Promise<UpdatedPermitWithNote[]> => {
-  const systemRecordPermits: { recordId: string; systemId: string; permit: Permit }[] = [];
-
   // Only fetch permits that have a peach integrated system permit type
   const peachIntegratedPermits = await listPeachIntegratedTrackings({ permit: repositories.permit });
 
-  // Find permits that have a permit tracking from a PEACH integrataed system
-  for (const permit of peachIntegratedPermits) {
-    const permitTrackings = permit.permitTracking ?? [];
+  // Find the highest priority system record for each permit.
+  const systemRecordPermits = peachIntegratedPermits.flatMap((permit) => {
+    const permitTracking = findPriorityPermitTracking(permit.permitTracking);
 
-    if (permitTrackings.length === 0) continue;
+    const recordId = permitTracking?.trackingId;
+    const systemId = permitTracking?.sourceSystemKind?.sourceSystem;
 
-    const permitTracking = findPriorityPermitTracking(permitTrackings);
-
-    if (!permitTracking) continue;
-
-    const recordId = permitTracking.trackingId;
-    const systemId = permitTracking.sourceSystemKind!.sourceSystem;
-
-    if (recordId && systemId) {
-      systemRecordPermits.push({
-        recordId,
-        systemId,
-        permit: permit
-      });
-    }
-  }
+    return recordId && systemId ? [{ recordId, systemId, permit }] : [];
+  });
 
   // Uses rate limiting with p-limit to avoid overwhelming PEACH with requests, limit is set to 5.
   const results = await Promise.allSettled(

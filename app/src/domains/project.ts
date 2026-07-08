@@ -1,7 +1,7 @@
 import { Repositories } from '../repositories/unitOfWork.ts';
 import { Problem } from '../utils/index.ts';
 
-import type { Project } from '../types';
+import type { Project, ProjectRepositoryKeys } from '../types';
 
 /**
  * Helper object for prisma include
@@ -24,7 +24,7 @@ const ACTIVITY_INCLUDE = {
  * @returns A Promise that resolves to the specific project
  */
 export const getProjectByActivityId = async (
-  repositories: Pick<Repositories, 'electrificationProject' | 'generalProject' | 'housingProject'>,
+  repositories: Pick<Repositories, ProjectRepositoryKeys>,
   activityId: string
 ): Promise<Project> => {
   const [electrificationResult, generalResult, housingResult] = await Promise.all([
@@ -62,7 +62,7 @@ export const getProjectByActivityId = async (
  * @returns A Promise that resolves to the specific project
  */
 export const getProjectByProjectId = async (
-  repositories: Pick<Repositories, 'electrificationProject' | 'generalProject' | 'housingProject'>,
+  repositories: Pick<Repositories, ProjectRepositoryKeys>,
   projectId: string
 ): Promise<Project> => {
   const [electrificationResult, generalResult, housingResult] = await Promise.all([

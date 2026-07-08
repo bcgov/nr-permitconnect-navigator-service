@@ -64,7 +64,12 @@ export const listSubjectPermissionsService = async (currentContext: CurrentConte
     // Double check correct COMS permissions.
     // This endpoint is called on client bootstrap, so it's a good place to verify
     //   COMS permissions without adding COMS calls to every API request.
-    await assignPermissions(currentContext, currentContext.tokenPayload.sub, groups);
+    try {
+      await assignPermissions(currentContext, currentContext.tokenPayload.sub, groups);
+    } catch (e) {
+      if (e instanceof Error) log.warn(e.message);
+      if (e instanceof Problem) log.warn(e.detail);
+    }
 
     return { groups, permissions };
   });

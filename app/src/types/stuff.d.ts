@@ -434,6 +434,8 @@ export interface UpdatedPermitWithNote {
 
 export type Project = ElectrificationProject | GeneralProject | HousingProject;
 
+export type ProjectRepositoryKeys = 'electrificationProject' | 'generalProject' | 'housingProject';
+
 interface SplitDatetimeBase<T> {
   date: T;
   time: string | null;
