@@ -58,6 +58,7 @@ import type {
   PeachSummary,
   Permit,
   PermitNote,
+  PermitTracking,
   PermitType,
   User
 } from '../../../src/types/index.ts';
@@ -492,6 +493,48 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
 
 export const TEST_GENERAL_PROJECT_UPDATE: Partial<Omit<GeneralProject, 'generalProjectId'>> = {
   projectName: 'NEW NAME'
+};
+
+export const TEST_GROUP_1: Group = {
+  groupId: 1,
+  initiativeId: 'init-1',
+  initiativeCode: Initiative.HOUSING,
+  name: GroupName.NAVIGATOR,
+  label: 'Navigator',
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GROUP_2_ADMIN: Group = {
+  groupId: 2,
+  initiativeId: 'init-1',
+  initiativeCode: Initiative.HOUSING,
+  name: GroupName.ADMIN,
+  label: 'Admin',
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_GROUP_3_SUPERVISOR: Group = {
+  groupId: 3,
+  initiativeId: 'init-1',
+  initiativeCode: Initiative.HOUSING,
+  name: GroupName.SUPERVISOR,
+  label: 'Supervisor',
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
 };
 
 export const TEST_HOUSING_PROJECT_1: HousingProjectBase = {
@@ -1090,6 +1133,20 @@ export const TEST_PERMIT_NOTE_UPDATE: PermitNote = {
   note: 'This application is none in the pre-submission stage.'
 };
 
+export const TEST_PERMIT_TRACKING_1: PermitTracking = {
+  permitTrackingId: 1,
+  permitId: 'permit-123',
+  trackingId: 'TRK-001',
+  sourceSystemKindId: 1,
+  shownToProponent: true,
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
 export const TEST_PERMIT_TYPE_1: PermitType = {
   permitTypeId: 1,
   agency: 'SOME_AGENCY',
@@ -1114,16 +1171,13 @@ export const TEST_PERMIT_TYPE_1: PermitType = {
 
 export const TEST_PERMIT_TYPE_LIST: PermitType[] = [TEST_PERMIT_TYPE_1];
 
-export const TEST_IDIR_USER_1: User = {
-  bceidBusinessName: null,
-  userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-  idp: IdentityProviderKind.AZUREIDIR,
-  sub: 'cd90c6bf44074872a7116f4dd4f3a45b@azureidir',
-  email: 'John.Doe@example.com',
-  firstName: 'John',
-  fullName: 'Doe, John',
-  lastName: 'Doe',
-  active: true,
+export const TEST_SUBJECT_GROUP_1 = {
+  groupId: 1,
+  initiativeId: 'init-1',
+  sub: TEST_IDIR_USER_1.sub,
+  name: GroupName.NAVIGATOR,
+  label: 'Navigator',
+  initiativeCode: Initiative.HOUSING,
   createdAt: null,
   createdBy: null,
   updatedAt: null,
