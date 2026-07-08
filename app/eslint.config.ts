@@ -47,9 +47,11 @@ export default defineConfig([
       'no-restricted-syntax': [
         'error',
         {
-          selector: "MemberExpression[object.type='ThisExpression'][property.name='model']",
+          // eslint-disable-next-line quotes
+          selector: `MemberExpression[object.type='ThisExpression'][property.name='model']`,
           message:
-            'Use inherited query methods (this.findMany, this.create, etc.) instead of this.model directly. Only readable.ts/writable.ts may access this.model.'
+            'Use inherited query methods (this.findMany, this.create, etc.) instead of this.model directly. ' +
+            'Only readable.ts/writable.ts may access this.model.'
         }
       ]
     }
