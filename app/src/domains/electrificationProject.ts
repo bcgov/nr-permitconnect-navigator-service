@@ -13,7 +13,7 @@ import { toTitleCase } from '../utils';
 import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
 
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 
 import { email } from '../external/ches';
 import { createActivity } from './activity';

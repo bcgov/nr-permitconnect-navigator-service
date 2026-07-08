@@ -1,4 +1,4 @@
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 import { CurrentAuthorization, CurrentContext } from '../types';
 import { Problem } from '../utils';
 

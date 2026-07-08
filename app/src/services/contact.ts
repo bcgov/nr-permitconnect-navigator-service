@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 
 import type { Contact, ContactBase, ContactSearchParameters } from '../types/index.ts';
 

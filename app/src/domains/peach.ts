@@ -5,7 +5,7 @@ import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { getPeachRecord } from '../external/peach.ts';
 import { parsePeachRecords } from '../parsers/peach.ts';
-import { Repositories } from '../repository/unitOfWork.ts';
+import { Repositories } from '../repositories/unitOfWork.ts';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 import { combineDateTime, compareDates, omit } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';

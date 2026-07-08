@@ -74,7 +74,7 @@ class RepositoryProvider implements Repositories {
   private readonly tx: PrismaTransactionClient;
   private readonly principal: string;
 
-  private repositories = new Map<string, object>();
+  private readonly repositories = new Map<string, object>();
 
   constructor(tx: PrismaTransactionClient, principal: string) {
     this.tx = tx;
@@ -228,7 +228,7 @@ interface TxOpts {
  * transaction.
  */
 class UnitOfWork {
-  private prisma: PrismaClientType;
+  private readonly prisma: PrismaClientType;
 
   constructor(prisma: PrismaClientType) {
     this.prisma = prisma;

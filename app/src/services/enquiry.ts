@@ -1,5 +1,5 @@
 import { emailEnquiryConfirmation, generateEnquiryData } from '../domains/enquiry.ts';
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { ActivityContactRole, EnquirySubmittedMethod } from '../utils/enums/projectCommon.ts';
 
 import type {

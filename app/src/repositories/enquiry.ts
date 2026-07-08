@@ -16,7 +16,7 @@ export class EnquiryRepository extends WritableRepository<PrismaTransactionClien
           {
             activity: {
               initiative: {
-                code: initiativeCode !== Initiative.PCNS ? initiativeCode : undefined
+                code: initiativeCode === Initiative.PCNS ? undefined : initiativeCode
               }
             }
           },

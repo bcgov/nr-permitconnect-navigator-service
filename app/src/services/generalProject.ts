@@ -5,7 +5,7 @@ import { emailProjectConfirmation, generateGeneralProjectData } from '../domains
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
 
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 
 import type {
   ContactBase,

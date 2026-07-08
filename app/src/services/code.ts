@@ -1,5 +1,5 @@
 import { CODE_TABLES } from '../db/codes/tables.ts';
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 
 import type { CodeTableName, CodeRow } from '../types/codes.ts';
 

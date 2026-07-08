@@ -2,7 +2,7 @@ import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { email } from '../external/ches';
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 import { formatDateOnly } from '../utils';
 
 import type { Permit, PermitUpdateEmailParams } from '../types';

@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { Problem } from '../utils/index.ts';
 import { GroupName } from '../utils/enums/application.ts';
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';

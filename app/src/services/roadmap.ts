@@ -4,7 +4,7 @@ import { PermitStage } from '../db/codes/enums';
 import { getProjectByActivityId } from '../domains/project';
 import { email } from '../external/ches';
 import { getObject, searchObject } from '../external/coms';
-import { unitOfWork } from '../repository/unitOfWork';
+import { unitOfWork } from '../repositories/unitOfWork';
 import { Problem } from '../utils';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole } from '../utils/enums/projectCommon';

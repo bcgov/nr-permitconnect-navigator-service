@@ -2,7 +2,7 @@ import config from 'config';
 
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 import { Problem } from '../utils';
 import { GroupName, Initiative, Resource } from '../utils/enums/application';
 import { NoteType } from '../utils/enums/projectCommon';

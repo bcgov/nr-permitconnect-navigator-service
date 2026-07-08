@@ -4,7 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 import { getCurrentUsername } from '../utils';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';

@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { isTruthy } from '../utils/index.ts';
 
 import type { User } from '../types/models.ts';

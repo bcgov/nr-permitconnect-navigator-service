@@ -1,5 +1,5 @@
 import { IPaginationOptions } from '../interfaces/IPaginationOptions';
-import { AuditFields, SoftDeleteFields } from '../repository';
+import { AuditFields, SoftDeleteFields } from '../repositories';
 import { Simplify } from './util';
 
 /**

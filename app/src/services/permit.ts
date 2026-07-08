@@ -16,7 +16,7 @@ import type {
   SearchPermitsResponse,
   SourceSystemKind
 } from '../types/index.ts';
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import Problem from '../utils/problem.ts';
 import { differential, isEmptyObject } from '../utils/utils.ts';

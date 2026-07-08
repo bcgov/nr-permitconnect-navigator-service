@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
 import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 

@@ -16,7 +16,7 @@ import { confirmationTemplateGeneralSubmission } from '../utils/templates';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repository/unitOfWork';
+import { Repositories } from '../repositories/unitOfWork';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
 import { UpsertPermitRequest } from '../types/requests';
 import { email } from '../external/ches';

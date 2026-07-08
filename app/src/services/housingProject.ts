@@ -3,7 +3,7 @@ import { Prisma } from '@prisma/client';
 import prisma from '../db/database.ts';
 import { emailProjectConfirmation, generateHousingProjectData } from '../domains/housingProject.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { unitOfWork } from '../repository/unitOfWork.ts';
+import { unitOfWork } from '../repositories/unitOfWork.ts';
 
 import type {
   ContactBase,
