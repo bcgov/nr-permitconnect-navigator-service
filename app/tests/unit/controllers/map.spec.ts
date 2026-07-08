@@ -1,10 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { getPIDsController } from '../../../src/controllers/map.ts';
-import * as mapService from '../../../src/external/openMaps.ts';
-import * as projectService from '../../../src/services/project.ts';
+import { getPidsController } from '../../../src/controllers/map.ts';
+import * as mapService from '../../../src/services/map.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
+
+vi.mock('config');
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -19,52 +19,34 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  vi.clearAllMocks();
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+describe('getPidsController', () => {
+  it('should call getPidsService with projectId and respond with 200 when PIDs returned', async () => {
+    const mockPids = '123|456|789';
+    vi.spyOn(mapService, 'getPidsService').mockResolvedValueOnce(mockPids);
 
-describe('getPIDsController', () => {
-  const getProjectSpy = vi.spyOn(projectService, 'getProjectByProjectId');
-  const getPIDsSpy = vi.spyOn(mapService, 'getPIDs');
+    const req = { params: { projectId: 'PRJ-001' } } as unknown as Request<{ projectId: string }>;
 
-  it('returns 200 with PIDs when project has geoJson', async () => {
-    getProjectSpy.mockResolvedValueOnce({ geoJson: { type: 'Feature' } } as never);
-    getPIDsSpy.mockResolvedValueOnce('123|456');
+    await getPidsController(req, res as unknown as Response);
 
-    await getPIDsController(
-      { params: { projectId: 'PRJ1' } } as unknown as Request<{ projectId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getProjectSpy).toHaveBeenCalledWith(prismaTxMock, 'PRJ1');
-    expect(getPIDsSpy).toHaveBeenCalledWith({ type: 'Feature' });
+    expect(mapService.getPidsService).toHaveBeenCalledTimes(1);
+    expect(mapService.getPidsService).toHaveBeenCalledWith('PRJ-001');
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith('123|456');
+    expect(res.json).toHaveBeenCalledWith(mockPids);
   });
 
-  it('returns 204 when project has no geoJson', async () => {
-    getProjectSpy.mockResolvedValueOnce({} as never);
+  it('should call getPidsService and respond with 204 when no PIDs returned', async () => {
+    vi.spyOn(mapService, 'getPidsService').mockResolvedValueOnce(undefined);
 
-    await getPIDsController(
-      { params: { projectId: 'PRJ2' } } as unknown as Request<{ projectId: string }>,
-      res as unknown as Response
-    );
+    const req = { params: { projectId: 'PRJ-002' } } as unknown as Request<{ projectId: string }>;
 
-    expect(getPIDsSpy).not.toHaveBeenCalled();
+    await getPidsController(req, res as unknown as Response);
+
+    expect(mapService.getPidsService).toHaveBeenCalledTimes(1);
+    expect(mapService.getPidsService).toHaveBeenCalledWith('PRJ-002');
     expect(res.status).toHaveBeenCalledWith(204);
-  });
-
-  it('returns 204 when project not found', async () => {
-    getProjectSpy.mockResolvedValueOnce(null as never);
-
-    await getPIDsController(
-      { params: { projectId: 'NOPE' } } as unknown as Request<{ projectId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getPIDsSpy).not.toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.json).toHaveBeenCalledWith(undefined);
   });
 });

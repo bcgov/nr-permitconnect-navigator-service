@@ -1,14 +1,10 @@
-import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1, TEST_INITIATIVE_HOUSING } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { getUsersWithGroups, searchUsersController } from '../../../src/controllers/user.ts';
-import * as initiativeService from '../../../src/services/initiative.ts';
+import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { searchUsersController } from '../../../src/controllers/user.ts';
 import * as userService from '../../../src/services/user.ts';
-import * as yarsService from '../../../src/services/yars.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
+import type { User, UserSearchParameters } from '../../../src/types/index.ts';
 import type { Mock } from 'vitest';
-import type { Group, User, UserSearchParameters } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -26,99 +22,63 @@ let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  vi.clearAllMocks();
 });
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
-
-const TEST_USER_LIST = [TEST_IDIR_USER_1];
 
 describe('searchUsersController', () => {
-  const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+  it('should call service with extracted params and respond with 200', async () => {
+    const mockUsers: User[] = [TEST_IDIR_USER_1];
+    vi.spyOn(userService, 'searchUsersService').mockResolvedValueOnce(mockUsers);
 
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      body: { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] }
+    const searchParams: UserSearchParameters = {
+      userId: ['user-1'],
+      idp: ['azureidir'],
+      sub: 'sub-123',
+      email: 'test@example.com',
+      firstName: 'John',
+      fullName: 'John Doe',
+      lastName: 'Doe',
+      active: true
     };
 
-    searchUsersSpy.mockResolvedValue(TEST_USER_LIST);
+    const req = { body: searchParams } as unknown as Request<never, never, UserSearchParameters, never>;
 
-    await searchUsersController(
-      req as unknown as Request<never, never, UserSearchParameters, never>,
-      res as unknown as Response
-    );
+    await searchUsersController(req, res as unknown as Response);
 
-    expect(searchUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchUsersSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923']
+    expect(userService.searchUsersService).toHaveBeenCalledTimes(1);
+    expect(userService.searchUsersService).toHaveBeenCalledWith(searchParams);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockUsers);
+  });
+
+  it('should call service with partial params (isTruthy coercion)', async () => {
+    const mockUsers: User[] = [];
+    vi.spyOn(userService, 'searchUsersService').mockResolvedValueOnce(mockUsers);
+
+    const req = { body: { active: undefined, firstName: 'Jane' } } as unknown as Request<
+      never,
+      never,
+      UserSearchParameters,
+      never
+    >;
+
+    await searchUsersController(req, res as unknown as Response);
+
+    expect(userService.searchUsersService).toHaveBeenCalledTimes(1);
+    expect(userService.searchUsersService).toHaveBeenCalledWith({
+      userId: undefined,
+      idp: undefined,
+      sub: undefined,
+      email: undefined,
+      firstName: 'Jane',
+      fullName: undefined,
+      lastName: undefined,
+      active: undefined,
+      group: undefined,
+      initiative: undefined,
+      includeUserGroups: undefined
     });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_USER_LIST);
-  });
-});
-
-describe('getUsersWithGroups', () => {
-  const getSubjectGroupsSpy = vi.spyOn(yarsService, 'getSubjectGroups');
-  const getInitiativeSpy = vi.spyOn(initiativeService, 'getInitiative');
-
-  const housingGroup: Group = {
-    groupId: 1,
-    name: GroupName.NAVIGATOR,
-    initiativeId: TEST_INITIATIVE_HOUSING.initiativeId,
-    initiativeCode: Initiative.HOUSING
-  };
-  const electrificationGroup: Group = {
-    groupId: 2,
-    name: GroupName.PROPONENT,
-    initiativeId: 'other-initiative-id',
-    initiativeCode: Initiative.ELECTRIFICATION
-  };
-
-  it('returns users untouched when no group/includeUserGroups option set', async () => {
-    const users: User[] = [TEST_IDIR_USER_1];
-
-    const result = await getUsersWithGroups(prismaTxMock, users, {});
-
-    expect(getSubjectGroupsSpy).not.toHaveBeenCalled();
-    expect(result).toBe(users);
-  });
-
-  it('attaches groups when includeUserGroups is truthy', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([housingGroup, electrificationGroup]);
-
-    const result = await getUsersWithGroups(prismaTxMock, [TEST_IDIR_USER_1], { includeUserGroups: true });
-
-    expect(result[0].groups).toEqual([housingGroup, electrificationGroup]);
-  });
-
-  it('filters users by group name and strips groups when includeUserGroups is not requested', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([electrificationGroup]);
-
-    const result = await getUsersWithGroups(prismaTxMock, [TEST_IDIR_USER_1], { group: [GroupName.NAVIGATOR] });
-
-    expect(result).toHaveLength(0);
-  });
-
-  it('keeps matching users and removes groups attribute when not requested', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([housingGroup]);
-
-    const result = await getUsersWithGroups(prismaTxMock, [TEST_IDIR_USER_1], { group: [GroupName.NAVIGATOR] });
-
-    expect(result).toHaveLength(1);
-    expect(result[0].groups).toBeUndefined();
-  });
-
-  it('filters groups by initiative when initiative option provided', async () => {
-    getSubjectGroupsSpy.mockResolvedValueOnce([housingGroup, electrificationGroup]);
-    getInitiativeSpy.mockResolvedValueOnce(TEST_INITIATIVE_HOUSING);
-
-    const result = await getUsersWithGroups(prismaTxMock, [TEST_IDIR_USER_1], {
-      includeUserGroups: true,
-      initiative: [Initiative.HOUSING]
-    });
-
-    expect(getInitiativeSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING);
-    expect(result[0].groups).toEqual([housingGroup]);
+    expect(res.json).toHaveBeenCalledWith(mockUsers);
   });
 });

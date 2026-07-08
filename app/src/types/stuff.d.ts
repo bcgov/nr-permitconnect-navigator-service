@@ -293,7 +293,7 @@ export interface HousingProjectIntake {
     financiallySupportedIndigenous: string;
     financiallySupportedNonProfit: string;
     financiallySupportedHousingCoop: string;
-    rentalUnits: string;
+    rentalUnits: string | null;
     indigenousDescription: string | null;
     nonProfitDescription: string | null;
     housingCoopDescription: string | null;

@@ -1,55 +1,37 @@
 import { Prisma } from '@prisma/client';
 
 import {
-  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_HOUSING,
   TEST_HOUSING_DRAFT,
   TEST_HOUSING_PROJECT_1,
   TEST_HOUSING_PROJECT_CREATE,
-  TEST_HOUSING_PROJECT_INTAKE,
-  TEST_IDIR_USER_1,
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_HOUSING_PROJECT_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+  TEST_HOUSING_PROJECT_INTAKE
+} from '../data/index.ts';
 import {
-  assignPriority,
   createHousingProjectController,
   deleteHousingProjectController,
   deleteHousingProjectDraftController,
-  getHousingProjectActivityIdsController,
   getHousingProjectController,
   getHousingProjectDraftController,
   getHousingProjectDraftsController,
-  getHousingProjectsController,
   getHousingProjectStatisticsController,
+  listHousingProjectActivityIdsController,
+  listHousingProjectsController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
   updateHousingProjectController,
   upsertHousingProjectDraftController
 } from '../../../src/controllers/housingProject.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
-import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/domains/activity.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as contactService from '../../../src/services/contact.ts';
+import * as activityService from '../../../src/services/activity.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
-import * as permitService from '../../../src/services/permit.ts';
-import * as permitTrackingService from '../../../src/domains/permitTracking.ts';
+import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
-import * as utils from '../../../src/utils/utils';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
-  ActivityContact,
   Draft,
   HousingProject,
   HousingProjectIntake,
@@ -60,11 +42,6 @@ import type {
 } from '../../../src/types/index.ts';
 
 vi.mock('config');
-
-const PROJECT_WITH_PROJECTID = {
-  ...TEST_HOUSING_PROJECT_1,
-  projectId: TEST_HOUSING_PROJECT_1.housingProjectId
-};
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -78,881 +55,350 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
-});
-
-afterEach(() => {
-  /*
-   * Must use clearAllMocks when using the mocked config
-   * resetAllMocks seems to cause strange issues such as
-   * functions not calling as expected
-   */
-  vi.clearAllMocks();
-});
-
-describe('assignPriority', () => {
-  it('assigns priority 1 when housing project matches priority 1 criteria - 50 to 500 units', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '50-500',
-      hasRentalUnits: 'No',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'No'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 1 when housing project matches priority 1 criteria - over 500 units', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '>500',
-      hasRentalUnits: 'No',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'No'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 1 when housing project matches priority 1 criteria - Has Rental Units', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '1-9',
-      hasRentalUnits: 'Yes',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'No'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 1 when housing project matches priority 1 criteria - Social Housing', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '1-9',
-      hasRentalUnits: 'No',
-      financiallySupportedBc: 'Yes',
-      financiallySupportedIndigenous: 'No'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 1 when housing project matches priority 1 criteria - Indigenous Led', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '1-9',
-      hasRentalUnits: 'No',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'Yes'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 1 when housing project matches priority 1 and priority 2 criteria', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '10-49',
-      hasRentalUnits: 'Yes',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'Yes',
-      multiFamilyUnits: '1-9',
-      otherUnits: ''
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(1);
-  });
-
-  it('assigns priority 2 when housing project matches priority 2 criteria - 10-49 single family units', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '10-49'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(2);
-  });
-
-  it('assigns priority 2 if only multiFamilyUnits is provided', () => {
-    const housingProject: Partial<HousingProject> = {
-      multiFamilyUnits: '1-9'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(2);
-  });
-
-  it('assigns priority 2 if only otherUnits is provided', () => {
-    const housingProject: Partial<HousingProject> = {
-      otherUnits: '1-9'
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(2);
-  });
-
-  it('assigns priority 3 when housing project matches neither priority 1 nor priority 2 criteria', () => {
-    const housingProject: Partial<HousingProject> = {
-      singleFamilyUnits: '1-9',
-      hasRentalUnits: 'No',
-      financiallySupportedBc: 'No',
-      financiallySupportedIndigenous: 'No',
-      multiFamilyUnits: '',
-      otherUnits: ''
-    };
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(3);
-  });
-
-  it('assigns priority 3 if no criteria are met/given', () => {
-    const housingProject: Partial<HousingProject> = {};
-
-    assignPriority(housingProject);
-
-    expect(housingProject.queuePriority).toBe(3);
-  });
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
 describe('createHousingProjectController', () => {
-  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
-  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
-  const createHousingProjectSpy = vi.spyOn(housingProjectService, 'createHousingProject');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const getCurrentUsernameSpy = vi.spyOn(utils, 'getCurrentUsername');
+  const createSpy = vi.spyOn(housingProjectService, 'createHousingProjectService');
 
-  it('should call services and respond with 201 and result', async () => {
+  it('calls the service with body and context then responds 201', async () => {
     const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE }
-    };
+      body: TEST_HOUSING_PROJECT_INTAKE
+    } as unknown as Request<never, never, HousingProjectIntake>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
-    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName!);
+    createSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
 
-    await createHousingProjectController(
-      req as unknown as Request<never, never, HousingProjectIntake>,
-      res as unknown as Response
-    );
+    await createHousingProjectController(req, res as unknown as Response<HousingProject, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_HOUSING.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      expect.objectContaining({
-        housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
-        submittedAt: expect.any(Date) as Date,
-        createdAt: expect.any(Date) as Date,
-        createdBy: TEST_CURRENT_CONTEXT.userId,
-        projectName: 'NAME',
-        projectDescription: 'DESCRIPTION',
-        companyIdRegistered: 'FM0281610',
-        companyNameRegistered: 'COMPANY'
-      })
-    );
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_INTAKE, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...TEST_HOUSING_PROJECT_CREATE,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_CREATE);
   });
 
-  it('creates permits if they exist', async () => {
-    const permit1NoTracking = { ...TEST_PERMIT_1 };
-    delete permit1NoTracking.permitTracking;
-    const permit2NoTracking = { ...TEST_PERMIT_2 };
-    delete permit2NoTracking.permitTracking;
-    const permit3NoTracking = { ...TEST_PERMIT_3 };
-    delete permit3NoTracking.permitTracking;
-
+  it('provides empty body when POST body is undefined', async () => {
     const req = {
-      body: {
-        permits: {
-          appliedPermits: [permit1NoTracking, permit2NoTracking],
-          investigatePermits: [TEST_PERMIT_3]
-        }
-      }
-    };
+      body: undefined
+    } as unknown as Request<never, never, HousingProjectIntake>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createHousingProjectSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
+    createSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
 
-    await createHousingProjectController(
-      req as unknown as Request<never, never, HousingProjectIntake>,
-      res as unknown as Response
-    );
+    await createHousingProjectController(req, res as unknown as Response<HousingProject, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...permit1NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...permit2NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...permit3NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      state: PermitState.NONE,
-      needed: 'Under investigation',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      submittedDate: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
+    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
 describe('deleteHousingProjectController', () => {
-  const getHousingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
-  const deleteHousingProjectSpy = vi.spyOn(housingProjectService, 'deleteHousingProject');
-  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
+  const getSpy = vi.spyOn(housingProjectService, 'getHousingProjectService');
+  const deleteSpy = vi.spyOn(activityService, 'deleteActivityService');
 
-  it('should call services and respond with 204', async () => {
+  it('fetches project and deletes activity then responds 204', async () => {
     const req = {
       params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ housingProjectId: string }>;
 
-    getHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-    deleteActivitySpy.mockResolvedValue();
+    getSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1 as HousingProject);
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteHousingProjectController(
-      req as unknown as Request<{ housingProjectId: string }>,
-      res as unknown as Response
-    );
+    await deleteHousingProjectController(req, res as unknown as Response);
 
-    expect(getHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
-    expect(deleteHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(deleteHousingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.housingProjectId);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('deleteHousingProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
-    deleteActivityHardSpy.mockResolvedValue();
-
-    await deleteHousingProjectDraftController(
-      req as unknown as Request<{ draftId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(deleteActivityHardSpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_HOUSING_DRAFT.activityId);
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('getHousingProjectActivityIdsController', () => {
-  const getHousingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {};
-
-    getHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
-
-    await getHousingProjectActivityIdsController(req as unknown as Request, res as unknown as Response);
-
-    expect(getHousingProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getHousingProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_PROJECT_1.activityId]);
-  });
-});
-
-describe('getHousingProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-
-  it('should call services and respond with 200', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
-
-    await getHousingProjectDraftController(req as unknown as Request<{ draftId: string }>, res as unknown as Response);
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_DRAFT);
-  });
-});
-
-describe('getHousingProjectDraftsController', () => {
-  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
-
-  it('should call services and respond with 200', async () => {
-    const req = {};
-
-    getDraftsSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
-    filterSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
-
-    await getHousingProjectDraftsController(
-      req as unknown as Request,
-      res as unknown as Response<Draft[], LocalContext>
-    );
-
-    expect(getDraftsSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.HOUSING_PROJECT);
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_HOUSING_DRAFT]);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_DRAFT]);
-  });
-});
-
-describe('getHousingProjectStatisticsController', () => {
-  const statisticsSpy = vi.spyOn(housingProjectService, 'getHousingProjectStatistics');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      query: {
-        dateFrom: '',
-        dateTo: '',
-        monthYear: '',
-        userId: ''
-      }
-    };
-
-    const statistics: HousingProjectStatistics[] = [
-      {
-        total_submissions: 0,
-        total_submissions_between: 0,
-        total_submissions_monthyear: 0,
-        total_submissions_assignedto: 0,
-        state_new: 0,
-        state_inprogress: 0,
-        state_delayed: 0,
-        state_completed: 0,
-        supported_bc: 0,
-        supported_indigenous: 0,
-        supported_non_profit: 0,
-        supported_housing_coop: 0,
-        queue_1: 0,
-        queue_2: 0,
-        queue_3: 0,
-        escalation: 0,
-        general_enquiry: 0,
-        guidance: 0,
-        inapplicable: 0,
-        status_request: 0,
-        multi_permits_needed: 0
-      }
-    ];
-
-    statisticsSpy.mockResolvedValue(statistics);
-
-    await getHousingProjectStatisticsController(
-      req as unknown as Request<never, never, never, StatisticsFilters>,
-      res as unknown as Response
-    );
-
-    expect(statisticsSpy).toHaveBeenCalledTimes(1);
-    expect(statisticsSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(statistics[0]);
   });
 });
 
 describe('getHousingProjectController', () => {
-  const housingProjectSpy = vi.spyOn(housingProjectService, 'getHousingProject');
-  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
+  const getSpy = vi.spyOn(housingProjectService, 'getHousingProjectService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with projectId then responds 200', async () => {
     const req = {
       params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ housingProjectId: string }>;
 
-    housingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-    getRelatedEnquiriesSpy.mockResolvedValue([]);
+    getSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1 as HousingProject);
 
-    await getHousingProjectController(
-      req as unknown as Request<{ housingProjectId: string }>,
-      res as unknown as Response
-    );
+    await getHousingProjectController(req, res as unknown as Response<HousingProject>);
 
-    expect(housingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(housingProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.housingProjectId);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.housingProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(PROJECT_WITH_PROJECTID);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1);
   });
 });
 
-describe('getHousingProjectsController', () => {
-  const housingProjectsSpy = vi.spyOn(housingProjectService, 'getHousingProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+describe('getHousingProjectStatisticsController', () => {
+  const statsSpy = vi.spyOn(housingProjectService, 'getHousingProjectStatisticsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with query filters then responds 200', async () => {
+    const mockStats = {
+      count: 5,
+      new: 2,
+      inProgress: 2,
+      submitted: 1
+    } as unknown as HousingProjectStatistics;
+
     const req = {
-      query: {}
-    };
+      query: { applicationsStatus: 'NEW' }
+    } as unknown as Request<never, never, never, StatisticsFilters>;
 
-    housingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
-    filterSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
+    statsSpy.mockResolvedValue([mockStats]);
 
-    await getHousingProjectsController(
-      req as unknown as Request,
-      res as unknown as Response<HousingProject[], LocalContext>
-    );
+    await getHousingProjectStatisticsController(req, res as unknown as Response<HousingProjectStatistics>);
 
-    expect(housingProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(housingProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(statsSpy).toHaveBeenCalledTimes(1);
+    expect(statsSpy).toHaveBeenCalledWith({ applicationsStatus: 'NEW' });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([PROJECT_WITH_PROJECTID]);
+    expect(res.json).toHaveBeenCalledWith(mockStats);
+  });
+});
+
+describe('listHousingProjectActivityIdsController', () => {
+  const listIdsSpy = vi.spyOn(housingProjectService, 'listHousingProjectActivityIdsService');
+
+  it('calls the service and responds 200', async () => {
+    const mockIds = ['ACTI1234', 'ACTI5678'];
+    const req = {} as unknown as Request;
+
+    listIdsSpy.mockResolvedValue(mockIds);
+
+    await listHousingProjectActivityIdsController(req, res as unknown as Response);
+
+    expect(listIdsSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockIds);
+  });
+});
+
+describe('listHousingProjectsController', () => {
+  const listSpy = vi.spyOn(housingProjectService, 'listHousingProjectsService');
+
+  it('calls the service with authorization and context then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
+
+    await listHousingProjectsController(req, res as unknown as Response<HousingProject[], LocalContext>);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_PROJECT_1]);
   });
 });
 
 describe('searchHousingProjectsController', () => {
-  const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+  const searchSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with search params and context then responds 200', async () => {
     const req = {
-      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false }
-    };
+      body: { projectName: 'test' }
+    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
 
-    searchHousingProjectsSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
-    filterSpy.mockResolvedValue([PROJECT_WITH_PROJECTID]);
+    searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
 
-    await searchHousingProjectsController(
-      req as unknown as Request<never, never, HousingProjectSearchParameters, never>,
-      res as unknown as Response<HousingProject[], LocalContext>
-    );
+    await searchHousingProjectsController(req, res as unknown as Response<HousingProject[], LocalContext>);
 
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      activityId: ['ACTI1234', 'ACTI5678'],
-      includeUser: false
-    });
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [PROJECT_WITH_PROJECTID]);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([PROJECT_WITH_PROJECTID]);
-  });
-});
-
-describe('submitHousingProjectDraftController', () => {
-  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
-  const createHousingProjectSpy = vi.spyOn(housingProjectService, 'createHousingProject');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
-  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
-  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
-
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-
-    await submitHousingProjectDraftController(
-      req as unknown as Request<never, never, HousingProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_HOUSING.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledWith(
-      prismaTxMock,
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
       expect.objectContaining({
-        housingProjectId: expect.stringMatching(uuidv4Pattern) as string,
-        submittedAt: expect.any(Date) as Date,
-        createdAt: expect.any(Date) as Date,
-        createdBy: TEST_CURRENT_CONTEXT.userId,
-        projectName: 'NAME',
-        projectDescription: 'DESCRIPTION',
-        companyIdRegistered: 'FM0281610',
-        companyNameRegistered: 'COMPANY'
+        projectName: 'test',
+        includeUser: undefined
       })
     );
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...PROJECT_WITH_PROJECTID,
-      contact: TEST_CONTACT_1
-    });
-  });
-
-  it('should delete associated draft if it exists', async () => {
-    const req = {
-      body: { ...TEST_HOUSING_PROJECT_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-    deleteDraftSpy.mockResolvedValue();
-
-    await submitHousingProjectDraftController(
-      req as unknown as Request<never, never, HousingProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
-    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.body.draftId);
-  });
-
-  it('creates permits if they exist', async () => {
-    const permit1NoTracking = { ...TEST_PERMIT_1 };
-    delete permit1NoTracking.permitTracking;
-    const permit2NoTracking = { ...TEST_PERMIT_2 };
-    delete permit2NoTracking.permitTracking;
-    const permit3NoTracking = { ...TEST_PERMIT_3 };
-    delete permit3NoTracking.permitTracking;
-
-    const req = {
-      body: {
-        permits: {
-          appliedPermits: [permit1NoTracking, permit2NoTracking],
-          investigatePermits: [TEST_PERMIT_3]
-        }
-      }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createHousingProjectSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-
-    await submitHousingProjectDraftController(
-      req as unknown as Request<never, never, HousingProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-    expect(createHousingProjectSpy).toHaveBeenCalledTimes(1);
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...permit1NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...permit2NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...permit3NoTracking,
-      activityId: TEST_ACTIVITY_HOUSING.activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      state: PermitState.NONE,
-      needed: 'Under investigation',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      submittedDate: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
-  });
-});
-
-describe('updateHousingProjectDraftController', () => {
-  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: {
-        data: {
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          },
-          basic: {
-            projectApplicantType: 'Business',
-            projectName: 'TheProject'
-          },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
-          }
-        }
-      }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_HOUSING);
-    createDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
-
-    await upsertHousingProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern) as string,
-      activityId: 'ACTI1234',
-      draftCode: DraftCode.HOUSING_PROJECT,
-      data: req.body.data,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.HOUSING_PROJECT,
-        data: expect.any(Object)
-      })
-    );
-  });
-
-  it('updates draft with the given draftId and activityId', async () => {
-    const req = {
-      body: {
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        data: {
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          },
-          basic: {
-            projectApplicantType: 'Business',
-            projectName: 'TheProject'
-          },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
-          }
-        }
-      }
-    };
-
-    updateDraftSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
-
-    await upsertHousingProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
-    expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...req.body,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(
+    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_PROJECT_1]);
+  });
+
+  it('coerces includeUser query parameter to boolean', async () => {
+    const req = {
+      body: { includeUser: 'true' }
+    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
+
+    searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
+
+    await searchHousingProjectsController(req, res as unknown as Response<HousingProject[], LocalContext>);
+
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
       expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.HOUSING_PROJECT,
-        data: expect.any(Object)
+        includeUser: true
       })
     );
   });
 });
 
 describe('updateHousingProjectController', () => {
-  const updateSpy = vi.spyOn(housingProjectService, 'updateHousingProject');
+  const updateSpy = vi.spyOn(housingProjectService, 'updateHousingProjectService');
 
-  const { housingProjectId } = TEST_HOUSING_PROJECT_1;
-
-  const UPDATED_PROJECT: HousingProject = { ...TEST_HOUSING_PROJECT_1, ...TEST_HOUSING_PROJECT_UPDATE };
-
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with update data and projectId then responds 200', async () => {
+    const updateData = { projectName: 'Updated Name' };
     const req = {
-      body: TEST_HOUSING_PROJECT_UPDATE,
-      params: {
-        housingProjectId
-      }
-    };
+      params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      body: updateData
+    } as unknown as Request<{ housingProjectId: string }, never, Prisma.housing_projectUpdateInput>;
 
-    updateSpy.mockResolvedValue(UPDATED_PROJECT);
+    updateSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1 as HousingProject);
 
-    await updateHousingProjectController(
-      req as unknown as Request<
-        { housingProjectId: string },
-        never,
-        Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>
-      >,
-      res as unknown as Response
-    );
+    await updateHousingProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
     expect(updateSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      {
-        ...TEST_HOUSING_PROJECT_UPDATE,
-        financiallySupported: expect.any(Boolean),
-        updatedAt: expect.any(Date) as Date,
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      },
-      housingProjectId
+      expect.objectContaining({
+        projectName: 'Updated Name',
+        financiallySupported: expect.any(Boolean)
+      }),
+      req.params.housingProjectId
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1);
+  });
+});
+
+describe('deleteHousingProjectDraftController', () => {
+  const deleteSpy = vi.spyOn(draftService, 'deleteDraftService');
+
+  it('calls the service with draftId then responds 204', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    deleteSpy.mockResolvedValue(undefined);
+
+    await deleteHousingProjectDraftController(req, res as unknown as Response);
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('getHousingProjectDraftController', () => {
+  const getSpy = vi.spyOn(draftService, 'getDraftService');
+
+  it('calls the service with draftId then responds 200', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    getSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
+
+    await getHousingProjectDraftController(req, res as unknown as Response<Draft>);
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_DRAFT);
+  });
+});
+
+describe('getHousingProjectDraftsController', () => {
+  const listSpy = vi.spyOn(draftService, 'listDraftsService');
+
+  it('calls the service with authorization, context and draft code then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_HOUSING_DRAFT]);
+
+    await getHousingProjectDraftsController(req, res as unknown as Response<Draft[], LocalContext>);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      DraftCode.HOUSING_PROJECT
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_HOUSING_DRAFT]);
+  });
+});
+
+describe('submitHousingProjectDraftController', () => {
+  const submitSpy = vi.spyOn(housingProjectService, 'submitHousingProjectDraftService');
+
+  it('calls the service with draft and context then responds 201', async () => {
+    const req = {
+      body: {
+        ...TEST_HOUSING_PROJECT_INTAKE,
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
+      }
+    } as unknown as Request<never, never, HousingProjectIntake>;
+
+    submitSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
+
+    await submitHousingProjectDraftController(req, res as unknown as Response<HousingProject, LocalContext>);
+
+    expect(submitSpy).toHaveBeenCalledTimes(1);
+    expect(submitSpy).toHaveBeenCalledWith(
+      req.body.draftId,
+      req.body,
+      TEST_HOUSING_PROJECT_INTAKE.contact,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_CREATE);
+  });
+});
+
+describe('upsertHousingProjectDraftController', () => {
+  const upsertSpy = vi.spyOn(draftService, 'upsertDraftService');
+
+  it('calls the service with draft data and draft code, responds 201 when creating', async () => {
+    const req = {
+      body: {
+        ...TEST_HOUSING_DRAFT,
+        draftId: undefined
+      }
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
+
+    await upsertHousingProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        draftId: undefined
+      }),
+      Initiative.HOUSING,
+      DraftCode.HOUSING_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_DRAFT);
+  });
+
+  it('calls the service and responds 200 when updating', async () => {
+    const req = {
+      body: TEST_HOUSING_DRAFT
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_HOUSING_DRAFT);
+
+    await upsertHousingProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      TEST_HOUSING_DRAFT.draftId,
+      TEST_HOUSING_DRAFT,
+      Initiative.HOUSING,
+      DraftCode.HOUSING_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_DRAFT);
   });
 });

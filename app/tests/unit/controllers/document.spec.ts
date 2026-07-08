@@ -1,12 +1,10 @@
-import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1 } from '../data/index.ts';
 import {
   createDocumentController,
   deleteDocumentController,
   listDocumentsController
 } from '../../../src/controllers/document.ts';
 import * as documentService from '../../../src/services/document.ts';
-import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
@@ -25,151 +23,80 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
-
 describe('createDocumentController', () => {
-  const createSpy = vi.spyOn(documentService, 'createDocument');
-  const readUserSpy = vi.spyOn(userService, 'readUser');
+  const createSpy = vi.spyOn(documentService, 'createDocumentService');
 
-  it('should call services and respond with 201 and result', async () => {
+  it('calls the service with document data then responds 201', async () => {
     const req = {
       body: {
-        documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
-        activityId: 'ACTI1234',
-        filename: 'testfile',
-        mimeType: 'imgjpg',
-        filesize: 1234567
+        documentId: 'doc-123',
+        activityId: 'acti-456',
+        filename: 'test.pdf',
+        mimeType: 'application/pdf',
+        filesize: 1024
       }
-    };
+    } as unknown as Request<
+      never,
+      never,
+      { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
+    >;
 
     createSpy.mockResolvedValue(TEST_DOCUMENT_1);
 
-    await createDocumentController(
-      req as unknown as Request<
-        never,
-        never,
-        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
-      >,
-      res as unknown as Response
-    );
+    await createDocumentController(req, res as unknown as Response);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
-      prismaTxMock,
       req.body.documentId,
       req.body.activityId,
       req.body.filename,
       req.body.mimeType,
-      req.body.filesize,
-      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
+      req.body.filesize
     );
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_DOCUMENT_1);
   });
-
-  it('adds createdByFullName', async () => {
-    const req = {
-      body: {
-        documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d',
-        activityId: 'ACTI1234',
-        filename: 'testfile',
-        mimeType: 'imgjpg',
-        filesize: 1234567
-      }
-    };
-
-    const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };
-
-    createSpy.mockResolvedValue(DOC);
-    readUserSpy.mockResolvedValue(TEST_IDIR_USER_1);
-
-    await createDocumentController(
-      req as unknown as Request<
-        never,
-        never,
-        { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
-      >,
-      res as unknown as Response
-    );
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      req.body.documentId,
-      req.body.activityId,
-      req.body.filename,
-      req.body.mimeType,
-      req.body.filesize,
-      { createdAt: expect.any(Date) as Date, createdBy: TEST_CURRENT_CONTEXT.userId }
-    );
-    expect(readUserSpy).toHaveBeenCalledTimes(1);
-    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ ...DOC, createdByFullName: TEST_IDIR_USER_1.fullName });
-  });
 });
 
 describe('deleteDocumentController', () => {
-  const deleteSpy = vi.spyOn(documentService, 'deleteDocument');
+  const deleteSpy = vi.spyOn(documentService, 'deleteDocumentService');
 
-  it('should call services and respond with 204', async () => {
+  it('calls the service with documentId then responds 204', async () => {
     const req = {
-      params: { documentId: 'fdbe13d4-e90f-4119-9b10-d5ed08ad1d6d' }
-    };
+      params: { documentId: 'doc-123' }
+    } as unknown as Request<{ documentId: string }>;
 
-    deleteSpy.mockResolvedValue();
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteDocumentController(req as unknown as Request<{ documentId: string }>, res as unknown as Response);
+    await deleteDocumentController(req, res as unknown as Response);
 
     expect(deleteSpy).toHaveBeenCalledTimes(1);
-    expect(deleteSpy).toHaveBeenCalledWith(prismaTxMock, req.params.documentId);
+    expect(deleteSpy).toHaveBeenCalledWith(req.params.documentId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
 });
 
 describe('listDocumentsController', () => {
-  const listSpy = vi.spyOn(documentService, 'listDocuments');
-  const readUserSpy = vi.spyOn(userService, 'readUser');
+  const listSpy = vi.spyOn(documentService, 'listDocumentsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with activityId then responds 200', async () => {
     const req = {
-      params: { activityId: 'ACTI1234' }
-    };
+      params: { activityId: 'acti-456' }
+    } as unknown as Request<{ activityId: string }>;
 
     listSpy.mockResolvedValue([TEST_DOCUMENT_1]);
 
-    await listDocumentsController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
+    await listDocumentsController(req, res as unknown as Response);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
+    expect(listSpy).toHaveBeenCalledWith(req.params.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_DOCUMENT_1]);
-  });
-
-  it('adds createdByFullName', async () => {
-    const req = {
-      params: { activityId: 'ACTI1234' }
-    };
-
-    const DOC = { ...TEST_DOCUMENT_1, createdBy: TEST_IDIR_USER_1.userId };
-
-    listSpy.mockResolvedValue([DOC]);
-    readUserSpy.mockResolvedValue(TEST_IDIR_USER_1);
-
-    await listDocumentsController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
-
-    expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
-    expect(readUserSpy).toHaveBeenCalledTimes(1);
-    expect(readUserSpy).toHaveBeenCalledWith(prismaTxMock, DOC.createdBy);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([{ ...DOC, createdByFullName: TEST_IDIR_USER_1.fullName }]);
   });
 });

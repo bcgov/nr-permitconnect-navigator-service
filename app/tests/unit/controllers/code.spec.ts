@@ -1,37 +1,35 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { listAllCodeTablesController } from '../../../src/controllers/code.ts';
+import { listCodeTablesController } from '../../../src/controllers/code.ts';
 import * as codeService from '../../../src/services/code.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 
+vi.mock('config');
+
 const mockResponse = () => {
-  const res: { status?: Mock; json?: Mock } = {};
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
   res.status = vi.fn().mockReturnValue(res);
   res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
   return res;
 };
 
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  vi.clearAllMocks();
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+describe('listCodeTablesController', () => {
+  it('should call service and respond with 200 and result', async () => {
+    const fakeResult = { foo: [{ code: 'X', display: 'X', definition: 'X' }] };
+    vi.spyOn(codeService, 'listCodeTablesService').mockResolvedValueOnce(fakeResult as never);
 
-describe('listAllCodeTablesController', () => {
-  const listAllCodeTablesSpy = vi.spyOn(codeService, 'listAllCodeTables');
+    await listCodeTablesController({} as Request, res as unknown as Response);
 
-  it('calls service and responds with 200 and result', async () => {
-    const fakeResult = { foo: [{ code: 'X', display: 'X', definition: 'X' }] } as never;
-    listAllCodeTablesSpy.mockResolvedValueOnce(fakeResult);
-
-    await listAllCodeTablesController({} as Request, res as unknown as Response);
-
-    expect(listAllCodeTablesSpy).toHaveBeenCalledTimes(1);
-    expect(listAllCodeTablesSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(codeService.listCodeTablesService).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(fakeResult);
   });

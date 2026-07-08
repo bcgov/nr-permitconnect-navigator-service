@@ -1,41 +1,26 @@
 import { Prisma } from '@prisma/client';
 
 import {
-  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_ELECTRIFICATION,
   TEST_ENQUIRY_1,
-  TEST_ENQUIRY_INTAKE,
-  TEST_HOUSING_PROJECT_1
+  TEST_ENQUIRY_INTAKE
 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import {
   createEnquiryController,
   deleteEnquiryController,
-  getEnquiriesController,
   getEnquiryController,
+  listEnquiriesController,
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
 } from '../../../src/controllers/enquiry.ts';
-import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/domains/activity.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as contactService from '../../../src/services/contact.ts';
+import * as activityService from '../../../src/services/activity.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
-import * as projectService from '../../../src/services/project.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type {
-  ActivityContact,
-  Enquiry,
-  EnquiryIntake,
-  EnquirySearchParameters,
-  LocalContext
-} from '../../../src/types/index.ts';
+import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -51,231 +36,170 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
-
-// Set an initiative for the context
-TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
 describe('createEnquiryController', () => {
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
-  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
-  const createEnquirySpy = vi.spyOn(enquiryService, 'createEnquiry');
-  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
+  const createEnquirySpy = vi.spyOn(enquiryService, 'createEnquiryService');
 
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: TEST_ENQUIRY_INTAKE
-    };
+  it('calls the service with the current context and body then responds 201', async () => {
+    const req = { body: TEST_ENQUIRY_INTAKE } as unknown as Request<never, never, EnquiryIntake>;
 
-    const PROJECT_WITH_PROJECTID = {
-      ...TEST_HOUSING_PROJECT_1,
-      projectId: TEST_HOUSING_PROJECT_1.housingProjectId
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    listActivityContactsSpy.mockResolvedValue([
-      {
-        activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-        contactId: TEST_CONTACT_1.contactId
-      } as ActivityContact
-    ]);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
     createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
-    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
 
-    await createEnquiryController(req as unknown as Request<never, never, EnquiryIntake>, res as unknown as Response);
+    await createEnquiryController(req, res as unknown as Response<Enquiry, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(2);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-      { ...TEST_ENQUIRY_INTAKE.contact, updatedAt: expect.any(Date) as Date, updatedBy: TEST_CURRENT_CONTEXT.userId }
-    ]);
-    expect(createEnquirySpy).toHaveBeenCalled();
+    expect(createEnquirySpy).toHaveBeenCalledTimes(1);
+    expect(createEnquirySpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, TEST_ENQUIRY_INTAKE);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ ...TEST_ENQUIRY_1, contact: TEST_CONTACT_1 });
+    expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
+  });
+
+  it('defaults the body to an empty object when undefined', async () => {
+    const req = { body: undefined } as unknown as Request<never, never, EnquiryIntake>;
+
+    createEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
+
+    await createEnquiryController(req, res as unknown as Response<Enquiry, LocalContext>);
+
+    expect(createEnquirySpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, {});
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
   });
 });
 
 describe('deleteEnquiryController', () => {
-  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
-  const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
-  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
+  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiryService');
+  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivityService');
 
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' }
-    };
+  it('looks up the enquiry, deletes its activity then responds 204', async () => {
+    const req = { params: { enquiryId: TEST_ENQUIRY_1.enquiryId } } as unknown as Request<{ enquiryId: string }>;
 
     getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
-    deleteActivitySpy.mockResolvedValue();
+    deleteActivitySpy.mockResolvedValue(undefined);
 
-    await deleteEnquiryController(req as unknown as Request<{ enquiryId: string }>, res as unknown as Response);
+    await deleteEnquiryController(req, res as unknown as Response);
 
-    expect(getEnquirySpy).toHaveBeenCalledTimes(1);
-    expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId);
-    expect(deleteEnquirySpy).toHaveBeenCalledTimes(1);
-    expect(deleteEnquirySpy).toHaveBeenCalledWith(prismaTxMock, req.params.enquiryId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ENQUIRY_1.activityId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(getEnquirySpy).toHaveBeenCalledWith(TEST_ENQUIRY_1.enquiryId);
+    expect(deleteActivitySpy).toHaveBeenCalledWith(TEST_ENQUIRY_1.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
 });
 
-describe('getEnquiriesController', () => {
-  const getEnquiriesSpy = vi.spyOn(enquiryService, 'getEnquiries');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {} as unknown as Request;
-
-    const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
-    getEnquiriesSpy.mockResolvedValue(enquiries);
-    filterSpy.mockResolvedValue(enquiries);
-
-    await getEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
-
-    expect(getEnquiriesSpy).toHaveBeenCalledWith(prismaTxMock);
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, enquiries);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(enquiries);
-  });
-});
-
 describe('getEnquiryController', () => {
-  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiry');
+  const getEnquirySpy = vi.spyOn(enquiryService, 'getEnquiryService');
 
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      params: { enquiryId: 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211' }
-    } as unknown as Request<{ enquiryId: string }>;
+  it('calls the service with the enquiryId then responds 200', async () => {
+    const req = { params: { enquiryId: TEST_ENQUIRY_1.enquiryId } } as unknown as Request<{ enquiryId: string }>;
 
     getEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
     await getEnquiryController(req, res as unknown as Response);
 
-    expect(getEnquirySpy).toHaveBeenCalledWith(prismaTxMock, 'ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211');
+    expect(getEnquirySpy).toHaveBeenCalledWith(TEST_ENQUIRY_1.enquiryId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
   });
 });
 
-describe('listRelatedEnquiriesController', () => {
-  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+describe('listEnquiriesController', () => {
+  const listEnquiriesSpy = vi.spyOn(enquiryService, 'listEnquiriesService');
 
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      params: { activityId: 'ACTI1234' }
-    };
+  it('calls the service with the authorization and context then responds 200', async () => {
+    const req = {} as unknown as Request;
+    const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
 
-    const relatedEnquiries: Enquiry[] = [TEST_ENQUIRY_1];
-    getRelatedEnquiriesSpy.mockResolvedValue(relatedEnquiries);
-    filterSpy.mockResolvedValue(relatedEnquiries);
+    listEnquiriesSpy.mockResolvedValue(enquiries);
 
-    await listRelatedEnquiriesController(
-      req as unknown as Request<{ activityId: string }>,
-      res as unknown as Response<Enquiry[], LocalContext>
-    );
+    await listEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
 
-    expect(getRelatedEnquiriesSpy).toHaveBeenCalledWith(prismaTxMock, 'ACTI1234');
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, relatedEnquiries);
+    expect(listEnquiriesSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(relatedEnquiries);
+    expect(res.json).toHaveBeenCalledWith(enquiries);
+  });
+});
+
+describe('listRelatedEnquiriesController', () => {
+  const listRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'listRelatedEnquiriesService');
+
+  it('calls the service with the authorization, context and activityId then responds 200', async () => {
+    const req = { params: { activityId: 'ACTI1234' } } as unknown as Request<{ activityId: string }>;
+    const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
+
+    listRelatedEnquiriesSpy.mockResolvedValue(enquiries);
+
+    await listRelatedEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
+
+    expect(listRelatedEnquiriesSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      'ACTI1234'
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(enquiries);
   });
 });
 
 describe('searchEnquiriesController', () => {
-  const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiries');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+  const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiriesService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('coerces includeUser, passes the initiative then responds 200', async () => {
     const req = {
-      body: { enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'], includeUser: true }
+      body: { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: 'true' }
     } as unknown as Request<never, never, EnquirySearchParameters, never>;
-
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
+
     searchEnquiriesSpy.mockResolvedValue(enquiries);
-    filterSpy.mockResolvedValue(enquiries);
 
     await searchEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
 
     expect(searchEnquiriesSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      {
-        enquiryId: ['ff5db6e3-3bd4-4a5c-b001-aa5ae3d72211'],
-        includeUser: true
-      },
-      Initiative.ELECTRIFICATION
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true },
+      TEST_CURRENT_CONTEXT.initiative
     );
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, enquiries);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(enquiries);
+  });
+
+  it('leaves includeUser undefined when the body is undefined', async () => {
+    const req = { body: undefined } as unknown as Request<never, never, EnquirySearchParameters | undefined, never>;
+    const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
+
+    searchEnquiriesSpy.mockResolvedValue(enquiries);
+
+    await searchEnquiriesController(req, res as unknown as Response<Enquiry[], LocalContext>);
+
+    expect(searchEnquiriesSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      { includeUser: undefined },
+      TEST_CURRENT_CONTEXT.initiative
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(enquiries);
   });
 });
 
 describe('updateEnquiryController', () => {
-  const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiry');
+  const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiryService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with the body and enquiryId then responds 200', async () => {
     const req = {
-      body: { ...TEST_ENQUIRY_1 },
+      body: { enquiryDescription: 'updated' },
       params: { enquiryId: TEST_ENQUIRY_1.enquiryId }
-    };
+    } as unknown as Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>;
 
     updateEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
-    await updateEnquiryController(
-      req as unknown as Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
-      res as unknown as Response
-    );
+    await updateEnquiryController(req, res as unknown as Response);
 
-    expect(updateEnquirySpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      {
-        ...TEST_ENQUIRY_1,
-        updatedAt: expect.any(Date) as Date,
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      },
-      req.params.enquiryId
-    );
+    expect(updateEnquirySpy).toHaveBeenCalledWith({ enquiryDescription: 'updated' }, TEST_ENQUIRY_1.enquiryId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
   });

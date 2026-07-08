@@ -1,14 +1,4 @@
-import config from 'config';
-import express from 'express';
-import request from 'supertest';
-
-import {
-  TEST_ACTIVITY_CONTACT_1,
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_HOUSING_PROJECT_1
-} from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CONTACT_1, TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import {
   createActivityContactController,
   deleteActivityContactController,
@@ -16,308 +6,119 @@ import {
   updateActivityContactController
 } from '../../../src/controllers/activityContact.ts';
 import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as contactService from '../../../src/services/contact.ts';
-import * as emailService from '../../../src/external/ches.ts';
-import * as activityContactHelpers from '../../../src/services/helpers/activityContact.ts';
-import * as projectService from '../../../src/services/project.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { Mocked } from 'vitest';
+import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
+import type { Contact, LocalContext } from '../../../src/types/index.ts';
 
 vi.mock('config');
-let mockedConfig = config as Mocked<typeof config>;
 
-const FAKE_ADMIN_ACTIVITY_CONTACT = {
-  ...TEST_ACTIVITY_CONTACT_1,
-  contact: TEST_CONTACT_1,
-  role: ActivityContactRole.ADMIN
-};
-const FAKE_MEMBER_ACTIVITY_CONTACT = {
-  ...TEST_ACTIVITY_CONTACT_1,
-  contact: TEST_CONTACT_1,
-  role: ActivityContactRole.MEMBER
-};
-const FAKE_PRIMARY_ACTIVITY_CONTACT = { ...TEST_ACTIVITY_CONTACT_1, contact: TEST_CONTACT_1 };
-
-const PROJECT_WITH_PROJECTID = {
-  ...TEST_HOUSING_PROJECT_1,
-  projectId: TEST_HOUSING_PROJECT_1.housingProjectId
+const mockResponse = () => {
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
+  return res;
 };
 
-const verifyPrimaryChangeSpy = vi.spyOn(activityContactHelpers, 'verifyPrimaryChange');
-
-let app: express.Express;
-
+let res = mockResponse();
 beforeEach(() => {
-  app = express();
-  app.use(express.json());
-  app.use((_req, res, next) => {
-    res.locals.currentAuthorization = { attributes: [], groups: [] };
-    res.locals.currentContext = TEST_CURRENT_CONTEXT;
-    next();
-  });
-
-  app.get('/activity/:activityId/contact', listActivityContactController);
-  app.delete('/activity/:activityId/contact/:contactId', deleteActivityContactController);
-  app.post('/activity/:activityId/contact/:contactId', createActivityContactController);
-  app.put('/activity/:activityId/contact/:contactId', updateActivityContactController);
-
-  mockedConfig = config as Mocked<typeof config>;
-  mockedConfig.get.mockImplementation(() => 'navEmail@test.com');
-
-  verifyPrimaryChangeSpy.mockResolvedValue(undefined);
+  vi.clearAllMocks();
+  res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+describe('createActivityContactController', () => {
+  const createSpy = vi.spyOn(activityContactService, 'createActivityContactService');
 
-describe('GET /activity/:activityId/contact', () => {
-  const listActivityContactsSpy = vi.spyOn(activityContactService, 'listActivityContacts');
+  it('calls the service with authorization, context, activityId, contactId and role then responds 201', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234', contactId: TEST_CONTACT_1.contactId },
+      body: { role: ActivityContactRole.PRIMARY }
+    } as unknown as Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>;
 
-  it('should call services and respond with 200 and result', async () => {
-    listActivityContactsSpy.mockResolvedValue([TEST_ACTIVITY_CONTACT_1]);
+    createSpy.mockResolvedValue(TEST_CONTACT_1);
 
-    const res = await request(app).get(`/activity/${TEST_ACTIVITY_CONTACT_1.activityId}/contact`).expect(200);
+    await createActivityContactController(req, res as unknown as Response<Contact, LocalContext>);
 
-    expect(listActivityContactsSpy).toHaveBeenCalledTimes(1);
-    expect(listActivityContactsSpy).toHaveBeenCalledWith(prismaTxMock, [TEST_ACTIVITY_CONTACT_1.activityId]);
-    expect(res.body).toEqual([TEST_ACTIVITY_CONTACT_1]);
-  });
-});
-
-describe('DELETE /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const deleteActivityContactSpy = vi.spyOn(activityContactService, 'deleteActivityContact');
-  const getActivityContactSpy = vi.spyOn(activityContactService, 'getActivityContact');
-  const emailSpy = vi.spyOn(emailService, 'email');
-
-  beforeEach(() => {
-    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-  });
-
-  it('should call services and respond with 204', async () => {
-    deleteActivityContactSpy.mockResolvedValue();
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-
-    await request(app)
-      .delete(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .expect(204);
-
-    expect(getActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId
-    );
-    expect(deleteActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId
-    );
-  });
-
-  it('should send an email on success', async () => {
-    deleteActivityContactSpy.mockResolvedValue();
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-
-    await request(app)
-      .delete(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .expect(204);
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should check for PRIMARY and halt, respond 403', async () => {
-    getActivityContactSpy.mockResolvedValue(FAKE_PRIMARY_ACTIVITY_CONTACT);
-
-    await request(app)
-      .delete(
-        `/activity/${FAKE_PRIMARY_ACTIVITY_CONTACT.activityId}/contact/${FAKE_PRIMARY_ACTIVITY_CONTACT.contactId}`
-      )
-      .expect(403);
-
-    expect(getActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(getActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_PRIMARY_ACTIVITY_CONTACT.activityId,
-      FAKE_PRIMARY_ACTIVITY_CONTACT.contactId
-    );
-    expect(deleteActivityContactSpy).not.toHaveBeenCalled();
-  });
-});
-
-describe('POST /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const emailSpy = vi.spyOn(emailService, 'email');
-
-  beforeEach(() => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-  });
-
-  it('should call services and respond with 201 and result', async () => {
-    createActivityContactSpy.mockResolvedValue(FAKE_MEMBER_ACTIVITY_CONTACT);
-
-    const res = await request(app)
-      .post(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_MEMBER_ACTIVITY_CONTACT.role })
-      .expect(201);
-
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.role
-    );
-    expect(res.body).toEqual(FAKE_MEMBER_ACTIVITY_CONTACT);
-  });
-
-  it('should send an email for MEMBER', async () => {
-    createActivityContactSpy.mockResolvedValue(FAKE_MEMBER_ACTIVITY_CONTACT);
-
-    await request(app)
-      .post(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_MEMBER_ACTIVITY_CONTACT.role })
-      .expect(201);
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should send an email for ADMIN', async () => {
-    createActivityContactSpy.mockResolvedValue(FAKE_ADMIN_ACTIVITY_CONTACT);
-
-    await request(app)
-      .post(`/activity/${FAKE_ADMIN_ACTIVITY_CONTACT.activityId}/contact/${FAKE_ADMIN_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_ADMIN_ACTIVITY_CONTACT.role })
-      .expect(201);
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not send an email for PRIMARY', async () => {
-    createActivityContactSpy.mockResolvedValue(FAKE_PRIMARY_ACTIVITY_CONTACT);
-
-    await request(app)
-      .post(`/activity/${FAKE_PRIMARY_ACTIVITY_CONTACT.activityId}/contact/${FAKE_PRIMARY_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_PRIMARY_ACTIVITY_CONTACT.role })
-      .expect(201);
-
-    expect(emailSpy).not.toHaveBeenCalled();
-  });
-});
-
-describe('PUT /activity/:activityId/contact/:contactId', () => {
-  const getProjectByActivityIdSpy = vi.spyOn(projectService, 'getProjectByActivityId');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const updateActivityContactSpy = vi.spyOn(activityContactService, 'updateActivityContact');
-  const getActivityContactSpy = vi.spyOn(activityContactService, 'getActivityContact');
-  const emailSpy = vi.spyOn(emailService, 'email');
-
-  beforeEach(() => {
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    getProjectByActivityIdSpy.mockResolvedValue(PROJECT_WITH_PROJECTID);
-  });
-
-  it('should call services and respond with 200', async () => {
-    updateActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN });
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-
-    const res = await request(app)
-      .put(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: ActivityContactRole.ADMIN })
-      .expect(200);
-
-    expect(getActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(getActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId
-    );
-    expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(updateActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId,
-      ActivityContactRole.ADMIN
-    );
-    expect(res.body).toEqual({ updated: { ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN } });
-  });
-
-  it('should send an email for ADMIN', async () => {
-    updateActivityContactSpy.mockResolvedValue({ ...FAKE_ADMIN_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN });
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_ADMIN_ACTIVITY_CONTACT, role: ActivityContactRole.ADMIN });
-
-    await request(app)
-      .put(`/activity/${FAKE_ADMIN_ACTIVITY_CONTACT.activityId}/contact/${FAKE_ADMIN_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_ADMIN_ACTIVITY_CONTACT.role })
-      .expect(200);
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(getProjectByActivityIdSpy).toHaveBeenCalledTimes(1);
-    expect(emailSpy).toHaveBeenCalledTimes(1);
-  });
-
-  it('should not send an email for MEMBER', async () => {
-    updateActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-
-    await request(app)
-      .put(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: FAKE_MEMBER_ACTIVITY_CONTACT.role })
-      .expect(200);
-
-    expect(emailSpy).not.toHaveBeenCalled();
-  });
-
-  it('should check for PRIMARY and halt, respond 403', async () => {
-    getActivityContactSpy.mockResolvedValue(FAKE_PRIMARY_ACTIVITY_CONTACT);
-
-    await request(app)
-      .put(`/activity/${FAKE_PRIMARY_ACTIVITY_CONTACT.activityId}/contact/${FAKE_PRIMARY_ACTIVITY_CONTACT.contactId}`)
-      .expect(403);
-
-    expect(getActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(getActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_PRIMARY_ACTIVITY_CONTACT.activityId,
-      FAKE_PRIMARY_ACTIVITY_CONTACT.contactId
-    );
-    expect(updateActivityContactSpy).not.toHaveBeenCalled();
-  });
-
-  it('should handle PRIMARY assignment, call verifyPrimaryChange, and return an array of contacts', async () => {
-    getActivityContactSpy.mockResolvedValue({ ...FAKE_MEMBER_ACTIVITY_CONTACT, role: ActivityContactRole.MEMBER });
-
-    updateActivityContactSpy.mockResolvedValue(FAKE_PRIMARY_ACTIVITY_CONTACT);
-
-    verifyPrimaryChangeSpy.mockResolvedValue(FAKE_ADMIN_ACTIVITY_CONTACT);
-
-    const res = await request(app)
-      .put(`/activity/${FAKE_MEMBER_ACTIVITY_CONTACT.activityId}/contact/${FAKE_MEMBER_ACTIVITY_CONTACT.contactId}`)
-      .send({ role: ActivityContactRole.PRIMARY })
-      .expect(200);
-
-    expect(verifyPrimaryChangeSpy).toHaveBeenCalledTimes(1);
-
-    expect(updateActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(updateActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      FAKE_MEMBER_ACTIVITY_CONTACT.activityId,
-      FAKE_MEMBER_ACTIVITY_CONTACT.contactId,
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      'ACTI1234',
+      TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
+  });
+});
 
-    expect(res.body).toEqual({ updated: FAKE_PRIMARY_ACTIVITY_CONTACT, demoted: FAKE_ADMIN_ACTIVITY_CONTACT });
+describe('deleteActivityContactController', () => {
+  const deleteSpy = vi.spyOn(activityContactService, 'deleteActivityContactService');
+
+  it('calls the service with context, activityId and contactId then responds 204', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234', contactId: TEST_CONTACT_1.contactId }
+    } as unknown as Request<{ activityId: string; contactId: string }>;
+
+    deleteSpy.mockResolvedValue(undefined);
+
+    await deleteActivityContactController(req, res as unknown as Response<never, LocalContext>);
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, 'ACTI1234', TEST_CONTACT_1.contactId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('listActivityContactController', () => {
+  const listSpy = vi.spyOn(activityContactService, 'listActivityContactsService');
+
+  it('calls the service with activityId then responds 200', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234' }
+    } as unknown as Request<{ activityId: string }>;
+    const contacts: Contact[] = [TEST_CONTACT_1];
+
+    listSpy.mockResolvedValue(contacts as never);
+
+    await listActivityContactController(req, res as unknown as Response);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith('ACTI1234');
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(contacts);
+  });
+});
+
+describe('updateActivityContactController', () => {
+  const updateSpy = vi.spyOn(activityContactService, 'updateActivityContactService');
+
+  it('calls the service with authorization, context, activityId, contactId and role then responds 200', async () => {
+    const req = {
+      params: { activityId: 'ACTI1234', contactId: TEST_CONTACT_1.contactId },
+      body: { role: ActivityContactRole.PRIMARY }
+    } as unknown as Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>;
+
+    updateSpy.mockResolvedValue(TEST_CONTACT_1 as never);
+
+    await updateActivityContactController(req, res as unknown as Response);
+
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      'ACTI1234',
+      TEST_CONTACT_1.contactId,
+      ActivityContactRole.PRIMARY
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
   });
 });

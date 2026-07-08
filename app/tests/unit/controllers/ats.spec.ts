@@ -1,14 +1,19 @@
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import {
-  createATSClientController,
-  createATSEnquiryController,
-  searchATSUsersController
+  createAtsClientController,
+  createAtsEnquiryController,
+  searchAtsUsersController
 } from '../../../src/controllers/ats.ts';
-import * as atsService from '../../../src/external/ats.ts';
+import * as atsExternal from '../../../src/external/ats.ts';
 
 import type { Request, Response } from 'express';
+import type {
+  AtsClientResource,
+  AtsEnquiryResource,
+  AtsUserSearchParameters,
+  LocalContext
+} from '../../../src/types/index.ts';
 import type { Mock } from 'vitest';
-import type { ATSClientResource, ATSEnquiryResource, ATSUserSearchParameters } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -26,209 +31,56 @@ let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  vi.clearAllMocks();
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+describe('createAtsClientController', () => {
+  it('should call createAtsClient with body and currentContext, respond with status and data', async () => {
+    const mockResp = { status: 201, data: { clientId: 'ats-123' } };
+    vi.spyOn(atsExternal, 'createAtsClient').mockResolvedValueOnce(mockResp);
 
-describe('createATSClientController', () => {
-  const createSpy = vi.spyOn(atsService, 'createATSClient');
+    const body: AtsClientResource = { clientName: 'Test Client' } as unknown as AtsClientResource;
+    const req = { body } as unknown as Request<never, never, AtsClientResource, never>;
 
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: {
-        '@type': 'ClientResource',
-        address: {
-          '@type': 'AddressResource',
-          addressLine1: null,
-          city: null,
-          provinceCode: null,
-          primaryPhone: '(213) 213-2132',
-          email: 's@s.com'
-        },
-        firstName: 'Gill',
-        surName: 'Bates',
-        regionName: 'HOUSING',
-        optOutOfBCStatSurveyInd: 'NO'
-      }
-    };
+    await createAtsClientController(req, res as unknown as Response<unknown, LocalContext>);
 
-    const created = {
-      data: {
-        '@type': 'ClientResource',
-        address: {
-          '@type': 'AddressResource',
-          addressLine1: null,
-          city: null,
-          provinceCode: null,
-          primaryPhone: '(213) 213-2132',
-          email: 's@s.com'
-        },
-        firstName: 'Gill',
-        surName: 'Bates',
-        regionName: 'HOUSING',
-        optOutOfBCStatSurveyInd: 'NO'
-      },
-      status: 201
-    };
-
-    createSpy.mockResolvedValue(created);
-
-    await createATSClientController(
-      req as unknown as Request<never, never, ATSClientResource, never>,
-      res as unknown as Response
-    );
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body
-    });
+    expect(atsExternal.createAtsClient).toHaveBeenCalledTimes(1);
+    expect(atsExternal.createAtsClient).toHaveBeenCalledWith(body, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ clientId: 'ats-123' });
   });
 });
 
-describe('createATSEnquiryController', () => {
-  const createSpy = vi.spyOn(atsService, 'createATSEnquiry');
+describe('createAtsEnquiryController', () => {
+  it('should call createAtsEnquiry with body and currentContext, respond with status and data', async () => {
+    const mockResp = { status: 201, data: { enquiryId: 'enq-123' } };
+    vi.spyOn(atsExternal, 'createAtsEnquiry').mockResolvedValueOnce(mockResp);
 
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: {
-        '@type': 'EnquiryResource',
-        clientId: 256432,
-        contactFirstName: 'PCNS BusinessTester',
-        contactSurname: 'k12',
-        regionName: 'Navigator',
-        subRegionalOffice: 'Navigator',
-        enquiryFileNumbers: ['B8D4B783'],
-        enquiryPartnerAgencies: ['Housing'],
-        enquiryMethodCodes: ['PCNS'],
-        notes: 'dsdsa',
-        enquiryTypeCodes: ['Project Intake'],
-        createdBy: 'IDIR\\DONNY'
-      }
-    };
+    const body: AtsEnquiryResource = { enquiryData: 'test' } as unknown as AtsEnquiryResource;
+    const req = { body } as unknown as Request<never, never, AtsEnquiryResource, never>;
 
-    const created = {
-      data: {
-        '@type': 'EnquiryResource',
-        clientId: 256432,
-        contactFirstName: 'PCNS BusinessTester',
-        contactSurname: 'k12',
-        regionName: 'Navigator',
-        subRegionalOffice: 'Navigator',
-        enquiryFileNumbers: ['B8D4B783'],
-        enquiryPartnerAgencies: ['Housing'],
-        enquiryMethodCodes: ['PCNS'],
-        notes: 'dsdsa',
-        enquiryTypeCodes: ['Project Intake'],
-        createdBy: 'IDIR\\DONNY'
-      },
-      status: 201
-    };
+    await createAtsEnquiryController(req, res as unknown as Response<unknown, LocalContext>);
 
-    createSpy.mockResolvedValue(created);
-
-    await createATSEnquiryController(
-      req as unknown as Request<never, never, ATSEnquiryResource, never>,
-      res as unknown as Response
-    );
-
-    expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith({
-      ...req.body
-    });
+    expect(atsExternal.createAtsEnquiry).toHaveBeenCalledTimes(1);
+    expect(atsExternal.createAtsEnquiry).toHaveBeenCalledWith(body, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ enquiryId: 'enq-123' });
   });
 });
 
-describe('searchATSUsersController', () => {
-  const searchATSUsersSpy = vi.spyOn(atsService, 'searchATSUsers');
+describe('searchAtsUsersController', () => {
+  it('should call searchAtsUsers with query params and respond with status and data', async () => {
+    const mockResp = { status: 200, data: [{ id: 'user-1', name: 'Test User' }] };
+    vi.spyOn(atsExternal, 'searchAtsUsers').mockResolvedValueOnce(mockResp);
 
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      query: { firstName: 'John' }
-    };
+    const query: AtsUserSearchParameters = { firstName: 'John' } as unknown as AtsUserSearchParameters;
+    const req = { query } as unknown as Request<never, never, never, AtsUserSearchParameters>;
 
-    const atsUsers = {
-      data: {
-        '@type': 'ClientsResource',
-        links: [
-          {
-            '@type': 'RelLink',
-            rel: 'self',
-            href: 'https://t1api.nrs.gov.bc.ca/ats-api/clients?firstName=John',
-            method: 'GET'
-          },
-          {
-            '@type': 'RelLink',
-            rel: 'next',
-            href: 'https://t1api.nrs.gov.bc.ca/ats-api/clients?firstName=John',
-            method: 'GET'
-          }
-        ],
-        pageNumber: 0,
-        pageRowCount: 956,
-        totalRowCount: 956,
-        totalPageCount: 1,
-        clients: [
-          {
-            '@type': 'ClientResource',
-            links: [
-              {
-                '@type': 'RelLink',
-                rel: 'self',
-                href: 'https://t1api.nrs.gov.bc.ca/ats-api/clients',
-                method: 'GET'
-              }
-            ],
-            clientId: 96,
-            address: {
-              '@type': 'AddressResource',
-              links: [],
-              addressId: 443,
-              addressLine1: null,
-              addressLine2: null,
-              city: 'Fqmrpml',
-              provinceCode: 'Alberta',
-              countryCode: 'Canada',
-              postalCode: null,
-              primaryPhone: null,
-              secondaryPhone: null,
-              fax: null,
-              email: null,
-              createdBy: null,
-              createdDateTime: null,
-              updatedBy: null,
-              updatedDateTime: null
-            },
-            businessOrgCode: null,
-            firstName: 'John',
-            surName: 'Nike',
-            companyName: null,
-            organizationNumber: null,
-            confirmedIndicator: false,
-            createdBy: 'IDIR\\JNNIKE',
-            createdDateTime: 1166734440000,
-            updatedBy: 'ATS',
-            updatedDateTime: 1166734440000,
-            regionName: 'Skeena',
-            optOutOfBCStatSurveyInd: 'NO'
-          }
-        ]
-      },
-      status: 200
-    };
+    await searchAtsUsersController(req, res as unknown as Response<unknown, LocalContext>);
 
-    searchATSUsersSpy.mockResolvedValue(atsUsers);
-
-    await searchATSUsersController(
-      req as unknown as Request<never, never, never, ATSUserSearchParameters>,
-      res as unknown as Response
-    );
-
-    expect(searchATSUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchATSUsersSpy).toHaveBeenCalledWith({ firstName: 'John' });
+    expect(atsExternal.searchAtsUsers).toHaveBeenCalledTimes(1);
+    expect(atsExternal.searchAtsUsers).toHaveBeenCalledWith(query);
     expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([{ id: 'user-1', name: 'Test User' }]);
   });
 });

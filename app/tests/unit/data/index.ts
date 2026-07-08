@@ -11,7 +11,8 @@ import {
   BasicResponse,
   GroupName,
   IdentityProviderKind,
-  Initiative
+  Initiative,
+  AccessRequestStatus
 } from '../../../src/utils/enums/application.ts';
 import { ProjectType } from '../../../src/utils/enums/electrification.ts';
 import { PeachIntegratedSystem, PermitNeeded } from '../../../src/utils/enums/permit.ts';
@@ -28,6 +29,7 @@ import {
 import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 
 import type {
+  AccessRequest,
   Activity,
   ActivityContact,
   CodingEvent,
@@ -59,6 +61,38 @@ import type {
   PermitType,
   User
 } from '../../../src/types/index.ts';
+
+export const TEST_IDIR_USER_1: User = {
+  bceidBusinessName: null,
+  userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
+  idp: IdentityProviderKind.AZUREIDIR,
+  sub: 'cd90c6bf44074872a7116f4dd4f3a45b@azureidir',
+  email: 'John.Doe@example.com',
+  firstName: 'John',
+  fullName: 'Doe, John',
+  lastName: 'Doe',
+  active: true,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
+
+export const TEST_ACCESS_REQUEST_1: AccessRequest = {
+  accessRequestId: 'aaaa-bbbb-cccc-dddd',
+  groupId: 1,
+  userId: TEST_IDIR_USER_1.userId,
+  status: AccessRequestStatus.PENDING,
+  grant: true,
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null,
+  deletedBy: null,
+  deletedAt: null
+};
 
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   activityId: 'ACTI1234',
@@ -182,7 +216,8 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
     projectType: ProjectType.IPP_WIND,
     bcHydroNumber: '12345'
   },
-  contact: TEST_CONTACT_1
+  contact: TEST_CONTACT_1,
+  draftId: null
 };
 
 export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
@@ -608,6 +643,7 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   location: {
     naturalDisaster: BasicResponse.NO,
     geomarkUrl: null,
+    geoJson: null,
     latitude: null,
     longitude: null,
     locality: 'Place',

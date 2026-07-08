@@ -1,11 +1,12 @@
-import { TEST_CURRENT_CONTEXT, TEST_PERMIT_TYPE_LIST } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_TYPE_1 } from '../data/index.ts';
 import { listPermitTypesController } from '../../../src/controllers/permitType.ts';
 import * as permitTypeService from '../../../src/services/permitType.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
+
+vi.mock('config');
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -19,32 +20,26 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
 });
 
-afterEach(() => {
-  vi.clearAllMocks();
-});
+describe('listPermitTypesController', () => {
+  const listSpy = vi.spyOn(permitTypeService, 'listPermitTypesService');
 
-describe('getPermitTypesController', () => {
-  const permitTypesSpy = vi.spyOn(permitTypeService, 'listPermitTypes');
-
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with optional initiative then responds 200', async () => {
     const req = {
       query: { initiative: Initiative.HOUSING }
-    };
+    } as unknown as Request<never, never, never, { initiative?: Initiative }>;
 
-    permitTypesSpy.mockResolvedValue(TEST_PERMIT_TYPE_LIST);
+    listSpy.mockResolvedValue([TEST_PERMIT_TYPE_1]);
 
-    await listPermitTypesController(
-      req as unknown as Request<never, never, never, { initiative: Initiative }>,
-      res as unknown as Response
-    );
+    await listPermitTypesController(req, res as unknown as Response);
 
-    expect(permitTypesSpy).toHaveBeenCalledTimes(1);
-    expect(permitTypesSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.HOUSING);
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(Initiative.HOUSING);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_TYPE_LIST);
+    expect(res.json).toHaveBeenCalledWith([TEST_PERMIT_TYPE_1]);
   });
 });

@@ -1,76 +1,21 @@
-import { TEST_CURRENT_CONTEXT } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+import {
+  TEST_ACCESS_REQUEST_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT,
+  TEST_IDIR_USER_1
+} from '../data/index.ts';
 import {
   createUserAccessRequestController,
   getAccessRequestsController,
   processUserAccessRequestController
-} from '../../../src/controllers/accessRequest';
-import { assignPermissions } from '../../../src/external/coms';
-import { getInitiative } from '../../../src/services/initiative';
-import { createUser, readUser } from '../../../src/services/user';
-import {
-  assignGroup,
-  getCorrespondingGlobalGroup,
-  getGroups,
-  getSubjectGroups,
-  removeGroup,
-  subjectHasGroupName
-} from '../../../src/services/yars';
-import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../../../src/utils/enums/application';
+} from '../../../src/controllers/accessRequest.ts';
+import * as accessRequestService from '../../../src/services/accessRequest.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { AccessRequest, User } from '../../../src/types';
-import {
-  createUserAccessRequest,
-  getAccessRequest,
-  getAccessRequests,
-  updateAccessRequest
-} from '../../../src/services/accessRequest';
+import type { AccessRequest, LocalContext, User } from '../../../src/types/index.ts';
 
-vi.mock('../../../src/services/accessRequest', () => ({
-  createUserAccessRequest: vi.fn(),
-  getAccessRequest: vi.fn(),
-  getAccessRequests: vi.fn(),
-  updateAccessRequest: vi.fn()
-}));
-
-vi.mock('../../../src/services/coms', () => ({
-  assignPermissions: vi.fn()
-}));
-
-vi.mock('../../../src/services/yars', () => ({
-  assignGroup: vi.fn(),
-  getCorrespondingGlobalGroup: vi.fn(),
-  getGroups: vi.fn(),
-  getSubjectGroups: vi.fn(),
-  removeGroup: vi.fn(),
-  subjectHasGroupName: vi.fn()
-}));
-
-vi.mock('../../../src/services/user', () => ({
-  createUser: vi.fn(),
-  readUser: vi.fn()
-}));
-
-vi.mock('../../../src/services/initiative', () => ({
-  getInitiative: vi.fn()
-}));
-
-const mockCreateUserAccessRequest = createUserAccessRequest as Mock;
-const mockGetAccessRequest = getAccessRequest as Mock;
-const mockGetAccessRequests = getAccessRequests as Mock;
-const mockUpdateAccessRequest = updateAccessRequest as Mock;
-const mockAssignPermissions = assignPermissions as Mock;
-const mockGetGroups = getGroups as Mock;
-const mockAssignGroup = assignGroup as Mock;
-const mockCreateUser = createUser as Mock;
-const mockReadUser = readUser as Mock;
-const mockGetCorrespondingGlobalGroup = getCorrespondingGlobalGroup as Mock;
-const mockGetInitiative = getInitiative as Mock;
-const mockGetSubjectGroups = getSubjectGroups as Mock;
-const mockSubjectHasGroupName = subjectHasGroupName as Mock;
-const mockRemoveGroup = removeGroup as Mock;
+vi.mock('config');
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -82,381 +27,106 @@ const mockResponse = () => {
   return res;
 };
 
-let res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock };
-
-afterEach(() => {
-  /*
-   * Must use clearAllMocks when using the mocked config
-   * resetAllMocks seems to cause strange issues such as
-   * functions not calling as expected
-   */
+let res = mockResponse();
+beforeEach(() => {
   vi.clearAllMocks();
+  res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
 describe('createUserAccessRequestController', () => {
-  beforeEach(() => {
-    res = mockResponse();
+  const createSpy = vi.spyOn(accessRequestService, 'createAccessRequestService');
 
-    res.locals.currentContext = TEST_CURRENT_CONTEXT;
-    res.locals.currentAuthorization = {
-      groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
-    };
-  });
-
-  it('automatically updates user group', async () => {
+  it('calls service with context, authorization, request, user & responds 201 when isAdmin is false', async () => {
     const req = {
       body: {
-        accessRequest: {
-          grant: true,
-          groupId: 'g-new',
-          update: true
-        },
-        user: {
-          userId: 'u1'
-        }
-      },
-      currentContext: TEST_CURRENT_CONTEXT,
-      currentAuthorization: {
-        groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
+        accessRequest: TEST_ACCESS_REQUEST_1,
+        user: TEST_IDIR_USER_1
       }
-    };
+    } as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>;
 
-    mockGetInitiative.mockResolvedValue({ initiativeId: 'i1' });
-    mockGetGroups.mockResolvedValue([{ groupId: 'g-new', name: GroupName.ADMIN, initiativeId: 'i1' }]);
-    mockReadUser.mockResolvedValue({
-      userId: 'u1',
-      sub: 'sub-123',
-      idp: IdentityProviderKind.AZUREIDIR
-    });
-    mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g-old', initiativeId: 'i1', name: GroupName.ADMIN }]);
-    mockSubjectHasGroupName.mockResolvedValue(false);
-    mockGetCorrespondingGlobalGroup
-      .mockResolvedValueOnce({ groupId: 'global-old' })
-      .mockResolvedValueOnce({ groupId: 'global-new' });
-    mockAssignPermissions.mockResolvedValue(undefined);
+    createSpy.mockResolvedValue({ isAdmin: false, data: TEST_ACCESS_REQUEST_1 } as never);
 
-    await createUserAccessRequestController(
-      req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
-      res as unknown as Response
+    await createUserAccessRequestController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_CONTEXT,
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_ACCESS_REQUEST_1,
+      TEST_IDIR_USER_1
     );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_ACCESS_REQUEST_1);
+  });
 
-    expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'g-old');
-    expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'global-old');
-    expect(mockAssignGroup).toHaveBeenNthCalledWith(1, prismaTxMock, 'sub-123', 'g-new');
-    expect(mockAssignGroup).toHaveBeenNthCalledWith(2, prismaTxMock, 'sub-123', 'global-new');
-    expect(mockAssignPermissions).toHaveBeenCalled();
+  it('calls the service and responds 200 when isAdmin is true', async () => {
+    const req = {
+      body: {
+        accessRequest: TEST_ACCESS_REQUEST_1,
+        user: TEST_IDIR_USER_1
+      }
+    } as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>;
+
+    createSpy.mockResolvedValue({ isAdmin: true, data: TEST_ACCESS_REQUEST_1 } as never);
+
+    await createUserAccessRequestController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(createSpy).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith({
-      userId: 'u1',
-      grant: true,
-      groupId: 'g-new',
-      status: AccessRequestStatus.APPROVED
-    });
-  });
-
-  describe('admin', () => {
-    beforeEach(() => {
-      res = mockResponse();
-
-      res.locals.currentContext = TEST_CURRENT_CONTEXT;
-      res.locals.currentAuthorization = {
-        groups: [{ name: GroupName.ADMIN, initiativeId: 'i1' }]
-      };
-    });
-
-    it('automatically grants access', async () => {
-      const req = {
-        body: {
-          accessRequest: {
-            grant: true,
-            groupId: 'g1',
-            update: false
-          },
-          user: {
-            userId: 'u1'
-          }
-        }
-      };
-
-      mockGetInitiative.mockResolvedValue({ initiativeId: 'i1' });
-      mockGetGroups.mockResolvedValue([{ groupId: 'g1', name: GroupName.ADMIN }]);
-      mockReadUser.mockResolvedValue({
-        userId: 'u1',
-        sub: 'sub-123',
-        idp: IdentityProviderKind.AZUREIDIR
-      });
-      mockGetSubjectGroups.mockResolvedValue([]);
-      mockGetCorrespondingGlobalGroup.mockResolvedValue({
-        groupId: 'global-g1'
-      });
-      mockAssignPermissions.mockResolvedValue(undefined);
-
-      await createUserAccessRequestController(
-        req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
-        res as unknown as Response
-      );
-
-      expect(mockAssignGroup).toHaveBeenCalledTimes(2);
-      expect(mockAssignGroup).toHaveBeenNthCalledWith(1, prismaTxMock, 'sub-123', 'g1');
-      expect(mockAssignGroup).toHaveBeenNthCalledWith(2, prismaTxMock, 'sub-123', 'global-g1');
-      expect(mockAssignPermissions).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith({
-        userId: 'u1',
-        grant: true,
-        groupId: 'g1',
-        status: AccessRequestStatus.APPROVED
-      });
-    });
-
-    it('removes user groups for initiative', async () => {
-      const req = {
-        body: {
-          accessRequest: {
-            grant: false,
-            groupId: 'g1',
-            update: false
-          },
-          user: {
-            userId: 'u1'
-          }
-        }
-      };
-
-      mockGetInitiative.mockResolvedValue({ initiativeId: 'i1' });
-      mockGetGroups.mockResolvedValue([{ groupId: 'g1', name: GroupName.ADMIN, initiativeId: 'i1' }]);
-      mockReadUser.mockResolvedValue({
-        userId: 'u1',
-        sub: 'sub-123',
-        idp: IdentityProviderKind.AZUREIDIR
-      });
-      mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g1', initiativeId: 'i1', name: GroupName.ADMIN }]);
-      mockSubjectHasGroupName.mockResolvedValue(false);
-      mockGetCorrespondingGlobalGroup.mockResolvedValueOnce({ groupId: 'global-g1' });
-      mockAssignPermissions.mockResolvedValue(undefined);
-
-      await createUserAccessRequestController(
-        req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
-        res as unknown as Response
-      );
-
-      expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'g1');
-      expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'global-g1');
-      expect(mockAssignGroup).not.toHaveBeenCalled();
-      expect(mockAssignPermissions).toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(200);
-      expect(res.json).toHaveBeenCalledWith(undefined);
-    });
-  });
-
-  describe('supervisor', () => {
-    beforeEach(() => {
-      res = mockResponse();
-
-      res.locals.currentContext = TEST_CURRENT_CONTEXT;
-      res.locals.currentAuthorization = {
-        groups: [{ name: GroupName.SUPERVISOR, initiativeId: 'i1' }]
-      };
-    });
-
-    it('creates access request', async () => {
-      const req = {
-        body: {
-          accessRequest: {
-            grant: true,
-            groupId: 'g1',
-            update: false
-          },
-          user: {
-            sub: 'sub-123',
-            idp: IdentityProviderKind.AZUREIDIR
-          }
-        }
-      };
-
-      mockGetInitiative.mockResolvedValue({ initiativeId: 'i1' });
-      mockGetGroups.mockResolvedValue([{ groupId: 'g1', name: GroupName.NAVIGATOR, initiativeId: 'i1' }]);
-      mockCreateUser.mockResolvedValue({
-        userId: 'u1',
-        sub: 'sub-123',
-        idp: IdentityProviderKind.AZUREIDIR
-      });
-      mockGetSubjectGroups.mockResolvedValue([]);
-      mockCreateUserAccessRequest.mockResolvedValue({
-        id: 'req-1',
-        userId: 'u1',
-        groupId: 'g1',
-        status: AccessRequestStatus.PENDING
-      });
-
-      await createUserAccessRequestController(
-        req as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
-        res as unknown as Response
-      );
-
-      expect(mockCreateUserAccessRequest).toHaveBeenCalledWith(prismaTxMock, {
-        grant: true,
-        groupId: 'g1',
-        update: false,
-        userId: 'u1'
-      });
-      expect(mockAssignGroup).not.toHaveBeenCalled();
-      expect(mockAssignPermissions).not.toHaveBeenCalled();
-      expect(res.status).toHaveBeenCalledWith(201);
-      expect(res.json).toHaveBeenCalledWith({
-        id: 'req-1',
-        userId: 'u1',
-        groupId: 'g1',
-        status: AccessRequestStatus.PENDING
-      });
-    });
+    expect(res.json).toHaveBeenCalledWith(TEST_ACCESS_REQUEST_1);
   });
 });
 
 describe('processUserAccessRequestController', () => {
-  beforeEach(() => {
-    res = mockResponse();
+  const processSpy = vi.spyOn(accessRequestService, 'processAccessRequestService');
 
-    res.locals.currentContext = TEST_CURRENT_CONTEXT;
-  });
-
-  it('approves and grants access', async () => {
+  it('calls the service with context, accessRequestId and approve then responds 204', async () => {
     const req = {
-      params: { accessRequestId: 'ar-1' },
-      body: { approve: true },
-      currentContext: TEST_CURRENT_CONTEXT
-    };
-
-    mockGetAccessRequest.mockResolvedValue({
-      accessRequestId: 'ar-1',
-      userId: 'u1',
-      grant: true,
-      groupId: 'g1'
-    });
-    mockReadUser.mockResolvedValue({
-      userId: 'u1',
-      sub: 'sub-123',
-      idp: IdentityProviderKind.AZUREIDIR
-    });
-    mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g-other', initiativeId: 'i1' }]);
-    mockGetCorrespondingGlobalGroup.mockResolvedValue({
-      groupId: 'global-g1'
-    });
-    mockAssignPermissions.mockResolvedValue(undefined);
-
-    await processUserAccessRequestController(
-      req as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>,
-      res as unknown as Response
-    );
-
-    expect(mockAssignGroup).toHaveBeenCalledTimes(2);
-    expect(mockAssignGroup).toHaveBeenNthCalledWith(1, prismaTxMock, 'sub-123', 'g1');
-    expect(mockAssignGroup).toHaveBeenNthCalledWith(2, prismaTxMock, 'sub-123', 'global-g1');
-    expect(mockUpdateAccessRequest).toHaveBeenCalledWith(
-      prismaTxMock,
-      { status: AccessRequestStatus.APPROVED },
-      'ar-1'
-    );
-    expect(mockAssignPermissions).toHaveBeenCalled();
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalled();
-  });
-
-  it('approves and removes access', async () => {
-    const req = {
-      params: { accessRequestId: 'ar-1' },
+      params: { accessRequestId: TEST_ACCESS_REQUEST_1.accessRequestId },
       body: { approve: true }
-    };
+    } as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>;
 
-    mockGetAccessRequest.mockResolvedValue({
-      accessRequestId: 'ar-1',
-      userId: 'u1',
-      grant: false,
-      groupId: 'g1'
-    });
-    mockReadUser.mockResolvedValue({
-      userId: 'u1',
-      sub: 'sub-123',
-      idp: IdentityProviderKind.AZUREIDIR
-    });
-    mockGetSubjectGroups.mockResolvedValue([{ groupId: 'g1', initiativeId: 'i1', name: 'ADMIN' }]);
-    mockSubjectHasGroupName.mockResolvedValue(false);
-    mockGetCorrespondingGlobalGroup.mockResolvedValue({
-      groupId: 'global-g1'
-    });
-    mockAssignPermissions.mockResolvedValue(undefined);
+    processSpy.mockResolvedValue(undefined);
 
-    await processUserAccessRequestController(
-      req as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>,
-      res as unknown as Response
-    );
+    await processUserAccessRequestController(req, res as unknown as Response<unknown, LocalContext>);
 
-    expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'g1');
-    expect(mockRemoveGroup).toHaveBeenCalledWith(prismaTxMock, 'sub-123', 'global-g1');
-    expect(mockUpdateAccessRequest).toHaveBeenCalledWith(
-      prismaTxMock,
-      { status: AccessRequestStatus.APPROVED },
-      'ar-1'
-    );
-    expect(mockAssignPermissions).toHaveBeenCalled();
+    expect(processSpy).toHaveBeenCalledTimes(1);
+    expect(processSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, TEST_ACCESS_REQUEST_1.accessRequestId, true);
     expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalled();
+    expect(res.end).toHaveBeenCalledWith();
   });
 
-  it('rejects access request', async () => {
+  it('calls the service with approve false', async () => {
     const req = {
-      params: { accessRequestId: 'ar-1' },
+      params: { accessRequestId: TEST_ACCESS_REQUEST_1.accessRequestId },
       body: { approve: false }
-    };
+    } as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>;
 
-    mockGetAccessRequest.mockResolvedValue({
-      accessRequestId: 'ar-1',
-      userId: 'u1',
-      grant: true,
-      groupId: 'g1'
-    });
-    mockReadUser.mockResolvedValue({
-      userId: 'u1',
-      sub: 'sub-123',
-      idp: IdentityProviderKind.AZUREIDIR
-    });
+    processSpy.mockResolvedValue(undefined);
 
-    await processUserAccessRequestController(
-      req as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>,
-      res as unknown as Response
-    );
+    await processUserAccessRequestController(req, res as unknown as Response<unknown, LocalContext>);
 
-    expect(mockUpdateAccessRequest).toHaveBeenCalledWith(
-      prismaTxMock,
-      { status: AccessRequestStatus.REJECTED },
-      'ar-1'
-    );
-    expect(mockAssignGroup).not.toHaveBeenCalled();
-    expect(mockRemoveGroup).not.toHaveBeenCalled();
-    expect(mockAssignPermissions).not.toHaveBeenCalled();
+    expect(processSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, TEST_ACCESS_REQUEST_1.accessRequestId, false);
     expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalled();
   });
 });
 
 describe('getAccessRequestsController', () => {
-  beforeEach(() => {
-    res = mockResponse();
+  const getSpy = vi.spyOn(accessRequestService, 'getAccessRequestsService');
 
-    res.locals.currentContext = TEST_CURRENT_CONTEXT;
-  });
+  it('calls the service with the current initiative then responds 200', async () => {
+    const req = {} as unknown as Request;
+    const accessRequests: AccessRequest[] = [TEST_ACCESS_REQUEST_1];
 
-  it('returns access requests with 200', async () => {
-    const req = {};
+    getSpy.mockResolvedValue(accessRequests);
 
-    const mockData = [{ accessRequestId: 'ar-1' }, { accessRequestId: 'ar-2' }];
+    await getAccessRequestsController(req, res as unknown as Response<AccessRequest[], LocalContext>);
 
-    mockGetAccessRequests.mockResolvedValue(mockData);
-
-    await getAccessRequestsController(req as unknown as Request, res as unknown as Response);
-
-    expect(mockGetAccessRequests).toHaveBeenCalledWith(prismaTxMock, TEST_CURRENT_CONTEXT.initiative);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT.initiative);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(mockData);
+    expect(res.json).toHaveBeenCalledWith(accessRequests);
   });
 });

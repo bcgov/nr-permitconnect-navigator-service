@@ -1,9 +1,10 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { getSourceSystemKindsController } from '../../../src/controllers/sourceSystemKind.ts';
+import { listSourceSystemKindsController } from '../../../src/controllers/sourceSystemKind.ts';
 import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
+
+vi.mock('config');
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -18,23 +19,17 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
+  vi.clearAllMocks();
 });
 
-afterEach(() => {
-  vi.resetAllMocks();
-});
+describe('listSourceSystemKindsController', () => {
+  it('should call service and respond with 200 and result', async () => {
+    const fakeResult = [{ sourceSystemKindId: 1, sourceSystem: 'PEACH', kind: 'BUILDING' }];
+    vi.spyOn(sourceSystemKindService, 'listSourceSystemKindsService').mockResolvedValueOnce(fakeResult as never);
 
-describe('getSourceSystemKindsController', () => {
-  const getSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'getSourceSystemKinds');
+    await listSourceSystemKindsController({} as Request, res as unknown as Response);
 
-  it('calls service and responds with 200 and result', async () => {
-    const fakeResult = [{ sourceSystemKindId: 1, sourceSystem: 'PEACH', kind: 'BUILDING' }] as never;
-    getSourceSystemKindsSpy.mockResolvedValueOnce(fakeResult);
-
-    await getSourceSystemKindsController({} as Request, res as unknown as Response);
-
-    expect(getSourceSystemKindsSpy).toHaveBeenCalledTimes(1);
-    expect(getSourceSystemKindsSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(sourceSystemKindService.listSourceSystemKindsService).toHaveBeenCalledTimes(1);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(fakeResult);
   });

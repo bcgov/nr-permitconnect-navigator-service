@@ -1,54 +1,37 @@
 import { Prisma } from '@prisma/client';
 
 import {
-  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
-  TEST_ACTIVITY_GENERAL,
   TEST_GENERAL_DRAFT,
   TEST_GENERAL_PROJECT_1,
   TEST_GENERAL_PROJECT_CREATE,
-  TEST_GENERAL_PROJECT_INTAKE,
-  TEST_IDIR_USER_1,
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
-  TEST_PERMIT_3,
-  TEST_GENERAL_PROJECT_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+  TEST_GENERAL_PROJECT_INTAKE
+} from '../data/index.ts';
 import {
   createGeneralProjectController,
   deleteGeneralProjectController,
   deleteGeneralProjectDraftController,
-  getGeneralProjectActivityIdsController,
   getGeneralProjectController,
   getGeneralProjectDraftController,
   getGeneralProjectDraftsController,
-  getGeneralProjectsController,
   getGeneralProjectStatisticsController,
+  listGeneralProjectActivityIdsController,
+  listGeneralProjectsController,
   searchGeneralProjectsController,
   submitGeneralProjectDraftController,
   updateGeneralProjectController,
   upsertGeneralProjectDraftController
 } from '../../../src/controllers/generalProject.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
-import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/domains/activity.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as contactService from '../../../src/services/contact.ts';
+import * as activityService from '../../../src/services/activity.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as generalProjectService from '../../../src/services/generalProject.ts';
-import * as permitService from '../../../src/services/permit.ts';
-import * as permitTrackingService from '../../../src/domains/permitTracking.ts';
+import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
-import * as utils from '../../../src/utils/utils';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
-  ActivityContact,
   Draft,
   GeneralProject,
   GeneralProjectIntake,
@@ -72,730 +55,344 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
-});
-
-afterEach(() => {
-  /*
-   * Must use clearAllMocks when using the mocked config
-   * resetAllMocks seems to cause strange issues such as
-   * functions not calling as expected
-   */
-  vi.clearAllMocks();
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
 describe('createGeneralProjectController', () => {
-  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
-  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
-  const createGeneralProjectSpy = vi.spyOn(generalProjectService, 'createGeneralProject');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const getCurrentUsernameSpy = vi.spyOn(utils, 'getCurrentUsername');
+  const createSpy = vi.spyOn(generalProjectService, 'createGeneralProjectService');
 
-  it('should call services and respond with 201 and result', async () => {
+  it('calls the service with body and context then responds 201', async () => {
     const req = {
-      body: { ...TEST_GENERAL_PROJECT_INTAKE }
-    };
+      body: TEST_GENERAL_PROJECT_INTAKE
+    } as unknown as Request<never, never, GeneralProjectIntake>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
-    getCurrentUsernameSpy.mockReturnValue(TEST_IDIR_USER_1.fullName!);
+    createSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
 
-    await createGeneralProjectController(
-      req as unknown as Request<never, never, GeneralProjectIntake>,
-      res as unknown as Response
-    );
+    await createGeneralProjectController(req, res as unknown as Response<GeneralProject, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.GENERAL, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_GENERAL.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_GENERAL_PROJECT_CREATE,
-      generalProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_INTAKE, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...TEST_GENERAL_PROJECT_1,
-      generalProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_CREATE);
   });
 
-  it('creates permits if they exist', async () => {
-    const permit1NoTracking = { ...TEST_PERMIT_1 };
-    delete permit1NoTracking.permitTracking;
-    const permit2NoTracking = { ...TEST_PERMIT_2 };
-    delete permit2NoTracking.permitTracking;
-    const permit3NoTracking = { ...TEST_PERMIT_3 };
-    delete permit3NoTracking.permitTracking;
-
+  it('provides empty body when POST body is undefined', async () => {
     const req = {
-      body: {
-        permits: {
-          appliedPermits: [permit1NoTracking, permit2NoTracking],
-          investigatePermits: [TEST_PERMIT_3]
-        }
-      }
-    };
+      body: undefined
+    } as unknown as Request<never, never, GeneralProjectIntake>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    createGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
+    createSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
 
-    await createGeneralProjectController(
-      req as unknown as Request<never, never, GeneralProjectIntake>,
-      res as unknown as Response
-    );
+    await createGeneralProjectController(req, res as unknown as Response<GeneralProject, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createGeneralProjectSpy).toHaveBeenCalledTimes(1);
-
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...permit1NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...permit2NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...permit3NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      state: PermitState.NONE,
-      needed: 'Under investigation',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      submittedDate: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
+    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
 describe('deleteGeneralProjectController', () => {
-  const getGeneralProjectSpy = vi.spyOn(generalProjectService, 'getGeneralProject');
-  const deleteGeneralProjectSpy = vi.spyOn(generalProjectService, 'deleteGeneralProject');
-  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
+  const getSpy = vi.spyOn(generalProjectService, 'getGeneralProjectService');
+  const deleteSpy = vi.spyOn(activityService, 'deleteActivityService');
 
-  it('should call services and respond with 204', async () => {
+  it('fetches project and deletes activity then responds 204', async () => {
     const req = {
       params: { generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ generalProjectId: string }>;
 
-    getGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
-    deleteActivitySpy.mockResolvedValue();
+    getSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1 as GeneralProject);
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteGeneralProjectController(
-      req as unknown as Request<{ generalProjectId: string }>,
-      res as unknown as Response
-    );
+    await deleteGeneralProjectController(req, res as unknown as Response);
 
-    expect(getGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.generalProjectId);
-    expect(deleteGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(deleteGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.generalProjectId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_GENERAL_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.generalProjectId);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_1.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('deleteGeneralProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
-    deleteActivityHardSpy.mockResolvedValue();
-
-    await deleteGeneralProjectDraftController(
-      req as unknown as Request<{ draftId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(deleteActivityHardSpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_GENERAL_DRAFT.activityId);
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('getGeneralProjectActivityIdsController', () => {
-  const getGeneralProjectsSpy = vi.spyOn(generalProjectService, 'getGeneralProjects');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {};
-
-    getGeneralProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
-
-    await getGeneralProjectActivityIdsController(req as unknown as Request, res as unknown as Response);
-
-    expect(getGeneralProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getGeneralProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_PROJECT_1.activityId]);
-  });
-});
-
-describe('getGeneralProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-
-  it('should call services and respond with 200', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
-
-    await getGeneralProjectDraftController(req as unknown as Request<{ draftId: string }>, res as unknown as Response);
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_DRAFT);
-  });
-});
-
-describe('getGeneralProjectDraftsController', () => {
-  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
-
-  it('should call services and respond with 200', async () => {
-    const req = {};
-
-    getDraftsSpy.mockResolvedValue([TEST_GENERAL_DRAFT]);
-    filterSpy.mockResolvedValue([TEST_GENERAL_DRAFT]);
-
-    await getGeneralProjectDraftsController(
-      req as unknown as Request,
-      res as unknown as Response<Draft[], LocalContext>
-    );
-
-    expect(getDraftsSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.GENERAL_PROJECT);
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_GENERAL_DRAFT]);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_DRAFT]);
-  });
-});
-
-describe('getGeneralProjectStatisticsController', () => {
-  const statisticsSpy = vi.spyOn(generalProjectService, 'getGeneralProjectStatistics');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      query: {
-        dateFrom: '',
-        dateTo: '',
-        monthYear: '',
-        userId: ''
-      }
-    };
-
-    const statistics: GeneralProjectStatistics[] = [
-      {
-        total_submissions: 0,
-        total_submissions_between: 0,
-        total_submissions_monthyear: 0,
-        total_submissions_assignedto: 0,
-        state_new: 0,
-        state_inprogress: 0,
-        state_delayed: 0,
-        state_completed: 0,
-        queue_1: 0,
-        queue_2: 0,
-        queue_3: 0,
-        escalation: 0,
-        general_enquiry: 0,
-        guidance: 0,
-        inapplicable: 0,
-        status_request: 0,
-        multi_permits_needed: 0
-      }
-    ];
-
-    statisticsSpy.mockResolvedValue(statistics);
-
-    await getGeneralProjectStatisticsController(
-      req as unknown as Request<never, never, never, StatisticsFilters>,
-      res as unknown as Response
-    );
-
-    expect(statisticsSpy).toHaveBeenCalledTimes(1);
-    expect(statisticsSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(statistics[0]);
   });
 });
 
 describe('getGeneralProjectController', () => {
-  const generalProjectSpy = vi.spyOn(generalProjectService, 'getGeneralProject');
-  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
+  const getSpy = vi.spyOn(generalProjectService, 'getGeneralProjectService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with projectId then responds 200', async () => {
     const req = {
       params: { generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ generalProjectId: string }>;
 
-    generalProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
-    getRelatedEnquiriesSpy.mockResolvedValue([]);
+    getSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1 as GeneralProject);
 
-    await getGeneralProjectController(
-      req as unknown as Request<{ generalProjectId: string }>,
-      res as unknown as Response
-    );
+    await getGeneralProjectController(req, res as unknown as Response<GeneralProject>);
 
-    expect(generalProjectSpy).toHaveBeenCalledTimes(1);
-    expect(generalProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.generalProjectId);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.generalProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_1);
   });
 });
 
-describe('getGeneralProjectsController', () => {
-  const generalProjectsSpy = vi.spyOn(generalProjectService, 'getGeneralProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+describe('getGeneralProjectStatisticsController', () => {
+  const statsSpy = vi.spyOn(generalProjectService, 'getGeneralProjectStatisticsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with query filters then responds 200', async () => {
+    const mockStats = {
+      count: 5,
+      new: 2,
+      inProgress: 2,
+      submitted: 1
+    } as unknown as GeneralProjectStatistics;
+
     const req = {
-      query: {}
-    };
+      query: { applicationsStatus: 'NEW' }
+    } as unknown as Request<never, never, never, StatisticsFilters>;
 
-    generalProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
-    filterSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
+    statsSpy.mockResolvedValue([mockStats]);
 
-    await getGeneralProjectsController(
-      req as unknown as Request,
-      res as unknown as Response<GeneralProject[], LocalContext>
-    );
+    await getGeneralProjectStatisticsController(req, res as unknown as Response<GeneralProjectStatistics>);
 
-    expect(generalProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(generalProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(statsSpy).toHaveBeenCalledTimes(1);
+    expect(statsSpy).toHaveBeenCalledWith({ applicationsStatus: 'NEW' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockStats);
+  });
+});
+
+describe('listGeneralProjectActivityIdsController', () => {
+  const listIdsSpy = vi.spyOn(generalProjectService, 'listGeneralProjectActivityIdsService');
+
+  it('calls the service and responds 200', async () => {
+    const mockIds = ['ACTI1234', 'ACTI5678'];
+    const req = {} as unknown as Request;
+
+    listIdsSpy.mockResolvedValue(mockIds);
+
+    await listGeneralProjectActivityIdsController(req, res as unknown as Response);
+
+    expect(listIdsSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockIds);
+  });
+});
+
+describe('listGeneralProjectsController', () => {
+  const listSpy = vi.spyOn(generalProjectService, 'listGeneralProjectsService');
+
+  it('calls the service with authorization and context then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
+
+    await listGeneralProjectsController(req, res as unknown as Response<GeneralProject[], LocalContext>);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_PROJECT_1]);
   });
 });
 
 describe('searchGeneralProjectsController', () => {
-  const searchGeneralProjectsSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+  const searchSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with search params and context then responds 200', async () => {
     const req = {
-      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false }
-    };
+      body: { projectName: 'test' }
+    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
 
-    searchGeneralProjectsSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
-    filterSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1]);
+    searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 
-    await searchGeneralProjectsController(
-      req as unknown as Request<never, never, GeneralProjectSearchParameters, never>,
-      res as unknown as Response<GeneralProject[], LocalContext>
+    await searchGeneralProjectsController(req, res as unknown as Response<GeneralProject[], LocalContext>);
+
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      expect.objectContaining({
+        projectName: 'test',
+        includeUser: undefined
+      })
     );
-
-    expect(searchGeneralProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchGeneralProjectsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      activityId: ['ACTI1234', 'ACTI5678'],
-      includeUser: false
-    });
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_GENERAL_PROJECT_1]);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_PROJECT_1]);
   });
-});
 
-describe('submitGeneralProjectDraftController', () => {
-  const upsertPermitSpy = vi.spyOn(permitService, 'upsertPermit');
-  const createGeneralProjectSpy = vi.spyOn(generalProjectService, 'createGeneralProject');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
-  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
-  const upsertPermitTrackingSpy = vi.spyOn(permitTrackingService, 'upsertPermitTracking');
-
-  it('should call services and respond with 201 and result', async () => {
+  it('coerces includeUser query parameter to boolean', async () => {
     const req = {
-      body: { ...TEST_GENERAL_PROJECT_INTAKE }
-    };
+      body: { includeUser: 'true' }
+    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 
-    await submitGeneralProjectDraftController(
-      req as unknown as Request<never, never, GeneralProjectIntake>,
-      res as unknown as Response
-    );
+    await searchGeneralProjectsController(req, res as unknown as Response<GeneralProject[], LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.GENERAL, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_GENERAL.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createGeneralProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_GENERAL_PROJECT_1,
-      generalProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...TEST_GENERAL_PROJECT_1,
-      contact: TEST_CONTACT_1
-    });
-  });
-
-  it('should delete associated draft if it exists', async () => {
-    const req = {
-      body: { ...TEST_GENERAL_PROJECT_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    createGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
-    deleteDraftSpy.mockResolvedValue();
-
-    await submitGeneralProjectDraftController(
-      req as unknown as Request<never, never, GeneralProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
-    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.body.draftId);
-  });
-
-  it('creates permits if they exist', async () => {
-    const permit1NoTracking = { ...TEST_PERMIT_1 };
-    delete permit1NoTracking.permitTracking;
-    const permit2NoTracking = { ...TEST_PERMIT_2 };
-    delete permit2NoTracking.permitTracking;
-    const permit3NoTracking = { ...TEST_PERMIT_3 };
-    delete permit3NoTracking.permitTracking;
-
-    const req = {
-      body: {
-        permits: { appliedPermits: [permit1NoTracking, permit2NoTracking], investigatePermits: [TEST_PERMIT_3] }
-      }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    createGeneralProjectSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_1);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_2);
-    upsertPermitSpy.mockResolvedValueOnce(TEST_PERMIT_3);
-    upsertPermitTrackingSpy.mockResolvedValue([]);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-
-    await submitGeneralProjectDraftController(
-      req as unknown as Request<never, never, GeneralProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-    expect(createGeneralProjectSpy).toHaveBeenCalledTimes(1);
-    expect(upsertPermitSpy).toHaveBeenCalledTimes(3);
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(1, prismaTxMock, {
-      ...permit1NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(2, prismaTxMock, {
-      ...permit2NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.APPLICATION_SUBMISSION,
-      state: PermitState.IN_PROGRESS,
-      needed: 'Yes',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitSpy).toHaveBeenNthCalledWith(3, prismaTxMock, {
-      ...permit3NoTracking,
-      activityId: TEST_ACTIVITY_GENERAL.activityId,
-      stage: PermitStage.PRE_SUBMISSION,
-      state: PermitState.NONE,
-      needed: 'Under investigation',
-      statusLastChanged: null,
-      statusLastVerified: null,
-      issuedPermitId: null,
-      submittedDate: null,
-      decisionDate: null,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(0);
-  });
-});
-
-describe('updateGeneralProjectDraftController', () => {
-  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: {
-        data: {
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          },
-          basic: {
-            projectName: 'TheProject',
-            projectApplicantType: 'Business'
-          },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
-          }
-        }
-      }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_GENERAL);
-    createDraftSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
-
-    await upsertGeneralProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern) as string,
-      activityId: 'ACTI1234',
-      draftCode: DraftCode.GENERAL_PROJECT,
-      data: req.body.data,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
       expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.GENERAL_PROJECT,
-        data: expect.any(Object)
-      })
-    );
-  });
-
-  it('updates draft with the given draftId and activityId', async () => {
-    const req = {
-      body: {
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        data: {
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          },
-          basic: {
-            projectName: 'TheProject',
-            projectApplicantType: 'Business'
-          },
-          location: {
-            projectLocation: 'Some place'
-          },
-          permits: {
-            hasAppliedProvincialPermits: true
-          }
-        }
-      }
-    };
-
-    updateDraftSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
-
-    await upsertGeneralProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
-    expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...req.body,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.GENERAL_PROJECT,
-        data: expect.any(Object)
+        includeUser: true
       })
     );
   });
 });
 
 describe('updateGeneralProjectController', () => {
-  const updateSpy = vi.spyOn(generalProjectService, 'updateGeneralProject');
+  const updateSpy = vi.spyOn(generalProjectService, 'updateGeneralProjectService');
 
-  const { generalProjectId } = TEST_GENERAL_PROJECT_1;
-
-  const UPDATED_PROJECT: GeneralProject = { ...TEST_GENERAL_PROJECT_1, ...TEST_GENERAL_PROJECT_UPDATE };
-
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with update data and projectId then responds 200', async () => {
+    const updateData = { projectName: 'Updated Name' };
     const req = {
-      body: TEST_GENERAL_PROJECT_UPDATE,
+      params: { generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      body: updateData
+    } as unknown as Request<{ generalProjectId: string }, never, Prisma.general_projectUpdateInput>;
 
-      params: {
-        generalProjectId
-      }
-    };
+    updateSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1 as GeneralProject);
 
-    updateSpy.mockResolvedValue(UPDATED_PROJECT);
-
-    await updateGeneralProjectController(
-      req as unknown as Request<
-        { generalProjectId: string },
-        never,
-        Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>
-      >,
-      res as unknown as Response
-    );
+    await updateGeneralProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      {
-        ...TEST_GENERAL_PROJECT_UPDATE,
-        updatedAt: expect.any(Date) as Date,
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      },
-      generalProjectId
+    expect(updateSpy).toHaveBeenCalledWith(updateData, req.params.generalProjectId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_1);
+  });
+});
+
+describe('deleteGeneralProjectDraftController', () => {
+  const deleteSpy = vi.spyOn(draftService, 'deleteDraftService');
+
+  it('calls the service with draftId then responds 204', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    deleteSpy.mockResolvedValue(undefined);
+
+    await deleteGeneralProjectDraftController(req, res as unknown as Response);
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('getGeneralProjectDraftController', () => {
+  const getSpy = vi.spyOn(draftService, 'getDraftService');
+
+  it('calls the service with draftId then responds 200', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    getSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
+
+    await getGeneralProjectDraftController(req, res as unknown as Response<Draft>);
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_DRAFT);
+  });
+});
+
+describe('getGeneralProjectDraftsController', () => {
+  const listSpy = vi.spyOn(draftService, 'listDraftsService');
+
+  it('calls the service with authorization, context and draft code then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_GENERAL_DRAFT]);
+
+    await getGeneralProjectDraftsController(req, res as unknown as Response<Draft[], LocalContext>);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      DraftCode.GENERAL_PROJECT
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
+    expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_DRAFT]);
+  });
+});
+
+describe('submitGeneralProjectDraftController', () => {
+  const submitSpy = vi.spyOn(generalProjectService, 'submitGeneralProjectDraftService');
+
+  it('calls the service with draft and context then responds 201', async () => {
+    const req = {
+      body: {
+        ...TEST_GENERAL_PROJECT_INTAKE,
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
+      }
+    } as unknown as Request<never, never, GeneralProjectIntake>;
+
+    submitSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
+
+    await submitGeneralProjectDraftController(req, res as unknown as Response<GeneralProject, LocalContext>);
+
+    expect(submitSpy).toHaveBeenCalledTimes(1);
+    expect(submitSpy).toHaveBeenCalledWith(
+      req.body.draftId,
+      req.body,
+      TEST_GENERAL_PROJECT_INTAKE.contact,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_CREATE);
+  });
+});
+
+describe('upsertGeneralProjectDraftController', () => {
+  const upsertSpy = vi.spyOn(draftService, 'upsertDraftService');
+
+  it('calls the service with draft data and draft code, responds 201 when creating', async () => {
+    const req = {
+      body: {
+        ...TEST_GENERAL_DRAFT,
+        draftId: undefined
+      }
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
+
+    await upsertGeneralProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        draftId: undefined
+      }),
+      Initiative.GENERAL,
+      DraftCode.GENERAL_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_DRAFT);
+  });
+
+  it('calls the service and responds 200 when updating', async () => {
+    const req = {
+      body: TEST_GENERAL_DRAFT
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
+
+    await upsertGeneralProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      TEST_GENERAL_DRAFT.draftId,
+      TEST_GENERAL_DRAFT,
+      Initiative.GENERAL,
+      DraftCode.GENERAL_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_DRAFT);
   });
 });

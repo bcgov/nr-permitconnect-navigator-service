@@ -1,13 +1,13 @@
-import { TEST_CURRENT_CONTEXT, TEST_CONTACT_1, TEST_CONTACT_WITH_ACTIVITY_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CONTACT_1, TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import {
   deleteContactController,
   getContactController,
+  getCurrentUserContactController,
+  matchContactsController,
   searchContactsController,
   upsertContactController
 } from '../../../src/controllers/contact.ts';
 import * as contactService from '../../../src/services/contact.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
@@ -27,222 +27,213 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
-});
-
-afterEach(() => {
-  vi.resetAllMocks();
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
 describe('deleteContactController', () => {
-  const deleteContactSpy = vi.spyOn(contactService, 'deleteContact');
+  const deleteSpy = vi.spyOn(contactService, 'deleteContactService');
 
-  it('should call services and respond with 204', async () => {
+  it('calls the service with contactId then responds 204', async () => {
     const req = {
-      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' }
-    } as unknown as Request;
+      params: { contactId: TEST_CONTACT_1.contactId }
+    } as unknown as Request<{ contactId: string }>;
 
-    deleteContactSpy.mockResolvedValue();
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteContactController(req as unknown as Request<{ contactId: string }>, res as unknown as Response);
+    await deleteContactController(req, res as unknown as Response<never, LocalContext>);
 
-    expect(deleteContactSpy).toHaveBeenCalledTimes(1);
-    expect(deleteContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(TEST_CONTACT_1.contactId);
     expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledTimes(1);
+    expect(res.end).toHaveBeenCalledWith();
   });
 });
 
 describe('getContactController', () => {
-  const getContactSpy = vi.spyOn(contactService, 'getContact');
+  const getSpy = vi.spyOn(contactService, 'getContactService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with contactId and coerced includeActivities then responds 200', async () => {
     const req = {
-      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
-      query: { includeActivities: false }
-    } as unknown as Request;
+      params: { contactId: TEST_CONTACT_1.contactId },
+      query: { includeActivities: 'true' }
+    } as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>;
 
-    getContactSpy.mockResolvedValue(TEST_CONTACT_1);
+    getSpy.mockResolvedValue(TEST_CONTACT_1);
 
-    await getContactController(
-      req as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
-      res as unknown as Response
-    );
+    await getContactController(req, res as unknown as Response<Contact>);
 
-    expect(getContactSpy).toHaveBeenCalledTimes(1);
-    expect(getContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId, false);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(TEST_CONTACT_1.contactId, true);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
   });
 
-  it('should call services and respond with 200 and result with activity contact if found', async () => {
+  it('defaults includeActivities to false when query is undefined', async () => {
     const req = {
-      params: { contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f' },
-      query: { includeActivities: true }
-    } as unknown as Request;
+      params: { contactId: TEST_CONTACT_1.contactId },
+      query: {}
+    } as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>;
 
-    getContactSpy.mockResolvedValue(TEST_CONTACT_WITH_ACTIVITY_1);
+    getSpy.mockResolvedValue(TEST_CONTACT_1);
 
-    await getContactController(
-      req as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
-      res as unknown as Response
-    );
+    await getContactController(req, res as unknown as Response<Contact>);
 
-    expect(getContactSpy).toHaveBeenCalledTimes(1);
-    expect(getContactSpy).toHaveBeenCalledWith(prismaTxMock, req.params.contactId, true);
+    expect(getSpy).toHaveBeenCalledWith(TEST_CONTACT_1.contactId, false);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_WITH_ACTIVITY_1);
+  });
+});
+
+describe('getCurrentUserContactController', () => {
+  const searchSpy = vi.spyOn(contactService, 'searchContactsService');
+
+  it('calls the service with userId from context then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    searchSpy.mockResolvedValue([TEST_CONTACT_1]);
+
+    await getCurrentUserContactController(req, res as unknown as Response<Contact, LocalContext>);
+
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith({
+      userId: [TEST_CURRENT_CONTEXT.userId]
+    });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
+  });
+});
+
+describe('matchContactsController', () => {
+  const matchSpy = vi.spyOn(contactService, 'matchContactsService');
+  const matchExactSpy = vi.spyOn(contactService, 'matchContactsExactService');
+
+  it('calls matchContactsService when user has AZUREIDIR identity', async () => {
+    const req = {
+      body: { email: 'john@example.com' }
+    } as unknown as Request<never, never, ContactSearchParameters, never>;
+
+    res.locals.currentContext = {
+      ...TEST_CURRENT_CONTEXT,
+      tokenPayload: { identity_provider: 'azureidir' }
+    };
+
+    matchSpy.mockResolvedValue([TEST_CONTACT_1]);
+
+    await matchContactsController(req, res as unknown as Response<Contact[], LocalContext>);
+
+    expect(matchSpy).toHaveBeenCalledTimes(1);
+    expect(matchSpy).toHaveBeenCalledWith({ email: 'john@example.com' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_CONTACT_1]);
+  });
+
+  it('calls matchContactsExactService when user does not have AZUREIDIR identity', async () => {
+    const req = {
+      body: { email: 'john@example.com' }
+    } as unknown as Request<never, never, ContactSearchParameters, never>;
+
+    res.locals.currentContext = {
+      ...TEST_CURRENT_CONTEXT,
+      tokenPayload: { identity_provider: 'bceid' }
+    };
+
+    matchExactSpy.mockResolvedValue([TEST_CONTACT_1]);
+
+    await matchContactsController(req, res as unknown as Response<Contact[], LocalContext>);
+
+    expect(matchExactSpy).toHaveBeenCalledTimes(1);
+    expect(matchExactSpy).toHaveBeenCalledWith({ email: 'john@example.com' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([TEST_CONTACT_1]);
   });
 });
 
 describe('searchContactsController', () => {
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+  const searchSpy = vi.spyOn(contactService, 'searchContactsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with parsed and coerced parameters then responds 200', async () => {
     const req = {
-      body: { userId: '5e3f0c19-8664-4a43-ac9e-210da336e923' }
-    } as unknown as Request;
+      body: {
+        userId: 'aaaabbbb-cccc-dddd-eeee-ffff00001111',
+        email: 'john@example.com',
+        includeActivities: 'true'
+      }
+    } as unknown as Request<never, never, ContactSearchParameters | undefined, never>;
 
-    const contacts = [TEST_CONTACT_1];
+    searchSpy.mockResolvedValue([TEST_CONTACT_1]);
 
-    searchContactsSpy.mockResolvedValue(contacts);
+    await searchContactsController(req, res as unknown as Response<Contact[]>);
 
-    await searchContactsController(
-      req as unknown as Request<never, never, ContactSearchParameters, never>,
-      res as unknown as Response
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        email: 'john@example.com',
+        includeActivities: true
+      })
     );
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'],
-      contactId: undefined,
-      email: undefined,
-      firstName: undefined,
-      lastName: undefined,
-      contactApplicantRelationship: undefined,
-      phoneNumber: undefined
-    });
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(contacts);
+    expect(res.json).toHaveBeenCalledWith([TEST_CONTACT_1]);
   });
 
-  it('adds dashes to user IDs', async () => {
+  it('handles undefined body', async () => {
     const req = {
-      body: { userId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' }
-    } as unknown as Request;
+      body: undefined
+    } as unknown as Request<never, never, ContactSearchParameters | undefined, never>;
 
-    const contacts = [TEST_CONTACT_1];
+    searchSpy.mockResolvedValue([]);
 
-    searchContactsSpy.mockResolvedValue(contacts);
+    await searchContactsController(req, res as unknown as Response<Contact[]>);
 
-    await searchContactsController(
-      req as unknown as Request<never, never, ContactSearchParameters, never>,
-      res as unknown as Response
+    expect(searchSpy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        includeActivities: undefined
+      })
     );
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
-      contactId: undefined,
-      email: undefined,
-      firstName: undefined,
-      lastName: undefined,
-      contactApplicantRelationship: undefined,
-      phoneNumber: undefined
-    });
-  });
-
-  it('adds dashes to contact IDs', async () => {
-    const req = {
-      body: { contactId: '5e3f0c1986644a43ac9e210da336e923,8b9dedd279d442c6b82f52844a8e2757' }
-    } as unknown as Request;
-
-    const contacts = [TEST_CONTACT_1];
-
-    searchContactsSpy.mockResolvedValue(contacts);
-
-    await searchContactsController(
-      req as unknown as Request<never, never, ContactSearchParameters, never>,
-      res as unknown as Response
-    );
-
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      contactId: ['5e3f0c19-8664-4a43-ac9e-210da336e923', '8b9dedd2-79d4-42c6-b82f-52844a8e2757'],
-      userId: undefined,
-      email: undefined,
-      firstName: undefined,
-      lastName: undefined,
-      contactApplicantRelationship: undefined,
-      phoneNumber: undefined
-    });
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 });
 
-describe('updateContactController', () => {
-  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
+describe('upsertContactController', () => {
+  const upsertSpy = vi.spyOn(contactService, 'upsertContactsService');
 
-  describe('no contactId in body', () => {
-    it('should call services and respond with 200 and result', async () => {
-      const req = {
-        body: {
-          userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-          email: 'first.last@gov.bc.ca',
-          firstName: 'First',
-          lastName: 'Last'
-        }
-      } as unknown as Request;
+  it('generates contactId when not provided and calls the service then responds 200', async () => {
+    const contactWithoutId = { ...TEST_CONTACT_1, contactId: undefined };
+    const req = {
+      body: contactWithoutId
+    } as unknown as Request<never, never, Contact, never>;
 
-      upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
+    upsertSpy.mockResolvedValue([TEST_CONTACT_1]);
 
-      await upsertContactController(
-        req as unknown as Request<never, never, Contact, never>,
-        res as unknown as Response<Contact, LocalContext>
-      );
+    await upsertContactController(req, res as unknown as Response<Contact, LocalContext>);
 
-      expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-      expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-        {
-          ...req.body,
-          contactId: expect.stringMatching(uuidv4Pattern) as string,
-          updatedAt: expect.any(Date) as Date,
-          updatedBy: TEST_CURRENT_CONTEXT.userId
-        }
-      ]);
-      expect(res.status).toHaveBeenCalledWith(200);
-    });
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      expect.arrayContaining([
+        expect.objectContaining({
+          contactId: expect.any(String)
+        })
+      ])
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
   });
 
-  describe('contactId in body', () => {
-    it('should call services and respond with 200 and result', async () => {
-      const req = {
-        body: {
-          contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
-          userId: '5e3f0c19-8664-4a43-ac9e-210da336e923',
-          email: 'first.last@gov.bc.ca',
-          firstName: 'First',
-          lastName: 'Last'
-        }
-      } as unknown as Request;
+  it('preserves existing contactId', async () => {
+    const req = {
+      body: TEST_CONTACT_1
+    } as unknown as Request<never, never, Contact, never>;
 
-      upsertContactsSpy.mockResolvedValueOnce([TEST_CONTACT_1]);
+    upsertSpy.mockResolvedValue([TEST_CONTACT_1]);
 
-      await upsertContactController(
-        req as unknown as Request<never, never, Contact, never>,
-        res as unknown as Response<Contact, LocalContext>
-      );
+    await upsertContactController(req, res as unknown as Response<Contact, LocalContext>);
 
-      expect(upsertContactsSpy).toHaveBeenCalledTimes(1);
-      expect(upsertContactsSpy).toHaveBeenCalledWith(prismaTxMock, [
-        {
-          ...req.body,
-          contactId: '59b6bad3-ed3c-43f6-81f9-bbd1609d880f',
-          updatedAt: expect.any(Date) as Date,
-          updatedBy: TEST_CURRENT_CONTEXT.userId
-        }
-      ]);
-      expect(res.status).toHaveBeenCalledWith(200);
-    });
+    expect(upsertSpy).toHaveBeenCalledWith([
+      expect.objectContaining({
+        contactId: TEST_CONTACT_1.contactId
+      })
+    ]);
+    expect(res.status).toHaveBeenCalledWith(200);
   });
 });

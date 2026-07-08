@@ -1,41 +1,18 @@
-import {
-  TEST_CURRENT_CONTEXT,
-  TEST_ELECTRIFICATION_PROJECT_1,
-  TEST_IDIR_USER_1,
-  TEST_NOTE_1,
-  TEST_NOTE_HISTORY_1,
-  TEST_NOTE_HISTORY_2
-} from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
 import {
   createNoteHistoryController,
   deleteNoteHistoryController,
-  listBringForwardController,
-  listNoteHistoryController,
+  listBringForwardsController,
+  listNoteHistoriesController,
   updateNoteHistoryController
 } from '../../../src/controllers/noteHistory.ts';
-import { generateNullDeleteStamps, generateNullUpdateStamps } from '../../../src/db/utils/utils.ts';
-import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
-import * as generalProjectService from '../../../src/services/generalProject.ts';
-import * as housingProjectService from '../../../src/services/housingProject.ts';
-import * as noteService from '../../../src/services/note.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
-import * as userService from '../../../src/services/user.ts';
-import { Initiative, Resource } from '../../../src/utils/enums/application.ts';
+import { Resource } from '../../../src/utils/enums/application.ts';
 import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type {
-  ElectrificationProject,
-  Enquiry,
-  GeneralProject,
-  HousingProject,
-  LocalContext,
-  NoteHistory
-} from '../../../src/types/index.ts';
+import type { LocalContext, NoteHistory } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -51,256 +28,121 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
-
-afterEach(() => {
-  vi.resetAllMocks();
-});
-
-const CURRENT_AUTHORIZATION = {
-  groups: [],
-  attributes: [] as string[]
-};
-
-TEST_CURRENT_CONTEXT.initiative = Initiative.ELECTRIFICATION;
 
 describe('createNoteHistoryController', () => {
-  const createHistorySpy = vi.spyOn(noteHistoryService, 'createNoteHistory');
-  const createNoteSpy = vi.spyOn(noteService, 'createNote');
+  const createSpy = vi.spyOn(noteHistoryService, 'createNoteHistoryService');
 
-  it('should call services and respond with 201 and result', async () => {
+  it('calls the service with note history data then responds 201', async () => {
     const req = {
-      body: { ...TEST_NOTE_HISTORY_1, note: 'Some text' }
-    };
+      body: {
+        ...TEST_NOTE_HISTORY_1,
+        note: 'test note text'
+      }
+    } as unknown as Request<never, never, NoteHistory & { note: string }>;
 
-    createHistorySpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
-    createNoteSpy.mockResolvedValue(TEST_NOTE_1);
+    createSpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
 
-    await createNoteHistoryController(
-      req as unknown as Request<never, never, NoteHistory & { note: string }>,
-      res as unknown as Response
-    );
+    await createNoteHistoryController(req, res as unknown as Response);
 
-    expect(createHistorySpy).toHaveBeenCalledTimes(1);
-    expect(createHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_NOTE_HISTORY_1,
-      noteHistoryId: expect.stringMatching(uuidv4Pattern) as string,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern) as string,
-      noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId,
-      note: req.body.note,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      ...generateNullUpdateStamps(),
-      ...generateNullDeleteStamps()
-    });
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(expect.objectContaining(TEST_NOTE_HISTORY_1), 'test note text');
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({ ...TEST_NOTE_HISTORY_1, note: [TEST_NOTE_1] });
+    expect(res.json).toHaveBeenCalledWith(TEST_NOTE_HISTORY_1);
   });
 });
 
 describe('deleteNoteHistoryController', () => {
-  const deleteHistorySpy = vi.spyOn(noteHistoryService, 'deleteNoteHistory');
+  const deleteSpy = vi.spyOn(noteHistoryService, 'deleteNoteHistoryService');
 
-  it('should call services and respond with 204', async () => {
+  it('calls the service with noteHistoryId then responds 204', async () => {
     const req = {
-      params: { noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1' }
-    };
+      params: { noteHistoryId: 'nh-123' }
+    } as unknown as Request<{ noteHistoryId: string }>;
 
-    deleteHistorySpy.mockResolvedValue();
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteNoteHistoryController(req as unknown as Request<{ noteHistoryId: string }>, res as unknown as Response);
+    await deleteNoteHistoryController(req, res as unknown as Response);
 
-    expect(deleteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(deleteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(req.params.noteHistoryId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
   });
 });
 
-describe('listBringForwardController', () => {
-  const listSpy = vi.spyOn(noteHistoryService, 'listBringForward');
-  const searchElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
-  const searchGeneralProjectsSpy = vi.spyOn(generalProjectService, 'searchGeneralProjects');
-  const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchHousingProjects');
-  const searchEnquiries = vi.spyOn(enquiryService, 'searchEnquiries');
-  const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+describe('listBringForwardsController', () => {
+  const listSpy = vi.spyOn(noteHistoryService, 'listBringForwardsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with initiative and bringForwardState then responds 200', async () => {
     const req = {
-      query: {
-        bringForwardState: BringForwardType.UNRESOLVED
-      }
-    };
+      query: { bringForwardState: BringForwardType.UNRESOLVED }
+    } as unknown as Request<never, never, never, { bringForwardState?: BringForwardType }>;
 
-    const NOTE_HISTORY_LIST: NoteHistory[] = [
-      { ...TEST_NOTE_HISTORY_1, createdBy: '5e3f0c19-8664-4a43-ac9e-210da336e923' }
-    ];
+    listSpy.mockResolvedValue([]);
 
-    const ENQUIRY_LIST: Enquiry[] = [];
-    const ELECTRIFICATION_PROJECT_LIST: ElectrificationProject[] = [TEST_ELECTRIFICATION_PROJECT_1];
-    const GENERAL_PROJECT_LIST: GeneralProject[] = [];
-    const HOUSING_PROJECT_LIST: HousingProject[] = [];
-    const USER_LIST = [TEST_IDIR_USER_1];
-
-    listSpy.mockResolvedValue(NOTE_HISTORY_LIST);
-    searchElectrificationProjectsSpy.mockResolvedValue(ELECTRIFICATION_PROJECT_LIST);
-    searchGeneralProjectsSpy.mockResolvedValue(GENERAL_PROJECT_LIST);
-    searchHousingProjectsSpy.mockResolvedValue(HOUSING_PROJECT_LIST);
-    searchEnquiries.mockResolvedValue(ENQUIRY_LIST);
-    searchUsersSpy.mockResolvedValue(USER_LIST);
-
-    await listBringForwardController(
-      req as unknown as Request<never, never, never, { bringForwardState?: BringForwardType }>,
-      res as unknown as Response
-    );
+    await listBringForwardsController(req, res as unknown as Response<unknown, LocalContext>);
 
     expect(listSpy).toHaveBeenCalledTimes(1);
-    expect(listSpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, BringForwardType.UNRESOLVED);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
-    expect(searchGeneralProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchGeneralProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
-    expect(searchHousingProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchHousingProjectsSpy).toHaveBeenCalledWith(prismaTxMock, { activityId: ['ACTI1234'] });
-    expect(searchUsersSpy).toHaveBeenCalledTimes(1);
-    expect(searchUsersSpy).toHaveBeenCalledWith(prismaTxMock, { userId: ['5e3f0c19-8664-4a43-ac9e-210da336e923'] });
+    expect(listSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT.initiative, BringForwardType.UNRESOLVED);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([
-      {
-        activityId: 'ACTI1234',
-        noteId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1',
-        electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
-        housingProjectId: undefined,
-        enquiryId: undefined,
-        title: 'Title',
-        projectName: 'NAME',
-        createdByFullName: 'Doe, John',
-        bringForwardDate: NOTE_HISTORY_LIST[0].bringForwardDate?.toISOString(),
-        escalateToDirector: false,
-        escalateToSupervisor: false
-      }
-    ]);
+    expect(res.json).toHaveBeenCalledWith([]);
   });
 });
 
-describe('listNoteHistoryController', () => {
-  const listNoteHistorySpy = vi.spyOn(noteHistoryService, 'listNoteHistory');
+describe('listNoteHistoriesController', () => {
+  const listSpy = vi.spyOn(noteHistoryService, 'listNoteHistoriesService');
 
-  const req = {
-    params: { activityId: 'ACTI1234' }
-  };
+  it('calls the service with authorization and activityId then responds 200', async () => {
+    const req = {
+      params: { activityId: 'acti-456' }
+    } as unknown as Request<{ activityId: string }>;
 
-  it('should call services and respond with 200 and result', async () => {
-    const NOTE_HISTORY_LIST: NoteHistory[] = [TEST_NOTE_HISTORY_1];
+    listSpy.mockResolvedValue([TEST_NOTE_HISTORY_1]);
 
-    listNoteHistorySpy.mockResolvedValue(NOTE_HISTORY_LIST);
+    await listNoteHistoriesController(req, res as unknown as Response<unknown, LocalContext>);
 
-    await listNoteHistoryController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
-
-    expect(listNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(listNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, req.params.activityId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(NOTE_HISTORY_LIST);
-  });
-
-  it('should filter results if scope:self and shownToProponent = true', async () => {
-    (res.locals as unknown as LocalContext).currentAuthorization = CURRENT_AUTHORIZATION;
-    (res.locals as unknown as LocalContext).currentAuthorization.attributes.push('scope:self');
-
-    const NOTE_HISTORY_LIST: NoteHistory[] = [TEST_NOTE_HISTORY_1, TEST_NOTE_HISTORY_2];
-
-    listNoteHistorySpy.mockResolvedValue(NOTE_HISTORY_LIST);
-
-    await listNoteHistoryController(req as unknown as Request<{ activityId: string }>, res as unknown as Response);
-
-    expect(listNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(listNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.activityId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([NOTE_HISTORY_LIST[1]]);
+    expect(res.json).toHaveBeenCalledWith([TEST_NOTE_HISTORY_1]);
   });
 });
 
 describe('updateNoteHistoryController', () => {
-  const createNoteSpy = vi.spyOn(noteService, 'createNote');
-  const getNoteHistorySpy = vi.spyOn(noteHistoryService, 'getNoteHistory');
-  const updateNoteHistorySpy = vi.spyOn(noteHistoryService, 'updateNoteHistory');
+  const updateSpy = vi.spyOn(noteHistoryService, 'updateNoteHistoryService');
 
-  const UPDATED_HISTORY: NoteHistory = { ...TEST_NOTE_HISTORY_1, title: 'New title' };
-
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with history data and note then responds 200', async () => {
     const req = {
-      body: { ...UPDATED_HISTORY },
-
-      params: {
-        noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
+      params: { noteHistoryId: 'nh-123' },
+      body: {
+        ...TEST_NOTE_HISTORY_1,
+        note: 'updated note',
+        resource: Resource.ENQUIRY
       }
-    };
+    } as unknown as Request<
+      { noteHistoryId: string },
+      never,
+      NoteHistory & { note: string | undefined; resource: Resource }
+    >;
 
-    getNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
-    updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
+    updateSpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
 
-    await updateNoteHistoryController(
-      req as unknown as Request<
-        { noteHistoryId: string },
-        never,
-        NoteHistory & { note: string | undefined; resource: Resource }
-      >,
-      res as unknown as Response<NoteHistory, LocalContext>
+    await updateNoteHistoryController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(updateSpy).toHaveBeenCalledTimes(1);
+    expect(updateSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      expect.objectContaining({ noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId }),
+      'updated note',
+      Resource.ENQUIRY
     );
-
-    expect(updateNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(updateNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...UPDATED_HISTORY,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(getNoteHistorySpy).toHaveBeenCalledTimes(1);
-    expect(getNoteHistorySpy).toHaveBeenCalledWith(prismaTxMock, req.params.noteHistoryId);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(UPDATED_HISTORY);
-  });
-
-  it('creates a new note if given', async () => {
-    const req = {
-      body: { ...UPDATED_HISTORY, note: 'Some text' },
-      params: {
-        noteHistoryId: 'd9bc3e53-2aad-4160-903f-e62e31e0efd1'
-      }
-    };
-
-    getNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
-    updateNoteHistorySpy.mockResolvedValue(UPDATED_HISTORY);
-
-    await updateNoteHistoryController(
-      req as unknown as Request<
-        { noteHistoryId: string },
-        never,
-        NoteHistory & { note: string | undefined; resource: Resource }
-      >,
-      res as unknown as Response<NoteHistory, LocalContext>
-    );
-
-    expect(createNoteSpy).toHaveBeenCalledTimes(1);
-    expect(createNoteSpy).toHaveBeenCalledWith(prismaTxMock, {
-      noteId: expect.stringMatching(uuidv4Pattern) as string,
-      noteHistoryId: req.params.noteHistoryId,
-      note: req.body.note,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      ...generateNullUpdateStamps(),
-      ...generateNullDeleteStamps()
-    });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(UPDATED_HISTORY);
+    expect(res.json).toHaveBeenCalledWith(TEST_NOTE_HISTORY_1);
   });
 });

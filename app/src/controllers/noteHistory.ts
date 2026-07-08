@@ -17,7 +17,7 @@ export const createNoteHistoryController = async (
   res: Response
 ) => {
   const { note, ...history } = req.body;
-  const response = createNoteHistoryService(history, note);
+  const response = await createNoteHistoryService(history, note);
   res.status(201).json(response);
 };
 

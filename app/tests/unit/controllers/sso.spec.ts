@@ -1,9 +1,11 @@
 import { searchIdirUsersController } from '../../../src/controllers/sso.ts';
-import * as ssoService from '../../../src/external/sso.ts';
+import * as ssoExternal from '../../../src/external/sso.ts';
 
 import type { Request, Response } from 'express';
-import type { Mock } from 'vitest';
 import type { IdirSearchParameters } from '../../../src/types/index.ts';
+import type { Mock } from 'vitest';
+
+vi.mock('config');
 
 const mockResponse = () => {
   const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
@@ -18,26 +20,22 @@ const mockResponse = () => {
 let res = mockResponse();
 beforeEach(() => {
   res = mockResponse();
-});
-
-afterEach(() => {
-  vi.resetAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('searchIdirUsersController', () => {
-  const spy = vi.spyOn(ssoService, 'searchIdirUsers');
+  it('should call searchIdirUsers with query params and respond with status and data', async () => {
+    const mockResp = { status: 200, data: [{ id: 'user-1', name: 'Test User' }] };
+    vi.spyOn(ssoExternal, 'searchIdirUsers').mockResolvedValueOnce(mockResp);
 
-  it('passes query through and forwards status and data', async () => {
-    const query: IdirSearchParameters = { firstName: 'Jane', lastName: 'Doe', email: 'jane@example.com' };
-    spy.mockResolvedValueOnce({ status: 200, data: [{ id: 1 }] });
+    const query: IdirSearchParameters = { firstName: 'Jane', lastName: 'Doe' } as unknown as IdirSearchParameters;
+    const req = { query } as unknown as Request<never, never, never, IdirSearchParameters>;
 
-    await searchIdirUsersController(
-      { query } as Request<never, never, never, IdirSearchParameters>,
-      res as unknown as Response
-    );
+    await searchIdirUsersController(req, res as unknown as Response);
 
-    expect(spy).toHaveBeenCalledWith(query);
+    expect(ssoExternal.searchIdirUsers).toHaveBeenCalledTimes(1);
+    expect(ssoExternal.searchIdirUsers).toHaveBeenCalledWith(query);
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([{ id: 1 }]);
+    expect(res.json).toHaveBeenCalledWith([{ id: 'user-1', name: 'Test User' }]);
   });
 });

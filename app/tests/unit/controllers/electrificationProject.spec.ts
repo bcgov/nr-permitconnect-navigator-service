@@ -1,46 +1,37 @@
 import { Prisma } from '@prisma/client';
 
 import {
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
-  TEST_ELECTRIFICATION_INTAKE,
-  TEST_ACTIVITY_ELECTRIFICATION,
-  TEST_ELECTRIFICATION_PROJECT_1,
-  TEST_ELECTRIFICATION_PROJECT_CREATE,
   TEST_ELECTRIFICATION_DRAFT,
-  TEST_CONTACT_1,
-  TEST_ELECTRIFICATION_PROJECT_UPDATE
-} from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock';
+  TEST_ELECTRIFICATION_INTAKE,
+  TEST_ELECTRIFICATION_PROJECT_1,
+  TEST_ELECTRIFICATION_PROJECT_CREATE
+} from '../data/index.ts';
 import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
-  getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
   getElectrificationProjectDraftController,
   getElectrificationProjectDraftsController,
-  getElectrificationProjectsController,
   getElectrificationProjectStatisticsController,
+  listElectrificationProjectActivityIdsController,
+  listElectrificationProjectsController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
 } from '../../../src/controllers/electrificationProject.ts';
-import * as resposeFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as activityService from '../../../src/domains/activity.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-import * as contactService from '../../../src/services/contact.ts';
+import * as activityService from '../../../src/services/activity.ts';
 import * as draftService from '../../../src/services/draft.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
 import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
-import { uuidv4Pattern } from '../../../src/utils/regexp.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
-  ActivityContact,
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
@@ -64,557 +55,359 @@ const mockResponse = () => {
 
 let res = mockResponse();
 beforeEach(() => {
+  vi.clearAllMocks();
   res = mockResponse();
   res.locals.currentContext = TEST_CURRENT_CONTEXT;
-});
-
-afterEach(() => {
-  /*
-   * Must use clearAllMocks when using the mocked config
-   * resetAllMocks seems to cause strange issues such as
-   * functions not calling as expected
-   */
-  vi.clearAllMocks();
+  res.locals.currentAuthorization = TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR;
 });
 
 describe('createElectrificationProjectController', () => {
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const createElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProject');
+  const createSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProjectService');
 
-  it('should call services and respond with 201 and result', async () => {
+  it('calls the service with body and context then responds 201', async () => {
     const req = {
-      body: {
-        basic: {
-          projectName: null,
-          projectDescription: null,
-          registeredId: null,
-          registeredName: null
-        },
-        project: {
-          projectType: null,
-          bcHydroNumber: null
-        }
-      }
-    };
+      body: TEST_ELECTRIFICATION_INTAKE
+    } as unknown as Request<never, never, ElectrificationProjectIntake>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
+    createSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
 
-    await createElectrificationProjectController(
-      req as unknown as Request<never, never, ElectrificationProjectIntake>,
-      res as unknown as Response
-    );
+    await createElectrificationProjectController(req, res as unknown as Response<ElectrificationProject, LocalContext>);
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...TEST_ELECTRIFICATION_PROJECT_CREATE,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(createSpy).toHaveBeenCalledTimes(1);
+    expect(createSpy).toHaveBeenCalledWith(TEST_ELECTRIFICATION_INTAKE, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...TEST_ELECTRIFICATION_PROJECT_CREATE,
-      electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
-      submittedAt: expect.any(Date) as Date,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_CREATE);
+  });
+
+  it('provides empty body when POST body is undefined', async () => {
+    const req = {
+      body: undefined
+    } as unknown as Request<never, never, ElectrificationProjectIntake>;
+
+    createSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
+
+    await createElectrificationProjectController(req, res as unknown as Response<ElectrificationProject, LocalContext>);
+
+    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
 describe('deleteElectrificationProjectController', () => {
-  const getElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProject');
-  const deleteElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'deleteElectrificationProject');
-  const deleteActivitySpy = vi.spyOn(activityService, 'deleteActivity');
+  const getSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjectService');
+  const deleteSpy = vi.spyOn(activityService, 'deleteActivityService');
 
-  it('should call services and respond with 204', async () => {
+  it('fetches project and deletes activity then responds 204', async () => {
     const req = {
       params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ electrificationProjectId: string }>;
 
-    getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
-    deleteActivitySpy.mockResolvedValue();
+    getSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject);
+    deleteSpy.mockResolvedValue(undefined);
 
-    await deleteElectrificationProjectController(
-      req as unknown as Request<{ electrificationProjectId: string }>,
-      res as unknown as Response
-    );
+    await deleteElectrificationProjectController(req, res as unknown as Response);
 
-    expect(getElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
-    expect(deleteElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(deleteElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(deleteActivitySpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivitySpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_PROJECT_1.activityId, {
-      deletedAt: expect.any(Date) as Date,
-      deletedBy: TEST_CURRENT_CONTEXT.userId
-    });
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1.activityId);
     expect(res.status).toHaveBeenCalledWith(204);
     expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('deleteElectrificationProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-  const deleteActivityHardSpy = vi.spyOn(activityService, 'deleteActivityHard');
-
-  it('should call services and respond with 204', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
-    deleteActivityHardSpy.mockResolvedValue();
-
-    await deleteElectrificationProjectDraftController(
-      req as unknown as Request<{ draftId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(deleteActivityHardSpy).toHaveBeenCalledTimes(1);
-    expect(deleteActivityHardSpy).toHaveBeenCalledWith(prismaTxMock, TEST_ELECTRIFICATION_DRAFT.activityId);
-    expect(res.status).toHaveBeenCalledWith(204);
-    expect(res.end).toHaveBeenCalledWith();
-  });
-});
-
-describe('getElectrificationProjectActivityIdsController', () => {
-  const getElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {};
-
-    getElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
-
-    await getElectrificationProjectActivityIdsController(req as unknown as Request, res as unknown as Response);
-
-    expect(getElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(getElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1.activityId]);
-  });
-});
-
-describe('getElectrificationProjectDraftController', () => {
-  const getDraftSpy = vi.spyOn(draftService, 'getDraft');
-
-  it('should call services and respond with 200', async () => {
-    const req = {
-      params: { draftId: 'ee25619b-4145-4fc6-aa47-c79f1213eaa6' }
-    };
-
-    getDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
-
-    await getElectrificationProjectDraftController(
-      req as unknown as Request<{ draftId: string }>,
-      res as unknown as Response
-    );
-
-    expect(getDraftSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.params.draftId);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_DRAFT);
-  });
-});
-
-describe('getElectrificationProjectDraftsController', () => {
-  const getDraftsSpy = vi.spyOn(draftService, 'getDrafts');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
-
-  it('should call services and respond with 200', async () => {
-    const req = {};
-
-    getDraftsSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
-    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
-
-    await getElectrificationProjectDraftsController(
-      req as unknown as Request,
-      res as unknown as Response<Draft[], LocalContext>
-    );
-
-    expect(getDraftsSpy).toHaveBeenCalledTimes(1);
-    expect(getDraftsSpy).toHaveBeenCalledWith(prismaTxMock, DraftCode.ELECTRIFICATION_PROJECT);
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_ELECTRIFICATION_DRAFT]);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_DRAFT]);
-  });
-});
-
-describe('getElectrificationProjectStatistics', () => {
-  const statisticsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjectStatistics');
-
-  it('should call services and respond with 200 and result', async () => {
-    const req = {
-      query: {
-        dateFrom: '',
-        dateTo: '',
-        monthYear: '',
-        userId: ''
-      }
-    };
-
-    const statistics: ElectrificationProjectStatistics[] = [
-      {
-        total_submissions: 0,
-        total_submissions_between: 0,
-        total_submissions_monthyear: 0,
-        total_submissions_assignedto: 0,
-        state_new: 0,
-        state_inprogress: 0,
-        state_delayed: 0,
-        state_completed: 0,
-        queue_1: 0,
-        queue_2: 0,
-        queue_3: 0,
-        escalation: 0,
-        general_enquiry: 0,
-        guidance: 0,
-        inapplicable: 0,
-        status_request: 0,
-        multi_permits_needed: 0
-      }
-    ];
-
-    statisticsSpy.mockResolvedValue(statistics);
-
-    await getElectrificationProjectStatisticsController(
-      req as unknown as Request<never, never, never, StatisticsFilters>,
-      res as unknown as Response
-    );
-
-    expect(statisticsSpy).toHaveBeenCalledTimes(1);
-    expect(statisticsSpy).toHaveBeenCalledWith(prismaTxMock, req.query);
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(statistics[0]);
   });
 });
 
 describe('getElectrificationProjectController', () => {
-  const getElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProject');
-  const getRelatedEnquiriesSpy = vi.spyOn(enquiryService, 'getRelatedEnquiries');
+  const getSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjectService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with projectId then responds 200', async () => {
     const req = {
       params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' }
-    };
+    } as unknown as Request<{ electrificationProjectId: string }>;
 
-    getElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
-    getRelatedEnquiriesSpy.mockResolvedValue([]);
+    getSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject);
 
-    await getElectrificationProjectController(
-      req as unknown as Request<{ electrificationProjectId: string }>,
-      res as unknown as Response
-    );
+    await getElectrificationProjectController(req, res as unknown as Response<ElectrificationProject>);
 
-    expect(getElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(getElectrificationProjectSpy).toHaveBeenCalledWith(prismaTxMock, req.params.electrificationProjectId);
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.electrificationProjectId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1);
   });
 });
 
-describe('getElectrificationProjectsController', () => {
-  const electrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+describe('getElectrificationProjectStatisticsController', () => {
+  const statsSpy = vi.spyOn(electrificationProjectService, 'getElectrificationProjectStatisticsService');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with query filters then responds 200', async () => {
+    const mockStats = {
+      count: 5,
+      new: 2,
+      inProgress: 2,
+      submitted: 1
+    } as unknown as ElectrificationProjectStatistics;
+
     const req = {
-      query: {}
-    };
+      query: { applicationsStatus: 'NEW' }
+    } as unknown as Request<never, never, never, StatisticsFilters>;
 
-    electrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
-    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+    statsSpy.mockResolvedValue([mockStats]);
 
-    await getElectrificationProjectsController(
-      req as unknown as Request,
+    await getElectrificationProjectStatisticsController(
+      req,
+      res as unknown as Response<ElectrificationProjectStatistics>
+    );
+
+    expect(statsSpy).toHaveBeenCalledTimes(1);
+    expect(statsSpy).toHaveBeenCalledWith({ applicationsStatus: 'NEW' });
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockStats);
+  });
+});
+
+describe('listElectrificationProjectActivityIdsController', () => {
+  const listIdsSpy = vi.spyOn(electrificationProjectService, 'listElectrificationProjectActivityIdsService');
+
+  it('calls the service and responds 200', async () => {
+    const mockIds = ['ACTI1234', 'ACTI5678'];
+    const req = {} as unknown as Request;
+
+    listIdsSpy.mockResolvedValue(mockIds);
+
+    await listElectrificationProjectActivityIdsController(req, res as unknown as Response);
+
+    expect(listIdsSpy).toHaveBeenCalledTimes(1);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(mockIds);
+  });
+});
+
+describe('listElectrificationProjectsController', () => {
+  const listSpy = vi.spyOn(electrificationProjectService, 'listElectrificationProjectsService');
+
+  it('calls the service with authorization and context then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
+
+    await listElectrificationProjectsController(
+      req,
       res as unknown as Response<ElectrificationProject[], LocalContext>
     );
 
-    expect(electrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(electrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock);
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
   });
 });
 
 describe('searchElectrificationProjectsController', () => {
-  const searchElectrificationProjectsSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
-  const filterSpy = vi.spyOn(resposeFiltering, 'filterActivityResponseByScope');
+  const searchSpy = vi.spyOn(electrificationProjectService, 'searchElectrificationProjects');
 
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with search params and context then responds 200', async () => {
     const req = {
-      body: { activityId: ['ACTI1234', 'ACTI5678'], includeUser: false }
-    };
+      body: { projectName: 'test' }
+    } as unknown as Request<never, never, ElectrificationProjectSearchParameters | undefined, never>;
 
-    searchElectrificationProjectsSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
-    filterSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1]);
+    searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 
     await searchElectrificationProjectsController(
-      req as unknown as Request<never, never, ElectrificationProjectSearchParameters, never>,
+      req,
       res as unknown as Response<ElectrificationProject[], LocalContext>
     );
 
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledTimes(1);
-    expect(searchElectrificationProjectsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      activityId: ['ACTI1234', 'ACTI5678'],
-      includeUser: false
-    });
-    expect(filterSpy).toHaveBeenCalledTimes(1);
-    expect(filterSpy).toHaveBeenCalledWith(prismaTxMock, res.locals, [TEST_ELECTRIFICATION_PROJECT_1]);
+    expect(searchSpy).toHaveBeenCalledTimes(1);
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      expect.objectContaining({
+        projectName: 'test',
+        includeUser: undefined
+      })
+    );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
   });
-});
 
-describe('submitElectrificationProjectDraftController', () => {
-  const createElectrificationProjectSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProject');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-  const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
-  const createActivityContactSpy = vi.spyOn(activityContactService, 'createActivityContact');
-  const deleteDraftSpy = vi.spyOn(draftService, 'deleteDraft');
-  const upsertContactsSpy = vi.spyOn(contactService, 'upsertContacts');
-
-  it('should call services and respond with 201 and result', async () => {
+  it('coerces includeUser query parameter to boolean', async () => {
     const req = {
-      body: { ...TEST_ELECTRIFICATION_INTAKE }
-    };
+      body: { includeUser: 'true' }
+    } as unknown as Request<never, never, ElectrificationProjectSearchParameters | undefined, never>;
 
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
-    searchContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
-    createActivityContactSpy.mockResolvedValue({
-      activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      contactId: TEST_CONTACT_1.contactId
-    } as ActivityContact);
-    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
-    upsertContactsSpy.mockResolvedValue([TEST_CONTACT_1]);
+    searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 
-    await submitElectrificationProjectDraftController(
-      req as unknown as Request<never, never, ElectrificationProjectIntake>,
-      res as unknown as Response
+    await searchElectrificationProjectsController(
+      req,
+      res as unknown as Response<ElectrificationProject[], LocalContext>
     );
 
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createActivitySpy).toHaveBeenCalledWith(prismaTxMock, Initiative.ELECTRIFICATION, {
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(searchContactsSpy).toHaveBeenCalledTimes(1);
-    expect(searchContactsSpy).toHaveBeenCalledWith(prismaTxMock, {
-      userId: [TEST_CURRENT_CONTEXT.userId]
-    });
-    expect(createActivityContactSpy).toHaveBeenCalledTimes(1);
-    expect(createActivityContactSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      TEST_ACTIVITY_ELECTRIFICATION.activityId,
-      TEST_CONTACT_1.contactId,
-      ActivityContactRole.PRIMARY
-    );
-    expect(createElectrificationProjectSpy).toHaveBeenCalledTimes(1);
-    expect(createElectrificationProjectSpy).toHaveBeenCalledWith(
-      prismaTxMock,
+    expect(searchSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
       expect.objectContaining({
-        ...TEST_ELECTRIFICATION_PROJECT_1,
-        electrificationProjectId: expect.stringMatching(uuidv4Pattern) as string,
-        submittedAt: expect.any(Date) as Date,
-        createdAt: expect.any(Date) as Date,
-        createdBy: TEST_CURRENT_CONTEXT.userId
-      })
-    );
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith({
-      ...TEST_ELECTRIFICATION_PROJECT_1,
-      contact: TEST_CONTACT_1
-    });
-  });
-
-  it('should delete associated draft if it exists', async () => {
-    const req = {
-      body: { ...TEST_ELECTRIFICATION_INTAKE, draftId: '44dc87a5-a441-4904-8a27-11f8a41c8d87' }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
-    createElectrificationProjectSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1);
-    deleteDraftSpy.mockResolvedValue();
-
-    await submitElectrificationProjectDraftController(
-      req as unknown as Request<never, never, ElectrificationProjectIntake>,
-      res as unknown as Response
-    );
-
-    expect(deleteDraftSpy).toHaveBeenCalledTimes(1);
-    expect(deleteDraftSpy).toHaveBeenCalledWith(prismaTxMock, req.body.draftId);
-  });
-});
-
-describe('updateElectrificationProjectDraftController', () => {
-  const createDraftSpy = vi.spyOn(draftService, 'createDraft');
-  const updateDraftSpy = vi.spyOn(draftService, 'updateDraft');
-  const createActivitySpy = vi.spyOn(activityService, 'createActivity');
-
-  it('should call services and respond with 201 and result', async () => {
-    const req = {
-      body: {
-        data: {
-          basic: {
-            projectApplicantType: 'Business',
-            projectName: 'TheProject'
-          },
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          }
-        }
-      }
-    };
-
-    createActivitySpy.mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION);
-    createDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
-
-    await upsertElectrificationProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(createActivitySpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledTimes(1);
-    expect(createDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      draftId: expect.stringMatching(uuidv4Pattern) as string,
-      activityId: 'ACTI1234',
-      draftCode: DraftCode.ELECTRIFICATION_PROJECT,
-      data: req.body.data,
-      createdAt: expect.any(Date) as Date,
-      createdBy: TEST_CURRENT_CONTEXT.userId,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null
-    });
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
-        data: expect.any(Object)
-      })
-    );
-  });
-
-  it('updates draft with the given draftId and activityId', async () => {
-    const req = {
-      body: {
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        data: {
-          basic: {
-            projectApplicantType: 'Business',
-            projectName: 'TheProject'
-          },
-          contact: {
-            firstName: 'test',
-            lastName: 'person'
-          }
-        }
-      }
-    };
-
-    updateDraftSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
-
-    await upsertElectrificationProjectDraftController(
-      req as unknown as Request<never, never, Draft>,
-      res as unknown as Response
-    );
-
-    expect(updateDraftSpy).toHaveBeenCalledTimes(1);
-    expect(updateDraftSpy).toHaveBeenCalledWith(prismaTxMock, {
-      ...req.body,
-      updatedAt: expect.any(Date) as Date,
-      updatedBy: TEST_CURRENT_CONTEXT.userId
-    });
-    expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(
-      expect.objectContaining({
-        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
-        activityId: 'ACTI1234',
-        draftCode: DraftCode.ELECTRIFICATION_PROJECT,
-        data: expect.any(Object)
+        includeUser: true
       })
     );
   });
 });
 
 describe('updateElectrificationProjectController', () => {
-  const updateSpy = vi.spyOn(electrificationProjectService, 'updateElectrificationProject');
+  const updateSpy = vi.spyOn(electrificationProjectService, 'updateElectrificationProjectService');
 
-  const { electrificationProjectId } = TEST_ELECTRIFICATION_PROJECT_1;
-
-  const UPDATED_PROJECT: ElectrificationProject = {
-    ...TEST_ELECTRIFICATION_PROJECT_1,
-    ...TEST_ELECTRIFICATION_PROJECT_UPDATE
-  };
-
-  it('should call services and respond with 200 and result', async () => {
+  it('calls the service with update data and projectId then responds 200', async () => {
+    const updateData = { projectName: 'Updated Name' };
     const req = {
-      body: TEST_ELECTRIFICATION_PROJECT_UPDATE,
+      params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
+      body: updateData
+    } as unknown as Request<{ electrificationProjectId: string }, never, Prisma.electrification_projectUpdateInput>;
 
-      params: {
-        electrificationProjectId
-      }
-    };
+    updateSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject);
 
-    updateSpy.mockResolvedValue(UPDATED_PROJECT);
-
-    await updateElectrificationProjectController(
-      req as unknown as Request<
-        { electrificationProjectId: string },
-        never,
-        Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>
-      >,
-      res as unknown as Response
-    );
+    await updateElectrificationProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(
-      prismaTxMock,
-      {
-        ...TEST_ELECTRIFICATION_PROJECT_UPDATE,
-        updatedAt: expect.any(Date) as Date,
-        updatedBy: TEST_CURRENT_CONTEXT.userId
-      },
-      electrificationProjectId
+    expect(updateSpy).toHaveBeenCalledWith(updateData, req.params.electrificationProjectId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1);
+  });
+});
+
+describe('deleteElectrificationProjectDraftController', () => {
+  const deleteSpy = vi.spyOn(draftService, 'deleteDraftService');
+
+  it('calls the service with draftId then responds 204', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    deleteSpy.mockResolvedValue(undefined);
+
+    await deleteElectrificationProjectDraftController(req, res as unknown as Response);
+
+    expect(deleteSpy).toHaveBeenCalledTimes(1);
+    expect(deleteSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(204);
+    expect(res.end).toHaveBeenCalledWith();
+  });
+});
+
+describe('getElectrificationProjectDraftController', () => {
+  const getSpy = vi.spyOn(draftService, 'getDraftService');
+
+  it('calls the service with draftId then responds 200', async () => {
+    const req = {
+      params: { draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102' }
+    } as unknown as Request<{ draftId: string }>;
+
+    getSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
+
+    await getElectrificationProjectDraftController(req, res as unknown as Response<Draft>);
+
+    expect(getSpy).toHaveBeenCalledTimes(1);
+    expect(getSpy).toHaveBeenCalledWith(req.params.draftId);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_DRAFT);
+  });
+});
+
+describe('getElectrificationProjectDraftsController', () => {
+  const listSpy = vi.spyOn(draftService, 'listDraftsService');
+
+  it('calls the service with authorization, context and draft code then responds 200', async () => {
+    const req = {} as unknown as Request;
+
+    listSpy.mockResolvedValue([TEST_ELECTRIFICATION_DRAFT]);
+
+    await getElectrificationProjectDraftsController(req, res as unknown as Response<Draft[], LocalContext>);
+
+    expect(listSpy).toHaveBeenCalledTimes(1);
+    expect(listSpy).toHaveBeenCalledWith(
+      TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      TEST_CURRENT_CONTEXT,
+      DraftCode.ELECTRIFICATION_PROJECT
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith(UPDATED_PROJECT);
+    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_DRAFT]);
+  });
+});
+
+describe('submitElectrificationProjectDraftController', () => {
+  const submitSpy = vi.spyOn(electrificationProjectService, 'submitElectrificationProjectDraftService');
+
+  it('calls the service with draft and context then responds 201', async () => {
+    const req = {
+      body: {
+        ...TEST_ELECTRIFICATION_INTAKE,
+        draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
+      }
+    } as unknown as Request<never, never, ElectrificationProjectIntake>;
+
+    submitSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
+
+    await submitElectrificationProjectDraftController(
+      req,
+      res as unknown as Response<ElectrificationProject, LocalContext>
+    );
+
+    expect(submitSpy).toHaveBeenCalledTimes(1);
+    expect(submitSpy).toHaveBeenCalledWith(
+      req.body.draftId,
+      req.body,
+      TEST_ELECTRIFICATION_INTAKE.contact,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_CREATE);
+  });
+});
+
+describe('upsertElectrificationProjectDraftController', () => {
+  const upsertSpy = vi.spyOn(draftService, 'upsertDraftService');
+
+  it('calls the service with draft data and draft code, responds 201 when creating', async () => {
+    const req = {
+      body: {
+        ...TEST_ELECTRIFICATION_DRAFT,
+        draftId: undefined
+      }
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
+
+    await upsertElectrificationProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      undefined,
+      expect.objectContaining({
+        draftId: undefined
+      }),
+      Initiative.ELECTRIFICATION,
+      DraftCode.ELECTRIFICATION_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_DRAFT);
+  });
+
+  it('calls the service and responds 200 when updating', async () => {
+    const req = {
+      body: TEST_ELECTRIFICATION_DRAFT
+    } as unknown as Request<never, never, Draft>;
+
+    upsertSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
+
+    await upsertElectrificationProjectDraftController(req, res as unknown as Response<Draft, LocalContext>);
+
+    expect(upsertSpy).toHaveBeenCalledTimes(1);
+    expect(upsertSpy).toHaveBeenCalledWith(
+      TEST_ELECTRIFICATION_DRAFT.draftId,
+      TEST_ELECTRIFICATION_DRAFT,
+      Initiative.ELECTRIFICATION,
+      DraftCode.ELECTRIFICATION_PROJECT,
+      TEST_CURRENT_CONTEXT
+    );
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_DRAFT);
   });
 });
