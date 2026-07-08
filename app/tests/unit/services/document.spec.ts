@@ -26,7 +26,7 @@ describe('document service', () => {
 
       const result = await createDocumentService(
         TEST_DOCUMENT_1.documentId,
-        TEST_DOCUMENT_1.activityId,
+        TEST_DOCUMENT_1.activityId as string,
         TEST_DOCUMENT_1.filename,
         TEST_DOCUMENT_1.mimeType,
         TEST_DOCUMENT_1.filesize
@@ -50,7 +50,7 @@ describe('document service', () => {
 
       const result = await createDocumentService(
         TEST_DOCUMENT_1.documentId,
-        TEST_DOCUMENT_1.activityId,
+        TEST_DOCUMENT_1.activityId as string,
         TEST_DOCUMENT_1.filename,
         TEST_DOCUMENT_1.mimeType,
         TEST_DOCUMENT_1.filesize
@@ -72,7 +72,7 @@ describe('document service', () => {
 
       const result = await createDocumentService(
         TEST_DOCUMENT_1.documentId,
-        TEST_DOCUMENT_1.activityId,
+        TEST_DOCUMENT_1.activityId as string,
         TEST_DOCUMENT_1.filename,
         TEST_DOCUMENT_1.mimeType,
         TEST_DOCUMENT_1.filesize
@@ -103,7 +103,7 @@ describe('document service', () => {
       mockRepos.document.findMany.mockResolvedValue([docWithUser]);
       mockRepos.user.findById.mockResolvedValue(TEST_IDIR_USER_1);
 
-      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId);
+      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId as string);
 
       expect(mockRepos.document.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.document.findMany).toHaveBeenCalledWith({
@@ -117,7 +117,7 @@ describe('document service', () => {
     it('returns documents without user lookup when createdBy is null', async () => {
       mockRepos.document.findMany.mockResolvedValue([TEST_DOCUMENT_1]);
 
-      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId);
+      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId as string);
 
       expect(mockRepos.document.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.user.findById).not.toHaveBeenCalled();
@@ -127,7 +127,7 @@ describe('document service', () => {
     it('returns empty array when no documents found', async () => {
       mockRepos.document.findMany.mockResolvedValue([]);
 
-      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId);
+      const result = await listDocumentsService(TEST_DOCUMENT_1.activityId as string);
 
       expect(mockRepos.document.findMany).toHaveBeenCalledTimes(1);
       expect(result).toEqual([]);

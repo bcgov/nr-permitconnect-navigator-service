@@ -1,24 +1,30 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock';
-import { filterActivityResponseByScope } from '../../../src/parsers/responseFiltering';
-import { listActivityContacts } from '../../../src/services/activityContact';
-import { searchContacts } from '../../../src/services/contact';
+import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1 } from '../data';
+import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
+import { filterActivityResponseByScope } from '../../../src/parsers/responseFiltering.ts';
+import { ActivityContactRepository } from '../../../src/repositories/activityContact.ts';
+import { ContactRepository } from '../../../src/repositories/contact.ts';
 import { Problem } from '../../../src/utils';
-import { ActivityContact, Contact, LocalContext } from '../../../src/types';
 
-vi.mock('../../../src/services/contact', () => ({
-  searchContacts: vi.fn()
-}));
+import type { Mock } from 'vitest';
+import type { Contact, LocalContext } from '../../../src/types';
 
-vi.mock('../../../src/services/activityContact', () => ({
-  listActivityContacts: vi.fn()
-}));
-
-const mockedSearchContacts = vi.mocked(searchContacts);
-const mockedListActivityContacts = vi.mocked(listActivityContacts);
+const makeContactRepo = () => new ContactRepository(prismaTxMock, 'principal-id');
+const makeActivityContactRepo = () => new ActivityContactRepository(prismaTxMock, 'principal-id');
 
 describe('filterActivityResponseByScope', () => {
+  let activityContactRepo = makeActivityContactRepo();
+  let contactRepo = makeContactRepo();
+  let findManyActivityContactMock: Mock;
+  let findManyContactMock: Mock;
+
   beforeEach(() => {
     vi.clearAllMocks();
+
+    activityContactRepo = makeActivityContactRepo();
+    contactRepo = makeContactRepo();
+
+    findManyActivityContactMock = vi.spyOn(activityContactRepo, 'findMany');
+    findManyContactMock = vi.spyOn(contactRepo, 'findMany');
   });
 
   describe('when scope:self is not present', () => {
@@ -28,14 +34,22 @@ describe('filterActivityResponseByScope', () => {
       const locals = {
         currentAuthorization: {
           attributes: ['scope:all']
+        },
+        currentContext: {
+          userId: 'user-1'
         }
       } as LocalContext;
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toBe(data);
-      expect(mockedSearchContacts).not.toHaveBeenCalled();
-      expect(mockedListActivityContacts).not.toHaveBeenCalled();
+      expect(findManyContactMock).not.toHaveBeenCalled();
+      expect(findManyActivityContactMock).not.toHaveBeenCalled();
     });
   });
 
@@ -50,21 +64,30 @@ describe('filterActivityResponseByScope', () => {
     } as LocalContext;
 
     it('throws when the current contact cannot be determined', async () => {
-      mockedSearchContacts.mockResolvedValue([]);
+      findManyContactMock.mockResolvedValue([]);
 
-      await expect(filterActivityResponseByScope(prismaTxMock, locals, [])).rejects.toEqual(
+      await expect(
+        filterActivityResponseByScope(
+          { activityContact: activityContactRepo, contact: contactRepo },
+          locals.currentAuthorization,
+          locals.currentContext,
+          []
+        )
+      ).rejects.toEqual(
         new Problem(403, {
           detail: 'Unable to determine contact'
         })
       );
 
-      expect(mockedSearchContacts).toHaveBeenCalledWith(prismaTxMock, {
-        userId: ['user-1']
-      });
+      expect(findManyContactMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ userId: expect.objectContaining({ in: [locals.currentContext.userId] }) })
+        })
+      );
     });
 
     it('filters using loaded activity contacts', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
       const data = [
         {
@@ -79,47 +102,73 @@ describe('filterActivityResponseByScope', () => {
         }
       ];
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toEqual([data[0]]);
-      expect(mockedListActivityContacts).not.toHaveBeenCalled();
+      expect(findManyActivityContactMock).not.toHaveBeenCalled();
     });
 
     it('filters using activityId lookup when contacts are not loaded', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
-      mockedListActivityContacts.mockResolvedValue([
+      findManyActivityContactMock.mockResolvedValue([
         {
+          ...TEST_ACTIVITY_CONTACT_1,
           activityId: 'activity-1',
-          contactId: 'contact-1'
+          contactId: 'contact-1',
+          contact: { ...TEST_CONTACT_1, contactId: 'contact-1' }
         },
         {
+          ...TEST_ACTIVITY_CONTACT_1,
           activityId: 'activity-2',
-          contactId: 'contact-2'
+          contactId: 'contact-2',
+          contact: { ...TEST_CONTACT_1, contactId: 'contact-2' }
         }
-      ] as ActivityContact[]);
+      ]);
 
       const data = [{ activityId: 'activity-1' }, { activityId: 'activity-2' }];
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toEqual([data[0]]);
     });
 
     it('deduplicates activity ids before loading contacts', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
-      mockedListActivityContacts.mockResolvedValue([]);
+      findManyActivityContactMock.mockResolvedValue([]);
 
       const data = [{ activityId: 'activity-1' }, { activityId: 'activity-1' }, { activityId: 'activity-2' }];
 
-      await filterActivityResponseByScope(prismaTxMock, locals, data);
+      await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
-      expect(mockedListActivityContacts).toHaveBeenCalledWith(prismaTxMock, ['activity-1', 'activity-2']);
+      expect(findManyActivityContactMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          include: expect.objectContaining({ contact: true }),
+          where: expect.objectContaining({
+            activityId: expect.objectContaining({ in: ['activity-1', 'activity-2'] })
+          })
+        })
+      );
     });
 
     it('does not query activity contacts when all records already contain them', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
       const data = [
         {
@@ -130,13 +179,18 @@ describe('filterActivityResponseByScope', () => {
         }
       ];
 
-      await filterActivityResponseByScope(prismaTxMock, locals, data);
+      await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
-      expect(mockedListActivityContacts).not.toHaveBeenCalled();
+      expect(findManyActivityContactMock).not.toHaveBeenCalled();
     });
 
     it('denies access when an item has no activityId and no activity contacts', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
       const data = [
         {},
@@ -147,36 +201,50 @@ describe('filterActivityResponseByScope', () => {
         }
       ];
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toEqual([data[1]]);
     });
 
     it('denies access when an activity has no associated contacts', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
-      mockedListActivityContacts.mockResolvedValue([]);
+      findManyActivityContactMock.mockResolvedValue([]);
 
       const data = [{ activityId: 'activity-1' }];
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toEqual([]);
     });
 
     it('handles a mixture of loaded and lookup-based activity contacts', async () => {
-      mockedSearchContacts.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
+      findManyContactMock.mockResolvedValue([{ contactId: 'contact-1' }] as Contact[]);
 
-      mockedListActivityContacts.mockResolvedValue([
+      findManyActivityContactMock.mockResolvedValue([
         {
+          ...TEST_ACTIVITY_CONTACT_1,
           activityId: 'activity-lookup-allowed',
-          contactId: 'contact-1'
+          contactId: 'contact-1',
+          contact: { ...TEST_CONTACT_1, contactId: 'contact-1' }
         },
         {
+          ...TEST_ACTIVITY_CONTACT_1,
           activityId: 'activity-lookup-denied',
-          contactId: 'contact-2'
+          contactId: 'contact-2',
+          contact: { ...TEST_CONTACT_1, contactId: 'contact-2' }
         }
-      ] as ActivityContact[]);
+      ]);
 
       const data = [
         {
@@ -197,7 +265,12 @@ describe('filterActivityResponseByScope', () => {
         }
       ];
 
-      const result = await filterActivityResponseByScope(prismaTxMock, locals, data);
+      const result = await filterActivityResponseByScope(
+        { activityContact: activityContactRepo, contact: contactRepo },
+        locals.currentAuthorization,
+        locals.currentContext,
+        data
+      );
 
       expect(result).toEqual([data[0], data[2]]);
     });

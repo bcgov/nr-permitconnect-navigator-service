@@ -47,7 +47,7 @@ vi.mock('vue-router', () => ({
 
 vi.mock('@/services/enquiryService', () => ({
   enquiryService: {
-    listEnquiries: vi.fn()
+    searchEnquiries: vi.fn()
   }
 }));
 
@@ -104,7 +104,7 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 
 // Tests
 beforeEach(() => {
-  vi.mocked(enquiryService.listEnquiries).mockResolvedValue([]);
+  vi.mocked(enquiryService.searchEnquiries).mockResolvedValue([]);
   vi.mocked(permitService.listPermits).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.getProjectStatistics).mockResolvedValue({} as ProjectStatistics);
@@ -132,7 +132,7 @@ describe('InitiativeView.vue', () => {
   });
 
   it('catches API errors and calls toast', async () => {
-    vi.mocked(enquiryService.listEnquiries).mockRejectedValueOnce(new Error('BOOM'));
+    vi.mocked(enquiryService.searchEnquiries).mockRejectedValueOnce(new Error('BOOM'));
 
     shallowMount(InitiativeView, wrapperSettings());
     await flushPromises();
