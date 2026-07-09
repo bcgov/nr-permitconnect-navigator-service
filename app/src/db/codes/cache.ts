@@ -1,10 +1,8 @@
-import { transactionWrapper } from '../utils/transactionWrapper.ts';
-import { listAllCodeTables } from '../../services/code.ts';
+import { listCodeTablesService } from '../../services/code.ts';
 import { getLogger } from '../../utils/log.ts';
 import { CODE_TABLES } from './tables.ts';
 
 import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from '../../types/codes.ts';
-import type { PrismaTransactionClient } from '../database.ts';
 
 const log = getLogger(module.filename);
 
@@ -45,9 +43,7 @@ export const codeTable: CodeCache = new Proxy({} as Record<CodeTableName, Cached
  */
 export async function refreshCodeCaches(): Promise<boolean> {
   try {
-    const codeTables: CodeTablesResult = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-      return await listAllCodeTables(tx);
-    });
+    const codeTables: CodeTablesResult = await listCodeTablesService();
 
     codeCache = buildCodeCache(codeTables);
 

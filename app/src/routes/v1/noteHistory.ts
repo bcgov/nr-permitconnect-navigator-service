@@ -3,8 +3,8 @@ import express from 'express';
 import {
   createNoteHistoryController,
   deleteNoteHistoryController,
-  listBringForwardController,
-  listNoteHistoryController,
+  listBringForwardsController,
+  listNoteHistoriesController,
   updateNoteHistoryController
 } from '../../controllers/noteHistory.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
@@ -43,14 +43,14 @@ router.delete(
 );
 
 /** Get a list of bring forward note histories */
-router.get('/bring-forward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardController);
+router.get('/bring-forward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardsController);
 
 /** Get a list of note histories */
 router.get(
   '/list/:activityId',
   hasAuthorization(Resource.NOTE, Action.READ),
   noteHistoryValidator.listNoteHistory,
-  listNoteHistoryController
+  listNoteHistoriesController
 );
 
 export default router;

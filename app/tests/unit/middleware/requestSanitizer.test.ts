@@ -7,64 +7,54 @@ import type { Request, Response } from 'express';
 
 function buildApp() {
   const app = express();
-  // Body parsers
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(requestSanitizer);
-
-  // Endpoints to inspect sanitized body
   app.post('/echo', (req: Request, res: Response) => {
     res.status(200).json(req.body);
   });
-
   app.get('/ping', (_req, res) => {
     res.status(200).json({ ok: true });
   });
-
   return app;
 }
 
+const nullCharacterTestCases = [
+  {
+    description: 'written as \\0 (octal)',
+    payload: { s: 'hello\0world' },
+    expected: { s: 'helloworld' }
+  },
+  {
+    description: 'written as \\x00 (hex)',
+    payload: { s: 'hello\x00world' },
+    expected: { s: 'helloworld' }
+  },
+  {
+    description: 'written as \\u0000 (unicode escape)',
+    payload: { s: 'hello\u0000world' },
+    expected: { s: 'helloworld' }
+  },
+  {
+    description: 'written as \\u{0} (unicode code point)',
+    payload: { s: 'hello\u{0}world' },
+    expected: { s: 'helloworld' }
+  },
+  {
+    description: 'from flat string fields',
+    payload: { name: 'a\u0000b\u0000c', city: 'Victoria' },
+    expected: { name: 'abc', city: 'Victoria' }
+  }
+];
+
 describe('requestSanitizer middleware', () => {
-  let app: express.Express;
-  beforeEach(() => {
-    app = buildApp();
-  });
+  nullCharacterTestCases.forEach(({ description, payload, expected }) => {
+    it(`removes NUL characters ${description} inside JSON body`, async () => {
+      const res = await request(buildApp()).post('/echo').send(payload);
 
-  it('removes NUL written as \\0 (octal) inside JSON body', async () => {
-    const res = await request(app).post('/echo').send({ s: 'hello\0world' });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ s: 'helloworld' });
-  });
-
-  it('removes NUL written as \\x00 (hex) inside JSON body', async () => {
-    const res = await request(app).post('/echo').send({ s: 'hello\x00world' });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ s: 'helloworld' });
-  });
-
-  it('removes NUL written as \\u0000 (unicode escape) inside JSON body', async () => {
-    const res = await request(app).post('/echo').send({ s: 'hello\u0000world' });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ s: 'helloworld' });
-  });
-
-  it('removes NUL written as \\u{0} (unicode code point) inside JSON body', async () => {
-    const res = await request(app).post('/echo').send({ s: 'hello\u{0}world' });
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ s: 'helloworld' });
-  });
-
-  it('strips NULs from flat string fields (application/json)', async () => {
-    const payload = { name: 'a\u0000b\u0000c', city: 'Victoria' };
-
-    const res = await request(app).post('/echo').set('content-type', 'application/json').send(payload);
-
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({ name: 'abc', city: 'Victoria' });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual(expected);
+    });
   });
 
   it('recursively strips NULs inside nested objects/arrays', async () => {
@@ -78,7 +68,7 @@ describe('requestSanitizer middleware', () => {
       flags: { active: true, count: 0, nullable: null }
     };
 
-    const res = await request(app).post('/echo').send(payload);
+    const res = await request(buildApp()).post('/echo').send(payload);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -103,7 +93,7 @@ describe('requestSanitizer middleware', () => {
       }
     };
 
-    const res = await request(app).post('/echo').send(payload);
+    const res = await request(buildApp()).post('/echo').send(payload);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({
@@ -122,7 +112,7 @@ describe('requestSanitizer middleware', () => {
       s: '\u0000ok\u0000'
     };
 
-    const res = await request(app).post('/echo').send(payload);
+    const res = await request(buildApp()).post('/echo').send(payload);
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ n: 42, f: false, t: true, nil: null, s: 'ok' });
@@ -130,7 +120,7 @@ describe('requestSanitizer middleware', () => {
   });
 
   it('works with application/x-www-form-urlencoded', async () => {
-    const res = await request(app)
+    const res = await request(buildApp())
       .post('/echo')
       .set('content-type', 'application/x-www-form-urlencoded')
       .send('a=a%00a&b=b&arr=x&arr=y%00');
@@ -140,14 +130,14 @@ describe('requestSanitizer middleware', () => {
   });
 
   it('GET with no body is a no-op (does not throw)', async () => {
-    const res = await request(app).get('/ping');
+    const res = await request(buildApp()).get('/ping');
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
   });
 
   it('large strings with no NULs are returned as-is', async () => {
     const big = 'x'.repeat(10000);
-    const res = await request(app).post('/echo').send({ big });
+    const res = await request(buildApp()).post('/echo').send({ big });
 
     expect(res.status).toBe(200);
     expect(res.body.big).toHaveLength(10000);
@@ -155,7 +145,7 @@ describe('requestSanitizer middleware', () => {
   });
 
   it('multiple NULs in a single string are all removed', async () => {
-    const res = await request(app).post('/echo').send({ s: '\u0000\u0000A\u0000B\u0000\u0000' });
+    const res = await request(buildApp()).post('/echo').send({ s: '\u0000\u0000A\u0000B\u0000\u0000' });
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ s: 'AB' });

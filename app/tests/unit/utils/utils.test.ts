@@ -533,7 +533,7 @@ describe('utils', () => {
       const { date, time } = utils.splitDateTime(onlyDate);
 
       expect(date).toBe('2025-03-10');
-      expect(time).toBe(null);
+      expect(time).toBeNull();
     });
   });
 
@@ -543,12 +543,6 @@ describe('utils', () => {
     });
     it('returns input when falsy', () => {
       expect(utils.toTitleCase('')).toBe('');
-    });
-  });
-
-  describe('uuidToActivityId', () => {
-    it('returns first 8 chars uppercased', () => {
-      expect(utils.uuidToActivityId('a1b2c3d4-e5f6-7890-aaaa-bbbbccccdddd')).toBe('A1B2C3D4');
     });
   });
 

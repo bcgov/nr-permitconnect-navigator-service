@@ -9,8 +9,7 @@ import {
   electrificationProjectService,
   generalProjectService,
   housingProjectService,
-  noteHistoryService,
-  permitService
+  noteHistoryService
 } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { NavigationPermission } from '@/store/authzStore';
@@ -112,9 +111,8 @@ onBeforeMount(async () => {
         throw new Error(t('views.initiativeStateError'));
     }
 
-    [enquiries.value, permits.value, projects.value, statistics.value, bringForward.value] = await Promise.all([
-      enquiryService.listEnquiries(),
-      permitService.listPermits(),
+    [enquiries.value, projects.value, statistics.value, bringForward.value] = await Promise.all([
+      enquiryService.searchEnquiries({}),
       initiativeState.value.projectService.listProjects(),
       initiativeState.value.projectService.getProjectStatistics({}),
       noteHistoryService.listBringForwards({ bringForwardState: BringForwardType.UNRESOLVED })

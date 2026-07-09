@@ -1,12 +1,12 @@
 import config from 'config';
 
-import { getAuthHeader, getBearerToken, setAuthHeader } from '../../../../src/middleware/providers/oidc';
-import { Problem } from '../../../../src/utils/index';
+import { getAuthHeader, getBearerToken, setAuthHeader } from '../../../../src/middleware/providers/oidc.ts';
+import { Problem } from '../../../../src/utils/index.ts';
 
 import type { Request, Response } from 'express';
 import type { JwksClient } from 'jwks-rsa';
 import type { Mock } from 'vitest';
-import type { AuthErrorAttributes } from '../../../../src/middleware/providers/oidc';
+import type { AuthErrorAttributes } from '../../../../src/middleware/providers/oidc.ts';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 
@@ -133,65 +133,15 @@ describe('oidc providers', () => {
       expect(result).toBe('token123');
     });
 
-    it('throws a 401 Problem if the scheme is not Bearer', () => {
+    it.each([
+      ['Basic token123', 'invalid scheme'],
+      ['Bearer token123 extra', 'too many parts'],
+      ['Bearer', 'too few parts'],
+      ['Bearer invalid_token!', 'malformed token with invalid characters'],
+      ['   ', 'empty or only whitespace']
+    ])('throws a 401 Problem for invalid bearerToken: %s (%s)', (authHeader: string) => {
       const req = { originalUrl: '/test' } as unknown as Request;
-      const action = () => getBearerToken('Basic token123', req, res);
-
-      expect(action).toThrow(Problem);
-      expect(action).toThrow(
-        expect.objectContaining({
-          status: 401,
-          detail: 'Invalid authentication token'
-        })
-      );
-      expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', expect.stringContaining('error="invalid_token"'));
-    });
-
-    it('throws a 401 Problem if there are too many parts in the header', () => {
-      const req = { originalUrl: '/test' } as unknown as Request;
-      const action = () => getBearerToken('Bearer token123 extra', req, res);
-
-      expect(action).toThrow(Problem);
-      expect(action).toThrow(
-        expect.objectContaining({
-          status: 401,
-          detail: 'Invalid authentication token'
-        })
-      );
-      expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', expect.stringContaining('error="invalid_token"'));
-    });
-
-    it('throws a 401 Problem if there are too few parts in the header', () => {
-      const req = { originalUrl: '/test' } as unknown as Request;
-      const action = () => getBearerToken('Bearer', req, res);
-
-      expect(action).toThrow(Problem);
-      expect(action).toThrow(
-        expect.objectContaining({
-          status: 401,
-          detail: 'Invalid authentication token'
-        })
-      );
-      expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', expect.stringContaining('error="invalid_token"'));
-    });
-
-    it('throws a 401 Problem if the token format is malformed (invalid characters)', () => {
-      const req = { originalUrl: '/test' } as unknown as Request;
-      const action = () => getBearerToken('Bearer invalid_token!', req, res);
-
-      expect(action).toThrow(Problem);
-      expect(action).toThrow(
-        expect.objectContaining({
-          status: 401,
-          detail: 'Invalid authentication token'
-        })
-      );
-      expect(res.set).toHaveBeenCalledWith('WWW-Authenticate', expect.stringContaining('error="invalid_token"'));
-    });
-
-    it('throws a 401 Problem if the header is empty or only whitespace', () => {
-      const req = { originalUrl: '/test' } as unknown as Request;
-      const action = () => getBearerToken('   ', req, res);
+      const action = () => getBearerToken(authHeader, req, res);
 
       expect(action).toThrow(Problem);
       expect(action).toThrow(

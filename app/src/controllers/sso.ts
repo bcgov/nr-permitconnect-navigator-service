@@ -1,4 +1,4 @@
-import { searchIdirUsers } from '../services/sso.ts';
+import { searchIdirUsers } from '../external/sso.ts';
 
 import type { Request, Response } from 'express';
 import type { IdirSearchParameters } from '../types/index.ts';

@@ -3,15 +3,13 @@ import jwt from 'jsonwebtoken';
 import { LRUCache } from 'lru-cache';
 
 import { getAuthHeader, getBearerToken, getJwksClient, setAuthHeader } from './providers/oidc.ts';
-import { transactionWrapper } from '../db/utils/transactionWrapper.ts';
-import { login } from '../services/user.ts';
+import { loginService } from '../services/login.ts';
 import { AuthType, Initiative } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { PrismaTransactionClient } from '../db/database.ts';
 
 const log = getLogger(module.filename);
 
@@ -41,9 +39,7 @@ export const hasAuthentication = (initiative: Initiative) => {
       } else {
         const token = getBearerToken(authHeader, req, res);
         const payload = await getVerifiedPayload(token, req, res);
-        const user = await transactionWrapper(async (tx: PrismaTransactionClient) => {
-          return await login(tx, payload);
-        });
+        const user = await loginService(payload);
 
         if (!user?.userId) throw new Problem(500, { detail: 'Failed to log user in', instance: req.originalUrl });
 

@@ -28,7 +28,7 @@ vi.mock('@prisma/client', async () => {
 let checkDatabaseHealth: (typeof DatabaseModule)['checkDatabaseHealth'];
 let checkDatabaseSchema: (typeof DatabaseModule)['checkDatabaseSchema'];
 
-beforeAll(async () => {
+beforeEach(async () => {
   const actual = await vi.importActual<typeof DatabaseModule>('../../../src/db/database.ts');
   checkDatabaseHealth = actual.checkDatabaseHealth;
   checkDatabaseSchema = actual.checkDatabaseSchema;

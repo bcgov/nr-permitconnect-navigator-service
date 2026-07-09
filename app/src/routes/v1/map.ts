@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { getPIDsController } from '../../controllers/map.ts';
+import { getPidsController } from '../../controllers/map.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
@@ -27,7 +27,7 @@ router.get(
     }
     return hasAuthorization(resource, Action.READ)(req, res, next);
   },
-  getPIDsController
+  getPidsController
 );
 
 export default router;

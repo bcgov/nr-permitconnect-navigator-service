@@ -1,9 +1,9 @@
 import express from 'express';
 
 import {
-  createATSClientController,
-  createATSEnquiryController,
-  searchATSUsersController
+  createAtsClientController,
+  createAtsEnquiryController,
+  searchAtsUsersController
 } from '../../controllers/ats.ts';
 import { hasAuthorization } from '../../middleware/authorization.ts';
 import { hasIdentity } from '../../middleware/identity.ts';
@@ -18,14 +18,14 @@ router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Search clients in ATS */
-router.get('/clients', hasAuthorization(Resource.ATS, Action.READ), searchATSUsersController);
+router.get('/clients', hasAuthorization(Resource.ATS, Action.READ), searchAtsUsersController);
 
 /** Creates a client in ATS */
 router.post(
   '/client',
   hasAuthorization(Resource.ATS, Action.CREATE),
   atsValidator.createATSClient,
-  createATSClientController
+  createAtsClientController
 );
 
 /** Creates an enquiry in ATS */
@@ -33,7 +33,7 @@ router.post(
   '/enquiry',
   hasAuthorization(Resource.ATS, Action.CREATE),
   atsValidator.createATSEnquiry,
-  createATSEnquiryController
+  createAtsEnquiryController
 );
 
 export default router;

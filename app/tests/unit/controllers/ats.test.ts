@@ -1,0 +1,86 @@
+import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import {
+  createAtsClientController,
+  createAtsEnquiryController,
+  searchAtsUsersController
+} from '../../../src/controllers/ats.ts';
+import * as atsExternal from '../../../src/external/ats.ts';
+
+import type { Request, Response } from 'express';
+import type {
+  AtsClientResource,
+  AtsEnquiryResource,
+  AtsUserSearchParameters,
+  LocalContext
+} from '../../../src/types/index.ts';
+import type { Mock } from 'vitest';
+
+vi.mock('config');
+
+const mockResponse = () => {
+  const res: { locals: Record<string, unknown>; status?: Mock; json?: Mock; end?: Mock } = {
+    locals: {}
+  };
+  res.status = vi.fn().mockReturnValue(res);
+  res.json = vi.fn().mockReturnValue(res);
+  res.end = vi.fn().mockReturnValue(res);
+  return res;
+};
+
+let res = mockResponse();
+beforeEach(() => {
+  res = mockResponse();
+  res.locals.currentContext = TEST_CURRENT_CONTEXT;
+  vi.clearAllMocks();
+});
+
+describe('createAtsClientController', () => {
+  it('should call createAtsClient with body and currentContext, respond with status and data', async () => {
+    const mockResp = { status: 201, data: { clientId: 'ats-123' } };
+    vi.spyOn(atsExternal, 'createAtsClient').mockResolvedValueOnce(mockResp);
+
+    const body: AtsClientResource = { clientName: 'Test Client' } as unknown as AtsClientResource;
+    const req = { body } as unknown as Request<never, never, AtsClientResource, never>;
+
+    await createAtsClientController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(atsExternal.createAtsClient).toHaveBeenCalledTimes(1);
+    expect(atsExternal.createAtsClient).toHaveBeenCalledWith(body, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ clientId: 'ats-123' });
+  });
+});
+
+describe('createAtsEnquiryController', () => {
+  it('should call createAtsEnquiry with body and currentContext, respond with status and data', async () => {
+    const mockResp = { status: 201, data: { enquiryId: 'enq-123' } };
+    vi.spyOn(atsExternal, 'createAtsEnquiry').mockResolvedValueOnce(mockResp);
+
+    const body: AtsEnquiryResource = { enquiryData: 'test' } as unknown as AtsEnquiryResource;
+    const req = { body } as unknown as Request<never, never, AtsEnquiryResource, never>;
+
+    await createAtsEnquiryController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(atsExternal.createAtsEnquiry).toHaveBeenCalledTimes(1);
+    expect(atsExternal.createAtsEnquiry).toHaveBeenCalledWith(body, TEST_CURRENT_CONTEXT);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith({ enquiryId: 'enq-123' });
+  });
+});
+
+describe('searchAtsUsersController', () => {
+  it('should call searchAtsUsers with query params and respond with status and data', async () => {
+    const mockResp = { status: 200, data: [{ id: 'user-1', name: 'Test User' }] };
+    vi.spyOn(atsExternal, 'searchAtsUsers').mockResolvedValueOnce(mockResp);
+
+    const query: AtsUserSearchParameters = { firstName: 'John' } as unknown as AtsUserSearchParameters;
+    const req = { query } as unknown as Request<never, never, never, AtsUserSearchParameters>;
+
+    await searchAtsUsersController(req, res as unknown as Response<unknown, LocalContext>);
+
+    expect(atsExternal.searchAtsUsers).toHaveBeenCalledTimes(1);
+    expect(atsExternal.searchAtsUsers).toHaveBeenCalledWith(query);
+    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.json).toHaveBeenCalledWith([{ id: 'user-1', name: 'Test User' }]);
+  });
+});

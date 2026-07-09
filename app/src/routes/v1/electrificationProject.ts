@@ -4,16 +4,16 @@ import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
   deleteElectrificationProjectDraftController,
-  getElectrificationProjectActivityIdsController,
   getElectrificationProjectController,
-  getElectrificationProjectsController,
   getElectrificationProjectDraftController,
   getElectrificationProjectDraftsController,
   getElectrificationProjectStatisticsController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  upsertElectrificationProjectDraftController
+  upsertElectrificationProjectDraftController,
+  listElectrificationProjectsController,
+  listElectrificationProjectActivityIdsController
 } from '../../controllers/electrificationProject.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
@@ -26,13 +26,13 @@ router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Gets a list of electrification projects */
-router.get('/', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), getElectrificationProjectsController);
+router.get('/', hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ), listElectrificationProjectsController);
 
 /** Get a list of all the activityIds */
 router.get(
   '/activityIds',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.READ),
-  getElectrificationProjectActivityIdsController
+  listElectrificationProjectActivityIdsController
 );
 
 /** Search electrification projects */

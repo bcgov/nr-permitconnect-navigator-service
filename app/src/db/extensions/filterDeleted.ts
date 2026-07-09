@@ -1,68 +1,99 @@
 import { Prisma } from '@prisma/client';
 
-// Prisma operations to exclude from filtering
-const excludeOperations: readonly string[] = ['create', 'createMany', 'createManyAndReturn'];
+const excludeOperations = new Set(['create', 'createMany', 'createManyAndReturn']);
 
-/*
- * Many eslint-disable lines as working with the prisma dynamic typing is basically impossible so its
- * significantly to work with `any` types
- */
+const softDeleteModels = new Set(
+  Prisma.dmmf.datamodel.models.filter((m) => m.fields.some((f) => f.name === 'deletedAt')).map((m) => m.name)
+);
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function filterColumn(operation: string, args: any) {
-  if (excludeOperations.includes(operation)) return args;
-
-  if (!args.where) args = { ...args, where: {} };
-  args.where = { ...args.where, deletedAt: null };
-
-  return args;
+interface RelationInfo {
+  targetModel: string;
+  isList: boolean;
 }
 
-/**
- * Models that are soft deleted to be added here
- * Using `$allModels` is not possible as that will affect views as well
- * This only filters data at the top level - will not filter relational includes
- */
+const modelRelations = new Map<string, Map<string, RelationInfo>>();
+
+for (const model of Prisma.dmmf.datamodel.models) {
+  const relations = new Map<string, RelationInfo>();
+  for (const field of model.fields) {
+    if (field.kind === 'object' && field.relationName) {
+      relations.set(field.name, { targetModel: field.type, isList: field.isList });
+    }
+  }
+  modelRelations.set(model.name, relations);
+}
+
+function processRelationArgs(
+  relationArgs: Record<string, unknown>,
+  relations: Map<string, RelationInfo>
+): Record<string, unknown> {
+  const newRelationArgs = { ...relationArgs };
+
+  for (const [relKey, relVal] of Object.entries(newRelationArgs)) {
+    const relationInfo = relations.get(relKey);
+
+    if (relationInfo && relVal) {
+      const childArgs = typeof relVal === 'boolean' ? {} : { ...(relVal as Record<string, unknown>) };
+      newRelationArgs[relKey] = applySoftDeleteFilter(relationInfo.targetModel, childArgs, relationInfo.isList);
+    }
+  }
+
+  return newRelationArgs;
+}
+
+function applySoftDeleteFilter(
+  modelName: string,
+  args: Record<string, unknown>,
+  filterThisLevel: boolean
+): Record<string, unknown> {
+  const nextArgs = { ...args };
+
+  if (filterThisLevel && softDeleteModels.has(modelName)) {
+    nextArgs.where = {
+      ...((nextArgs.where ?? {}) as Record<string, unknown>),
+      deletedAt: null
+    };
+  }
+
+  const relations = modelRelations.get(modelName);
+  if (!relations) {
+    return nextArgs;
+  }
+
+  for (const key of ['include', 'select']) {
+    const relationArgs = nextArgs[key] as Record<string, unknown> | undefined;
+
+    if (relationArgs && typeof relationArgs === 'object') {
+      nextArgs[key] = processRelationArgs(relationArgs, relations);
+    }
+  }
+
+  return nextArgs;
+}
+
+function processArguments<T>(modelName: string, operation: string, args: T): T {
+  if (excludeOperations.has(operation)) return args;
+
+  const safeArgs = { ...((args ?? {}) as Record<string, unknown>) };
+
+  // The includeDeleted flag is a custom argument to apply the soft delete filter or not.
+  // It only applies to the top level of the query, not to any nested relations.
+  const includeDeleted = safeArgs.includeDeleted;
+  delete safeArgs.includeDeleted;
+
+  if (includeDeleted === true) {
+    return safeArgs as T;
+  }
+
+  return applySoftDeleteFilter(modelName, safeArgs, true) as T;
+}
+
 const filterDeletedTransform = Prisma.defineExtension({
   query: {
-    activity: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    enquiry: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    electrification_project: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    general_project: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    housing_project: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    note_history: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    permit: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
-      }
-    },
-    permit_note: {
-      $allOperations({ operation, args, query }) {
-        return query(filterColumn(operation, args));
+    $allModels: {
+      $allOperations({ model, operation, args, query }) {
+        const processedArgs = processArguments(model, operation, args);
+        return query(processedArgs);
       }
     }
   }

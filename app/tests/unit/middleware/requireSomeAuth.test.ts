@@ -36,7 +36,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  vi.resetAllMocks();
+  vi.clearAllMocks();
 });
 
 describe('requireSomeAuth middleware', () => {

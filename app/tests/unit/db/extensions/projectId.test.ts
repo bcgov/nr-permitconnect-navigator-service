@@ -1,5 +1,5 @@
-import projectIdTransform from '../../../../src/db/extensions/projectId.ts';
 import { captureExtension } from './captureExtension.ts';
+import projectIdTransform from '../../../../src/db/extensions/projectId.ts';
 
 const ext = captureExtension(projectIdTransform);
 

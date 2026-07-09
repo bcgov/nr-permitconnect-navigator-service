@@ -22,7 +22,7 @@ model access_request {
   updatedAt       DateTime?                  @map("updated_at") @db.Timestamptz(6)
   deletedBy       String?                    @map("deleted_by")
   deletedAt       DateTime?                  @map("deleted_at") @db.Timestamptz(6)
-  user            user                       @relation(fields: [userId], references: [userId], onDelete: NoAction, onUpdate: NoAction, map: "access_request_user_id_foreign")
+  user            user                       @relation(fields: [userId], references: [userId], onDelete: Cascade, map: "access_request_user_id_foreign")
   group           group                      @relation(fields: [groupId], references: [groupId], onDelete: Cascade, map: "public_access_request_group_id_foreign")
 
   @@schema("public")
@@ -37,7 +37,7 @@ model activity {
   updatedAt              DateTime?                @map("updated_at") @db.Timestamptz(6)
   deletedBy              String?                  @map("deleted_by")
   deletedAt              DateTime?                @map("deleted_at") @db.Timestamptz(6)
-  initiative             initiative               @relation(fields: [initiativeId], references: [initiativeId], onDelete: Cascade, map: "activity_initiative_id_foreign")
+  initiative             initiative               @relation(fields: [initiativeId], references: [initiativeId], map: "activity_initiative_id_foreign")
   activityContact        activity_contact[]
   document               document[]
   draft                  draft[]
@@ -91,7 +91,7 @@ model contact {
 
 model document {
   documentId String    @id @map("document_id") @db.Uuid
-  activityId String    @map("activity_id")
+  activityId String?   @map("activity_id")
   filename   String
   mimeType   String    @default("application/octet-stream") @map("mime_type")
   filesize   BigInt
@@ -101,7 +101,7 @@ model document {
   updatedAt  DateTime? @map("updated_at") @db.Timestamptz(6)
   deletedBy  String?   @map("deleted_by")
   deletedAt  DateTime? @map("deleted_at") @db.Timestamptz(6)
-  activity   activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "document_activity_id_foreign")
+  activity   activity? @relation(fields: [activityId], references: [activityId], map: "document_activity_id_foreign")
 
   @@unique([documentId, activityId], map: "document_document_id_activity_id_unique")
   @@schema("public")
@@ -128,7 +128,7 @@ model enquiry {
   submittedMethod    enquiry_submitted_method_enum @default(PCNS) @map("submitted_method")
   atsEnquiryId       Int?                          @map("ats_enquiry_id")
   activity           activity                      @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "enquiry_activity_id_foreign")
-  user               user?                         @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "enquiry_assigned_user_id_foreign")
+  user               user?                         @relation(fields: [assignedUserId], references: [userId], map: "enquiry_assigned_user_id_foreign")
 
   @@schema("public")
 }
@@ -207,7 +207,7 @@ model permit {
   onHoldCode             String?            @map("on_hold_code")
   activity               activity           @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "permit_activity_id_foreign")
   piesOnHoldCode         pies_on_hold_code? @relation(fields: [onHoldCode], references: [code], map: "permit_on_hold_code_foreign")
-  permitType             permit_type        @relation(fields: [permitTypeId], references: [permitTypeId], onDelete: Cascade, map: "permit_permit_type_id_foreign")
+  permitType             permit_type        @relation(fields: [permitTypeId], references: [permitTypeId], map: "permit_permit_type_id_foreign")
   permitStageCode        permit_stage_code  @relation(fields: [stage], references: [code])
   permitStateCode        permit_state_code  @relation(fields: [state], references: [code])
   permitNote             permit_note[]
@@ -253,7 +253,7 @@ model permit_type {
   sourceSystem                   String?                               @map("source_system")
   infoUrl                        String?                               @map("info_url")
   permit                         permit[]
-  sourceSystemCode               source_system_code?                   @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "permit_type_source_system_foreign")
+  sourceSystemCode               source_system_code?                   @relation(fields: [sourceSystem], references: [code], map: "permit_type_source_system_foreign")
   permitTypeInitiativeXref       permit_type_initiative_xref[]
   permitTypeSourceSystemKindXref permit_type_source_system_kind_xref[]
 
@@ -283,7 +283,7 @@ model user {
   enquiry                enquiry[]
   generalProject         general_project[]
   housingProject         housing_project[]
-  identityProvider       identity_provider?        @relation(fields: [idp], references: [idp], onDelete: Cascade, map: "user_idp_foreign")
+  identityProvider       identity_provider?        @relation(fields: [idp], references: [idp], onDelete: Restrict, map: "user_idp_foreign")
 
   @@index([email], map: "user_email_index")
   @@index([sub], map: "user_username_index")
@@ -554,7 +554,7 @@ model electrification_project_type_code {
 /// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model housing_project {
-  housingProjectId                String    @id(map: "submission_pkey") @map("housing_project_id") @db.Uuid
+  housingProjectId                String    @id @map("housing_project_id") @db.Uuid
   activityId                      String    @unique(map: "housing_project_activity_id_unique") @map("activity_id")
   assignedUserId                  String?   @map("assigned_user_id") @db.Uuid
   submittedAt                     DateTime  @map("submitted_at") @db.Timestamptz(6)
@@ -611,7 +611,7 @@ model housing_project {
   atsEnquiryId                    Int?      @map("ats_enquiry_id")
   companyIdRegistered             String?   @map("company_id_registered")
   activity                        activity  @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "submission_activity_id_foreign")
-  user                            user?     @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "submission_assigned_user_id_foreign")
+  user                            user?     @relation(fields: [assignedUserId], references: [userId], map: "submission_assigned_user_id_foreign")
 
   @@schema("public")
 }
@@ -662,7 +662,7 @@ model electrification_project {
   addedToAts                         Boolean                                @default(false) @map("added_to_ats")
   companyIdRegistered                String?                                @map("company_id_registered")
   activity                           activity                               @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "electrification_project_activity_id_foreign")
-  user                               user?                                  @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "electrification_project_assigned_user_id_foreign")
+  user                               user?                                  @relation(fields: [assignedUserId], references: [userId], map: "electrification_project_assigned_user_id_foreign")
   electrificationProjectCategoryCode electrification_project_category_code? @relation(fields: [projectCategory], references: [code], map: "electrification_project_project_category_foreign")
   electrificationProjectTypeCode     electrification_project_type_code?     @relation(fields: [projectType], references: [code], map: "electrification_project_project_type_foreign")
 
@@ -698,7 +698,7 @@ model permit_tracking {
   deletedBy          String?             @map("deleted_by")
   deletedAt          DateTime?           @map("deleted_at") @db.Timestamptz(6)
   permit             permit              @relation(fields: [permitId], references: [permitId], onDelete: Cascade, map: "permit_tracking_permit_id_foreign")
-  sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], onDelete: Cascade, map: "permit_tracking_source_system_kind_id_foreign")
+  sourceSystemKind   source_system_kind? @relation(fields: [sourceSystemKindId], references: [sourceSystemKindId], map: "permit_tracking_source_system_kind_id_foreign")
 
   @@schema("public")
 }
@@ -735,7 +735,7 @@ model source_system_kind {
   integrated                     Boolean                               @default(false)
   permitTracking                 permit_tracking[]
   permitTypeSourceSystemKindXref permit_type_source_system_kind_xref[]
-  sourceSystemCode               source_system_code                    @relation(fields: [sourceSystem], references: [code], onDelete: Cascade, map: "source_system_kind_source_system_foreign")
+  sourceSystemCode               source_system_code                    @relation(fields: [sourceSystem], references: [code], map: "source_system_kind_source_system_foreign")
 
   @@schema("public")
 }
@@ -857,7 +857,7 @@ model general_project {
   deletedBy                   String?             @map("deleted_by")
   deletedAt                   DateTime?           @map("deleted_at") @db.Timestamptz(6)
   activity                    activity            @relation(fields: [activityId], references: [activityId], onDelete: Cascade, map: "general_project_activity_id_foreign")
-  user                        user?               @relation(fields: [assignedUserId], references: [userId], onDelete: Cascade, map: "general_project_assigned_user_id_foreign")
+  user                        user?               @relation(fields: [assignedUserId], references: [userId], map: "general_project_assigned_user_id_foreign")
   businessAreaCode            business_area_code? @relation(fields: [businessArea], references: [code], map: "general_project_business_area_foreign")
 
   @@schema("public")

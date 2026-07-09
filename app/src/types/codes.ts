@@ -1,6 +1,6 @@
 import { CustomHelpers, ErrorReport } from 'joi';
 
-import { listAllCodeTables } from '../services/code.ts';
+import { listCodeTablesService } from '../services/code.ts';
 
 import type * as codeEnums from '../db/codes/enums.ts';
 
@@ -27,7 +27,7 @@ export type CachedCodeTable = Readonly<{
 
 export type CodeTableName = keyof typeof codeEnums;
 
-export type CodeTablesResult = Awaited<ReturnType<typeof listAllCodeTables>>;
+export type CodeTablesResult = Awaited<ReturnType<typeof listCodeTablesService>>;
 
 export type CodeCache = Readonly<Record<CodeTableName, CachedCodeTable>>;
 

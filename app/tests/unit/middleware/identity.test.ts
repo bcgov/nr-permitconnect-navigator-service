@@ -8,7 +8,6 @@ import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/e
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { CurrentContext } from '../../../src/types/stuff';
 import type Problem from '../../../src/utils/problem.ts';
 
 vi.mock('node:fs', () => ({
@@ -33,82 +32,74 @@ const IDP_LIST = [
   }
 ];
 
-function buildApp(kind: IdentityProviderKind, contextPayloadOverride?: CurrentContext) {
+function buildApp(kind: IdentityProviderKind, currentContext: unknown) {
   const app = express();
   app.use(express.json());
-
-  app.use((req: Request, res: Response, next: NextFunction) => {
-    res.locals.currentContext = {
-      ...TEST_CURRENT_CONTEXT,
-      ...contextPayloadOverride
-    };
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.locals.currentContext = currentContext;
     next();
   });
-
-  app.get(
-    '/test',
-    async (req: Request, res: Response, next: NextFunction) => {
-      try {
-        await hasIdentity(kind)(req, res, next);
-      } catch (err) {
-        next(err);
-      }
-    },
-    (req: Request, res: Response) => {
-      res.status(200).json({ ok: true });
-    }
-  );
-
+  app.get('/test', hasIdentity(kind), (_req: Request, res: Response) => {
+    res.status(200).json({ ok: true });
+  });
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.use((err: Problem, req: Request, res: Response, _next: NextFunction) => {
+  app.use((err: Problem, req: Request, res: Response, next: NextFunction) => {
     res.status(err.status || 500).json({ detail: err.detail || err.message });
   });
-
   return app;
 }
 
-describe('hasIdentity middleware', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
+afterEach(() => {
+  vi.clearAllMocks();
+});
 
+describe('hasIdentity middleware', () => {
+  it('calls next and allows the request if the user has the required identity', async () => {
     (existsSync as Mock).mockReturnValue(true);
     (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
-  });
 
-  it('calls next and allows the request if the user has the required identity', async () => {
-    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
-      authType: AuthType.BEARER,
-      initiative: Initiative.PCNS,
-      tokenPayload: { identity_provider: IdentityProviderKind.AZUREIDIR }
-    });
-
-    const res = await request(app).get('/test');
+    const res = await request(
+      buildApp(IdentityProviderKind.AZUREIDIR, {
+        ...TEST_CURRENT_CONTEXT,
+        authType: AuthType.BEARER,
+        initiative: Initiative.PCNS,
+        tokenPayload: { identity_provider: IdentityProviderKind.AZUREIDIR }
+      })
+    ).get('/test');
 
     expect(res.status).toBe(200);
     expect(res.body).toEqual({ ok: true });
   });
 
   it('throws a 403 Problem if the user does not have the required identity', async () => {
-    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
-      authType: AuthType.BEARER,
-      initiative: Initiative.PCNS,
-      tokenPayload: { identity_provider: IdentityProviderKind.BCEID } // Mismatch
-    });
+    (existsSync as Mock).mockReturnValue(true);
+    (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
 
-    const res = await request(app).get('/test');
+    const res = await request(
+      buildApp(IdentityProviderKind.AZUREIDIR, {
+        ...TEST_CURRENT_CONTEXT,
+        authType: AuthType.BEARER,
+        initiative: Initiative.PCNS,
+        tokenPayload: { identity_provider: IdentityProviderKind.BCEID }
+      })
+    ).get('/test');
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ detail: 'Invalid user identity' });
   });
 
   it('throws a 403 Problem if the token payload is missing entirely', async () => {
-    const app = buildApp(IdentityProviderKind.AZUREIDIR, {
-      authType: AuthType.NONE,
-      initiative: Initiative.PCNS,
-      tokenPayload: undefined
-    });
+    (existsSync as Mock).mockReturnValue(true);
+    (readFileSync as Mock).mockReturnValue(JSON.stringify(IDP_LIST));
 
-    const res = await request(app).get('/test');
+    const res = await request(
+      buildApp(IdentityProviderKind.AZUREIDIR, {
+        ...TEST_CURRENT_CONTEXT,
+        authType: AuthType.NONE,
+        initiative: Initiative.PCNS,
+        tokenPayload: undefined
+      })
+    ).get('/test');
 
     expect(res.status).toBe(403);
     expect(res.body).toEqual({ detail: 'Invalid user identity' });

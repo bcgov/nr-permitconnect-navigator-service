@@ -109,12 +109,13 @@ type PermitDateTimeKeys =
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
 export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & Record<PermitDateTimeKeys, string | null>;
-export type Permit = PermitBase & {
-  activity?: Activity;
-  permitNote?: PermitNote[];
-  permitTracking?: PermitTracking[];
-  permitType?: PermitType;
-};
+interface PermitRelations {
+  activity: Activity;
+  permitNote: PermitNote[];
+  permitTracking: PermitTracking[];
+  permitType: PermitType;
+}
+export type Permit = PermitBase & Partial<PermitRelations>;
 
 const permitNoteBase = Prisma.validator<Prisma.permit_noteDefaultArgs>()({});
 export type PermitNoteBase = Prisma.permit_noteGetPayload<typeof permitNoteBase>;
