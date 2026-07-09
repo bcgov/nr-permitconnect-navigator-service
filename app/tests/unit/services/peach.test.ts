@@ -6,6 +6,22 @@ import Problem from '../../../src/utils/problem.ts';
 
 import type { PermitTracking } from '../../../src/types/index.ts';
 
+vi.mock('config', async () => {
+  const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');
+  return {
+    default: {
+      ...actual,
+      get: vi.fn((key: string) => {
+        if (key === 'server.env') return 'ci';
+        if (key === 'server.pcns.appUrl') return 'www.example.com';
+
+        return actual.get(key);
+      }),
+      has: vi.fn(() => false)
+    }
+  };
+});
+
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
 const getPeachRecordSpy = vi.spyOn(peachExternal, 'getPeachRecord');
 const summarizePeachRecordSpy = vi.spyOn(peachParser, 'summarizePeachRecord');
