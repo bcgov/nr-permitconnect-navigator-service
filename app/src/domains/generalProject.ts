@@ -1,56 +1,15 @@
-import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createActivity } from './activity';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { email } from '../external/ches';
-import { toTitleCase } from '../utils';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { confirmationTemplateGeneralSubmission } from '../utils/templates';
 
 import type { Repositories } from '../db/unitOfWork';
-import type {
-  Contact,
-  CurrentContext,
-  GeneralProject,
-  GeneralProjectBase,
-  GeneralProjectIntake,
-  Permit,
-  PermitTrackingBase
-} from '../types';
+import type { CurrentContext, GeneralProjectBase, GeneralProjectIntake, Permit, PermitTrackingBase } from '../types';
 import type { UpsertPermitRequest } from '../types/requests';
-
-/**
- * Generates and sends a templated email with the given data
- * @param projectWithContact Email data
- */
-export async function emailProjectConfirmation(projectWithContact: GeneralProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const body = confirmationTemplateGeneralSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.GENERAL),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.generalProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Project Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
 
 /**
  * Transforms intake data to match DB schema

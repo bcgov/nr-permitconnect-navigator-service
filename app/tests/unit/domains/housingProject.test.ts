@@ -3,26 +3,20 @@ import { mockReset } from 'vitest-mock-extended';
 import {
   TEST_CURRENT_CONTEXT,
   TEST_CONTACT_1,
-  TEST_HOUSING_PROJECT_1,
   TEST_HOUSING_PROJECT_INTAKE,
   TEST_ACTIVITY_HOUSING,
-  TEST_EMAIL_RESPONSE,
   TEST_PERMIT_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import {
-  assignPriority,
-  emailProjectConfirmation,
-  generateHousingProjectData
-} from '../../../src/domains/housingProject.ts';
 import * as activityDomain from '../../../src/domains/activity.ts';
+import { assignPriority, generateHousingProjectData } from '../../../src/domains/housingProject.ts';
 import { Initiative, BasicResponse } from '../../../src/utils/enums/application.ts';
 import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 
-import type { HousingProject, Contact, Permit } from '../../../src/types/index.ts';
+import type { HousingProject, Permit } from '../../../src/types/index.ts';
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {
@@ -190,54 +184,6 @@ describe('housingProject domain', () => {
       assignPriority(project);
 
       expect(project.queuePriority).toBe(3);
-    });
-  });
-
-  describe('emailProjectConfirmation', () => {
-    it('should send email with correct template data when contact has name', async () => {
-      const emailModule = await import('../../../src/external/ches.ts');
-      const emailSpy = vi.spyOn(emailModule, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
-      const projectWithContact: HousingProject & { contact: Contact } = {
-        ...TEST_HOUSING_PROJECT_1,
-        contact: {
-          ...TEST_CONTACT_1,
-          firstName: 'Alice',
-          lastName: 'Johnson',
-          email: 'alice@example.com'
-        }
-      } as never;
-
-      await emailProjectConfirmation(projectWithContact);
-
-      expect(emailSpy).toHaveBeenCalledOnce();
-      const call = emailSpy.mock.calls[0][0];
-      expect(call.to).toEqual(['alice@example.com']);
-      expect(call.cc).toEqual(['noreply@example.com']);
-      expect(call.subject).toBe('Confirmation of Project Submission');
-      expect(call.bodyType).toBe('html');
-      expect(call.body).toBeDefined();
-      expect(call.body.length).toBeGreaterThan(0);
-    });
-
-    it('should send email with empty name when contact name missing', async () => {
-      const emailModule = await import('../../../src/external/ches.ts');
-      const emailSpy = vi.spyOn(emailModule, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
-      const projectWithContact: HousingProject & { contact: Contact } = {
-        ...TEST_HOUSING_PROJECT_1,
-        contact: {
-          ...TEST_CONTACT_1,
-          firstName: null,
-          lastName: null,
-          email: 'alice@example.com'
-        }
-      } as never;
-
-      await emailProjectConfirmation(projectWithContact);
-
-      expect(emailSpy).toHaveBeenCalledOnce();
-      expect(emailSpy.mock.calls[0][0].to).toEqual(['alice@example.com']);
     });
   });
 

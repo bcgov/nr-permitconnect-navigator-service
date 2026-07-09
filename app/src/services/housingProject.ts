@@ -2,9 +2,12 @@ import { Prisma } from '@prisma/client';
 
 import prisma from '../db/database.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
-import { emailProjectConfirmation, generateHousingProjectData } from '../domains/housingProject.ts';
+import { generateHousingProjectData } from '../domains/housingProject.ts';
+import { emailProjectConfirmation } from '../domains/project.ts';
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { confirmationTemplateHousingSubmission } from '../utils/templates.ts';
 
 import type {
   ContactBase,
@@ -219,7 +222,13 @@ export const submitHousingProjectDraftService = async (
       // Update the contact
       const contactResponse = await contact.upsert({ contactId: contactData.contactId }, contactData, contactData);
 
-      await emailProjectConfirmation({ ...response, contact: contactResponse });
+      await emailProjectConfirmation(
+        Initiative.HOUSING,
+        project.activityId,
+        project.housingProjectId,
+        confirmationTemplateHousingSubmission,
+        contactResponse
+      );
 
       return response;
     }

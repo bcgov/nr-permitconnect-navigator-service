@@ -1,51 +1,11 @@
-import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createActivity } from './activity';
-import { email } from '../external/ches';
-import { toTitleCase } from '../utils';
 import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
 
 import type { Repositories } from '../db/unitOfWork';
-import type {
-  Contact,
-  CurrentContext,
-  ElectrificationProject,
-  ElectrificationProjectBase,
-  ElectrificationProjectIntake
-} from '../types';
-
-/**
- * Generates and sends a templated email with the given data
- * @param projectWithContact Email data
- */
-export async function emailProjectConfirmation(projectWithContact: ElectrificationProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-  const subject = 'Confirmation of Project Submission';
-
-  const body = confirmationTemplateElectrificationSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.ELECTRIFICATION),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.electrificationProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: subject,
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
+import type { CurrentContext, ElectrificationProjectBase, ElectrificationProjectIntake } from '../types';
 
 /**
  * Transforms intake data to match DB schema

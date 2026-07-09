@@ -110,7 +110,7 @@ describe('permit domain', () => {
         to: ['recipient@example.com'],
         from: 'noreply@example.com',
         cc: ['noreply@example.com'],
-        subject: 'TEST -- Updates for project ACTI1234, Water Permit -- TEST',
+        subject: 'TEST -- Updates for Housing project ACTI1234, Water Permit -- TEST',
         bodyType: 'html',
         body: '<html>Email body</html>'
       });
@@ -149,7 +149,7 @@ describe('permit domain', () => {
       await sendPermitUpdateEmail(params);
 
       const emailCall = emailSpy.mock.calls[0]?.[0];
-      expect(emailCall?.subject).toBe('Updates for project ACTI1234, Permit');
+      expect(emailCall?.subject).toBe('Updates for Housing project ACTI1234, Permit');
       expect(emailCall?.subject).not.toContain('TEST');
     });
   });

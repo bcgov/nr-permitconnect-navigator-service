@@ -1,7 +1,15 @@
-import { Problem } from '../utils/index.ts';
+import config from 'config';
+
+import { email } from '../external/ches.ts';
+import { Initiative } from '../utils/enums/application.ts';
+import { Problem, toTitleCase } from '../utils/index.ts';
+import getLogger from '../utils/log.ts';
+import { EmailTemplate } from '../utils/templates.ts';
 
 import type { Repositories } from '../db/unitOfWork';
-import type { Project, ProjectRepositoryKeys } from '../types';
+import type { Contact, Project, ProjectRepositoryKeys } from '../types';
+
+const log = getLogger(module.filename);
 
 /**
  * Helper object for prisma include
@@ -16,6 +24,52 @@ const ACTIVITY_INCLUDE = {
     }
   }
 };
+
+/**
+ * Generates and sends a templated email with the given data
+ * @param initiative - Initiative of the project
+ * @param activityId - Activity ID of the project
+ * @param projectId - ID assigned to the project
+ * @param template - Email template function to use
+ * @param contact - Primary contact of the project
+ */
+export async function emailProjectConfirmation(
+  initiative: Initiative,
+  activityId: string,
+  projectId: string,
+  template: EmailTemplate,
+  contact: Contact
+) {
+  if (!contact.email) {
+    log.warn('Contact has no email. Cannot send project confirmation email.', {
+      activityId,
+      projectId
+    });
+    return;
+  }
+
+  const configCC = config.get<string>('server.ches.submission.cc');
+  const initiativeTitle = toTitleCase(initiative);
+  const subject = `Confirmation of ${initiativeTitle} Project Submission`;
+
+  const body = template({
+    contactName: contact?.firstName && contact?.lastName ? `${contact?.firstName} ${contact?.lastName}` : '',
+    initiative: initiativeTitle,
+    activityId,
+    projectId
+  });
+
+  const emailData = {
+    from: configCC,
+    to: [contact.email],
+    cc: [configCC],
+    subject,
+    bodyType: 'html',
+    body
+  };
+
+  await email(emailData);
+}
 
 /**
  * Gets a specific project from the PCNS database by given ActivityId

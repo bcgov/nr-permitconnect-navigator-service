@@ -121,5 +121,11 @@
   },
   "prisma": {
     "schema": "src/db/prisma/schema.prisma"
+  },
+  "allowScripts": {
+    "prisma@6.16.1": true,
+    "@prisma/client@6.16.1": true,
+    "@prisma/engines@6.16.1": true,
+    "@prisma/engines@4.16.2": true
   }
 }
