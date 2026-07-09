@@ -3,21 +3,20 @@ import { mockReset } from 'vitest-mock-extended';
 import {
   TEST_CURRENT_CONTEXT,
   TEST_CONTACT_1,
-  TEST_GENERAL_PROJECT_1,
   TEST_GENERAL_PROJECT_INTAKE,
   TEST_ACTIVITY_GENERAL,
-  TEST_EMAIL_RESPONSE,
   TEST_PERMIT_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { emailProjectConfirmation, generateGeneralProjectData } from '../../../src/domains/generalProject.ts';
 import * as activityDomain from '../../../src/domains/activity.ts';
+import { generateGeneralProjectData } from '../../../src/domains/generalProject.ts';
+
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 
-import type { GeneralProject, Contact, Permit } from '../../../src/types/index.ts';
+import type { Permit } from '../../../src/types/index.ts';
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {
@@ -40,53 +39,6 @@ describe('generalProject domain', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockReset(mockRepos);
-  });
-
-  describe('emailProjectConfirmation', () => {
-    it('should send email with correct template data when contact has name', async () => {
-      const emailModule = await import('../../../src/external/ches.ts');
-      const emailSpy = vi.spyOn(emailModule, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
-      const projectWithContact: GeneralProject & { contact: Contact } = {
-        ...TEST_GENERAL_PROJECT_1,
-        contact: {
-          ...TEST_CONTACT_1,
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane@example.com'
-        }
-      };
-      await emailProjectConfirmation(projectWithContact);
-
-      expect(emailSpy).toHaveBeenCalledOnce();
-      const call = emailSpy.mock.calls[0][0];
-      expect(call.to).toEqual(['jane@example.com']);
-      expect(call.cc).toEqual(['noreply@example.com']);
-      expect(call.subject).toBe('Confirmation of Project Submission');
-      expect(call.bodyType).toBe('html');
-      expect(call.body).toBeDefined();
-      expect(call.body.length).toBeGreaterThan(0);
-    });
-
-    it('should send email with empty name when contact name missing', async () => {
-      const emailModule = await import('../../../src/external/ches.ts');
-      const emailSpy = vi.spyOn(emailModule, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
-
-      const projectWithContact: GeneralProject & { contact: Contact } = {
-        ...TEST_GENERAL_PROJECT_1,
-        contact: {
-          ...TEST_CONTACT_1,
-          firstName: null,
-          lastName: null,
-          email: 'jane@example.com'
-        }
-      };
-
-      await emailProjectConfirmation(projectWithContact);
-
-      expect(emailSpy).toHaveBeenCalledOnce();
-      expect(emailSpy.mock.calls[0][0].to).toEqual(['jane@example.com']);
-    });
   });
 
   describe('generateGeneralProjectData', () => {

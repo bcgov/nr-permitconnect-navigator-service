@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from 'uuid';
 import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
-import { getCurrentUsername } from '../utils';
+import { getCurrentUsername, toTitleCase } from '../utils';
+import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';
 
@@ -14,7 +15,7 @@ import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, 
 export async function emailEnquiryConfirmation(
   repositories: Pick<Repositories, ProjectRepositoryKeys>,
   enquiryWithContact: Enquiry & { contact: ContactBase },
-  initiative: string,
+  initiative: Initiative,
   relatedActivityId?: string
 ) {
   const configCC = config.get<string>('server.ches.submission.cc');
@@ -72,7 +73,7 @@ export async function emailEnquiryConfirmation(
     from: configCC,
     to: [enquiryWithContact.contact.email!],
     cc: [configCC],
-    subject: 'Confirmation of Enquiry Submission',
+    subject: `Confirmation of ${toTitleCase(initiative)} Enquiry Submission`,
     bodyType: 'html',
     body: body
   };

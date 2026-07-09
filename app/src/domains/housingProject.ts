@@ -1,20 +1,16 @@
-import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
 import { createActivity } from './activity';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { email } from '../external/ches';
-import { getCurrentUsername, toTitleCase } from '../utils';
+import { getCurrentUsername } from '../utils';
 import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { confirmationTemplateHousingSubmission } from '../utils/templates';
 
 import type { Repositories } from '../db/unitOfWork';
 import type {
-  Contact,
   CurrentContext,
   HousingProject,
   HousingProjectBase,
@@ -64,35 +60,6 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
     housingProject.queuePriority = 3; // Everything Else
   }
 };
-
-/**
- * Generates and sends a templated email with the given data
- * @param projectWithContact Email data
- */
-export async function emailProjectConfirmation(projectWithContact: HousingProject & { contact: Contact }) {
-  const configCC = config.get<string>('server.ches.submission.cc');
-
-  const body = confirmationTemplateHousingSubmission({
-    contactName:
-      projectWithContact.contact?.firstName && projectWithContact.contact?.lastName
-        ? `${projectWithContact.contact?.firstName} ${projectWithContact.contact?.lastName}`
-        : '',
-    initiative: toTitleCase(Initiative.HOUSING),
-    activityId: projectWithContact.activityId,
-    projectId: projectWithContact.housingProjectId
-  });
-
-  const emailData = {
-    from: configCC,
-    to: [projectWithContact.contact.email!],
-    cc: [configCC],
-    subject: 'Confirmation of Project Submission',
-    bodyType: 'html',
-    body: body
-  };
-
-  await email(emailData);
-}
 
 /**
  * Transforms intake data to match DB schema
