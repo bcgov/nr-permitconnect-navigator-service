@@ -1,7 +1,7 @@
 import { syncPeachRecords } from './src/domains/peach.ts';
 import { sendPermitUpdateNotifications } from './src/domains/permit.ts';
 import { refreshCodeCaches } from './src/db/codes/cache.ts';
-import { unitOfWork } from './src/repositories/unitOfWork.ts';
+import { unitOfWork } from './src/db/unitOfWork.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 

@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 
 import type { Document } from '../types/index.ts';
 

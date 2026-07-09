@@ -2,12 +2,12 @@ import config from 'config';
 
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
-import { Repositories } from '../repositories/unitOfWork';
 import { Problem } from '../utils';
 import { GroupName, Initiative, Resource } from '../utils/enums/application';
 import { NoteType } from '../utils/enums/projectCommon';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { NoteHistory, ProjectRepositoryKeys, User } from '../types';
 
 export async function emailBringForwardNotification(

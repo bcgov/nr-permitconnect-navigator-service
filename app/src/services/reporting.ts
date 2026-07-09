@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 
 /**
  * Execute a raw query to get electrification permit reporting data

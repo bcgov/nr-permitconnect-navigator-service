@@ -4,11 +4,11 @@ import { v4 as uuidv4 } from 'uuid';
 import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
-import { Repositories } from '../repositories/unitOfWork';
 import { getCurrentUsername } from '../utils';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '../types';
 
 export async function emailEnquiryConfirmation(
@@ -26,7 +26,7 @@ export async function emailEnquiryConfirmation(
   // If has permit description convert \n to <br>
   if (enquiryDescription.includes('Tracking ID:')) {
     const descriptionSplit = enquiryDescription.split('\n\n');
-    permitDescription = descriptionSplit[0]?.replace(/\n/g, '<br>') + '<br><br>';
+    permitDescription = descriptionSplit[0]?.replaceAll(/\n/g, '<br>') + '<br><br>';
     enquiryDescription = descriptionSplit.slice(1, descriptionSplit.length).join(' ');
   }
 

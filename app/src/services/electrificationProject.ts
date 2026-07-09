@@ -1,5 +1,10 @@
 import { Prisma } from '@prisma/client';
 
+import prisma from '../db/database.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
+import { emailProjectConfirmation, generateElectrificationProjectData } from '../domains/electrificationProject.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+
 import type {
   ContactBase,
   CurrentAuthorization,
@@ -10,10 +15,6 @@ import type {
   ElectrificationProjectStatistics,
   Maybe
 } from '../types/index.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
-import { emailProjectConfirmation, generateElectrificationProjectData } from '../domains/electrificationProject.ts';
-import prisma from '../db/database.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 
 export const createElectrificationProjectService = async (
   data: ElectrificationProjectIntake,

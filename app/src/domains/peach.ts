@@ -5,11 +5,11 @@ import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { getPeachRecord } from '../external/peach.ts';
 import { parsePeachRecords } from '../parsers/peach.ts';
-import { Repositories } from '../repositories/unitOfWork.ts';
 import { PeachIntegratedSystem } from '../utils/enums/permit';
 import { combineDateTime, compareDates, omit } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { PeachSummary, PermitTracking, Record as PeachRecord, UpdatedPermitWithNote } from '../types';
 
 const log = getLogger(module.filename);

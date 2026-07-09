@@ -1,6 +1,15 @@
 import { v4 as uuidv4 } from 'uuid';
 
+import { unitOfWork } from '../db/unitOfWork.ts';
+import { findPriorityPermitTracking } from '../domains/peach.ts';
+import { sendPermitUpdateNotifications } from '../domains/permit.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
+import { getPeachRecord } from '../external/peach.ts';
+import { summarizePeachRecord } from '../parsers/peach.ts';
+import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { Initiative } from '../utils/enums/application.ts';
+import Problem from '../utils/problem.ts';
+import { differential, isEmptyObject } from '../utils/utils.ts';
 
 import type {
   CurrentAuthorization,
@@ -16,15 +25,6 @@ import type {
   SearchPermitsResponse,
   SourceSystemKind
 } from '../types/index.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import Problem from '../utils/problem.ts';
-import { differential, isEmptyObject } from '../utils/utils.ts';
-import { sendPermitUpdateNotifications } from '../domains/permit.ts';
-import { findPriorityPermitTracking } from '../domains/peach.ts';
-import { getPeachRecord } from '../external/peach.ts';
-import { summarizePeachRecord } from '../parsers/peach.ts';
-import { upsertPermitTracking } from '../domains/permitTracking.ts';
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
   const hasIntegratedSourceSystemKind = sourceSystemKinds.some(

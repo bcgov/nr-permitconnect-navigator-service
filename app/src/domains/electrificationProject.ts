@@ -1,6 +1,14 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
+import { createActivity } from './activity';
+import { email } from '../external/ches';
+import { toTitleCase } from '../utils';
+import { Initiative } from '../utils/enums/application';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
+
+import type { Repositories } from '../db/unitOfWork';
 import type {
   Contact,
   CurrentContext,
@@ -8,15 +16,6 @@ import type {
   ElectrificationProjectBase,
   ElectrificationProjectIntake
 } from '../types';
-import { Initiative } from '../utils/enums/application';
-import { toTitleCase } from '../utils';
-import { confirmationTemplateElectrificationSubmission } from '../utils/templates';
-
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repositories/unitOfWork';
-
-import { email } from '../external/ches';
-import { createActivity } from './activity';
 
 /**
  * Generates and sends a templated email with the given data

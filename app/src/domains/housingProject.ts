@@ -1,8 +1,18 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
+import { createActivity } from './activity';
+import { PermitStage, PermitState } from '../db/codes/enums';
+import { jsonToPrismaInputJson } from '../db/utils/utils';
+import { email } from '../external/ches';
+import { getCurrentUsername, toTitleCase } from '../utils';
+import { BasicResponse, Initiative } from '../utils/enums/application';
 import { NumResidentialUnits } from '../utils/enums/housing';
+import { PermitNeeded } from '../utils/enums/permit';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { confirmationTemplateHousingSubmission } from '../utils/templates';
 
+import type { Repositories } from '../db/unitOfWork';
 import type {
   Contact,
   CurrentContext,
@@ -12,17 +22,7 @@ import type {
   Permit,
   PermitTrackingBase
 } from '../types';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { getCurrentUsername, toTitleCase } from '../utils';
-import { confirmationTemplateHousingSubmission } from '../utils/templates';
-import { PermitStage, PermitState } from '../db/codes/enums';
-import { PermitNeeded } from '../utils/enums/permit';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repositories/unitOfWork';
-import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { UpsertPermitRequest } from '../types/requests';
-import { email } from '../external/ches';
-import { createActivity } from './activity';
+import type { UpsertPermitRequest } from '../types/requests';
 
 /**
  * Assigns a priority level to a housing project based on given criteria

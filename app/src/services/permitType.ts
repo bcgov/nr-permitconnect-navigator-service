@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repositories/unitOfWork';
+import { unitOfWork } from '../db/unitOfWork';
 import { Initiative } from '../utils/enums/application';
 
 import type { PermitType } from '../types';

@@ -1,6 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
+import { emailBringForwardNotification } from '../domains/noteHistory.ts';
+import { SYSTEM_ID } from '../utils/constants/application.ts';
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
 import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 
@@ -8,11 +10,10 @@ import type {
   BringForward,
   CurrentAuthorization,
   CurrentContext,
+  Enquiry,
   NoteHistory,
   NoteHistoryBase
 } from '../types/index.ts';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
-import { emailBringForwardNotification } from '../domains/noteHistory.ts';
 
 /**
  * Create a note history
@@ -114,7 +115,7 @@ export const listBringForwardsService = async (
           }
         });
 
-        const enquiries = (
+        const enquiries: Enquiry[] = (
           await Promise.all([
             enquiry.search(
               {
@@ -135,7 +136,7 @@ export const listBringForwardsService = async (
               Initiative.HOUSING
             )
           ])
-        ).flatMap((x) => x);
+        ).flat();
 
         return history.map((h) => ({
           activityId: h.activityId,

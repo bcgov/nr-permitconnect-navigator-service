@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getCurrentSubject } from '../utils/utils.ts';

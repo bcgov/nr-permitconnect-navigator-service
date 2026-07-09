@@ -1,6 +1,6 @@
-import { Repositories } from '../repositories/unitOfWork.ts';
 import { Problem } from '../utils/index.ts';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { Project, ProjectRepositoryKeys } from '../types';
 
 /**

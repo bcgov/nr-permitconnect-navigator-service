@@ -1,6 +1,6 @@
-import { Repositories } from '../repositories/unitOfWork';
 import { GroupName, Initiative } from '../utils/enums/application';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { Group } from '../types';
 
 export const assignGroup = async (

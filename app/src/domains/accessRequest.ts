@@ -1,7 +1,7 @@
-import { Repositories } from '../repositories/unitOfWork';
 import { getCorrespondingGlobalGroup } from '../domains/yars';
 import { GroupName, Initiative } from '../utils/enums/application';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { Group } from '../types';
 
 export const isUserAdmin = async (

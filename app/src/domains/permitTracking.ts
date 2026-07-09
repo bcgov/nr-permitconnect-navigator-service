@@ -1,5 +1,4 @@
-import { Repositories } from '../repositories/unitOfWork';
-
+import type { Repositories } from '../db/unitOfWork';
 import type { PermitTracking, PermitTrackingBase } from '../types';
 
 /**

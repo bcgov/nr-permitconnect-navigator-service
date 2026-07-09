@@ -1,10 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { DuplicateKeyProblem, NotFoundProblem } from '../db/errors';
-import { Repositories } from '../repositories/unitOfWork';
 import { JwtUser } from '../services/login';
 import { differential, Problem } from '../utils';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { User } from '../types';
 
 export const createUser = async (

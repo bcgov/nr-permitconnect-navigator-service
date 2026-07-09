@@ -1,9 +1,10 @@
 import { Prisma } from '@prisma/client';
 
 import prisma from '../db/database.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { emailProjectConfirmation, generateHousingProjectData } from '../domains/housingProject.ts';
+import { upsertPermitTracking } from '../domains/permitTracking.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
 
 import type {
   ContactBase,
@@ -15,7 +16,6 @@ import type {
   HousingProjectStatistics,
   Maybe
 } from '../types/index.ts';
-import { upsertPermitTracking } from '../domains/permitTracking.ts';
 
 export const createHousingProjectService = async (
   data: HousingProjectIntake,

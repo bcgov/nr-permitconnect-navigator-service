@@ -1,4 +1,4 @@
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { isTruthy } from '../utils/index.ts';
 
 import type { User } from '../types/models.ts';
@@ -50,7 +50,7 @@ export const searchUsersService = async (params: UserSearchParameters): Promise<
               })
             )
           )
-        ).flatMap((r) => r);
+        ).flat();
         userWithGroups.forEach((user) => {
           if (user.groups)
             user.groups = user.groups.filter((ug) => initiativeResult.some((i) => ug.initiativeId === i.initiativeId));

@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken';
 import { v4 as uuidv4 } from 'uuid';
 
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { createUser, updateUser } from '../domains/user.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
 import { IdentityProviderKind } from '../utils/enums/application.ts';
 
 import type { Contact, User } from '../types/models.ts';

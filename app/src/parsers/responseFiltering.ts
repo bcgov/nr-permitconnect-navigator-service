@@ -1,6 +1,7 @@
-import { Repositories } from '../repositories/unitOfWork';
-import { CurrentAuthorization, CurrentContext } from '../types';
+import { Repositories } from '../db/unitOfWork';
 import { Problem } from '../utils';
+
+import type { CurrentAuthorization, CurrentContext } from '../types';
 
 interface ActivityScopeFilterable {
   activityId?: string;

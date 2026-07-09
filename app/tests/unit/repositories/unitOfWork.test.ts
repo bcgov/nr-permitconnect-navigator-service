@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import { unitOfWork } from '../../../src/repositories/unitOfWork.ts';
+import { unitOfWork } from '../../../src/db/unitOfWork.ts';
 import { requestContext } from '../../../src/types/context.ts';
 import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
 import prisma from '../../../src/db/database.ts';

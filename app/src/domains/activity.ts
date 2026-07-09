@@ -1,8 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { Repositories } from '../repositories/unitOfWork.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { Activity } from '../types/index.ts';
 
 /**

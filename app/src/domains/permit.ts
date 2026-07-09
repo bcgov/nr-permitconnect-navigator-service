@@ -1,23 +1,23 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
-import { email } from '../external/ches';
-import { Repositories } from '../repositories/unitOfWork';
-import { formatDateOnly } from '../utils';
-
-import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys } from '../types';
 import { getProjectByActivityId } from './project';
+import { codeTable } from '../db/codes/cache';
+import { PermitStage } from '../db/codes/enums';
+import { email } from '../external/ches';
+import { formatDateOnly } from '../utils';
 import { Initiative } from '../utils/enums/application';
+import { PermitNeeded } from '../utils/enums/permit';
+import { ActivityContactRole } from '../utils/enums/projectCommon';
 import {
   initialPeachPermitUpdateTemplate,
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
 } from '../utils/templates';
-import { codeTable } from '../db/codes/cache';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
 import { state } from '../../state';
-import { PermitNeeded } from '../utils/enums/permit';
-import { PermitStage } from '../db/codes/enums';
+
+import type { Repositories } from '../db/unitOfWork';
+import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys } from '../types';
 
 /**
  * Retrieve permits and trackings that are PEACH integrated

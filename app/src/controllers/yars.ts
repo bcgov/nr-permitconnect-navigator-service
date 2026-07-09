@@ -7,7 +7,7 @@ import {
 import { GroupName, Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import { LocalContext } from '../types/stuff';
+import type { LocalContext } from '../types/stuff';
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,

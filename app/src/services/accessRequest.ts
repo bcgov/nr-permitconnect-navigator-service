@@ -1,11 +1,10 @@
 import { v4 as uuidv4 } from 'uuid';
 
-import { assignPermissions } from '../external/coms.ts';
-
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
 import { createUser } from '../domains/user.ts';
 import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { assignPermissions } from '../external/coms.ts';
 import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';

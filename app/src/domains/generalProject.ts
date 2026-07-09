@@ -1,6 +1,17 @@
 import config from 'config';
 import { v4 as uuidv4 } from 'uuid';
 
+import { createActivity } from './activity';
+import { PermitStage, PermitState } from '../db/codes/enums';
+import { jsonToPrismaInputJson } from '../db/utils/utils';
+import { email } from '../external/ches';
+import { toTitleCase } from '../utils';
+import { BasicResponse, Initiative } from '../utils/enums/application';
+import { PermitNeeded } from '../utils/enums/permit';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { confirmationTemplateGeneralSubmission } from '../utils/templates';
+
+import type { Repositories } from '../db/unitOfWork';
 import type {
   Contact,
   CurrentContext,
@@ -10,17 +21,7 @@ import type {
   Permit,
   PermitTrackingBase
 } from '../types';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { toTitleCase } from '../utils';
-import { confirmationTemplateGeneralSubmission } from '../utils/templates';
-import { PermitStage, PermitState } from '../db/codes/enums';
-import { PermitNeeded } from '../utils/enums/permit';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { Repositories } from '../repositories/unitOfWork';
-import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { UpsertPermitRequest } from '../types/requests';
-import { email } from '../external/ches';
-import { createActivity } from './activity';
+import type { UpsertPermitRequest } from '../types/requests';
 
 /**
  * Generates and sends a templated email with the given data

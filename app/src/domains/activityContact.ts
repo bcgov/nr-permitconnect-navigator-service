@@ -1,11 +1,11 @@
 import config from 'config';
 
 import { getProjectByActivityId } from './project';
-import { Repositories } from '../repositories/unitOfWork';
 import { Problem } from '../utils';
 import { GroupName, Initiative } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { ActivityContact, Contact, CurrentAuthorization, CurrentContext, ProjectRepositoryKeys } from '../types';
 
 export const getTeamMemberEmailTemplateData = async (

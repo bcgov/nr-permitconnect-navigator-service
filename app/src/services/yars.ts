@@ -1,6 +1,6 @@
-import { assignPermissions } from '../external/coms.ts';
+import { unitOfWork } from '../db/unitOfWork.ts';
 import { getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
-import { unitOfWork } from '../repositories/unitOfWork.ts';
+import { assignPermissions } from '../external/coms.ts';
 import { Initiative, GroupName } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';

@@ -1,31 +1,33 @@
 import { Prisma } from '@prisma/client';
 
-import { UserRepository } from './user';
 import prisma, { PrismaClientType, PrismaTransactionClient } from '../db/database';
-import { ContactRepository } from './contact';
+import {
+  AccessRequestRepository,
+  ActivityContactRepository,
+  ActivityRepository,
+  ContactRepository,
+  DocumentRepository,
+  DraftRepository,
+  ElectrificationProjectRepository,
+  EnquiryRepository,
+  GeneralProjectRepository,
+  GroupRepository,
+  GroupRolePolicyVwRepository,
+  HousingProjectRepository,
+  IdentityProviderRepository,
+  InitiativeRepository,
+  NoteHistoryRepository,
+  NoteRepository,
+  PermitNoteRepository,
+  PermitRepository,
+  PermitTrackingRepository,
+  PermitTypeRepository,
+  PolicyAttributeRepository,
+  SourceSystemKindRepository,
+  SubjectGroupRepository,
+  UserRepository
+} from '../repositories/index';
 import { SYSTEM_ID } from '../utils/constants/application';
-import { IdentityProviderRepository } from './identityProvider';
-import { SubjectGroupRepository } from './yars/subjectGroup';
-import { GroupRepository } from './yars/group';
-import { InitiativeRepository } from './initiative';
-import { GroupRolePolicyVwRepository } from './yars/groupRolePolicyVw';
-import { AccessRequestRepository } from './accessRequest';
-import { PolicyAttributeRepository } from './yars/policyAttribute';
-import { HousingProjectRepository } from './housingProject';
-import { PermitRepository } from './permit';
-import { ActivityRepository } from './activity';
-import { ActivityContactRepository } from './activityContact';
-import { DraftRepository } from './draft';
-import { PermitTrackingRepository } from './permitTracking';
-import { ElectrificationProjectRepository } from './electrificationProject';
-import { GeneralProjectRepository } from './generalProject';
-import { EnquiryRepository } from './enquiry';
-import { DocumentRepository } from './document';
-import { NoteRepository } from './note';
-import { NoteHistoryRepository } from './noteHistory';
-import { PermitTypeRepository } from './permitType';
-import { SourceSystemKindRepository } from './sourceSystemKind';
-import { PermitNoteRepository } from './permitNote';
 import { requestContext } from '../types/context';
 
 /**

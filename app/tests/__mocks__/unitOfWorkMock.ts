@@ -2,11 +2,11 @@ import { mockDeep } from 'vitest-mock-extended';
 
 import { prismaTxMock } from './prismaMock.ts';
 
-import type { Repositories } from '../../src/repositories/unitOfWork.ts';
+import type { Repositories } from '../../src/db/unitOfWork.ts';
 
 export const mockRepos = mockDeep<Repositories>();
 
-vi.mock('../../src/repositories/unitOfWork', () => ({
+vi.mock('../../src/db/unitOfWork', () => ({
   __esModule: true,
   unitOfWork: {
     execute: vi.fn(async (fn: (repos: Repositories, tx: unknown) => unknown) => fn(mockRepos, prismaTxMock)),
