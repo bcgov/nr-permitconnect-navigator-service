@@ -57,6 +57,7 @@ const wrapperSettings = (props = {}) => ({
       Panel: { template: '<div class="stub-panel"><slot name="header" /><slot /></div>' },
       Message: { template: '<div class="stub-message"><slot /></div>' },
       DatePicker: true,
+      InputText: true,
       Select: true,
       TextArea: true,
       Tooltip: true
@@ -150,6 +151,7 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
         wrapper.find('[name="statusLastChanged"]'),
         wrapper.find('[name="decisionDate"]'),
         wrapper.find('[name="targetDate"]'),
+        wrapper.find('[name="technicalReviewer"]'),
         wrapper.find('[name="targetDateDescription"]'),
         wrapper.find('[name="permitNote"]')
       ];

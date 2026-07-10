@@ -2,7 +2,7 @@
 import { useI18n } from 'vue-i18n';
 
 import Tooltip from '@/components/common/Tooltip.vue';
-import { DatePicker, Select, TextArea } from '@/components/form';
+import { DatePicker, InputText, Select, TextArea } from '@/components/form';
 import { Message, Panel } from '@/lib/primevue';
 import { useCodeStore } from '@/store';
 import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
@@ -155,6 +155,16 @@ const { codeDefinition, codeDisplay, options } = useCodeStore();
               class="mt-2"
               name="targetDate"
               :disabled="!editable"
+            />
+          </span>
+        </div>
+        <div>
+          <span>
+            <InputText
+              name="technicalReviewer"
+              :disabled="!editable"
+              :label="t('authorization.authorizationStatusUpdatesCard.technicalReviewer')"
+              :tooltip="t('authorization.authorizationStatusUpdatesCard.technicalReviewerTooltip')"
             />
           </span>
         </div>

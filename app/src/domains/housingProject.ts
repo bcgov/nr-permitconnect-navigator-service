@@ -173,7 +173,8 @@ export const generateHousingProjectData = async (
           decisionDate: null,
           decisionTime: null,
           targetDate: null,
-          targetDateDescription: null
+          targetDateDescription: null,
+          technicalReviewer: null
         };
       });
     }
@@ -197,7 +198,8 @@ export const generateHousingProjectData = async (
         decisionDate: null,
         decisionTime: null,
         targetDate: null,
-        targetDateDescription: null
+        targetDateDescription: null,
+        technicalReviewer: null
       }));
     }
   }
