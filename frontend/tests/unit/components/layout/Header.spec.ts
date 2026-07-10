@@ -13,6 +13,10 @@ vi.mock('vue-i18n', () => ({
 }));
 
 vi.mock('vue-router', () => ({
+  useRoute: () => ({
+    query: {},
+    params: {}
+  }),
   useRouter: () => ({
     push: vi.fn()
   })

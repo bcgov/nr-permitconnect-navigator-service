@@ -5,7 +5,7 @@ import type { RouteRecordRaw } from 'vue-router';
 const routes: RouteRecordRaw[] = [
   {
     path: '/oidc',
-    meta: { hideBreadcrumb: true, hideNavbar: true },
+    meta: { hideBreadcrumb: true, hideAppDrawer: true },
     children: [
       {
         path: 'callback',
