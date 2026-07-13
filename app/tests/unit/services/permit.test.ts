@@ -131,6 +131,7 @@ describe('permit service', () => {
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([TEST_PERMIT_TYPE_1] as never);
       mockRepos.permit.findFirst.mockResolvedValueOnce(null as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({} as never);
 
       const response = await permitService.upsertPermitService(TEST_PERMIT_1, undefined, [], TEST_PERMIT_TYPE_1);
@@ -148,6 +149,7 @@ describe('permit service', () => {
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([] as never);
       mockRepos.permit.findFirst.mockResolvedValueOnce(null as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({} as never);
       upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
@@ -192,6 +194,7 @@ describe('permit service', () => {
 
       mockRepos.permit.findFirst.mockResolvedValueOnce(oldPermit as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(newPermit as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(newPermit as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({} as never);
       sendNotificationsSpy.mockResolvedValueOnce(undefined);
 
@@ -218,6 +221,7 @@ describe('permit service', () => {
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([] as never);
       mockRepos.permit.findFirst.mockResolvedValueOnce(oldPermit as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(newPermit as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
       sendNotificationsSpy.mockResolvedValueOnce(undefined);
 
@@ -235,6 +239,7 @@ describe('permit service', () => {
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([] as never);
       mockRepos.permit.findFirst.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(TEST_PERMIT_1 as never);
+      mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
 
       await permitService.upsertPermitService(

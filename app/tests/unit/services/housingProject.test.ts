@@ -9,11 +9,14 @@ import {
   TEST_HOUSING_PROJECT_INTAKE
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as housingProjectService from '../../../src/services/housingProject.ts';
+import prisma from '../../../src/db/database.ts';
 import * as housingProjectDomain from '../../../src/domains/housingProject.ts';
 import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
+import * as projectDomain from '../../../src/domains/project.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
-import prisma from '../../../src/db/database.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { confirmationTemplateHousingSubmission } from '../../../src/utils/templates.ts';
 
 vi.mock('config');
 vi.mock('../../../src/db/database.ts', () => ({
@@ -23,7 +26,7 @@ vi.mock('../../../src/db/database.ts', () => ({
 }));
 
 const generateDataSpy = vi.spyOn(housingProjectDomain, 'generateHousingProjectData');
-const emailSpy = vi.spyOn(housingProjectDomain, 'emailProjectConfirmation');
+const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
@@ -255,7 +258,13 @@ describe('housingProject service', () => {
         TEST_CONTACT_1
       );
       expect(emailSpy).toHaveBeenCalledTimes(1);
-      expect(emailSpy).toHaveBeenCalledWith(projectResponse);
+      expect(emailSpy).toHaveBeenCalledWith(
+        Initiative.HOUSING,
+        projectResponse.activityId,
+        projectResponse.housingProjectId,
+        confirmationTemplateHousingSubmission,
+        projectResponse.contact
+      );
       expect(response).toStrictEqual(projectResponse);
     });
 

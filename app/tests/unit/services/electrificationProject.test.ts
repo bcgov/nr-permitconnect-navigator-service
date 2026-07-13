@@ -8,10 +8,13 @@ import {
   TEST_ELECTRIFICATION_INTAKE,
   TEST_CONTACT_1
 } from '../data/index.ts';
-import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
-import * as electrificationProjectDomain from '../../../src/domains/electrificationProject.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
 import prisma from '../../../src/db/database.ts';
+import * as electrificationProjectDomain from '../../../src/domains/electrificationProject.ts';
+import * as projectDomain from '../../../src/domains/project.ts';
+import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
+import { Initiative } from '../../../src/utils/enums/application.ts';
+import { confirmationTemplateElectrificationSubmission } from '../../../src/utils/templates.ts';
 
 vi.mock('config');
 vi.mock('../../../src/db/database.ts', () => ({
@@ -21,7 +24,7 @@ vi.mock('../../../src/db/database.ts', () => ({
 }));
 
 const generateDataSpy = vi.spyOn(electrificationProjectDomain, 'generateElectrificationProjectData');
-const emailSpy = vi.spyOn(electrificationProjectDomain, 'emailProjectConfirmation');
+const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
 describe('electrificationProject service', () => {
@@ -232,7 +235,13 @@ describe('electrificationProject service', () => {
         TEST_CONTACT_1
       );
       expect(emailSpy).toHaveBeenCalledTimes(1);
-      expect(emailSpy).toHaveBeenCalledWith(projectResponse);
+      expect(emailSpy).toHaveBeenCalledWith(
+        Initiative.ELECTRIFICATION,
+        projectResponse.activityId,
+        projectResponse.electrificationProjectId,
+        confirmationTemplateElectrificationSubmission,
+        projectResponse.contact
+      );
       expect(response).toStrictEqual(projectResponse);
     });
 

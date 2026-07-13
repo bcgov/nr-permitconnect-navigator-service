@@ -66,7 +66,7 @@ describe('enquiry domain', () => {
       expect(emailSpy).toHaveBeenCalled();
       const emailCall = emailSpy.mock.calls[0]?.[0];
       expect(emailCall?.to).toContain(TEST_CONTACT_1.email);
-      expect(emailCall?.subject).toBe('Confirmation of Enquiry Submission');
+      expect(emailCall?.subject).toBe('Confirmation of Housing Enquiry Submission');
     });
 
     it('should include first two sentences in email body', async () => {

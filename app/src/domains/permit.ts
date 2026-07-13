@@ -5,7 +5,7 @@ import { getProjectByActivityId } from './project';
 import { codeTable } from '../db/codes/cache';
 import { PermitStage } from '../db/codes/enums';
 import { email } from '../external/ches';
-import { formatDateOnly } from '../utils';
+import { formatDateOnly, toTitleCase } from '../utils';
 import { Initiative } from '../utils/enums/application';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
@@ -61,7 +61,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
   });
 
   const appEnv = config.get('server.env');
-  let subject = `Updates for project ${activityId}, ${permitName}`;
+  let subject = `Updates for ${toTitleCase(initiative)} project ${activityId}, ${permitName}`;
   if (appEnv === 'dev' || appEnv === 'test') subject = `TEST -- ${subject} -- TEST`;
 
   const emailData = {

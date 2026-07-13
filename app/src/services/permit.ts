@@ -222,13 +222,17 @@ export const upsertPermitService = async (
       const oldAuthorization = permitData.permitId
         ? await permit.findFirst({ where: { permitId: permitData.permitId } })
         : undefined;
-      const data = await permit.upsert(
+      const upsert = await permit.upsert(
         {
           permitId: upsertPermitData.permitId
         },
         upsertPermitData,
         upsertPermitData
       );
+      const data = await permit.findUniqueOrThrow({
+        where: { permitId: upsert.permitId },
+        include: { permitType: true }
+      });
 
       await permitTracking.deleteMany(
         {
