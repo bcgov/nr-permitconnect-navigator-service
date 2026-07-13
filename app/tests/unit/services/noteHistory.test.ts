@@ -5,12 +5,10 @@ import {
   TEST_ACTIVITY_HOUSING,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
-  TEST_NOTE_HISTORY_1,
-  TEST_NOTE_HISTORY_2,
-  TEST_IDIR_USER_1,
-  TEST_GENERAL_PROJECT_1,
   TEST_HOUSING_PROJECT_1,
-  TEST_ENQUIRY_1
+  TEST_IDIR_USER_1,
+  TEST_NOTE_HISTORY_1,
+  TEST_NOTE_HISTORY_2
 } from '../data/index.ts';
 import * as noteHistoryService from '../../../src/services/noteHistory.ts';
 import * as noteHistoryDomain from '../../../src/domains/noteHistory.ts';
@@ -76,43 +74,35 @@ describe('noteHistory service', () => {
 
   describe('listBringForwardsService', () => {
     it('fetches unresolved bring forwards with projects and user details', async () => {
-      const mockHistories = [TEST_NOTE_HISTORY_1];
-      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
-      mockRepos.electrificationProject.search.mockResolvedValueOnce([] as never);
-      mockRepos.generalProject.search.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1] as never);
-      mockRepos.housingProject.search.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1] as never);
-      mockRepos.user.findMany.mockResolvedValueOnce([TEST_IDIR_USER_1] as never);
-      mockRepos.enquiry.search.mockResolvedValueOnce([TEST_ENQUIRY_1] as never);
-      mockRepos.enquiry.search.mockResolvedValueOnce([] as never);
-      mockRepos.enquiry.search.mockResolvedValueOnce([] as never);
+      const mockHistories = [
+        {
+          ...TEST_NOTE_HISTORY_1,
+          createdBy: TEST_IDIR_USER_1.userId,
+          activity: {
+            housingProject: TEST_HOUSING_PROJECT_1
+          }
+        }
+      ];
+      mockRepos.noteHistory.listBringForwards.mockResolvedValueOnce(mockHistories as never);
+      mockRepos.user.search.mockResolvedValueOnce([TEST_IDIR_USER_1 as never]);
 
       const response = await noteHistoryService.listBringForwardsService(Initiative.GENERAL);
 
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith({
-        where: {
-          bringForwardState: BringForwardType.UNRESOLVED,
-          activity: {
-            initiative: {
-              code: Initiative.GENERAL
-            }
-          }
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        include: {
-          note: { orderBy: { createdAt: 'desc' } }
-        }
-      });
+      expect(mockRepos.noteHistory.listBringForwards).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.listBringForwards).toHaveBeenCalledWith(
+        Initiative.GENERAL,
+        BringForwardType.UNRESOLVED
+      );
+      expect(mockRepos.user.search).toHaveBeenCalledTimes(1);
+      expect(mockRepos.user.search).toHaveBeenCalledWith({ userId: [TEST_IDIR_USER_1.userId] });
       expect(response).toHaveLength(1);
       expect(response[0]).toHaveProperty('activityId', TEST_NOTE_HISTORY_1.activityId);
-      expect(response[0]).toHaveProperty('noteId', TEST_NOTE_HISTORY_1.noteHistoryId);
+      expect(response[0]).toHaveProperty('noteHistoryId', TEST_NOTE_HISTORY_1.noteHistoryId);
       expect(response[0]).toHaveProperty('title', TEST_NOTE_HISTORY_1.title);
     });
 
     it('returns empty array when no histories found', async () => {
-      mockRepos.noteHistory.findMany.mockResolvedValueOnce([] as never);
+      mockRepos.noteHistory.listBringForwards.mockResolvedValueOnce([] as never);
 
       const response = await noteHistoryService.listBringForwardsService(Initiative.HOUSING, BringForwardType.RESOLVED);
 
@@ -120,22 +110,14 @@ describe('noteHistory service', () => {
     });
 
     it('fetches bring forwards with custom state', async () => {
-      mockRepos.noteHistory.findMany.mockResolvedValueOnce([] as never);
+      mockRepos.noteHistory.listBringForwards.mockResolvedValueOnce([] as never);
 
       await noteHistoryService.listBringForwardsService(Initiative.ELECTRIFICATION, BringForwardType.RESOLVED);
 
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: {
-            bringForwardState: BringForwardType.RESOLVED,
-            activity: {
-              initiative: {
-                code: Initiative.ELECTRIFICATION
-              }
-            }
-          }
-        })
+      expect(mockRepos.noteHistory.listBringForwards).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.listBringForwards).toHaveBeenCalledWith(
+        Initiative.ELECTRIFICATION,
+        BringForwardType.RESOLVED
       );
     });
   });
@@ -143,25 +125,15 @@ describe('noteHistory service', () => {
   describe('listNoteHistoriesService', () => {
     it('returns all note histories when user has no scope:self attribute', async () => {
       const mockHistories = [TEST_NOTE_HISTORY_1, TEST_NOTE_HISTORY_2];
-      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
+      mockRepos.noteHistory.listNoteHistories.mockResolvedValueOnce(mockHistories as never);
 
       const response = await noteHistoryService.listNoteHistoriesService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         TEST_ACTIVITY_HOUSING.activityId
       );
 
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledTimes(1);
-      expect(mockRepos.noteHistory.findMany).toHaveBeenCalledWith({
-        where: {
-          activityId: TEST_ACTIVITY_HOUSING.activityId
-        },
-        orderBy: {
-          createdAt: 'desc'
-        },
-        include: {
-          note: { orderBy: { createdAt: 'desc' } }
-        }
-      });
+      expect(mockRepos.noteHistory.listNoteHistories).toHaveBeenCalledTimes(1);
+      expect(mockRepos.noteHistory.listNoteHistories).toHaveBeenCalledWith(TEST_ACTIVITY_HOUSING.activityId);
       expect(response).toHaveLength(2);
     });
 
@@ -170,7 +142,7 @@ describe('noteHistory service', () => {
         { ...TEST_NOTE_HISTORY_1, shownToProponent: true },
         { ...TEST_NOTE_HISTORY_2, shownToProponent: false }
       ];
-      mockRepos.noteHistory.findMany.mockResolvedValueOnce(mockHistories as never);
+      mockRepos.noteHistory.listNoteHistories.mockResolvedValueOnce(mockHistories as never);
       const proponentAuthContext: CurrentAuthorization = {
         ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         attributes: ['scope:self']

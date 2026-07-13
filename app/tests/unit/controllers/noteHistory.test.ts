@@ -138,7 +138,7 @@ describe('updateNoteHistoryController', () => {
     expect(updateSpy).toHaveBeenCalledWith(
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
       TEST_CURRENT_CONTEXT,
-      expect.objectContaining({ noteHistoryId: TEST_NOTE_HISTORY_1.noteHistoryId }),
+      expect.objectContaining({ noteHistoryId: 'nh-123' }),
       'updated note',
       Resource.ENQUIRY
     );
