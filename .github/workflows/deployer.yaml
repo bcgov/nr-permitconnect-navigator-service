@@ -52,7 +52,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Login to OpenShift Cluster
-        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:
           oc_server: ${{ secrets.openshift_server }}
           oc_token: ${{ secrets.openshift_token }}
