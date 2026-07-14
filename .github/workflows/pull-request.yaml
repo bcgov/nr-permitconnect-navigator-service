@@ -65,7 +65,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Login to OpenShift Cluster
-        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:
           oc_server: ${{ secrets.OPENSHIFT_SERVER }}
           oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
@@ -92,7 +92,7 @@ jobs:
     if: success()
     steps:
       - name: Release Comment on PR
-        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         if: success()
         with:
           header: release
@@ -126,7 +126,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Login to OpenShift Cluster
-        uses: bcgov/action-oc-runner@d2fc921aaa9d70684c186dbb7754e6985d44d86f # v1.4.1
+        uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
         with:
           oc_server: ${{ secrets.OPENSHIFT_SERVER }}
           oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
@@ -139,7 +139,7 @@ jobs:
           oc delete --namespace ${{ vars.NAMESPACE_PREFIX }}-dev cm,secret --selector app.kubernetes.io/instance=pr-${{ github.event.number }}
 
       - name: Remove Release Comment on PR
-        uses: marocchino/sticky-pull-request-comment@70d2764d1a7d5d9560b100cbea0077fc8f633987 # v3.0.2
+        uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: release
           delete: true
