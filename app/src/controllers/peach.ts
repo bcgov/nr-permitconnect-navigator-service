@@ -11,6 +11,6 @@ export const getPeachSummaryController = async (
   req: Request<never, never, { permitTrackings: PermitTracking[] }, never>,
   res: Response
 ) => {
-  const response = getPeachSummaryService(req.body.permitTrackings);
+  const response = await getPeachSummaryService(req.body.permitTrackings);
   res.status(200).json(response);
 };
