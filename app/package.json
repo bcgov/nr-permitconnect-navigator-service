@@ -77,7 +77,7 @@
     "express-winston": "4.2.0",
     "helmet": "8.2.0",
     "joi": "18.2.1",
-    "js-yaml": "4.2.0",
+    "js-yaml": "5.2.1",
     "jsonwebtoken": "9.0.3",
     "jwks-rsa": "4.0.1",
     "knex": "3.2.10",
