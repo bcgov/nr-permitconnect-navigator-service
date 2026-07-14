@@ -57,7 +57,7 @@ jobs:
           - "24.x"
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Check Sonar Secrets
         id: check-secrets
         run: |
@@ -67,7 +67,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-app
         env:
           cache-name: cache-node-modules
@@ -124,7 +124,7 @@ jobs:
           - "24.x"
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Check Sonar Secrets
         id: check-secrets
         run: |
@@ -134,7 +134,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         id: cache-frontend
         env:
           cache-name: cache-node-modules
@@ -182,14 +182,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Restore Coverage Results
         uses: actions/download-artifact@v8
         with:
           name: coverage-app
           path: ${{ github.workspace }}/app/coverage
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2 # v7.2.1
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_APP }}
         with:
@@ -206,14 +206,14 @@ jobs:
       contents: read
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Restore Coverage Results
         uses: actions/download-artifact@v8
         with:
           name: coverage-frontend
           path: ${{ github.workspace }}/frontend/coverage
       - name: SonarCloud Scan
-        uses: SonarSource/sonarqube-scan-action@c7ee0f9df90b7aa20e8dcf9695dcfe2e7da5b4f2 # v7.2.1
+        uses: SonarSource/sonarqube-scan-action@713881670b6b3676cda39549040e2d88c70d582e # v8.2.0
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_FRONTEND }}
         with:
