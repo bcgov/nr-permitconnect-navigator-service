@@ -48,10 +48,10 @@ jobs:
       image_tag: ${{ steps.deploy_tag.outputs.tag }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: Parse Input Values
         id: parse
