@@ -1,6 +1,5 @@
 import config from 'config';
 import { existsSync, readFileSync, statSync } from 'node:fs';
-import { validate, version } from 'uuid';
 
 import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 import * as utils from '../../../src/utils/utils.ts';
@@ -21,11 +20,6 @@ vi.mock('node:fs', () => ({
 
 vi.mock('../../../src/utils/log', () => ({
   getLogger: () => ({ warn: vi.fn(), info: vi.fn(), error: vi.fn() })
-}));
-
-vi.mock('uuid', () => ({
-  validate: vi.fn(),
-  version: vi.fn()
 }));
 
 const TOKEN_PAYLOAD: JwtPayload = {
@@ -547,21 +541,22 @@ describe('utils', () => {
   });
 
   describe('uuidValidateV4', () => {
-    it('returns true when validate is true and version is 4', () => {
-      (validate as Mock).mockReturnValue(true);
-      (version as Mock).mockReturnValue(4);
-      expect(utils.uuidValidateV4('anything')).toBe(true);
+    it('returns true for valid v4 UUIDs', () => {
+      expect(utils.uuidValidateV4('12345678-90ab-4def-8123-456789abcdef')).toBe(true);
+      expect(utils.uuidValidateV4('a1b2c3d4-e5f6-4789-a012-3456789abcde')).toBe(true);
     });
 
-    it('returns false when not valid', () => {
-      (validate as Mock).mockReturnValue(false);
-      expect(utils.uuidValidateV4('anything')).toBe(false);
+    it('returns false for invalid UUID format', () => {
+      expect(utils.uuidValidateV4('not-a-uuid')).toBe(false);
+      expect(utils.uuidValidateV4('12345678-90ab-4def-8123')).toBe(false);
+      expect(utils.uuidValidateV4('')).toBe(false);
     });
 
-    it('returns false when version not 4', () => {
-      (validate as Mock).mockReturnValue(true);
-      (version as Mock).mockReturnValue(1);
-      expect(utils.uuidValidateV4('anything')).toBe(false);
+    it('returns false for non-v4 UUIDs', () => {
+      // v1 UUID
+      expect(utils.uuidValidateV4('12345678-90ab-1def-8123-456789abcdef')).toBe(false);
+      // v5 UUID
+      expect(utils.uuidValidateV4('12345678-90ab-5def-8123-456789abcdef')).toBe(false);
     });
   });
 });
