@@ -1,5 +1,5 @@
 import jwt from 'jsonwebtoken';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { createUser, updateUser } from '../domains/user.ts';
@@ -83,7 +83,7 @@ export const loginService = async (token: jwt.JwtPayload): Promise<User> => {
         }
 
         const newContact = {
-          contactId: uuidv4(),
+          contactId: randomUUID(),
           userId: response.userId,
           firstName: firstNameOverride ?? newUser.firstName,
           lastName: lastNameOverride ?? newUser.lastName ?? ' ', // Default blank string if no other options

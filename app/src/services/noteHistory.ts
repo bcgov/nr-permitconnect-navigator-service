@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { emailBringForwardNotification } from '../domains/noteHistory.ts';
@@ -23,11 +23,11 @@ export const createNoteHistoryService = async (data: NoteHistoryBase, noteStr: s
   return await unitOfWork.execute(async ({ note, noteHistory }) => {
     const historyResult = await noteHistory.create({
       ...data,
-      noteHistoryId: uuidv4()
+      noteHistoryId: randomUUID()
     });
 
     const noteResult = await note.create({
-      noteId: uuidv4(),
+      noteId: randomUUID(),
       noteHistoryId: historyResult.noteHistoryId,
       note: noteStr
     });
@@ -144,7 +144,7 @@ export const updateNoteHistoryService = async (
       if (note) {
         await note.create({
           noteHistoryId: data.noteHistoryId,
-          noteId: uuidv4(),
+          noteId: randomUUID(),
           note: noteStr
         });
       }

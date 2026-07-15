@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
 import { randomUUID } from 'node:crypto';
 
-import { NIL_UUID } from '../../utils/constants/application.ts';
 import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
+
+const NIL_UUID = '00000000-0000-0000-0000-000000000000';
 
 export async function up(knex: Knex): Promise<void> {
   return (

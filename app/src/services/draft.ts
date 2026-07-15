@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
@@ -110,7 +110,7 @@ export const upsertDraftService = async (
       const activityId = (await createActivity({ activity, initiative }, initiativeCode))?.activityId;
 
       const response = await draft.create({
-        draftId: uuidv4(),
+        draftId: randomUUID(),
         activityId,
         draftCode,
         data: jsonToPrismaInputJson(data.data)

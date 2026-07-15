@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
 import { Initiative } from '../utils/enums/application';
@@ -43,7 +43,7 @@ export const generateElectrificationProjectData = async (
   if (!activityId) throw new Error('Failed to generate activity ID');
 
   // Put new electrification project together
-  const UUID = uuidv4();
+  const UUID = randomUUID();
 
   const electrificationProjectData: ElectrificationProjectBase = {
     companyIdRegistered: data.basic?.registeredId ?? null,

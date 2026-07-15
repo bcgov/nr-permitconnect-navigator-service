@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { DuplicateKeyProblem, NotFoundProblem } from '../db/errors';
 import { JwtUser } from '../services/login';
@@ -17,7 +17,7 @@ export const createUser = async (
 
   const newUser = {
     bceidBusinessName: data.bceidBusinessName ?? null,
-    userId: uuidv4(),
+    userId: randomUUID(),
     sub: data.sub,
     fullName: data.fullName,
     email: data.email,

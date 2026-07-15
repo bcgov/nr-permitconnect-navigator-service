@@ -1,5 +1,5 @@
 import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
@@ -118,7 +118,7 @@ export const generateEnquiryData = async (
 
   // Put new enquiry together
   return {
-    enquiryId: data.enquiryId ?? uuidv4(),
+    enquiryId: data.enquiryId ?? randomUUID(),
     activityId: activityId,
     relatedActivityId: data.relatedActivityId,
     enquiryDescription: data.enquiryDescription,

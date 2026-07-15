@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { PermitStage } from '../db/codes/enums';
 import { unitOfWork } from '../db/unitOfWork';
@@ -117,7 +117,7 @@ export const sendRoadmapService = async (
       }
 
       const noteHistoryRes = await noteHistory.create({
-        noteHistoryId: uuidv4(),
+        noteHistoryId: randomUUID(),
         activityId: activityId,
         type: 'Roadmap',
         title: 'Sent roadmap',
@@ -130,7 +130,7 @@ export const sendRoadmapService = async (
       });
 
       const noteRes = await note.create({
-        noteId: uuidv4(),
+        noteId: randomUUID(),
         noteHistoryId: noteHistoryRes.noteHistoryId,
         note: noteBody
       });

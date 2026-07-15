@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
 import { PermitStage, PermitState } from '../db/codes/enums';
@@ -150,7 +150,7 @@ export const generateHousingProjectData = async (
 
     if (data.permits.appliedPermits?.length) {
       appliedPermits = data.permits.appliedPermits.map((x: Permit) => {
-        const permitId = x.permitId ?? uuidv4();
+        const permitId = x.permitId ?? randomUUID();
 
         // Add each tracker for this permit with the proper permitId
         x.permitTracking?.forEach((pt) => appliedPermitTrackers.push({ ...pt, permitId }));
@@ -181,7 +181,7 @@ export const generateHousingProjectData = async (
 
     if (data.permits.investigatePermits?.length) {
       investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
-        permitId: x.permitId ?? uuidv4(),
+        permitId: x.permitId ?? randomUUID(),
         permitTypeId: x.permitTypeId,
         activityId: activityId,
         stage: PermitStage.PRE_SUBMISSION,
@@ -211,7 +211,7 @@ export const generateHousingProjectData = async (
       ...housing,
       ...location,
       ...permits,
-      housingProjectId: uuidv4(),
+      housingProjectId: randomUUID(),
       activityId: activityId,
       submittedAt: new Date(),
       submittedBy: getCurrentUsername(currentContext),

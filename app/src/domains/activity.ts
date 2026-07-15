@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { Initiative } from '../utils/enums/application.ts';
 
@@ -19,7 +19,7 @@ export const createActivity = async (
   let id, queryResult;
 
   do {
-    id = uuidv4().substring(0, 8).toUpperCase();
+    id = randomUUID().substring(0, 8).toUpperCase();
     queryResult = await repositories.activity.findUnique({
       where: { activityId: id },
       select: { activityId: true }

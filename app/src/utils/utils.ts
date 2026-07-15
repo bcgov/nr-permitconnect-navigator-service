@@ -4,14 +4,11 @@ import { join } from 'node:path';
 import { cwd } from 'node:process';
 
 import { IdentityProviderKind } from './enums/application.ts';
+import { uuidV4Pattern } from './regexp.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
 
-// Constants
-const UUID_REGEX =
-  // eslint-disable-next-line max-len
-  /^(?:[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/i;
 const log = getLogger(module.filename);
 
 /**
@@ -410,34 +407,11 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * Validates a UUID and checks if it is version 4
- * @param uuid The UUID to validate
- * @returns True if the UUID is valid and is version 4
- */
-export function uuidValidateV4(uuid: string): boolean {
-  return uuidValidate(uuid) && uuidVersion(uuid) === 4;
-}
-
-/**
- * Validates a UUID
- * @param uuid The UUID to validate
- * @returns True if the UUID is valid
+ * Validates a UUIDV4
+ * @param uuid The UUIDV4 to validate
+ * @returns True if the UUIDV4 is valid
  */
 
-function uuidValidate(uuid: unknown) {
-  return typeof uuid === 'string' && UUID_REGEX.test(uuid);
-}
-
-/**
- * Validates a UUID and returns the version
- * @param uuid The UUID to get the version of
- * @returns The version of the UUID
- */
-
-export function uuidVersion(uuid: string) {
-  if (!uuidValidate(uuid)) {
-    throw TypeError('Invalid UUID');
-  }
-
-  return parseInt(uuid.slice(14, 15), 16);
+export function uuidValidateV4(uuid: string) {
+  return uuidV4Pattern.test(uuid);
 }

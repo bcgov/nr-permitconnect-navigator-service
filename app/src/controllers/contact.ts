@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import {
   deleteContactService,
@@ -76,7 +76,7 @@ export const upsertContactController = async (
   req: Request<never, never, Contact, never>,
   res: Response<Contact, LocalContext>
 ) => {
-  const contact = { ...req.body, contactId: req.body.contactId ?? uuidv4() };
+  const contact = { ...req.body, contactId: req.body.contactId ?? randomUUID() };
   const response = await upsertContactsService([contact]);
   res.status(200).json(response[0]);
 };

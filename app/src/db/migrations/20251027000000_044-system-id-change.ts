@@ -1,6 +1,8 @@
-import { NIL_UUID, SYSTEM_ID } from '../../utils/constants/application.ts';
+import { SYSTEM_ID } from '../../utils/constants/application.ts';
 
 import type { Knex } from 'knex';
+
+const NIL_UUID = '00000000-0000-0000-0000-000000000000';
 
 export async function up(knex: Knex): Promise<void> {
   return Promise.resolve()
