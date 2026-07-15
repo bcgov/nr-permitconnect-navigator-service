@@ -1,13 +1,11 @@
-import { NIL } from 'uuid';
-
-import { SYSTEM_ID } from '../../utils/constants/application.ts';
+import { NIL_UUID, SYSTEM_ID } from '../../utils/constants/application.ts';
 
 import type { Knex } from 'knex';
 
 export async function up(knex: Knex): Promise<void> {
   return Promise.resolve()
     .then(() => {
-      return knex('user').where('user_id', NIL).update({ user_id: SYSTEM_ID });
+      return knex('user').where('user_id', NIL_UUID).update({ user_id: SYSTEM_ID });
     })
 
     .then(() =>
@@ -118,6 +116,6 @@ export async function down(knex: Knex): Promise<void> {
     )
 
     .then(() => {
-      return knex('user').where('user_id', SYSTEM_ID).update({ user_id: NIL });
+      return knex('user').where('user_id', SYSTEM_ID).update({ user_id: NIL_UUID });
     });
 }
