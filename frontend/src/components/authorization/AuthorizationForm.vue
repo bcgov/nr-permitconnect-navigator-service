@@ -13,8 +13,9 @@ import AuthorizationUpdateHistory from '@/components/authorization/Authorization
 import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
-import { useCodeStore, useFeatureStore, useProjectStore } from '@/store';
+import { useAppStore, useAuthZStore, useCodeStore, useFeatureStore, useProjectStore } from '@/store';
 import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
+import { Action, Resource } from '@/utils/enums/application';
 import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { formatDateTime } from '@/utils/formatters';
@@ -49,6 +50,8 @@ const router = useRouter();
 const toast = useToast();
 
 // Store
+const appStore = useAppStore();
+const authzStore = useAuthZStore();
 const { codeDisplay } = useCodeStore();
 const featureStore = useFeatureStore();
 const projectStore = useProjectStore();
@@ -116,7 +119,8 @@ const formSchema = object({
   statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
   statusLastChanged: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastChanged')),
   targetDate: date().nullable(),
-  targetDateDescription: string().nullable()
+  targetDateDescription: string().nullable(),
+  technicalReviewer: string().nullable().max(255)
 });
 
 type FormSchemaType = InferType<typeof formSchema> & { authorizationType: PermitType } & AuditFields;
@@ -262,6 +266,7 @@ function initializeFormValues() {
       state: authorization.state,
       needed: authorization.needed as PermitNeeded,
       permitId: authorization?.permitId,
+      technicalReviewer: authorization?.technicalReviewer,
       targetDate: authorization?.targetDate ? new Date(authorization?.targetDate) : undefined,
       targetDateDescription: authorization?.targetDateDescription,
       createdAt: authorization.createdAt,
@@ -336,7 +341,8 @@ async function onSubmit(data: GenericObject) {
       statusLastChanged: statusLastChanged.date,
       statusLastChangedTime: statusLastChanged.time,
       targetDate: data.targetDate ? data.targetDate.toISOString() : null,
-      targetDateDescription: data.targetDateDescription ?? null
+      targetDateDescription: data.targetDateDescription ?? null,
+      technicalReviewer: data.technicalReviewer ?? null
     };
 
     if (
@@ -470,7 +476,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
           "
           type="submit"
           icon="pi pi-check"
-          :disabled="!editable"
+          :disabled="!authzStore.can(appStore.getInitiative, Resource.PERMIT, Action.UPDATE)"
         />
         <Button
           class="p-button-outlined mr-2"

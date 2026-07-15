@@ -654,6 +654,8 @@
       "targetDateTooltip": "Target dates are used to track authorizations that need to meet specific timelines.",
       "targetDateDescription": "Target date description",
       "targetDateDescriptionTooltip": "Please provide the reason for the target date.",
+      "technicalReviewer": "Technical reviewer",
+      "technicalReviewerTooltip": "Technical reviewer is responsible for reviewing the application during the technical review stage. Please enter the name of the associated staff member.",
       "updateNoteForProponent": "Update note for Proponent",
       "updateToToday": "Update to today"
     },

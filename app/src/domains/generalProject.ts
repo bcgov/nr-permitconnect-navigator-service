@@ -105,7 +105,8 @@ export const generateGeneralProjectData = async (
           decisionDate: null,
           decisionTime: null,
           targetDate: null,
-          targetDateDescription: null
+          targetDateDescription: null,
+          technicalReviewer: null
         };
       });
     }
@@ -129,7 +130,8 @@ export const generateGeneralProjectData = async (
         decisionDate: null,
         decisionTime: null,
         targetDate: null,
-        targetDateDescription: null
+        targetDateDescription: null,
+        technicalReviewer: null
       }));
     }
   }

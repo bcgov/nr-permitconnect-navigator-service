@@ -372,6 +372,7 @@ interface PermitBase extends AuditFields {
   statusLastVerifiedTime?: Nullable<string>;
   targetDate?: Nullable<string>;
   targetDateDescription?: Nullable<string>;
+  technicalReviewer?: Nullable<string>;
   decisionDate?: Nullable<string>;
   decisionTime?: Nullable<string>;
   onHoldCode?: Nullable<PiesOnHold>;
