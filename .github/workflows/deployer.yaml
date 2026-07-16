@@ -58,6 +58,16 @@ jobs:
           oc_token: ${{ secrets.openshift_token }}
           oc_namespace: ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
 
+      - name: Deploy Standalone Database
+        shell: bash
+        run: >-
+          helm upgrade --install patroni-${{ inputs.job_name }} patroni
+          --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
+          --repo https://bcgov.github.io/nr-patroni-chart
+          --set fullnameOverride=patroni-${{ inputs.job_name }}
+          --timeout 10m
+          --wait
+
       - name: Helm Deploy
         shell: bash
         run: >-
@@ -68,6 +78,10 @@ jobs:
           --set image.repository=ghcr.io/${{ github.repository_owner }}
           --set image.tag=${{ inputs.image_tag }}
           --set route.host=${{ inputs.acronym }}-${{ inputs.namespace_environment }}-${{ inputs.job_name }}.apps.silver.devops.gov.bc.ca
+          --set database.host=patroni-${{ inputs.job_name }}
+          --set database.secretName=patroni-${{ inputs.job_name }}
+          --set database.selectorLabels."app\.kubernetes\.io/instance"=${{ inputs.job_name }}
+          --set database.selectorLabels.cluster-name=${{ inputs.job_name }}
           --timeout 10m
           --wait
 

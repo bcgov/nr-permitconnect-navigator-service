@@ -5,6 +5,9 @@
 # -- Number of pod replicas running in the deployment
 replicaCount: 2
 
+database:
+  name: "patroni-master"
+
 image:
   # -- Default image repository
   repository: ghcr.io/bcgov
@@ -93,7 +96,7 @@ route:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   host: chart-example.local
-  # path: /
+  path: /
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
@@ -213,16 +216,12 @@ ssoSecretOverride:
   username: ~
   password: ~
 
-# Patroni subchart configuration overrides
-patroni:
-  # Controls whether to enable managing a Patroni db dependency as a part of the helm release
-  enabled: false
-
-  # replicaCount: 3
-  # resources: {}
-
-  # persistentVolume:
-  #   enabled: false
+migration:
+  # Controls whether to enable managing a database migration as a part of the helm release
+  enabled: true
+  backoffLimit: 3
+  activeDeadlineSeconds: 1200
+  resources: {}
 
 peachSync:
   enabled: true

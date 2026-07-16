@@ -1,0 +1,57 @@
+{{- if .Values.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pcns.fullname" . }}-migration
+  labels:
+    {{- include "pcns.migrationLabels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "0"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: {{ .Values.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.migration.activeDeadlineSeconds }}
+  template:
+    metadata:
+      labels:
+        {{- include "pcns.migrationLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: migrate
+          image: "{{ .Values.image.repository }}/{{ .Chart.Name }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          command:
+            - /usr/local/bin/node
+            - ./node_modules/knex/bin/cli.js
+            - migrate:latest
+            - --knexfile
+            - ./sbin/knexfile.js
+          env:
+            - name: NODE_ENV
+              value: production
+            - name: SERVER_DB_DATABASE
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-name
+                  name: {{ .Values.database.secretName }}
+            - name: SERVER_DB_HOST
+              value: {{ .Values.database.host | quote }}
+            - name: SERVER_DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-username
+                  name: {{ .Values.database.secretName }}
+            - name: SERVER_DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  key: app-db-password
+                  name: {{ .Values.database.secretName }}
+          resources:
+            {{- toYaml .Values.migration.resources | nindent 12 }}
+{{- end }}

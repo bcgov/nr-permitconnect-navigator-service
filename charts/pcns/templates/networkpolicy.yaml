@@ -17,13 +17,14 @@ spec:
           protocol: TCP
   podSelector:
     matchLabels: {{- include "pcns.selectorLabels" . | nindent 6 }}
-{{- if .Values.patroni.enabled }}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-{{ include "pcns.fullname" . }}-app-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-{{ include "pcns.fullname" . }}-app-to-{{ .Values.database.name }}-cluster
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
@@ -33,31 +34,39 @@ spec:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      {{- include "pcns.database.selectorLabels" .  | nindent 6 }}
+
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-pre-hook-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-migration-job-to-{{ .Values.database.name }}
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
         - podSelector:
+            # TODO: Targets the explicit labels we will define in your migration-job.yaml
             matchLabels:
-              openshift.io/deployer-pod.type: hook-pre
+              app.kubernetes.io/component: database-migration
+              app.kubernetes.io/instance: {{ .Release.Name }}
       ports:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      {{- include "pcns.database.selectorLabels" .  | nindent 6 }}
+
 {{- if .Values.peachSync.enabled }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-{{ include "pcns.fullname" . }}-peach-sync-app-to-{{ include "patroni.fullname" .Subcharts.patroni }}-cluster
-  labels: {{ include "patroni.labels" . | nindent 4 }}
+  name: allow-{{ include "pcns.fullname" . }}-peach-sync-app-to-{{ .Values.database.name }}-cluster
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
 spec:
   ingress:
     - from:
@@ -67,7 +76,8 @@ spec:
         - port: {{ default "5432" .Values.config.configMap.SERVER_DB_PORT | atoi }}
           protocol: TCP
   podSelector:
-    matchLabels: {{ include "patroni.selectorLabels" .Subcharts.patroni | nindent 6 }}
+    matchLabels:
+      {{- include "pcns.database.selectorLabels" .  | nindent 6 }}
 {{- end }}
-{{- end }}
+
 {{- end }}

@@ -98,3 +98,28 @@ PEACH selector labels
 {{ include "pcns.selectorLabels" . }}
 app.kubernetes.io/component: peach-sync
 {{- end }}
+
+{{/*
+Patroni DB pod selector labels
+*/}}
+{{- define "pcns.database.selectorLabels" -}}
+app.kubernetes.io/name: patroni
+app.kubernetes.io/instance: {{ .Values.database.name }}
+cluster-name: {{ .Values.database.name }}
+{{- end }}
+
+{{/*
+Migration labels
+*/}}
+{{- define "pcns.migrationLabels" -}}
+{{ include "pcns.migrationSelectorLabels" . }}
+{{ include "common.labels" . }}
+{{- end }}
+
+{{/*
+Migration selector labels
+*/}}
+{{- define "pcns.migrationSelectorLabels" -}}
+{{ include "pcns.selectorLabels" . }}
+app.kubernetes.io/component: database-migration
+{{- end }}

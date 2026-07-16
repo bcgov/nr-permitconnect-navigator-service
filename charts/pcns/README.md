@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.0.36](https://img.shields.io/badge/Version-0.0.36-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 0.0.37](https://img.shields.io/badge/Version-0.0.37-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -20,10 +20,6 @@ PermitConnect Navigator Service
 
 Kubernetes: `>= 1.13.0`
 
-| Repository | Name | Version |
-|------------|------|---------|
-| https://bcgov.github.io/nr-patroni-chart | patroni | 0.0.4 |
-
 ## Values
 
 | Key | Type | Default | Description |
@@ -40,6 +36,22 @@ Kubernetes: `>= 1.13.0`
 | config.configMap | object | `{"FRONTEND_APIPATH":"api/v1","FRONTEND_CHES_ROADMAP_BCC":null,"FRONTEND_COMS_APIPATH":null,"FRONTEND_COMS_BUCKETID":null,"FRONTEND_GEOCODER_APIPATH":null,"FRONTEND_OIDC_AUTHORITY":null,"FRONTEND_OIDC_CLIENTID":null,"FRONTEND_OPENSTREETMAP_APIPATH":null,"FRONTEND_ORGBOOK_APIPATH":null,"SERVER_APIPATH":"/v1","SERVER_ATS_APIPATH":null,"SERVER_ATS_TOKENURL":null,"SERVER_BODYLIMIT":"30mb","SERVER_CHEFS_APIPATH":null,"SERVER_CHES_APIPATH":null,"SERVER_CHES_SUBMISSION_CC":null,"SERVER_CHES_TOKENURL":null,"SERVER_DB_HOST":null,"SERVER_DB_POOL_MAX":"10","SERVER_DB_POOL_MIN":"2","SERVER_DB_PORT":"5432","SERVER_ENV":null,"SERVER_LOGLEVEL":"http","SERVER_OBJECTSTORAGE_BUCKET":null,"SERVER_OBJECTSTORAGE_ENDPOINT":null,"SERVER_OBJECTSTORAGE_KEY":null,"SERVER_OIDC_AUDIENCE":null,"SERVER_OIDC_AUTHORITY":null,"SERVER_OPENMAPS_APIPATH":null,"SERVER_PCNS_APPURL":null,"SERVER_PCNS_NAVEMAIL":null,"SERVER_PEACH_APIPATH":null,"SERVER_PEACH_TOKENURL":null,"SERVER_PORT":"8080","SERVER_SSO_APIPATH":null,"SERVER_SSO_INTEGRATION":null,"SERVER_SSO_TOKENURL":null}` | These values will be wholesale added to the configmap as is; refer to the pcns documentation for what each of these values mean and whether you need them defined. Ensure that all values are represented explicitly as strings, as non-string values will not translate over as expected into container environment variables. For configuration keys named `*_ENABLED`, either leave them commented/undefined, or set them to string value "true". |
 | config.enabled | bool | `false` | Set to true if you want to let Helm manage and overwrite your configmaps. |
 | config.releaseScoped | bool | `false` | This should be set to true if and only if you require configmaps and secrets to be release scoped. In the event you want all instances in the same namespace to share a similar configuration, this should be set to false |
+| database.host | string | `"patroni-master"` |  |
+| database.labels."app.kubernetes.io/component" | string | `"database"` |  |
+| database.labels."app.kubernetes.io/instance" | string | `"master"` |  |
+| database.labels."app.kubernetes.io/managed-by" | string | `"Helm"` |  |
+| database.labels."app.kubernetes.io/name" | string | `"patroni"` |  |
+| database.labels."app.kubernetes.io/part-of" | string | `"master"` |  |
+| database.labels."app.kubernetes.io/version" | string | `"2.0.1-12.4-latest"` |  |
+| database.labels."app.openshift.io/runtime" | string | `"postgresql"` |  |
+| database.labels."helm.sh/chart" | string | `"patroni-0.0.4"` |  |
+| database.labels.app | string | `"patroni-master"` |  |
+| database.labels.cluster-name | string | `"master"` |  |
+| database.secretName | string | `"patroni-master"` |  |
+| database.selectorLabels."app.kubernetes.io/instance" | string | `"master"` |  |
+| database.selectorLabels."app.kubernetes.io/name" | string | `"patroni"` |  |
+| database.selectorLabels.cluster-name | string | `"master"` |  |
+| database.selectorLabels.role | string | `"master"` |  |
 | dbSecretOverride.password | string | `nil` |  |
 | dbSecretOverride.username | string | `nil` |  |
 | failurePolicy | string | `"Retry"` | DeploymentConfig pre-hook failure behavior |
@@ -52,13 +64,16 @@ Kubernetes: `>= 1.13.0`
 | image.repository | string | `"ghcr.io/bcgov"` | Default image repository |
 | image.tag | string | `nil` | Overrides the image tag whose default is the chart appVersion. |
 | imagePullSecrets | list | `[]` | Specify docker-registry secret names as an array |
+| migration.activeDeadlineSeconds | int | `1200` |  |
+| migration.backoffLimit | int | `3` |  |
+| migration.enabled | bool | `true` |  |
+| migration.resources | object | `{}` |  |
 | nameOverride | string | `nil` | String to partially override fullname |
 | networkPolicy.enabled | bool | `true` | Specifies whether a network policy should be created |
 | objectStorageSecretOverride.password | string | `nil` |  |
 | objectStorageSecretOverride.username | string | `nil` |  |
 | oidcSecretOverride.password | string | `nil` |  |
 | oidcSecretOverride.username | string | `nil` |  |
-| patroni.enabled | bool | `false` |  |
 | peachSecretOverride.password | string | `nil` |  |
 | peachSecretOverride.username | string | `nil` |  |
 | peachSync.activeDeadlineSeconds | int | `1800` |  |
@@ -82,6 +97,7 @@ Kubernetes: `>= 1.13.0`
 | route.annotations | object | `{}` | Annotations to add to the route |
 | route.enabled | bool | `true` | Specifies whether a route should be created |
 | route.host | string | `"chart-example.local"` |  |
+| route.path | string | `"/"` |  |
 | route.tls.insecureEdgeTerminationPolicy | string | `"Redirect"` |  |
 | route.tls.termination | string | `"edge"` |  |
 | route.wildcardPolicy | string | `"None"` |  |
