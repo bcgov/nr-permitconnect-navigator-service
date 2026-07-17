@@ -33,6 +33,7 @@ vi.mock('config', async () => {
         if (key === 'server.env') return 'test';
         if (key === 'server.pcns.navEmail') return 'nav@example.com';
         if (key === 'server.pcns.appUrl') return 'www.example.com';
+        if (key === 'server.pcbcUrl') return 'www.example.com';
 
         return actual.get(key);
       }),
