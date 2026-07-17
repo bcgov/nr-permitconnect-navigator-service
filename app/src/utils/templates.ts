@@ -1,5 +1,6 @@
 import config from 'config';
 
+const PCBC_URL: string = config.get('server.pcbcUrl');
 const PCNS_URL: string = config.get('server.pcns.appUrl');
 const BC_EMAIL_BANNER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/446ee8ee-e302-4cb8-b44d-24a1f583edba';
 const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e62f-41f5-81fd-6eff6cb66d52';
@@ -50,7 +51,7 @@ export const navPermitStatusUpdateTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -88,7 +89,7 @@ export const permitNoteUpdateTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -122,7 +123,7 @@ export const teamMemberAddedTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -154,7 +155,7 @@ export const teamAdminAddedTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -186,7 +187,7 @@ export const teamPrimaryAddedTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -218,7 +219,7 @@ export const teamMemberRevokedTemplate: EmailTemplate = (replaceConfig) => {
 
         Regards,<br><br>
 
-        <a href="${PCNS_URL}">
+        <a href="${PCBC_URL}">
           Navigator Service
         <a><br><br><br>
       </div>
@@ -291,7 +292,7 @@ export const confirmationTemplateElectrificationSubmission: EmailTemplate = (rep
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
 
     <img src="${BC_EMAIL_FOOTER_IMG}"
@@ -326,7 +327,7 @@ export const confirmationTemplateGeneralSubmission: EmailTemplate = (replaceConf
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
     <img
     src="${BC_EMAIL_FOOTER_IMG}"
@@ -361,7 +362,7 @@ export const confirmationTemplateHousingSubmission: EmailTemplate = (replaceConf
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
     <img
     src="${BC_EMAIL_FOOTER_IMG}"
@@ -400,7 +401,7 @@ export const confirmationTemplateEnquiry: EmailTemplate = (replaceConfig) => {
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
 
     <img
@@ -433,7 +434,7 @@ export const initialPeachPermitUpdateTemplate: EmailTemplate = (replaceConfig) =
     You will receive an email if the status or stage changes, or when your Navigator posts an update.<br><br>
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
 
     <img
@@ -461,7 +462,7 @@ export const bringForwardProjectNotificationTemplate: EmailTemplate = (replaceCo
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
 
     <img
@@ -489,7 +490,7 @@ export const bringForwardEnquiryNotificationTemplate: EmailTemplate = (replaceCo
 
     Regards,<br><br>
 
-    <a href="${PCNS_URL}">Navigator Service<a><br><br><br>
+    <a href="${PCBC_URL}">Navigator Service<a><br><br><br>
     </div>
 
     <img

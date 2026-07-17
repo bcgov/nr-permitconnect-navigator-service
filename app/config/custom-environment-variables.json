@@ -82,6 +82,7 @@
     "openMaps": {
       "apiPath": "SERVER_OPENMAPS_APIPATH"
     },
+    "pcbcUrl": "SERVER_PCBC_URL",
     "pcns": {
       "appUrl": "SERVER_PCNS_APPURL",
       "navEmail": "SERVER_PCNS_NAVEMAIL"
