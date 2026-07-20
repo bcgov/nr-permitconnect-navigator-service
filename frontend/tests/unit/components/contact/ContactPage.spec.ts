@@ -8,6 +8,7 @@ import { shallowMount } from '@vue/test-utils';
 import ContactPage from '@/components/contact/ContactPage.vue';
 import { contactService, housingProjectService, enquiryService, userService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
+import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -51,15 +52,27 @@ const wrapperSettings = () => ({
     plugins: [
       () =>
         createTestingPinia({
-          initialState: {
-            auth: { user: {} }
-          }
+          initialState: {}
         }),
       PrimeVue,
       ConfirmationService,
       ToastService
     ],
-    stubs: ['Button', 'Card', 'Tabs', 'Tab', 'TabList', 'TabPanel', 'TabPanels', 'ContactHistoryList']
+    provide: {
+      [contactRouteNameKey as symbol]: { value: 'route-name' },
+      [projectServiceKey as symbol]: { value: { foo: vi.fn() } }
+    },
+    stubs: [
+      'Button',
+      'Card',
+      'font-awesome-icon',
+      'Tabs',
+      'Tab',
+      'TabList',
+      'TabPanel',
+      'TabPanels',
+      'ContactHistoryList'
+    ]
   }
 });
 

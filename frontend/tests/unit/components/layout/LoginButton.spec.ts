@@ -40,9 +40,7 @@ describe.todo('LoginButton.vue', () => {
       global: {
         plugins: [
           createTestingPinia({
-            initialState: {
-              auth: { user: {} }
-            }
+            initialState: {}
           }),
           PrimeVue
         ]

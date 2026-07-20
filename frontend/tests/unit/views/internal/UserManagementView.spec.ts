@@ -9,7 +9,7 @@ import UserManagementView from '@/views/internal/UserManagementView.vue';
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: vi.fn()
+    t: (key: string) => key // returns the key as the translation
   })
 }));
 
@@ -42,7 +42,10 @@ const wrapperSettings = () => ({
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon', 'router-link']
+    stubs: {
+      'font-awesome-icon': true,
+      'router-link': true
+    }
   }
 });
 

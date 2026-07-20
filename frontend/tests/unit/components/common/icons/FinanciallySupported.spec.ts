@@ -11,7 +11,7 @@ vi.mock('vue-i18n', () => ({
 
 const wrapperSettingsForm = () => ({
   global: {
-    plugins: [() => createTestingPinia({ initialState: { auth: { user: {} } } }), PrimeVue]
+    plugins: [() => createTestingPinia({ initialState: {} }), PrimeVue]
   }
 });
 

@@ -4,6 +4,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+import { projectServiceKey } from '@/utils/keys';
 
 const testConfirmationId = 'activity123';
 
@@ -25,6 +26,9 @@ const wrapperSettings = (testConfirmationIdProp = testConfirmationId) => ({
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [projectServiceKey as symbol]: { value: { foo: vi.fn() } }
+    },
     stubs: ['font-awesome-icon', 'router-link']
   }
 });

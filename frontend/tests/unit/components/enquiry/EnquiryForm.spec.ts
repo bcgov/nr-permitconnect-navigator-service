@@ -17,7 +17,7 @@ import {
   ProjectRelationship
 } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { VEE_FORM_STUB } from '../../../helpers';
+import { PRIMEVUE_STUBS, VEE_FORM_STUB } from '../../../helpers';
 
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
@@ -93,6 +93,8 @@ const wrapperSettings = (
       [atsEnquiryTypeCodeKey]: atsEnquiryTypeCode
     },
     stubs: {
+      ATSInfo: true,
+      ContactCardNavForm: true,
       'font-awesome-icon': true,
       'router-link': true,
       'form-navigation-guard': true,
@@ -100,7 +102,10 @@ const wrapperSettings = (
       'ats-user-details-modal': true,
       'ats-user-create-modal': true,
       'ats-user-link-modal': true,
-      Form: VEE_FORM_STUB
+      Form: VEE_FORM_STUB,
+      CancelButton: true,
+      SubmissionStateSection: true,
+      ...PRIMEVUE_STUBS
     }
   }
 });

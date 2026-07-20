@@ -11,6 +11,7 @@ import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note, NoteHistory, User } from '@/types';
+import { enquiryRouteNameKey, projectEnquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -73,6 +74,12 @@ const wrapperSettings = () => ({
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [projectRouteNameKey as symbol]: { value: 'project-route-name' },
+      [enquiryRouteNameKey as symbol]: { value: 'enquiry-route-name' },
+      [projectEnquiryRouteNameKey as symbol]: { value: 'project-enquiry-route-name' },
+      [resourceKey as symbol]: { value: 'resource-key' }
+    },
     stubs: {
       'font-awesome-icon': true
     }

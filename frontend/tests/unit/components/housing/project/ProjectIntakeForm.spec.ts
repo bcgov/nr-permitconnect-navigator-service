@@ -1,36 +1,34 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import Tooltip from 'primevue/tooltip';
+import { flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
-import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
 
-import { default as i18n } from '@/i18n';
 import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
+import { StepperHeader } from '@/components/form';
 import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
 import { contactService } from '@/services';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
-import { BasicResponse, StorageKey } from '@/utils/enums/application';
+import { BasicResponse, RouteName, StorageKey } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
-import type { Contact } from '@/types';
+import { mountComponent } from '../../../../mountComponent';
+import { mockRouter, resetMockRouter } from '../../../../mockRouter';
 
+import type { Contact, Draft, HousingProject } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
+
+// Mocks
+
+// vi.mock is hoisted, so it can't reference `mockRouter` directly from the
+// shared util at declaration time -- but it CAN return the same object
+// reference at call time, which is all that matters for spies.
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  }),
-  useRoute: () => ({
-    params: {},
-    query: {}
-  }),
+  useRouter: () => mockRouter,
+  useRoute: () => ({ params: {}, query: {} }),
   onBeforeRouteLeave: vi.fn(),
   onBeforeRouteUpdate: vi.fn()
 }));
 
-const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+// Fixtures
 
 const sampleContact: Contact = {
   contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
@@ -46,45 +44,43 @@ const sampleContact: Contact = {
   updatedBy: 'testUpdatedAt',
   updatedAt: new Date().toISOString()
 };
-searchContactsSpy.mockResolvedValue([sampleContact]);
-const wrapperSettings = () => ({
-  global: {
-    plugins: [
-      createTestingPinia({
-        initialState: {
-          auth: {
-            user: {}
-          }
-        }
-      }),
-      i18n,
-      PrimeVue,
-      ConfirmationService,
-      ToastService
-    ],
-    stubs: {
-      RouterLink: RouterLinkStub,
-      'font-awesome-icon': true,
-      Map: true,
-      SubmissionAssistance: true
+
+// Minimal fixtures for the "both draft and project supplied" error path.
+// These deliberately don't need to be full valid shapes -- the component
+// throws on this combination before it ever reads their fields.
+const minimalDraft = { draftId: 'draft-1', activityId: 'activity-1', data: {} } as unknown as Draft<FormSchemaType>;
+const minimalProject = { projectId: 'project-1' } as unknown as HousingProject;
+
+// Mount
+
+const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+
+function mountProjectIntakeForm(props: Record<string, unknown> = {}) {
+  const { wrapper } = mountComponent(ProjectIntakeForm, {
+    props,
+    piniaState: {
+      auth: { user: {} }
     },
-    directives: {
-      Tooltip: Tooltip
+    stubs: {
+      Map: true,
+      ProjectIntakeAssistance: true,
+      SubmissionAssistance: true
     }
-  }
-});
+  });
+
+  return { wrapper };
+}
 
 beforeEach(() => {
   sessionStorage.setItem(
     StorageKey.CONFIG,
     JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
+      oidc: { authority: 'abc', clientId: '123' }
     })
   );
 
+  searchContactsSpy.mockResolvedValue([sampleContact]);
+  resetMockRouter();
   vi.clearAllMocks();
 });
 
@@ -92,173 +88,199 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
+// Tests
+
 describe('ProjectIntakeForm', () => {
-  it('renders component', async () => {
-    const wrapper = mount(ProjectIntakeForm, wrapperSettings());
-    expect(wrapper).toBeTruthy();
+  describe('rendering', () => {
+    it('mounts without error', async () => {
+      const { wrapper } = mountProjectIntakeForm();
+      await flushPromises();
+
+      expect(wrapper.exists()).toBe(true);
+    });
+
+    it('renders the form synchronously on mount', async () => {
+      const { wrapper } = mountProjectIntakeForm();
+
+      expect(wrapper.find('#form').exists()).toBe(true);
+    });
+
+    it('renders one stepper header per step, in order', async () => {
+      const { wrapper } = mountProjectIntakeForm();
+      await flushPromises();
+
+      const headers = wrapper.findAllComponents(StepperHeader);
+
+      expect(headers).toHaveLength(4);
+      expect(headers.map((h) => h.props('index'))).toEqual([0, 1, 2, 3]);
+    });
+
+    it('disables the submit button until the last step is reached', async () => {
+      const { wrapper } = mountProjectIntakeForm();
+      await nextTick();
+      await flushPromises();
+
+      const submitButton = wrapper.find('[type="submit"]');
+
+      expect(submitButton.attributes('disabled')).toBeDefined();
+    });
   });
 
   describe('onBeforeMount', () => {
-    it('checks submit btn disabled conditions', async () => {
-      const wrapper = mount(ProjectIntakeForm, wrapperSettings());
-      await nextTick();
+    it('redirects to the general error route if both `draft` and `project` are supplied', async () => {
+      mountProjectIntakeForm({ draft: minimalDraft, project: minimalProject });
       await flushPromises();
-      const submitButton = wrapper.find('[type="submit"]');
-      expect(submitButton.attributes('disabled')).toBeDefined();
+
+      expect(mockRouter.replace).toHaveBeenCalledWith({ name: RouteName.EXT_GENERAL });
     });
+  });
 
-    it('checks categories for valid data', async () => {
-      // Contacts are kinda whack right now
-      // const applicantTest = submissionIntakeSchema.validate(
-      //   {
-      //     contactFirstName: '',
-      //     contactLastName: 'testLastName',
-      //     contactPhoneNumber: '2501234567',
-      //     contactEmail: 'test@test.com',
-      //     contactApplicantRelationship: ProjectRelationship.OTHER,
-      //     contactPreference: ContactPreference.PHONE_CALL
-      //   }
-      // );
-
-      const basicTest = createProjectIntakeSchema([
-        { registeredName: 'testString3', registeredId: 'FM0281610' }
-      ]).validateAt('basic', {
-        basic: {
-          consentToFeedback: false,
-          projectApplicantType: ProjectApplicant.BUSINESS,
-          isDevelopedInBc: BasicResponse.NO,
-          registeredId: 'FM0281610',
-          registeredName: 'testString3',
-          projectName: 'Project',
-          projectDescription: 'Desc'
+  // These don't need a mounted component at all
+  // `createProjectIntakeSchema` is a pure function, so we test it directly
+  describe('validation schema', () => {
+    const validCases = [
+      {
+        category: 'basic',
+        orgBookOptions: [{ registeredName: 'testString3', registeredId: 'FM0281610' }],
+        data: {
+          basic: {
+            consentToFeedback: false,
+            projectApplicantType: ProjectApplicant.BUSINESS,
+            isDevelopedInBc: BasicResponse.NO,
+            registeredId: 'FM0281610',
+            registeredName: 'testString3',
+            projectName: 'Project',
+            projectDescription: 'Desc'
+          }
         }
-      });
-
-      const housingTest = createProjectIntakeSchema([]).validateAt('housing', {
-        housing: {
-          projectName: 'testString1',
-          projectDescription: 'testString2',
-          hasRentalUnits: 'Yes',
-          financiallySupportedBc: 'No',
-          financiallySupportedIndigenous: 'No',
-          financiallySupportedNonProfit: 'No',
-          financiallySupportedHousingCoop: 'No',
-          rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-          indigenousDescription: 'No',
-          nonProfitDescription: 'No',
-          housingCoopDescription: 'No',
-          singleFamilySelected: true,
-          singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-          multiFamilyUnits: 'No',
-          otherUnitsDescription: 'No',
-          otherUnits: 'No'
+      },
+      {
+        category: 'housing',
+        orgBookOptions: [],
+        data: {
+          housing: {
+            projectName: 'testString1',
+            projectDescription: 'testString2',
+            hasRentalUnits: 'Yes',
+            financiallySupportedBc: 'No',
+            financiallySupportedIndigenous: 'No',
+            financiallySupportedNonProfit: 'No',
+            financiallySupportedHousingCoop: 'No',
+            rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
+            indigenousDescription: 'No',
+            nonProfitDescription: 'No',
+            housingCoopDescription: 'No',
+            singleFamilySelected: true,
+            singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
+            multiFamilyUnits: 'No',
+            otherUnitsDescription: 'No',
+            otherUnits: 'No'
+          }
         }
-      });
-
-      const locationTest = createProjectIntakeSchema([]).validateAt('location', {
-        location: {
-          naturalDisaster: 'Yes',
-          projectLocation: 'testString1',
-          streetAddress: 'testString2',
-          locality: 'testString3',
-          province: 'testString4',
-          latitude: '51',
-          longitude: '-139',
-          ltsaPIDLookup: '',
-          geomarkUrl: ''
+      },
+      {
+        category: 'location',
+        orgBookOptions: [],
+        data: {
+          location: {
+            naturalDisaster: 'Yes',
+            projectLocation: 'testString1',
+            streetAddress: 'testString2',
+            locality: 'testString3',
+            province: 'testString4',
+            latitude: '51',
+            longitude: '-139',
+            ltsaPIDLookup: '',
+            geomarkUrl: ''
+          }
         }
-      });
-
-      const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
-        permits: {
-          appliedPermits: [
-            {
-              permitTypeId: 1,
-              submittedDate: new Date(),
-              trackingId: 'testString'
-            }
-          ],
-          hasAppliedProvincialPermits: BasicResponse.YES
+      },
+      {
+        category: 'permits',
+        orgBookOptions: [],
+        data: {
+          permits: {
+            appliedPermits: [{ permitTypeId: 1, submittedDate: new Date(), trackingId: 'testString' }],
+            hasAppliedProvincialPermits: BasicResponse.YES
+          }
         }
-      });
+      }
+    ] as const;
 
-      //await expect(applicantTest).resolves.toBeTruthy();
-      await expect(basicTest).resolves.toBeTruthy();
-      await expect(housingTest).resolves.toBeTruthy();
-      await expect(locationTest).resolves.toBeTruthy();
-      await expect(permitsTest).resolves.toBeTruthy();
-    });
-
-    it('checks categories for successful fail', async () => {
-      // Contacts are kinda whack right now
-      // const applicantTestFail = submissionIntakeSchema.validate({
-      //   contactFirstName: '',
-      //   contactLastName: 'testcontactLastName',
-      //   contactPhoneNumber: '2501234567',
-      //   contactEmail: 'test@test.com',
-      //   contactApplicantRelationship: ProjectRelationship.OTHER,
-      //   contactPreference: ContactPreference.PHONE_CALL
-      // });
-
-      const basicTestFail = createProjectIntakeSchema([]).validateAt('basic', {
-        basic: {
-          projectApplicantType: 'testString1',
-          isDevelopedInBC: 'testString2',
-          registeredName: 'testString3'
+    const invalidCases = [
+      {
+        category: 'basic',
+        data: {
+          basic: {
+            projectApplicantType: 'testString1',
+            isDevelopedInBC: 'testString2',
+            registeredName: 'testString3'
+          }
         }
-      });
-
-      const housingTestFail = createProjectIntakeSchema([]).validateAt('housing', {
-        housing: {
-          projectName: 'testString1',
-          projectDescription: 'testString2',
-          hasRentalUnits: 'wrongRentalUnit',
-          financiallySupportedBC: 'No',
-          financiallySupportedIndigenous: 'No',
-          financiallySupportedNonProfit: 'No',
-          financiallySupportedHousingCoop: 'No',
-          rentalUnits: 'No',
-          indigenousDescription: 'No',
-          nonProfitDescription: 'No',
-          housingCoopDescription: 'No',
-          singleFamilyUnits: 'No',
-          multiFamilyUnits: 'No',
-          otherUnitsDescription: 'No',
-          otherUnits: 'No'
+      },
+      {
+        category: 'housing',
+        data: {
+          housing: {
+            projectName: 'testString1',
+            projectDescription: 'testString2',
+            hasRentalUnits: 'wrongRentalUnit',
+            financiallySupportedBC: 'No',
+            financiallySupportedIndigenous: 'No',
+            financiallySupportedNonProfit: 'No',
+            financiallySupportedHousingCoop: 'No',
+            rentalUnits: 'No',
+            indigenousDescription: 'No',
+            nonProfitDescription: 'No',
+            housingCoopDescription: 'No',
+            singleFamilyUnits: 'No',
+            multiFamilyUnits: 'No',
+            otherUnitsDescription: 'No',
+            otherUnits: 'No'
+          }
         }
-      });
-
-      const locationTestFail = createProjectIntakeSchema([]).validateAt('location', {
-        location: {
-          projectLocation: '',
-          streetAddress: 'testString2',
-          locality: 'testString3',
-          province: 'testString4',
-          latitude: '12',
-          longitude: '-139',
-          ltsaPIDLookup: '',
-          geomarkUrl: ''
+      },
+      {
+        category: 'location',
+        data: {
+          location: {
+            projectLocation: '',
+            streetAddress: 'testString2',
+            locality: 'testString3',
+            province: 'testString4',
+            latitude: '12',
+            longitude: '-139',
+            ltsaPIDLookup: '',
+            geomarkUrl: ''
+          }
         }
-      });
-
-      const permitsTest = createProjectIntakeSchema([]).validateAt('permits', {
-        permits: {
-          appliedPermits: [
-            {
-              permitTypeId: '',
-              submittedDate: new Date(),
-              trackingId: 'testString'
-            }
-          ],
-          hasAppliedProvincialPermits: 123
+      },
+      {
+        category: 'permits',
+        data: {
+          permits: {
+            appliedPermits: [{ permitTypeId: '', submittedDate: new Date(), trackingId: 'testString' }],
+            hasAppliedProvincialPermits: 123
+          }
         }
-      });
+      },
+      // New edge case: a category that's missing entirely should fail the
+      // same way as one with invalid fields, for every category.
+      { category: 'basic', data: {} },
+      { category: 'housing', data: {} },
+      { category: 'location', data: {} },
+      { category: 'permits', data: {} }
+    ] as const;
 
-      //await expect(applicantTestFail).rejects.toThrowError();
-      await expect(basicTestFail).rejects.toThrowError();
-      await expect(housingTestFail).rejects.toThrowError();
-      await expect(locationTestFail).rejects.toThrowError();
-      await expect(permitsTest).rejects.toThrowError();
+    it.each(validCases)(
+      '$category passes validation with well-formed data',
+      async ({ category, orgBookOptions, data }) => {
+        await expect(createProjectIntakeSchema([...orgBookOptions]).validateAt(category, data)).resolves.toBeTruthy();
+      }
+    );
+
+    it.each(invalidCases)('$category rejects malformed or missing data', async ({ category, data }) => {
+      await expect(createProjectIntakeSchema([]).validateAt(category, data)).rejects.toThrowError();
     });
   });
 });

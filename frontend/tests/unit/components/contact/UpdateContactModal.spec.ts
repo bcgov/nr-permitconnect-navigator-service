@@ -26,7 +26,7 @@ const wrapperSettings = () => ({
     contact: testContact
   },
   global: {
-    plugins: [() => createTestingPinia({ initialState: { auth: { user: {} } } }), PrimeVue],
+    plugins: [() => createTestingPinia({ initialState: {} }), PrimeVue],
     stubs: ['ContactForm']
   }
 });

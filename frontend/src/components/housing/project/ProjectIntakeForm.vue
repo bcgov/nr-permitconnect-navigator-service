@@ -205,7 +205,7 @@ async function onSubmit(data: FormSchemaType) {
   }
 }
 
-onBeforeMount(async () => {
+onBeforeMount(() => {
   try {
     if (draft.value && project) throw new Error(t('projectIntakeForm.load.tooManyProps'));
 

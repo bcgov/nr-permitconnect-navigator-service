@@ -48,7 +48,8 @@ describe('ProjectRoadmapTab.vue', () => {
               }
             }
           })
-        ]
+        ],
+        stubs: ['font-awesome-icon']
       }
     });
 

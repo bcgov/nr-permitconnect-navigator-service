@@ -9,6 +9,7 @@ import { userService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 
 import type { Enquiry, User } from '@/types';
+import { projectEnquiryRouteNameKey } from '@/utils/keys';
 
 const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
@@ -52,6 +53,9 @@ const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [projectEnquiryRouteNameKey as symbol]: { value: 'route-name' }
+    },
     stubs: ['font-awesome-icon', 'router-link']
   }
 });

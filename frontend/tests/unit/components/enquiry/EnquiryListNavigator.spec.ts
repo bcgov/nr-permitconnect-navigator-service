@@ -9,6 +9,7 @@ import { enquiryService } from '@/services';
 import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
 
 import type { Enquiry } from '@/types';
+import { enquiryRouteNameKey } from '@/utils/keys';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -66,6 +67,9 @@ const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => 
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [enquiryRouteNameKey as symbol]: { value: 'route-name' }
+    },
     stubs: ['font-awesome-icon', 'router-link']
   }
 });

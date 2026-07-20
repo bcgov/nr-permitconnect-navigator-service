@@ -121,13 +121,7 @@ const mockSubmitValues = {
 const wrapperSettings = () => ({
   props: { project: testProject },
   global: {
-    plugins: [
-      () => createTestingPinia({ initialState: { auth: { user: {} } } }),
-      PrimeVue,
-      ConfirmationService,
-      i18n,
-      ToastService
-    ],
+    plugins: [() => createTestingPinia({ initialState: {} }), PrimeVue, ConfirmationService, i18n, ToastService],
     directives: {
       // Silences vue waring for failed to resolve directive tooltip
       tooltip: () => {}
@@ -144,8 +138,16 @@ const wrapperSettings = () => ({
         emits: ['on-complete']
       },
       ContactCardNavForm: true,
+      CompanyProjectNamePanel: true,
+      ElectrificationPanel: true,
+      ProjectDescriptionPanel: true,
+      LocationDescriptionPanel: true,
+      AstNotesPanel: true,
+      SubmissionStateSection: true,
+      ProjectAreasUpdatedSection: true,
       Form: VEE_FORM_STUB,
-      FormNavigationGuard: true
+      FormNavigationGuard: true,
+      CancelButton: true
     },
     provide: {
       [updateLiveNameKey]: () => {}

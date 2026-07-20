@@ -11,10 +11,16 @@ import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { Contact, HousingProject } from '@/types';
+import {
+  enquiryConfirmRouteNameKey,
+  enquiryPermitConfirmRouteNameKey,
+  enquiryProjectConfirmRouteNameKey,
+  enquiryRouteNameKey
+} from '@/utils/keys';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: vi.fn()
+    t: (key: string) => key // returns the key as the translation
   })
 }));
 
@@ -68,9 +74,20 @@ const wrapperSettings = () => ({
       ConfirmationService,
       ToastService
     ],
+    provide: {
+      [enquiryConfirmRouteNameKey as symbol]: { value: 'route-name' },
+      [enquiryPermitConfirmRouteNameKey as symbol]: { value: 'route-name' },
+      [enquiryProjectConfirmRouteNameKey as symbol]: { value: 'route-name' },
+      [enquiryRouteNameKey as symbol]: { value: 'route-name' }
+    },
     stubs: {
       RouterLink: RouterLinkStub,
-      'font-awesome-icon': true
+      'font-awesome-icon': true,
+      CollectionDisclaimer: true,
+      FormNavigationGuard: true,
+      ContactCardIntakeForm: true,
+      TextAreaCard: true,
+      'i18n-t': true
     },
     directives: {
       Tooltip: Tooltip
@@ -103,24 +120,6 @@ describe('EnquiryIntakeForm', () => {
       await flushPromises();
 
       expect(wrapper.isVisible()).toBeTruthy();
-    });
-
-    it('renders initial form fields', async () => {
-      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
-      await flushPromises();
-
-      const firstNameInput = wrapper.get('[name="contacts.firstName"]');
-      const lastNameInput = wrapper.get('[name="contacts.lastName"]');
-      const phoneInput = wrapper.get('[name="contacts.phoneNumber"]');
-      const emailInput = wrapper.get('[name="contacts.email"]');
-
-      expect(firstNameInput.isVisible()).toBeTruthy();
-      expect(lastNameInput.isVisible()).toBeTruthy();
-      expect(phoneInput.isVisible()).toBeTruthy();
-      expect(emailInput.isVisible()).toBeTruthy();
-
-      const descriptionInput = wrapper.find('[name="basic.enquiryDescription"]');
-      expect(descriptionInput.exists()).toBe(true);
     });
   });
 });

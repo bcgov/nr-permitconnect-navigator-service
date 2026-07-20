@@ -4,6 +4,7 @@ import ToastService from 'primevue/toastservice';
 import { createTestingPinia } from '@pinia/testing';
 import { vi } from 'vitest';
 import { mount } from '@vue/test-utils';
+import Tooltip from 'primevue/tooltip';
 
 import ContactsProponentsList from '@/components/contact/ContactsProponentsList.vue';
 import { contactService } from '@/services';
@@ -63,9 +64,7 @@ const wrapperSettings = (loading = false, contacts = testContacts) => ({
     plugins: [
       () =>
         createTestingPinia({
-          initialState: {
-            auth: { user: {} }
-          }
+          initialState: {}
         }),
       PrimeVue,
       ConfirmationService,
@@ -74,7 +73,17 @@ const wrapperSettings = (loading = false, contacts = testContacts) => ({
     provide: {
       [contactRouteNameKey]: 'ContactView'
     },
-    stubs: ['Button', 'DataTable', 'Column', 'FilterMatchMode', 'InputIcon', 'InputText', 'router-link']
+    stubs: [
+      'Button',
+      'DataTable',
+      'Column',
+      'FilterMatchMode',
+      'font-awesome-icon',
+      'InputIcon',
+      'InputText',
+      'router-link'
+    ],
+    directives: { Tooltip }
   }
 });
 
