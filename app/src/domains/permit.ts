@@ -1,5 +1,5 @@
 import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { getProjectByActivityId } from './project';
 import { codeTable } from '../db/codes/cache';
@@ -132,7 +132,7 @@ export const sendPermitUpdateNotifications = async (
 
   // Create update note for status change
   const permitNoteRes = await repositories.permitNote.create({
-    permitNoteId: uuidv4(),
+    permitNoteId: randomUUID(),
     permitId: permit.permitId,
     note: note ?? `This application is ${stateDisplay.toLocaleLowerCase()} in the ${stageDisplay.toLocaleLowerCase()}.`
   });

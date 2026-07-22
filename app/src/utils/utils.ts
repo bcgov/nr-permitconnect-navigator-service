@@ -2,9 +2,9 @@ import config from 'config';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
-import { validate, version } from 'uuid';
 
 import { IdentityProviderKind } from './enums/application.ts';
+import { uuidV4Pattern } from './regexp.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
@@ -407,10 +407,11 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * Validates a UUID and checks if it is version 4
- * @param uuid The UUID to validate
- * @returns True if the UUID is valid and is version 4
+ * Validates a UUIDV4
+ * @param uuid The UUIDV4 to validate
+ * @returns True if the UUIDV4 is valid
  */
-export function uuidValidateV4(uuid: string): boolean {
-  return validate(uuid) && version(uuid) === 4;
+
+export function uuidValidateV4(uuid: string) {
+  return uuidV4Pattern.test(uuid);
 }

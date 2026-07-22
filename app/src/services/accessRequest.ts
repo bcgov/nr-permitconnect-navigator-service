@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
@@ -146,7 +146,7 @@ export const createAccessRequestService = async (
         updateComsPerms = true;
       } else {
         const newAccessRequest = {
-          accessRequestId: uuidv4(),
+          accessRequestId: randomUUID(),
           grant: accessReq.grant,
           groupId: accessReq.groupId,
           status: AccessRequestStatus.PENDING,

@@ -7,7 +7,7 @@
  */
 
 /* eslint-disable max-len */
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
@@ -117,7 +117,7 @@ export async function up(knex: Knex): Promise<void> {
           .from({ s: 'public.submission' });
 
         submissions = submissions.map((x) => ({
-          contact_id: uuidv4(),
+          contact_id: randomUUID(),
           ...x
         }));
 
@@ -134,7 +134,7 @@ export async function up(knex: Knex): Promise<void> {
           .from({ e: 'public.enquiry' });
 
         enquiries = enquiries.map((x) => ({
-          contact_id: uuidv4(),
+          contact_id: randomUUID(),
           ...x
         }));
 

@@ -1,9 +1,11 @@
 /* eslint-disable max-len */
-import { NIL, v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { addAuditStamps } from '../utils/migrations/helpers.ts';
 
 import type { Knex } from 'knex';
+
+const NIL_UUID = '00000000-0000-0000-0000-000000000000';
 
 export async function up(knex: Knex): Promise<void> {
   return (
@@ -421,10 +423,10 @@ export async function up(knex: Knex): Promise<void> {
       .then(() => {
         const users = ['system'];
         const items = users.map((user) => ({
-          user_id: NIL,
+          user_id: NIL_UUID,
           username: user,
           active: true,
-          created_by: NIL
+          created_by: NIL_UUID
         }));
         return knex('user').insert(items);
       })
@@ -432,7 +434,7 @@ export async function up(knex: Knex): Promise<void> {
       .then(() => {
         const items = [
           {
-            initiative_id: uuidv4(),
+            initiative_id: randomUUID(),
             code: 'HOUSING',
             label: 'Housing'
           }

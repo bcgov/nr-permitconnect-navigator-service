@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { findPriorityPermitTracking } from '../domains/peach.ts';
@@ -191,7 +191,7 @@ export const upsertPermitService = async (
       // Add permit ID and stamp data if necessary
       const upsertPermitData: PermitBase = {
         ...permitData,
-        permitId: permitData.permitId || uuidv4()
+        permitId: permitData.permitId || randomUUID()
       };
 
       const sourceSystemKinds = await sourceSystemKind.list();

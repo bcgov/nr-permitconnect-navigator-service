@@ -1,6 +1,6 @@
 import axios from 'axios';
 import config from 'config';
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import prisma from '../db/database.ts';
 
@@ -106,7 +106,7 @@ export const logEmail = async (data: EmailData | null, recipients: string[], sta
   return await prisma.$transaction(async (trx) => {
     return await trx.email_log.createMany({
       data: recipients.map((recipient) => ({
-        emailLogId: uuidv4(),
+        emailLogId: randomUUID(),
         msgId: data?.messages?.[0].msgId,
         to: recipient,
         txId: data?.txId,

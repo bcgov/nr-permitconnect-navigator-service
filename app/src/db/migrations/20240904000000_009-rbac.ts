@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import { addAuditStamps } from '../utils/migrations/helpers.ts';
 import { Action, GroupName, Initiative, Resource, ResourceLegacy } from '../../utils/enums/application.ts';
@@ -420,7 +420,7 @@ export async function up(knex: Knex): Promise<void> {
         if (exists.length === 0) {
           const items = [
             {
-              initiative_id: uuidv4(),
+              initiative_id: randomUUID(),
               code: Initiative.PCNS,
               label: 'Permit Connect Navigator Service'
             }

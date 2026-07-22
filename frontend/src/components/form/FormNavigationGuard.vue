@@ -60,4 +60,6 @@ onBeforeRouteLeave(async (to) => {
 });
 </script>
 
-<template><div /></template>
+<template>
+  <div>{{ isDirty }}</div>
+</template>

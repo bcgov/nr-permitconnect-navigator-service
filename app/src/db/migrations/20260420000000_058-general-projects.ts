@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-import { v4 as uuidv4 } from 'uuid';
+import { randomUUID } from 'node:crypto';
 
 import {
   addAuditStamps,
@@ -35,7 +35,7 @@ export async function up(knex: Knex): Promise<void> {
       .then(() => {
         return knex('initiative').insert([
           {
-            initiative_id: uuidv4(),
+            initiative_id: randomUUID(),
             code: Initiative.GENERAL,
             label: 'Generic'
           }
