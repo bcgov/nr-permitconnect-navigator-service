@@ -365,7 +365,7 @@ describe('permit note notification templates', () => {
 
     expect(html).toContain('Dear John Doe');
     expect(html).toContain('<b>Project ID: ACT-123</b>');
-    expect(html).toContain('Special Use Permit<a>');
+    expect(html).toContain('Special Use Permit</a>');
     expect(html).toContain('submitted on January 1, 2025');
     expect(html).toContain('You can now track your application progress here');
     expect(html).toContain('/e/housing/project/PROJ-456#PERMIT-789');
