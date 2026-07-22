@@ -304,6 +304,9 @@ onBeforeMount(async () => {
     } else {
       const userContact = useContactStore().getContact;
       initialFormValues.value = {
+        basic: {
+          consentToFeedback: false
+        },
         contacts: {
           contactId: userContact?.contactId,
           firstName: userContact?.firstName,
