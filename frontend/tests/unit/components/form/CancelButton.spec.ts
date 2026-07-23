@@ -6,12 +6,12 @@ import { mountWithFormContext, setFieldValue } from '../../../mountWithFormConte
 
 // Mount
 
-function mountCancelButton(props: { editable?: boolean } = {}) {
+function mountCancelButton(options: { editable?: boolean } = {}) {
   const onClicked = vi.fn();
 
   const { wrapper } = mountWithFormContext(CancelButton, {
     fields: ['testField'],
-    componentProps: { ...props, onClicked }
+    componentProps: { ...options, onClicked }
   });
 
   return { wrapper, onClicked };
