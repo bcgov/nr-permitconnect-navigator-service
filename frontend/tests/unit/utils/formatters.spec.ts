@@ -11,12 +11,14 @@ describe('formatters.ts', () => {
     });
 
     it('returns empty string if given invalid format', () => {
-      // Prevent logging the try/catch error
+      // Prevent logging the try/catch in formatDate
       const spy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
-      expect(formatDate('asd')).toEqual('');
-
-      spy.mockRestore();
+      try {
+        expect(formatDate('asd')).toEqual('');
+      } finally {
+        spy.mockRestore();
+      }
     });
   });
 

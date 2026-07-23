@@ -12,6 +12,7 @@ import { NoteType } from '@/utils/enums/projectCommon';
 
 import type { Note, NoteHistory, User } from '@/types';
 import { enquiryRouteNameKey, projectEnquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -75,10 +76,10 @@ const wrapperSettings = () => ({
       ToastService
     ],
     provide: {
-      [projectRouteNameKey as symbol]: { value: 'project-route-name' },
-      [enquiryRouteNameKey as symbol]: { value: 'enquiry-route-name' },
-      [projectEnquiryRouteNameKey as symbol]: { value: 'project-enquiry-route-name' },
-      [resourceKey as symbol]: { value: 'resource-key' }
+      [projectRouteNameKey as symbol]: ref('project-route-name'),
+      [enquiryRouteNameKey as symbol]: ref('enquiry-route-name'),
+      [projectEnquiryRouteNameKey as symbol]: ref('project-enquiry-route-name'),
+      [resourceKey as symbol]: ref('resource-key')
     },
     stubs: {
       'font-awesome-icon': true

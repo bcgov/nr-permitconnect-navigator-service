@@ -9,6 +9,7 @@ import ContactPage from '@/components/contact/ContactPage.vue';
 import { contactService, housingProjectService, enquiryService, userService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -59,8 +60,8 @@ const wrapperSettings = () => ({
       ToastService
     ],
     provide: {
-      [contactRouteNameKey as symbol]: { value: 'route-name' },
-      [projectServiceKey as symbol]: { value: { foo: vi.fn() } }
+      [contactRouteNameKey as symbol]: ref('route-name'),
+      [projectServiceKey as symbol]: ref({ foo: vi.fn() })
     },
     stubs: [
       'Button',

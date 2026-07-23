@@ -12,6 +12,7 @@ import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
 import type { GetPeachSummaryResponse, Permit, PermitTracking, PermitType, User } from '@/types';
+import { ref } from 'vue';
 
 // Mock Services
 vi.mock('@/services', () => ({
@@ -109,8 +110,8 @@ const wrapperSettings = (props = {}, isPeachEnabled = true) => ({
       PrimeVue
     ],
     provide: {
-      [projectRouteNameKey as symbol]: { value: 'housing-project' },
-      [projectServiceKey as symbol]: { value: { emailConfirmation: vi.fn() } }
+      [projectRouteNameKey as symbol]: ref('housing-project'),
+      [projectServiceKey as symbol]: ref({ foo: vi.fn() })
     },
     stubs: {
       'font-awesome-icon': true,

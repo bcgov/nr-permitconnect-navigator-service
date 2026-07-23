@@ -19,7 +19,9 @@ const contactFieldNames = [
 
 // Mount
 
-function mountContactCardNavForm(formValues: DeepPartial<HousingFormSchemaType> = {}) {
+function mountContactCardNavForm(options: { formValues?: DeepPartial<HousingFormSchemaType> } = {}) {
+  const { formValues = {} } = options;
+
   const { wrapper } = mountWithFormContext(ContactCardNavForm, {
     componentProps: { formValues }
   });
@@ -38,7 +40,7 @@ describe('ContactCardNavForm', () => {
 
   describe('when there is no selected contact', () => {
     it('renders neither the manual-contact warning nor the contact fields', () => {
-      const { wrapper } = mountContactCardNavForm({ contact: undefined });
+      const { wrapper } = mountContactCardNavForm({ formValues: { contact: undefined } });
 
       expect(wrapper.find('.p-message').exists()).toBe(false);
       expect(wrapper.findComponent(InputText).exists()).toBe(false);
@@ -57,7 +59,7 @@ describe('ContactCardNavForm', () => {
     } as unknown as DeepPartial<HousingFormSchemaType>;
 
     it('renders all six contact fields, each disabled', () => {
-      const { wrapper } = mountContactCardNavForm(selectedContact);
+      const { wrapper } = mountContactCardNavForm({ formValues: selectedContact });
 
       const textFields = wrapper.findAllComponents(InputText);
       const selectFields = wrapper.findAllComponents(Select);
@@ -77,15 +79,17 @@ describe('ContactCardNavForm', () => {
     });
 
     it('does not show the manual-contact warning when the contact has a linked userId', () => {
-      const { wrapper } = mountContactCardNavForm(selectedContact);
+      const { wrapper } = mountContactCardNavForm({ formValues: selectedContact });
 
       expect(wrapper.find('.p-message').exists()).toBe(false);
     });
 
     it('shows the manual-contact warning when the contact has no linked userId (a manually-entered contact)', () => {
       const { wrapper } = mountContactCardNavForm({
-        contact: { ...selectedContact.contact, userId: undefined }
-      } as unknown as DeepPartial<HousingFormSchemaType>);
+        formValues: {
+          contact: { ...selectedContact.contact, userId: undefined }
+        } as unknown as DeepPartial<HousingFormSchemaType>
+      });
 
       expect(wrapper.find('.p-message').exists()).toBe(true);
     });
@@ -98,7 +102,7 @@ describe('ContactCardNavForm', () => {
     // actually intentional, since it looks more like unfinished wiring than
     // a deliberate default.
     it('renders the hidden contact.userId input as empty regardless of the contact prop', () => {
-      const { wrapper } = mountContactCardNavForm(selectedContact);
+      const { wrapper } = mountContactCardNavForm({ formValues: selectedContact });
 
       const hiddenInput = wrapper.find('input[name="contact.userId"]');
       expect(hiddenInput.exists()).toBe(true);

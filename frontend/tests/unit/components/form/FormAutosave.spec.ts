@@ -10,7 +10,9 @@ const DELAY = 500;
 
 // Mount
 
-function mountFormAutoSave(callback = vi.fn().mockResolvedValue(undefined), delay: number = DELAY) {
+function mountFormAutoSave(options: { callback?: ReturnType<typeof vi.fn>; delay?: number } = {}) {
+  const { callback = vi.fn().mockResolvedValue(undefined), delay = DELAY } = options;
+
   const { wrapper } = mountWithFormContext(FormAutoSave, {
     fields: ['testField'],
     componentProps: { callback, delay }

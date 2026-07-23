@@ -8,6 +8,7 @@ import ProjectDraftListProponent from '@/components/projectCommon/ProjectDraftLi
 
 import type { Draft } from '@/types';
 import { draftableProjectServiceKey, projectIntakeRouteNameKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -39,8 +40,8 @@ const wrapperSettings = (testDraftsProp = testDrafts) => ({
       ToastService
     ],
     provide: {
-      [projectIntakeRouteNameKey as symbol]: { value: 'project-intake-route-name' },
-      [draftableProjectServiceKey as symbol]: { value: { foo: vi.fn() } }
+      [projectIntakeRouteNameKey as symbol]: ref('project-intake-route-name'),
+      [draftableProjectServiceKey as symbol]: ref({ foo: vi.fn() })
     },
     stubs: ['font-awesome-icon', 'router-link']
   }

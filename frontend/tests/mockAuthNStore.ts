@@ -1,6 +1,6 @@
 /**
  * Shared authn store mock -- a deliberate exception to the "seed real Pinia
- * state, don't mock the store" rule in TESTING_STANDARDS.md. `useAuthNStore`
+ * state, don't mock the store" rule in TESTING-STANDARDS.md. `useAuthNStore`
  * is a Pinia *setup* store (src/store/authnStore.ts). Even under
  * `createTestingPinia`, only the store's returned actions get auto-stubbed --
  * the setup() body itself still runs for real, unconditionally constructing

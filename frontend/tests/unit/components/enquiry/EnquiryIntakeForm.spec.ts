@@ -17,6 +17,7 @@ import {
   enquiryProjectConfirmRouteNameKey,
   enquiryRouteNameKey
 } from '@/utils/keys';
+import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -75,10 +76,10 @@ const wrapperSettings = () => ({
       ToastService
     ],
     provide: {
-      [enquiryConfirmRouteNameKey as symbol]: { value: 'route-name' },
-      [enquiryPermitConfirmRouteNameKey as symbol]: { value: 'route-name' },
-      [enquiryProjectConfirmRouteNameKey as symbol]: { value: 'route-name' },
-      [enquiryRouteNameKey as symbol]: { value: 'route-name' }
+      [enquiryConfirmRouteNameKey as symbol]: ref('route-name'),
+      [enquiryPermitConfirmRouteNameKey as symbol]: ref('route-name'),
+      [enquiryProjectConfirmRouteNameKey as symbol]: ref('route-name'),
+      [enquiryRouteNameKey as symbol]: ref('route-name')
     },
     stubs: {
       RouterLink: RouterLinkStub,

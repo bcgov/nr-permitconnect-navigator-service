@@ -10,6 +10,7 @@ import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/uti
 
 import type { Enquiry, User } from '@/types';
 import { projectEnquiryRouteNameKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
@@ -54,7 +55,7 @@ const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
       ToastService
     ],
     provide: {
-      [projectEnquiryRouteNameKey as symbol]: { value: 'route-name' }
+      [projectEnquiryRouteNameKey as symbol]: ref('route-name')
     },
     stubs: ['font-awesome-icon', 'router-link']
   }

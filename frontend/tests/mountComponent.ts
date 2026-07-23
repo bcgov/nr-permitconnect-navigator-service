@@ -48,7 +48,7 @@ export interface MountComponentOptions extends PiniaOptions {
   props?: Record<string, unknown>;
   /** Component stubs, merged with any caller-specific defaults */
   stubs?: Stubs;
-  /** Injection keys/values, e.g. { [someKey]: { value: 'x' } } */
+  /** Injection keys/values, e.g. { [someKey]: ref('x') } */
   provide?: Record<string | symbol, unknown>;
   /** Extra global plugins beyond the always-installed PrimeVue/i18n/etc. */
   plugins?: Plugin[];

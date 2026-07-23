@@ -10,6 +10,7 @@ import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/uti
 
 import type { Enquiry } from '@/types';
 import { enquiryRouteNameKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -68,7 +69,7 @@ const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => 
       ToastService
     ],
     provide: {
-      [enquiryRouteNameKey as symbol]: { value: 'route-name' }
+      [enquiryRouteNameKey as symbol]: ref('route-name')
     },
     stubs: ['font-awesome-icon', 'router-link']
   }

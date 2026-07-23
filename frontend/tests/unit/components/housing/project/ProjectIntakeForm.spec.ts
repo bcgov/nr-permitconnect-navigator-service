@@ -55,12 +55,10 @@ const minimalProject = { projectId: 'project-1' } as unknown as HousingProject;
 
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
 
-function mountProjectIntakeForm(props: Record<string, unknown> = {}) {
+function mountProjectIntakeForm(options: { props?: Record<string, unknown> } = {}) {
   const { wrapper } = mountComponent(ProjectIntakeForm, {
-    props,
-    piniaState: {
-      auth: { user: {} }
-    },
+    props: options.props,
+    piniaState: {},
     stubs: {
       Map: true,
       ProjectIntakeAssistance: true,
@@ -128,7 +126,7 @@ describe('ProjectIntakeForm', () => {
 
   describe('onBeforeMount', () => {
     it('redirects to the general error route if both `draft` and `project` are supplied', async () => {
-      mountProjectIntakeForm({ draft: minimalDraft, project: minimalProject });
+      mountProjectIntakeForm({ props: { draft: minimalDraft, project: minimalProject } });
       await flushPromises();
 
       expect(mockRouter.replace).toHaveBeenCalledWith({ name: RouteName.EXT_GENERAL });

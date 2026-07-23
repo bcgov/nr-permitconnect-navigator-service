@@ -114,8 +114,8 @@ function mountProjectListNavigator(
       ...(permissions === undefined ? {} : { authz: { permissions } })
     },
     provide: {
-      [projectRouteNameKey as symbol]: { value: 'route-name' },
-      [projectServiceKey as symbol]: { value: { foo: vi.fn() } },
+      [projectRouteNameKey as symbol]: ref('route-name'),
+      [projectServiceKey as symbol]: ref({ foo: vi.fn() }),
       [resourceKey as symbol]: ref(PROVIDED_RESOURCE)
     },
     stubs: {
