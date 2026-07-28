@@ -105,7 +105,7 @@ describe('permit domain', () => {
         emailTemplate: vi.fn().mockReturnValue('<html>Email body</html>')
       };
 
-      await sendPermitUpdateEmail(params);
+      await sendPermitUpdateEmail(mockRepos, params);
 
       expect(emailSpy).toHaveBeenCalledWith({
         to: ['recipient@example.com'],
@@ -147,7 +147,7 @@ describe('permit domain', () => {
         emailTemplate: vi.fn().mockReturnValue('body')
       };
 
-      await sendPermitUpdateEmail(params);
+      await sendPermitUpdateEmail(mockRepos, params);
 
       const emailCall = emailSpy.mock.calls[0]?.[0];
       expect(emailCall?.subject).toBe('Updates for Housing project ACTI1234, Permit');

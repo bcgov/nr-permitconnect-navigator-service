@@ -13,7 +13,7 @@ async function syncPeachToPcns() {
   if (!state.features.peach) return;
 
   await unitOfWork.execute(
-    async ({ electrificationProject, generalProject, housingProject, permit, permitNote, user }) => {
+    async ({ electrificationProject, generalProject, housingProject, permit, permitNote, permitType, user }) => {
       const started = Date.now();
       let updatedPermitsWithNotes: UpdatedPermitWithNote[];
 
@@ -37,7 +37,7 @@ async function syncPeachToPcns() {
         for (const permitWithNote of updatedPermitsWithNotes) {
           const { permit, note } = permitWithNote;
           await sendPermitUpdateNotifications(
-            { electrificationProject, generalProject, housingProject, permitNote, user },
+            { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
             permit,
             true,
             note
