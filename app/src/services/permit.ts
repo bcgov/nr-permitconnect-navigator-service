@@ -185,6 +185,7 @@ export const upsertPermitService = async (
       permit,
       permitNote,
       permitTracking,
+      permitType,
       sourceSystemKind,
       user
     }) => {
@@ -275,7 +276,7 @@ export const upsertPermitService = async (
             ? `This application is ${data.state.toLocaleLowerCase()} in the ${data.stage.toLocaleLowerCase()}.`
             : permitNoteText;
           await sendPermitUpdateNotifications(
-            { electrificationProject, generalProject, housingProject, permitNote, user },
+            { electrificationProject, generalProject, housingProject, permitNote, permitType, user },
             data,
             false,
             note

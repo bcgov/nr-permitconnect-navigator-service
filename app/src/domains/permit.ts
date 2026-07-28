@@ -40,12 +40,25 @@ export const listPeachIntegratedTrackings = async (repositories: Pick<Repositori
 
 /**
  * Sends out an email notification for the given update email params
+ * @param repositories - The required repositories
  * @param params Email information for template and recipients
  */
-export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => {
+export const sendPermitUpdateEmail = async (
+  repositories: Pick<Repositories, 'permitType'>,
+  params: PermitUpdateEmailParams
+) => {
   const { permit, initiative, dearName, projectId, toEmails, emailTemplate } = params;
   const { permitId, activityId } = permit;
-  const permitName = permit.permitType?.name;
+
+  let permitName = permit.permitType?.name;
+  if (!permitName) {
+    const permitType = await repositories.permitType.findFirst({
+      select: { name: true },
+      where: { permitTypeId: permit.permitTypeId }
+    });
+    permitName = permitType?.name;
+  }
+
   const submittedDate = formatDateOnly(permit.submittedDate);
 
   const nrmPermitEmail: string = config.get('server.ches.submission.cc');
@@ -84,7 +97,7 @@ export const sendPermitUpdateEmail = async (params: PermitUpdateEmailParams) => 
  * @param note A permit note to be used in permit note creation, if given
  */
 export const sendPermitUpdateNotifications = async (
-  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'user'>,
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitNote' | 'permitType' | 'user'>,
   permit: Permit,
   fromPeachSync: boolean,
   note?: string
@@ -167,6 +180,6 @@ export const sendPermitUpdateNotifications = async (
 
   // Send out permit update emails
   for (const emailJob of permitUpdateEmails) {
-    await sendPermitUpdateEmail(emailJob);
+    await sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob);
   }
 };
