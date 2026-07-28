@@ -17,12 +17,6 @@ const { t } = useI18n();
 
 const listUsersSpy = vi.spyOn(userService, 'listUsers');
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: vi.fn()
-  })
-}));
-
 vi.mock('vue-router', () => ({
   useRouter: () => ({
     push: vi.fn(),

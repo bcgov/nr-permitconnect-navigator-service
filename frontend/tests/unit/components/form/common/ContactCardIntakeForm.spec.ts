@@ -1,47 +1,35 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import { shallowMount } from '@vue/test-utils';
-
-import { default as i18n } from '@/i18n';
 import ContactCardIntakeForm from '@/components/form/common/ContactCardIntakeForm.vue';
-import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
+import { useFormStore } from '@/store';
+
+import { mountWithFormContext } from '../../../../mountWithFormContext';
+import { FormType, FormState } from '@/utils/enums/projectCommon';
+
+function mountContactCardIntakeForm(options: { formType?: FormType; formState?: FormState; tab?: number } = {}) {
+  const { formType = FormType.NEW, formState = FormState.UNLOCKED, tab } = options;
+
+  const { wrapper, pinia, form } = mountWithFormContext(ContactCardIntakeForm, {
+    piniaState: { form: { formType, formState } },
+    componentProps: tab === undefined ? {} : { tab }
+  });
+
+  const formStore = useFormStore(pinia!);
+
+  return { wrapper, formStore, form };
+}
 
 beforeEach(() => {
   vi.clearAllMocks();
 });
 
-afterEach(() => {
-  sessionStorage.clear();
-});
-
-const wrapperSettings = () => ({
-  props: {
-    initialFormValues: {
-      contactId: '123',
-      firstName: 'Test',
-      lastName: 'Test',
-      phoneNumber: 'Test',
-      email: 'Test',
-      contactApplicantRelationship: ProjectRelationship.OWNER,
-      contactPreference: ContactPreference.EITHER
-    }
-  },
-  global: {
-    plugins: [
-      createTestingPinia({
-        initialState: {}
-      }),
-      i18n,
-      PrimeVue
-    ],
-    stubs: ['font-awesome-icon']
-  }
-});
-
-describe('ContactCardIntakeForm.vue', () => {
+describe('ContactCardIntakeForm', () => {
   it('renders', () => {
-    const wrapper = shallowMount(ContactCardIntakeForm, wrapperSettings());
-
+    const { wrapper } = mountContactCardIntakeForm();
     expect(wrapper).toBeTruthy();
+  });
+
+  it('renders a non-empty translated header', () => {
+    const { wrapper } = mountContactCardIntakeForm();
+
+    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
   });
 });

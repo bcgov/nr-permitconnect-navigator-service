@@ -1,11 +1,10 @@
 import { flushPromises } from '@vue/test-utils';
 import { nextTick } from 'vue';
 
-import ProjectIntakeForm from '@/components/housing/project/ProjectIntakeForm.vue';
+import ProjectIntakeForm from '@/components/general/project/ProjectIntakeForm.vue';
 import { StepperHeader } from '@/components/form';
-import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFormSchema';
+import { createProjectIntakeSchema } from '@/validators/general/projectIntakeFormSchema';
 import { contactService } from '@/services';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, RouteName, StorageKey } from '@/utils/enums/application';
 import { ProjectApplicant } from '@/utils/enums/projectCommon';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
@@ -13,8 +12,8 @@ import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCom
 import { mountComponent } from '../../../../mountComponent';
 import { mockRouter, resetMockRouter } from '../../../../mockRouter';
 
-import type { Contact, Draft, HousingProject } from '@/types';
-import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
+import type { Contact, Draft, GeneralProject } from '@/types';
+import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 // Mocks
 
@@ -49,7 +48,7 @@ const sampleContact: Contact = {
 // These deliberately don't need to be full valid shapes -- the component
 // throws on this combination before it ever reads their fields.
 const minimalDraft = { draftId: 'draft-1', activityId: 'activity-1', data: {} } as unknown as Draft<FormSchemaType>;
-const minimalProject = { projectId: 'project-1' } as unknown as HousingProject;
+const minimalProject = { projectId: 'project-1' } as unknown as GeneralProject;
 
 // Mount
 
@@ -61,8 +60,7 @@ function mountProjectIntakeForm(options: { props?: Record<string, unknown> } = {
     piniaState: {},
     stubs: {
       Map: true,
-      ProjectIntakeAssistance: true,
-      SubmissionAssistance: true
+      ProjectIntakeAssistance: true
     }
   });
 
@@ -142,37 +140,13 @@ describe('ProjectIntakeForm', () => {
         orgBookOptions: [{ registeredName: 'testString3', registeredId: 'FM0281610' }],
         data: {
           basic: {
-            consentToFeedback: false,
             projectApplicantType: ProjectApplicant.BUSINESS,
             isDevelopedInBc: BasicResponse.NO,
             registeredId: 'FM0281610',
             registeredName: 'testString3',
             projectName: 'Project',
-            projectDescription: 'Desc'
-          }
-        }
-      },
-      {
-        category: 'housing',
-        orgBookOptions: [],
-        data: {
-          housing: {
-            projectName: 'testString1',
-            projectDescription: 'testString2',
-            hasRentalUnits: 'Yes',
-            financiallySupportedBc: 'No',
-            financiallySupportedIndigenous: 'No',
-            financiallySupportedNonProfit: 'No',
-            financiallySupportedHousingCoop: 'No',
-            rentalUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-            indigenousDescription: 'No',
-            nonProfitDescription: 'No',
-            housingCoopDescription: 'No',
-            singleFamilySelected: true,
-            singleFamilyUnits: NUM_RESIDENTIAL_UNITS_LIST[0],
-            multiFamilyUnits: 'No',
-            otherUnitsDescription: 'No',
-            otherUnits: 'No'
+            projectDescription: 'Desc',
+            projectNumber: 'PN-1'
           }
         }
       },
@@ -217,28 +191,6 @@ describe('ProjectIntakeForm', () => {
         }
       },
       {
-        category: 'housing',
-        data: {
-          housing: {
-            projectName: 'testString1',
-            projectDescription: 'testString2',
-            hasRentalUnits: 'wrongRentalUnit',
-            financiallySupportedBC: 'No',
-            financiallySupportedIndigenous: 'No',
-            financiallySupportedNonProfit: 'No',
-            financiallySupportedHousingCoop: 'No',
-            rentalUnits: 'No',
-            indigenousDescription: 'No',
-            nonProfitDescription: 'No',
-            housingCoopDescription: 'No',
-            singleFamilyUnits: 'No',
-            multiFamilyUnits: 'No',
-            otherUnitsDescription: 'No',
-            otherUnits: 'No'
-          }
-        }
-      },
-      {
         category: 'location',
         data: {
           location: {
@@ -262,10 +214,9 @@ describe('ProjectIntakeForm', () => {
           }
         }
       },
-      // New edge case: a category that's missing entirely should fail the
-      // same way as one with invalid fields, for every category.
+      // A category that's missing entirely should fail the same way as one
+      // with invalid fields, for every category.
       { category: 'basic', data: {} },
-      { category: 'housing', data: {} },
       { category: 'location', data: {} },
       { category: 'permits', data: {} }
     ] as const;

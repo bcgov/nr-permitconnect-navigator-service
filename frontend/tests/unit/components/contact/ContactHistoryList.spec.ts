@@ -13,6 +13,8 @@ import {
 import type { Enquiry, HousingProject } from '@/types';
 import { BasicResponse } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
+import { enquiryRouteNameKey, projectRouteNameKey } from '@/utils/keys';
+import { ref } from 'vue';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -110,12 +112,14 @@ const wrapperSettings = (loading = false, contactsHistory = testHistory, assigne
     plugins: [
       () =>
         createTestingPinia({
-          initialState: {
-            auth: { user: {} }
-          }
+          initialState: {}
         }),
       PrimeVue
     ],
+    provide: {
+      [projectRouteNameKey as symbol]: ref('project-route-name'),
+      [enquiryRouteNameKey as symbol]: ref('enquiry-route-name')
+    },
     stubs: ['Spinner', 'DataTable', 'Column', 'router-link']
   }
 });

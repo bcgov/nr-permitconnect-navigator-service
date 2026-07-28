@@ -189,6 +189,7 @@ onBeforeMount(async () => {
             >
               <InputIcon class="pi pi-search" />
               <InputText
+                id="searchTag"
                 v-model="searchTag"
                 class="h-full"
                 :placeholder="t('authorization.common.search')"

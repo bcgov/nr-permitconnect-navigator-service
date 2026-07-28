@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { computed, nextTick, onBeforeMount, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ATSInfo from '@/components/ats/ATSInfo.vue';
@@ -69,7 +69,27 @@ const { getInitiative } = storeToRefs(useAppStore());
 // State
 const atsCreateType: Ref<ATSCreateTypes | undefined> = ref(undefined);
 const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
-const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
+// Every top-level section is pre-populated with an empty object (rather than
+// leaving the whole thing `undefined`) so the Form can mount immediately --
+// the template reads paths like `values.companyProjectName.companyNameRegistered`
+// with no optional chaining, which would throw if `values.companyProjectName`
+// itself were missing. The real data replaces this via `resetForm()` once it
+// loads (see `onMounted`); `isFormReady` (below) hides the form with
+// `v-show` until then, purely to avoid a flash of empty fields -- not to gate
+// the Form's existence, since vee-validate only applies `initial-values` once,
+// at creation.
+const initialFormValues: Ref<DeepPartial<FormSchemaType>> = ref({
+  contact: {},
+  companyProjectName: {},
+  electrification: {},
+  projectDescription: {},
+  locationDescription: {},
+  astNotes: {},
+  submissionState: {},
+  atsInfo: {},
+  projectAreasUpdated: {}
+});
+const isFormReady: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
@@ -373,12 +393,14 @@ watch(getPrimaryActivityContact, (newContact, oldContact) => {
   }
 });
 
-onBeforeMount(async () => {
+onMounted(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
 
-  // Default form values
-  initialFormValues.value = await initializeFormValues(project);
+  // `formRef` is a template ref, only guaranteed
+  // populated once the component has mounted
+  formRef.value?.resetForm({ values: await initializeFormValues(project) });
+  isFormReady.value = true;
 });
 </script>
 
@@ -393,7 +415,7 @@ onBeforeMount(async () => {
     {{ t('i.common.form.cancelMessage') }}
   </Message>
   <Form
-    v-if="initialFormValues"
+    v-show="isFormReady"
     v-slot="{ setFieldValue, values }"
     ref="formRef"
     :initial-values="initialFormValues"

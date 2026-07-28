@@ -5,6 +5,9 @@ import { mount } from '@vue/test-utils';
 import ViewHeader from '@/components/common/ViewHeader.vue';
 
 const wrapperSettings = () => ({
+  props: {
+    header: 'text'
+  },
   global: {
     plugins: [
       () =>

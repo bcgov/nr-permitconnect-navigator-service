@@ -1,13 +1,7 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import { nextTick } from 'vue';
-import { flushPromises, shallowMount } from '@vue/test-utils';
+import { flushPromises } from '@vue/test-utils';
 
 import ProjectFormNavigator from '@/components/housing/project/ProjectFormNavigator.vue';
-import i18n from '@/i18n';
-import { atsService, mapService, userService, housingProjectService } from '@/services';
+import { atsService, housingProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
 import { ATSCreateTypes, BasicResponse, GroupName } from '@/utils/enums/application';
 import {
@@ -20,51 +14,23 @@ import {
 } from '@/utils/enums/projectCommon';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { updateLiveNameKey } from '@/utils/keys';
-import { mockAxiosResponse, VEE_FORM_STUB } from '../../../../helpers';
 
-import type { DefineComponent, ComponentPublicInstance } from 'vue';
-import type { HousingProject, Group, User, AtsClientResource, AtsEnquiryResource } from '@/types';
-import type { VueWrapper } from '@vue/test-utils';
+import { mockAxiosResponse } from '../../../../helpers';
+import { mountComponent } from '../../../../mountComponent';
 
-vi.mock('@/services', () => ({
-  atsService: {
-    createAtsClient: vi.fn(),
-    createAtsEnquiry: vi.fn()
-  },
-  externalApiService: {
-    searchOrgBook: vi.fn()
-  },
-  mapService: {
-    getPids: vi.fn()
-  },
-  userService: {
-    listUsers: vi.fn()
-  },
-  housingProjectService: {
-    patchProject: vi.fn()
-  }
-}));
+import type { AtsClientResource, AtsEnquiryResource, Group, HousingProject, User } from '@/types';
+
+// Mocks
+
+const createAtsClientSpy = vi.spyOn(atsService, 'createAtsClient');
+const createAtsEnquirySpy = vi.spyOn(atsService, 'createAtsEnquiry');
+const getPidsSpy = vi.spyOn(mapService, 'getPids');
+const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const patchProjectSpy = vi.spyOn(housingProjectService, 'patchProject');
+
+// Fixtures
 
 const currentDate = new Date().toISOString();
-
-const testUser = {
-  active: true,
-  email: 'john.doe@example.com',
-  firstName: 'John',
-  fullName: 'John Doe',
-  idp: 'idir',
-  lastName: 'Doe',
-  groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
-  status: 'active',
-  userId: 'user123',
-  sub: 'sub-123',
-  elevatedRights: true,
-  bceidBusinessName: '',
-  createdBy: 'testCreatedBy',
-  createdAt: currentDate,
-  updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
-};
 
 const exampleContact = {
   contactId: 'contact123',
@@ -79,7 +45,7 @@ const testProject: HousingProject = {
   housingProjectId: 'project789',
   projectId: 'project789',
   queuePriority: 1,
-  submissionType: SubmissionType.ASSISTANCE,
+  submissionType: SubmissionType.GUIDANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
   hasRelatedEnquiry: true,
@@ -95,7 +61,7 @@ const testProject: HousingProject = {
   otherUnitsDescription: 'Other units description.',
   otherUnits: NumResidentialUnits.UNSURE,
   hasRentalUnits: BasicResponse.YES,
-  rentalUnits: '15',
+  rentalUnits: NumResidentialUnits.ONE_TO_NINE,
   financiallySupportedBc: BasicResponse.YES,
   financiallySupportedIndigenous: BasicResponse.YES,
   indigenousDescription: 'Indigenous support description.',
@@ -123,337 +89,244 @@ const testProject: HousingProject = {
   hasAppliedProvincialPermits: false,
   projectLocation: '',
   contacts: [exampleContact],
-  user: testUser,
+  user: {
+    active: true,
+    email: 'john.doe@example.com',
+    firstName: 'John',
+    fullName: 'John Doe',
+    idp: 'idir',
+    lastName: 'Doe',
+    groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
+    status: 'active',
+    userId: 'user123',
+    sub: 'sub-123',
+    elevatedRights: true,
+    bceidBusinessName: '',
+    createdBy: 'testCreatedBy',
+    createdAt: currentDate,
+    updatedBy: 'testUpdatedAt',
+    updatedAt: currentDate
+  } as User,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
   updatedAt: currentDate
 };
 
-const mockSubmitValues = {
+// A primary activity contact backing `getPrimaryActivityContact`, so the
+// form's initial `contact` section is populated with valid data (rather
+// than all-`undefined`) and the real vee-validate schema can validate it.
+const primaryActivityContact = {
+  contactId: exampleContact.contactId,
+  activityId: testProject.activityId,
+  role: ActivityContactRole.PRIMARY,
   contact: {
-    contactId: exampleContact.contactId,
-    firstName: exampleContact.firstName,
-    lastName: exampleContact.lastName,
+    ...exampleContact,
     phoneNumber: '1234567890',
-    email: exampleContact.email,
     contactApplicantRelationship: ProjectRelationship.CONSULTANT,
     contactPreference: ContactPreference.EITHER
-  },
-
-  companyProjectName: {
-    companyIdRegistered: null,
-    companyNameRegistered: null,
-    projectName: 'Test'
-  },
-
-  location: {
-    locationAddress: null,
-    streetAddress: null,
-    locality: null,
-    province: null,
-    locationPids: null,
-    latitude: null,
-    longitude: null,
-    geomarkUrl: null,
-    naturalDisaster: BasicResponse.NO
-  },
-  finance: {
-    financiallySupportedBc: BasicResponse.NO,
-    financiallySupportedIndigenous: BasicResponse.NO,
-    indigenousDescription: null,
-    financiallySupportedNonProfit: BasicResponse.NO,
-    nonProfitDescription: null,
-    financiallySupportedHousingCoop: BasicResponse.NO,
-    housingCoopDescription: null
-  },
-  units: {
-    singleFamilyUnits: null,
-    multiFamilyUnits: null,
-    otherUnitsDescription: null,
-    otherUnits: null,
-    hasRentalUnits: BasicResponse.NO,
-    rentalUnits: null
-  },
-
-  projectDescription: { description: 'Test' },
-
-  submissionState: {
-    applicationStatus: '',
-    submissionType: '',
-    queuePriority: 3
-  },
-  atsInfo: {
-    atsClientId: null,
-    atsEnquiryId: null
-  },
-  projectAreasUpdated: {
-    addedToAts: false,
-    aaiUpdated: false,
-    ltsaUpdated: false
-  },
-  consent: {
-    consentToFeedback: false
   }
 };
 
-const wrapperSettings = (testProjectProp = testProject, editableProp = true) => ({
-  props: {
-    project: testProjectProp,
-    editable: editableProp
-  },
-  global: {
-    plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
-      PrimeVue,
-      ConfirmationService,
-      i18n,
-      ToastService
-    ],
-    directives: {
-      // Silences vue waring for failed to resolve directive tooltip
-      tooltip: () => {}
+// Mount
+
+function mountProjectFormNavigator(options: { project?: HousingProject; editable?: boolean } = {}) {
+  const { project = testProject, editable = true } = options;
+
+  const { wrapper } = mountComponent(ProjectFormNavigator, {
+    props: { project, editable },
+    piniaState: {
+      project: { activityContacts: [primaryActivityContact] }
     },
+    provide: { [updateLiveNameKey]: () => {} },
     stubs: {
-      'font-awesome-icon': true,
-      'router-link': true,
       ATSInfo: true,
       ContactCardNavForm: true,
-      // Silences the Vue warning for undeclared emit/prop on-complete in test printout
-      AutoComplete: {
-        name: 'AutoComplete',
-        props: ['disabled', 'name', 'suggestions'],
-        template: '<div class="stub-autocomplete p-inputtext"></div>'
-      },
-      Form: VEE_FORM_STUB
-    },
-    provide: {
-      [updateLiveNameKey]: () => {}
+      CompanyProjectNamePanel: true,
+      ResidentialUnitsPanel: true,
+      FinanciallySupportedPanel: true,
+      LocationPanel: true,
+      LocationPidsPanel: true,
+      LocationDescriptionPanel: true,
+      ProjectDescriptionPanel: true,
+      AstNotesPanel: true,
+      SubmissionStateSection: true,
+      RelatedEnquiriesSection: true,
+      ProjectAreasUpdatedSection: true,
+      FeedbackConsentSection: true,
+      FormNavigationGuard: true,
+      CancelButton: true
     }
-  }
+  });
+
+  return { wrapper };
+}
+
+/**
+ * One `trigger('submit')` + `flushPromises()` isn't enough to see
+ * `@submit`/`@invalid-submit` fire -- a second flush, with a real timer
+ * delay before it, is needed too. Found by trial and error; the underlying
+ * reason isn't confirmed.
+ */
+async function submitForm(wrapper: ReturnType<typeof mountProjectFormNavigator>['wrapper']) {
+  await wrapper.find('form').trigger('submit');
+  await flushPromises();
+  await new Promise((resolve) => setTimeout(resolve, 50));
+  await flushPromises();
+}
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' } as User]);
+  getPidsSpy.mockResolvedValue('123456789');
 });
 
-describe('ProjectForm.vue', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(userService.listUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
-    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
+// Tests
+
+describe('ProjectFormNavigator', () => {
+  describe('rendering', () => {
+    it('renders the component with the provided props', async () => {
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      expect(wrapper.exists()).toBe(true);
+    });
   });
 
-  it('renders the component with the provided props', async () => {
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
-    await nextTick();
+  describe('onBeforeMount', () => {
+    it('searches for the assigned user', async () => {
+      const mountProject = { ...testProject, assignedUserId: 'testAssignedUseId' };
+      const { wrapper } = mountProjectFormNavigator({ project: mountProject });
+      await flushPromises();
 
-    expect(wrapper).toBeTruthy();
+      expect(wrapper.isVisible()).toBe(true);
+      expect(listUsersSpy).toHaveBeenCalledExactlyOnceWith({ userId: [mountProject.assignedUserId] });
+    });
+
+    it('gets the location PIDs for the project', async () => {
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      expect(wrapper.isVisible()).toBe(true);
+      expect(getPidsSpy).toHaveBeenCalledExactlyOnceWith({ projectId: testProject.housingProjectId });
+    });
   });
 
-  it('searches for users onMount', async () => {
-    const mountProject = { ...testProject, assignedUserId: 'testAssignedUseId' };
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(mountProject));
-    await flushPromises();
+  describe('form submission', () => {
+    beforeEach(() => {
+      patchProjectSpy.mockResolvedValue(testProject);
+    });
 
-    expect(wrapper.isVisible()).toBeTruthy();
-    expect(userService.listUsers).toHaveBeenCalledTimes(1);
-    expect(userService.listUsers).toHaveBeenCalledWith({ userId: [mountProject.assignedUserId] });
+    it('creates a client and enquiry when the CLIENT_ENQUIRY type is chosen', async () => {
+      createAtsClientSpy.mockResolvedValue(mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201));
+      createAtsEnquirySpy.mockResolvedValue(mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201));
+
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      await wrapper.findComponent({ name: 'ATSInfo' }).vm.$emit('ats-info:create', ATSCreateTypes.CLIENT_ENQUIRY);
+      await submitForm(wrapper);
+
+      expect(createAtsClientSpy).toHaveBeenCalled();
+      expect(createAtsEnquirySpy).toHaveBeenCalled();
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectId: testProject.projectId,
+          atsClientId: 111,
+          atsEnquiryId: 222,
+          addedToAts: true
+        })
+      );
+    });
+
+    it('creates only an enquiry when the ENQUIRY type is chosen, leaving the existing client untouched', async () => {
+      createAtsEnquirySpy.mockResolvedValue(mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201));
+
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      await wrapper.findComponent({ name: 'ATSInfo' }).vm.$emit('ats-info:create', ATSCreateTypes.ENQUIRY);
+      await submitForm(wrapper);
+
+      expect(createAtsEnquirySpy).toHaveBeenCalled();
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectId: testProject.projectId,
+          atsClientId: testProject.atsClientId,
+          atsEnquiryId: 222,
+          addedToAts: true
+        })
+      );
+    });
+
+    it('creates only a client when the CLIENT type is chosen, leaving the existing enquiry untouched', async () => {
+      createAtsClientSpy.mockResolvedValue(mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201));
+
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      await wrapper.findComponent({ name: 'ATSInfo' }).vm.$emit('ats-info:create', ATSCreateTypes.CLIENT);
+      await submitForm(wrapper);
+
+      expect(createAtsClientSpy).toHaveBeenCalled();
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          projectId: testProject.projectId,
+          atsClientId: 111,
+          atsEnquiryId: testProject.atsEnquiryId,
+          addedToAts: true
+        })
+      );
+    });
+
+    it('keeps addedToAts false when the CLIENT_ENQUIRY IDs fail to generate', async () => {
+      createAtsClientSpy.mockResolvedValue(mockAxiosResponse({} as AtsClientResource));
+      createAtsEnquirySpy.mockResolvedValue(mockAxiosResponse({} as AtsEnquiryResource));
+
+      const { wrapper } = mountProjectFormNavigator({ project: { ...testProject, addedToAts: false } });
+      await flushPromises();
+
+      await wrapper.findComponent({ name: 'ATSInfo' }).vm.$emit('ats-info:create', ATSCreateTypes.CLIENT_ENQUIRY);
+      await submitForm(wrapper);
+
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: testProject.projectId, addedToAts: false })
+      );
+    });
+
+    it('patches the project directly when no ATS type was chosen', async () => {
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
+
+      await submitForm(wrapper);
+
+      expect(createAtsClientSpy).not.toHaveBeenCalled();
+      expect(createAtsEnquirySpy).not.toHaveBeenCalled();
+      expect(patchProjectSpy).toHaveBeenCalled();
+    });
   });
 
-  it('gets PIDs onMount', async () => {
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
-    await flushPromises();
+  describe('watchers', () => {
+    it('updates ContactCardNavForm when the primary contact changes in the store', async () => {
+      const { wrapper } = mountProjectFormNavigator();
+      await flushPromises();
 
-    expect(wrapper.isVisible()).toBeTruthy();
-    expect(mapService.getPids).toHaveBeenCalledTimes(1);
-    expect(mapService.getPids).toHaveBeenCalledWith({ projectId: testProject.housingProjectId });
-  });
-});
+      const store = useProjectStore();
+      store.activityContacts = [
+        {
+          contactId: 'new-contact-999',
+          activityId: 'activity456',
+          role: ActivityContactRole.PRIMARY,
+          contact: { ...exampleContact, contactId: 'new-contact-999', firstName: 'Jane' }
+        }
+      ];
+      await flushPromises();
 
-describe('Form Submission & ATS Integration', () => {
-  const payload = {
-    ...mockSubmitValues,
-    atsInfo: {
-      atsClientId: 111,
-      atsEnquiryId: 222
-    },
-    projectAreasUpdated: {
-      addedToAts: true,
-      aaiUpdated: false,
-      ltsaUpdated: false
-    }
-  };
+      const contactCard = wrapper.findComponent({ name: 'ContactCardNavForm' });
+      const passedFormValues = contactCard.props('formValues');
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(housingProjectService.patchProject).mockResolvedValue(testProject);
-    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
-  });
-
-  it('handles CLIENT_ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createAtsClient).mockResolvedValue(
-      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
-    );
-    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
-      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
-    );
-
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
-    await flushPromises();
-
-    const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
-    await atsInfo.vm.$emit('ats-info:create', ATSCreateTypes.CLIENT_ENQUIRY);
-
-    const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
-      '.vee-form-stub'
-    );
-
-    form.vm.$emit('submit', payload);
-    await flushPromises();
-
-    expect(atsService.createAtsClient).toHaveBeenCalled();
-    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
-    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      expect.objectContaining({
-        projectId: testProject.housingProjectId,
-        atsClientId: 111,
-        atsEnquiryId: 222,
-        addedToAts: true
-      })
-    );
-  });
-
-  it('handles ENQUIRY creation path upon form submit', async () => {
-    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(
-      mockAxiosResponse({ enquiryId: 222 } as AtsEnquiryResource, 201)
-    );
-
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
-    await flushPromises();
-
-    const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
-    await atsInfo.vm.$emit('ats-info:create', ATSCreateTypes.ENQUIRY);
-
-    const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
-      '.vee-form-stub'
-    );
-
-    form.vm.$emit('submit', payload);
-    await flushPromises();
-
-    expect(atsService.createAtsEnquiry).toHaveBeenCalled();
-    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      expect.objectContaining({
-        projectId: testProject.housingProjectId,
-        atsClientId: 111,
-        atsEnquiryId: 222,
-        addedToAts: true
-      })
-    );
-  });
-
-  it('handles CLIENT creation path upon form submit', async () => {
-    vi.mocked(atsService.createAtsClient).mockResolvedValue(
-      mockAxiosResponse({ clientId: 111 } as AtsClientResource, 201)
-    );
-
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
-    await flushPromises();
-
-    const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
-    await atsInfo.vm.$emit('ats-info:create', ATSCreateTypes.CLIENT);
-
-    const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
-      '.vee-form-stub'
-    );
-    form.vm.$emit('submit', payload);
-    await flushPromises();
-
-    expect(atsService.createAtsClient).toHaveBeenCalled();
-    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      expect.objectContaining({
-        projectId: testProject.housingProjectId,
-        atsClientId: 111,
-        atsEnquiryId: 222,
-        addedToAts: true
-      })
-    );
-  });
-
-  it('bypasses addedToAts in CLIENT_ENQUIRY path when IDs fail to generate', async () => {
-    vi.mocked(atsService.createAtsClient).mockResolvedValue(mockAxiosResponse({} as AtsClientResource));
-    vi.mocked(atsService.createAtsEnquiry).mockResolvedValue(mockAxiosResponse({} as AtsEnquiryResource));
-
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
-    await flushPromises();
-
-    const atsInfo = wrapper.findComponent({ name: 'ATSInfo' });
-    await atsInfo.vm.$emit('ats-info:create', ATSCreateTypes.CLIENT_ENQUIRY);
-
-    const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
-      '.vee-form-stub'
-    );
-
-    const noAtsPayload = payload;
-    noAtsPayload.projectAreasUpdated.addedToAts = false;
-
-    form.vm.$emit('submit', noAtsPayload);
-    await flushPromises();
-
-    expect(housingProjectService.patchProject).toHaveBeenCalledWith(
-      expect.objectContaining({ projectId: testProject.housingProjectId, addedToAts: false })
-    );
-  });
-
-  it('does nothing and falls through to update if atsCreateType is undefined', async () => {
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings(testProject));
-    await flushPromises();
-
-    const form: Omit<VueWrapper<ComponentPublicInstance>, 'exists'> = wrapper.getComponent<DefineComponent>(
-      '.vee-form-stub'
-    );
-    form.vm.$emit('submit', payload);
-    await flushPromises();
-
-    expect(atsService.createAtsClient).not.toHaveBeenCalled();
-    expect(atsService.createAtsEnquiry).not.toHaveBeenCalled();
-    expect(housingProjectService.patchProject).toHaveBeenCalled();
-  });
-});
-
-describe('Watchers', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    vi.mocked(mapService.getPids).mockResolvedValue('123456789');
-  });
-
-  it('updates form values passed to ContactCardNavForm when primaryContact changes in store', async () => {
-    const wrapper = shallowMount(ProjectFormNavigator, wrapperSettings());
-    await flushPromises();
-    await nextTick();
-
-    const store = useProjectStore();
-
-    store.activityContacts = [
-      {
-        contactId: 'new-contact-999',
-        activityId: 'activity456',
-        role: ActivityContactRole.PRIMARY,
-        contact: { ...exampleContact, contactId: 'new-contact-999', firstName: 'Jane' }
-      }
-    ];
-
-    await flushPromises();
-    await nextTick();
-
-    const contactCard = wrapper.findComponent({ name: 'ContactCardNavForm' });
-    const passedFormValues = contactCard.props('formValues');
-
-    expect(passedFormValues.contact.contactId).toBe('new-contact-999');
-    expect(passedFormValues.contact.firstName).toBe('Jane');
+      expect(passedFormValues.contact.contactId).toBe('new-contact-999');
+      expect(passedFormValues.contact.firstName).toBe('Jane');
+    });
   });
 });

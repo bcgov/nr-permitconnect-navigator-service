@@ -3,6 +3,7 @@ import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
+import Tooltip from 'primevue/tooltip';
 
 import ATSInfo from '@/components/ats/ATSInfo.vue';
 
@@ -49,7 +50,8 @@ const wrapperSettings = (
       ConfirmationService,
       ToastService
     ],
-    stubs: ['font-awesome-icon', 'router-link']
+    stubs: ['font-awesome-icon', 'router-link'],
+    directives: { Tooltip }
   }
 });
 
