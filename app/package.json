@@ -48,7 +48,7 @@
     "prisma:migrate:down": "npm run knex:local migrate:down",
     "prisma:migrate:up": "npm run knex:local migrate:up",
     "prisma:migrate:dev": "npm run knex:local migrate:latest",
-    "prisma:migrate": "npm run knex:local migrate:latest",
+    "prisma:migrate": "cross-env NODE_ENV=dev npm run knex:local migrate:latest",
     "prisma:sync": "prisma db pull",
     "purge": "rimraf node_modules",
     "rebuild": "npm run clean",
