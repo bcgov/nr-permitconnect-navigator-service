@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
+/**
+ * File may be deprecated once we upgrade to Prisma 7 as contains a lot more auto generation of types for you
+ */
+
 import { Prisma } from '@prisma/client';
+
+import type { GroupName, Initiative as InitiativeEnum } from '../../utils/enums/application.ts';
 
 const accessRequestBase = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
 export type AccessRequestBase = Prisma.access_requestGetPayload<typeof accessRequestBase>;
@@ -155,3 +161,65 @@ export type SourceSystemKind = SourceSystemKindBase & { permitTypeIds?: number[]
 const user = Prisma.validator<Prisma.userDefaultArgs>()({});
 export type UserBase = Prisma.userGetPayload<typeof user>;
 export type User = UserBase & { identityProvider?: IdentityProvider };
+
+/**
+ * Renamed from interfaces/IStamps.ts's IStamps
+ * Duplicate of AuditFields+SoftDeleteFields in writable.ts
+ * TBD if we can remove this entirely
+ */
+export interface Stamps {
+  createdBy: string | null;
+  createdAt: Date | null;
+  updatedBy: string | null;
+  updatedAt: Date | null;
+  deletedBy: string | null;
+  deletedAt: Date | null;
+}
+
+/**
+ * Renamed from interfaces/IProject.ts's IProject; kept distinct from the
+ * Project union in common.ts to avoid a naming collision.
+ */
+export interface ProjectRecord extends Stamps {
+  projectId?: string; // Auto populated from the projects PK - for front end use only
+  activityId: string;
+  assignedUserId: string | null;
+  submittedAt: Date;
+  applicationStatus: string | null;
+  projectName: string | null;
+  projectDescription: string | null;
+  submissionType: string | null;
+  companyNameRegistered: string | null;
+  aaiUpdated: boolean;
+  astNotes: string | null;
+  queuePriority: number | null;
+  atsClientId: number | null;
+  atsEnquiryId: number | null;
+  addedToAts: boolean;
+}
+
+export interface BringForward {
+  activityId: string;
+  noteHistoryId: string;
+  projectId?: string;
+  enquiryId?: string;
+  initiative?: InitiativeEnum;
+  title: string;
+  projectName: string | null;
+  bringForwardDate?: string;
+  createdByFullName: string | null;
+  escalateToSupervisor: boolean;
+  escalateToDirector: boolean;
+}
+
+export interface Group extends Partial<Stamps> {
+  groupId: number;
+  initiativeCode: string;
+  initiativeId: string;
+  name: GroupName;
+  label?: string;
+}
+
+export interface UserAccessRequest extends User {
+  accessRequest?: AccessRequest;
+}

@@ -1,6 +1,6 @@
-import { IPaginationOptions } from '../interfaces/IPaginationOptions';
-import { AuditFields, SoftDeleteFields } from '../repositories';
-import { Simplify } from './util';
+import type { PaginationOptions } from '../common.ts';
+import type { Simplify } from '../utils.ts';
+import type { AuditFields, SoftDeleteFields } from '../../repositories';
 
 /**
  * Schema configuration
@@ -43,7 +43,7 @@ export type CreateRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
 export type GetRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<Pick<T, S['ids']>>;
 
 export type ListRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
-  Pick<T, S['scope'] extends keyof T ? S['scope'] : never> & ResolveQuery<T, S> & Partial<IPaginationOptions>
+  Pick<T, S['scope'] extends keyof T ? S['scope'] : never> & ResolveQuery<T, S> & Partial<PaginationOptions>
 >;
 
 export type PutRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
