@@ -1,4 +1,4 @@
-import type { OrgBookOption } from '@/types/api/external/orgBook';
+import type { OrgBookOption } from '@/types/api/vendors/orgBook';
 import type { Initiative } from '@/utils/enums/application';
 import type { CodeTableName } from './common';
 
