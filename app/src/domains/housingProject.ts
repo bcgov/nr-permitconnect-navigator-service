@@ -16,9 +16,9 @@ import type {
   HousingProjectBase,
   HousingProjectIntake,
   Permit,
-  PermitTrackingBase
+  PermitTrackingBase,
+  UpsertPermitRequest
 } from '../types';
-import type { UpsertPermitRequest } from '../types/requests';
 
 /**
  * Assigns a priority level to a housing project based on given criteria

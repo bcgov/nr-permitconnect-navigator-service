@@ -2,8 +2,8 @@ import { searchIdirUsersController } from '../../../src/controllers/sso.ts';
 import * as ssoExternal from '../../../src/external/sso.ts';
 
 import type { Request, Response } from 'express';
-import type { IdirSearchParameters } from '../../../src/types/index.ts';
 import type { Mock } from 'vitest';
+import type { IdirSearchParameters } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

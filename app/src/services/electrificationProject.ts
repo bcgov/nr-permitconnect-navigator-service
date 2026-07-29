@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 import prisma from '../db/database.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { generateElectrificationProjectData } from '../domains/electrificationProject.ts';
@@ -8,6 +6,7 @@ import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { confirmationTemplateElectrificationSubmission } from '../utils/templates.ts';
 
+import type { Prisma } from '@prisma/client';
 import type {
   ContactBase,
   CurrentAuthorization,

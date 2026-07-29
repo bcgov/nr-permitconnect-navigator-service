@@ -1,5 +1,5 @@
-import { isTruthy } from '../utils/utils.ts';
 import { searchUsersService } from '../services/user.ts';
+import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type { User, UserSearchParameters } from '../types/index.ts';

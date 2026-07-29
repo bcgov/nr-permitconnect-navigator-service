@@ -1,7 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { TEST_PERMIT_TYPE_1 } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { listPermitTypesService } from '../../../src/services/permitType.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 

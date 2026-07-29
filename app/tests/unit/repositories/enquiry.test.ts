@@ -1,7 +1,7 @@
+import { TEST_ENQUIRY_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { EnquiryRepository } from '../../../src/repositories/enquiry.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
-import { TEST_ENQUIRY_1 } from '../data/index.ts';
 
 import type { Mock } from 'vitest';
 

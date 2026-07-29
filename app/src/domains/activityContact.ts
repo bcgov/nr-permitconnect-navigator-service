@@ -2,11 +2,12 @@ import config from 'config';
 
 import { getProjectByActivityId } from './project';
 import { Problem } from '../utils';
-import { GroupName, Initiative } from '../utils/enums/application';
+import { GroupName } from '../utils/enums/application';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 
 import type { Repositories } from '../db/unitOfWork';
 import type { ActivityContact, Contact, CurrentAuthorization, CurrentContext, ProjectRepositoryKeys } from '../types';
+import type { Initiative } from '../utils/enums/application';
 
 export const getTeamMemberEmailTemplateData = async (
   repositories: Pick<Repositories, 'contact' | ProjectRepositoryKeys | 'enquiry'>,

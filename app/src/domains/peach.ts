@@ -1,7 +1,7 @@
 import pLimit from 'p-limit';
 
 import { listPeachIntegratedTrackings } from './permit.ts';
-import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
+import { PiesOnHold } from '../db/codes/enums.ts';
 import { generateUpdateStamps } from '../db/utils/utils.ts';
 import { getPeachRecord } from '../external/peach.ts';
 import { parsePeachRecords } from '../parsers/peach.ts';
@@ -9,6 +9,7 @@ import { PeachIntegratedSystem } from '../utils/enums/permit';
 import { combineDateTime, compareDates, omit } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
+import type { PermitStage, PermitState } from '../db/codes/enums.ts';
 import type { Repositories } from '../db/unitOfWork';
 import type { PeachSummary, PermitTracking, Record as PeachRecord, UpdatedPermitWithNote } from '../types';
 
@@ -138,7 +139,7 @@ export const syncPeachRecords = async (
 
     pcnsPermit.stage = peachSummary.stage;
     pcnsPermit.state = peachSummary.state;
-    pcnsPermit.onHoldCode = peachSummary.onHoldCode;
+    pcnsPermit.onHoldCode = peachSummary.onHoldCode ?? null;
 
     pcnsPermit.submittedDate = peachSummary.submittedDate;
     pcnsPermit.submittedTime = peachSummary.submittedTime;

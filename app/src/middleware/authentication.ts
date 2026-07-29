@@ -4,12 +4,13 @@ import { LRUCache } from 'lru-cache';
 
 import { getAuthHeader, getBearerToken, getJwksClient, setAuthHeader } from './providers/oidc.ts';
 import { loginService } from '../services/login.ts';
-import { AuthType, Initiative } from '../utils/enums/application.ts';
+import { AuthType } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
+import type { Initiative } from '../utils/enums/application.ts';
 
 const log = getLogger(module.filename);
 

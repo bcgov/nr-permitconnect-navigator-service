@@ -13,8 +13,8 @@ import prisma from '../../../src/db/database.ts';
 import * as housingProjectDomain from '../../../src/domains/housingProject.ts';
 import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
 import * as projectDomain from '../../../src/domains/project.ts';
-import * as housingProjectService from '../../../src/services/housingProject.ts';
 import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+import * as housingProjectService from '../../../src/services/housingProject.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { confirmationTemplateHousingSubmission } from '../../../src/utils/templates.ts';
 

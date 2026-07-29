@@ -1,19 +1,19 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
-  TEST_PERMIT_1,
-  TEST_PERMIT_2,
   TEST_PEACH_RECORD_1,
   TEST_PEACH_RECORD_2,
-  TEST_PEACH_SUMMARY
+  TEST_PEACH_SUMMARY,
+  TEST_PERMIT_1,
+  TEST_PERMIT_2
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { PermitStage, PermitState, PiesOnHold } from '../../../src/db/codes/enums.ts';
 import { findPriorityPermitTracking, syncPeachRecords } from '../../../src/domains/peach.ts';
 import * as permitDomain from '../../../src/domains/permit.ts';
 import * as peachExternal from '../../../src/external/peach.ts';
 import * as peachParser from '../../../src/parsers/peach.ts';
 import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
-import { PermitStage, PermitState, PiesOnHold } from '../../../src/db/codes/enums.ts';
 
 vi.mock('../../../src/domains/permit.ts');
 vi.mock('../../../src/external/peach.ts');

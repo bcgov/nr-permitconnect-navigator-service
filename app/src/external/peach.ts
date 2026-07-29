@@ -4,7 +4,7 @@ import config from 'config';
 import { Problem } from '../utils/index.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { Record as PeachRecord } from '../types/pies';
+import type { Record as PeachRecord } from '../types/index.ts';
 
 /**
  * Gets Auth token using PEACH client credentials

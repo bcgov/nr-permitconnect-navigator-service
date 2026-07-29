@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 import {
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
@@ -18,6 +16,7 @@ import {
 import * as activityService from '../../../src/services/activity.ts';
 import * as enquiryService from '../../../src/services/enquiry.ts';
 
+import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../../../src/types/index.ts';

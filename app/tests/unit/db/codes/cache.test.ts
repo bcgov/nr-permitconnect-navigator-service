@@ -6,7 +6,7 @@ import { CODE_TABLES } from '../../../../src/db/codes/tables.ts';
 import * as codeService from '../../../../src/services/code.ts';
 import { getLogger } from '../../../../src/utils/log.ts';
 
-import type { CodeTableName } from '../../../../src/types/codes.ts';
+import type { CodeTableName } from '../../../../src/types/index.ts';
 
 vi.mock('../../../../src/utils/log.ts', () => {
   const mLogger = {

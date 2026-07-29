@@ -1,13 +1,13 @@
 import Joi from 'joi';
 
 import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
-import { validate } from '../middleware/validation.ts';
 import { paginationOptions } from './paginationOptions.ts';
 import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
 import { createStamps } from './stamps.ts';
 import { requireValidCode } from '../db/codes/validator.ts';
+import { validate } from '../middleware/validation.ts';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,

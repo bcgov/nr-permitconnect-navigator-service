@@ -3,8 +3,8 @@ import { getRoadmapNoteController, sendRoadmapController } from '../../../src/co
 import * as roadmapService from '../../../src/services/roadmap.ts';
 
 import type { Request, Response } from 'express';
-import type { Email } from '../../../src/types';
 import type { Mock } from 'vitest';
+import type { Email } from '../../../src/types';
 
 vi.mock('config');
 

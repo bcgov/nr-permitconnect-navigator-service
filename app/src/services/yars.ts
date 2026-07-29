@@ -1,11 +1,12 @@
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
 import { assignPermissions } from '../external/coms.ts';
-import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { Initiative } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
 
 import type { CurrentContext } from '../types/index.ts';
+import type { GroupName } from '../utils/enums/application.ts';
 
 const log = getLogger(module.filename);
 

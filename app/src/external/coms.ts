@@ -5,7 +5,7 @@ import { Action, GroupName } from '../utils/enums/application.ts';
 import { Problem, uuidValidateV4 } from '../utils/index.ts';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { CurrentContext, Group } from '../types/stuff';
+import type { CurrentContext, Group } from '../types/index.ts';
 
 /**
  * PCNS Groups to COMS Permission mappings

@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 import { deleteActivityService } from '../services/activity.ts';
 import {
   createEnquiryService,
@@ -11,6 +9,7 @@ import {
 } from '../services/enquiry.ts';
 import { isTruthy } from '../utils/utils.ts';
 
+import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../types/index.ts';
 

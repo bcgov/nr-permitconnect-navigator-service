@@ -1,8 +1,7 @@
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { HousingProject } from '../types/models.ts';
-import type { HousingProjectSearchParameters } from '../types/stuff';
+import type { HousingProject, HousingProjectSearchParameters } from '../types/index.ts';
 
 export class HousingProjectRepository extends WritableRepository<PrismaTransactionClient['housing_project']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

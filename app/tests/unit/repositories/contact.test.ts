@@ -1,6 +1,6 @@
+import { TEST_CONTACT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { ContactRepository } from '../../../src/repositories/contact.ts';
-import { TEST_CONTACT_1 } from '../data/index.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 // Construct the real repo — its constructor picks tx.contact, so prismaTxMock.contact

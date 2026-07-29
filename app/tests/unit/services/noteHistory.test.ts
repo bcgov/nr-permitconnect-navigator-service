@@ -1,6 +1,5 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import {
   TEST_ACTIVITY_HOUSING,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -10,11 +9,13 @@ import {
   TEST_NOTE_HISTORY_1,
   TEST_NOTE_HISTORY_2
 } from '../data/index.ts';
-import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import * as noteHistoryDomain from '../../../src/domains/noteHistory.ts';
-import { Initiative, Resource, GroupName } from '../../../src/utils/enums/application.ts';
+import * as noteHistoryService from '../../../src/services/noteHistory.ts';
+import { GroupName, Initiative, Resource } from '../../../src/utils/enums/application.ts';
 import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
-import { CurrentAuthorization } from '../../../src/types/index.ts';
+
+import type { CurrentAuthorization } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

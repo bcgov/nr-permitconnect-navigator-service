@@ -1,6 +1,6 @@
+import { TEST_ENQUIRY_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { WritableRepository } from '../../../src/repositories/writable.ts';
-import { TEST_ENQUIRY_1 } from '../data/index.ts';
 
 import type { PrismaTransactionClient } from '../../../src/db/database.ts';
 

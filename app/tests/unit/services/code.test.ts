@@ -5,8 +5,8 @@ import '../../__mocks__/unitOfWorkMock.ts';
 import { CODE_TABLES } from '../../../src/db/codes/tables.ts';
 import { listCodeTablesService } from '../../../src/services/code.ts';
 
-import type { CodeRow } from '../../../src/types/codes.ts';
 import type { Mock } from 'vitest';
+import type { CodeRow } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

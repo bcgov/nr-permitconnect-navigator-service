@@ -2,8 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { emailBringForwardNotification } from '../domains/noteHistory.ts';
+import { GroupName } from '../utils/enums/application.ts';
 import { BringForwardType } from '../utils/enums/projectCommon.ts';
-import { GroupName, Initiative, Resource } from '../utils/enums/application.ts';
 
 import type {
   BringForward,
@@ -12,6 +12,7 @@ import type {
   NoteHistory,
   NoteHistoryBase
 } from '../types/index.ts';
+import type { Initiative, Resource } from '../utils/enums/application.ts';
 
 /**
  * Create a note history

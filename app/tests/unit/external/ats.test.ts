@@ -1,9 +1,9 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
 import axios from 'axios';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 
-import { searchAtsUsers, createAtsClient, createAtsEnquiry } from '../../../src/external/ats.ts';
-import * as utils from '../../../src/utils/utils.ts';
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { createAtsClient, createAtsEnquiry, searchAtsUsers } from '../../../src/external/ats.ts';
+import * as utils from '../../../src/utils/utils.ts';
 
 import type { InternalAxiosRequestConfig } from 'axios';
 

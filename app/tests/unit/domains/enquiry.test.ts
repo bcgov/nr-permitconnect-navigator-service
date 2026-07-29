@@ -4,17 +4,17 @@ import {
   TEST_ACTIVITY_ELECTRIFICATION,
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
+  TEST_EMAIL_RESPONSE,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE,
-  TEST_HOUSING_PROJECT_1,
-  TEST_EMAIL_RESPONSE
+  TEST_HOUSING_PROJECT_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import * as activityDomain from '../../../src/domains/activity.ts';
 import { emailEnquiryConfirmation, generateEnquiryData } from '../../../src/domains/enquiry.ts';
 import * as projectDomain from '../../../src/domains/project.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { ContactBase, Enquiry } from '../../../src/types/index.ts';
 

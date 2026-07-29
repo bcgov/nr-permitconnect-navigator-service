@@ -3,8 +3,8 @@ import { searchUsersController } from '../../../src/controllers/user.ts';
 import * as userService from '../../../src/services/user.ts';
 
 import type { Request, Response } from 'express';
-import type { User, UserSearchParameters } from '../../../src/types/index.ts';
 import type { Mock } from 'vitest';
+import type { User, UserSearchParameters } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

@@ -5,12 +5,12 @@ import {
   listNoteHistoriesService,
   updateNoteHistoryService
 } from '../services/noteHistory.ts';
-
-import { Initiative, Resource } from '../utils/enums/application.ts';
-import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
 import type { BringForward, LocalContext, NoteHistory } from '../types/index.ts';
+import type { Resource } from '../utils/enums/application.ts';
+import type { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 export const createNoteHistoryController = async (
   req: Request<never, never, NoteHistory & { note: string }>,

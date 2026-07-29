@@ -2,15 +2,15 @@ import { mockReset } from 'vitest-mock-extended';
 
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as roadmapService from '../../../src/services/roadmap.ts';
+import { PermitStage } from '../../../src/db/codes/enums.ts';
 import * as projectDomain from '../../../src/domains/project.ts';
 import * as chesMail from '../../../src/external/ches.ts';
 import * as coms from '../../../src/external/coms.ts';
-import * as templates from '../../../src/utils/templates.ts';
-import { PermitStage } from '../../../src/db/codes/enums.ts';
+import * as roadmapService from '../../../src/services/roadmap.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 import Problem from '../../../src/utils/problem.ts';
+import * as templates from '../../../src/utils/templates.ts';
 
 import type { Email } from '../../../src/types/index.ts';
 

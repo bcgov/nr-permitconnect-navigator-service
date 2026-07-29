@@ -1,14 +1,13 @@
-import { Prisma } from '@prisma/client';
-
 import prisma from '../db/database.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { generateHousingProjectData } from '../domains/housingProject.ts';
-import { emailProjectConfirmation } from '../domains/project.ts';
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
+import { emailProjectConfirmation } from '../domains/project.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { confirmationTemplateHousingSubmission } from '../utils/templates.ts';
 
+import type { Prisma } from '@prisma/client';
 import type {
   ContactBase,
   CurrentAuthorization,

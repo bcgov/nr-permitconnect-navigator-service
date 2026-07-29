@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 

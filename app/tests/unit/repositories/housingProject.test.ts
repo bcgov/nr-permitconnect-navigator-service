@@ -1,6 +1,6 @@
+import { TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { HousingProjectRepository } from '../../../src/repositories/housingProject.ts';
-import { TEST_HOUSING_PROJECT_1 } from '../data/index.ts';
 import { SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { Mock } from 'vitest';

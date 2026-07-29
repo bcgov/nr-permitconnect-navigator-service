@@ -1,6 +1,6 @@
+import { TEST_PERMIT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { PermitRepository } from '../../../src/repositories/permit.ts';
-import { TEST_PERMIT_1 } from '../data/index.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 
 // Test data for the permit select shape that comes back from findMany

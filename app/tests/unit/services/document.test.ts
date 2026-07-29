@@ -1,7 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { TEST_DOCUMENT_1, TEST_IDIR_USER_1 } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { createDocumentService, deleteDocumentService, listDocumentsService } from '../../../src/services/document.ts';
 
 import type { Document } from '../../../src/types/index.ts';

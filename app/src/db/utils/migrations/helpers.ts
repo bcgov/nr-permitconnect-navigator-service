@@ -1,6 +1,6 @@
-import { Knex } from 'knex';
-
 import { SYSTEM_ID } from '../../../utils/constants/application.ts';
+
+import type { Knex } from 'knex';
 
 /**
  * Add standard timestamp and user tracking columns to a table

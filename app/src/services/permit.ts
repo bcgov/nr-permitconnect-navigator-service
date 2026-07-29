@@ -7,7 +7,6 @@ import { upsertPermitTracking } from '../domains/permitTracking.ts';
 import { getPeachRecord } from '../external/peach.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { Initiative } from '../utils/enums/application.ts';
 import Problem from '../utils/problem.ts';
 import { differential, isEmptyObject } from '../utils/utils.ts';
 
@@ -25,6 +24,7 @@ import type {
   SearchPermitsResponse,
   SourceSystemKind
 } from '../types/index.ts';
+import type { Initiative } from '../utils/enums/application.ts';
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
   const hasIntegratedSourceSystemKind = sourceSystemKinds.some(

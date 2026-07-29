@@ -1,4 +1,4 @@
-import { stripNullCharactersFromString, sanitize } from '../../../src/middleware/utils.ts';
+import { sanitize, stripNullCharactersFromString } from '../../../src/middleware/utils.ts';
 
 describe('stripNullCharactersFromString', () => {
   it(String.raw`removes NUL (\\u0000) characters from a string`, () => {

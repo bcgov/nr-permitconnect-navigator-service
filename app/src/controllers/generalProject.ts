@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 import { deleteActivityService } from '../services/activity.ts';
 import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '../services/draft.ts';
 import {
@@ -16,6 +14,7 @@ import { Initiative } from '../utils/enums/application.ts';
 import { DraftCode } from '../utils/enums/projectCommon.ts';
 import { isTruthy } from '../utils/utils.ts';
 
+import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,

@@ -5,11 +5,12 @@ import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
 import { createUser } from '../domains/user.ts';
 import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
 import { assignPermissions } from '../external/coms.ts';
-import { AccessRequestStatus, GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
+import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../utils/enums/application.ts';
 import { getLogger } from '../utils/log.ts';
 import Problem from '../utils/problem.ts';
 
 import type { AccessRequest, CurrentAuthorization, CurrentContext, Group, User } from '../types/index.ts';
+import type { Initiative } from '../utils/enums/application.ts';
 
 const log = getLogger(module.filename);
 

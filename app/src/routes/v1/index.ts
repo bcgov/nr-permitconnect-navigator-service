@@ -1,8 +1,5 @@
 import express from 'express';
 
-import { hasAuthentication } from '../../middleware/authentication.ts';
-import { Initiative } from '../../utils/enums/application.ts';
-
 import activityContact from './activityContact.ts';
 import ats from './ats.ts';
 import code from './code.ts';
@@ -18,8 +15,9 @@ import sso from './sso.ts';
 import sourceSystemKind from './sourceSystemKind.ts';
 import user from './user.ts';
 import yars from './yars.ts';
-
+import { hasAuthentication } from '../../middleware/authentication.ts';
 import { requestContext } from '../../types/context.ts';
+import { Initiative } from '../../utils/enums/application.ts';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.PCNS));

@@ -1,8 +1,7 @@
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { ElectrificationProject } from '../types/models.ts';
-import type { ElectrificationProjectSearchParameters } from '../types/stuff';
+import type { ElectrificationProject, ElectrificationProjectSearchParameters } from '../types/index.ts';
 
 export class ElectrificationProjectRepository extends WritableRepository<
   PrismaTransactionClient['electrification_project']

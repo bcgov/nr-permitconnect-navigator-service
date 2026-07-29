@@ -1,5 +1,6 @@
-import { Knex } from 'knex';
 import { Initiative } from '../../utils/enums/application';
+
+import type { Knex } from 'knex';
 
 export async function seed(knex: Knex): Promise<void> {
   const housingId = knex('initiative')

@@ -1,9 +1,8 @@
 import { randomUUID } from 'node:crypto';
 
-import { Initiative } from '../utils/enums/application.ts';
-
 import type { Repositories } from '../db/unitOfWork';
 import type { Activity } from '../types/index.ts';
+import type { Initiative } from '../utils/enums/application.ts';
 
 /**
  * Create an activity for the given initiative with a unique identifier

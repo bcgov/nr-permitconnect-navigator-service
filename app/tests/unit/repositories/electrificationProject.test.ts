@@ -1,6 +1,6 @@
+import { TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import { ElectrificationProjectRepository } from '../../../src/repositories/electrificationProject.ts';
-import { TEST_ELECTRIFICATION_PROJECT_1 } from '../data/index.ts';
 
 import type { Mock } from 'vitest';
 
