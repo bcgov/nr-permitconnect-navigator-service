@@ -14,17 +14,19 @@ const {
   peachIntegratedAuthType = false,
   peachIntegratedTrackingId = false,
   onHoldCode = undefined,
-  showTargetDateDescription = false
+  showTargetDateDescription = false,
+  validStageOptions
 } = defineProps<{
   editable?: boolean;
   peachIntegratedAuthType?: boolean;
   peachIntegratedTrackingId?: boolean;
   onHoldCode?: PiesOnHold | null;
   showTargetDateDescription?: boolean;
+  validStageOptions: { label: string; value: string }[];
 }>();
 
 // Emits
-const emit = defineEmits(['update:setVerifiedDate', 'update:targetDateChanged']);
+const emit = defineEmits(['update:setVerifiedDate', 'update:stateChanged', 'update:targetDateChanged']);
 
 // Composables
 const { t } = useI18n();
@@ -96,13 +98,14 @@ const { codeDefinition, codeDisplay, options } = useCodeStore();
             option-label="label"
             option-value="value"
             :disabled="peachIntegratedAuthType || !editable"
+            @on-change="emit('update:stateChanged')"
           />
         </div>
         <div>
           <Select
             name="stage"
             :label="t('authorization.common.applicationStage')"
-            :options="options.PermitStage"
+            :options="validStageOptions"
             option-label="label"
             option-value="value"
             :disabled="peachIntegratedAuthType || !editable"

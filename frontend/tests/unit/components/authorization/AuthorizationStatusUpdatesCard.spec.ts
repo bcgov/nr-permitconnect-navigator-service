@@ -34,6 +34,7 @@ vi.mock('@/store', () => ({
 const wrapperSettings = (props = {}) => ({
   props: {
     editable: true,
+    validStageOptions: [],
     ...props
   },
   global: {
@@ -86,7 +87,10 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
 
   describe('DOM Rendering & Layout', () => {
     it('renders component without errors', () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+      const wrapper = mount(
+        AuthorizationStatusUpdatesCard,
+        wrapperSettings({ validStageOptions: [{ label: 'Submission', value: 'SUBMISSION' }] })
+      );
       expect(wrapper.exists()).toBe(true);
       expect(wrapper.html()).toContain(t('authorization.authorizationStatusUpdatesCard.statusUpdates'));
     });

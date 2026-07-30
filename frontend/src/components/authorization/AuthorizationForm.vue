@@ -14,7 +14,7 @@ import { FormNavigationGuard } from '@/components/form';
 import { Button, Dialog, useConfirm, useToast } from '@/lib/primevue';
 import { peachService, permitService, sourceSystemKindService, userService } from '@/services';
 import { useAppStore, useAuthZStore, useCodeStore, useFeatureStore, useProjectStore } from '@/store';
-import { PERMIT_NEEDED_LIST } from '@/utils/constants/permit';
+import { PERMIT_NEEDED_LIST, VALID_STATE_STAGES } from '@/utils/constants/permit';
 import { Action, Resource } from '@/utils/enums/application';
 import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
@@ -52,7 +52,7 @@ const toast = useToast();
 // Store
 const appStore = useAppStore();
 const authzStore = useAuthZStore();
-const { codeDisplay } = useCodeStore();
+const { codeDisplay, options } = useCodeStore();
 const featureStore = useFeatureStore();
 const projectStore = useProjectStore();
 const { isPeachEnabled } = storeToRefs(featureStore);
@@ -98,22 +98,11 @@ const formSchema = object({
     .required()
     .oneOf(Object.values(PermitState))
     .label(t('authorization.authorizationForm.authorizationStatus'))
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionNewNone'), function (value) {
+    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInvalid'), function (value) {
       const { stage } = this.parent;
-      return (
-        (stage === PermitStage.PRE_SUBMISSION && value === PermitState.NONE) ||
-        (stage !== PermitStage.PRE_SUBMISSION && value !== PermitState.NONE)
-      );
-    })
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionInProPre'), function (value) {
-      const { stage } = this.parent;
-      return stage !== PermitStage.POST_DECISION || value !== PermitState.IN_PROGRESS;
-    })
-    .test('valid-stage', t('authorization.authorizationForm.authStatusConditionAccepted'), function (value) {
-      const { stage } = this.parent;
-      if (value === PermitState.ACCEPTED) return stage === PermitStage.APPLICATION_SUBMISSION;
-      return true;
+      return VALID_STATE_STAGES[value]?.includes(stage) || stage === undefined;
     }),
+
   submittedDate: notInFutureValidator.nullable().label(t('authorization.common.submittedDate')),
   decisionDate: notInFutureValidator.nullable().label(t('authorization.common.decisionDate')),
   statusLastVerified: notInFutureValidator.nullable().label(t('authorization.authorizationForm.statusLastVerified')),
@@ -141,6 +130,10 @@ const isPeachIntegratedTrackingId = computed(() =>
   checkIfPeachIntegratedTrackingId(formRef.value?.values?.permitTracking)
 );
 const isPeachIntegrated = computed(() => isPeachIntegratedAuthType.value && isPeachIntegratedTrackingId.value);
+
+const getValidStageOptions = (state: PermitState) => {
+  return options.PermitStage.filter((stage) => VALID_STATE_STAGES[state]?.includes(stage.value as PermitStage));
+};
 
 // Providers
 const projectRouteName = inject(projectRouteNameKey);
@@ -461,8 +454,10 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
       :on-hold-code="authorization?.onHoldCode"
       :show-target-date-description="!!values?.targetDate"
+      :valid-stage-options="getValidStageOptions(values?.state)"
       class="mt-7"
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
+      @update:state-changed="setFieldValue('stage', undefined)"
       @update:target-date-changed="if (!!values?.targetDate) setFieldValue('targetDateDescription', undefined);"
     />
     <div class="mt-8 flex justify-between">
