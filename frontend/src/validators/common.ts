@@ -74,20 +74,22 @@ export const notInFutureValidator = date().test('not-in-future', 'Date cannot be
   return value.getTime() <= Date.now();
 });
 
+export const appliedPermitsValidator = array().of(
+  object({
+    permitTypeId: number().required().label('Permit type'),
+    submittedDate: date()
+      .test(
+        'submitted-date',
+        'Submitted date must be valid or empty',
+        (val) => val instanceof Date || val === undefined
+      )
+      .label('Submitted date'),
+    permitTracking: array().of(object({ trackingId: string().max(255).nullable().label('Tracking ID') }))
+  })
+);
+
 export const permitsValidator = object({
-  appliedPermits: array().of(
-    object({
-      permitTypeId: number().required().label('Permit type'),
-      submittedDate: date()
-        .test(
-          'submitted-date',
-          'Submitted date must be valid or empty',
-          (val) => val instanceof Date || val === undefined
-        )
-        .label('Submitted date'),
-      permitTracking: array().of(object({ trackingId: string().max(255).nullable().label('Tracking ID') }))
-    })
-  ),
+  appliedPermits: appliedPermitsValidator,
   hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits'),
   investigatePermits: array().of(
     object({

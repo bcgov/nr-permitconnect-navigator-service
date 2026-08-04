@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
+import { buildNewPermitRecord } from './permit';
 import { PermitStage, PermitState } from '../db/codes/enums';
 import { jsonToPrismaInputJson } from '../db/utils/utils';
 import { BasicResponse, Initiative } from '../utils/enums/application';
@@ -93,52 +94,31 @@ export const generateGeneralProjectData = async (
         // Add each tracker for this permit with the proper permitId
         x.permitTracking?.forEach((pt) => appliedPermitTrackers.push({ ...pt, permitId }));
 
-        return {
+        return buildNewPermitRecord({
           permitId,
           permitTypeId: x.permitTypeId,
-          activityId: activityId,
+          activityId,
           stage: PermitStage.APPLICATION_SUBMISSION,
           needed: PermitNeeded.YES,
-          statusLastChanged: null,
-          statusLastChangedTime: null,
-          statusLastVerified: null,
-          statusLastVerifiedTime: null,
-          issuedPermitId: null,
           state: PermitState.IN_PROGRESS,
-          onHoldCode: null,
           submittedDate: x.submittedDate,
-          submittedTime: x.submittedTime,
-          decisionDate: null,
-          decisionTime: null,
-          targetDate: null,
-          targetDateDescription: null,
-          technicalReviewer: null
-        };
+          submittedTime: x.submittedTime
+        });
       });
     }
 
     if (data.permits.investigatePermits?.length) {
-      investigatePermits = data.permits.investigatePermits.map((x: Permit) => ({
-        permitId: x.permitId ?? randomUUID(),
-        permitTypeId: x.permitTypeId,
-        activityId: activityId,
-        stage: PermitStage.PRE_SUBMISSION,
-        needed: PermitNeeded.UNDER_INVESTIGATION,
-        statusLastChanged: null,
-        statusLastChangedTime: null,
-        statusLastVerified: null,
-        statusLastVerifiedTime: null,
-        issuedPermitId: null,
-        state: PermitState.NONE,
-        onHoldCode: null,
-        submittedDate: null,
-        submittedTime: x.submittedTime,
-        decisionDate: null,
-        decisionTime: null,
-        targetDate: null,
-        targetDateDescription: null,
-        technicalReviewer: null
-      }));
+      investigatePermits = data.permits.investigatePermits.map((x: Permit) =>
+        buildNewPermitRecord({
+          permitId: x.permitId ?? randomUUID(),
+          permitTypeId: x.permitTypeId,
+          activityId,
+          stage: PermitStage.PRE_SUBMISSION,
+          needed: PermitNeeded.UNDER_INVESTIGATION,
+          state: PermitState.NONE,
+          submittedTime: x.submittedTime
+        })
+      );
     }
   }
 

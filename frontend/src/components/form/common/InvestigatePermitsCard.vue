@@ -94,6 +94,7 @@ useFormErrorWatcher(formRef, 'InvestigatePermitsCard', tab);
               <Button
                 v-if="getEditable"
                 class="w-full flex justify-center font-bold h-10"
+                outlined
                 @click="
                   push({ permitTypeId: undefined });
                   nextTick(() => {

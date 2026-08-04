@@ -7,6 +7,7 @@ import {
   TEST_PERMIT_TYPE_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as peachDomain from '../../../src/domains/peach.ts';
 import * as permitDomain from '../../../src/domains/permit.ts';
 import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
@@ -15,7 +16,10 @@ import * as peachParser from '../../../src/parsers/peach.ts';
 import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
 import * as permitService from '../../../src/services/permit.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import Problem from '../../../src/utils/problem.ts';
+
+import type { CurrentAuthorization, IntakePermitRequest } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -61,6 +65,121 @@ describe('permit service', () => {
         }
       });
       expect(response).toStrictEqual(TEST_PERMIT_1);
+    });
+  });
+
+  describe('intakePermitService', () => {
+    it('creates a permit for each applied permit and tracking only for those with a trackingId', async () => {
+      const intakeData: IntakePermitRequest[] = [
+        {
+          activityId: TEST_PERMIT_1.activityId,
+          permitTypeId: TEST_PERMIT_1.permitTypeId,
+          trackingId: 'REC-1',
+          submittedDate: '2024-01-01'
+        },
+        {
+          activityId: TEST_PERMIT_1.activityId,
+          permitTypeId: TEST_PERMIT_1.permitTypeId
+        }
+      ];
+
+      mockRepos.permit.upsert.mockResolvedValue({} as never);
+      upsertPermitTrackingSpy.mockResolvedValueOnce({} as never);
+      mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
+
+      const response = await permitService.intakePermitService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        intakeData
+      );
+
+      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
+      expect(mockRepos.permit.upsert).toHaveBeenCalledWith(
+        { permitId: expect.any(String) },
+        expect.objectContaining({
+          activityId: intakeData[0].activityId,
+          permitTypeId: intakeData[0].permitTypeId,
+          stage: PermitStage.APPLICATION_SUBMISSION,
+          needed: PermitNeeded.YES,
+          state: PermitState.IN_PROGRESS,
+          submittedDate: intakeData[0].submittedDate
+        }),
+        expect.objectContaining({ activityId: intakeData[0].activityId })
+      );
+
+      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
+      expect(upsertPermitTrackingSpy).toHaveBeenCalledWith(
+        { permitTracking: mockRepos.permitTracking },
+        expect.objectContaining({ trackingId: 'REC-1', permitId: expect.any(String) })
+      );
+
+      expect(mockRepos.permit.findMany).toHaveBeenCalledWith({
+        where: { permitId: { in: [expect.any(String), expect.any(String)] } }
+      });
+      expect(response).toStrictEqual([TEST_PERMIT_1]);
+    });
+
+    it('does not create a tracking record when no trackingId is provided', async () => {
+      const intakeData: IntakePermitRequest[] = [
+        { activityId: TEST_PERMIT_1.activityId, permitTypeId: TEST_PERMIT_1.permitTypeId }
+      ];
+
+      mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
+      mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
+
+      await permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, intakeData);
+
+      expect(upsertPermitTrackingSpy).not.toHaveBeenCalled();
+    });
+
+    it('returns an empty array when given no permits to intake', async () => {
+      mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
+
+      const response = await permitService.intakePermitService(
+        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        TEST_CURRENT_CONTEXT,
+        []
+      );
+
+      expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
+      expect(upsertPermitTrackingSpy).not.toHaveBeenCalled();
+      expect(mockRepos.permit.findMany).toHaveBeenCalledWith({ where: { permitId: { in: [] } } });
+      expect(response).toStrictEqual([]);
+    });
+
+    describe('scope:self delegate check', () => {
+      const proponentAuthContext: CurrentAuthorization = {
+        ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+        attributes: ['scope:self']
+      };
+      const intakeData: IntakePermitRequest[] = [
+        { activityId: TEST_PERMIT_1.activityId, permitTypeId: TEST_PERMIT_1.permitTypeId }
+      ];
+
+      it('throws 403 when the scope:self user is not a delegate for one of the activities', async () => {
+        mockRepos.activityContact.findMany.mockResolvedValueOnce([] as never);
+
+        await expect(
+          permitService.intakePermitService(proponentAuthContext, TEST_CURRENT_CONTEXT, intakeData)
+        ).rejects.toThrow(
+          new Problem(403, { detail: 'User is not a delegate for one or more activities in the permit request list' })
+        );
+        expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
+      });
+
+      it('proceeds when the scope:self user is a delegate for every activity', async () => {
+        mockRepos.activityContact.findMany.mockResolvedValueOnce([{ activityId: TEST_PERMIT_1.activityId }] as never);
+        mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
+        mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
+
+        await permitService.intakePermitService(proponentAuthContext, TEST_CURRENT_CONTEXT, intakeData);
+
+        expect(mockRepos.activityContact.findMany).toHaveBeenCalledWith({
+          where: { contact: { user: { userId: TEST_CURRENT_CONTEXT.userId } } },
+          select: { activityId: true }
+        });
+        expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(1);
+      });
     });
   });
 

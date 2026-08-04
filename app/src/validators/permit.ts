@@ -46,6 +46,17 @@ const schema = {
       permitId: uuidv4.required()
     })
   },
+  intakePermit: {
+    body: Joi.array()
+      .items({
+        permitTypeId: Joi.number().max(255).required(),
+        activityId: activityId.required(),
+        trackingId: Joi.string().allow(null),
+        submittedDate: Joi.date().max('now').allow(null)
+      })
+      .min(1)
+      .required()
+  },
   listPermits: {
     query: Joi.object({
       activityId: Joi.string().min(8).max(8).allow(null),
@@ -71,6 +82,7 @@ export const searchPermitsQuerySchema = schema.searchPermits.query;
 export default {
   deletePermit: validate(schema.deletePermit),
   getPermit: validate(schema.getPermit),
+  intakePermit: validate(schema.intakePermit),
   listPermits: validate(schema.listPermits),
   searchPermits: validate(schema.searchPermits),
   upsertPermit: validate(schema.upsertPermit)

@@ -52,6 +52,7 @@ interface InitiativeState {
   navigationPermission: NavigationPermission;
   projectAuthorizationRouteName: RouteName;
   projectIntakeRouteName: RouteName;
+  projectPermitAddRouteName: RouteName;
   projectService: ProjectService<Project>;
 }
 
@@ -65,6 +66,7 @@ const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_ELECTRIFICATION,
   projectAuthorizationRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_INTAKE,
+  projectPermitAddRouteName: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ADD,
   projectService: electrificationProjectService
 };
 
@@ -77,6 +79,7 @@ const GENERAL_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_GENERAL,
   projectAuthorizationRouteName: RouteName.EXT_GENERAL_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_GENERAL_PROJECT_INTAKE,
+  projectPermitAddRouteName: RouteName.EXT_GENERAL_PROJECT_PERMIT_ADD,
   projectService: generalProjectService
 };
 
@@ -89,6 +92,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   navigationPermission: NavigationPermission.EXT_HOUSING,
   projectAuthorizationRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT,
   projectIntakeRouteName: RouteName.EXT_HOUSING_PROJECT_INTAKE,
+  projectPermitAddRouteName: RouteName.EXT_HOUSING_PROJECT_PERMIT_ADD,
   projectService: housingProjectService
 };
 
@@ -239,7 +243,6 @@ onBeforeMount(async () => {
         <Button
           v-if="canNavigate(provideNavigationPermission) && getProject?.submissionType !== SubmissionType.INAPPLICABLE"
           class="p-button-sm header-btn mt-3"
-          :label="t('views.e.projectView.askMyNavigator')"
           @click="
             router.push({
               name: initiativeState.enquiryProjectRouteName
@@ -314,7 +317,24 @@ onBeforeMount(async () => {
               :auths-not-needed="getAuthsNotNeeded"
               :auths-under-investigation="getAuthsUnderInvestigation"
             />
-            <h3 class="mt-20 mb-8">{{ t('views.e.projectView.ongoingAuths') }}</h3>
+            <div class="mt-20 mb-8 flex flex-row items-center justify-between">
+              <h3>{{ t('views.e.projectView.ongoingAuths') }}</h3>
+              <div class="flex justify-center">
+                <Button
+                  @click="
+                    router.push({
+                      name: initiativeState.projectPermitAddRouteName
+                    })
+                  "
+                >
+                  <font-awesome-icon
+                    icon="fa-solid fa-plus"
+                    fixed-width
+                  />
+                  {{ t('views.e.projectView.addPermit') }}
+                </Button>
+              </div>
+            </div>
 
             <router-link
               v-for="permit in getAuthsOnGoing"

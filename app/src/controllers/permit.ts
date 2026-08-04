@@ -1,6 +1,7 @@
 import {
   deletePermitService,
   getPermitService,
+  intakePermitService,
   listPermitsService,
   searchPermitsService,
   upsertPermitService
@@ -11,6 +12,7 @@ import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type {
+  IntakePermitRequest,
   ListPermitsOptions,
   LocalContext,
   Permit,
@@ -26,6 +28,14 @@ export const deletePermitController = async (req: Request<{ permitId: string }>,
 export const getPermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   const response = await getPermitService(req.params.permitId);
   res.status(200).json(response);
+};
+
+export const intakePermitsController = async (
+  req: Request<never, never, IntakePermitRequest[]>,
+  res: Response<Permit[], LocalContext>
+) => {
+  const response = await intakePermitService(res.locals.currentAuthorization, res.locals.currentContext, req.body);
+  res.status(201).json(response);
 };
 
 export const listPermitsController = async (

@@ -116,7 +116,7 @@ describe('ContactProfileView.vue', () => {
     expect(wrapper.find('.p-button-text').exists()).toBe(false);
 
     const cancelButton = wrapper.find('.p-button-danger');
-    expect(cancelButton.attributes('label')).toBe(t('cancelButton.btnText'));
+    expect(cancelButton.attributes('label')).toBe(t('ui.actions.cancel'));
     await cancelButton.trigger('click');
 
     expect(wrapper.find('.p-button-text').exists()).toBe(true);

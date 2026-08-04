@@ -39,11 +39,7 @@ export const createHousingProjectService = async (
       });
 
       // Create each permit and tracking IDs
-      await Promise.all(
-        appliedPermits.map(async (p) => {
-          permit.upsert({ permitId: p.permitId }, p, p);
-        })
-      );
+      await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
       await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
       await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
 

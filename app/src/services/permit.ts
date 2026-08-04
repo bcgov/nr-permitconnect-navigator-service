@@ -1,18 +1,21 @@
 import { randomUUID } from 'node:crypto';
 
+import { PermitStage, PermitState } from '../db/codes/enums.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { findPriorityPermitTracking } from '../domains/peach.ts';
-import { sendPermitUpdateNotifications } from '../domains/permit.ts';
+import { buildNewPermitRecord, sendPermitUpdateNotifications } from '../domains/permit.ts';
 import { upsertPermitTracking } from '../domains/permitTracking.ts';
 import { getPeachRecord } from '../external/peach.ts';
 import { summarizePeachRecord } from '../parsers/peach.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
+import { PermitNeeded } from '../utils/enums/permit.ts';
 import Problem from '../utils/problem.ts';
 import { differential, isEmptyObject } from '../utils/utils.ts';
 
 import type {
   CurrentAuthorization,
   CurrentContext,
+  IntakePermitRequest,
   ListPermitsOptions,
   Permit,
   PermitBase,
@@ -22,7 +25,8 @@ import type {
   PermitType,
   SearchPermitsOptions,
   SearchPermitsResponse,
-  SourceSystemKind
+  SourceSystemKind,
+  UpsertPermitRequest
 } from '../types/index.ts';
 import type { Initiative } from '../utils/enums/application.ts';
 
@@ -79,6 +83,61 @@ export const getPermitService = async (permitId: string): Promise<Permit> => {
         permitTracking: { include: { sourceSystemKind: true } }
       }
     });
+  });
+};
+
+export const intakePermitService = async (
+  currentAuthorization: CurrentAuthorization,
+  currentContext: CurrentContext,
+  data: IntakePermitRequest[]
+): Promise<Permit[]> => {
+  return await unitOfWork.execute(async ({ activityContact, permit, permitTracking }) => {
+    // Validate the calling user is a delegate for every activity in the permit request list
+    // if the calling user has `scope:self`
+    if (currentAuthorization?.attributes.includes('scope:self')) {
+      const userActivities = (
+        await activityContact.findMany({
+          where: {
+            contact: { user: { userId: currentContext.userId! } }
+          },
+          select: { activityId: true }
+        })
+      ).map((x) => x.activityId);
+
+      const permitActivities = data.map((x: IntakePermitRequest) => x.activityId);
+
+      if (!permitActivities.every((activityId) => userActivities.includes(activityId))) {
+        throw new Problem(403, {
+          detail: 'User is not a delegate for one or more activities in the permit request list'
+        });
+      }
+    }
+
+    // Build new permit and tracking ID arrays
+    const appliedPermitTrackers: PermitTrackingBase[] = [];
+
+    const appliedPermits: UpsertPermitRequest[] = data.map((x: IntakePermitRequest) => {
+      const permitId = randomUUID();
+
+      // Add each tracker for this permit with the proper permitId
+      if (x.trackingId) appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingBase);
+
+      return buildNewPermitRecord({
+        permitId,
+        permitTypeId: x.permitTypeId,
+        activityId: x.activityId,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: x.submittedDate
+      });
+    });
+
+    // Create each permit and tracking IDs
+    await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+    await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+
+    return permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
   });
 };
 

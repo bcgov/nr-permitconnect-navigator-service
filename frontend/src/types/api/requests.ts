@@ -352,42 +352,6 @@ export interface CreateObjectRequest {
   axiosOptions?: AxiosRequestConfig;
 }
 
-export interface CreateObjectResponse {
-  id: string;
-  path: string;
-  public: boolean;
-  active: boolean;
-  bucketId: string;
-  name: string;
-
-  lastSyncedDate: string;
-  createdBy: string;
-  createdAt: string;
-  updatedBy: string;
-  updatedAt: string;
-
-  length: number;
-  mimeType: string;
-  versionId: string;
-
-  metadata: Record<string, string>;
-  tags: Record<string, string>;
-
-  $metadata: {
-    httpStatusCode: number;
-    extendedRequestId: string;
-    attempts: number;
-    totalRetryDelay: number;
-  };
-
-  ETag: string;
-  Bucket: string;
-  Key: string;
-  Location: string;
-  ServerSideEncryption: string;
-  s3VersionId: string;
-}
-
 export interface DeleteObjectRequest {
   objectId: string;
   versionId?: string;
@@ -419,6 +383,13 @@ export interface Email {
 export interface DeleteSubjectGroupRequest {
   sub: string;
   groupId: number;
+}
+
+export interface IntakePermitRequest {
+  activityId: string;
+  permitTypeId: number;
+  trackingId?: Nullable<string>;
+  submittedDate?: string;
 }
 
 export interface ListGroupsRequest {

@@ -2,6 +2,7 @@ import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_PERMIT_
 import {
   deletePermitController,
   getPermitController,
+  intakePermitsController,
   listPermitsController,
   searchPermitsController,
   upsertPermitController
@@ -12,7 +13,13 @@ import { Problem } from '../../../src/utils/index.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { ListPermitsOptions, LocalContext, Permit, SearchPermitsOptions } from '../../../src/types/index.ts';
+import type {
+  IntakePermitRequest,
+  ListPermitsOptions,
+  LocalContext,
+  Permit,
+  SearchPermitsOptions
+} from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -69,6 +76,32 @@ describe('getPermitController', () => {
     expect(getSpy).toHaveBeenCalledWith(req.params.permitId);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_PERMIT_1);
+  });
+});
+
+describe('intakePermitsController', () => {
+  const intakeSpy = vi.spyOn(permitService, 'intakePermitService');
+
+  it('calls the service with permit intake data then responds 201', async () => {
+    const req = {
+      body: [
+        {
+          activityId: '123',
+          permitTypeId: 1,
+          trackingId: '123',
+          submittedDate: new Date().toISOString()
+        }
+      ] satisfies IntakePermitRequest[]
+    } as unknown as Request<never, never, IntakePermitRequest[]>;
+
+    intakeSpy.mockResolvedValue([TEST_PERMIT_1]);
+
+    await intakePermitsController(req, res as unknown as Response<Permit[], LocalContext>);
+
+    expect(intakeSpy).toHaveBeenCalledTimes(1);
+    expect(intakeSpy).toHaveBeenCalledWith(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, req.body);
+    expect(res.status).toHaveBeenCalledWith(201);
+    expect(res.json).toHaveBeenCalledWith([TEST_PERMIT_1]);
   });
 });
 
