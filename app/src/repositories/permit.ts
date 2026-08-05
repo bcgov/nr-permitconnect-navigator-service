@@ -2,7 +2,7 @@ import { WritableRepository } from './writable.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import { SearchPermitsOptions } from '../types/stuff';
+import type { SearchPermitsOptions } from '../types/index.ts';
 
 export class PermitRepository extends WritableRepository<PrismaTransactionClient['permit']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

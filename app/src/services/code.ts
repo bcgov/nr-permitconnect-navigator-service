@@ -1,7 +1,7 @@
 import { CODE_TABLES } from '../db/codes/tables.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
 
-import type { CodeTableName, CodeRow } from '../types/codes.ts';
+import type { CodeRow, CodeTableName } from '../types/index.ts';
 
 /**
  * List all active code tables discovered from the Prisma schema.

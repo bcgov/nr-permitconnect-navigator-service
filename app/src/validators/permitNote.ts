@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 import { uuidv4 } from './common.ts';
-import { validate } from '../middleware/validation.ts';
 import { createStamps } from './stamps.ts';
+import { validate } from '../middleware/validation.ts';
 
 export const sharedPermitNoteSchema = {
   permitId: uuidv4.allow(null),

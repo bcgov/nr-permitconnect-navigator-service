@@ -2,9 +2,9 @@ import { mockReset } from 'vitest-mock-extended';
 
 import { TEST_IDIR_USER_1 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { DuplicateKeyProblem } from '../../../src/db/errors.ts';
 import { createUser, updateUser } from '../../../src/domains/user.ts';
 import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
-import { DuplicateKeyProblem } from '../../../src/db/errors.ts';
 
 import type { JwtUser } from '../../../src/services/login.ts';
 

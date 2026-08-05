@@ -1,10 +1,10 @@
 import express from 'express';
 import helmet from 'helmet';
-import request from 'supertest';
 import { dump } from 'js-yaml';
+import request from 'supertest';
 
-import router from '../../../../src/routes/v1/docs';
 import { getDocHTML, getSpec } from '../../../../src/docs/docs';
+import router from '../../../../src/routes/v1/docs';
 
 // Mock dependencies
 vi.mock('helmet', () => ({

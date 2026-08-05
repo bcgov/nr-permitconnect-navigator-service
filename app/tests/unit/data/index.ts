@@ -3,18 +3,17 @@
  * DO NOT change the existing objects in this file unless a schema change is required.
  * If you need something wildly different than the existing ones then add new ones.
  */
-import { Prisma } from '@prisma/client';
-
 import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import {
+  AccessRequestStatus,
   AuthType,
   BasicResponse,
   GroupName,
   IdentityProviderKind,
-  Initiative,
-  AccessRequestStatus
+  Initiative
 } from '../../../src/utils/enums/application.ts';
 import { ProjectType } from '../../../src/utils/enums/electrification.ts';
+import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 import { PeachIntegratedSystem, PermitNeeded } from '../../../src/utils/enums/permit.ts';
 import {
   ActivityContactRole,
@@ -26,8 +25,8 @@ import {
   ProjectRelationship,
   SubmissionType
 } from '../../../src/utils/enums/projectCommon.ts';
-import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 
+import type { Prisma } from '@prisma/client';
 import type {
   AccessRequest,
   Activity,

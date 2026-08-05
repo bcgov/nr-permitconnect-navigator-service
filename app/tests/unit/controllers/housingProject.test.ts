@@ -1,5 +1,3 @@
-import { Prisma } from '@prisma/client';
-
 import {
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
@@ -26,9 +24,10 @@ import {
 import * as activityService from '../../../src/services/activity.ts';
 import * as draftService from '../../../src/services/draft.ts';
 import * as housingProjectService from '../../../src/services/housingProject.ts';
-import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 
+import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {

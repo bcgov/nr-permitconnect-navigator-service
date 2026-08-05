@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import prisma, { PrismaClientType, PrismaTransactionClient } from '../db/database';
+import prisma from '../db/database';
 import {
   AccessRequestRepository,
   ActivityContactRepository,
@@ -27,8 +27,10 @@ import {
   SubjectGroupRepository,
   UserRepository
 } from '../repositories/index';
-import { SYSTEM_ID } from '../utils/constants/application';
 import { requestContext } from '../types/context';
+import { SYSTEM_ID } from '../utils/constants/application';
+
+import type { PrismaClientType, PrismaTransactionClient } from '../db/database';
 
 /**
  * Collection of repositories available within a unit-of-work scope.

@@ -2,9 +2,9 @@ import express from 'express';
 import request from 'supertest';
 
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { requireSomeGroup } from '../../../src/middleware/requireSomeGroup.ts';
-import * as comsService from '../../../src/external/coms.ts';
 import * as yarsDomain from '../../../src/domains/yars.ts';
+import * as comsService from '../../../src/external/coms.ts';
+import { requireSomeGroup } from '../../../src/middleware/requireSomeGroup.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
 
 import type { NextFunction, Request, Response } from 'express';

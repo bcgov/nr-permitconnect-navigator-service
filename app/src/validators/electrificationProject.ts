@@ -5,9 +5,9 @@ import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { requireValidCode } from '../db/codes/validator.ts';
 import { validate } from '../middleware/validation.ts';
+import { YES_NO_LIST } from '../utils/constants/application.ts';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon.ts';
 import { ProjectType } from '../utils/enums/electrification.ts';
-import { YES_NO_LIST } from '../utils/constants/application.ts';
 
 const schema = {
   createElectrificationProject: {

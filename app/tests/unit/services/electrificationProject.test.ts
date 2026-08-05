@@ -1,13 +1,13 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import {
-  TEST_CURRENT_CONTEXT,
+  TEST_CONTACT_1,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-  TEST_ELECTRIFICATION_PROJECT_1,
+  TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE,
-  TEST_CONTACT_1
+  TEST_ELECTRIFICATION_PROJECT_1
 } from '../data/index.ts';
+import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import prisma from '../../../src/db/database.ts';
 import * as electrificationProjectDomain from '../../../src/domains/electrificationProject.ts';
 import * as projectDomain from '../../../src/domains/project.ts';

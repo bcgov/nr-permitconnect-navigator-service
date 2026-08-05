@@ -5,12 +5,12 @@ import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
 import { getCurrentUsername, toTitleCase } from '../utils';
-import { Initiative } from '../utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '../utils/templates';
 
 import type { Repositories } from '../db/unitOfWork';
 import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '../types';
+import type { Initiative } from '../utils/enums/application';
 
 export async function emailEnquiryConfirmation(
   repositories: Pick<Repositories, ProjectRepositoryKeys>,

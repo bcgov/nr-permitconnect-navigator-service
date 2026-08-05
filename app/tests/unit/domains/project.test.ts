@@ -15,8 +15,8 @@ import {
   getProjectByActivityId,
   getProjectByProjectId
 } from '../../../src/domains/project.ts';
-import { Problem } from '../../../src/utils/index.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { Problem } from '../../../src/utils/index.ts';
 import { confirmationTemplateHousingSubmission } from '../../../src/utils/templates.ts';
 
 vi.mock('../../../src/external/ches');

@@ -1,7 +1,7 @@
-import { IdentityProviderKind } from '../utils/enums/application.ts';
 import { hasIdentity as hasIdentityUtil, Problem } from '../utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
+import type { IdentityProviderKind } from '../utils/enums/application.ts';
 
 /**
  * Verify requesting user has necessary identity

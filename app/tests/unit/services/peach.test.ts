@@ -1,7 +1,7 @@
-import * as peachService from '../../../src/services/peach.ts';
 import * as peachDomain from '../../../src/domains/peach.ts';
 import * as peachExternal from '../../../src/external/peach.ts';
 import * as peachParser from '../../../src/parsers/peach.ts';
+import * as peachService from '../../../src/services/peach.ts';
 import Problem from '../../../src/utils/problem.ts';
 
 import type { PermitTracking } from '../../../src/types/index.ts';

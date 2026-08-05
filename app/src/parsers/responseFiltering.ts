@@ -1,6 +1,6 @@
-import { Repositories } from '../db/unitOfWork';
 import { Problem } from '../utils';
 
+import type { Repositories } from '../db/unitOfWork';
 import type { CurrentAuthorization, CurrentContext } from '../types';
 
 interface ActivityScopeFilterable {

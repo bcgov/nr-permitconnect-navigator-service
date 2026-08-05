@@ -1,14 +1,15 @@
-import { mockReset } from 'vitest-mock-extended';
 import config from 'config';
+import { mockReset } from 'vitest-mock-extended';
 
 import {
+  TEST_EMAIL_RESPONSE,
+  TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_NOTE_1,
-  TEST_IDIR_USER_1,
-  TEST_EMAIL_RESPONSE
+  TEST_PERMIT_NOTE_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import {
   listPeachIntegratedTrackings,
   sendPermitUpdateEmail,
@@ -18,7 +19,6 @@ import * as projectDomain from '../../../src/domains/project.ts';
 import * as chesExternal from '../../../src/external/ches.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { PermitUpdateEmailParams } from '../../../src/types/index.ts';

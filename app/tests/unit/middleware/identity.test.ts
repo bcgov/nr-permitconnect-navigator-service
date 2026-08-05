@@ -1,6 +1,6 @@
 import express from 'express';
-import request from 'supertest';
 import { existsSync, readFileSync } from 'node:fs';
+import request from 'supertest';
 
 import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
 import { hasIdentity } from '../../../src/middleware/identity.ts';

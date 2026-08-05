@@ -1,13 +1,14 @@
 import { randomUUID } from 'node:crypto';
 
-import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 import { unitOfWork } from '../db/unitOfWork.ts';
+import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 import { createActivity } from '../domains/activity.ts';
 import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../utils/enums/projectCommon.ts';
+import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { CurrentAuthorization, CurrentContext, Draft, DraftBase, Maybe } from '../types/index.ts';
+import type { Initiative } from '../utils/enums/application.ts';
+import type { DraftCode } from '../utils/enums/projectCommon.ts';
 
 /**
  * Create a draft

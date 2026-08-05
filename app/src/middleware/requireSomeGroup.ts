@@ -1,8 +1,8 @@
 import { unitOfWork } from '../db/unitOfWork.ts';
 import { assignGroup, getGroups } from '../domains/yars.ts';
 import { assignPermissions } from '../external/coms.ts';
-import { Problem } from '../utils/index.ts';
 import { GroupName, IdentityProviderKind, Initiative } from '../utils/enums/application.ts';
+import { Problem } from '../utils/index.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 

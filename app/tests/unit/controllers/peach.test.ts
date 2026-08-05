@@ -2,8 +2,8 @@ import { getPeachSummaryController } from '../../../src/controllers/peach.ts';
 import * as peachService from '../../../src/services/peach.ts';
 
 import type { Request, Response } from 'express';
-import type { PermitTracking } from '../../../src/types/index.ts';
 import type { Mock } from 'vitest';
+import type { PermitTracking } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

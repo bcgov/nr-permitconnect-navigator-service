@@ -1,9 +1,9 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as mapService from '../../../src/services/map.ts';
 import * as projectDomain from '../../../src/domains/project.ts';
 import * as openMapsExternal from '../../../src/external/openMaps.ts';
+import * as mapService from '../../../src/services/map.ts';
 
 const getProjectByProjectIdSpy = vi.spyOn(projectDomain, 'getProjectByProjectId');
 const getPidsSpy = vi.spyOn(openMapsExternal, 'getPids');

@@ -7,13 +7,13 @@ import {
 import * as atsExternal from '../../../src/external/ats.ts';
 
 import type { Request, Response } from 'express';
+import type { Mock } from 'vitest';
 import type {
   AtsClientResource,
   AtsEnquiryResource,
   AtsUserSearchParameters,
   LocalContext
 } from '../../../src/types/index.ts';
-import type { Mock } from 'vitest';
 
 vi.mock('config');
 

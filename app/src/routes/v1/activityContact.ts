@@ -6,13 +6,12 @@ import {
   listActivityContactController,
   updateActivityContactController
 } from '../../controllers/activityContact.ts';
+import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireActivityAdmin } from '../../middleware/requireActivityAdmin.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
 import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-
-import { activityContactValidator } from '../../validators/index.ts';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { Action, Resource } from '../../utils/enums/application.ts';
+import { activityContactValidator } from '../../validators/index.ts';
 
 const router = express.Router({ mergeParams: true }); // mergeParams allows parent router to pass route params down
 router.use(requireSomeAuth);

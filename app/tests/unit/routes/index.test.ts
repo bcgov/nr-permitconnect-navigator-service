@@ -1,8 +1,8 @@
 import express from 'express';
 import request from 'supertest';
 
-import { state } from '../../../state.ts';
 import router from '../../../src/routes/index.ts';
+import { state } from '../../../state.ts';
 
 const app = express();
 app.use(router);

@@ -8,12 +8,12 @@ import {
   getElectrificationProjectDraftController,
   getElectrificationProjectDraftsController,
   getElectrificationProjectStatisticsController,
+  listElectrificationProjectActivityIdsController,
+  listElectrificationProjectsController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
-  upsertElectrificationProjectDraftController,
-  listElectrificationProjectsController,
-  listElectrificationProjectActivityIdsController
+  upsertElectrificationProjectDraftController
 } from '../../controllers/electrificationProject.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';

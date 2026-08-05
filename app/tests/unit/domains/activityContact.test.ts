@@ -1,23 +1,23 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_ACTIVITY_CONTACT_1,
-  TEST_HOUSING_PROJECT_1,
   TEST_ACTIVITY_HOUSING,
-  TEST_INITIATIVE_HOUSING,
+  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT,
   TEST_ENQUIRY_1,
+  TEST_GROUP_1,
   TEST_GROUP_2_ADMIN,
   TEST_GROUP_3_SUPERVISOR,
-  TEST_GROUP_1
+  TEST_HOUSING_PROJECT_1,
+  TEST_INITIATIVE_HOUSING
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '../../../src/domains/activityContact.ts';
 import * as projectDomain from '../../../src/domains/project.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
+import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 import { Problem } from '../../../src/utils/index.ts';
 
 import type { ActivityContact, CurrentAuthorization } from '../../../src/types/index.ts';

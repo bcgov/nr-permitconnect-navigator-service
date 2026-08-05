@@ -2,7 +2,6 @@ import { mockReset } from 'vitest-mock-extended';
 
 import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
 import '../../__mocks__/unitOfWorkMock.ts';
-
 import {
   getElectrificationProjectPermitDataService,
   getGeneralProjectPermitDataService,

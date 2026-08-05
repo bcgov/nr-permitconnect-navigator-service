@@ -3,3 +3,9 @@ declare module 'jsonwebtoken' {
     identity_provider: string;
   }
 }
+
+export interface IdpAttributes {
+  idp: string;
+  kind: string;
+  username: string;
+}

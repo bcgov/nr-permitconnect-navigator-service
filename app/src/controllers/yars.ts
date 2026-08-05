@@ -4,10 +4,10 @@ import {
   listPermissionsService,
   listSubjectPermissionsService
 } from '../services/yars.ts';
-import { GroupName, Initiative } from '../utils/enums/application.ts';
 
 import type { Request, Response } from 'express';
-import type { LocalContext } from '../types/stuff';
+import type { LocalContext } from '../types/index.ts';
+import type { GroupName, Initiative } from '../utils/enums/application.ts';
 
 export const getGroupsController = async (
   req: Request<never, never, never, { initiative: Initiative }>,

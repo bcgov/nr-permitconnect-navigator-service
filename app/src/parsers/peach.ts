@@ -1,17 +1,17 @@
 import { codeTable } from '../db/codes/cache.ts';
 import { PermitStage, PermitState, PiesOnHold } from '../db/codes/enums.ts';
-import { compareDates, splitDateTime } from '../utils/index.ts';
 import { PeachTerminatedStage, PermitPhase } from '../utils/enums/permit.ts';
+import { compareDates, splitDateTime } from '../utils/index.ts';
 import { getLogger } from '../utils/log.ts';
 
 import type {
   CodingEvent,
-  Record as PeachRecord,
+  DateTimeStrings,
   Event as PiesEvent,
   NullableDateTimeStrings,
   PeachSummary,
   ProcessEvent,
-  DateTimeStrings
+  Record as PeachRecord
 } from '../types/index.ts';
 
 const log = getLogger(module.filename);
@@ -468,7 +468,7 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   return {
     stage,
     state,
-    onHoldCode,
+    onHoldCode: onHoldCode ?? undefined,
     submittedDate,
     submittedTime,
     decisionDate,

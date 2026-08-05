@@ -1,20 +1,20 @@
 import { mockReset } from 'vitest-mock-extended';
 
+import { TEST_CURRENT_CONTEXT, TEST_GROUP_1, TEST_IDIR_USER_1 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import {
-  getGroupsService,
-  listPermissionsService,
-  listSubjectPermissionsService,
-  deleteSubjectGroupService
-} from '../../../src/services/yars.ts';
 import * as yarsDomain from '../../../src/domains/yars.ts';
 import * as comsExternal from '../../../src/external/coms.ts';
-import { Initiative, GroupName } from '../../../src/utils/enums/application.ts';
-import { TEST_IDIR_USER_1, TEST_CURRENT_CONTEXT, TEST_GROUP_1 } from '../data/index.ts';
+import {
+  deleteSubjectGroupService,
+  getGroupsService,
+  listPermissionsService,
+  listSubjectPermissionsService
+} from '../../../src/services/yars.ts';
+import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
 import Problem from '../../../src/utils/problem.ts';
 
-import type { CurrentContext } from '../../../src/types/index.ts';
 import type { JwtPayload } from 'jsonwebtoken';
+import type { CurrentContext } from '../../../src/types/index.ts';
 
 vi.mock('config');
 

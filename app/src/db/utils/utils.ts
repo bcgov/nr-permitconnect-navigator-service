@@ -1,7 +1,6 @@
-import { Prisma } from '@prisma/client';
-
 import { SYSTEM_ID } from '../../utils/constants/application.ts';
 
+import type { Prisma } from '@prisma/client';
 import type { CurrentContext } from '../../types/index.ts';
 
 /**

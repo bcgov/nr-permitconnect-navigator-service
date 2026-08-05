@@ -1,20 +1,20 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
-  TEST_CURRENT_CONTEXT,
-  TEST_CONTACT_1,
-  TEST_HOUSING_PROJECT_INTAKE,
   TEST_ACTIVITY_HOUSING,
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
+  TEST_HOUSING_PROJECT_INTAKE,
   TEST_PERMIT_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
 import * as activityDomain from '../../../src/domains/activity.ts';
 import { assignPriority, generateHousingProjectData } from '../../../src/domains/housingProject.ts';
-import { Initiative, BasicResponse } from '../../../src/utils/enums/application.ts';
-import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
+import { BasicResponse, Initiative } from '../../../src/utils/enums/application.ts';
 import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
 import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { HousingProject, Permit } from '../../../src/types/index.ts';
 

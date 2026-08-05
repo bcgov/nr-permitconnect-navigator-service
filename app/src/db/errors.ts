@@ -1,4 +1,5 @@
 import { Prisma } from '@prisma/client';
+
 import { Problem } from '../utils';
 
 export class DatabaseProblem extends Problem {

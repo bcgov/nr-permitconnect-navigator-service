@@ -2,7 +2,7 @@ import { WritableRepository } from './writable.ts';
 import { Initiative } from '../utils/enums/application.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { EnquirySearchParameters } from '../types/stuff';
+import type { EnquirySearchParameters } from '../types/index.ts';
 
 export class EnquiryRepository extends WritableRepository<PrismaTransactionClient['enquiry']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

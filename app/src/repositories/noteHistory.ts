@@ -1,8 +1,8 @@
 import { WritableRepository } from './writable.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
+import type { Initiative } from '../utils/enums/application.ts';
+import type { BringForwardType } from '../utils/enums/projectCommon.ts';
 
 export class NoteHistoryRepository extends WritableRepository<PrismaTransactionClient['note_history']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

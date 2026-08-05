@@ -1,5 +1,5 @@
 import { unitOfWork } from '../db/unitOfWork.ts';
-import { Initiative, GroupName } from '../utils/enums/application.ts';
+import { GroupName, Initiative } from '../utils/enums/application.ts';
 import { Problem } from '../utils/index.ts';
 import { getCurrentSubject } from '../utils/utils.ts';
 

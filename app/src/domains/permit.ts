@@ -6,7 +6,6 @@ import { codeTable } from '../db/codes/cache';
 import { PermitStage } from '../db/codes/enums';
 import { email } from '../external/ches';
 import { formatDateOnly, toTitleCase } from '../utils';
-import { Initiative } from '../utils/enums/application';
 import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole } from '../utils/enums/projectCommon';
 import {
@@ -18,6 +17,7 @@ import { state } from '../../state';
 
 import type { Repositories } from '../db/unitOfWork';
 import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys } from '../types';
+import type { Initiative } from '../utils/enums/application';
 
 /**
  * Retrieve permits and trackings that are PEACH integrated

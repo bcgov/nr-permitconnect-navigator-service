@@ -1,10 +1,10 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
-  TEST_CURRENT_CONTEXT,
+  TEST_ACTIVITY_ELECTRIFICATION,
   TEST_CONTACT_1,
-  TEST_ELECTRIFICATION_INTAKE,
-  TEST_ACTIVITY_ELECTRIFICATION
+  TEST_CURRENT_CONTEXT,
+  TEST_ELECTRIFICATION_INTAKE
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
 import * as activityDomain from '../../../src/domains/activity.ts';

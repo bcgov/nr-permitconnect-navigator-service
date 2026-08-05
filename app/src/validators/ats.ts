@@ -1,7 +1,6 @@
 import Joi from 'joi';
 
 import { validate } from '../middleware/validation.ts';
-
 import { BasicResponse } from '../utils/enums/application.ts';
 
 const addressBody = {

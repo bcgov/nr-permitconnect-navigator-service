@@ -8,8 +8,14 @@ import { PermitNeeded } from '../utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
 
 import type { Repositories } from '../db/unitOfWork';
-import type { CurrentContext, GeneralProjectBase, GeneralProjectIntake, Permit, PermitTrackingBase } from '../types';
-import type { UpsertPermitRequest } from '../types/requests';
+import type {
+  CurrentContext,
+  GeneralProjectBase,
+  GeneralProjectIntake,
+  Permit,
+  PermitTrackingBase,
+  UpsertPermitRequest
+} from '../types';
 
 /**
  * Transforms intake data to match DB schema

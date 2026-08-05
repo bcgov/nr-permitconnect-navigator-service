@@ -4,7 +4,6 @@ import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
-
 import { housing } from './housing';
 import { validate } from '../middleware/validation';
 import { YES_NO_UNSURE_LIST } from '../utils/constants/application';

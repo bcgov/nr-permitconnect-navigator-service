@@ -1,8 +1,5 @@
 import express from 'express';
 
-import { hasAuthentication } from '../../middleware/authentication.ts';
-import { Initiative } from '../../utils/enums/application.ts';
-
 import accessRequest from './accessRequest.ts';
 import document from './document.ts';
 import electrificationProject from './electrificationProject.ts';
@@ -10,6 +7,8 @@ import enquiry from './enquiry.ts';
 import noteHistory from './noteHistory.ts';
 import permit from './permit.ts';
 import roadmap from './roadmap.ts';
+import { hasAuthentication } from '../../middleware/authentication.ts';
+import { Initiative } from '../../utils/enums/application.ts';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.ELECTRIFICATION));

@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import * as emailService from '../../../src/external/ches.ts';
 import { prismaMock } from '../../__mocks__/prismaMock.ts';
+import * as emailService from '../../../src/external/ches.ts';
 
 import type { InternalAxiosRequestConfig } from 'axios';
 import type { Email } from '../../../src/types/index.ts';

@@ -3,11 +3,11 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { cwd } from 'node:process';
 
-import { IdentityProviderKind } from './enums/application.ts';
 import { uuidV4Pattern } from './regexp.ts';
 import { getLogger } from '../utils/log.ts';
 
-import type { CurrentContext, IdpAttributes, DateTimeStrings } from '../types/index.ts';
+import type { IdentityProviderKind } from './enums/application.ts';
+import type { CurrentContext, DateTimeStrings, IdpAttributes } from '../types/index.ts';
 
 const log = getLogger(module.filename);
 

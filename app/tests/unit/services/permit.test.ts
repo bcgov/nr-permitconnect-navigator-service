@@ -7,13 +7,13 @@ import {
   TEST_PERMIT_TYPE_1
 } from '../data/index.ts';
 import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as permitService from '../../../src/services/permit.ts';
+import * as peachDomain from '../../../src/domains/peach.ts';
 import * as permitDomain from '../../../src/domains/permit.ts';
 import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as peachDomain from '../../../src/domains/peach.ts';
 import * as externalPeach from '../../../src/external/peach.ts';
 import * as peachParser from '../../../src/parsers/peach.ts';
+import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+import * as permitService from '../../../src/services/permit.ts';
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import Problem from '../../../src/utils/problem.ts';
 

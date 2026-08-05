@@ -3,12 +3,13 @@ import config from 'config';
 import { getProjectByActivityId } from './project';
 import { email } from '../external/ches';
 import { Problem } from '../utils';
-import { GroupName, Initiative, Resource } from '../utils/enums/application';
+import { GroupName, Resource } from '../utils/enums/application';
 import { NoteType } from '../utils/enums/projectCommon';
 import { bringForwardEnquiryNotificationTemplate, bringForwardProjectNotificationTemplate } from '../utils/templates';
 
 import type { Repositories } from '../db/unitOfWork';
 import type { NoteHistory, ProjectRepositoryKeys, User } from '../types';
+import type { Initiative } from '../utils/enums/application';
 
 export async function emailBringForwardNotification(
   repositories: Pick<Repositories, ProjectRepositoryKeys | 'subjectGroup' | 'user'>,
