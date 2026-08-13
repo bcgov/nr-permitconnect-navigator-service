@@ -22,7 +22,7 @@ const { t } = useI18n();
 const { getEditable } = storeToRefs(useFormStore());
 
 // State
-const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+const formRef: Ref<ComponentPublicInstance | Element | null> = ref(null);
 
 // Actions
 useFormErrorWatcher(formRef, 'FeedbackConsentSection', tab);

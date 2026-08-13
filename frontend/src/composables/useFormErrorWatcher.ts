@@ -13,7 +13,7 @@ import type { ComponentPublicInstance, MaybeRef, Ref } from 'vue';
  * @param tab Optional tab the component is in
  */
 export function useFormErrorWatcher(
-  formRef: Ref<ComponentPublicInstance | null>,
+  formRef: Ref<ComponentPublicInstance | Element | null>,
   formName: string,
   tab: MaybeRef<number> = 0
 ) {

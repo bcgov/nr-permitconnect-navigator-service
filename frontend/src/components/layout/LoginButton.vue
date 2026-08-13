@@ -17,7 +17,7 @@ const router = useRouter();
 
 function isLoginEnabled() {
   return (
-    !getIsAuthenticated &&
+    !getIsAuthenticated.value &&
     router.currentRoute.value.name &&
     ![RouteName.HOME, RouteName.OIDC_LOGIN, RouteName.OIDC_CALLBACK, RouteName.OIDC_LOGOUT].includes(
       router.currentRoute.value.name as RouteName

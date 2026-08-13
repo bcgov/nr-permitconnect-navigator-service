@@ -1,157 +1,102 @@
-import { createTestingPinia } from '@pinia/testing';
-import { mount, shallowMount } from '@vue/test-utils';
-import { useRouter, useRoute } from 'vue-router';
+import { ref } from 'vue';
 
-import PrimeVue from 'primevue/config';
 import LoginButton from '@/components/layout/LoginButton.vue';
-import { RouteName, StorageKey } from '@/utils/enums/application';
+import { RouteName } from '@/utils/enums/application';
 
-import type { RouteLocationNormalizedLoaded, Router } from 'vue-router';
+import { mockAuthNStore, resetMockAuthNStore } from '../../../mockAuthNStore';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
+import { mountComponent } from '../../../mountComponent';
 
-// Mock router calls
-vi.mock('vue-router', () => ({
-  useRoute: vi.fn(),
-  useRouter: vi.fn(() => ({
-    push: () => {}
-  }))
+// Mocks
+
+vi.mock('@/store/authnStore', () => ({
+  default: () => mockAuthNStore,
+  useAuthNStore: () => mockAuthNStore
 }));
 
+// `mockRouter` only covers `push`/`replace` -- this component also reads
+// `router.currentRoute`, which no other spec needs yet, so it's extended
+// locally rather than added to the shared mock.
+const mockCurrentRoute = ref<{ name: RouteName | undefined }>({ name: RouteName.INT_HOUSING_PROJECT });
+
+vi.mock('vue-router', () => ({
+  useRouter: () => ({ ...mockRouter, currentRoute: mockCurrentRoute })
+}));
+
+// Mount
+
+function mountLoginButton() {
+  const { wrapper } = mountComponent(LoginButton);
+
+  return { wrapper };
+}
+
 beforeEach(() => {
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
-    })
-  );
-
   vi.clearAllMocks();
+  resetMockAuthNStore();
+  resetMockRouter();
+  mockCurrentRoute.value = { name: RouteName.INT_HOUSING_PROJECT };
 });
 
-afterEach(() => {
-  sessionStorage.clear();
-});
+// Tests
 
-describe.todo('LoginButton.vue', () => {
-  it('renders', () => {
-    const wrapper = shallowMount(LoginButton, {
-      global: {
-        plugins: [
-          createTestingPinia({
-            initialState: {}
-          }),
-          PrimeVue
-        ]
-      }
-    });
-    expect(wrapper).toBeTruthy();
-  });
+describe('LoginButton', () => {
+  describe('rendering', () => {
+    it('renders a login button on an eligible route while unauthenticated', () => {
+      mockAuthNStore.getIsAuthenticated.value = false;
+      mockCurrentRoute.value = { name: RouteName.INT_HOUSING_PROJECT };
 
-  describe('unauthenticated', () => {
-    it('renders login button', () => {
-      const wrapper = mount(LoginButton, {
-        global: {
-          plugins: [
-            createTestingPinia({
-              initialState: {
-                auth: { isAuthenticated: false }
-              }
-            }),
-            PrimeVue
-          ]
-        }
-      });
+      const { wrapper } = mountLoginButton();
 
-      const btn = wrapper.getComponent({ name: 'Button' });
-      expect(btn.text()).toBe('Log in');
+      expect(wrapper.find('button').exists()).toBe(true);
+      expect(wrapper.text()).toContain('Log in');
     });
 
-    it('navigates to login on click', async () => {
-      vi.mocked(useRoute).mockImplementation(
-        () =>
-          ({
-            params: { name: RouteName.OIDC_LOGIN }
-          }) as Partial<RouteLocationNormalizedLoaded> as RouteLocationNormalizedLoaded
-      );
+    it('renders nothing when unauthenticated and no current route is set', () => {
+      mockAuthNStore.getIsAuthenticated.value = false;
+      mockCurrentRoute.value = { name: undefined };
 
-      const push = vi.fn();
-      vi.mocked(useRouter).mockReturnValue({
-        push
-      } as Partial<Router> as Router);
+      const { wrapper } = mountLoginButton();
 
-      const wrapper = shallowMount(LoginButton, {
-        global: {
-          plugins: [
-            createTestingPinia({
-              initialState: {
-                auth: { isAuthenticated: false }
-              }
-            }),
-            PrimeVue
-          ],
-          stubs: ['router-link', 'router-view']
-        }
-      });
+      expect(wrapper.find('button').exists()).toBe(false);
+    });
 
-      const btn = wrapper.getComponent({ name: 'Button' });
-      await btn.trigger('click');
-      expect(push).toBeCalledTimes(1);
-      expect(push).toBeCalledWith({ name: RouteName.OIDC_LOGIN });
+    it('renders nothing when unauthenticated on an excluded route', () => {
+      mockAuthNStore.getIsAuthenticated.value = false;
+      mockCurrentRoute.value = { name: RouteName.OIDC_LOGIN };
+
+      const { wrapper } = mountLoginButton();
+
+      expect(wrapper.find('button').exists()).toBe(false);
+    });
+
+    it('renders a logout button when authenticated', () => {
+      mockAuthNStore.getIsAuthenticated.value = true;
+
+      const { wrapper } = mountLoginButton();
+
+      expect(wrapper.find('button').exists()).toBe(true);
     });
   });
 
-  describe('authenticated', () => {
-    it('renders logout button', () => {
-      const wrapper = mount(LoginButton, {
-        global: {
-          plugins: [
-            createTestingPinia({
-              initialState: {
-                auth: { isAuthenticated: true }
-              }
-            }),
-            PrimeVue
-          ]
-        }
-      });
+  describe('user interaction', () => {
+    it('navigates to the login route when the login button is clicked', async () => {
+      mockAuthNStore.getIsAuthenticated.value = false;
+      mockCurrentRoute.value = { name: RouteName.INT_HOUSING_PROJECT };
 
-      const btn = wrapper.getComponent({ name: 'Button' });
-      expect(btn.text()).toBe('Log out');
+      const { wrapper } = mountLoginButton();
+      await wrapper.find('button').trigger('click');
+
+      expect(mockRouter.push).toHaveBeenCalledWith({ name: RouteName.OIDC_LOGIN });
     });
 
-    it('navigates to logout on click', async () => {
-      vi.mocked(useRoute).mockImplementation(
-        () =>
-          ({
-            params: { name: RouteName.OIDC_LOGOUT }
-          }) as Partial<RouteLocationNormalizedLoaded> as RouteLocationNormalizedLoaded
-      );
+    it('navigates to the logout route when the logout button is clicked', async () => {
+      mockAuthNStore.getIsAuthenticated.value = true;
 
-      const push = vi.fn();
-      vi.mocked(useRouter).mockReturnValue({
-        push
-      } as Partial<Router> as Router);
+      const { wrapper } = mountLoginButton();
+      await wrapper.find('button').trigger('click');
 
-      const wrapper = shallowMount(LoginButton, {
-        global: {
-          plugins: [
-            createTestingPinia({
-              initialState: {
-                auth: { isAuthenticated: true }
-              }
-            }),
-            PrimeVue
-          ],
-          stubs: ['router-link', 'router-view']
-        }
-      });
-
-      const btn = wrapper.getComponent({ name: 'Button' });
-      await btn.trigger('click');
-      expect(push).toBeCalledTimes(1);
-      expect(push).toBeCalledWith({ name: RouteName.OIDC_LOGOUT });
+      expect(mockRouter.push).toHaveBeenCalledWith({ name: RouteName.OIDC_LOGOUT });
     });
   });
 });
