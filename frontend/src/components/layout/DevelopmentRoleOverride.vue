@@ -51,8 +51,8 @@ onBeforeMount(() => {
 </script>
 
 <template>
-  <div class="px-2 py-1 flex items-center role-override">
-    <p class="m-0 mr-2">Viewing site as:</p>
+  <div class="px-2 py-1 flex items-center bg-[var(--p-primary-color)]">
+    <p class="m-0 mr-2 text-black">Viewing site as:</p>
     <Select
       v-model="initiative"
       class="w-2/12 mr-2"
@@ -77,13 +77,3 @@ onBeforeMount(() => {
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-p {
-  color: black;
-}
-
-.role-override {
-  background-color: var(--p-primary-color);
-}
-</style>

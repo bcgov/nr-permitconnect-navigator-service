@@ -199,15 +199,13 @@ watch(visible, () => {
     v-model:visible="visible"
     class="app-info-dialog w-6/12"
     :pt="{
-      header: { class: '!mb-1 !pb-0' }
+      header: { class: 'mb-1! pb-0!' }
     }"
     :draggable="false"
     :modal="true"
   >
     <template #header>
-      <span class="p-dialog-title">
-        {{ isInternal ? t('projectTeamAddModal.headerNav') : t('projectTeamAddModal.headerProp') }}
-      </span>
+      <h3>{{ isInternal ? t('projectTeamAddModal.headerNav') : t('projectTeamAddModal.headerProp') }}</h3>
     </template>
     <Message
       v-if="selectedUserExists"
@@ -382,7 +380,7 @@ watch(visible, () => {
         <Column
           v-if="isInternal"
           field="userId"
-          class="w-[5%] whitespace-nowrap !pl-4 !pr-1 !py-1"
+          class="w-[5%] whitespace-nowrap pl-4! pr-1! py-1!"
         >
           <template #body="{ data }">
             <font-awesome-icon
@@ -393,20 +391,20 @@ watch(visible, () => {
           </template>
         </Column>
         <Column
-          class="whitespace-nowrap !p-1"
+          class="whitespace-nowrap p-1!"
           :class="isInternal ? 'w-[10%]' : 'w-[15%]'"
         >
           <template #body="{ data }">{{ data.contact.firstName }} {{ data.contact.lastName }}</template>
         </Column>
-        <Column class="w-[60%] whitespace-nowrap !p-1">
+        <Column class="w-[60%] whitespace-nowrap p-1!">
           <template #body="{ data }">
             <div class="flex justify-center w-full">
               <Message
                 v-if="data.role === ActivityContactRole.ADMIN"
-                class="!m-0 !py-0 !px-0"
+                class="m-0! py-0! px-0!"
                 severity="warn"
                 :pt="{
-                  content: { class: '!px-2.5 !py-2' }
+                  content: { class: 'px-2.5! py-2!' }
                 }"
               >
                 {{ t('projectTeamAddModal.adminSelectedWarning') }}
@@ -416,7 +414,7 @@ watch(visible, () => {
         </Column>
         <Column
           field="role"
-          class="w-[20%] whitespace-nowrap !p-1"
+          class="w-[20%] whitespace-nowrap p-1!"
         >
           <template #body="{ data }">
             <Select
@@ -424,7 +422,7 @@ watch(visible, () => {
               class="w-full"
               name="assignRole"
               :pt="{
-                label: { class: '!pl-1.5 !pr-0 !py-1.5' }
+                label: { class: 'pl-1.5! pr-0! py-1.5!' }
               }"
               :placeholder="t('projectTeamAddModal.assign')"
               :options="selectableRoles"
@@ -435,7 +433,7 @@ watch(visible, () => {
         <Column
           field="remove"
           header-class="header-right"
-          class="w-[5%] whitespace-nowrap !pl-0 !pr-2 !py-1"
+          class="w-[5%] whitespace-nowrap pl-0! pr-2! py-1!"
         >
           <template #body="{ index }">
             <Button

@@ -112,7 +112,7 @@ function onDelete(draftId: string) {
       field="action"
       :header="t('projectDraftListProponent.action')"
       header-class="header-right"
-      class="!text-right !py-0"
+      class="text-right! py-0!"
       style="width: 10%"
     >
       <template #body="{ data }">

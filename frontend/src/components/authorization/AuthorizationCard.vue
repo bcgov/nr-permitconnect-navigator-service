@@ -59,7 +59,7 @@ function toCopy(toCopy: string) {
           v-if="permit.onHoldCode"
           class="mb-4"
           severity="warn"
-          :pt:content:class="['!px-2', '!py-2.5']"
+          :pt:content:class="['px-2!', 'py-2.5!']"
         >
           <div class="flex items-center gap-2">
             <font-awesome-icon

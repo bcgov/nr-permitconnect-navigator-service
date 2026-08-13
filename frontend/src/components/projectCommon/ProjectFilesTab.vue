@@ -78,13 +78,11 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
 
 <template>
   <div>
-    <div class="mb-4 border-dashed file-upload rounded-md">
-      <FileUpload
-        v-if="getProject?.activityId"
-        :activity-id="getProject.activityId"
-        :disabled="getProjectIsCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.CREATE)"
-      />
-    </div>
+    <FileUpload
+      v-if="getProject?.activityId"
+      :activity-id="getProject.activityId"
+      :disabled="getProjectIsCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.CREATE)"
+    />
     <div class="flex flex-row justify-between pb-4">
       <div class="flex items-center">
         <IconField icon-position="left">
@@ -283,13 +281,6 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
 
 .p-inputtext.p-component {
   width: 20rem;
-}
-
-.file-upload {
-  color: var(--p-greyscale-500);
-  &:hover {
-    color: var(--p-content-hover-background);
-  }
 }
 
 .p-button.p-component.view-switch-button {

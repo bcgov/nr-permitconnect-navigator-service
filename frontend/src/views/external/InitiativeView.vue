@@ -220,7 +220,7 @@ onBeforeMount(async () => {
 
 <template>
   <ViewHeader
-    class="shadow px-4"
+    class="shadow-sm px-4"
     :header="initiativeState.headerText"
   />
   <div class="flex flex-col items-center justify-start h-full">
@@ -294,7 +294,7 @@ onBeforeMount(async () => {
     <div class="w-full">
       <div
         v-if="!projects.length"
-        class="flex flex-col items-center justify-center rounded-sm shadow-md custom-card px-4 py-4 bg"
+        class="flex flex-col items-center justify-center rounded-xs shadow-md custom-card px-4 py-4 bg"
       >
         <p class="font-bold">{{ t('views.e.initiativeView.projectsEmpty') }}</p>
       </div>
@@ -303,11 +303,13 @@ onBeforeMount(async () => {
         v-else
         :key="project.activityId"
         :index="index"
-        class="rounded-sm shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
-        :class="{
-          'mb-2': index != displayedProjectsInOrder.length - 1,
-          'custom-card-completed': project.applicationStatus === ApplicationStatus.COMPLETED
-        }"
+        class="rounded-xs shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
+        :class="[
+          { 'mb-2': index != displayedProjectsInOrder.length - 1 },
+          project.applicationStatus === ApplicationStatus.COMPLETED
+            ? 'bg-[var(--p-greyscale-50)] hover:[&_a]:!underline'
+            : ''
+        ]"
       >
         <router-link
           v-if="hasPendingAuth(project.activityId)"
@@ -436,15 +438,6 @@ onBeforeMount(async () => {
 .custom-card {
   background-color: var(--p-white);
   border: 1px solid var(--p-greyscale-200);
-
-  &:hover {
-    a {
-      text-decoration: underline !important;
-    }
-  }
-}
-.custom-card-completed {
-  background-color: var(--p-greyscale-50);
 
   &:hover {
     a {

@@ -457,7 +457,7 @@ onBeforeMount(async () => {
         </div>
       </div>
       <div class="flex flex-col gap-y-9">
-        <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
+        <div class="bg-[var(--p-bcblue-50)] rounded-sm px-9 py-6">
           <h4 class="section-header mb-4 mt-0">
             {{ t('enquiryForm.relatedSubmission') }}
           </h4>

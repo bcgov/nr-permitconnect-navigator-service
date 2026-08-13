@@ -242,7 +242,8 @@ onBeforeMount(async () => {
         </div>
         <Button
           v-if="canNavigate(provideNavigationPermission) && getProject?.submissionType !== SubmissionType.INAPPLICABLE"
-          class="p-button-sm header-btn mt-3"
+          class="p-button-sm max-h-8 mt-3"
+          :label="t('views.e.projectView.askMyNavigator')"
           @click="
             router.push({
               name: initiativeState.enquiryProjectRouteName
@@ -418,10 +419,6 @@ onBeforeMount(async () => {
 </template>
 
 <style scoped lang="scss">
-a {
-  text-decoration: none;
-}
-
 .ellipsis-icon {
   cursor: pointer;
   width: 1.5rem;
@@ -435,9 +432,5 @@ a {
 .empty-block {
   background-color: var(--p-bcblue-50);
   border-radius: 0.5rem;
-}
-
-.header-btn {
-  max-height: 2rem;
 }
 </style>

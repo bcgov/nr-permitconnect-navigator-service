@@ -17,7 +17,7 @@ const { t } = useI18n();
             <div class="logo">
               <img
                 src="@/assets/images/BCID_H_rgb_pos.png"
-                class="bc-logo"
+                class="bc-logo max-h-[60px] h-[60px]"
                 alt="B.C. Government Logo"
               />
             </div>
@@ -66,11 +66,6 @@ const { t } = useI18n();
 </template>
 
 <style lang="scss" scoped>
-.bc-logo {
-  max-height: 60px;
-  height: 60px;
-}
-
 .gov-footer {
   .acknowledgement {
     border-top: 3px solid #fcba19;

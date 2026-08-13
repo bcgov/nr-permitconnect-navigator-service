@@ -83,7 +83,7 @@ function onClick() {
         <img
           alt="document header"
           :src="displayIcon(document.mimeType)"
-          class="document-image"
+          class="max-h-10"
         />
       </div>
     </template>
@@ -112,7 +112,7 @@ function onClick() {
           {{ filesize(document.filesize) }}
         </h6>
         <DeleteDocument
-          class="!p-0"
+          class="p-0!"
           :disabled="!editable || !useAuthZStore().can(Initiative.HOUSING, Resource.DOCUMENT, Action.DELETE)"
           :document="document"
         />
@@ -122,10 +122,6 @@ function onClick() {
 </template>
 
 <style scoped lang="scss">
-.document-image {
-  max-height: 2.5rem;
-}
-
 .clicked {
   box-shadow: 0 0 11px #036;
 }

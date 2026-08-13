@@ -136,7 +136,7 @@ watch(
   <div v-if="statistics">
     <div class="flex justify-end mb-4">
       <Button
-        class="download-production-btn"
+        class="bg-[var(--p-greyscale-100)]! text-black! border! border-[#d9d9d9]! hover:bg-[var(--p-greyscale-200)]!"
         :disabled="!useAuthZStore().can(Initiative.PCNS, Resource.REPORTING, Action.READ)"
         @click="onDownloadProjectPermitData"
       >
@@ -147,8 +147,8 @@ watch(
         Download Production Data
       </Button>
     </div>
-    <table class="w-full text-left">
-      <thead>
+    <table class="w-full text-left border-collapse mx-auto">
+      <thead class="bg-[var(--p-greyscale-400)]">
         <tr>
           <th class="col-span-9"><div class="p-2">Statistics</div></th>
           <th class="col-span-1 text-right"><div class="py-2">Number</div></th>
@@ -347,27 +347,6 @@ watch(
 </template>
 
 <style scoped lang="scss">
-.download-production-btn {
-  background-color: #f3f2f1;
-  color: #000;
-  border: 1px solid #d9d9d9;
-  &:hover {
-    background-color: #eceae8;
-    color: #000;
-    border: 1px solid #d9d9d9;
-  }
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-  margin: auto;
-}
-
-thead {
-  background-color: #d3d3d3;
-}
-
 td {
   padding-top: 0.5rem;
   padding-bottom: 0.5rem;

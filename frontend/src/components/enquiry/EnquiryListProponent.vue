@@ -119,7 +119,7 @@ function getRouteToObject(data: Enquiry): RouteLocationRaw {
       :header="t('enquiryListProponent.submittedDate')"
       :sortable="true"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
     >
       <template #body="{ data }">
         {{ formatDate(data?.submittedAt) }}

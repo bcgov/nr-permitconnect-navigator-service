@@ -22,7 +22,11 @@ const { codeDisplay } = useCodeStore();
 </script>
 
 <template>
-  <Card class="permit-card--hover mb-4">
+  <!-- eslint-disable max-len -->
+  <Card
+    class="border-[var(--p-greyscale-100)] shadow-[0.25rem_0.25rem_0.25rem_0rem_var(--p-greyscale-50)] hover:bg-[var(--p-bcblue-50)] mb-4"
+  >
+    <!-- eslint-enable max-len -->
     <template #content>
       <div class="flex justify-between">
         <h5 class="m-0 app-primary-color cursor-pointer hover:underline">{{ permit.permitType?.name }}</h5>
@@ -77,16 +81,6 @@ const { codeDisplay } = useCodeStore();
 </template>
 
 <style scoped lang="scss">
-.permit-card {
-  border-color: var(--p-greyscale-100);
-  border-style: solid;
-  border-width: 0.063rem;
-  box-shadow: 0.25rem 0.25rem 0.25rem 0rem var(--p-greyscale-50);
-  &--hover:hover {
-    background-color: var(--p-bcblue-50);
-  }
-}
-
 .permit-data {
   overflow: auto;
   word-break: break-word;

@@ -17,7 +17,7 @@ function login(kind: IdentityProviderKind) {
 
 <template>
   <div class="flex justify-center mt-7">
-    <Card class="flex items-center card">
+    <Card class="flex items-center w-[28.75rem] h-[48.25rem]">
       <template #title>
         <div>
           <h3 class="mb-0 mx-2">{{ t('oidcLoginView.login') }}</h3>
@@ -108,10 +108,5 @@ function login(kind: IdentityProviderKind) {
 .account-setup {
   outline: solid 0.063rem var(--p-greyscale-200);
   border-radius: 0.5rem;
-}
-
-.card {
-  width: 28.75rem;
-  height: 48.25rem;
 }
 </style>

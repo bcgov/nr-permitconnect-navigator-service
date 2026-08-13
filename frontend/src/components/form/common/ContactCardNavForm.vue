@@ -34,7 +34,7 @@ const isManualContact = computed(() => {
 </script>
 
 <template>
-  <div class="p-panel rounded px-9 py-6">
+  <div class="p-panel rounded-sm px-9 py-6">
     <div class="flex items-center justify-between mb-2">
       <div class="flex items-center gap-x-2.5">
         <BasicInfo />

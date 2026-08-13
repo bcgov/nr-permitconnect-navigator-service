@@ -101,14 +101,18 @@ const filteredDocuments = computed(() => {
 </script>
 
 <template>
-  <div class="mb-4 border-2 border-dashed file-upload rounded-md w-full">
+  <!-- eslint-disable max-len -->
+  <div
+    class="mb-4 border-2 border-dashed rounded-md w-full text-[var(--p-greyscale-500)] hover:text-[var(--p-content-hover-background)]"
+  >
+    <!-- eslint-enable max-len -->
     <div
       v-if="uploading"
       class="h-16 content-center pl-2 pr-2"
     >
       <ProgressBar
         mode="indeterminate"
-        class="self-center progress-bar"
+        class="self-center h-[0.3rem]"
       />
     </div>
     <div
@@ -184,10 +188,6 @@ const filteredDocuments = computed(() => {
   }
 }
 
-.file-input {
-  display: none;
-}
-
 .p-button.p-component {
   background-color: transparent;
   color: var(--text-color);
@@ -195,18 +195,6 @@ const filteredDocuments = computed(() => {
 
 .p-fileupload {
   border-style: none;
-}
-
-.progress-bar {
-  height: 0.3rem;
-}
-
-.file-upload {
-  width: 100%;
-  color: var(--p-greyscale-500);
-  &:hover {
-    color: var(--p-content-hover-background);
-  }
 }
 
 :deep(.p-button) {
