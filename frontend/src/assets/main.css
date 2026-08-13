@@ -1,7 +1,9 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@layer properties, theme, base, main, components, primevue-overrides, utilities, keyframes;
 
+@import "tailwindcss";
+@import "tailwindcss-primeui";
+
+@layer main {
 /* -------- text and fonts -------- */
 :root {
   font-size: 16px;
@@ -133,9 +135,50 @@ label {
   color: var(--app-label-color);
 }
 
+.app-info-dialog {
+  .p-dialog-header {
+    .svg-inline--fa {
+      color: var(--p-primary-color);
+      font-size: 1.8rem;
+    }
+  }
+}
+
+/* hover effects */
+.hover-hand:hover {
+  cursor: pointer;
+}
+
+.hover-shadow:hover {
+  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
+}
+
+/* pointer events */
+.no-click {
+  pointer-events: none;
+}
+
+.screen-reader-only {
+  overflow: hidden !important;
+  width: 0px !important;
+  height: 0px !important;
+}
+
+/* common */
+.disclaimer-block {
+  outline: solid 0.063rem var(--p-greyscale-200);
+  border-radius: 0.5rem;
+}
+
 /* ---------- primevue overrides ------------ */
 
-.p-accordionheader {
+
+
+}
+
+@layer primevue-overrides {
+
+  .p-accordionheader {
   justify-content: flex-start !important;
   .p-accordionheader-toggle-icon {
     order: -1;
@@ -166,6 +209,7 @@ label {
 
   .p-divider {
     margin-bottom: 0;
+
   }
 
   .section-header {
@@ -177,6 +221,8 @@ label {
   .p-card-title {
     padding-left: 1rem;
     padding-right: 1rem;
+    padding-top: 1rem;
+
   }
 
   .p-card-body {
@@ -185,7 +231,7 @@ label {
   }
 
  .p-card-content {
-    padding: 0 1rem 0 1rem;
+    padding: 0 1rem 1rem 1rem;
   }
 }
 
@@ -237,44 +283,5 @@ label {
     color: var(--p-surface-0);
   }
 }
-
-.app-info-dialog {
-  .p-dialog-header {
-    .svg-inline--fa {
-      color: var(--p-primary-color);
-      font-size: 1.8rem;
-    }
-
-    .p-dialog-title {
-      flex-grow: 1;
-      font-size: 1.8rem;
-      font-weight: bold;
-    }
-  }
 }
 
-/* hover effects */
-.hover-hand:hover {
-  cursor: pointer;
-}
-
-.hover-shadow:hover {
-  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
-}
-
-/* pointer events */
-.no-click {
-  pointer-events: none;
-}
-
-.screen-reader-only {
-  overflow: hidden !important;
-  width: 0px !important;
-  height: 0px !important;
-}
-
-/* common */
-.disclaimer-block {
-  outline: solid 0.063rem var(--p-greyscale-200);
-  border-radius: 0.5rem;
-}

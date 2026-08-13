@@ -233,6 +233,13 @@ export const ThemeOverride = definePreset(Material, {
         }
       }
     },
+    dialog: {
+      title: {
+        font: {
+          size: '1.8rem'
+        }
+      }
+    },
     menu: {
       item: {
         color: '{primary.color}',
