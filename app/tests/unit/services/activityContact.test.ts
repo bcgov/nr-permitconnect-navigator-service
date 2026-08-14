@@ -52,7 +52,7 @@ describe('activityContact service', () => {
   describe('createActivityContactService', () => {
     it('creates an activity contact and sends notification email', async () => {
       verifyPrimaryChangeSpy.mockResolvedValue(undefined);
-      mockRepos.activityContact.create.mockResolvedValue(undefined as never);
+      mockRepos.activityContact.create.mockResolvedValue(TEST_ACTIVITY_CONTACT_1);
       mockRepos.contact.findUniqueOrThrow.mockResolvedValue(TEST_CONTACT_1);
       getTeamMemberEmailTemplateDataSpy.mockResolvedValue({
         templateParams: TEMPLATE_PARAMS,
@@ -82,7 +82,7 @@ describe('activityContact service', () => {
         bodyType: 'html',
         body: '<html>Member Template</html>'
       });
-      expect(result).toEqual(TEST_CONTACT_1);
+      expect(result).toEqual(TEST_ACTIVITY_CONTACT_1);
     });
 
     it('verifies primary change when creating PRIMARY role', async () => {
