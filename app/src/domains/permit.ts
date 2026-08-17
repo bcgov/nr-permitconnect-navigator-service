@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 
 import { getProjectByActivityId } from './project';
 import { codeTable } from '../db/codes/cache';
-import { PermitStage } from '../db/codes/enums';
+import { PermitStage, PermitState } from '../db/codes/enums';
 import { email } from '../external/ches';
 import { formatDateOnly, toTitleCase } from '../utils';
 import { PermitNeeded } from '../utils/enums/permit';
@@ -16,8 +16,44 @@ import {
 import { state } from '../../state';
 
 import type { Repositories } from '../db/unitOfWork';
-import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys } from '../types';
+import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys, UpsertPermitRequest } from '../types';
 import type { Initiative } from '../utils/enums/application';
+
+/**
+ * Builds a new permit record with default values for a freshly created permit
+ * @param params - The identifying and varying fields of the permit
+ * @returns A permit record ready for upsert
+ */
+export const buildNewPermitRecord = (params: {
+  permitId: string;
+  permitTypeId: number;
+  activityId: string;
+  stage: PermitStage;
+  needed: PermitNeeded;
+  state: PermitState;
+  submittedDate?: string | null;
+  submittedTime?: string | null;
+}): UpsertPermitRequest => ({
+  permitId: params.permitId,
+  permitTypeId: params.permitTypeId,
+  activityId: params.activityId,
+  stage: params.stage,
+  needed: params.needed,
+  statusLastChanged: null,
+  statusLastChangedTime: null,
+  statusLastVerified: null,
+  statusLastVerifiedTime: null,
+  issuedPermitId: null,
+  state: params.state,
+  onHoldCode: null,
+  submittedDate: params.submittedDate ?? null,
+  submittedTime: params.submittedTime ?? null,
+  decisionDate: null,
+  decisionTime: null,
+  targetDate: null,
+  targetDateDescription: null,
+  technicalReviewer: null
+});
 
 /**
  * Retrieve permits and trackings that are PEACH integrated

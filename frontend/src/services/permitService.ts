@@ -4,11 +4,13 @@ import { createInitiativeRouteBuilder } from './routeBuilder';
 import type {
   DeletePermitRequest,
   GetPermitRequest,
+  IntakePermitRequest,
   ListPermitsRequest,
   Permit,
   SearchPermitsResponse,
   UpsertPermitRequest
 } from '@/types';
+
 /**
  * Base route builder and endpoint definitions for this resource.
  * Routes should be referenced through this object rather than
@@ -20,6 +22,7 @@ const permitRoutes = {
   root: () => permitRoute(),
   byId: (permitId: string) => permitRoute(permitId),
 
+  intake: () => permitRoute('intake'),
   types: () => permitRoute('types'),
   search: () => permitRoute('search')
 } as const;
@@ -44,6 +47,15 @@ export function getPermit(req: GetPermitRequest): Promise<Permit> {
   const { permitId } = req;
 
   return api.get<Permit>(permitRoutes.byId(permitId));
+}
+
+/**
+ * Submit multiple new permits.
+ * @param req - The request payload containing the permit intake information.
+ * @returns A promise resolving to the new Permit information.
+ */
+export function intakePermits(req: IntakePermitRequest[]): Promise<Permit[]> {
+  return api.post<Permit[]>(permitRoutes.intake(), req);
 }
 
 /**
@@ -88,6 +100,7 @@ export function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
 export const permitService = {
   deletePermit,
   getPermit,
+  intakePermits,
   listPermits,
   searchPermits,
   upsertPermit

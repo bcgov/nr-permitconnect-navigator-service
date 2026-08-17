@@ -17,7 +17,7 @@ import {
   ProjectDescriptionCard,
   LocationAdditionalCard,
   LocationDescriptionCard,
-  AppliedPermitsCard,
+  AppliedPermitsIntakeCard,
   PermitLearnCard,
   InvestigatePermitsCard,
   FeedbackConsentCard,
@@ -475,7 +475,7 @@ watch(activeStep, () => {
         <!-- Permits & Reports -->
         <StepPanel :value="3">
           <ValidationBanner />
-          <AppliedPermitsCard :tab="3" />
+          <AppliedPermitsIntakeCard :tab="3" />
           <PermitLearnCard />
           <InvestigatePermitsCard :tab="3" />
           <FeedbackConsentCard :tab="3" />

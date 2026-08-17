@@ -93,6 +93,14 @@ const routes: RouteRecordRaw[] = [
                 meta: { breadcrumb: 'Project Intake Form' }
               },
               {
+                path: 'permit/add',
+                name: RouteName.EXT_ELECTRIFICATION_PROJECT_PERMIT_ADD,
+                component: () => import('@/views/external/PermitAddView.vue'),
+                beforeEnter: accessHandler,
+                props: createProps,
+                meta: { breadcrumb: 'Add permit(s)' }
+              },
+              {
                 path: 'permit/:permitId',
                 component: () => import('@/views/GenericView.vue'),
                 meta: { dynamicBreadcrumb: 'authorization' },

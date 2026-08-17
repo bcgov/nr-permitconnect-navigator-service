@@ -5,7 +5,8 @@ import {
   getPermit,
   listPermits,
   searchPermits,
-  upsertPermit
+  upsertPermit,
+  intakePermits
 } from '@/services/permitService';
 import { useAppStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
@@ -20,6 +21,7 @@ vi.mock('@/store', () => ({
 
 describe('permit service', () => {
   const mockGet = vi.fn();
+  const mockPost = vi.fn();
   const mockPut = vi.fn();
   const mockDelete = vi.fn();
 
@@ -32,6 +34,7 @@ describe('permit service', () => {
 
     vi.mocked(appAxios).mockReturnValue({
       get: mockGet,
+      post: mockPost,
       put: mockPut,
       delete: mockDelete
     } as never);
@@ -82,6 +85,34 @@ describe('permit service', () => {
       mockGet.mockRejectedValue(error);
 
       await expect(getPermit({ permitId: 'permit-123' })).rejects.toThrow(error);
+    });
+  });
+
+  describe('intakePermits', () => {
+    it('posts permits and returns response data', async () => {
+      const permits = [
+        {
+          trackingId: '123'
+        }
+      ];
+
+      mockPost.mockResolvedValue({
+        data: permits
+      });
+
+      const result = await intakePermits(permits as never);
+
+      expect(mockPost).toHaveBeenCalledWith('housing/permit/intake', permits, undefined);
+
+      expect(result).toEqual(permits);
+    });
+
+    it('propagates errors', async () => {
+      const error = new Error('intake  failed');
+
+      mockPost.mockRejectedValue(error);
+
+      await expect(intakePermits({} as never)).rejects.toThrow(error);
     });
   });
 
@@ -207,6 +238,7 @@ describe('permit service', () => {
     expect(permitService).toEqual({
       deletePermit,
       getPermit,
+      intakePermits,
       listPermits,
       searchPermits,
       upsertPermit

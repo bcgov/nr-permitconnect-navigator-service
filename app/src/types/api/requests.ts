@@ -2,6 +2,7 @@ import type { ParsedQs } from 'qs';
 import type { DeleteRequestDTO, GetRequestDTO, ListRequestDTO, ResourceSchemaConfig, UpsertRequestDTO } from './dto.ts';
 import type { Permit, PermitBase, Stamps } from './resources.ts';
 import type { PaginationOptions } from '../common.ts';
+import type { Nullable } from '../utils.ts';
 import type { GroupName, Initiative } from '../../utils/enums/application.ts';
 import type { EmailTemplate } from '../../utils/templates';
 
@@ -98,6 +99,13 @@ export interface IdirSearchParameters extends ParsedQs {
   firstName: string;
   lastName: string;
   email: string;
+}
+
+export interface IntakePermitRequest {
+  activityId: string;
+  permitTypeId: number;
+  trackingId?: Nullable<string>;
+  submittedDate?: string;
 }
 
 export interface ListPermitsOptions extends Partial<Stamps> {

@@ -27,6 +27,8 @@ vi.mock('config', async () => {
       get: vi.fn((key: string) => {
         if (key === 'server.ches.submission.cc') return 'noreply@example.com';
         if (key === 'server.pcns.appUrl') return 'www.example.com';
+        if (key === 'server.pcbcUrl') return 'www.example.com';
+        if (key === 'server.env') return 'test';
 
         return actual.get(key);
       }),

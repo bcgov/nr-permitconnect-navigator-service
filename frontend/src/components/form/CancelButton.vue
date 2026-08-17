@@ -5,7 +5,8 @@ import { useI18n } from 'vue-i18n';
 import { Button } from '@/lib/primevue';
 
 // Props
-const { editable = true } = defineProps<{
+const { canDisable = true, editable = true } = defineProps<{
+  canDisable?: boolean;
   editable?: boolean;
 }>();
 
@@ -24,8 +25,8 @@ const { t } = useI18n();
     outlined
     class="ml-2 p-button-danger"
     icon="pi pi-times"
-    :disabled="!editable || !isDirty"
-    :label="t('cancelButton.btnText')"
+    :disabled="canDisable && (!editable || !isDirty)"
+    :label="t('ui.actions.cancel')"
     @click="emit('clicked')"
   />
 </template>

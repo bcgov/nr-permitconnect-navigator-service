@@ -86,7 +86,7 @@ onBeforeMount(() => {
           <template #cancel>
             <Button
               class="p-button-danger"
-              :label="t('cancelButton.btnText')"
+              :label="t('ui.actions.cancel')"
               icon="pi pi-times"
               outlined
               @click="onCancel"

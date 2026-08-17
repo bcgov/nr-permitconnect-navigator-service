@@ -1,4 +1,5 @@
 export { default as AppliedPermitsCard } from './AppliedPermitsCard.vue';
+export { default as AppliedPermitsIntakeCard } from './AppliedPermitsIntakeCard.vue';
 export { default as BcHydroNumberCard } from './BcHydroNumberCard.vue';
 export { default as CollectionDisclaimer } from './CollectionDisclaimer.vue';
 export { default as ContactCardIntakeForm } from './ContactCardIntakeForm.vue';
