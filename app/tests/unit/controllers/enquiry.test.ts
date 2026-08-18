@@ -16,7 +16,6 @@ import {
 import * as activityService from '#src/services/activity';
 import * as enquiryService from '#src/services/enquiry';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
@@ -185,20 +184,20 @@ describe('searchEnquiriesController', () => {
   });
 });
 
-describe('updateEnquiryController', () => {
-  const updateEnquirySpy = vi.spyOn(enquiryService, 'updateEnquiryService');
+describe('patchEnquiryController', () => {
+  const updateEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiryService');
 
   it('calls the service with the body and enquiryId then responds 200', async () => {
     const req = {
       body: { enquiryDescription: 'updated' },
       params: { enquiryId: TEST_ENQUIRY_1.enquiryId }
-    } as unknown as Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>;
+    } as unknown as Request<{ enquiryId: string }, never, PatchEnquiryRequest>;
 
     updateEnquirySpy.mockResolvedValue(TEST_ENQUIRY_1);
 
-    await updateEnquiryController(req, res as unknown as Response);
+    await patchEnquiryController(req, res as unknown as Response);
 
-    expect(updateEnquirySpy).toHaveBeenCalledWith({ enquiryDescription: 'updated' }, TEST_ENQUIRY_1.enquiryId);
+    expect(updateEnquirySpy).toHaveBeenCalledWith(TEST_ENQUIRY_1.enquiryId, { enquiryDescription: 'updated' });
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ENQUIRY_1);
   });

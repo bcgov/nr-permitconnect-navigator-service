@@ -231,17 +231,17 @@ export const submitHousingProjectDraftService = async (
 };
 
 /**
- * Updates a specific housing project
- * @param data Housing project to update
+ * Patches a specific housing project
  * @param housingProjectId ID of the project to update
+ * @param data Housing project to update
  * @returns A Promise that resolves to the updated housing project
  */
-export const updateHousingProjectService = async (
-  data: Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>,
-  housingProjectId: string
+export const patchHousingProjectService = async (
+  housingProjectId: string,
+  data: PatchHousingProjectRequest
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
-    await housingProject.update(
+    await housingProject.patch(
       {
         housingProjectId
       },

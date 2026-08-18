@@ -226,16 +226,15 @@ export const searchEnquiriesService = async (
 
 /**
  * Updates a specific enquiry
- * @param data Enquiry to update
  * @param enquiryId ID of the enquiry to update
+ * @param data Enquiry to update
  * @returns A Promise that resolves to the updated enquiry
  */
-export const updateEnquiryService = async (
-  data: Omit<Prisma.enquiryUpdateInput, 'enquiryId'>,
-  enquiryId: string
-): Promise<Enquiry> => {
+export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryRequest): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
-    await enquiry.update({ enquiryId }, data);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { enquiryId: _id, ...rest } = data;
+    await enquiry.update({ enquiryId }, rest);
     return await enquiry.findFirstOrThrow({
       where: { enquiryId },
       include: { activity: { include: { activityContact: { include: { contact: true } } } } }

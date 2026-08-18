@@ -160,7 +160,7 @@ export function searchProjects(req: ListHousingProjectRequest): Promise<HousingP
 export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
   const { ...body } = req;
 
-  return api.put<HousingProject>(housingProjectRoutes.submitDraft(), body);
+  return api.post<HousingProject>(housingProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -171,7 +171,7 @@ export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<Hous
 export function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  return api.put<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
+  return api.post<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
 }
 
 /**

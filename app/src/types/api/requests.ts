@@ -7,6 +7,79 @@ import type { GroupName, Initiative } from '#src/utils/enums/application';
 import type { EmailTemplate } from '#src/utils/templates';
 
 /**
+ * Electrification Project
+ */
+
+interface ElectrificationProjectBaseSchema extends ResourceSchemaConfig<ElectrificationProjectBase> {
+  ids: 'electrificationProjectId';
+  immutable: 'activityId' | 'electrificationProjectId';
+  serverGenerated: 'activityId' | 'electrificationProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    electrificationProjectId: string[];
+    projectType: string[];
+    projectCategory: string[];
+  };
+}
+
+export type PatchElectrificationProjectRequest = PatchRequestDTO<
+  ElectrificationProjectBase,
+  ElectrificationProjectBaseSchema
+>;
+
+/**
+ * Enquiry
+ */
+
+interface EnquiryBaseSchema extends ResourceSchemaConfig<EnquiryBase> {
+  ids: 'enquiryId';
+  immutable: 'activityId' | 'enquiryId';
+  serverGenerated: 'activityId' | 'enquiryId';
+}
+
+export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+
+/**
+ * General Project
+ */
+
+interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBase> {
+  ids: 'generalProjectId';
+  immutable: 'activityId' | 'generalProjectId';
+  serverGenerated: 'activityId' | 'generalProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    generalProjectId: string[];
+    submissionType: string[];
+  };
+}
+
+export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
+
+/**
+ * Housing Project
+ */
+
+interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBase> {
+  ids: 'housingProjectId';
+  immutable: 'activityId' | 'housingProjectId';
+  serverGenerated: 'activityId' | 'housingProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    housingProjectId: string[];
+    submissionType: string[];
+  };
+}
+
+export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
+
+/**
  * Permit
  */
 

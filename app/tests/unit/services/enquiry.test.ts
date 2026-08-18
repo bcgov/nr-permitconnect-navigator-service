@@ -241,16 +241,19 @@ describe('enquiry service', () => {
     });
   });
 
-  describe('updateEnquiryService', () => {
+  describe('patchEnquiryService', () => {
     it('updates the enquiry then returns the refreshed record', async () => {
-      const data = { enquiryDescription: 'Updated description' };
+      const data = { enquiryId: TEST_ENQUIRY_1.enquiryId, enquiryDescription: 'Updated description' };
       mockRepos.enquiry.update.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.findFirstOrThrow.mockResolvedValue(TEST_ENQUIRY_1 as never);
 
-      const result = await updateEnquiryService(data, TEST_ENQUIRY_1.enquiryId);
+      const result = await patchEnquiryService(TEST_ENQUIRY_1.enquiryId, data);
 
       expect(mockRepos.enquiry.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.enquiry.update).toHaveBeenCalledWith({ enquiryId: TEST_ENQUIRY_1.enquiryId }, data);
+      expect(mockRepos.enquiry.update).toHaveBeenCalledWith(
+        { enquiryId: TEST_ENQUIRY_1.enquiryId },
+        { enquiryDescription: 'Updated description' }
+      );
       expect(mockRepos.enquiry.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(mockRepos.enquiry.findFirstOrThrow).toHaveBeenCalledWith({
         where: { enquiryId: TEST_ENQUIRY_1.enquiryId },

@@ -10,9 +10,9 @@ import {
   getGeneralProjectStatisticsController,
   listGeneralProjectActivityIdsController,
   listGeneralProjectsController,
+  patchGeneralProjectController,
   searchGeneralProjectsController,
   submitGeneralProjectDraftController,
-  updateGeneralProjectController,
   upsertGeneralProjectDraftController
 } from '#src/controllers/generalProject';
 import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
@@ -63,10 +63,10 @@ router.get(
 router.get('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
-router.put('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE), upsertGeneralProjectDraftController);
+router.post('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE), upsertGeneralProjectDraftController);
 
 /** Creates or updates an intake and set status to Submitted */
-router.put(
+router.post(
   '/draft/submit',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
   generalProjectValidator.createGeneralProject,
@@ -99,13 +99,13 @@ router.get(
   getGeneralProjectController
 );
 
-/** Updates a general project*/
+/** Patches a general project*/
 router.patch(
   '/:generalProjectId',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.UPDATE),
   hasAccess('generalProjectId'),
-  generalProjectValidator.updateGeneralProject,
-  updateGeneralProjectController
+  generalProjectValidator.patchGeneralProject,
+  patchGeneralProjectController
 );
 
 /** Deletes a general project */

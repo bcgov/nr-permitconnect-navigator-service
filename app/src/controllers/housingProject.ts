@@ -6,6 +6,7 @@ import {
   getHousingProjectStatisticsService,
   listHousingProjectActivityIdsService,
   listHousingProjectsService,
+  patchHousingProjectService,
   searchHousingProjects,
   submitHousingProjectDraftService,
   updateHousingProjectService
@@ -14,7 +15,6 @@ import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';
 import { isTruthy } from '#src/utils/utils';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
@@ -23,6 +23,7 @@ import type {
   HousingProjectSearchParameters,
   HousingProjectStatistics,
   LocalContext,
+  PatchHousingProjectRequest,
   StatisticsFilters
 } from '#types';
 
@@ -80,22 +81,19 @@ export const searchHousingProjectsController = async (
   res.status(200).json(response);
 };
 
-export const updateHousingProjectController = async (
-  req: Request<{ housingProjectId: string }, never, Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>>,
+export const patchHousingProjectController = async (
+  req: Request<{ housingProjectId: string }, never, PatchHousingProjectRequest>,
   res: Response
 ) => {
-  const response = await updateHousingProjectService(
-    {
-      ...req.body,
-      financiallySupported: [
-        req.body.financiallySupportedBc,
-        req.body.financiallySupportedIndigenous,
-        req.body.financiallySupportedNonProfit,
-        req.body.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES)
-    },
-    req.params.housingProjectId
-  );
+  const response = await patchHousingProjectService(req.params.housingProjectId, {
+    ...req.body,
+    financiallySupported: [
+      req.body.financiallySupportedBc,
+      req.body.financiallySupportedIndigenous,
+      req.body.financiallySupportedNonProfit,
+      req.body.financiallySupportedHousingCoop
+    ].includes(BasicResponse.YES)
+  });
   res.status(200).json(response);
 };
 

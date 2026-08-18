@@ -160,7 +160,7 @@ export async function searchProjects(req: ListGeneralProjectsRequest): Promise<G
 export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject> {
   const { ...body } = req;
 
-  return api.put<GeneralProject>(generalProjectRoutes.submitDraft(), body);
+  return api.post<GeneralProject>(generalProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -171,7 +171,7 @@ export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promis
 export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  return api.put<Draft<FormSchemaType>>(generalProjectRoutes.draft(), body);
+  return api.post<Draft<FormSchemaType>>(generalProjectRoutes.draft(), body);
 }
 
 /**

@@ -54,13 +54,13 @@ router.post(
   createEnquiryController
 );
 
-/** Updates an enquiry */
+/** Patches an enquiry */
 router.patch(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
   hasAccess('enquiryId'),
-  enquiryValidator.updateEnquiry,
-  updateEnquiryController
+  enquiryValidator.patchEnquiry,
+  patchEnquiryController
 );
 
 /** Deletes an enquiry */

@@ -9,7 +9,6 @@ import {
 } from '#src/services/enquiry';
 import { isTruthy } from '#src/utils/utils';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
 
@@ -69,10 +68,10 @@ export const searchEnquiriesController = async (
   res.status(200).json(response);
 };
 
-export const updateEnquiryController = async (
-  req: Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+export const patchEnquiryController = async (
+  req: Request<{ enquiryId: string }, never, PatchEnquiryRequest>,
   res: Response
 ) => {
-  const response = await updateEnquiryService(req.body, req.params.enquiryId);
+  const response = await patchEnquiryService(req.params.enquiryId, req.body);
   res.status(200).json(response);
 };

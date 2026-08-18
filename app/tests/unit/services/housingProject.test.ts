@@ -296,19 +296,19 @@ describe('housingProject service', () => {
     });
   });
 
-  describe('updateHousingProjectService', () => {
+  describe('patchHousingProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { submittedAt: new Date() };
-      mockRepos.housingProject.update.mockResolvedValueOnce({} as never);
+      const updateData = { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId, submittedAt: new Date() };
+      mockRepos.housingProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
 
-      const response = await housingProjectService.updateHousingProjectService(
-        updateData,
-        TEST_HOUSING_PROJECT_1.housingProjectId
+      const response = await housingProjectService.patchHousingProjectService(
+        TEST_HOUSING_PROJECT_1.housingProjectId,
+        updateData
       );
 
-      expect(mockRepos.housingProject.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.housingProject.update).toHaveBeenCalledWith(
+      expect(mockRepos.housingProject.patch).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.patch).toHaveBeenCalledWith(
         { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId },
         updateData
       );

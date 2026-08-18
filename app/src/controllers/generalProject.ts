@@ -6,6 +6,7 @@ import {
   getGeneralProjectStatisticsService,
   listGeneralProjectActivityIdsService,
   listGeneralProjectsService,
+  patchGeneralProjectService,
   searchGeneralProjects,
   submitGeneralProjectDraftService,
   updateGeneralProjectService
@@ -14,7 +15,6 @@ import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';
 import { isTruthy } from '#src/utils/utils';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
@@ -22,6 +22,7 @@ import type {
   GeneralProjectIntake,
   GeneralProjectSearchParameters,
   LocalContext,
+  PatchGeneralProjectRequest,
   StatisticsFilters
 } from '#types';
 
@@ -76,16 +77,11 @@ export const searchGeneralProjectsController = async (
   res.status(200).json(response);
 };
 
-export const updateGeneralProjectController = async (
-  req: Request<{ generalProjectId: string }, never, Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>>,
+export const patchGeneralProjectController = async (
+  req: Request<{ generalProjectId: string }, never, PatchGeneralProjectRequest>,
   res: Response
 ) => {
-  const response = await updateGeneralProjectService(
-    {
-      ...req.body
-    },
-    req.params.generalProjectId
-  );
+  const response = await patchGeneralProjectService(req.params.generalProjectId, req.body);
   res.status(200).json(response);
 };
 
