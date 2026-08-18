@@ -6,7 +6,6 @@ import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { confirmationTemplateElectrificationSubmission } from '../utils/templates.ts';
 
-import type { Prisma } from '@prisma/client';
 import type {
   ContactBase,
   CurrentAuthorization,
@@ -15,7 +14,8 @@ import type {
   ElectrificationProjectIntake,
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
-  Maybe
+  Maybe,
+  PatchElectrificationProjectRequest
 } from '../types/index.ts';
 
 export const createElectrificationProjectService = async (
@@ -212,20 +212,23 @@ export const submitElectrificationProjectDraftService = async (
 
 /**
  * Updates a specific electrification project
- * @param data Electrification project to update
  * @param electrificationProjectId ID of the project to update
+ * @param data Electrification project to update
  * @returns A Promise that resolves to the updated electrification project
  */
-export const updateElectrificationProjectService = async (
-  data: Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>,
-  electrificationProjectId: string
+export const patchElectrificationProjectService = async (
+  electrificationProjectId: string,
+  data: PatchElectrificationProjectRequest
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(async ({ electrificationProject }) => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { electrificationProjectId: _id, ...rest } = data;
+
     await electrificationProject.update(
       {
         electrificationProjectId
       },
-      data
+      rest
     );
 
     return await electrificationProject.findFirstOrThrow({

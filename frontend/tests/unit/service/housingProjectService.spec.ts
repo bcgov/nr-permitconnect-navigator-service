@@ -24,7 +24,6 @@ vi.mock('@/services/interceptors', () => ({
 describe('housingProject service', () => {
   const mockGet = vi.fn();
   const mockPost = vi.fn();
-  const mockPut = vi.fn();
   const mockPatch = vi.fn();
   const mockDelete = vi.fn();
 
@@ -36,7 +35,6 @@ describe('housingProject service', () => {
     vi.mocked(appAxios).mockReturnValue({
       get: mockGet,
       post: mockPost,
-      put: mockPut,
       patch: mockPatch,
       delete: mockDelete
     } as never);
@@ -250,19 +248,19 @@ describe('housingProject service', () => {
         projectId: 'project-1'
       };
 
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: project
       });
 
       const result = await submitDraft(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft/submit`, request, undefined);
+      expect(mockPost).toHaveBeenCalledWith(`${PATH}/draft/submit`, request, undefined);
 
       expect(result).toEqual(project);
     });
 
     it('propagates errors', async () => {
-      mockPut.mockRejectedValue(new Error('failed'));
+      mockPost.mockRejectedValue(new Error('failed'));
 
       await expect(submitDraft({} as never)).rejects.toThrow('failed');
     });
@@ -334,19 +332,19 @@ describe('housingProject service', () => {
         draftId: 'draft-1'
       };
 
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: draft
       });
 
       const result = await upsertDraft(draft as never);
 
-      expect(mockPut).toHaveBeenCalledWith(`${PATH}/draft`, draft, undefined);
+      expect(mockPost).toHaveBeenCalledWith(`${PATH}/draft`, draft, undefined);
 
       expect(result).toEqual(draft);
     });
 
     it('propagates errors', async () => {
-      mockPut.mockRejectedValue(new Error('failed'));
+      mockPost.mockRejectedValue(new Error('failed'));
 
       await expect(upsertDraft({} as never)).rejects.toThrow('failed');
     });

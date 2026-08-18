@@ -10,9 +10,9 @@ import {
   getHousingProjectStatisticsController,
   listHousingProjectActivityIdsController,
   listHousingProjectsController,
+  patchHousingProjectController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
-  updateHousingProjectController,
   upsertHousingProjectDraftController
 } from '../../controllers/housingProject.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
@@ -64,10 +64,10 @@ router.get(
 router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
-router.put('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), upsertHousingProjectDraftController);
+router.post('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), upsertHousingProjectDraftController);
 
 /** Creates or updates an intake and set status to Submitted */
-router.put(
+router.post(
   '/draft/submit',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
   housingProjectValidator.createHousingProject,
@@ -101,13 +101,13 @@ router.get(
   getHousingProjectController
 );
 
-/** Updates a housing project*/
+/** Patches a housing project*/
 router.patch(
   '/:housingProjectId',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE),
   hasAccess('housingProjectId'),
-  housingProjectValidator.updateHousingProject,
-  updateHousingProjectController
+  housingProjectValidator.patchHousingProject,
+  patchHousingProjectController
 );
 
 /** Deletes a housing project */

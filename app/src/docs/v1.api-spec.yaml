@@ -559,9 +559,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateElectrificationEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchElectrificationEnquiry
       tags:
         - Electrification Enquiry
       parameters:
@@ -571,7 +571,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -1023,9 +1023,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a electrification project
-      operationId: updateElectrificationProject
+    patch:
+      summary: Partially update a electrification project
+      operationId: patchElectrificationProject
       tags:
         - Electrification Project
       parameters:
@@ -1035,7 +1035,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-ElectrificationProjectUpdate'
+              $ref: '#/components/schemas/Request-ElectrificationProjectPatch'
       responses:
         '200':
           description: Electrification Project updated successfully
@@ -1535,9 +1535,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateGeneralEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchGeneralEnquiry
       tags:
         - General Enquiry
       parameters:
@@ -1547,7 +1547,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -1911,9 +1911,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a general project
-      operationId: updateGeneralProject
+    patch:
+      summary: Partially update a general project
+      operationId: patchGeneralProject
       tags:
         - General Project
       parameters:
@@ -1923,7 +1923,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-GeneralProjectUpdate'
+              $ref: '#/components/schemas/Request-GeneralProjectPatch'
       responses:
         '200':
           description: General Project updated successfully
@@ -2430,9 +2430,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateHousingEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchHousingEnquiry
       tags:
         - Housing Enquiry
       parameters:
@@ -2442,7 +2442,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -2894,9 +2894,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a housing project
-      operationId: updateHousingProject
+    patch:
+      summary: Partially update a housing project
+      operationId: patchHousingProject
       tags:
         - Housing Project
       parameters:
@@ -2906,7 +2906,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-HousingProjectUpdate'
+              $ref: '#/components/schemas/Request-HousingProjectPatch'
       responses:
         '200':
           description: Housing Project updated successfully
@@ -4541,6 +4541,57 @@ components:
             $ref: '#/components/schemas/DB-Contact'
         basic:
           $ref: '#/components/schemas/Enquiry-Basic'
+    Request-EnquiryPatch:
+      title: Request to Partially Update an Enquiry
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        enquiryId is supplied via the path parameter, not the body.
+      type: object
+      properties:
+        submissionType:
+          type: string
+          description: The submission type of the enquiry
+          example: Guidance
+          nullable: true
+        relatedActivityId:
+          type: string
+          description: Activity ID of a related project
+          example: D95F1DE6
+          maxLength: 255
+          nullable: true
+        enquiryDescription:
+          type: string
+          description: Description of the enquiry
+          example: Enquiry description example.
+          nullable: true
+        assignedUserId:
+          type: string
+          description: User ID assigned to the enquiry
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+        enquiryStatus:
+          type: string
+          description: Status of the enquiry
+          example: New
+        submittedMethod:
+          type: string
+          description: Method the enquiry was submitted through
+          example: PCNS
+        addedToAts:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+          example: 1001
+          nullable: true
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
+          nullable: true
     Request-Document:
       type: object
       properties:
@@ -4999,53 +5050,122 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-    Request-ElectrificationProjectUpdate:
-      title: Request to Update Electrification Project
+    Request-ElectrificationProjectPatch:
+      title: Request to Partially Update Electrification Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        electrificationProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - housingProjectId
-        - activityId
-        - submittedAt
       properties:
-        electrificationProjectId:
+        projectName:
           type: string
-          description: UUID for the electrification project
+          description: Name of the Project
+          example: New Project
+          maxLength: 255
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+          maxLength: 255
+          nullable: true
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
+          maxLength: 255
+          nullable: true
+        projectType:
+          type: string
+          description: Type of electrification project
+          example: New Connection
+        bcHydroNumber:
+          type: string
+          description: BC Hydro account number
+          example: '1234567890'
+          maxLength: 255
+          nullable: true
+        projectDescription:
+          type: string
+          description: Description of the project. Required when projectType is "Other".
+          example: Project description example.
+          maxLength: 4000
+          nullable: true
+        projectCategory:
+          type: string
+          description: Category of the electrification project
+          example: Generation
+          nullable: true
+        assignedUserId:
+          type: string
+          description: User ID assigned to the electrification project
           format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+        hasEpa:
           type: string
-          description: Activity ID
-          example: D95F1DE6
-        submittedAt:
+          description: Whether the project has an Electricity Purchase Agreement
+          example: 'Yes'
+          nullable: true
+        megawatts:
+          type: number
+          description: Project capacity in megawatts
+          example: 25.5
+          nullable: true
+        bcEnvironmentAssessNeeded:
           type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
-    Request-GeneralProjectUpdate:
-      title: Request to Update General Project
+          description: Whether a BC environmental assessment is needed
+          example: 'No'
+          nullable: true
+        locationDescription:
+          type: string
+          description: Description of the location of the project
+          example: Near the river
+          maxLength: 4000
+          nullable: true
+        astNotes:
+          type: string
+          description: Notes from AST
+          example: AST notes here
+          maxLength: 4000
+          nullable: true
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          format: integer
+          example: 2
+        submissionType:
+          type: string
+          description: The submission type of the project
+          example: Guidance
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        addedToAts:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+          example: ATS-001
+          nullable: true
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
+          nullable: true
+        aaiUpdated:
+          type: boolean
+          description: Updated by AAI
+          example: false
+    Request-GeneralProjectPatch:
+      title: Request to Partially Update General Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        generalProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - generalProjectId
-        - activityId
-        - queuePriority
-        - submissionType
-        - submittedAt
-        - projectName
-        - naturalDisaster
-        - addedToAts
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - aaiUpdated
       properties:
-        generalProjectId:
-          type: string
-          description: UUID for the general project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
         queuePriority:
           type: number
           description: Navigator assigned priority rank
@@ -5056,19 +5176,22 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
         projectName:
           type: string
           description: Name of the Project
           example: New Project
+        activityType:
+          type: string
+          description: Type of activity
+          example: General
         projectDescription:
           type: string
           description: Description of the project
@@ -5108,31 +5231,23 @@ components:
           example: http://geomark.com
           maxLength: 255
         naturalDisaster:
-          type: string
+          type: boolean
           description: Is it affected by a natural disaster?
-          example: 'No'
+          example: false
         projectLocationDescription:
           type: string
           description: Description of the location of the project
           example: Near the river
           maxLength: 4000
-        addedToAts:
-          type: boolean
-          description: Whether added to ATS
-          example: false
         atsClientId:
           type: number
           description: Client number from ATS
           example: ATS-001
           maxLength: 255
-        ltsaCompleted:
-          type: boolean
-          description: Ltsa completed
-          example: false
-        bcOnlineCompleted:
-          type: boolean
-          description: BC Online completed
-          example: false
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
         aaiUpdated:
           type: boolean
           description: Updated by AAI
@@ -5144,43 +5259,36 @@ components:
           maxLength: 4000
         assignedUserId:
           type: string
-          description: User ID assigned to the housing project
+          description: User ID assigned to the general project
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
         applicationStatus:
           type: string
           description: Status of the application
           example: New
-    Request-HousingProjectUpdate:
-      title: Request to Update Housing Project
+        region:
+          type: string
+          description: Region of the project
+          example: North
+        area:
+          type: string
+          description: Area of the project
+          example: North East
+        businessArea:
+          type: string
+          description: Business area code
+          example: FLNR
+    Request-HousingProjectPatch:
+      title: Request to Partially Update Housing Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        housingProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - housingProjectId
-        - activityId
-        - queuePriority
-        - submissionType
-        - submittedAt
-        - projectName
-        - hasRentalUnits
-        - financiallySupportedBc
-        - financiallySupportedIndigenous
-        - financiallySupportedNonProfit
-        - financiallySupportedHousingCoop
-        - naturalDisaster
-        - addedToAts
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - aaiUpdated
       properties:
-        housingProjectId:
-          type: string
-          description: UUID for the housing project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
+        consentToFeedback:
+          type: boolean
+          description: Whether the applicant consented to being contacted for feedback
+          example: false
         queuePriority:
           type: number
           description: Navigator assigned priority rank
@@ -5191,15 +5299,14 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
         projectName:
           type: string
           description: Name of the Project
@@ -5300,9 +5407,9 @@ components:
           example: http://geomark.com
           maxLength: 255
         naturalDisaster:
-          type: string
+          type: boolean
           description: Is it affected by a natural disaster?
-          example: 'No'
+          example: false
         projectLocationDescription:
           type: string
           description: Description of the location of the project
@@ -5317,6 +5424,10 @@ components:
           description: Client number from ATS
           example: ATS-001
           maxLength: 255
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
         ltsaCompleted:
           type: boolean
           description: Ltsa completed

@@ -75,12 +75,12 @@ const schema = {
       projectCategory: Joi.array().items(Joi.string().custom(requireValidCode.ElectrificationProjectCategory))
     })
   },
-  updateElectrificationProject: {
+  patchElectrificationProject: {
     body: Joi.object({
-      projectName: Joi.string().required().max(255).trim(),
+      projectName: Joi.string().max(255).trim(),
       companyNameRegistered: Joi.string().max(255).trim().allow(null),
       companyIdRegistered: Joi.string().max(255).trim().allow(null),
-      projectType: Joi.string().required().custom(requireValidCode.ElectrificationProjectType),
+      projectType: Joi.string().custom(requireValidCode.ElectrificationProjectType),
       bcHydroNumber: Joi.string().max(255).trim().allow(null),
       projectDescription: Joi.when('projectType', {
         is: ProjectType.OTHER,
@@ -98,13 +98,11 @@ const schema = {
         .allow(null),
       locationDescription: Joi.string().max(4000).allow(null),
       astNotes: Joi.string().max(4000).allow(null),
-      queuePriority: Joi.number().integer().required().min(0).max(3),
-      submissionType: Joi.string()
-        .required()
-        .valid(...SUBMISSION_TYPE_LIST),
+      queuePriority: Joi.number().integer().min(0).max(3),
+      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
       ...atsValidator.atsEnquirySubmissionFields,
-      aaiUpdated: Joi.boolean().required()
+      aaiUpdated: Joi.boolean()
     }),
     params: Joi.object({
       electrificationProjectId: uuidv4.required()
@@ -120,5 +118,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getElectrificationProject: validate(schema.getElectrificationProject),
   searcElectrificationProjects: validate(schema.searchElectrificationProjects),
-  updateElectrificationProject: validate(schema.updateElectrificationProject)
+  patchElectrificationProject: validate(schema.patchElectrificationProject)
 };

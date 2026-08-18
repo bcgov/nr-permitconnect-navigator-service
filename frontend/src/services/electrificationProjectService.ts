@@ -160,7 +160,7 @@ export async function searchProjects(req: ListElectrificationProjectsRequest): P
 export async function submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject> {
   const { ...body } = req;
 
-  return api.put<ElectrificationProject>(electrificationProjectRoutes.submitDraft(), body);
+  return api.post<ElectrificationProject>(electrificationProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -171,7 +171,7 @@ export async function submitDraft(req: SubmitDraftElectrificationProjectRequest)
 export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  return api.put<Draft<FormSchemaType>>(electrificationProjectRoutes.draft(), body);
+  return api.post<Draft<FormSchemaType>>(electrificationProjectRoutes.draft(), body);
 }
 
 /**

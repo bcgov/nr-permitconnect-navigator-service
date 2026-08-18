@@ -4,14 +4,19 @@ import {
   getEnquiryService,
   listEnquiriesService,
   listRelatedEnquiriesService,
-  searchEnquiriesService,
-  updateEnquiryService
+  patchEnquiryService,
+  searchEnquiriesService
 } from '../services/enquiry.ts';
 import { isTruthy } from '../utils/utils.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../types/index.ts';
+import type {
+  Enquiry,
+  EnquiryIntake,
+  EnquirySearchParameters,
+  LocalContext,
+  PatchEnquiryRequest
+} from '../types/index.ts';
 
 export const createEnquiryController = async (
   req: Request<never, never, EnquiryIntake>,
@@ -69,10 +74,10 @@ export const searchEnquiriesController = async (
   res.status(200).json(response);
 };
 
-export const updateEnquiryController = async (
-  req: Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+export const patchEnquiryController = async (
+  req: Request<{ enquiryId: string }, never, PatchEnquiryRequest>,
   res: Response
 ) => {
-  const response = await updateEnquiryService(req.body, req.params.enquiryId);
+  const response = await patchEnquiryService(req.params.enquiryId, req.body);
   res.status(200).json(response);
 };

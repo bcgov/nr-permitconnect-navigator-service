@@ -6,15 +6,14 @@ import {
   getElectrificationProjectStatisticsService,
   listElectrificationProjectActivityIdsService,
   listElectrificationProjectsService,
+  patchElectrificationProjectService,
   searchElectrificationProjects,
-  submitElectrificationProjectDraftService,
-  updateElectrificationProjectService
+  submitElectrificationProjectDraftService
 } from '../services/electrificationProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { DraftCode } from '../utils/enums/projectCommon.ts';
 import { isTruthy } from '../utils/utils.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
@@ -23,6 +22,7 @@ import type {
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
   LocalContext,
+  PatchElectrificationProjectRequest,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -86,20 +86,11 @@ export const searchElectrificationProjectsController = async (
   res.status(200).json(response);
 };
 
-export const updateElectrificationProjectController = async (
-  req: Request<
-    { electrificationProjectId: string },
-    never,
-    Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>
-  >,
+export const patchElectrificationProjectController = async (
+  req: Request<{ electrificationProjectId: string }, never, PatchElectrificationProjectRequest>,
   res: Response
 ) => {
-  const response = await updateElectrificationProjectService(
-    {
-      ...req.body
-    },
-    req.params.electrificationProjectId
-  );
+  const response = await patchElectrificationProjectService(req.params.electrificationProjectId, req.body);
   res.status(200).json(response);
 };
 
