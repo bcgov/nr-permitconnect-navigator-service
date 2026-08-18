@@ -33,10 +33,12 @@ export interface FormContextOptions {
   piniaState?: MountComponentOptions['piniaState'];
   /** See PiniaOptions.configurePinia in mountComponent.ts for caveats */
   configurePinia?: MountComponentOptions['configurePinia'];
+  /** Injection keys/values, e.g. { [someKey]: ref('x') } */
+  provide?: MountComponentOptions['provide'];
 }
 
 export function mountWithFormContext(component: Component, options: FormContextOptions = {}) {
-  const { fields, formProps, componentProps, stubs, plugins, piniaState, configurePinia } = options;
+  const { fields, formProps, componentProps, stubs, plugins, piniaState, configurePinia, provide } = options;
 
   return mountComponent(component, {
     props: componentProps,
@@ -44,6 +46,7 @@ export function mountWithFormContext(component: Component, options: FormContextO
     plugins,
     piniaState,
     configurePinia,
+    provide,
     formContext: { fields, formProps }
   });
 }

@@ -16,7 +16,7 @@ const { tab = 0 } = defineProps<{
 const { t } = useI18n();
 
 // State
-const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+const formRef: Ref<ComponentPublicInstance | Element | null> = ref(null);
 
 // Actions
 useFormErrorWatcher(formRef, 'RelatedEnquiriesSection', tab);

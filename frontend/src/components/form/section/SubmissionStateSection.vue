@@ -38,7 +38,7 @@ const { getProject } = storeToRefs(useProjectStore());
 const { getEnquiry } = storeToRefs(useEnquiryStore());
 
 // State
-const formRef: Ref<ComponentPublicInstance | null> = ref(null);
+const formRef: Ref<ComponentPublicInstance | Element | null> = ref(null);
 
 // Actions
 useFormErrorWatcher(formRef, 'SubmissionStateSection', tab);
