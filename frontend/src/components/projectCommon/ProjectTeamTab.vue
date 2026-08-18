@@ -141,14 +141,16 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
       if (!getProject.value?.activityId) throw new Error('No activity ID');
 
-      const response = await activityContactService.createActivityContact({
+      const created = await activityContactService.createActivityContact({
         activityId: getProject.value.activityId,
         contactId: contact.contactId,
         role
       });
 
+      const activityContact: ActivityContact = { ...created, contact };
+
       // Update store
-      projectStore.addActivityContact(response);
+      projectStore.addActivityContact(activityContact);
 
       successes.push({ role, contact });
     } catch (error) {
@@ -188,8 +190,14 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
     });
 
     // Update store
-    projectStore.updateActivityContact(updated);
-    if (demoted) projectStore.updateActivityContact(demoted);
+    const updatedWithContact = { ...updated, contact: contact.contact };
+    projectStore.updateActivityContact(updatedWithContact);
+
+    if (demoted) {
+      const originalDemoted = getActivityContacts.value.find((ac) => ac.contactId === demoted.contactId);
+      const demotedWithContact = { ...demoted, contact: originalDemoted?.contact };
+      projectStore.updateActivityContact(demotedWithContact);
+    }
 
     // Close modal on success
     manageUserModalVisible.value = false;

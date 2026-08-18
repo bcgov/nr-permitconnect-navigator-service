@@ -1,4 +1,9 @@
-import { TEST_CONTACT_1, TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import {
+  TEST_ACTIVITY_CONTACT_1,
+  TEST_CONTACT_1,
+  TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+  TEST_CURRENT_CONTEXT
+} from '../data/index.ts';
 import {
   createActivityContactController,
   deleteActivityContactController,
@@ -10,7 +15,7 @@ import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Contact, LocalContext } from '../../../src/types/index.ts';
+import type { ActivityContact, Contact, LocalContext } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -37,24 +42,24 @@ describe('createActivityContactController', () => {
 
   it('calls the service with authorization, context, activityId, contactId and role then responds 201', async () => {
     const req = {
-      params: { activityId: 'ACTI1234', contactId: TEST_CONTACT_1.contactId },
+      params: { activityId: TEST_ACTIVITY_CONTACT_1.activityId, contactId: TEST_CONTACT_1.contactId },
       body: { role: ActivityContactRole.PRIMARY }
     } as unknown as Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>;
 
-    createSpy.mockResolvedValue(TEST_CONTACT_1);
+    createSpy.mockResolvedValue(TEST_ACTIVITY_CONTACT_1);
 
-    await createActivityContactController(req, res as unknown as Response<Contact, LocalContext>);
+    await createActivityContactController(req, res as unknown as Response<ActivityContact, LocalContext>);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
     expect(createSpy).toHaveBeenCalledWith(
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
       TEST_CURRENT_CONTEXT,
-      'ACTI1234',
+      TEST_ACTIVITY_CONTACT_1.activityId,
       TEST_CONTACT_1.contactId,
       ActivityContactRole.PRIMARY
     );
     expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_CONTACT_1);
+    expect(res.json).toHaveBeenCalledWith(TEST_ACTIVITY_CONTACT_1);
   });
 });
 

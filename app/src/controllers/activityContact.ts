@@ -7,11 +7,11 @@ import {
 import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
 
 import type { Request, Response } from 'express';
-import type { Contact, LocalContext } from '../types/index.ts';
+import type { ActivityContact, LocalContext } from '../types/index.ts';
 
 export const createActivityContactController = async (
   req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,
-  res: Response<Contact, LocalContext>
+  res: Response<ActivityContact, LocalContext>
 ) => {
   const response = await createActivityContactService(
     res.locals.currentAuthorization,

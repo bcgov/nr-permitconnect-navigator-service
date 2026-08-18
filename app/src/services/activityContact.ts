@@ -25,7 +25,7 @@ export const createActivityContactService = async (
       if (role === ActivityContactRole.PRIMARY)
         await verifyPrimaryChange({ activityContact, contact }, activityId, currentAuthorization, currentContext);
 
-      await activityContact.create({
+      const created = await activityContact.create({
         activityId,
         contactId,
         role
@@ -62,7 +62,7 @@ export const createActivityContactService = async (
         }
       }
 
-      return linkedContact;
+      return created;
     }
   );
 };
@@ -168,7 +168,7 @@ export const updateActivityContactService = async (
           }
         },
         {
-          role: ActivityContactRole.ADMIN
+          role: role
         }
       );
 
