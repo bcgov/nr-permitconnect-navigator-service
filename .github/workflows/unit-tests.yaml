@@ -63,7 +63,7 @@ jobs:
         run: |
           echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_APP != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
@@ -130,7 +130,7 @@ jobs:
         run: |
           echo "HAS_SONAR_SECRETS=${{ secrets.SONAR_TOKEN_FRONTEND != '' }}" >> $GITHUB_OUTPUT
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ matrix.node-version }}
       - name: Cache node modules
