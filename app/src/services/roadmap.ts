@@ -1,4 +1,6 @@
 import { randomUUID } from 'node:crypto';
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 
 import { PermitStage } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
@@ -9,9 +11,14 @@ import { Problem } from '#src/utils/index';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 import { roadmapTemplate } from '#src/utils/templates';
-import { description } from '../../package.json';
 
 import type { CurrentContext, Email, EmailAttachment, NoteHistory, Permit } from '#types';
+
+// Read at runtime (not statically imported) so tsc doesn't pull package.json into the
+// compiled sbin/ output, which would shadow the real package.json's `imports` map there.
+const { description } = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
+  description: string;
+};
 
 function getPermitTypeNamesByNeeded(permits: Permit[], permitNeeded: PermitNeeded) {
   return permits.filter((p) => p.needed === permitNeeded).map((p) => p.permitType?.name);
