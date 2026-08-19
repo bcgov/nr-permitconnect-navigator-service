@@ -145,7 +145,7 @@ function getRouteNameFromFirstChild(record: RouteRecordRaw) {
       </router-link>
       <span
         v-else
-        class="text-[var(p--greyscale-900)] font-[family-name:'BC_Sans',sans-serif] font-bold"
+        class="text-[var(--p-greyscale-900)] font-[family-name:'BC_Sans',sans-serif] font-bold"
       >
         {{ item.label }}
       </span>

@@ -24,7 +24,8 @@ const copyToClipboard = () => {
 <template>
   <Button
     v-if="mode === ButtonMode.ICON"
-    class="p-button-rounded-sm p-button-secondary p-button-outlined"
+    rounded
+    class="p-button-secondary p-button-outlined"
     @click="copyToClipboard"
   >
     <font-awesome-icon icon="fa fa-clipboard" />
