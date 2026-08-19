@@ -93,7 +93,7 @@ route:
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   host: chart-example.local
-  # path: /
+  path: /
   tls:
     insecureEdgeTerminationPolicy: Redirect
     termination: edge
@@ -215,16 +215,13 @@ ssoSecretOverride:
   username: ~
   password: ~
 
-# Patroni subchart configuration overrides
-patroni:
-  # Controls whether to enable managing a Patroni db dependency as a part of the helm release
-  enabled: false
-
-  # replicaCount: 3
-  # resources: {}
-
-  # persistentVolume:
-  #   enabled: false
+database:
+  host: pcns-pgbouncer
+  secretName: pcns-pguser-pcns
+  # secretKeys:
+  #   database: dbname
+  #   username: user
+  #   password: password
 
 peachSync:
   enabled: true

@@ -1,11 +1,21 @@
-{{- if .Values.peachSync.enabled }}
+{{- $dbHostName := .Values.database.host | default .Values.config.configMap.SERVER_DB_HOST -}}
+{{- $dbSecretName := .Values.database.secretName | default (printf "%s-%s" (include "pcns.fullname" .) "passphrase") -}}
 
-{{ $dbHostName := .Values.config.configMap.SERVER_DB_HOST }}
-{{ $dbSecretName := printf "%s-%s" (include "pcns.fullname" .) "passphrase" }}
+{{- $dbDbKey := default "dbname" (and .Values.database .Values.database.secretKeys .Values.database.secretKeys.database) -}}
+{{- $dbUserKey := default "user" (and .Values.database .Values.database.secretKeys .Values.database.secretKeys.username) -}}
+{{- $dbPassKey := default "password" (and .Values.database .Values.database.secretKeys .Values.database.secretKeys.password) -}}
+
+{{- if .Values.patroni }}
 {{- if .Values.patroni.enabled }}
-{{ $dbHostName = include "patroni.fullname" .Subcharts.patroni }}
-{{ $dbSecretName = include "patroni.fullname" .Subcharts.patroni }}
-{{- end }}
+{{- if .Subcharts.patroni }}
+{{- $dbHostName = include "patroni.fullname" .Subcharts.patroni -}}
+{{- $dbSecretName = include "patroni.fullname" .Subcharts.patroni -}}
+{{- $dbDbKey = "app-db-name" -}}
+{{- $dbUserKey = "app-db-username" -}}
+{{- $dbPassKey = "app-db-password" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
 
 apiVersion: batch/v1
 kind: CronJob
@@ -23,7 +33,7 @@ spec:
   jobTemplate:
     metadata:
       labels:
-        {{- include "pcns.peachSyncLabels" . | nindent 6 }}
+        {{- include "pcns.peachSyncSelectorLabels" . | nindent 8 }}
     spec:
       backoffLimit: {{ .Values.peachSync.backoffLimit }}
       activeDeadlineSeconds: {{ .Values.peachSync.activeDeadlineSeconds }}
@@ -55,19 +65,19 @@ spec:
                 - name: SERVER_DB_DATABASE
                   valueFrom:
                     secretKeyRef:
-                      key: app-db-name
+                      key: {{ $dbDbKey }}
                       name: {{ $dbSecretName }}
                 - name: SERVER_DB_HOST
-                  value: {{ $dbHostName }}
+                  value: {{ $dbHostName | quote }}
                 - name: SERVER_DB_USERNAME
                   valueFrom:
                     secretKeyRef:
-                      key: app-db-username
+                      key: {{ $dbUserKey }}
                       name: {{ $dbSecretName }}
                 - name: SERVER_DB_PASSWORD
                   valueFrom:
                     secretKeyRef:
-                      key: app-db-password
+                      key: {{ $dbPassKey }}
                       name: {{ $dbSecretName }}
                 - name: SERVER_CHES_CLIENTID
                   valueFrom:
@@ -92,4 +102,3 @@ spec:
               envFrom:
                 - configMapRef:
                     name: {{ include "pcns.configname" . }}-config
-{{- end }}

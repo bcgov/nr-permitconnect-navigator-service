@@ -1,0 +1,59 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pcns.fullname" . }}-database-permissions
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 12
+  activeDeadlineSeconds: 1800
+  template:
+    metadata:
+      labels:
+        {{- include "pcns.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: grant-database-permissions
+          image: postgres:16
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: PGHOST
+              value: pcns-primary
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: postgres
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: pcns-pguser-postgres
+                  key: user
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: pcns-pguser-postgres
+                  key: password
+            - name: APP_DATABASE
+              value: pcns
+            - name: APP_USER
+              value: pcns
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              until pg_isready; do
+                sleep 5
+              done
+
+              psql -v ON_ERROR_STOP=1 \
+                -d pcns \
+                -c 'GRANT ALL ON SCHEMA public TO "pcns";'
+
+              psql -v ON_ERROR_STOP=1 \
+                -d postgres \
+                -c 'ALTER DATABASE "pcns" OWNER TO "pcns";'

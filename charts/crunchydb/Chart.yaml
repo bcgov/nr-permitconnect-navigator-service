@@ -1,0 +1,13 @@
+apiVersion: v2
+name: crunchydb
+description: Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
+type: application
+version: 0.1.0
+appVersion: "16"
+dependencies:
+  - name: crunchy-postgres
+    version: 0.6.6
+    repository: https://bcgov.github.io/crunchy-postgres/
+  - name: crunchy-postgres-tools
+    version: 0.3.0
+    repository: https://bcgov.github.io/crunchy-postgres/
