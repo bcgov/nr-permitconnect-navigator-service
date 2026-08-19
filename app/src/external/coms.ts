@@ -1,11 +1,11 @@
 import axios from 'axios';
 import config from 'config';
 
-import { Action, GroupName } from '../utils/enums/application.ts';
-import { Problem, uuidValidateV4 } from '../utils/index.ts';
+import { Action, GroupName } from '#src/utils/enums/application';
+import { Problem, uuidValidateV4 } from '#src/utils/index';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { CurrentContext, Group } from '../types/index.ts';
+import type { CurrentContext, Group } from '#types';
 
 /**
  * PCNS Groups to COMS Permission mappings

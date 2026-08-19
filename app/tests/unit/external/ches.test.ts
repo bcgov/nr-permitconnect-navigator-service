@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-import { prismaMock } from '../../__mocks__/prismaMock.ts';
-import * as emailService from '../../../src/external/ches.ts';
+import { prismaMock } from '#tests/__mocks__/prismaMock';
+import * as emailService from '#src/external/ches';
 
 import type { InternalAxiosRequestConfig } from 'axios';
-import type { Email } from '../../../src/types/index.ts';
+import type { Email } from '#types';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');

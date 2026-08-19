@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { PermitTrackingRepository } from '../../../src/repositories/permitTracking.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { PermitTrackingRepository } from '#src/repositories/permitTracking';
 
 // Construct the real repo
 const makeRepo = () => new PermitTrackingRepository(prismaTxMock, 'principal-id');

@@ -1,10 +1,10 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { GroupName } from '../utils/enums/application.ts';
-import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
-import { Problem } from '../utils/index.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { GroupName } from '#src/utils/enums/application';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import { Problem } from '#src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { LocalContext } from '../types/index.ts';
+import type { LocalContext } from '#types';
 
 /**
  * Verify requesting user has elevated priviledges on the requested activity

@@ -1,18 +1,18 @@
-import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
+import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_NOTE_HISTORY_1 } from '#tests/unit/data/index';
 import {
   createNoteHistoryController,
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
   updateNoteHistoryController
-} from '../../../src/controllers/noteHistory.ts';
-import * as noteHistoryService from '../../../src/services/noteHistory.ts';
-import { Resource } from '../../../src/utils/enums/application.ts';
-import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/controllers/noteHistory';
+import * as noteHistoryService from '#src/services/noteHistory';
+import { Resource } from '#src/utils/enums/application';
+import { BringForwardType } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { LocalContext, NoteHistory } from '../../../src/types/index.ts';
+import type { LocalContext, NoteHistory } from '#types';
 
 vi.mock('config');
 

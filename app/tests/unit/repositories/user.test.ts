@@ -1,7 +1,7 @@
-import { TEST_IDIR_USER_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { UserRepository } from '../../../src/repositories/user.ts';
-import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
+import { TEST_IDIR_USER_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { UserRepository } from '#src/repositories/user';
+import { SYSTEM_ID } from '#src/utils/constants/application';
 
 // Construct the real repo - its constructor picks tx.user, so prismaTxMock.user
 // acts as the deep-mocked delegate. prismaMock setup resets it before each test.

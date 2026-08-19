@@ -3,17 +3,17 @@ import {
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
   TEST_IDIR_USER_1
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createUserAccessRequestController,
   getAccessRequestsController,
   processUserAccessRequestController
-} from '../../../src/controllers/accessRequest.ts';
-import * as accessRequestService from '../../../src/services/accessRequest.ts';
+} from '#src/controllers/accessRequest';
+import * as accessRequestService from '#src/services/accessRequest';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { AccessRequest, LocalContext, User } from '../../../src/types/index.ts';
+import type { AccessRequest, LocalContext, User } from '#types';
 
 vi.mock('config');
 

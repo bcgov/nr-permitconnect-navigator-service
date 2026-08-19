@@ -1,12 +1,17 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_GROUP_1, TEST_GROUP_2_ADMIN, TEST_INITIATIVE_HOUSING, TEST_SUBJECT_GROUP_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { isUserAdmin, removeUserGroups } from '../../../src/domains/accessRequest.ts';
-import * as yarsDomain from '../../../src/domains/yars.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+import {
+  TEST_GROUP_1,
+  TEST_GROUP_2_ADMIN,
+  TEST_INITIATIVE_HOUSING,
+  TEST_SUBJECT_GROUP_1
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { isUserAdmin, removeUserGroups } from '#src/domains/accessRequest';
+import * as yarsDomain from '#src/domains/yars';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
-import type { Group } from '../../../src/types/index.ts';
+import type { Group } from '#types';
 
 vi.mock('../../../src/domains/yars.ts');
 

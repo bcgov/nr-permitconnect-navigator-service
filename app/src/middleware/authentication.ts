@@ -3,14 +3,14 @@ import jwt from 'jsonwebtoken';
 import { LRUCache } from 'lru-cache';
 
 import { getAuthHeader, getBearerToken, getJwksClient, setAuthHeader } from './providers/oidc.ts';
-import { loginService } from '../services/login.ts';
-import { AuthType } from '../utils/enums/application.ts';
-import { Problem } from '../utils/index.ts';
-import { getLogger } from '../utils/log.ts';
+import { loginService } from '#src/services/login';
+import { AuthType } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
+import { getLogger } from '#src/utils/log';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
-import type { Initiative } from '../utils/enums/application.ts';
+import type { Initiative } from '#src/utils/enums/application';
 
 const log = getLogger(module.filename);
 

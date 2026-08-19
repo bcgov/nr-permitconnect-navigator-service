@@ -5,7 +5,7 @@
 
 import { Prisma } from '@prisma/client';
 
-import type { GroupName, Initiative as InitiativeEnum } from '../../utils/enums/application.ts';
+import type { GroupName, Initiative as InitiativeEnum } from '#src/utils/enums/application';
 
 const accessRequestBase = Prisma.validator<Prisma.access_requestDefaultArgs>()({});
 export type AccessRequestBase = Prisma.access_requestGetPayload<typeof accessRequestBase>;

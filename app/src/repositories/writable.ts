@@ -1,5 +1,5 @@
 import { ReadableRepository } from './readable';
-import { mapPrismaError } from '../db/errors';
+import { mapPrismaError } from '#src/db/errors';
 
 import type { Prisma } from '@prisma/client';
 import type { ReadableModelDelegate } from './readable';

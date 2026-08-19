@@ -1,10 +1,10 @@
 import axios from 'axios';
 import config from 'config';
 
-import { getCurrentUsername } from '../utils/utils.ts';
+import { getCurrentUsername } from '#src/utils/utils';
 
 import type { AxiosInstance } from 'axios';
-import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, CurrentContext } from '../types/index.ts';
+import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, CurrentContext } from '#types';
 
 /**
  * Gets Auth token using ATS client credentials

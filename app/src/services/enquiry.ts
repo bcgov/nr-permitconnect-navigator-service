@@ -1,17 +1,11 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { emailEnquiryConfirmation, generateEnquiryData } from '../domains/enquiry.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { ActivityContactRole, EnquirySubmittedMethod } from '../utils/enums/projectCommon.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enquiry';
+import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
-import type {
-  CurrentAuthorization,
-  CurrentContext,
-  Enquiry,
-  EnquiryIntake,
-  EnquirySearchParameters
-} from '../types/index.ts';
-import type { Initiative } from '../utils/enums/application.ts';
+import type { CurrentAuthorization, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 /**
  * Creates a new enquiry

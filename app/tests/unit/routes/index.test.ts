@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import router from '../../../src/routes/index.ts';
+import router from '#src/routes/index';
 import { state } from '../../../state.ts';
 
 const app = express();

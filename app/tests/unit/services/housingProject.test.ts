@@ -7,16 +7,16 @@ import {
   TEST_HOUSING_PROJECT_1,
   TEST_HOUSING_PROJECT_CREATE,
   TEST_HOUSING_PROJECT_INTAKE
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import prisma from '../../../src/db/database.ts';
-import * as housingProjectDomain from '../../../src/domains/housingProject.ts';
-import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as housingProjectService from '../../../src/services/housingProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { confirmationTemplateHousingSubmission } from '../../../src/utils/templates.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import prisma from '#src/db/database';
+import * as housingProjectDomain from '#src/domains/housingProject';
+import * as permitTrackingDomain from '#src/domains/permitTracking';
+import * as projectDomain from '#src/domains/project';
+import * as responseFiltering from '#src/parsers/responseFiltering';
+import * as housingProjectService from '#src/services/housingProject';
+import { Initiative } from '#src/utils/enums/application';
+import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 vi.mock('config');
 vi.mock('../../../src/db/database.ts', () => ({

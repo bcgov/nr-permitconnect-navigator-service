@@ -1,6 +1,6 @@
-import { TEST_GENERAL_PROJECT_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { GeneralProjectRepository } from '../../../src/repositories/generalProject.ts';
+import { TEST_GENERAL_PROJECT_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { GeneralProjectRepository } from '#src/repositories/generalProject';
 
 import type { Mock } from 'vitest';
 

@@ -8,16 +8,12 @@ import {
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_GENERAL_PROJECT_1,
   TEST_HOUSING_PROJECT_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import {
-  emailProjectConfirmation,
-  getProjectByActivityId,
-  getProjectByProjectId
-} from '../../../src/domains/project.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { Problem } from '../../../src/utils/index.ts';
-import { confirmationTemplateHousingSubmission } from '../../../src/utils/templates.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { emailProjectConfirmation, getProjectByActivityId, getProjectByProjectId } from '#src/domains/project';
+import { Initiative } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
+import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {

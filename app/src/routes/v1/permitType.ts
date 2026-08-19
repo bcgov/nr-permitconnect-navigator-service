@@ -1,11 +1,11 @@
 import express from 'express';
 
-import { listPermitTypesController } from '../../controllers/permitType.ts';
-import { hasAuthorization } from '../../middleware/authorization.ts';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
-import { permitTypeValidator } from '../../validators/index.ts';
+import { listPermitTypesController } from '#src/controllers/permitType';
+import { hasAuthorization } from '#src/middleware/authorization';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { Action, Resource } from '#src/utils/enums/application';
+import { permitTypeValidator } from '#src/validators/index';
 
 const router = express.Router();
 router.use(requireSomeAuth);

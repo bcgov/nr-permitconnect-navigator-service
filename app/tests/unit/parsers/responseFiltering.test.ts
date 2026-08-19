@@ -1,12 +1,12 @@
-import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1 } from '../data';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { filterActivityResponseByScope } from '../../../src/parsers/responseFiltering.ts';
-import { ActivityContactRepository } from '../../../src/repositories/activityContact.ts';
-import { ContactRepository } from '../../../src/repositories/contact.ts';
-import { Problem } from '../../../src/utils';
+import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { ActivityContactRepository } from '#src/repositories/activityContact';
+import { ContactRepository } from '#src/repositories/contact';
+import { Problem } from '#src/utils/index';
 
 import type { Mock } from 'vitest';
-import type { Contact, LocalContext } from '../../../src/types';
+import type { Contact, LocalContext } from '#types';
 
 const makeContactRepo = () => new ContactRepository(prismaTxMock, 'principal-id');
 const makeActivityContactRepo = () => new ActivityContactRepository(prismaTxMock, 'principal-id');

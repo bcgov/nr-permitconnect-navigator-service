@@ -8,15 +8,15 @@ import {
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE,
   TEST_HOUSING_PROJECT_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import { emailEnquiryConfirmation, generateEnquiryData } from '../../../src/domains/enquiry.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as activityDomain from '#src/domains/activity';
+import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enquiry';
+import * as projectDomain from '#src/domains/project';
+import { Initiative } from '#src/utils/enums/application';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { ContactBase, Enquiry } from '../../../src/types/index.ts';
+import type { ContactBase, Enquiry } from '#types';
 
 vi.mock('../../../src/domains/project.ts');
 vi.mock('../../../src/domains/activity.ts');

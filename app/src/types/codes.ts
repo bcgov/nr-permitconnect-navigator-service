@@ -1,7 +1,7 @@
-import { listCodeTablesService } from '../services/code.ts';
+import { listCodeTablesService } from '#src/services/code';
 
 import type { CustomHelpers, ErrorReport } from 'joi';
-import type * as codeEnums from '../db/codes/enums.ts';
+import type * as codeEnums from '#src/db/codes/enums';
 
 export type CodeTableName = keyof typeof codeEnums;
 

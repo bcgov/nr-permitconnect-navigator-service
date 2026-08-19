@@ -1,4 +1,4 @@
-import { deleteActivityService } from '../services/activity.ts';
+import { deleteActivityService } from '#src/services/activity';
 import {
   createEnquiryService,
   getEnquiryService,
@@ -6,12 +6,12 @@ import {
   listRelatedEnquiriesService,
   searchEnquiriesService,
   updateEnquiryService
-} from '../services/enquiry.ts';
-import { isTruthy } from '../utils/utils.ts';
+} from '#src/services/enquiry';
+import { isTruthy } from '#src/utils/utils';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../types/index.ts';
+import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
 
 export const createEnquiryController = async (
   req: Request<never, never, EnquiryIntake>,

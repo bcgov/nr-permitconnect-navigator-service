@@ -4,13 +4,13 @@ import {
   listBringForwardsService,
   listNoteHistoriesService,
   updateNoteHistoryService
-} from '../services/noteHistory.ts';
-import { Initiative } from '../utils/enums/application.ts';
+} from '#src/services/noteHistory';
+import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
-import type { BringForward, LocalContext, NoteHistory } from '../types/index.ts';
-import type { Resource } from '../utils/enums/application.ts';
-import type { BringForwardType } from '../utils/enums/projectCommon.ts';
+import type { BringForward, LocalContext, NoteHistory } from '#types';
+import type { Resource } from '#src/utils/enums/application';
+import type { BringForwardType } from '#src/utils/enums/projectCommon';
 
 export const createNoteHistoryController = async (
   req: Request<never, never, NoteHistory & { note: string }>,

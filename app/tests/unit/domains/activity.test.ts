@@ -9,10 +9,10 @@ import {
   TEST_PERMIT_1,
   TEST_PERMIT_2,
   TEST_PERMIT_3
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { createActivity, deleteActivity } from '../../../src/domains/activity.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { createActivity, deleteActivity } from '#src/domains/activity';
+import { Initiative } from '#src/utils/enums/application';
 
 describe('activity domain', () => {
   beforeEach(() => {

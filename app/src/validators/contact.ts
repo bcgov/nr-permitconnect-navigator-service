@@ -1,9 +1,9 @@
 import Joi from 'joi';
 
 import { email, phoneNumber, uuidv4 } from './common.ts';
-import { validate } from '../middleware/validation.ts';
-import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '../utils/constants/projectCommon.ts';
-import { Initiative } from '../utils/enums/application.ts';
+import { validate } from '#src/middleware/validation';
+import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '#src/utils/constants/projectCommon';
+import { Initiative } from '#src/utils/enums/application';
 
 export const contactSchema = Joi.object({
   contactId: uuidv4.allow(null),

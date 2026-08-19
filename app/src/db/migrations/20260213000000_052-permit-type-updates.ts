@@ -1,4 +1,4 @@
-import { Initiative } from '../../utils/enums/application.ts';
+import { Initiative } from '#src/utils/enums/application';
 
 import type { Knex } from 'knex';
 

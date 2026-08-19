@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../../__mocks__/prismaMock.ts';
-import { GroupRepository } from '../../../../src/repositories/yars/group.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { GroupRepository } from '#src/repositories/yars/group';
 
 // Construct the real repo
 const makeRepo = () => new GroupRepository(prismaTxMock, 'principal-id');

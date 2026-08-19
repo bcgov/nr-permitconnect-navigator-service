@@ -1,7 +1,7 @@
-import { TEST_ACTIVITY_HOUSING } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import { deleteActivityService } from '../../../src/services/activity.ts';
+import { TEST_ACTIVITY_HOUSING } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as activityDomain from '#src/domains/activity';
+import { deleteActivityService } from '#src/services/activity';
 
 vi.mock('config');
 

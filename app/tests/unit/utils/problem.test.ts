@@ -1,4 +1,4 @@
-import Problem from '../../../src/utils/problem.ts';
+import Problem from '#src/utils/problem';
 
 import type { Request, Response } from 'express';
 

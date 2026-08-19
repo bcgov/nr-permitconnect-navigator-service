@@ -4,10 +4,10 @@ import { join } from 'node:path';
 import { cwd } from 'node:process';
 
 import { uuidV4Pattern } from './regexp.ts';
-import { getLogger } from '../utils/log.ts';
+import { getLogger } from '#src/utils/log';
 
 import type { IdentityProviderKind } from './enums/application.ts';
-import type { CurrentContext, DateTimeStrings, IdpAttributes } from '../types/index.ts';
+import type { CurrentContext, DateTimeStrings, IdpAttributes } from '#types';
 
 const log = getLogger(module.filename);
 

@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { IdentityProviderRepository } from '../../../src/repositories/identityProvider.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { IdentityProviderRepository } from '#src/repositories/identityProvider';
 
 // Construct the real repo
 const makeRepo = () => new IdentityProviderRepository(prismaTxMock, 'principal-id');

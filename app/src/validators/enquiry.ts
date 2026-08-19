@@ -3,12 +3,12 @@ import Joi from 'joi';
 import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
-import { validate } from '../middleware/validation.ts';
+import { validate } from '#src/middleware/validation';
 import {
   APPLICATION_STATUS_LIST,
   ENQUIRY_SUBMITTED_METHOD,
   ENQUIRY_TYPE_LIST
-} from '../utils/constants/projectCommon.ts';
+} from '#src/utils/constants/projectCommon';
 
 const schema = {
   createEnquiry: {

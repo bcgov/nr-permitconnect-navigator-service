@@ -15,9 +15,9 @@ import sso from './sso.ts';
 import sourceSystemKind from './sourceSystemKind.ts';
 import user from './user.ts';
 import yars from './yars.ts';
-import { hasAuthentication } from '../../middleware/authentication.ts';
-import { requestContext } from '../../types/context.ts';
-import { Initiative } from '../../utils/enums/application.ts';
+import { hasAuthentication } from '#src/middleware/authentication';
+import { requestContext } from '#src/types/context';
+import { Initiative } from '#src/utils/enums/application';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.PCNS));

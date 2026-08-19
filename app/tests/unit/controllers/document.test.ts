@@ -1,10 +1,6 @@
-import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1 } from '../data/index.ts';
-import {
-  createDocumentController,
-  deleteDocumentController,
-  listDocumentsController
-} from '../../../src/controllers/document.ts';
-import * as documentService from '../../../src/services/document.ts';
+import { TEST_CURRENT_CONTEXT, TEST_DOCUMENT_1 } from '#tests/unit/data/index';
+import { createDocumentController, deleteDocumentController, listDocumentsController } from '#src/controllers/document';
+import * as documentService from '#src/services/document';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

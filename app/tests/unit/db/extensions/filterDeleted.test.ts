@@ -1,7 +1,7 @@
 import { Prisma } from '@prisma/client';
 
 import { captureExtension } from './captureExtension.ts';
-import filterDeletedTransform from '../../../../src/db/extensions/filterDeleted.ts';
+import filterDeletedTransform from '#src/db/extensions/filterDeleted';
 
 const ext = captureExtension(filterDeletedTransform);
 

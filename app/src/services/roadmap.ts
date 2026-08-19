@@ -1,17 +1,17 @@
 import { randomUUID } from 'node:crypto';
 
-import { PermitStage } from '../db/codes/enums';
-import { unitOfWork } from '../db/unitOfWork';
-import { getProjectByActivityId } from '../domains/project';
-import { email } from '../external/ches';
-import { getObject, searchObject } from '../external/coms';
-import { Problem } from '../utils';
-import { PermitNeeded } from '../utils/enums/permit';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
-import { roadmapTemplate } from '../utils/templates';
+import { PermitStage } from '#src/db/codes/enums';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { getProjectByActivityId } from '#src/domains/project';
+import { email } from '#src/external/ches';
+import { getObject, searchObject } from '#src/external/coms';
+import { Problem } from '#src/utils/index';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import { roadmapTemplate } from '#src/utils/templates';
 import { description } from '../../package.json';
 
-import type { CurrentContext, Email, EmailAttachment, NoteHistory, Permit } from '../types';
+import type { CurrentContext, Email, EmailAttachment, NoteHistory, Permit } from '#types';
 
 function getPermitTypeNamesByNeeded(permits: Permit[], permitNeeded: PermitNeeded) {
   return permits.filter((p) => p.needed === permitNeeded).map((p) => p.permitType?.name);

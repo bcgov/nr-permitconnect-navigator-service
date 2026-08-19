@@ -2,7 +2,7 @@ import { mockDeep } from 'vitest-mock-extended';
 
 import { prismaTxMock } from './prismaMock.ts';
 
-import type { Repositories } from '../../src/db/unitOfWork.ts';
+import type { Repositories } from '#src/db/unitOfWork';
 
 export const mockRepos = mockDeep<Repositories>();
 

@@ -6,10 +6,10 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_DRAFT,
   TEST_HOUSING_DRAFT
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as activityDomain from '#src/domains/activity';
+import * as responseFiltering from '#src/parsers/responseFiltering';
 import {
   createDraftService,
   deleteDraftService,
@@ -17,12 +17,12 @@ import {
   listDraftsService,
   updateDraftService,
   upsertDraftService
-} from '../../../src/services/draft.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole, DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/services/draft';
+import { Initiative } from '#src/utils/enums/application';
+import { ActivityContactRole, DraftCode } from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
-import type { DraftBase } from '../../../src/types/index.ts';
+import type { DraftBase } from '#types';
 
 vi.mock('config');
 

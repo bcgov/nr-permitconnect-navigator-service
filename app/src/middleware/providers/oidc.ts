@@ -1,8 +1,8 @@
 import config from 'config';
 import jwksRsa from 'jwks-rsa';
 
-import { Problem } from '../../utils/index.ts';
-import { getLogger } from '../../utils/log.ts';
+import { Problem } from '#src/utils/index';
+import { getLogger } from '#src/utils/log';
 
 import type { Request, Response } from 'express';
 import type { JwksClient } from 'jwks-rsa';

@@ -1,10 +1,10 @@
-import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '../data/index.ts';
-import { searchUsersController } from '../../../src/controllers/user.ts';
-import * as userService from '../../../src/services/user.ts';
+import { TEST_CURRENT_CONTEXT, TEST_IDIR_USER_1 } from '#tests/unit/data/index';
+import { searchUsersController } from '#src/controllers/user';
+import * as userService from '#src/services/user';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { User, UserSearchParameters } from '../../../src/types/index.ts';
+import type { User, UserSearchParameters } from '#types';
 
 vi.mock('config');
 

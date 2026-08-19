@@ -1,8 +1,8 @@
 import { CODE_TABLES } from './tables.ts';
-import { listCodeTablesService } from '../../services/code.ts';
-import { getLogger } from '../../utils/log.ts';
+import { listCodeTablesService } from '#src/services/code';
+import { getLogger } from '#src/utils/log';
 
-import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from '../../types/index.ts';
+import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from '#types';
 
 const log = getLogger(module.filename);
 

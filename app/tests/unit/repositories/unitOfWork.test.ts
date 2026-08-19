@@ -1,10 +1,10 @@
 import { Prisma } from '@prisma/client';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import prisma from '../../../src/db/database.ts';
-import { unitOfWork } from '../../../src/db/unitOfWork.ts';
-import { requestContext } from '../../../src/types/context.ts';
-import { SYSTEM_ID } from '../../../src/utils/constants/application.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import prisma from '#src/db/database';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { requestContext } from '#src/types/context';
+import { SYSTEM_ID } from '#src/utils/constants/application';
 
 // Mock requestContext to control the AsyncLocalStorage output during tests
 vi.mock('../../../src/types/context.ts', () => ({

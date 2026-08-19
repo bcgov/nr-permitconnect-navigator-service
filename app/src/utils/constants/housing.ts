@@ -2,7 +2,7 @@
  * Housing initiative constants
  */
 
-import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '../enums/housing.ts';
+import { NumResidentialUnits, ProjectApplicant, ProjectLocation } from '#src/utils/enums/housing';
 
 export const ADDRESS_CODER_QUERY_PARAMS = {
   echo: false,

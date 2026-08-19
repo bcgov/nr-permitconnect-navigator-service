@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import { Problem } from '../utils';
+import { Problem } from '#src/utils/index';
 
 export class DatabaseProblem extends Problem {
   constructor(detail = 'Database operation failed') {
