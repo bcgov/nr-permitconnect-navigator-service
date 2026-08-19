@@ -61,7 +61,29 @@ describe('AuthorizationStatePill', () => {
     it('applies the badge class for the given state', () => {
       const { wrapper } = mountAuthorizationStatePill({ state: PermitState.DENIED });
 
-      expect(wrapper.find('.auth-indicator').classes()).toContain('red');
+      const rootDiv = wrapper.find('div');
+      expect(rootDiv.classes()).toContain('red');
+    });
+
+    it('applies the green badge class for approved state', () => {
+      const { wrapper } = mountAuthorizationStatePill({ state: PermitState.APPROVED });
+
+      const rootDiv = wrapper.find('div');
+      expect(rootDiv.classes()).toContain('green');
+    });
+
+    it('applies the yellow badge class for pending applicant action state', () => {
+      const { wrapper } = mountAuthorizationStatePill({ state: PermitState.PENDING_APPLICANT_ACTION });
+
+      const rootDiv = wrapper.find('div');
+      expect(rootDiv.classes()).toContain('yellow');
+    });
+
+    it('applies the grey badge class for none state', () => {
+      const { wrapper } = mountAuthorizationStatePill({ state: PermitState.NONE });
+
+      const rootDiv = wrapper.find('div');
+      expect(rootDiv.classes()).toContain('grey');
     });
 
     it('renders an icon for states with an icon configured', () => {
@@ -79,13 +101,19 @@ describe('AuthorizationStatePill', () => {
     it('uses larger dimensions when enlarge is true', () => {
       const { wrapper } = mountAuthorizationStatePill({ enlarge: true });
 
-      expect(wrapper.find('.auth-indicator').attributes('style')).toContain('--font-size: 1rem');
+      const rootDiv = wrapper.find('div');
+      const style = rootDiv.attributes('style');
+      expect(style).toContain('--font-size: 1rem');
+      expect(style).toContain('--height: 2rem');
     });
 
     it('uses the default (smaller) dimensions when enlarge is false', () => {
       const { wrapper } = mountAuthorizationStatePill({ enlarge: false });
 
-      expect(wrapper.find('.auth-indicator').attributes('style')).toContain('--font-size: 0.75rem');
+      const rootDiv = wrapper.find('div');
+      const style = rootDiv.attributes('style');
+      expect(style).toContain('--font-size: 0.75rem');
+      expect(style).toContain('--height: 1.5rem');
     });
   });
 });
