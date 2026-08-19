@@ -341,6 +341,7 @@ onBeforeMount(async () => {
               v-for="permit in getAuthsOnGoing"
               :id="permit.permitId"
               :key="permit.permitId"
+              class="no-underline"
               :to="{
                 name: canNavigate(initiativeState.internalNavigationPermission)
                   ? initiativeState.internalProjectProponentAuthorizationRouteName

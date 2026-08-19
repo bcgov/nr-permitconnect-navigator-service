@@ -180,7 +180,7 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
             <DocumentCard
               :document="document"
               :editable="!getProjectIsCompleted"
-              class="hover-hand hover-shadow"
+              class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)]"
               @click="
                 documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })
               "

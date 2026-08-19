@@ -303,7 +303,7 @@ onBeforeMount(async () => {
         v-else
         :key="project.activityId"
         :index="index"
-        class="rounded-xs shadow-md hover:shadow-lg px-6 py-4 custom-card hover-hand"
+        class="rounded-xs shadow-md hover:shadow-lg px-6 py-4 custom-card cursor-pointer"
         :class="[
           { 'mb-2': index != displayedProjectsInOrder.length - 1 },
           project.applicationStatus === ApplicationStatus.COMPLETED

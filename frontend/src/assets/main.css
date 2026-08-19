@@ -135,50 +135,34 @@ label {
   color: var(--app-label-color);
 }
 
-.app-info-dialog {
-  .p-dialog-header {
-    .svg-inline--fa {
-      color: var(--p-primary-color);
-      font-size: 1.8rem;
-    }
-  }
-}
-
-/* hover effects */
-.hover-hand:hover {
-  cursor: pointer;
-}
-
-.hover-shadow:hover {
-  box-shadow: 0 0 11px rgba(33, 33, 33, 0.2);
-}
-
-/* pointer events */
-.no-click {
-  pointer-events: none;
-}
-
-.screen-reader-only {
-  overflow: hidden !important;
-  width: 0px !important;
-  height: 0px !important;
-}
-
 /* common */
 .disclaimer-block {
   outline: solid 0.063rem var(--p-greyscale-200);
   border-radius: 0.5rem;
 }
 
-/* ---------- primevue overrides ------------ */
-
-
 
 }
+/* ---------- primevue overrides ------------ */
 
 @layer primevue-overrides {
 
-  .p-accordionheader {
+.p-dialog-title {
+  flex-grow: 1;
+  font-size: 1.25rem !important;
+  font-weight: bold;
+}
+
+.app-info-dialog {
+  .p-dialog-header {
+    .svg-inline--fa {
+      color: var(--p-primary-color);
+      font-size: 1.5rem;
+    }
+  }
+}
+
+.p-accordionheader {
   justify-content: flex-start !important;
   .p-accordionheader-toggle-icon {
     order: -1;

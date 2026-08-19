@@ -75,7 +75,7 @@ function onClick() {
 <template>
   <Card
     class="pb-1 text-center rounded-xl"
-    :class="{ clicked: isSelected }"
+    :class="{ 'shadow-[0_0_11px_var(--p-primary-950)]': isSelected }"
     @click="onClick"
   >
     <template #header>
@@ -122,10 +122,6 @@ function onClick() {
 </template>
 
 <style scoped lang="scss">
-.clicked {
-  box-shadow: 0 0 11px #036;
-}
-
 :deep(.p-card-header) {
   height: 5rem;
   background-color: lightgray;

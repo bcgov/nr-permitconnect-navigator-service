@@ -110,7 +110,7 @@ function onNewATSEnquiry() {
         </p>
         <a
           v-if="atsClientId"
-          class="hover-hand"
+          class="cursor-pointer"
           @click="atsUserDetailsModalVisible = true"
         >
           {{ atsClientId }}

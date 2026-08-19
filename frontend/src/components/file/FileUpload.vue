@@ -92,7 +92,7 @@ const onUpload = async (files: File[]) => {
     </div>
     <div
       v-if="!uploading"
-      class="hover-hand hover-shadow"
+      class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)]"
     >
       <FileUpload
         name="fileUpload"

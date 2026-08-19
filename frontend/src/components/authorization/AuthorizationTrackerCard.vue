@@ -228,7 +228,7 @@ const timelineDescription = computed(() => (iconClass: string) => {
               <!-- This component is to display status for screenreaders -->
               <div
                 role="definition"
-                class="screen-reader-only"
+                class="sr-only overflow-hidden! w-0! h-0!"
               >
                 {{ timelineDescription(slotProps?.item?.iconClass) }}
               </div>

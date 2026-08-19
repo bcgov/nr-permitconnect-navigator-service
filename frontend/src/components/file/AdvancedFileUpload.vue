@@ -117,7 +117,7 @@ const filteredDocuments = computed(() => {
     </div>
     <div
       v-if="!uploading"
-      class="hover-hand hover-shadow"
+      class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)]"
     >
       <FileUpload
         name="fileUpload"
@@ -166,7 +166,7 @@ const filteredDocuments = computed(() => {
       <DocumentCardLite
         :document="document"
         :delete-button="!disabled"
-        class="hover-hand hover-shadow mb-2"
+        class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)] mb-2"
         @click="documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })"
       />
     </div>
