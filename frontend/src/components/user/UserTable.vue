@@ -90,7 +90,7 @@ function getStatusClass(data: UserAccessRequest) {
       field="manage"
       header="Manage"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
       style="min-width: 150px"
     >
       <template #body="{ data }">
@@ -114,7 +114,7 @@ function getStatusClass(data: UserAccessRequest) {
       field="revoke"
       header="Revoke"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
       style="min-width: 150px"
     >
       <template #body="{ data }">
@@ -138,7 +138,7 @@ function getStatusClass(data: UserAccessRequest) {
       field="approve"
       header="Approve"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
       style="min-width: 150px"
     >
       <template #body="{ data }">
@@ -161,7 +161,7 @@ function getStatusClass(data: UserAccessRequest) {
       field="deny"
       header="Deny"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
       style="min-width: 150px"
     >
       <template #body="{ data }">

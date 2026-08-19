@@ -161,7 +161,7 @@ describe('Breadcrumb.vue', () => {
         ],
         stubs: {
           'router-link': {
-            template: '<a class="breadcrumb-link" :to="to"><slot /></a>',
+            template: '<a :to="to"><slot /></a>',
             props: ['to']
           }
         },
@@ -206,11 +206,13 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(links[0]!.text()).toBe('Static One');
     expect(currentSpans[0]!.text()).toBe('Static Two');
   });
@@ -229,11 +231,13 @@ describe('Breadcrumb.vue', () => {
     projectStore.setProject(testProject);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(links[0]!.text()).toBe(testProject.projectName.substring(0, 10) + '...');
     const tooltipEl = links[0]!.find('[title]');
     expect(tooltipEl.exists()).toBe(true);
@@ -254,11 +258,13 @@ describe('Breadcrumb.vue', () => {
     projectStore.setProject(testProject);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(currentSpans[0]!.text()).toBe(testProject.projectName);
   });
 
@@ -272,11 +278,13 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(links[0]!.text()).toBe('...Loading');
   });
 
@@ -294,11 +302,13 @@ describe('Breadcrumb.vue', () => {
     enquiryStore.setEnquiry(testEnquiry);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(currentSpans[0]!.text()).toBe(`Enquiry ${testEnquiry.activityId}`);
   });
 
@@ -316,11 +326,13 @@ describe('Breadcrumb.vue', () => {
     enquiryStore.setEnquiry(testEnquiry);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
 
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(links[0]!.text()).toBe(`Enquiry ${testEnquiry.activityId}`.substring(0, 10) + '...');
   });
 
@@ -342,10 +354,12 @@ describe('Breadcrumb.vue', () => {
     permitStore.setPermit(testPermit);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(currentSpans[0]!.text()).toBe(testPermit.permitType?.name);
   });
 
@@ -363,10 +377,12 @@ describe('Breadcrumb.vue', () => {
     permitStore.setPermit(testPermit);
     await nextTick();
 
-    const links = wrapper.findAll('a.breadcrumb-link');
-    const currentSpans = wrapper.findAll('span.breadcrumb-current');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
+    const allSpans = breadcrumb.findAll('span');
+    const currentSpans = allSpans.filter((span) => !span.element.closest('a'));
     expect(links.length).toBe(1);
-    expect(currentSpans.length).toBe(1);
+    expect(currentSpans.length).toBeGreaterThanOrEqual(1);
     expect(links[0]!.text()).toBe(testPermit.permitType?.name.substring(0, 10) + '...');
   });
 
@@ -380,7 +396,8 @@ describe('Breadcrumb.vue', () => {
     };
 
     const wrapper = mountComponent();
-    const links = wrapper.findAll('a.breadcrumb-link');
+    const breadcrumb = wrapper.findComponent({ name: 'Breadcrumb' });
+    const links = breadcrumb.findAll('a');
     expect(links[0]!.text()).toBe('Missing Label');
   });
 

@@ -168,7 +168,7 @@ watchEffect(() => {
   <Card ref="formRef">
     <template #title>
       <div class="flex align-items-center">
-        <div class="flex flex-grow-1">
+        <div class="flex grow-1">
           <h6
             class="section-header"
             aria-level="2"

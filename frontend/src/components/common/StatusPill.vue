@@ -36,8 +36,9 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
 
 <template>
   <div class="flex">
+    <!-- eslint-disable max-len -->
     <div
-      class="flex justify-center items-center rounded status-indicator"
+      class="flex justify-center items-center rounded-sm border-solid text-[length:var(--font-size)] h-[var(--height)] leading-[var(--line-height)] px-2 cursor-default text-center"
       :style="{
         '--font-size': dimensions.fontSize,
         '--icon-font-size': dimensions.iconFontSize,
@@ -48,6 +49,7 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
       }"
       :aria-label="status"
     >
+      <!-- eslint-enable max-len -->
       <font-awesome-icon
         v-if="icon"
         :icon="icon"
@@ -58,16 +60,3 @@ const dimensions = computed(() => (enlarge ? enlargedDimensions : defaultDimensi
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-.status-indicator {
-  border-style: solid;
-  font-size: var(--font-size);
-  height: var(--height);
-  line-height: var(--line-height);
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  cursor: default;
-  text-align: center;
-}
-</style>

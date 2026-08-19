@@ -78,13 +78,11 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
 
 <template>
   <div>
-    <div class="mb-4 border-dashed file-upload rounded-md">
-      <FileUpload
-        v-if="getProject?.activityId"
-        :activity-id="getProject.activityId"
-        :disabled="getProjectIsCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.CREATE)"
-      />
-    </div>
+    <FileUpload
+      v-if="getProject?.activityId"
+      :activity-id="getProject.activityId"
+      :disabled="getProjectIsCompleted || !useAuthZStore().can(getInitiative, Resource.DOCUMENT, Action.CREATE)"
+    />
     <div class="flex flex-row justify-between pb-4">
       <div class="flex items-center">
         <IconField icon-position="left">
@@ -182,7 +180,7 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
             <DocumentCard
               :document="document"
               :editable="!getProjectIsCompleted"
-              class="hover-hand hover-shadow"
+              class="cursor-pointer hover:shadow-[0_0_11px_rgba(33,33,33,0.2)]"
               @click="
                 documentService.downloadDocument({ documentId: document.documentId, filename: document.filename })
               "
@@ -283,13 +281,6 @@ function sortComparator(sortValue: number | undefined, a: string | number, b: st
 
 .p-inputtext.p-component {
   width: 20rem;
-}
-
-.file-upload {
-  color: var(--p-greyscale-500);
-  &:hover {
-    color: var(--p-content-hover-background);
-  }
 }
 
 .p-button.p-component.view-switch-button {

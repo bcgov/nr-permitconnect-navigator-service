@@ -29,9 +29,3 @@ onBeforeMount(async () => {
 <template>
   <slot v-if="ready" />
 </template>
-
-<style lang="scss" scoped>
-h3 {
-  font-weight: bold;
-}
-</style>

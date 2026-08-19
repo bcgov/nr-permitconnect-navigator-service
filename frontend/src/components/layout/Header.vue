@@ -14,6 +14,7 @@ const route = useRoute();
   <header>
     <nav
       id="header-branding"
+      class="bg-white text-[var(--p-bcblue-950)] whitespace-nowrap border-b-2 border-[var(--p-gold-950)]"
       role="none"
     >
       <div class="flex flex-row flex-wrap items-center lg:pl-12 py-2">
@@ -21,12 +22,12 @@ const route = useRoute();
           <a href="https://www2.gov.bc.ca">
             <img
               src="@/assets/images/BCID_H_rgb_pos.png"
-              class="bc-logo"
+              class="bc-logo max-h-[60px] h-[60px]"
               alt="B.C. Government Logo"
             />
           </a>
         </div>
-        <div class="mx-2 bcds-header-line" />
+        <div class="mx-2 bcds-header-line bg-[#d8d8d8] w-[1px] h-[32px]" />
         <div class="flex grow ml-2">
           <h2 class="m-0 font-bold app-primary-color">{{ t('common.header.name') }}</h2>
         </div>
@@ -38,24 +39,3 @@ const route = useRoute();
     </nav>
   </header>
 </template>
-
-<style lang="scss" scoped>
-#header-branding {
-  background-color: white;
-  color: var(--p-bcblue-950);
-  white-space: nowrap;
-  border-bottom: 2px solid var(--p-gold-950);
-}
-
-.bc-logo {
-  max-height: 60px;
-  height: 60px;
-}
-
-.bcds-header-line {
-  // TODO: Reference a surface colour once PrimeVue 4 changes come in
-  background-color: #d8d8d8;
-  width: 1px;
-  height: 32px;
-}
-</style>

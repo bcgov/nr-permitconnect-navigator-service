@@ -63,7 +63,7 @@ const toHousing = (): void => {
     <div class="flex items-center justify-start h-full">
       <div class="text-left">
         <h3>{{ t('views.homeView.welcome') }}</h3>
-        <h1 class="!mt-0">{{ t('views.homeView.pcns') }}</h1>
+        <h1 class="mt-0!">{{ t('views.homeView.pcns') }}</h1>
         <h3 class="mb-7">{{ t('views.homeView.chooseProject') }}</h3>
         <div class="mb-4 space-x-4">
           <Button

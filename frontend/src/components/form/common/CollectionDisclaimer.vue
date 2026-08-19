@@ -14,7 +14,7 @@ const { t } = useI18n();
       <Divider type="solid" />
     </template>
     <template #content>
-      <p class="disclaimer">
+      <p class="font-medium">
         {{ t('collectionDisclaimer.disclaimer') }}
         <!-- prettier-ignore -->
         <span>
@@ -24,9 +24,3 @@ const { t } = useI18n();
     </template>
   </Card>
 </template>
-
-<style scoped lang="scss">
-.disclaimer {
-  font-weight: 500;
-}
-</style>

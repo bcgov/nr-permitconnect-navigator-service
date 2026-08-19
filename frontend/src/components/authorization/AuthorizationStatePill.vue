@@ -112,9 +112,10 @@ const { codeDisplay } = useCodeStore();
 </script>
 
 <template>
+  <!-- eslint-disable max-len -->
   <div
     v-tooltip.right="getState?.toolTip"
-    class="flex justify-center items-center rounded auth-indicator"
+    class="flex justify-center items-center rounded-sm border-solid border-[0.1rem] text-[length:var(--font-size)] h-[var(--height)] px-2 cursor-default text-center hover:!border-[#2e5dd7]"
     :class="[getState?.badgeClass]"
     :style="{
       '--font-size': dimensions.fontSize,
@@ -123,20 +124,21 @@ const { codeDisplay } = useCodeStore();
       '--line-height': dimensions.lineHeight
     }"
   >
+    <!-- eslint-enable max-len -->
     <div
       v-tooltip.focus.right="getState?.toolTip"
       tabindex="0"
       :aria-label="getState?.toolTip"
-      class="flex items-center gap-2 focus:outline-none"
+      class="flex items-center gap-2 focus:outline-hidden"
     >
       <font-awesome-icon
         v-if="getState?.iconString"
-        class="icon-detail"
+        class="text-[length:var(--icon-font-size)]"
         aria-hidden="true"
         :class="[getState?.iconClass]"
         :icon="getState?.iconString"
       />
-      <span class="text-color">
+      <span class="font-normal text-[var(--p-greyscale-900)]">
         {{ displayText ?? codeDisplay.PermitState?.[state] ?? state }}
       </span>
     </div>
@@ -144,26 +146,6 @@ const { codeDisplay } = useCodeStore();
 </template>
 
 <style scoped lang="scss">
-.auth-indicator {
-  border-style: solid;
-  border-width: 0.1rem;
-  font-size: var(--font-size);
-  height: var(--height);
-  line-height: var(--line-height);
-  padding-left: 0.5rem;
-  padding-right: 0.5rem;
-  cursor: default;
-  text-align: center;
-
-  &:hover {
-    border-color: #2e5dd7;
-  }
-}
-
-.icon-detail {
-  font-size: var(--icon-font-size);
-}
-
 .green {
   background-color: var(--p-support-success-surface);
   border-color: var(--p-support-success-border);
@@ -185,10 +167,5 @@ const { codeDisplay } = useCodeStore();
   background-color: var(--p-support-warning-surface);
   border-color: var(--p-support-warning-border);
   color: var(--p-support-warning-icon);
-}
-
-.text-color {
-  font-weight: normal;
-  color: var(--p-greyscale-900);
 }
 </style>

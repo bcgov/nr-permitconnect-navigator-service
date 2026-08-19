@@ -17,7 +17,7 @@ import { AuthService, configService } from '@/services';
 
 import '@bcgov/bc-sans/css/BCSans.css';
 import 'primeicons/primeicons.css';
-import '@/assets/main.scss';
+import '@/assets/main.css';
 import type { CallbackFn } from './types';
 
 /**

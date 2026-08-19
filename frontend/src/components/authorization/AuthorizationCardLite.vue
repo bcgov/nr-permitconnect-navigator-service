@@ -28,7 +28,11 @@ const isTerminalState = computed(() => {
 </script>
 
 <template>
-  <Card class="auth-card--hover">
+  <!-- eslint-disable max-len -->
+  <Card
+    class="px-0 py-4 border-[var(--p-greyscale-100)] shadow-[0.25rem_0.25rem_0.25rem_0rem_var(--p-greyscale-50)] hover:bg-[var(--p-bcblue-50)]"
+  >
+    <!-- eslint-enable max-len -->
     <template #content>
       <div class="flex justify-between items-center">
         <h6 class="mb-0 font-bold">{{ permit.permitType?.name }}</h6>
@@ -47,15 +51,3 @@ const isTerminalState = computed(() => {
     </template>
   </Card>
 </template>
-
-<style scoped lang="scss">
-.auth-card {
-  border-color: var(--p-greyscale-100);
-  border-style: solid;
-  border-width: 0.063rem;
-  box-shadow: 0.25rem 0.25rem 0.25rem 0rem var(--p-greyscale-50);
-  &--hover:hover {
-    background-color: var(--p-bcblue-50);
-  }
-}
-</style>
