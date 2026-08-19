@@ -180,7 +180,7 @@ async function onSubmit(data: GenericObject) {
       });
     } else {
       if (!resource?.value) throw new Error(t('note.noteForm.resourceNotDef'));
-      await noteHistoryService.putNoteHistory({
+      await noteHistoryService.patchNoteHistory({
         ...body,
         activityId,
         note: data.note,

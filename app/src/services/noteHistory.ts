@@ -112,39 +112,37 @@ export const listNoteHistoriesService = async (
 };
 
 /**
- * Update a note history
+ * Patches a note history
+ * @param noteHistoryId - ID of the note history to update
  * @param currentAuthorization - The authorization of the current authorized user
  * @param currentContext - Context data of current request
- * @param data - The note history to update
+ * @param data - The note history fields to update
  * @param noteStr - Optional string to be added as a note
- * @param resource - The type of Resource the note history belongs to
+ * @param resource - Control-flow flag identifying which project/enquiry type the note history belongs to;
+ *   not a persisted note_history column, only used to route the bring-forward notification email
  * @returns A Promise that resolves to the updated resource
  */
-export const updateNoteHistoryService = async (
+export const patchNoteHistoryService = async (
+  noteHistoryId: string,
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  data: NoteHistoryBase,
+  data: Omit<PatchNoteHistoryRequest, 'noteHistoryId' | 'note' | 'resource'>,
   noteStr: string | undefined,
   resource: Resource
 ): Promise<NoteHistory> => {
   return await unitOfWork.execute(
     async ({ electrificationProject, generalProject, housingProject, note, noteHistory, subjectGroup, user }) => {
-      await noteHistory.update(
-        {
-          noteHistoryId: data.noteHistoryId
-        },
-        data
-      );
+      await noteHistory.update({ noteHistoryId }, data);
 
-      if (note) {
+      if (noteStr) {
         await note.create({
-          noteHistoryId: data.noteHistoryId,
+          noteHistoryId,
           noteId: randomUUID(),
           note: noteStr
         });
       }
 
-      const response = await noteHistory.findFirstOrThrow({ where: { noteHistoryId: data.noteHistoryId } });
+      const response = await noteHistory.findFirstOrThrow({ where: { noteHistoryId } });
 
       const isNavigator = !!currentAuthorization?.groups.some((group) => group.name === GroupName.NAVIGATOR);
       if (isNavigator)

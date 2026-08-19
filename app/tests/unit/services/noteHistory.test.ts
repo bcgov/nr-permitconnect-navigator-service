@@ -159,7 +159,7 @@ describe('noteHistory service', () => {
     });
   });
 
-  describe('updateNoteHistoryService', () => {
+  describe('patchNoteHistoryService', () => {
     it('updates noteHistory, creates note if provided, returns updated record', async () => {
       const noteStr = 'Updated note content';
       const updatedData = { ...TEST_NOTE_HISTORY_1, title: 'Updated Title' };
@@ -168,7 +168,8 @@ describe('noteHistory service', () => {
       mockRepos.noteHistory.findFirstOrThrow.mockResolvedValueOnce(updatedData as never);
       emailBringForwardNotificationSpy.mockResolvedValueOnce(undefined as never);
 
-      const response = await noteHistoryService.updateNoteHistoryService(
+      const response = await noteHistoryService.patchNoteHistoryService(
+        updatedData.noteHistoryId,
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         TEST_CURRENT_CONTEXT,
         updatedData,
@@ -197,7 +198,8 @@ describe('noteHistory service', () => {
       mockRepos.noteHistory.findFirstOrThrow.mockResolvedValueOnce(updatedData as never);
       emailBringForwardNotificationSpy.mockResolvedValueOnce(undefined as never);
 
-      await noteHistoryService.updateNoteHistoryService(
+      await noteHistoryService.patchNoteHistoryService(
+        updatedData.noteHistoryId,
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         TEST_CURRENT_CONTEXT,
         updatedData,
@@ -238,7 +240,8 @@ describe('noteHistory service', () => {
         ]
       };
 
-      await noteHistoryService.updateNoteHistoryService(
+      await noteHistoryService.patchNoteHistoryService(
+        updatedData.noteHistoryId,
         adminAuthContext,
         TEST_CURRENT_CONTEXT,
         updatedData,
