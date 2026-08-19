@@ -32,7 +32,7 @@ vi.mock('@/services', () => ({
     deleteActivityContact: vi.fn()
   },
   contactService: {
-    putContact: vi.fn()
+    upsertContact: vi.fn()
   }
 }));
 
@@ -161,7 +161,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('handles single success toast for PRIMARY role', async () => {
-      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
+      vi.mocked(contactService.upsertContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -251,7 +251,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('calls updateContact when contactId is missing (manual entry)', async () => {
-      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
+      vi.mocked(contactService.upsertContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -262,12 +262,12 @@ describe('ProjectTeamTab.vue', () => {
       ]);
       await flushPromises();
 
-      expect(contactService.putContact).toHaveBeenCalled();
+      expect(contactService.upsertContact).toHaveBeenCalled();
       expect(activityContactService.createActivityContact).toHaveBeenCalled();
     });
 
     it('covers single success toast for ADMIN role', async () => {
-      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
+      vi.mocked(contactService.upsertContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -282,7 +282,7 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('covers single success toast for MEMBER role', async () => {
-      vi.mocked(contactService.putContact).mockResolvedValue(mockContact);
+      vi.mocked(contactService.upsertContact).mockResolvedValue(mockContact);
       vi.mocked(activityContactService.createActivityContact).mockResolvedValue(mockActivityContact);
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());

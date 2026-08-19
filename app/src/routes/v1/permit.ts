@@ -22,7 +22,12 @@ router.use(requireSomeGroup);
 router.get('/', hasAuthorization(Resource.PERMIT, Action.READ), permitValidator.listPermits, listPermitsController);
 
 /** Create or update a permit */
-router.put('/', hasAuthorization(Resource.PERMIT, Action.CREATE), permitValidator.upsertPermit, upsertPermitController);
+router.post(
+  '/',
+  hasAuthorization(Resource.PERMIT, Action.CREATE),
+  permitValidator.upsertPermit,
+  upsertPermitController
+);
 
 /** Delete a permit */
 router.delete(

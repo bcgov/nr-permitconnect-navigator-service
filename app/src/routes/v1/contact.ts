@@ -48,7 +48,7 @@ router.get(
 );
 
 /** Create or update a contact */
-router.put(
+router.post(
   '/',
   hasAuthorization(Resource.CONTACT, Action.UPDATE),
   contactValidator.upsertContact,

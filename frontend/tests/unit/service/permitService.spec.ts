@@ -22,7 +22,6 @@ vi.mock('@/store', () => ({
 describe('permit service', () => {
   const mockGet = vi.fn();
   const mockPost = vi.fn();
-  const mockPut = vi.fn();
   const mockDelete = vi.fn();
 
   beforeEach(() => {
@@ -35,7 +34,6 @@ describe('permit service', () => {
     vi.mocked(appAxios).mockReturnValue({
       get: mockGet,
       post: mockPost,
-      put: mockPut,
       delete: mockDelete
     } as never);
   });
@@ -208,19 +206,19 @@ describe('permit service', () => {
   });
 
   describe('upsertPermit', () => {
-    it('puts permit and returns response data', async () => {
+    it('posts permit and returns response data', async () => {
       const permit = {
         permitId: 'permit-123',
         permitNumber: 'P-001'
       };
 
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: permit
       });
 
       const result = await upsertPermit(permit as never);
 
-      expect(mockPut).toHaveBeenCalledWith('housing/permit', permit, undefined);
+      expect(mockPost).toHaveBeenCalledWith('housing/permit', permit, undefined);
 
       expect(result).toEqual(permit);
     });
@@ -228,7 +226,7 @@ describe('permit service', () => {
     it('propagates errors', async () => {
       const error = new Error('upsert failed');
 
-      mockPut.mockRejectedValue(error);
+      mockPost.mockRejectedValue(error);
 
       await expect(upsertPermit({} as never)).rejects.toThrow(error);
     });

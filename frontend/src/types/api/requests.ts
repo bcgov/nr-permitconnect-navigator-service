@@ -107,7 +107,7 @@ interface ContactSearchSchema extends ContactBaseSchema {
 export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
 export type GetContactRequest = ListRequestDTO<ContactBase, ContactGetSchema>;
 export type ListContactsRequest = ListRequestDTO<ContactBase, ContactSearchSchema>;
-export type PutContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
+export type UpsertContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
 export type DeleteContactRequest = DeleteRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
@@ -264,8 +264,9 @@ interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
 export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
 export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
 export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
-export type PutNoteHistoryRequest = PutRequestDTO<NoteHistoryBase & { resource: Resource }, NoteHistoryBaseSchema> & {
-  note: string;
+export type PatchNoteHistoryRequest = PatchRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & {
+  note: string | undefined;
+  resource: Resource;
 };
 export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
 

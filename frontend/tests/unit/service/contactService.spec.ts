@@ -5,7 +5,7 @@ import {
   deleteContact,
   matchContacts,
   searchContacts,
-  putContact
+  upsertContact
 } from '@/services/contactService';
 import { appAxios } from '@/services/interceptors';
 
@@ -16,7 +16,6 @@ vi.mock('@/services/interceptors', () => ({
 describe('contactService', () => {
   const mockGet = vi.fn();
   const mockPost = vi.fn();
-  const mockPut = vi.fn();
   const mockDelete = vi.fn();
 
   beforeEach(() => {
@@ -25,7 +24,6 @@ describe('contactService', () => {
     vi.mocked(appAxios).mockReturnValue({
       get: mockGet,
       post: mockPost,
-      put: mockPut,
       delete: mockDelete
     } as never);
   });
@@ -189,8 +187,8 @@ describe('contactService', () => {
     });
   });
 
-  describe('putContact', () => {
-    it('updates a contact and returns the updated resource', async () => {
+  describe('upsertContact', () => {
+    it('saves a contact and returns the saved resource', async () => {
       const request = {
         firstName: 'Jane',
         lastName: 'Doe'
@@ -201,13 +199,13 @@ describe('contactService', () => {
         ...request
       };
 
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: contact
       });
 
-      const result = await putContact(request as never);
+      const result = await upsertContact(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith('contact', request, undefined);
+      expect(mockPost).toHaveBeenCalledWith('contact', request, undefined);
 
       expect(result).toEqual(contact);
     });
@@ -215,9 +213,9 @@ describe('contactService', () => {
     it('propagates errors', async () => {
       const error = new Error('update failed');
 
-      mockPut.mockRejectedValue(error);
+      mockPost.mockRejectedValue(error);
 
-      await expect(putContact({} as never)).rejects.toThrow(error);
+      await expect(upsertContact({} as never)).rejects.toThrow(error);
     });
   });
 
@@ -228,7 +226,7 @@ describe('contactService', () => {
       deleteContact,
       matchContacts,
       searchContacts,
-      putContact
+      upsertContact
     });
   });
 });
