@@ -54,7 +54,7 @@ export function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory> {
     normalizedEmailData.bcc = delimitEmails(normalizedEmailData.bcc);
   }
 
-  return api.put<NoteHistory>(roadmapRoutes.root(), {
+  return api.post<NoteHistory>(roadmapRoutes.root(), {
     activityId,
     selectedFileIds,
     emailData: normalizedEmailData

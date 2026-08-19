@@ -21,7 +21,7 @@ vi.mock('@/lib/primevue/useToast', () => ({
   })
 }));
 
-const putContactSpy = vi.spyOn(contactService, 'putContact');
+const upsertContactSpy = vi.spyOn(contactService, 'upsertContact');
 
 const testContact: Contact = {
   contactId: 'contact123',
@@ -80,7 +80,7 @@ describe('ContactForm.vue', () => {
 
   describe('onSubmit', () => {
     it('handles successful form submission', async () => {
-      putContactSpy.mockResolvedValueOnce(testContact);
+      upsertContactSpy.mockResolvedValueOnce(testContact);
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -88,32 +88,32 @@ describe('ContactForm.vue', () => {
       vm.formRef = { resetForm: vi.fn(), values: {} };
       await vm.onSubmit(testContact);
 
-      expect(putContactSpy).toHaveBeenCalled();
+      expect(upsertContactSpy).toHaveBeenCalled();
       expect(mockToastSuccess).toHaveBeenCalledWith(t('contactForm.formSaved'));
       expect(wrapper.emitted('updateContact')?.[0]).toEqual([testContact]);
     });
 
     it('handles API failure response', async () => {
-      putContactSpy.mockRejectedValueOnce(new Error('Bad Request'));
+      upsertContactSpy.mockRejectedValueOnce(new Error('Bad Request'));
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       await vm.onSubmit(testContact);
 
-      expect(putContactSpy).toHaveBeenCalled();
+      expect(upsertContactSpy).toHaveBeenCalled();
       expect(mockToastError).toHaveBeenCalledWith(t('contactForm.failedToSaveTheForm'), 'Error: Bad Request');
     });
 
     it('handles caught exceptions during submission', async () => {
-      putContactSpy.mockRejectedValueOnce(new Error('Network Failure'));
+      upsertContactSpy.mockRejectedValueOnce(new Error('Network Failure'));
 
       const wrapper = mount(ContactForm, wrapperSettingsForm(true));
       const vm: any = wrapper.vm; // eslint-disable-line @typescript-eslint/no-explicit-any
 
       await vm.onSubmit(testContact);
 
-      expect(putContactSpy).toHaveBeenCalled();
+      expect(upsertContactSpy).toHaveBeenCalled();
       expect(mockToastError).toHaveBeenCalledWith(t('contactForm.failedToSaveTheForm'), 'Error: Network Failure');
     });
   });

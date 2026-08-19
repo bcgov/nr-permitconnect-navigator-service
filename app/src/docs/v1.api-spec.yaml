@@ -96,6 +96,32 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a contact
+      operationId: upsertContact
+      tags:
+        - Contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Contact'
+      responses:
+        '200':
+          description: Contact upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Contact'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /contact/{contactId}:
     get:
       summary: Get a specific contact
@@ -688,9 +714,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateElectrificationNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchElectrificationNoteHistory
       tags:
         - Electrification Note
       parameters:
@@ -700,7 +726,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -816,6 +842,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertElectrificationPermit
+      tags:
+        - Electrification Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Permit'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1075,7 +1127,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/draft:
-    put:
+    post:
       summary: Create or update a draft electrification project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -1103,7 +1155,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft electrification project
       description: Creates or updates an intake and set status to Submitted
       operationId: electrificationProject-updateDraft
@@ -1257,7 +1309,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: electrificationRoadmap
       tags:
@@ -1664,9 +1716,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateGeneralNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchGeneralNoteHistory
       tags:
         - General Note
       parameters:
@@ -1676,7 +1728,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -1792,6 +1844,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertGeneralPermit
+      tags:
+        - General Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Permit'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1962,7 +2040,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/draft:
-    put:
+    post:
       summary: Create or update a draft general project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -1990,7 +2068,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft general project
       description: Creates or updates an intake and set status to Submitted
       operationId: generalProject-updateDraft
@@ -2152,7 +2230,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: generalRoadmap
       tags:
@@ -2559,9 +2637,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateHousingNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchHousingNoteHistory
       tags:
         - Housing Note
       parameters:
@@ -2571,7 +2649,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -2687,6 +2765,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertHousingPermit
+      tags:
+        - Housing Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DB-Permit'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -2945,7 +3049,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/draft:
-    put:
+    post:
       summary: Create or update a draft housing project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -2973,7 +3077,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft housing project
       description: Creates or updates an intake and set status to Submitted
       operationId: housingProject-updateDraft
@@ -3135,7 +3239,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: housingRoadmap
       tags:
@@ -4668,6 +4772,65 @@ components:
           type: string
           description: A reason for the escalation
           example: Time-sensitive
+    Request-NoteHistoryPatch:
+      title: Request Note History Patch
+      type: object
+      required:
+        - resource
+      properties:
+        activityId:
+          type: string
+          description: The ID of the activity the note is associated with
+          example: 2DE67F13
+        type:
+          type: string
+          description: Type of note
+          example: Bring forward
+        title:
+          type: string
+          description: Title of the note
+          example: Some Title
+        bringForwardDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date time for when note is to be brought forward
+          example: '2029-08-14T07:00:00.000Z'
+        bringForwardState:
+          type: string
+          nullable: true
+          description: State of a bring forward type note
+          example: Unresolved
+        note:
+          type: string
+          nullable: true
+          description: Optional note to add to the history
+          example: Some new note text
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          nullable: true
+          description: A reason for the escalation
+          example: Time-sensitive
+        resource:
+          type: string
+          description: The type of Resource the note history belongs to
+          enum:
+            - ELECTRIFICATION_PROJECT
+            - ENQUIRY
+            - GENERAL_PROJECT
+            - HOUSING_PROJECT
     Request-PermitNote:
       title: Request Permit Note
       type: object
