@@ -7,8 +7,14 @@
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
   "main": "server.ts",
   "imports": {
-    "#types": "./src/types/index.ts",
-    "#src/*": "./src/*.ts",
+    "#types": {
+      "sbin": "./sbin/src/types/index.js",
+      "default": "./src/types/index.ts"
+    },
+    "#src/*": {
+      "sbin": "./sbin/src/*.js",
+      "default": "./src/*.ts"
+    },
     "#tests/*": "./tests/*.ts"
   },
   "scripts": {
@@ -27,7 +33,7 @@
     "migrate:rollback:all": "knex migrate:rollback --all",
     "migrate:rollback": "knex migrate:rollback",
     "migrate:up": "knex migrate:up",
-    "migrate": "knex migrate:latest --knexfile ./sbin/knexfile.js",
+    "migrate": "node --conditions=sbin ./node_modules/knex/bin/cli.js migrate:latest --knexfile ./sbin/knexfile.js",
     "peach:sync": "node sbin/peachSync.js",
     "peach:sync:local": "tsx ./peachSync.ts",
     "postbuild:all": "npm run build",
