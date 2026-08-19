@@ -1,5 +1,6 @@
 import type { ParsedQs } from 'qs';
 import type {
+  CreateRequestDTO,
   DeleteRequestDTO,
   GetRequestDTO,
   ListRequestDTO,
@@ -8,18 +9,33 @@ import type {
   UpsertRequestDTO
 } from './dto.ts';
 import type {
+  ContactBase,
   ElectrificationProjectBase,
   EnquiryBase,
   GeneralProjectBase,
   HousingProjectBase,
+  NoteHistoryBase,
   Permit,
   PermitBase,
   Stamps
 } from './resources.ts';
 import type { PaginationOptions } from '../common.ts';
 import type { Nullable } from '../utils.ts';
-import type { GroupName, Initiative } from '../../utils/enums/application.ts';
+import type { GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
 import type { EmailTemplate } from '../../utils/templates';
+
+/**
+ * Contact
+ */
+
+interface ContactBaseSchema extends ResourceSchemaConfig<ContactBase> {
+  ids: 'contactId';
+  immutable: 'contactId';
+  serverGenerated: 'contactId';
+}
+
+export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
+export type UpsertContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
  * Electrification Project
@@ -93,6 +109,32 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
 }
 
 export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
+
+/**
+ * Note History
+ */
+
+interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
+  ids: 'noteHistoryId';
+  immutable: 'noteHistoryId';
+  serverGenerated: 'noteHistoryId';
+}
+interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
+  query: {
+    bringForwardState: Nullable<string>;
+  };
+}
+interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
+  scope: 'activityId';
+}
+export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
+export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
+export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
+export type PatchNoteHistoryRequest = PatchRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & {
+  note: string | undefined;
+  resource: Resource;
+};
+export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
 
 /**
  * Permit

@@ -5,7 +5,7 @@ import {
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
-  updateNoteHistoryController
+  patchNoteHistoryController
 } from '../../controllers/noteHistory.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
@@ -25,13 +25,13 @@ router.post(
   createNoteHistoryController
 );
 
-/** Update a note history */
-router.put(
+/** Patch a note history */
+router.patch(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
   hasAccess('noteHistoryId'),
-  noteHistoryValidator.updateNoteHistory,
-  updateNoteHistoryController
+  noteHistoryValidator.patchNoteHistory,
+  patchNoteHistoryController
 );
 
 /** Delete a note history */
