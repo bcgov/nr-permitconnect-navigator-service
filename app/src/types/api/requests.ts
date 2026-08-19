@@ -37,10 +37,19 @@ interface ElectrificationProjectBaseSchema extends ResourceSchemaConfig<Electrif
   };
 }
 
+export type CreateElectrificationProjectRequest = CreateRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ElectrificationProjectBaseSchema
+>;
+export type SearchElectrificationProjectRequest = ListRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ElectrificationProjectBaseSchema
+>;
 export type PatchElectrificationProjectRequest = PatchRequestDTO<
   ElectrificationProjectBase,
   ElectrificationProjectBaseSchema
 >;
+export type SubmitDraftElectrificationProjectRequest = ElectrificationProjectIntake;
 
 /**
  * Enquiry
@@ -51,8 +60,21 @@ interface EnquiryBaseSchema extends ResourceSchemaConfig<EnquiryBase> {
   immutable: 'activityId' | 'enquiryId';
   serverGenerated: 'activityId' | 'enquiryId';
 }
-
+interface EnquiryListRelatedSchema extends EnquiryBaseSchema {
+  scope: 'activityId';
+}
+interface EnquirySearchSchema extends EnquiryBaseSchema {
+  query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
+}
+export type CreateEnquiryRequest = PartialFields<
+  Pick<EnquiryBase, 'enquiryDescription' | 'relatedActivityId' | 'submissionType'> & { contact: ContactBase },
+  'submissionType'
+>;
+export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquiryListRelatedSchema>;
+export type SearchEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquirySearchSchema>;
 export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, EnquiryBaseSchema>;
 
 /**
  * General Project
@@ -71,7 +93,10 @@ interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBa
   };
 }
 
+export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type SearchGeneralProjectRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
 export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
+export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
 
 /**
  * Housing Project
@@ -90,7 +115,10 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
   };
 }
 
+export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
 export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
+export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 /**
  * Note History
@@ -153,15 +181,6 @@ export interface ContactSearchParameters {
   includeActivities?: boolean;
 }
 
-export interface ElectrificationProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  electrificationProjectId?: string[];
-  projectType?: string[];
-  projectCategory?: string[];
-  includeUser?: boolean;
-}
-
 export interface Email {
   bcc?: string[];
   bodyType: string;
@@ -182,29 +201,6 @@ export interface EmailAttachment {
   contentType: string;
   encoding: string;
   filename: string;
-}
-
-export interface EnquirySearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  enquiryId?: string[];
-  includeUser?: boolean;
-}
-
-export interface GeneralProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  generalProjectId?: string[];
-  submissionType?: string[];
-  includeUser?: boolean;
-}
-
-export interface HousingProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  housingProjectId?: string[];
-  submissionType?: string[];
-  includeUser?: boolean;
 }
 
 export interface IdirSearchParameters extends ParsedQs {

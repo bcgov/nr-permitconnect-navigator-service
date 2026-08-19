@@ -33,7 +33,7 @@ import type {
   Draft,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
+  SearchGeneralProjectRequest,
   GeneralProjectStatistics,
   LocalContext,
   PatchGeneralProjectRequest,
@@ -200,7 +200,7 @@ describe('searchGeneralProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchGeneralProjectRequest | undefined, never>;
 
     searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 
@@ -222,7 +222,7 @@ describe('searchGeneralProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchGeneralProjectRequest | undefined, never>;
 
     searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 

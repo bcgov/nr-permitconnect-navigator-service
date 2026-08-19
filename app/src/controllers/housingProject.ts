@@ -20,8 +20,8 @@ import type {
   Draft,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
+  SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
   StatisticsFilters
@@ -71,7 +71,7 @@ export const listHousingProjectsController = async (_req: Request, res: Response
 };
 
 export const searchHousingProjectsController = async (
-  req: Request<never, never, HousingProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchHousingProjectRequest | undefined, never>,
   res: Response<HousingProject[], LocalContext>
 ) => {
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {

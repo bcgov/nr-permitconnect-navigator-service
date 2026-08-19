@@ -12,7 +12,6 @@ import type {
   CurrentContext,
   ElectrificationProject,
   ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
   Maybe
 } from '#types';
@@ -159,7 +158,7 @@ export const listElectrificationProjectsService = async (
 export const searchElectrificationProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: ElectrificationProjectSearchParameters
+  params: SearchElectrificationProjectRequest
 ): Promise<ElectrificationProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
     const result = await electrificationProject.search(params);
@@ -220,14 +219,11 @@ export const patchElectrificationProjectService = async (
   data: PatchElectrificationProjectRequest
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(async ({ electrificationProject }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { electrificationProjectId: _id, ...rest } = data;
-
     await electrificationProject.update(
       {
         electrificationProjectId
       },
-      rest
+      data
     );
 
     return await electrificationProject.findFirstOrThrow({

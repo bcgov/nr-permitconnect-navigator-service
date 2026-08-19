@@ -126,7 +126,7 @@ export const patchNoteHistoryService = async (
   noteHistoryId: string,
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  data: Omit<PatchNoteHistoryRequest, 'noteHistoryId' | 'note' | 'resource'>,
+  data: Omit<PatchNoteHistoryRequest, 'note' | 'resource'>,
   noteStr: string | undefined,
   resource: Resource
 ): Promise<NoteHistory> => {

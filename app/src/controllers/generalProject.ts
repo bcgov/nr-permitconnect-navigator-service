@@ -20,9 +20,9 @@ import type {
   Draft,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
   LocalContext,
   PatchGeneralProjectRequest,
+  SearchGeneralProjectRequest,
   StatisticsFilters
 } from '#types';
 
@@ -67,7 +67,7 @@ export const listGeneralProjectsController = async (_req: Request, res: Response
 };
 
 export const searchGeneralProjectsController = async (
-  req: Request<never, never, GeneralProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchGeneralProjectRequest | undefined, never>,
   res: Response<GeneralProject[], LocalContext>
 ) => {
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {

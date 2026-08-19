@@ -9,7 +9,7 @@ export class EnquiryRepository extends WritableRepository<PrismaTransactionClien
     super(tx.enquiry, principal, true);
   }
 
-  public async search(params: EnquirySearchParameters, initiativeCode?: Initiative) {
+  public async search(params: SearchEnquiriesRequest, initiativeCode?: Initiative) {
     return await this.findMany({
       where: {
         AND: [

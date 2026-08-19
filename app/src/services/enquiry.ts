@@ -16,7 +16,7 @@ import type { Initiative } from '#src/utils/enums/application';
 export const createEnquiryService = async (
   currentContext: CurrentContext,
   intakeData: EnquiryIntake
-): Promise<Enquiry> => {
+): Promise<CreateEnquiryResponse> => {
   return await unitOfWork.execute(
     async ({
       activity,
@@ -198,18 +198,14 @@ export const listRelatedEnquiriesService = async (
  * Search and filter for specific enquiries
  * @param currentAuthorization - Authorizations assigned to the current authorized user
  * @param currentContext - Context data of current request
- * @param params Optional filtering parameters
- * @param params.activityId Optional array of uuids representing the activity ID
- * @param params.createdBy Optional array of uuids representing users who created enquiries
- * @param params.enquiryId Optional array of uuids representing the enquiry ID
- * @param params.includeUser Optional boolean representing whether the linked user should be included
- * @param initiative Initiative to search in
+ * @param params - Optional filtering parameters
+ * @param initiative - Initiative to search in
  * @returns A Promise that resolves to an array of enquiries from search params
  */
 export const searchEnquiriesService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: EnquirySearchParameters,
+  params: SearchEnquiriesRequest,
   initiative: Initiative
 ): Promise<Enquiry[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
@@ -232,9 +228,7 @@ export const searchEnquiriesService = async (
  */
 export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryRequest): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { enquiryId: _id, ...rest } = data;
-    await enquiry.update({ enquiryId }, rest);
+    await enquiry.update({ enquiryId }, data);
     return await enquiry.findFirstOrThrow({
       where: { enquiryId },
       include: { activity: { include: { activityContact: { include: { contact: true } } } } }

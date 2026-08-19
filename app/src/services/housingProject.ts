@@ -14,7 +14,6 @@ import type {
   CurrentContext,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
   Maybe
 } from '#types';
@@ -167,7 +166,7 @@ export const listHousingProjectsService = async (
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: HousingProjectSearchParameters
+  params: SearchHousingProjectRequest
 ): Promise<HousingProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);

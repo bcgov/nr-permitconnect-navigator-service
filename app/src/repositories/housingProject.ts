@@ -10,8 +10,7 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
   }
 
   public async patch(where: { housingProjectId: string }, data: PatchHousingProjectRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { housingProjectId: _id, geoJson, ...rest } = data;
+    const { geoJson, ...rest } = data;
 
     const updateData: Prisma.housing_projectUncheckedUpdateInput = {
       ...rest,
@@ -21,7 +20,7 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: HousingProjectSearchParameters): Promise<HousingProject[]> {
+  public async search(params: SearchHousingProjectRequest): Promise<HousingProject[]> {
     return await this.findMany({
       where: {
         AND: [

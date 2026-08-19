@@ -10,8 +10,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
   }
 
   public async patch(where: { generalProjectId: string }, data: PatchGeneralProjectRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { generalProjectId: _id, geoJson, ...rest } = data;
+    const { geoJson, ...rest } = data;
 
     const updateData: Prisma.general_projectUncheckedUpdateInput = {
       ...rest,
@@ -21,7 +20,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: GeneralProjectSearchParameters): Promise<GeneralProject[]> {
+  public async search(params: SearchGeneralProjectRequest): Promise<GeneralProject[]> {
     return await this.findMany({
       where: {
         AND: [

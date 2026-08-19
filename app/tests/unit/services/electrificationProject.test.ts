@@ -269,7 +269,6 @@ describe('electrificationProject service', () => {
   describe('patchElectrificationProjectService', () => {
     it('updates project and returns refetched project', async () => {
       const updateData = {
-        electrificationProjectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
         submittedAt: new Date()
       };
       mockRepos.electrificationProject.update.mockResolvedValueOnce({} as never);

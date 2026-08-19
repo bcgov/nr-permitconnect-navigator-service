@@ -10,7 +10,7 @@ export class ElectrificationProjectRepository extends WritableRepository<
     super(tx.electrification_project, principal, true);
   }
 
-  public async search(params: ElectrificationProjectSearchParameters): Promise<ElectrificationProject[]> {
+  public async search(params: SearchElectrificationProjectRequest): Promise<ElectrificationProject[]> {
     return await this.findMany({
       where: {
         AND: [

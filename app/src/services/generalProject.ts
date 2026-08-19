@@ -14,7 +14,6 @@ import type {
   CurrentContext,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
   GeneralProjectStatistics,
   Maybe
 } from '#types';
@@ -148,7 +147,7 @@ export const getGeneralProjectStatisticsService = async (filters: {
 export const searchGeneralProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: GeneralProjectSearchParameters
+  params: SearchGeneralProjectRequest
 ): Promise<GeneralProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
     const result = await generalProject.search(params);
