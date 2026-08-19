@@ -215,7 +215,7 @@ export interface EnquiryBase extends AuditFields {
 
 interface EnquiryRelations {
   activity: Activity;
-  contact: Contact;
+  user: User;
 }
 
 export type Enquiry = EnquiryBase & Partial<EnquiryRelations>;

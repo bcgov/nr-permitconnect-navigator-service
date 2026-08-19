@@ -33,8 +33,8 @@ import type {
   Draft,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
+  SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
   StatisticsFilters
@@ -200,7 +200,7 @@ describe('searchHousingProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchHousingProjectRequest | undefined, never>;
 
     searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
 
@@ -222,7 +222,7 @@ describe('searchHousingProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchHousingProjectRequest | undefined, never>;
 
     searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
 

@@ -19,10 +19,10 @@ import type {
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
   LocalContext,
   PatchElectrificationProjectRequest,
+  SearchElectrificationProjectRequest,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -76,7 +76,7 @@ export const listElectrificationProjectsController = async (
 };
 
 export const searchElectrificationProjectsController = async (
-  req: Request<never, never, ElectrificationProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchElectrificationProjectRequest | undefined, never>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {

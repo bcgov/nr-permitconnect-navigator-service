@@ -3,7 +3,7 @@ import { WritableRepository } from './writable.ts';
 
 import type { Prisma } from '@prisma/client';
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { GeneralProject, GeneralProjectSearchParameters, PatchGeneralProjectRequest } from '../types/index.ts';
+import type { GeneralProject, PatchGeneralProjectRequest, SearchGeneralProjectRequest } from '../types/index.ts';
 
 export class GeneralProjectRepository extends WritableRepository<PrismaTransactionClient['general_project']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
@@ -11,8 +11,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
   }
 
   public async patch(where: { generalProjectId: string }, data: PatchGeneralProjectRequest) {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { generalProjectId: _id, geoJson, ...rest } = data;
+    const { geoJson, ...rest } = data;
 
     const updateData: Prisma.general_projectUncheckedUpdateInput = {
       ...rest,
@@ -22,7 +21,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: GeneralProjectSearchParameters): Promise<GeneralProject[]> {
+  public async search(params: SearchGeneralProjectRequest): Promise<GeneralProject[]> {
     return await this.findMany({
       where: {
         AND: [

@@ -14,7 +14,6 @@ import type {
   Document,
   Draft,
   ElectrificationProjectBase,
-  Enquiry,
   EnquiryBase,
   GeneralProjectBase,
   HousingProjectBase,
@@ -167,7 +166,7 @@ export type CreateElectrificationProjectRequest = CreateRequestDTO<
   Partial<ElectrificationProjectBase>,
   ElectrificationProjectBaseSchema
 >;
-export type ListElectrificationProjectsRequest = ListRequestDTO<
+export type SearchElectrificationProjectRequest = ListRequestDTO<
   Partial<ElectrificationProjectBase>,
   ElectrificationProjectBaseSchema
 >;
@@ -193,7 +192,7 @@ interface EnquirySearchSchema extends EnquiryBaseSchema {
   query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
 }
 export type CreateEnquiryRequest = PartialFields<
-  Pick<Enquiry, 'contact' | 'enquiryDescription' | 'relatedActivityId' | 'submissionType'>,
+  Pick<EnquiryBase, 'enquiryDescription' | 'relatedActivityId' | 'submissionType'> & { contact: ContactBase },
   'submissionType'
 >;
 export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
@@ -219,7 +218,7 @@ interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBa
   };
 }
 export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
-export type ListGeneralProjectsRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type SearchGeneralProjectRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
 export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
 export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
 
@@ -240,7 +239,7 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
   };
 }
 export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
-export type ListHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
 export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
 export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 

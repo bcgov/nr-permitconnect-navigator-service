@@ -14,8 +14,8 @@ import type {
   CurrentContext,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
+  SearchHousingProjectRequest,
   Maybe,
   PatchHousingProjectRequest
 } from '../types/index.ts';
@@ -168,7 +168,7 @@ export const listHousingProjectsService = async (
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: HousingProjectSearchParameters
+  params: SearchHousingProjectRequest
 ): Promise<HousingProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);

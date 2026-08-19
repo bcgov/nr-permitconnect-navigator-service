@@ -3,6 +3,7 @@ import { createInitiativeRouteBuilder } from './routeBuilder';
 
 import type {
   CreateEnquiryRequest,
+  CreateEnquiryResponse,
   DeleteEnquiryRequest,
   Enquiry,
   GetEnquiryRequest,
@@ -31,10 +32,10 @@ const enquiryRoutes = {
  * @param req - The request payload containing the enquiry data to create.
  * @returns A promise resolving to the created `Enquiry` resource.
  */
-export function createEnquiry(req: CreateEnquiryRequest): Promise<Enquiry> {
+export function createEnquiry(req: CreateEnquiryRequest): Promise<CreateEnquiryResponse> {
   const { ...body } = req;
 
-  return api.post<Enquiry>(enquiryRoutes.root(), body);
+  return api.post<CreateEnquiryResponse>(enquiryRoutes.root(), body);
 }
 
 /**

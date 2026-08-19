@@ -1,4 +1,8 @@
 import type { PermitStage, PermitState, PiesOnHold } from '../../db/codes/enums.ts';
+import type { Contact, Enquiry } from './resources.ts';
+
+/** Create bolts a top-level `contact` onto the response; not a real Enquiry relation, kept off `Enquiry` itself. */
+export type CreateEnquiryResponse = Enquiry & { contact: Contact };
 
 export interface PeachSummary {
   stage: PermitStage;

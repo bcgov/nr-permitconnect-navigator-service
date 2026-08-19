@@ -11,16 +11,17 @@ import { isTruthy } from '../utils/utils.ts';
 
 import type { Request, Response } from 'express';
 import type {
+  CreateEnquiryResponse,
   Enquiry,
   EnquiryIntake,
-  EnquirySearchParameters,
   LocalContext,
-  PatchEnquiryRequest
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
 } from '../types/index.ts';
 
 export const createEnquiryController = async (
   req: Request<never, never, EnquiryIntake>,
-  res: Response<Enquiry, LocalContext>
+  res: Response<CreateEnquiryResponse, LocalContext>
 ) => {
   // Provide an empty body if POST body is given undefined
   req.body ??= {} as EnquiryIntake;
@@ -59,15 +60,17 @@ export const listRelatedEnquiriesController = async (
 };
 
 export const searchEnquiriesController = async (
-  req: Request<never, never, EnquirySearchParameters | undefined, never>,
+  req: Request<never, never, SearchEnquiriesRequest, never>,
   res: Response<Enquiry[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchEnquiriesService(
     res.locals.currentAuthorization,
     res.locals.currentContext,
     {
       ...req.body,
-      includeUser: isTruthy(req.body?.includeUser)
+      includeUser: isTruthy(req.body.includeUser)
     },
     res.locals.currentContext.initiative
   );

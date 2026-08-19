@@ -21,7 +21,7 @@ import {
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { ActivityContactRole, EnquirySubmittedMethod } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { EnquirySearchParameters } from '../../../src/types/index.ts';
+import type { SearchEnquiriesRequest } from '../../../src/types/index.ts';
 
 vi.mock('config');
 
@@ -217,7 +217,7 @@ describe('enquiry service', () => {
 
   describe('searchEnquiriesService', () => {
     it('searches enquiries via the repository and filters by scope', async () => {
-      const params: EnquirySearchParameters = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
+      const params: SearchEnquiriesRequest = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
       const enquiries = [TEST_ENQUIRY_1];
       mockRepos.enquiry.search.mockResolvedValue(enquiries as never);
       filterSpy.mockResolvedValue(enquiries as never);
@@ -243,7 +243,7 @@ describe('enquiry service', () => {
 
   describe('patchEnquiryService', () => {
     it('updates the enquiry then returns the refreshed record', async () => {
-      const data = { enquiryId: TEST_ENQUIRY_1.enquiryId, enquiryDescription: 'Updated description' };
+      const data = { enquiryDescription: 'Updated description' };
       mockRepos.enquiry.update.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.findFirstOrThrow.mockResolvedValue(TEST_ENQUIRY_1 as never);
 
