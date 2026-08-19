@@ -1,11 +1,11 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_GROUP_1, TEST_GROUP_2_ADMIN, TEST_IDIR_USER_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { searchUsersService } from '../../../src/services/user.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_GROUP_1, TEST_GROUP_2_ADMIN, TEST_IDIR_USER_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { searchUsersService } from '#src/services/user';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
-import type { UserSearchParameters } from '../../../src/types/index.ts';
+import type { UserSearchParameters } from '#types';
 
 vi.mock('config');
 

@@ -1,6 +1,6 @@
 import { WritableRepository } from './writable.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
 
 export class SourceSystemKindRepository extends WritableRepository<PrismaTransactionClient['source_system_kind']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

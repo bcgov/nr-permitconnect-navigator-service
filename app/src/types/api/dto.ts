@@ -1,6 +1,6 @@
-import type { PaginationOptions } from '../common.ts';
-import type { Simplify } from '../utils.ts';
-import type { AuditFields, SoftDeleteFields } from '../../repositories';
+import type { PaginationOptions } from '#src/types/common';
+import type { Simplify } from '#src/types/utils';
+import type { AuditFields, SoftDeleteFields } from '#src/repositories/index';
 
 /**
  * Schema configuration

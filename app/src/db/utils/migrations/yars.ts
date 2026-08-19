@@ -1,7 +1,7 @@
-import { Action } from '../../../utils/enums/application.ts';
+import { Action } from '#src/utils/enums/application';
 
 import type { Knex } from 'knex';
-import type { GroupName, Initiative, Resource } from '../../../utils/enums/application.ts';
+import type { GroupName, Initiative, Resource } from '#src/utils/enums/application';
 
 /**
  * Adds a new attribute_group row

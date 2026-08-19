@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { AccessRequestRepository } from '../../../src/repositories/accessRequest.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { AccessRequestRepository } from '#src/repositories/accessRequest';
 
 // Construct the real repo
 const makeRepo = () => new AccessRequestRepository(prismaTxMock, 'principal-id');

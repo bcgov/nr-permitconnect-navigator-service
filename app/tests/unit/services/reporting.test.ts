@@ -1,12 +1,12 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import '../../__mocks__/unitOfWorkMock.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import '#tests/__mocks__/unitOfWorkMock';
 import {
   getElectrificationProjectPermitDataService,
   getGeneralProjectPermitDataService,
   getHousingProjectPermitDataService
-} from '../../../src/services/reporting.ts';
+} from '#src/services/reporting';
 
 vi.mock('config');
 

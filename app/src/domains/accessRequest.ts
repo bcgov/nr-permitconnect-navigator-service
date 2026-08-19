@@ -1,9 +1,9 @@
-import { getCorrespondingGlobalGroup } from '../domains/yars';
-import { GroupName } from '../utils/enums/application';
+import { getCorrespondingGlobalGroup } from '#src/domains/yars';
+import { GroupName } from '#src/utils/enums/application';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { Group } from '../types';
-import type { Initiative } from '../utils/enums/application';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { Group } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 export const isUserAdmin = async (
   repositories: Pick<Repositories, 'initiative'>,

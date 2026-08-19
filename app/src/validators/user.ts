@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { uuidv4 } from './common.ts';
-import { validate } from '../middleware/validation.ts';
+import { validate } from '#src/middleware/validation';
 
 const schema = {
   searchUsers: {

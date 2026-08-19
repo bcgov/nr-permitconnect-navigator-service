@@ -1,6 +1,6 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
 
-import type { SourceSystemKind } from '../types/index.ts';
+import type { SourceSystemKind } from '#types';
 
 /**
  * Get all source system kinds and include their associated permit type ids

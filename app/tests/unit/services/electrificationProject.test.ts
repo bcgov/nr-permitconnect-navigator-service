@@ -6,15 +6,15 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE,
   TEST_ELECTRIFICATION_PROJECT_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import prisma from '../../../src/db/database.ts';
-import * as electrificationProjectDomain from '../../../src/domains/electrificationProject.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { confirmationTemplateElectrificationSubmission } from '../../../src/utils/templates.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import prisma from '#src/db/database';
+import * as electrificationProjectDomain from '#src/domains/electrificationProject';
+import * as projectDomain from '#src/domains/project';
+import * as responseFiltering from '#src/parsers/responseFiltering';
+import * as electrificationProjectService from '#src/services/electrificationProject';
+import { Initiative } from '#src/utils/enums/application';
+import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
 vi.mock('config');
 vi.mock('../../../src/db/database.ts', () => ({

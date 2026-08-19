@@ -6,10 +6,10 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as enquiryDomain from '../../../src/domains/enquiry.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as enquiryDomain from '#src/domains/enquiry';
+import * as responseFiltering from '#src/parsers/responseFiltering';
 import {
   createEnquiryService,
   getEnquiryService,
@@ -17,11 +17,11 @@ import {
   listRelatedEnquiriesService,
   searchEnquiriesService,
   updateEnquiryService
-} from '../../../src/services/enquiry.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole, EnquirySubmittedMethod } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/services/enquiry';
+import { Initiative } from '#src/utils/enums/application';
+import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
-import type { EnquirySearchParameters } from '../../../src/types/index.ts';
+import type { EnquirySearchParameters } from '#types';
 
 vi.mock('config');
 

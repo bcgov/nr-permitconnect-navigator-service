@@ -3,11 +3,11 @@ import {
   deleteActivityContactService,
   listActivityContactsService,
   updateActivityContactService
-} from '../services/activityContact.ts';
-import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
+} from '#src/services/activityContact';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
-import type { ActivityContact, LocalContext } from '../types/index.ts';
+import type { ActivityContact, LocalContext } from '#types';
 
 export const createActivityContactController = async (
   req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,

@@ -1,7 +1,7 @@
 import { WritableRepository } from './writable.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { ContactSearchParameters } from '../types/index.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
+import type { ContactSearchParameters } from '#types';
 
 export class ContactRepository extends WritableRepository<PrismaTransactionClient['contact']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

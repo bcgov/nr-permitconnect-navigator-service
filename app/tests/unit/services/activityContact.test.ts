@@ -5,20 +5,20 @@ import {
   TEST_CONTACT_1,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as activityContactDomain from '../../../src/domains/activityContact.ts';
-import { email } from '../../../src/external/ches.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as activityContactDomain from '#src/domains/activityContact';
+import { email } from '#src/external/ches';
 import {
   createActivityContactService,
   deleteActivityContactService,
   listActivityContactsService,
   updateActivityContactService
-} from '../../../src/services/activityContact.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
-import Problem from '../../../src/utils/problem.ts';
+} from '#src/services/activityContact';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import Problem from '#src/utils/problem';
 
-import type { ActivityContact } from '../../../src/types/index.ts';
+import type { ActivityContact } from '#types';
 
 vi.mock('config');
 vi.mock('../../../src/external/ches.ts', () => ({

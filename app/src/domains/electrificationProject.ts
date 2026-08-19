@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
-import { Initiative } from '../utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { Initiative } from '#src/utils/enums/application';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { CurrentContext, ElectrificationProjectBase, ElectrificationProjectIntake } from '../types';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { CurrentContext, ElectrificationProjectBase, ElectrificationProjectIntake } from '#types';
 
 /**
  * Transforms intake data to match DB schema

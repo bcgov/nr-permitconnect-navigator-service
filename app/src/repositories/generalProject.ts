@@ -1,7 +1,7 @@
 import { WritableRepository } from './writable.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { GeneralProject, GeneralProjectSearchParameters } from '../types/index.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
+import type { GeneralProject, GeneralProjectSearchParameters } from '#types';
 
 export class GeneralProjectRepository extends WritableRepository<PrismaTransactionClient['general_project']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

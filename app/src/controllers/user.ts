@@ -1,8 +1,8 @@
-import { searchUsersService } from '../services/user.ts';
-import { isTruthy } from '../utils/utils.ts';
+import { searchUsersService } from '#src/services/user';
+import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
-import type { User, UserSearchParameters } from '../types/index.ts';
+import type { User, UserSearchParameters } from '#types';
 
 export const searchUsersController = async (
   req: Request<never, never, UserSearchParameters, never>,

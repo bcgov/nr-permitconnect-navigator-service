@@ -1,10 +1,10 @@
 import jwt from 'jsonwebtoken';
 
-import { getVerifiedPayload, hasAuthentication, jwtPayloadCache } from '../../../src/middleware/authentication.ts';
-import * as oidcProviders from '../../../src/middleware/providers/oidc.ts';
-import { loginService } from '../../../src/services/login.ts';
-import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
-import { Problem } from '../../../src/utils/index.ts';
+import { getVerifiedPayload, hasAuthentication, jwtPayloadCache } from '#src/middleware/authentication';
+import * as oidcProviders from '#src/middleware/providers/oidc';
+import { loginService } from '#src/services/login';
+import { AuthType, IdentityProviderKind, Initiative } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
 

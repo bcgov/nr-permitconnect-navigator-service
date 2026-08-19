@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common.ts';
-import { validate } from '../middleware/validation.ts';
-import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
+import { validate } from '#src/middleware/validation';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 const schema = {
   createActivityContact: {

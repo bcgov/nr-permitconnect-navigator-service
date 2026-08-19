@@ -1,7 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { listSourceSystemKindsService } from '../../../src/services/sourceSystemKind.ts';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { listSourceSystemKindsService } from '#src/services/sourceSystemKind';
 
 vi.mock('config');
 

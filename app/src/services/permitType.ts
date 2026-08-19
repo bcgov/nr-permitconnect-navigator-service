@@ -1,7 +1,7 @@
-import { unitOfWork } from '../db/unitOfWork';
+import { unitOfWork } from '#src/db/unitOfWork';
 
-import type { PermitType } from '../types';
-import type { Initiative } from '../utils/enums/application';
+import type { PermitType } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 /**
  * Lists Permit types

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import * as mapService from '../../../src/external/openMaps.ts';
+import * as mapService from '#src/external/openMaps';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');

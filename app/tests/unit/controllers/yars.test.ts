@@ -1,16 +1,16 @@
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
 import {
   deleteSubjectGroupController,
   getGroupsController,
   listPermissionsController,
   listSubjectPermissionsController
-} from '../../../src/controllers/yars.ts';
-import * as yarsService from '../../../src/services/yars.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+} from '#src/controllers/yars';
+import * as yarsService from '#src/services/yars';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { LocalContext } from '../../../src/types/index.ts';
+import type { LocalContext } from '#types';
 
 vi.mock('config');
 

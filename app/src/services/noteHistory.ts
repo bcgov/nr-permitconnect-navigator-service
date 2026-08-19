@@ -1,18 +1,12 @@
 import { randomUUID } from 'node:crypto';
 
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { emailBringForwardNotification } from '../domains/noteHistory.ts';
-import { GroupName } from '../utils/enums/application.ts';
-import { BringForwardType } from '../utils/enums/projectCommon.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { emailBringForwardNotification } from '#src/domains/noteHistory';
+import { GroupName } from '#src/utils/enums/application';
+import { BringForwardType } from '#src/utils/enums/projectCommon';
 
-import type {
-  BringForward,
-  CurrentAuthorization,
-  CurrentContext,
-  NoteHistory,
-  NoteHistoryBase
-} from '../types/index.ts';
-import type { Initiative, Resource } from '../utils/enums/application.ts';
+import type { BringForward, CurrentAuthorization, CurrentContext, NoteHistory, NoteHistoryBase } from '#types';
+import type { Initiative, Resource } from '#src/utils/enums/application';
 
 /**
  * Create a note history

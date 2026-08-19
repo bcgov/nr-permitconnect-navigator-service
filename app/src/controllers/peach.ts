@@ -1,7 +1,7 @@
-import { getPeachSummaryService } from '../services/peach.ts';
+import { getPeachSummaryService } from '#src/services/peach';
 
 import type { Request, Response } from 'express';
-import type { PermitTracking } from '../types/index.ts';
+import type { PermitTracking } from '#types';
 /**
  * Fetches PEACH data for permit tracking
  * @param req Express Request object

@@ -1,5 +1,5 @@
-import { listCodeTablesController } from '../../../src/controllers/code.ts';
-import * as codeService from '../../../src/services/code.ts';
+import { listCodeTablesController } from '#src/controllers/code';
+import * as codeService from '#src/services/code';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

@@ -1,13 +1,13 @@
 import express from 'express';
 import request from 'supertest';
 
-import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { requireActivityAdmin } from '../../../src/middleware/requireActivityAdmin.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
+import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1, TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { requireActivityAdmin } from '#src/middleware/requireActivityAdmin';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { NextFunction, Request, Response } from 'express';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 function buildApp(locals?: Record<string, unknown>) {
   const app = express();

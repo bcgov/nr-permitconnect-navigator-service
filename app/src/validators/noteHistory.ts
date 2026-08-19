@@ -1,10 +1,10 @@
 import Joi from 'joi';
 
 import { activityId, uuidv4 } from './common.ts';
-import { requireValidCode } from '../db/codes/validator.ts';
-import { validate } from '../middleware/validation.ts';
-import { BRING_FORWARD_TYPE_LIST } from '../utils/constants/projectCommon.ts';
-import { Resource } from '../utils/enums/application.ts';
+import { requireValidCode } from '#src/db/codes/validator';
+import { validate } from '#src/middleware/validation';
+import { BRING_FORWARD_TYPE_LIST } from '#src/utils/constants/projectCommon';
+import { Resource } from '#src/utils/enums/application';
 
 const schema = {
   createNoteHistory: {

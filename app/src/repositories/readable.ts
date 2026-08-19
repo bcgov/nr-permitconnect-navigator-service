@@ -1,4 +1,4 @@
-import { NotFoundProblem } from '../db/errors';
+import { NotFoundProblem } from '#src/db/errors';
 
 import type { Prisma } from '@prisma/client';
 

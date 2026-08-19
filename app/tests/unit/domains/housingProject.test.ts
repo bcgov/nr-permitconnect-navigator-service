@@ -6,17 +6,17 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_HOUSING_PROJECT_INTAKE,
   TEST_PERMIT_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import { assignPriority, generateHousingProjectData } from '../../../src/domains/housingProject.ts';
-import { BasicResponse, Initiative } from '../../../src/utils/enums/application.ts';
-import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
-import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
+import * as activityDomain from '#src/domains/activity';
+import { assignPriority, generateHousingProjectData } from '#src/domains/housingProject';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
+import { NumResidentialUnits } from '#src/utils/enums/housing';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { HousingProject, Permit } from '../../../src/types/index.ts';
+import type { HousingProject, Permit } from '#types';
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {

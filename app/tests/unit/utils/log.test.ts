@@ -1,6 +1,6 @@
 import config from 'config';
 
-import getLogger, { httpLogger } from '../../../src/utils/log.ts';
+import getLogger, { httpLogger } from '#src/utils/log';
 
 import type { Logger } from 'winston';
 

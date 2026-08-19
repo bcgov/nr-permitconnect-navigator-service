@@ -1,7 +1,7 @@
-import { getRoadmapNoteService, sendRoadmapService } from '../services/roadmap.ts';
+import { getRoadmapNoteService, sendRoadmapService } from '#src/services/roadmap';
 
 import type { Request, Response } from 'express';
-import type { Email } from '../types';
+import type { Email } from '#types';
 
 export const getRoadmapNoteController = async (
   req: Request<never, never, never, { activityId: string }>,

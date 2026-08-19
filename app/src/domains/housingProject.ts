@@ -2,15 +2,15 @@ import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
 import { buildNewPermitRecord } from './permit';
-import { PermitStage, PermitState } from '../db/codes/enums';
-import { jsonToPrismaInputJson } from '../db/utils/utils';
-import { getCurrentUsername } from '../utils';
-import { BasicResponse, Initiative } from '../utils/enums/application';
-import { NumResidentialUnits } from '../utils/enums/housing';
-import { PermitNeeded } from '../utils/enums/permit';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { getCurrentUsername } from '#src/utils/index';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
+import { NumResidentialUnits } from '#src/utils/enums/housing';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { Repositories } from '../db/unitOfWork';
+import type { Repositories } from '#src/db/unitOfWork';
 import type {
   CurrentContext,
   HousingProject,
@@ -19,7 +19,7 @@ import type {
   Permit,
   PermitTrackingBase,
   UpsertPermitRequest
-} from '../types';
+} from '#types';
 
 /**
  * Assigns a priority level to a housing project based on given criteria

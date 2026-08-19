@@ -6,6 +6,11 @@
   "description": "Permit Connect Navigator Service",
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
   "main": "server.ts",
+  "imports": {
+    "#types": "./src/types/index.ts",
+    "#src/*": "./src/*.ts",
+    "#tests/*": "./tests/*.ts"
+  },
   "scripts": {
     "build:all": "tsx ./deploy-utils.ts",
     "build": "tsc --project tsconfig.build.json",

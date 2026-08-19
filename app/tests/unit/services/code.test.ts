@@ -1,12 +1,12 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import '../../__mocks__/unitOfWorkMock.ts';
-import { CODE_TABLES } from '../../../src/db/codes/tables.ts';
-import { listCodeTablesService } from '../../../src/services/code.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import '#tests/__mocks__/unitOfWorkMock';
+import { CODE_TABLES } from '#src/db/codes/tables';
+import { listCodeTablesService } from '#src/services/code';
 
 import type { Mock } from 'vitest';
-import type { CodeRow } from '../../../src/types/index.ts';
+import type { CodeRow } from '#types';
 
 vi.mock('config');
 

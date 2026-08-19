@@ -1,8 +1,8 @@
-import { TEST_NOTE_HISTORY_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { NoteHistoryRepository } from '../../../src/repositories/noteHistory.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { BringForwardType } from '../../../src/utils/enums/projectCommon.ts';
+import { TEST_NOTE_HISTORY_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { NoteHistoryRepository } from '#src/repositories/noteHistory';
+import { Initiative } from '#src/utils/enums/application';
+import { BringForwardType } from '#src/utils/enums/projectCommon';
 
 import type { Mock } from 'vitest';
 

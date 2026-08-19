@@ -1,8 +1,8 @@
 import config from 'config';
 import { existsSync, readFileSync, statSync } from 'node:fs';
 
-import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
-import * as utils from '../../../src/utils/utils.ts';
+import { AuthType, IdentityProviderKind, Initiative } from '#src/utils/enums/application';
+import * as utils from '#src/utils/utils';
 
 import type { JwtPayload } from 'jsonwebtoken';
 import type { Mock } from 'vitest';

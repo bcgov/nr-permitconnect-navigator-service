@@ -3,14 +3,14 @@ import { randomUUID } from 'node:crypto';
 
 import { createActivity } from './activity';
 import { getProjectByActivityId } from './project';
-import { email } from '../external/ches';
-import { getCurrentUsername, toTitleCase } from '../utils';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon';
-import { confirmationTemplateEnquiry } from '../utils/templates';
+import { email } from '#src/external/ches';
+import { getCurrentUsername, toTitleCase } from '#src/utils/index';
+import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
+import { confirmationTemplateEnquiry } from '#src/utils/templates';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '../types';
-import type { Initiative } from '../utils/enums/application';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 export async function emailEnquiryConfirmation(
   repositories: Pick<Repositories, ProjectRepositoryKeys>,

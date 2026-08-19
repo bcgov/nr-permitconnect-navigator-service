@@ -1,8 +1,8 @@
 import { WritableRepository } from './writable.ts';
-import { SYSTEM_ID } from '../utils/constants/application.ts';
+import { SYSTEM_ID } from '#src/utils/constants/application';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { UserSearchParameters } from '../types/index.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
+import type { UserSearchParameters } from '#types';
 
 export class UserRepository extends WritableRepository<PrismaTransactionClient['user']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

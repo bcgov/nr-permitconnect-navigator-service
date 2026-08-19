@@ -1,6 +1,6 @@
 import { mockDeep } from 'vitest-mock-extended';
 
-import type * as DatabaseModule from '../../../src/db/database.ts';
+import type * as DatabaseModule from '#src/db/database';
 
 vi.mock('config', () => ({
   default: {

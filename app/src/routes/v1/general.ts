@@ -8,8 +8,8 @@ import map from './map.ts';
 import noteHistory from './noteHistory.ts';
 import permit from './permit.ts';
 import roadmap from './roadmap.ts';
-import { hasAuthentication } from '../../middleware/authentication.ts';
-import { Initiative } from '../../utils/enums/application.ts';
+import { hasAuthentication } from '#src/middleware/authentication';
+import { Initiative } from '#src/utils/enums/application';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.GENERAL));

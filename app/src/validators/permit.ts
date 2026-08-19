@@ -6,8 +6,8 @@ import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { permitTypeSchema } from './permitType.ts';
 import { createStamps } from './stamps.ts';
-import { requireValidCode } from '../db/codes/validator.ts';
-import { validate } from '../middleware/validation.ts';
+import { requireValidCode } from '#src/db/codes/validator';
+import { validate } from '#src/middleware/validation';
 
 const sharedPermitSchema = {
   permitType: permitTypeSchema,

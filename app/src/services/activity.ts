@@ -1,5 +1,5 @@
-import { unitOfWork } from '../db/unitOfWork';
-import { deleteActivity } from '../domains/activity';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { deleteActivity } from '#src/domains/activity';
 
 export const deleteActivityService = async (activityId: string): Promise<void> => {
   return await unitOfWork.execute(

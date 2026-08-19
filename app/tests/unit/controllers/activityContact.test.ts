@@ -3,19 +3,19 @@ import {
   TEST_CONTACT_1,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createActivityContactController,
   deleteActivityContactController,
   listActivityContactController,
   updateActivityContactController
-} from '../../../src/controllers/activityContact.ts';
-import * as activityContactService from '../../../src/services/activityContact.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/controllers/activityContact';
+import * as activityContactService from '#src/services/activityContact';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { ActivityContact, Contact, LocalContext } from '../../../src/types/index.ts';
+import type { ActivityContact, Contact, LocalContext } from '#types';
 
 vi.mock('config');
 

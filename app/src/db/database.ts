@@ -5,7 +5,7 @@ import filterDeletedTransform from './extensions/filterDeleted.ts';
 import numericTransform from './extensions/numeric.ts';
 import permitStatusDatesTransform from './extensions/permitStatusDates.ts';
 import projectIdTransform from './extensions/projectId.ts';
-import { getLogger } from '../utils/log.ts';
+import { getLogger } from '#src/utils/log';
 
 const log = getLogger(module.filename);
 

@@ -1,4 +1,4 @@
-import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_PERMIT_1 } from '../data/index.ts';
+import { TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, TEST_PERMIT_1 } from '#tests/unit/data/index';
 import {
   deletePermitController,
   getPermitController,
@@ -6,20 +6,14 @@ import {
   listPermitsController,
   searchPermitsController,
   upsertPermitController
-} from '../../../src/controllers/permit.ts';
-import * as permitService from '../../../src/services/permit.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { Problem } from '../../../src/utils/index.ts';
+} from '#src/controllers/permit';
+import * as permitService from '#src/services/permit';
+import { Initiative } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type {
-  IntakePermitRequest,
-  ListPermitsOptions,
-  LocalContext,
-  Permit,
-  SearchPermitsOptions
-} from '../../../src/types/index.ts';
+import type { IntakePermitRequest, ListPermitsOptions, LocalContext, Permit, SearchPermitsOptions } from '#types';
 
 vi.mock('config');
 

@@ -1,5 +1,5 @@
-import { deleteActivityService } from '../services/activity.ts';
-import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '../services/draft.ts';
+import { deleteActivityService } from '#src/services/activity';
+import { deleteDraftService, getDraftService, listDraftsService, upsertDraftService } from '#src/services/draft';
 import {
   createElectrificationProjectService,
   getElectrificationProjectService,
@@ -9,10 +9,10 @@ import {
   searchElectrificationProjects,
   submitElectrificationProjectDraftService,
   updateElectrificationProjectService
-} from '../services/electrificationProject.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { DraftCode } from '../utils/enums/projectCommon.ts';
-import { isTruthy } from '../utils/utils.ts';
+} from '#src/services/electrificationProject';
+import { Initiative } from '#src/utils/enums/application';
+import { DraftCode } from '#src/utils/enums/projectCommon';
+import { isTruthy } from '#src/utils/utils';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
@@ -24,7 +24,7 @@ import type {
   ElectrificationProjectStatistics,
   LocalContext,
   StatisticsFilters
-} from '../types/index.ts';
+} from '#types';
 
 export const createElectrificationProjectController = async (
   req: Request<never, never, ElectrificationProjectIntake>,

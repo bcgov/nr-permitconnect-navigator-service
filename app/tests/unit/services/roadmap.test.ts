@@ -1,18 +1,18 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { PermitStage } from '../../../src/db/codes/enums.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import * as chesMail from '../../../src/external/ches.ts';
-import * as coms from '../../../src/external/coms.ts';
-import * as roadmapService from '../../../src/services/roadmap.ts';
-import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
-import Problem from '../../../src/utils/problem.ts';
-import * as templates from '../../../src/utils/templates.ts';
+import { TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { PermitStage } from '#src/db/codes/enums';
+import * as projectDomain from '#src/domains/project';
+import * as chesMail from '#src/external/ches';
+import * as coms from '#src/external/coms';
+import * as roadmapService from '#src/services/roadmap';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import Problem from '#src/utils/problem';
+import * as templates from '#src/utils/templates';
 
-import type { Email } from '../../../src/types/index.ts';
+import type { Email } from '#types';
 
 vi.mock('config');
 

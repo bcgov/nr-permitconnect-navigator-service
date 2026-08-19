@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client';
 
-import { toPascalCase } from '../../utils';
+import { toPascalCase } from '#src/utils/index';
 
 /**
  * Set of Prisma model names that should be excluded from the automatic

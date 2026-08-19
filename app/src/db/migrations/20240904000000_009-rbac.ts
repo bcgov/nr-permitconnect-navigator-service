@@ -1,8 +1,8 @@
 /* eslint-disable max-len */
 import { randomUUID } from 'node:crypto';
 
-import { addAuditStamps } from '../utils/migrations/helpers.ts';
-import { Action, GroupName, Initiative, Resource, ResourceLegacy } from '../../utils/enums/application.ts';
+import { addAuditStamps } from '#src/db/utils/migrations/helpers';
+import { Action, GroupName, Initiative, Resource, ResourceLegacy } from '#src/utils/enums/application';
 
 import type { Knex } from 'knex';
 

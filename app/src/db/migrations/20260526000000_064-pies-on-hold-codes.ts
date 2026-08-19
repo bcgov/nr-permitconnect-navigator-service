@@ -4,7 +4,7 @@ import {
   createUpdatedAtTrigger,
   dropAuditLogTrigger,
   dropUpdatedAtTrigger
-} from '../utils/migrations/helpers.ts';
+} from '#src/db/utils/migrations/helpers';
 
 import type { Knex } from 'knex';
 

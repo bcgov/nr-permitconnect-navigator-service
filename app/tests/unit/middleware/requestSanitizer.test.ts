@@ -1,7 +1,7 @@
 import express from 'express';
 import request from 'supertest';
 
-import { requestSanitizer } from '../../../src/middleware/requestSanitizer.ts';
+import { requestSanitizer } from '#src/middleware/requestSanitizer';
 
 import type { Request, Response } from 'express';
 

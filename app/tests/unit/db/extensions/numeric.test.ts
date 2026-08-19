@@ -1,5 +1,5 @@
 import { captureExtension } from './captureExtension.ts';
-import numericTransform from '../../../../src/db/extensions/numeric.ts';
+import numericTransform from '#src/db/extensions/numeric';
 
 const ext = captureExtension(numericTransform);
 

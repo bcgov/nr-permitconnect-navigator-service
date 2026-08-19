@@ -1,7 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { normalize } from 'node:path';
 
-import { prismaMock } from '../../../__mocks__/prismaMock.ts';
+import { prismaMock } from '#tests/__mocks__/prismaMock';
 
 import type { Mock, MockInstance } from 'vitest';
 

@@ -2,8 +2,8 @@ import {
   getElectrificationProjectPermitDataController,
   getGeneralProjectPermitDataController,
   getHousingProjectPermitDataController
-} from '../../../src/controllers/reporting.ts';
-import * as reportingService from '../../../src/services/reporting.ts';
+} from '#src/controllers/reporting';
+import * as reportingService from '#src/services/reporting';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

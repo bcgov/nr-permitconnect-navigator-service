@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { IdirSearchParameters } from '../types/index.ts';
+import type { IdirSearchParameters } from '#types';
 
 /**
  * Gets Auth token using SSO credentials

@@ -1,10 +1,10 @@
 import express from 'express';
 
-import { getPidsController } from '../../controllers/map.ts';
-import { hasAuthorization } from '../../middleware/authorization.ts';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Initiative, Resource } from '../../utils/enums/application.ts';
+import { getPidsController } from '#src/controllers/map';
+import { hasAuthorization } from '#src/middleware/authorization';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { Action, Initiative, Resource } from '#src/utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 

@@ -1,8 +1,8 @@
 import config from 'config';
 
 import { setAuthHeader } from './providers/oidc.ts';
-import { AuthType } from '../utils/enums/application.ts';
-import { Problem } from '../utils/index.ts';
+import { AuthType } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
 

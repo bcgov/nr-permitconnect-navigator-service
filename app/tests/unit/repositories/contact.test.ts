@@ -1,7 +1,7 @@
-import { TEST_CONTACT_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { ContactRepository } from '../../../src/repositories/contact.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_CONTACT_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { ContactRepository } from '#src/repositories/contact';
+import { Initiative } from '#src/utils/enums/application';
 
 // Construct the real repo — its constructor picks tx.contact, so prismaTxMock.contact
 // acts as the deep-mocked delegate. prismaMock setup resets it before each test.

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { listSourceSystemKindsController } from '../../controllers/sourceSystemKind.ts';
+import { listSourceSystemKindsController } from '#src/controllers/sourceSystemKind';
 
 const router = express.Router();
 

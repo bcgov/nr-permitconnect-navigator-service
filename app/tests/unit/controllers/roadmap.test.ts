@@ -1,10 +1,10 @@
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import { getRoadmapNoteController, sendRoadmapController } from '../../../src/controllers/roadmap.ts';
-import * as roadmapService from '../../../src/services/roadmap.ts';
+import { TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
+import { getRoadmapNoteController, sendRoadmapController } from '#src/controllers/roadmap';
+import * as roadmapService from '#src/services/roadmap';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Email } from '../../../src/types';
+import type { Email } from '#types';
 
 vi.mock('config');
 
