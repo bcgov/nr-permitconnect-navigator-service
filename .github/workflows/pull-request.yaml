@@ -78,8 +78,8 @@ jobs:
             /usr/local/bin/node \
             ./node_modules/knex/bin/cli.js \
             seed:run \
-            --specific=dev_groups.js \
-            --knexfile=./sbin/knexfile.js
+            --specific=dev_groups.ts \
+            --knexfile=./knexfile.ts
 
   comment-pr:
     name: Comment on PR

@@ -71,7 +71,7 @@ spec:
             - ./node_modules/knex/bin/cli.js
             - migrate:latest
             - --knexfile
-            - ./sbin/knexfile.js
+            - ./knexfile.ts
 
           env:
             - name: NODE_ENV
