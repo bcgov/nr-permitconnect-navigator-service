@@ -66,12 +66,14 @@ export const listGeneralProjectsController = async (_req: Request, res: Response
 };
 
 export const searchGeneralProjectsController = async (
-  req: Request<never, never, SearchGeneralProjectRequest | undefined, never>,
+  req: Request<never, never, SearchGeneralProjectRequest>,
   res: Response<GeneralProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };

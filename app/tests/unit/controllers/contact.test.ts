@@ -160,7 +160,7 @@ describe('searchContactsController', () => {
         email: 'john@example.com',
         includeActivities: 'true'
       }
-    } as unknown as Request<never, never, ContactSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, ContactSearchParameters, never>;
 
     searchSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -180,7 +180,7 @@ describe('searchContactsController', () => {
   it('handles undefined body', async () => {
     const req = {
       body: undefined
-    } as unknown as Request<never, never, ContactSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, ContactSearchParameters, never>;
 
     searchSpy.mockResolvedValue([]);
 

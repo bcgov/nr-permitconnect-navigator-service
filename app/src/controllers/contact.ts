@@ -51,22 +51,24 @@ export const matchContactsController = async (
 };
 
 export const searchContactsController = async (
-  req: Request<never, never, ContactSearchParameters | undefined, never>,
+  req: Request<never, never, ContactSearchParameters, never>,
   res: Response<Contact[]>
 ) => {
-  const contactIds = mixedQueryToArray(req.body?.contactId);
-  const userIds = mixedQueryToArray(req.body?.userId);
+  req.body ??= {};
+
+  const contactIds = mixedQueryToArray(req.body.contactId);
+  const userIds = mixedQueryToArray(req.body.userId);
 
   const response = await searchContactsService({
     userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
     contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
-    email: req.body?.email,
-    firstName: req.body?.firstName,
-    lastName: req.body?.lastName,
-    contactApplicantRelationship: req.body?.contactApplicantRelationship,
-    phoneNumber: req.body?.phoneNumber,
-    initiative: req.body?.initiative,
-    includeActivities: isTruthy(req.body?.includeActivities)
+    email: req.body.email,
+    firstName: req.body.firstName,
+    lastName: req.body.lastName,
+    contactApplicantRelationship: req.body.contactApplicantRelationship,
+    phoneNumber: req.body.phoneNumber,
+    initiative: req.body.initiative,
+    includeActivities: isTruthy(req.body.includeActivities)
   });
 
   res.status(200).json(response);

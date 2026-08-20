@@ -70,12 +70,14 @@ export const listHousingProjectsController = async (_req: Request, res: Response
 };
 
 export const searchHousingProjectsController = async (
-  req: Request<never, never, SearchHousingProjectRequest | undefined, never>,
+  req: Request<never, never, SearchHousingProjectRequest>,
   res: Response<HousingProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };
