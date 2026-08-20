@@ -9,7 +9,7 @@ import type { User } from '@/types';
 
 // Mocks
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 // Fixtures
 

@@ -25,7 +25,7 @@ import type { AtsClientResource, AtsEnquiryResource, Group, HousingProject, User
 const createAtsClientSpy = vi.spyOn(atsService, 'createAtsClient');
 const createAtsEnquirySpy = vi.spyOn(atsService, 'createAtsEnquiry');
 const getPidsSpy = vi.spyOn(mapService, 'getPids');
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 const patchProjectSpy = vi.spyOn(housingProjectService, 'patchProject');
 
 // Fixtures

@@ -11,7 +11,7 @@ import { StorageKey } from '@/utils/enums/application';
 
 import type { User } from '@/types';
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({

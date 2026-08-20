@@ -30,7 +30,6 @@ const schema = {
   },
   patchNoteHistory: {
     body: Joi.object({
-      activityId: activityId,
       bringForwardDate: Joi.date().iso().allow(null),
       bringForwardState: Joi.string()
         .valid(...BRING_FORWARD_TYPE_LIST)

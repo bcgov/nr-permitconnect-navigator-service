@@ -126,7 +126,7 @@ export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
   ids: 'noteHistoryId';
-  immutable: 'noteHistoryId';
+  immutable: 'activityId' | 'noteHistoryId';
   serverGenerated: 'noteHistoryId';
 }
 interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {

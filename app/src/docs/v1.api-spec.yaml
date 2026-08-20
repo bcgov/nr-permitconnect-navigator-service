@@ -251,71 +251,53 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /contact/search:
-    get:
+    post:
       summary: Search contacts
       description: Returns a list of contacts based on the given queries
       operationId: searchContacts
       tags:
         - Contact
-      parameters:
-        - in: query
-          name: contactApplicantRelationship
-          required: false
-          schema:
-            type: string
-            description: The contact applicant relationship type to filter on
-            example: Property owner
-        - in: query
-          name: contactPreference
-          required: false
-          schema:
-            type: string
-            description: The Contact's contact preference
-            example: Email
-        - in: query
-          name: contactId
-          required: false
-          schema:
-            type: array
-            description: The Contact IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ContactId'
-        - in: query
-          name: email
-          required: false
-          schema:
-            type: string
-            description: The Contact's email to filter on
-            example: JaneDoe@email.com
-        - in: query
-          name: firstName
-          required: false
-          schema:
-            type: string
-            description: The Contact's firstName to filter on
-            example: Jane
-        - in: query
-          name: lastName
-          required: false
-          schema:
-            type: string
-            description: The Contact's lastName to filter on
-            example: Doe
-        - in: query
-          name: phoneNumber
-          required: false
-          schema:
-            type: string
-            description: The Contact's phoneNumber to filter on
-            example: (123) 456-7890
-        - in: query
-          name: userId
-          required: false
-          schema:
-            type: array
-            description: The Contact User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-UserId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contactApplicantRelationship:
+                  type: string
+                  description: The contact applicant relationship type to filter on
+                  example: Property owner
+                contactPreference:
+                  type: string
+                  description: The Contact's contact preference
+                  example: Email
+                contactId:
+                  type: array
+                  description: The Contact IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ContactId'
+                email:
+                  type: string
+                  description: The Contact's email to filter on
+                  example: JaneDoe@email.com
+                firstName:
+                  type: string
+                  description: The Contact's firstName to filter on
+                  example: Jane
+                lastName:
+                  type: string
+                  description: The Contact's lastName to filter on
+                  example: Doe
+                phoneNumber:
+                  type: string
+                  description: The Contact's phoneNumber to filter on
+                  example: (123) 456-7890
+                userId:
+                  type: array
+                  description: The Contact User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-UserId'
       responses:
         '200':
           description: A list of contacts matching the search criteria
@@ -637,38 +619,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchElectrificationEnquiries
       tags:
         - Electrification Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -1210,38 +1191,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/search:
-    get:
+    post:
       summary: Search electrification projects
       description: Returns a list of electrification projects based on the given queries
       operationId: searchElectrificationProjects
       tags:
         - Electrification Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: electrificationProjectId
-          required: false
-          schema:
-            type: array
-            description: The Electrification Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                electrificationProjectId:
+                  type: array
+                  description: The Electrification Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ElectrificationProjectId'
       responses:
         '200':
           description: A list of electrification projects matching the search criteria
@@ -1639,38 +1619,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchGeneralEnquiries
       tags:
         - General Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -2123,46 +2102,42 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/search:
-    get:
+    post:
       summary: Search general projects
       description: Returns a list of general projects based on the given queries
       operationId: searchGeneralProjects
       tags:
         - General Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: generalProjectId
-          required: false
-          schema:
-            type: array
-            description: The General Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-GeneralProjectId'
-        - in: query
-          name: submissionType
-          required: false
-          schema:
-            type: array
-            description: The general submission types to filter on
-            items:
-              $ref: '#/components/parameters/Query-SubmissionType'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                generalProjectId:
+                  type: array
+                  description: The General Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-GeneralProjectId'
+                submissionType:
+                  type: array
+                  description: The general submission types to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of general projects matching the search criteria
@@ -2560,38 +2535,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchHousingEnquiries
       tags:
         - Housing Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -3132,46 +3106,42 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/search:
-    get:
+    post:
       summary: Search housing projects
       description: Returns a list of housing projects based on the given queries
       operationId: searchHousingProjects
       tags:
         - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: housingProjectId
-          required: false
-          schema:
-            type: array
-            description: The Housing Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-HousingProjectId'
-        - in: query
-          name: submissionType
-          required: false
-          schema:
-            type: array
-            description: The housing submission types to filter on
-            items:
-              $ref: '#/components/parameters/Query-SubmissionType'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                housingProjectId:
+                  type: array
+                  description: The Housing Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-HousingProjectId'
+                submissionType:
+                  type: array
+                  description: The housing submission types to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of housing projects matching the search criteria
@@ -3372,13 +3342,62 @@ paths:
                 $ref: '#/components/schemas/DB-SourceSystemKind'
         "401":
           $ref: "#/components/responses/Unauthorized"
-  /user:
-    get:
+  /user/search:
+    post:
       summary: Search users
       description: Gets a list of users based on given parameters
       operationId: searchUsers
       tags:
         - User
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    type: string
+                    format: uuid
+                idp:
+                  type: array
+                  description: The identity provider kinds to filter on
+                  items:
+                    type: string
+                sub:
+                  type: string
+                  description: The IDIR/BCeID subject identifier to filter on
+                email:
+                  type: string
+                  description: The User's email to filter on
+                firstName:
+                  type: string
+                  description: The User's firstName to filter on
+                fullName:
+                  type: string
+                  description: The User's full name to filter on
+                lastName:
+                  type: string
+                  description: The User's lastName to filter on
+                active:
+                  type: boolean
+                  description: Whether to filter on active users only
+                group:
+                  type: array
+                  description: The group names to filter on
+                  items:
+                    type: string
+                includeUserGroups:
+                  type: boolean
+                  description: Whether to include group data with each user being returned
+                initiative:
+                  type: array
+                  description: The initiatives to filter on
+                  items:
+                    type: string
       responses:
         '200':
           description: Users

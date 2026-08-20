@@ -15,7 +15,7 @@ import type { Note, NoteHistory, User } from '@/types';
 
 const { t } = useI18n();
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-router', () => ({
   useRouter: () => ({

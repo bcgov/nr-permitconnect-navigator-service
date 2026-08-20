@@ -24,7 +24,7 @@ vi.mock('@/services', () => ({
   permitService: { upsertPermit: vi.fn(), deletePermit: vi.fn() },
   permitNoteService: { createPermitNote: vi.fn() },
   sourceSystemKindService: { listSourceSystemKinds: vi.fn() },
-  userService: { listUsers: vi.fn() }
+  userService: { searchUsers: vi.fn() }
 }));
 
 // Mock PrimeVue Composables
@@ -153,7 +153,7 @@ describe('AuthorizationForm.vue', () => {
     vi.mocked(useConfirm).mockReturnValue({ require: mockConfirmRequire } as any);
 
     vi.mocked(sourceSystemKindService.listSourceSystemKinds).mockResolvedValue(testSourceSystemKinds);
-    vi.mocked(userService.listUsers).mockResolvedValue([{ firstName: 'John', lastName: 'Doe' }] as User[]);
+    vi.mocked(userService.searchUsers).mockResolvedValue([{ firstName: 'John', lastName: 'Doe' }] as User[]);
   });
 
   describe('Initialization and Rendering', () => {
@@ -172,7 +172,7 @@ describe('AuthorizationForm.vue', () => {
       );
       await flushPromises();
 
-      expect(userService.listUsers).toHaveBeenCalledWith({ userId: ['user-1'] });
+      expect(userService.searchUsers).toHaveBeenCalledWith({ userId: ['user-1'] });
       expect(wrapper.html()).toContain('Agency');
       expect(wrapper.html()).toContain('Domain');
       expect(wrapper.html()).toContain('Doe, John');
