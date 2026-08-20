@@ -47,7 +47,7 @@ export async function emailBringForwardNotification(
       activityId: noteHistory.activityId
     });
   } else if (
-    [Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, resource === Resource.HOUSING_PROJECT].includes(
+    ([Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, Resource.HOUSING_PROJECT] as Resource[]).includes(
       resource
     )
   ) {
