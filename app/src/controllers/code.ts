@@ -1,4 +1,4 @@
-import { listCodeTablesService } from '../services/code.ts';
+import { listCodeTablesService } from '#src/services/code';
 
 import type { Request, Response } from 'express';
 

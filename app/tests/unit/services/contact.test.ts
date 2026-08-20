@@ -1,7 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_CONTACT_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
+import { TEST_CONTACT_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import {
   createContactsService,
   deleteContactService,
@@ -10,10 +10,10 @@ import {
   matchContactsService,
   searchContactsService,
   upsertContactsService
-} from '../../../src/services/contact.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+} from '#src/services/contact';
+import { Initiative } from '#src/utils/enums/application';
 
-import type { ContactSearchParameters } from '../../../src/types/index.ts';
+import type { ContactSearchParameters } from '#types';
 
 describe('contact service', () => {
   beforeEach(() => {

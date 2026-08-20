@@ -1,4 +1,4 @@
-import { createDocumentService, deleteDocumentService, listDocumentsService } from '../services/document.ts';
+import { createDocumentService, deleteDocumentService, listDocumentsService } from '#src/services/document';
 
 import type { Request, Response } from 'express';
 

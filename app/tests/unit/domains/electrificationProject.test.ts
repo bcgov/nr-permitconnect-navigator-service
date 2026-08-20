@@ -5,12 +5,12 @@ import {
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as activityDomain from '../../../src/domains/activity.ts';
-import { generateElectrificationProjectData } from '../../../src/domains/electrificationProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ApplicationStatus, SubmissionType } from '../../../src/utils/enums/projectCommon.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as activityDomain from '#src/domains/activity';
+import { generateElectrificationProjectData } from '#src/domains/electrificationProject';
+import { Initiative } from '#src/utils/enums/application';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {

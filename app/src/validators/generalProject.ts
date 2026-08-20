@@ -4,12 +4,12 @@ import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
-import { requireValidCode } from '../db/codes/validator.ts';
-import { validate } from '../middleware/validation';
-import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
-import { PROJECT_APPLICANT_LIST } from '../utils/constants/housing.ts';
-import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
-import { ProjectApplicant } from '../utils/enums/housing.ts';
+import { requireValidCode } from '#src/db/codes/validator';
+import { validate } from '#src/middleware/validation';
+import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
+import { PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
+import { ProjectApplicant } from '#src/utils/enums/housing';
 
 const schema = {
   createGeneralProject: {

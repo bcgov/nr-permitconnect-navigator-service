@@ -1,4 +1,4 @@
-import { GroupName, Initiative } from '../../utils/enums/application.ts';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
 import type { Knex } from 'knex';
 

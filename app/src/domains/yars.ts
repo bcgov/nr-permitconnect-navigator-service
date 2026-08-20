@@ -1,8 +1,8 @@
-import { Initiative } from '../utils/enums/application';
+import { Initiative } from '#src/utils/enums/application';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { Group } from '../types';
-import type { GroupName } from '../utils/enums/application';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { Group } from '#types';
+import type { GroupName } from '#src/utils/enums/application';
 
 export const assignGroup = async (
   repositories: Pick<Repositories, 'group' | 'subjectGroup'>,

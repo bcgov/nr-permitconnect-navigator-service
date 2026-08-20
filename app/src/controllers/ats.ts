@@ -1,7 +1,7 @@
-import { createAtsClient, createAtsEnquiry, searchAtsUsers } from '../external/ats.ts';
+import { createAtsClient, createAtsEnquiry, searchAtsUsers } from '#src/external/ats';
 
 import type { Request, Response } from 'express';
-import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, LocalContext } from '../types/index.ts';
+import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, LocalContext } from '#types';
 
 export const createAtsClientController = async (
   req: Request<never, never, AtsClientResource, never>,

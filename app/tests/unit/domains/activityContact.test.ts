@@ -12,15 +12,15 @@ import {
   TEST_GROUP_3_SUPERVISOR,
   TEST_HOUSING_PROJECT_1,
   TEST_INITIATIVE_HOUSING
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '../../../src/domains/activityContact.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
-import { Problem } from '../../../src/utils/index.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '#src/domains/activityContact';
+import * as projectDomain from '#src/domains/project';
+import { Initiative } from '#src/utils/enums/application';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import { Problem } from '#src/utils/index';
 
-import type { ActivityContact, CurrentAuthorization } from '../../../src/types/index.ts';
+import type { ActivityContact, CurrentAuthorization } from '#types';
 
 vi.mock('../../../src/domains/project.ts');
 vi.mock('config', async () => {

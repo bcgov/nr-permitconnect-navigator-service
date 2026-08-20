@@ -1,6 +1,6 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
 
-import type { Contact, ContactBase, ContactSearchParameters } from '../types/index.ts';
+import type { Contact, ContactBase, ContactSearchParameters } from '#types';
 
 /**
  * Deletes a specific contact from the PCNS database.

@@ -8,21 +8,21 @@ import {
   TEST_GROUP_2_ADMIN,
   TEST_IDIR_USER_1,
   TEST_SUBJECT_GROUP_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as accessRequestDomain from '../../../src/domains/accessRequest.ts';
-import * as userDomain from '../../../src/domains/user.ts';
-import * as yarsDomain from '../../../src/domains/yars.ts';
-import { assignPermissions } from '../../../src/external/coms.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as accessRequestDomain from '#src/domains/accessRequest';
+import * as userDomain from '#src/domains/user';
+import * as yarsDomain from '#src/domains/yars';
+import { assignPermissions } from '#src/external/coms';
 import {
   createAccessRequestService,
   getAccessRequestsService,
   processAccessRequestService
-} from '../../../src/services/accessRequest.ts';
-import { AccessRequestStatus, IdentityProviderKind } from '../../../src/utils/enums/application.ts';
-import Problem from '../../../src/utils/problem.ts';
+} from '#src/services/accessRequest';
+import { AccessRequestStatus, IdentityProviderKind } from '#src/utils/enums/application';
+import Problem from '#src/utils/problem';
 
-import type { AccessRequest, User } from '../../../src/types/index.ts';
+import type { AccessRequest, User } from '#types';
 
 vi.mock('config');
 vi.mock('../../../src/external/coms.ts', () => ({

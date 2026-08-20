@@ -1,9 +1,9 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_PERMIT_TYPE_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { listPermitTypesService } from '../../../src/services/permitType.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_PERMIT_TYPE_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { listPermitTypesService } from '#src/services/permitType';
+import { Initiative } from '#src/utils/enums/application';
 
 vi.mock('config');
 

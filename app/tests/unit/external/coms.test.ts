@@ -1,10 +1,10 @@
 import axios from 'axios';
 
-import * as comsService from '../../../src/external/coms.ts';
-import { Action, GroupName } from '../../../src/utils/enums/application.ts';
-import { Problem } from '../../../src/utils/index.ts';
+import * as comsService from '#src/external/coms';
+import { Action, GroupName } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
 
-import type { CurrentContext, Group } from '../../../src/types/index.ts';
+import type { CurrentContext, Group } from '#types';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');

@@ -1,4 +1,4 @@
-import { getPidsService } from '../services/map.ts';
+import { getPidsService } from '#src/services/map';
 
 import type { Request, Response } from 'express';
 

@@ -1,10 +1,10 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_PERMIT_TRACKING_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { upsertPermitTracking } from '../../../src/domains/permitTracking.ts';
+import { TEST_PERMIT_TRACKING_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { upsertPermitTracking } from '#src/domains/permitTracking';
 
-import type { PermitTrackingBase } from '../../../src/types/index.ts';
+import type { PermitTrackingBase } from '#types';
 
 describe('permitTracking domain', () => {
   beforeEach(() => {

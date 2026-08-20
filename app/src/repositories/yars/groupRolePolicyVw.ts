@@ -1,7 +1,7 @@
-import { ReadableRepository } from '../readable.ts';
-import { Initiative } from '../../utils/enums/application.ts';
+import { ReadableRepository } from '#src/repositories/readable';
+import { Initiative } from '#src/utils/enums/application';
 
-import type { PrismaTransactionClient } from '../../db/database.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
 
 export class GroupRolePolicyVwRepository extends ReadableRepository<PrismaTransactionClient['group_role_policy_vw']> {
   constructor(tx: PrismaTransactionClient) {

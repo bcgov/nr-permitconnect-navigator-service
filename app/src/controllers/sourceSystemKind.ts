@@ -1,4 +1,4 @@
-import { listSourceSystemKindsService } from '../services/sourceSystemKind.ts';
+import { listSourceSystemKindsService } from '#src/services/sourceSystemKind';
 
 import type { Request, Response } from 'express';
 

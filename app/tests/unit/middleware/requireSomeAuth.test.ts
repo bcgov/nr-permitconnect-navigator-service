@@ -2,12 +2,12 @@ import config from 'config';
 import express from 'express';
 import request from 'supertest';
 
-import { requireSomeAuth } from '../../../src/middleware/requireSomeAuth.ts';
-import { AuthType } from '../../../src/utils/enums/application.ts';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { AuthType } from '#src/utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Mocked } from 'vitest';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 vi.mock('config');
 const mockedConfig = config as Mocked<typeof config>;

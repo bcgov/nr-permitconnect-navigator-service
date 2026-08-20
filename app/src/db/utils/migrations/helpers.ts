@@ -1,4 +1,4 @@
-import { SYSTEM_ID } from '../../../utils/constants/application.ts';
+import { SYSTEM_ID } from '#src/utils/constants/application';
 
 import type { Knex } from 'knex';
 

@@ -13,7 +13,7 @@ import {
   teamMemberAddedTemplate,
   teamMemberRevokedTemplate,
   teamPrimaryAddedTemplate
-} from '../../../src/utils/templates.ts';
+} from '#src/utils/templates';
 
 vi.mock('config', () => {
   const mock = {

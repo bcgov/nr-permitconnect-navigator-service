@@ -1,12 +1,12 @@
 import config from 'config';
 
-import { getAuthHeader, getBearerToken, setAuthHeader } from '../../../../src/middleware/providers/oidc.ts';
-import { Problem } from '../../../../src/utils/index.ts';
+import { getAuthHeader, getBearerToken, setAuthHeader } from '#src/middleware/providers/oidc';
+import { Problem } from '#src/utils/index';
 
 import type { Request, Response } from 'express';
 import type { JwksClient } from 'jwks-rsa';
 import type { Mock } from 'vitest';
-import type { AuthErrorAttributes } from '../../../../src/middleware/providers/oidc.ts';
+import type { AuthErrorAttributes } from '#src/middleware/providers/oidc';
 
 const AUDIENCE = 'nr-permitting-connect-test';
 

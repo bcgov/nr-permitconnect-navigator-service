@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-import { getPeachRecord } from '../../../src/external/peach.ts';
-import Problem from '../../../src/utils/problem.ts';
+import { getPeachRecord } from '#src/external/peach';
+import Problem from '#src/utils/problem';
 
 import type { InternalAxiosRequestConfig } from 'axios';
 

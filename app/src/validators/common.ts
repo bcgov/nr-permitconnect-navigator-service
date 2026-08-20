@@ -1,6 +1,6 @@
 import Joi from 'joi';
 
-import { Regex } from '../utils/enums/application.ts';
+import { Regex } from '#src/utils/enums/application';
 
 export const activityId = Joi.string().min(8).max(8);
 

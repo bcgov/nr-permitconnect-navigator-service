@@ -1,8 +1,8 @@
 import Joi from 'joi';
 
-import { YES_NO_UNSURE_LIST } from '../utils/constants/application.ts';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '../utils/constants/housing.ts';
-import { BasicResponse } from '../utils/enums/application.ts';
+import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '#src/utils/constants/housing';
+import { BasicResponse } from '#src/utils/enums/application';
 
 export const housing = Joi.object({
   financiallySupportedBc: Joi.string()

@@ -7,7 +7,7 @@ import {
   createUpdatedAtTrigger,
   dropAuditLogTrigger,
   dropUpdatedAtTrigger
-} from '../utils/migrations/helpers.ts';
+} from '#src/db/utils/migrations/helpers';
 import {
   addAttributeGroup,
   addGroupRoles,
@@ -24,8 +24,8 @@ import {
   deleteResources,
   deleteRolePolicies,
   deleteRoles
-} from '../utils/migrations/yars.ts';
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
+} from '#src/db/utils/migrations/yars';
+import { Action, GroupName, Initiative, Resource } from '#src/utils/enums/application';
 
 import type { Knex } from 'knex';
 

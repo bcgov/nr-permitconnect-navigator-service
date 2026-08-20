@@ -2,10 +2,10 @@ import axios from 'axios';
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
-import prisma from '../db/database.ts';
+import prisma from '#src/db/database';
 
 import type { AxiosInstance } from 'axios';
-import type { Email } from '../types/index.ts';
+import type { Email } from '#types';
 
 interface Message {
   msgId: string;

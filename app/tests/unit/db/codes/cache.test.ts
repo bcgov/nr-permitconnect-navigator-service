@@ -1,12 +1,12 @@
 // Unmock the cache module so we test the actual implementation
 vi.unmock('../../../../src/db/codes/cache.ts');
 
-import { codeTable, refreshCodeCaches } from '../../../../src/db/codes/cache.ts';
-import { CODE_TABLES } from '../../../../src/db/codes/tables.ts';
-import * as codeService from '../../../../src/services/code.ts';
-import { getLogger } from '../../../../src/utils/log.ts';
+import { codeTable, refreshCodeCaches } from '#src/db/codes/cache';
+import { CODE_TABLES } from '#src/db/codes/tables';
+import * as codeService from '#src/services/code';
+import { getLogger } from '#src/utils/log';
 
-import type { CodeTableName } from '../../../../src/types/index.ts';
+import type { CodeTableName } from '#types';
 
 vi.mock('../../../../src/utils/log.ts', () => {
   const mLogger = {

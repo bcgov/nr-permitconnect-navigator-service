@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../../__mocks__/prismaMock.ts';
-import { PolicyAttributeRepository } from '../../../../src/repositories/yars/policyAttribute.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { PolicyAttributeRepository } from '#src/repositories/yars/policyAttribute';
 
 const makeRepo = () => new PolicyAttributeRepository(prismaTxMock, 'principal-id');
 

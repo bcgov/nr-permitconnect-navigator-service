@@ -1,13 +1,13 @@
 import config from 'config';
 
-import { email } from '../external/ches.ts';
-import { Problem, toTitleCase } from '../utils/index.ts';
-import getLogger from '../utils/log.ts';
+import { email } from '#src/external/ches';
+import { Problem, toTitleCase } from '#src/utils/index';
+import getLogger from '#src/utils/log';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { Contact, Project, ProjectRepositoryKeys } from '../types';
-import type { Initiative } from '../utils/enums/application.ts';
-import type { EmailTemplate } from '../utils/templates.ts';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { Contact, Project, ProjectRepositoryKeys } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
+import type { EmailTemplate } from '#src/utils/templates';
 
 const log = getLogger(module.filename);
 

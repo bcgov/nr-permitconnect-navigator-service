@@ -1,7 +1,7 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { isTruthy } from '../utils/index.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { isTruthy } from '#src/utils/index';
 
-import type { Group, User, UserSearchParameters } from '../types/index.ts';
+import type { Group, User, UserSearchParameters } from '#types';
 
 export type UserWithGroup = User & { groups?: Group[] };
 

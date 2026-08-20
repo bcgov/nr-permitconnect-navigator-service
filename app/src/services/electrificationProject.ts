@@ -1,10 +1,10 @@
-import prisma from '../db/database.ts';
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { generateElectrificationProjectData } from '../domains/electrificationProject.ts';
-import { emailProjectConfirmation } from '../domains/project.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { confirmationTemplateElectrificationSubmission } from '../utils/templates.ts';
+import prisma from '#src/db/database';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { generateElectrificationProjectData } from '#src/domains/electrificationProject';
+import { emailProjectConfirmation } from '#src/domains/project';
+import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { Initiative } from '#src/utils/enums/application';
+import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
 import type {
@@ -16,7 +16,7 @@ import type {
   ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
   Maybe
-} from '../types/index.ts';
+} from '#types';
 
 export const createElectrificationProjectService = async (
   data: ElectrificationProjectIntake,

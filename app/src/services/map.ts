@@ -1,6 +1,6 @@
-import { unitOfWork } from '../db/unitOfWork';
-import { getProjectByProjectId } from '../domains/project';
-import { getPids } from '../external/openMaps';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { getProjectByProjectId } from '#src/domains/project';
+import { getPids } from '#src/external/openMaps';
 
 export const getPidsService = async (projectId: string): Promise<string | undefined> => {
   return await unitOfWork.execute(async ({ electrificationProject, generalProject, housingProject }) => {

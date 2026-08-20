@@ -5,7 +5,7 @@ import {
   TEST_GENERAL_PROJECT_1,
   TEST_GENERAL_PROJECT_CREATE,
   TEST_GENERAL_PROJECT_INTAKE
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createGeneralProjectController,
   deleteGeneralProjectController,
@@ -20,12 +20,12 @@ import {
   submitGeneralProjectDraftController,
   updateGeneralProjectController,
   upsertGeneralProjectDraftController
-} from '../../../src/controllers/generalProject.ts';
-import * as activityService from '../../../src/services/activity.ts';
-import * as draftService from '../../../src/services/draft.ts';
-import * as generalProjectService from '../../../src/services/generalProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/controllers/generalProject';
+import * as activityService from '#src/services/activity';
+import * as draftService from '#src/services/draft';
+import * as generalProjectService from '#src/services/generalProject';
+import { Initiative } from '#src/utils/enums/application';
+import { DraftCode } from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
@@ -38,7 +38,7 @@ import type {
   GeneralProjectStatistics,
   LocalContext,
   StatisticsFilters
-} from '../../../src/types/index.ts';
+} from '#types';
 
 vi.mock('config');
 

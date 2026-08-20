@@ -1,9 +1,9 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as userDomain from '../../../src/domains/user.ts';
-import * as loginService from '../../../src/services/login.ts';
-import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as userDomain from '#src/domains/user';
+import * as loginService from '#src/services/login';
+import { IdentityProviderKind } from '#src/utils/enums/application';
 
 import type { JwtPayload } from 'jsonwebtoken';
 

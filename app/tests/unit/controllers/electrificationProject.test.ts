@@ -5,7 +5,7 @@ import {
   TEST_ELECTRIFICATION_INTAKE,
   TEST_ELECTRIFICATION_PROJECT_1,
   TEST_ELECTRIFICATION_PROJECT_CREATE
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createElectrificationProjectController,
   deleteElectrificationProjectController,
@@ -20,12 +20,12 @@ import {
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
-} from '../../../src/controllers/electrificationProject.ts';
-import * as activityService from '../../../src/services/activity.ts';
-import * as draftService from '../../../src/services/draft.ts';
-import * as electrificationProjectService from '../../../src/services/electrificationProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/controllers/electrificationProject';
+import * as activityService from '#src/services/activity';
+import * as draftService from '#src/services/draft';
+import * as electrificationProjectService from '#src/services/electrificationProject';
+import { Initiative } from '#src/utils/enums/application';
+import { DraftCode } from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
@@ -38,7 +38,7 @@ import type {
   ElectrificationProjectStatistics,
   LocalContext,
   StatisticsFilters
-} from '../../../src/types/index.ts';
+} from '#types';
 
 vi.mock('config');
 

@@ -107,4 +107,4 @@ EXPOSE ${APP_PORT}
 
 # Enter using the binary directly
 ENTRYPOINT ["/usr/local/bin/node"]
-CMD ["--max-old-space-size=50", "./sbin/server.js"]
+CMD ["--max-old-space-size=50", "--conditions=sbin", "./sbin/server.js"]

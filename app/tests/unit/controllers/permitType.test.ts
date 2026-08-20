@@ -1,7 +1,7 @@
-import { TEST_CURRENT_CONTEXT, TEST_PERMIT_TYPE_1 } from '../data/index.ts';
-import { listPermitTypesController } from '../../../src/controllers/permitType.ts';
-import * as permitTypeService from '../../../src/services/permitType.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_CURRENT_CONTEXT, TEST_PERMIT_TYPE_1 } from '#tests/unit/data/index';
+import { listPermitTypesController } from '#src/controllers/permitType';
+import * as permitTypeService from '#src/services/permitType';
+import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

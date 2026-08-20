@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { createStamps } from './stamps.ts';
-import { validate } from '../middleware/validation.ts';
+import { validate } from '#src/middleware/validation';
 
 const schema = {
   getPeachSummary: {

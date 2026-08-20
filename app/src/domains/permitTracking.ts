@@ -1,5 +1,5 @@
-import type { Repositories } from '../db/unitOfWork';
-import type { PermitTracking, PermitTrackingBase } from '../types';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { PermitTracking, PermitTrackingBase } from '#types';
 
 /**
  * Upsert Permit Tracking

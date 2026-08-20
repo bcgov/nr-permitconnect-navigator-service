@@ -1,8 +1,8 @@
-import { TEST_ENQUIRY_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { ReadableRepository } from '../../../src/repositories/readable.ts';
+import { TEST_ENQUIRY_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { ReadableRepository } from '#src/repositories/readable';
 
-import type { PrismaTransactionClient } from '../../../src/db/database.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
 
 // Tiny concrete subclass exposing the protected constructor over a real (deep-mocked) delegate.
 class TestReadableRepository extends ReadableRepository<PrismaTransactionClient['enquiry']> {

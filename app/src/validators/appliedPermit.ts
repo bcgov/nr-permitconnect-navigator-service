@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import { permitTrackingSchema } from './permitTracking.ts';
-import { requireValidCode } from '../db/codes/validator.ts';
+import { requireValidCode } from '#src/db/codes/validator';
 
 export const appliedPermit = Joi.object({
   permitTypeId: Joi.number().required(),

@@ -5,12 +5,12 @@ import {
   TEST_PEACH_RECORD_2,
   TEST_PEACH_RECORD_REJECTED,
   TEST_PEACH_RECORD_UNMAPPED
-} from '../data/index.ts';
-import { PermitStage, PermitState, PiesOnHold } from '../../../src/db/codes/enums.ts';
-import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '../../../src/parsers/peach.ts';
-import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
+} from '#tests/unit/data/index';
+import { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
+import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '#src/parsers/peach';
+import { PeachIntegratedSystem } from '#src/utils/enums/permit';
 
-import type { ProcessEvent } from '../../../src/types/index.ts';
+import type { ProcessEvent } from '#types';
 
 vi.mock('config');
 vi.mock('../../../src/utils/log', () => ({

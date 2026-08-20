@@ -1,12 +1,12 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_IDIR_USER_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { DuplicateKeyProblem } from '../../../src/db/errors.ts';
-import { createUser, updateUser } from '../../../src/domains/user.ts';
-import { IdentityProviderKind } from '../../../src/utils/enums/application.ts';
+import { TEST_IDIR_USER_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { DuplicateKeyProblem } from '#src/db/errors';
+import { createUser, updateUser } from '#src/domains/user';
+import { IdentityProviderKind } from '#src/utils/enums/application';
 
-import type { JwtUser } from '../../../src/services/login.ts';
+import type { JwtUser } from '#src/services/login';
 
 describe('user domain', () => {
   beforeEach(() => {

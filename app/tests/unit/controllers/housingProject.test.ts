@@ -5,7 +5,7 @@ import {
   TEST_HOUSING_PROJECT_1,
   TEST_HOUSING_PROJECT_CREATE,
   TEST_HOUSING_PROJECT_INTAKE
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createHousingProjectController,
   deleteHousingProjectController,
@@ -20,12 +20,12 @@ import {
   submitHousingProjectDraftController,
   updateHousingProjectController,
   upsertHousingProjectDraftController
-} from '../../../src/controllers/housingProject.ts';
-import * as activityService from '../../../src/services/activity.ts';
-import * as draftService from '../../../src/services/draft.ts';
-import * as housingProjectService from '../../../src/services/housingProject.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/controllers/housingProject';
+import * as activityService from '#src/services/activity';
+import * as draftService from '#src/services/draft';
+import * as housingProjectService from '#src/services/housingProject';
+import { Initiative } from '#src/utils/enums/application';
+import { DraftCode } from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
@@ -38,7 +38,7 @@ import type {
   HousingProjectStatistics,
   LocalContext,
   StatisticsFilters
-} from '../../../src/types/index.ts';
+} from '#types';
 
 vi.mock('config');
 

@@ -1,11 +1,11 @@
-import prisma from '../db/database.ts';
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { generateHousingProjectData } from '../domains/housingProject.ts';
-import { upsertPermitTracking } from '../domains/permitTracking.ts';
-import { emailProjectConfirmation } from '../domains/project.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { confirmationTemplateHousingSubmission } from '../utils/templates.ts';
+import prisma from '#src/db/database';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { generateHousingProjectData } from '#src/domains/housingProject';
+import { upsertPermitTracking } from '#src/domains/permitTracking';
+import { emailProjectConfirmation } from '#src/domains/project';
+import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { Initiative } from '#src/utils/enums/application';
+import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
 import type {
@@ -17,7 +17,7 @@ import type {
   HousingProjectSearchParameters,
   HousingProjectStatistics,
   Maybe
-} from '../types/index.ts';
+} from '#types';
 
 export const createHousingProjectService = async (
   data: HousingProjectIntake,

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import * as ssoService from '../../../src/external/sso.ts';
+import * as ssoService from '#src/external/sso';
 
 import type { InternalAxiosRequestConfig } from 'axios';
 

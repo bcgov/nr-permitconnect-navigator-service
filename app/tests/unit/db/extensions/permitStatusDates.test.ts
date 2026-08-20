@@ -1,5 +1,5 @@
 import { captureExtension } from './captureExtension.ts';
-import permitStatusDatesTransform from '../../../../src/db/extensions/permitStatusDates.ts';
+import permitStatusDatesTransform from '#src/db/extensions/permitStatusDates';
 
 const ext = captureExtension(permitStatusDatesTransform);
 

@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { createUser, updateUser } from '../domains/user.ts';
-import { IdentityProviderKind } from '../utils/enums/application.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { createUser, updateUser } from '#src/domains/user';
+import { IdentityProviderKind } from '#src/utils/enums/application';
 
 import type jwt from 'jsonwebtoken';
-import type { Contact, User } from '../types/index.ts';
+import type { Contact, User } from '#types';
 
 /**
  * An equivalent User model object without timestamp information

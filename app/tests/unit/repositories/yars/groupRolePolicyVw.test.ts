@@ -1,6 +1,6 @@
-import { prismaTxMock } from '../../../__mocks__/prismaMock.ts';
-import { GroupRolePolicyVwRepository } from '../../../../src/repositories/yars/groupRolePolicyVw.ts';
-import { Initiative } from '../../../../src/utils/enums/application.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { GroupRolePolicyVwRepository } from '#src/repositories/yars/groupRolePolicyVw';
+import { Initiative } from '#src/utils/enums/application';
 
 const makeRepo = () => new GroupRolePolicyVwRepository(prismaTxMock);
 

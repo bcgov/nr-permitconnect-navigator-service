@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
-import { validate } from '../middleware/validation.ts';
-import { Initiative } from '../utils/enums/application';
+import { validate } from '#src/middleware/validation';
+import { Initiative } from '#src/utils/enums/application';
 
 export const permitTypeSchema = Joi.object({
   permitTypeId: Joi.number().max(255).required(),

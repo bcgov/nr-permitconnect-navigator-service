@@ -1,7 +1,7 @@
 import type { Prisma } from '@prisma/client';
 import type { Contact, ContactBase, Permit } from './api/resources.ts';
 import type { Maybe } from './utils.ts';
-import type { ApplicationStatus, SubmissionType } from '../utils/enums/projectCommon.ts';
+import type { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 export interface ElectrificationProjectIntake {
   activityId?: string;

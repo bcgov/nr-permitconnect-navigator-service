@@ -1,4 +1,4 @@
-import { Action, GroupName, Initiative, Resource } from '../../utils/enums/application.ts';
+import { Action, GroupName, Initiative, Resource } from '#src/utils/enums/application';
 import {
   addGroupRoles,
   addPolicies,
@@ -11,7 +11,7 @@ import {
   deleteResources,
   deleteRolePolicies,
   deleteRoles
-} from '../utils/migrations/yars.ts';
+} from '#src/db/utils/migrations/yars';
 
 import type { Knex } from 'knex';
 

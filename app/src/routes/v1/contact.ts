@@ -7,13 +7,13 @@ import {
   matchContactsController,
   searchContactsController,
   upsertContactController
-} from '../../controllers/contact.ts';
-import { hasAuthorization } from '../../middleware/authorization.ts';
-import { hasIdentity } from '../../middleware/identity.ts';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, IdentityProviderKind, Resource } from '../../utils/enums/application.ts';
-import { contactValidator } from '../../validators/index.ts';
+} from '#src/controllers/contact';
+import { hasAuthorization } from '#src/middleware/authorization';
+import { hasIdentity } from '#src/middleware/identity';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
+import { contactValidator } from '#src/validators/index';
 
 const router = express.Router();
 router.use(requireSomeAuth);

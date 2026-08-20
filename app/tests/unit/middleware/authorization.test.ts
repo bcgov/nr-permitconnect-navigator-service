@@ -1,13 +1,13 @@
 import express from 'express';
 import request from 'supertest';
 
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { hasAccess, hasAuthorization } from '../../../src/middleware/authorization.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 const SUB = 'cd90c6bf44074872a7116f4dd4f3a45b@azureidir';
 const USER_ID = 'user-123';

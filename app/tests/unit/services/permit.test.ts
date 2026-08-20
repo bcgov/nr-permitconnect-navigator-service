@@ -5,21 +5,21 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_PERMIT_1,
   TEST_PERMIT_TYPE_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
-import * as peachDomain from '../../../src/domains/peach.ts';
-import * as permitDomain from '../../../src/domains/permit.ts';
-import * as permitTrackingDomain from '../../../src/domains/permitTracking.ts';
-import * as externalPeach from '../../../src/external/peach.ts';
-import * as peachParser from '../../../src/parsers/peach.ts';
-import * as responseFiltering from '../../../src/parsers/responseFiltering.ts';
-import * as permitService from '../../../src/services/permit.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import Problem from '../../../src/utils/problem.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
+import * as peachDomain from '#src/domains/peach';
+import * as permitDomain from '#src/domains/permit';
+import * as permitTrackingDomain from '#src/domains/permitTracking';
+import * as externalPeach from '#src/external/peach';
+import * as peachParser from '#src/parsers/peach';
+import * as responseFiltering from '#src/parsers/responseFiltering';
+import * as permitService from '#src/services/permit';
+import { Initiative } from '#src/utils/enums/application';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import Problem from '#src/utils/problem';
 
-import type { CurrentAuthorization, IntakePermitRequest } from '../../../src/types/index.ts';
+import type { CurrentAuthorization, IntakePermitRequest } from '#types';
 
 vi.mock('config');
 

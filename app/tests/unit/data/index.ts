@@ -3,7 +3,7 @@
  * DO NOT change the existing objects in this file unless a schema change is required.
  * If you need something wildly different than the existing ones then add new ones.
  */
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
   AccessRequestStatus,
   AuthType,
@@ -11,10 +11,10 @@ import {
   GroupName,
   IdentityProviderKind,
   Initiative
-} from '../../../src/utils/enums/application.ts';
-import { ProjectType } from '../../../src/utils/enums/electrification.ts';
-import { NumResidentialUnits } from '../../../src/utils/enums/housing.ts';
-import { PeachIntegratedSystem, PermitNeeded } from '../../../src/utils/enums/permit.ts';
+} from '#src/utils/enums/application';
+import { ProjectType } from '#src/utils/enums/electrification';
+import { NumResidentialUnits } from '#src/utils/enums/housing';
+import { PeachIntegratedSystem, PermitNeeded } from '#src/utils/enums/permit';
 import {
   ActivityContactRole,
   ApplicationStatus,
@@ -24,7 +24,7 @@ import {
   NoteType,
   ProjectRelationship,
   SubmissionType
-} from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/utils/enums/projectCommon';
 
 import type { Prisma } from '@prisma/client';
 import type {
@@ -60,7 +60,7 @@ import type {
   PermitTracking,
   PermitType,
   User
-} from '../../../src/types/index.ts';
+} from '#types';
 
 export const TEST_IDIR_USER_1: User = {
   bceidBusinessName: null,
