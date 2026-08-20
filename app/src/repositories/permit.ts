@@ -11,7 +11,7 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
   }
 
   public async search(
-    initiativeCode: Exclude<Initiative, Initiative.PCNS>,
+    initiativeCode: Exclude<Initiative, 'PCNS'>,
     options: SearchPermitsRequest,
     scopeUserId?: string
   ) {

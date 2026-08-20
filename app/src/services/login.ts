@@ -71,7 +71,9 @@ export const loginService = async (token: jwt.JwtPayload): Promise<User> => {
         let firstNameOverride: string | null = null,
           lastNameOverride: string | null = null;
         if (
-          [IdentityProviderKind.BCEID, IdentityProviderKind.BCEIDBUSINESS].includes(newUser.idp as IdentityProviderKind)
+          ([IdentityProviderKind.BCEID, IdentityProviderKind.BCEIDBUSINESS] as IdentityProviderKind[]).includes(
+            newUser.idp as IdentityProviderKind
+          )
         ) {
           const split = newUser.firstName?.indexOf(' ');
           if (newUser.firstName && split && split > 0) {
