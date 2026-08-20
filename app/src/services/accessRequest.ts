@@ -53,7 +53,7 @@ export const createAccessRequestService = async (
       const groups = await getGroups({ group, initiative }, currentContext.initiative);
 
       // Groups the current user can modify
-      const userAllowedGroups = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
+      const userAllowedGroups: GroupName[] = [GroupName.NAVIGATOR, GroupName.NAVIGATOR_READ_ONLY];
       if (isAdmin) {
         userAllowedGroups.unshift(GroupName.ADMIN, GroupName.SUPERVISOR);
       }

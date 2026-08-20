@@ -9,10 +9,7 @@ export class NoteHistoryRepository extends WritableRepository<PrismaTransactionC
     super(tx.note_history, principal, true);
   }
 
-  public async listBringForwards(
-    initiativeCode: Exclude<Initiative, Initiative.PCNS> | undefined,
-    state: BringForwardType
-  ) {
+  public async listBringForwards(initiativeCode: Exclude<Initiative, 'PCNS'> | undefined, state: BringForwardType) {
     return await this.findMany({
       where: {
         bringForwardState: state,
