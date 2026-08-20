@@ -12,7 +12,7 @@ import type { Enquiry, User } from '@/types';
 import { projectEnquiryRouteNameKey } from '@/utils/keys';
 import { ref } from 'vue';
 
-const listUsersSpy = vi.spyOn(userService, 'searchUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 const currentDate = new Date().toISOString();
 
@@ -34,7 +34,7 @@ const testEnquiry: Enquiry = {
   atsEnquiryId: 654321
 };
 
-listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 
 const wrapperSettings = (testEnquiryProp = testEnquiry) => ({
   props: {

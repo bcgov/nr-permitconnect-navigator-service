@@ -22,7 +22,7 @@ import { PRIMEVUE_STUBS, VEE_FORM_STUB } from '../../../helpers';
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
 
-const listUsersSpy = vi.spyOn(userService, 'searchUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
 const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityIds');
 const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
@@ -168,8 +168,8 @@ describe('EnquiryForm.vue', () => {
       await flushPromises();
       await nextTick();
 
-      expect(listUsersSpy).toHaveBeenCalledTimes(1);
-      expect(listUsersSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
+      expect(searchUsersSpy).toHaveBeenCalledTimes(1);
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: [mountEnquiry.assignedUserId] });
     });
 
     it('gets housing activity Ids onMount', async () => {

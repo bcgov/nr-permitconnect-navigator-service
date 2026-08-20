@@ -106,7 +106,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Contact'
+              $ref: '#/components/schemas/Request-ContactUpsert'
       responses:
         '200':
           description: Contact upserted successfully
@@ -841,7 +841,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Permit'
+              $ref: '#/components/schemas/Request-PermitUpsert'
       responses:
         '200':
           description: Permit upserted successfully
@@ -1841,7 +1841,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Permit'
+              $ref: '#/components/schemas/Request-PermitUpsert'
       responses:
         '200':
           description: Permit upserted successfully
@@ -2757,7 +2757,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Permit'
+              $ref: '#/components/schemas/Request-PermitUpsert'
       responses:
         '200':
           description: Permit upserted successfully
@@ -4715,6 +4715,144 @@ components:
           description: Enquiry number from ATS
           example: 1001
           nullable: true
+    Request-PermitUpsert:
+      title: Request Permit Upsert
+      type: object
+      required:
+        - permitTypeId
+        - needed
+        - state
+        - stage
+      properties:
+        permitId:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID for permit. Omit to create a new permit.
+          example: 68a9a188-4d67-46e3-92a4-b57174354231
+        activityId:
+          type: string
+          description: The ID of the activity associated with the permit
+          example: 2DE67F13
+        permitTypeId:
+          type: number
+          description: ID for the associated permit type
+          example: 1
+        issuedPermitId:
+          type: string
+          nullable: true
+          description: ID of the issued permit
+          example: '123'
+        needed:
+          type: string
+          description: Whether permit is needed, or still uner investigation
+          example: 'Yes'
+        state:
+          type: string
+          description: State of the permit
+          example: In progress
+        stage:
+          type: string
+          description: Stage of the permit
+          example: Application submission
+        submittedDate:
+          type: string
+          description: Date the permit was submitted
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        submittedTime:
+          type: string
+          description: Time the permit was submitted
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        decisionDate:
+          type: string
+          description: Date of the permit's decision
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        decisionTime:
+          type: string
+          description: Time of the permit's decision
+          format: timetz
+          nullable: true
+          example: '2024-08-14'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastChangedTime:
+          type: string
+          description: Time of the last time the status of permit was changed
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastVerifiedTime:
+          type: string
+          description: Time of the last verified status of permit
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+    Request-ContactUpsert:
+      title: Request Contact Upsert
+      type: object
+      required:
+        - email
+        - firstName
+        - phoneNumber
+        - contactApplicantRelationship
+        - contactPreference
+      properties:
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+          description: The ID of the user associated with the contact
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        contactId:
+          type: string
+          format: uuid
+          nullable: true
+          description: The ID of the contact. Omit to create a new contact.
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        firstName:
+          type: string
+          description: First name of the contact person
+          example: John
+        lastName:
+          type: string
+          nullable: true
+          description: Last name of the contact person
+          example: Smith
+        phoneNumber:
+          type: string
+          description: Phone number for contact
+          example: (123) 456-7890
+        email:
+          type: string
+          format: email
+          description: Email address for contact
+          example: john.smith@example.com
+        contactApplicantRelationship:
+          type: string
+          enum: [Property owner, Project consultant, Other]
+          description: Relationship of the contact person to the project
+          example: Agent
+        contactPreference:
+          type: string
+          enum: [Phone call, Email, Either]
+          description: Preferred method of contact
+          example: Email
     Request-Document:
       type: object
       properties:
@@ -4797,10 +4935,6 @@ components:
       required:
         - resource
       properties:
-        activityId:
-          type: string
-          description: The ID of the activity the note is associated with
-          example: 2DE67F13
         type:
           type: string
           description: Type of note

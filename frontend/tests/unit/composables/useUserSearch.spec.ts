@@ -9,7 +9,7 @@ import type { User } from '@/types';
 
 // Mocks
 
-const listUsersSpy = vi.spyOn(userService, 'searchUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 // Fixtures
 
@@ -22,7 +22,7 @@ function setIdpList(idpList: unknown[]) {
 beforeEach(() => {
   vi.clearAllMocks();
   setActivePinia(createPinia());
-  listUsersSpy.mockResolvedValue([]);
+  searchUsersSpy.mockResolvedValue([]);
 });
 
 // Tests
@@ -35,17 +35,17 @@ describe('useUserSearch', () => {
       const { loadById } = useUserSearch();
       await loadById('user-1');
 
-      expect(listUsersSpy).not.toHaveBeenCalled();
+      expect(searchUsersSpy).not.toHaveBeenCalled();
     });
 
     it('wraps a single userId in an array and populates users', async () => {
       setIdpList([azureIdp]);
-      listUsersSpy.mockResolvedValue([{ userId: 'user-1' } as User]);
+      searchUsersSpy.mockResolvedValue([{ userId: 'user-1' } as User]);
 
       const { loadById, users } = useUserSearch();
       await loadById('user-1');
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ userId: ['user-1'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['user-1'] });
       expect(users.value).toEqual([{ userId: 'user-1' }]);
     });
 
@@ -55,7 +55,7 @@ describe('useUserSearch', () => {
       const { loadById } = useUserSearch();
       await loadById(['user-1', 'user-2']);
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ userId: ['user-1', 'user-2'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['user-1', 'user-2'] });
     });
   });
 
@@ -66,7 +66,7 @@ describe('useUserSearch', () => {
       const { search } = useUserSearch();
       await search('someone@example.com');
 
-      expect(listUsersSpy).not.toHaveBeenCalled();
+      expect(searchUsersSpy).not.toHaveBeenCalled();
     });
 
     it('searches by email and fullName when the input meets the minimum length', async () => {
@@ -75,7 +75,7 @@ describe('useUserSearch', () => {
       const { search } = useUserSearch();
       await search('jo');
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ email: 'jo', fullName: 'jo', idp: ['azureidir'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ email: 'jo', fullName: 'jo', idp: ['azureidir'] });
     });
 
     // MIN_SEARCH_INPUT_LENGTH is 2, and a valid email always has at least 2
@@ -87,7 +87,7 @@ describe('useUserSearch', () => {
       const { search } = useUserSearch();
       await search('a@b.co');
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ email: 'a@b.co', fullName: 'a@b.co', idp: ['azureidir'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ email: 'a@b.co', fullName: 'a@b.co', idp: ['azureidir'] });
     });
 
     it('clears users when the input is too short and not an email', async () => {
@@ -97,7 +97,7 @@ describe('useUserSearch', () => {
       users.value = [{ userId: 'stale' } as User];
       await search('a');
 
-      expect(listUsersSpy).not.toHaveBeenCalled();
+      expect(searchUsersSpy).not.toHaveBeenCalled();
       expect(users.value).toEqual([]);
     });
   });
