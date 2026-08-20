@@ -62,7 +62,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "@pinia/testing": "1.0.3",
+    "@pinia/testing": "2.0.1",
     "@testing-library/vue": "8.1.0",
     "@types/node": "25.9.5",
     "@vitejs/plugin-vue": "^6.0.8",
