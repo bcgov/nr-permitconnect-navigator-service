@@ -249,7 +249,7 @@ export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
   ids: 'noteHistoryId';
-  immutable: 'noteHistoryId';
+  immutable: 'activityId' | 'noteHistoryId';
   serverGenerated: 'noteHistoryId';
 }
 interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
@@ -326,7 +326,7 @@ export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
  * User
  */
 
-export interface ListUsersRequest {
+export interface SearchUsersRequest {
   userId?: string[];
   idp?: string[];
   sub?: string;

@@ -27,7 +27,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 const TEST_NOTE: Note = {
   noteId: '123',

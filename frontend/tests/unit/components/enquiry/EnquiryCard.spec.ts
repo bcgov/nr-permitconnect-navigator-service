@@ -12,7 +12,7 @@ import type { Enquiry, User } from '@/types';
 import { projectEnquiryRouteNameKey } from '@/utils/keys';
 import { ref } from 'vue';
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 const currentDate = new Date().toISOString();
 

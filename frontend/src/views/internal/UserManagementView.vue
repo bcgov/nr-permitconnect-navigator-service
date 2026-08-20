@@ -325,7 +325,7 @@ onBeforeMount(async () => {
     const idpCfg = findIdpConfig(IdentityProviderKind.AZUREIDIR);
     if (!idpCfg) throw new Error(`${t('views.i.userManagementView.errorIdpCfg')}`);
 
-    const users: User[] = await userService.listUsers({
+    const users: User[] = await userService.searchUsers({
       active: true,
       idp: [idpCfg.idp],
       includeUserGroups: true,
@@ -357,7 +357,7 @@ onBeforeMount(async () => {
       .filter((x) => x.user.groups.length > 0 || x.accessRequest);
 
     // Get requesting users and add their access requests
-    const newRequestingUsers: User[] = await userService.listUsers({
+    const newRequestingUsers: User[] = await userService.searchUsers({
       userId: Array.from(currentAccessRequests.keys())
     });
 

@@ -22,7 +22,7 @@ import { PRIMEVUE_STUBS, VEE_FORM_STUB } from '../../../helpers';
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const listUsersSpy = vi.spyOn(userService, 'searchUsers');
 const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
 const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityIds');
 const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
@@ -113,7 +113,7 @@ const wrapperSettings = (
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(userService.listUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+    vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
       enquiryId: 'enquiry123',
       activityId: 'activity456'
