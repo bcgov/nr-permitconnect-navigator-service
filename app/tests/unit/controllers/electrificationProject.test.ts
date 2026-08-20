@@ -206,7 +206,7 @@ describe('searchElectrificationProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, SearchElectrificationProjectRequest | undefined, never>;
+    } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 
@@ -231,7 +231,7 @@ describe('searchElectrificationProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, SearchElectrificationProjectRequest | undefined, never>;
+    } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 

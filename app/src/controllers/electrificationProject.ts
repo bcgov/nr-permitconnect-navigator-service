@@ -77,12 +77,14 @@ export const listElectrificationProjectsController = async (
 };
 
 export const searchElectrificationProjectsController = async (
-  req: Request<never, never, SearchElectrificationProjectRequest | undefined, never>,
+  req: Request<never, never, SearchElectrificationProjectRequest>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };
