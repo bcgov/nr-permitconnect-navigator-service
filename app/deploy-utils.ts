@@ -5,9 +5,7 @@ import { basename, join } from 'path';
 
 const FRONTEND_DIR = '../frontend';
 const DIST_DIR = 'dist';
-const SBIN_DIR = 'sbin';
 const TITLE = 'nr-permitting-navigator-service-frontend';
-const V1_DOCS = 'v1.api-spec.yaml';
 
 try {
   const args = process.argv.slice(2);
@@ -20,12 +18,6 @@ try {
       break;
     case 'deploy':
       deployComponents();
-      break;
-    case 'docs':
-      copyDocs();
-      break;
-    case 'prisma-client':
-      copyPrismaClient();
       break;
     case 'purge':
       console.log(`Purging "${DIST_DIR}"...`);
@@ -74,22 +66,6 @@ function cleanComponents() {
   console.log(`Cleaning ${TITLE}...`);
   runSync('npm run clean', FRONTEND_DIR);
   console.log(`${TITLE} has been cleaned`);
-}
-
-function copyDocs() {
-  console.log('Copying OpenAPI docs...');
-  if (existsSync(SBIN_DIR)) {
-    copyFileSync(`./src/docs/${V1_DOCS}`, `./sbin/src/docs/${V1_DOCS}`);
-  }
-  console.log('OpenAPI docs have been copied.');
-}
-
-function copyPrismaClient() {
-  console.log('Copying generated Prisma client...');
-  if (existsSync(SBIN_DIR) && existsSync('./src/db/generated')) {
-    copyDirRecursiveSync('./src/db/generated', './sbin/src/db');
-  }
-  console.log('Generated Prisma client has been copied.');
 }
 
 /**
