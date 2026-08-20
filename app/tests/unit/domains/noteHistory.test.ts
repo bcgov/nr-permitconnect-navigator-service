@@ -222,7 +222,10 @@ describe('noteHistory domain', () => {
       expect(emailSpy).toHaveBeenCalled();
     });
 
-    it('should throw error for HOUSING_PROJECT resource due to source code bug', async () => {
+    it('should send email for HOUSING_PROJECT resource', async () => {
+      const emailModule = await import('../../../src/external/ches.ts');
+      const emailSpy = vi.spyOn(emailModule, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
+
       vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
         projectName: 'Test Housing Project'
       } as never);
@@ -237,13 +240,9 @@ describe('noteHistory domain', () => {
         activityId: 'ACTI0000'
       };
 
-      try {
-        await emailBringForwardNotification(mockRepos, noteHistory, Initiative.HOUSING, Resource.HOUSING_PROJECT);
-        expect.fail('Should have thrown an error due to source code bug');
-      } catch (error: unknown) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        expect((error as any)?.detail).toContain('Invalid resource type for bring forward notification');
-      }
+      await emailBringForwardNotification(mockRepos, noteHistory, Initiative.HOUSING, Resource.HOUSING_PROJECT);
+
+      expect(emailSpy).toHaveBeenCalled();
     });
 
     it('should not send email when getProjectByActivityId returns null', async () => {
