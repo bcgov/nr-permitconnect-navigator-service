@@ -6,7 +6,7 @@ import type { CodeTableName } from '../common';
 import type { PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { Code, Permission } from '../ui';
 
-export type CreateEnquiryResponse = Enquiry & { contact?: Contact };
+export type CreateEnquiryResponse = Enquiry & { contact: Contact };
 
 export interface CreateObjectResponse {
   id: string;

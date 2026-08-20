@@ -240,11 +240,20 @@ export const patchHousingProjectService = async (
   data: PatchHousingProjectRequest
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
+    const current = await housingProject.findFirstOrThrow({ where: { housingProjectId } });
+
+    const financiallySupported = [
+      data.financiallySupportedBc ?? current.financiallySupportedBc,
+      data.financiallySupportedIndigenous ?? current.financiallySupportedIndigenous,
+      data.financiallySupportedNonProfit ?? current.financiallySupportedNonProfit,
+      data.financiallySupportedHousingCoop ?? current.financiallySupportedHousingCoop
+    ].includes(BasicResponse.YES);
+
     await housingProject.patch(
       {
         housingProjectId
       },
-      data
+      { ...data, financiallySupported }
     );
 
     return await housingProject.findFirstOrThrow({

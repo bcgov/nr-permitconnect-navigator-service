@@ -253,13 +253,7 @@ describe('patchHousingProjectController', () => {
     await patchHousingProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(
-      req.params.housingProjectId,
-      expect.objectContaining({
-        projectName: 'Updated Name',
-        financiallySupported: expect.any(Boolean)
-      })
-    );
+    expect(updateSpy).toHaveBeenCalledWith(req.params.housingProjectId, updateData);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1);
   });

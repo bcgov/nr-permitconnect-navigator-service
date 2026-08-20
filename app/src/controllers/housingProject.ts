@@ -87,15 +87,7 @@ export const patchHousingProjectController = async (
   req: Request<{ housingProjectId: string }, never, PatchHousingProjectRequest>,
   res: Response
 ) => {
-  const response = await patchHousingProjectService(req.params.housingProjectId, {
-    ...req.body,
-    financiallySupported: [
-      req.body.financiallySupportedBc,
-      req.body.financiallySupportedIndigenous,
-      req.body.financiallySupportedNonProfit,
-      req.body.financiallySupportedHousingCoop
-    ].includes(BasicResponse.YES)
-  });
+  const response = await patchHousingProjectService(req.params.housingProjectId, req.body);
   res.status(200).json(response);
 };
 

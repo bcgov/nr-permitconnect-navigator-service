@@ -25,7 +25,7 @@ import type { AtsClientResource, AtsEnquiryResource, Group, HousingProject, User
 const createAtsClientSpy = vi.spyOn(atsService, 'createAtsClient');
 const createAtsEnquirySpy = vi.spyOn(atsService, 'createAtsEnquiry');
 const getPidsSpy = vi.spyOn(mapService, 'getPids');
-const listUsersSpy = vi.spyOn(userService, 'searchUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 const patchProjectSpy = vi.spyOn(housingProjectService, 'patchProject');
 
 // Fixtures
@@ -177,7 +177,7 @@ async function submitForm(wrapper: ReturnType<typeof mountProjectFormNavigator>[
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' } as User]);
+  searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' } as User]);
   getPidsSpy.mockResolvedValue('123456789');
 });
 
@@ -200,7 +200,7 @@ describe('ProjectFormNavigator', () => {
       await flushPromises();
 
       expect(wrapper.isVisible()).toBe(true);
-      expect(listUsersSpy).toHaveBeenCalledExactlyOnceWith({ userId: [mountProject.assignedUserId] });
+      expect(searchUsersSpy).toHaveBeenCalledExactlyOnceWith({ userId: [mountProject.assignedUserId] });
     });
 
     it('gets the location PIDs for the project', async () => {
