@@ -9,7 +9,7 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
     super(tx.permit, principal, true);
   }
 
-  public async search(initiativeCode: Exclude<Initiative, Initiative.PCNS>, options: SearchPermitsOptions) {
+  public async search(initiativeCode: Exclude<Initiative, 'PCNS'>, options: SearchPermitsOptions) {
     // Determine project table based on initiative, exclude PCNS
     const projectTableMap = {
       [Initiative.ELECTRIFICATION]: 'electrificationProject',

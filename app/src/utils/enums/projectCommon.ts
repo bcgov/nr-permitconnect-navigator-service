@@ -2,60 +2,69 @@
  * Common initiative enums
  */
 
-export enum ActivityContactRole {
-  ADMIN = 'ADMIN',
-  MEMBER = 'MEMBER',
-  PRIMARY = 'PRIMARY'
-}
+export const ActivityContactRole = {
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER',
+  PRIMARY: 'PRIMARY'
+} as const;
+export type ActivityContactRole = (typeof ActivityContactRole)[keyof typeof ActivityContactRole];
 
-export enum ApplicationStatus {
-  NEW = 'New',
-  IN_PROGRESS = 'In Progress',
-  DELAYED = 'Delayed',
-  COMPLETED = 'Completed'
-}
+export const ApplicationStatus = {
+  NEW: 'New',
+  IN_PROGRESS: 'In Progress',
+  DELAYED: 'Delayed',
+  COMPLETED: 'Completed'
+} as const;
+export type ApplicationStatus = (typeof ApplicationStatus)[keyof typeof ApplicationStatus];
 
-export enum BringForwardType {
-  UNRESOLVED = 'Unresolved',
-  RESOLVED = 'Resolved'
-}
+export const BringForwardType = {
+  UNRESOLVED: 'Unresolved',
+  RESOLVED: 'Resolved'
+} as const;
+export type BringForwardType = (typeof BringForwardType)[keyof typeof BringForwardType];
 
-export enum ContactPreference {
-  PHONE_CALL = 'Phone call',
-  EMAIL = 'Email',
-  EITHER = 'Either'
-}
+export const ContactPreference = {
+  PHONE_CALL: 'Phone call',
+  EMAIL: 'Email',
+  EITHER: 'Either'
+} as const;
+export type ContactPreference = (typeof ContactPreference)[keyof typeof ContactPreference];
 
-export enum EnquirySubmittedMethod {
-  PHONE = 'Phone',
-  EMAIL = 'Email',
-  PCNS = 'PCNS'
-}
+export const EnquirySubmittedMethod = {
+  PHONE: 'Phone',
+  EMAIL: 'Email',
+  PCNS: 'PCNS'
+} as const;
+export type EnquirySubmittedMethod = (typeof EnquirySubmittedMethod)[keyof typeof EnquirySubmittedMethod];
 
-export enum DraftCode {
-  ELECTRIFICATION_PROJECT = 'ELECTRIFICATION_PROJECT',
-  GENERAL_PROJECT = 'GENERAL_PROJECT',
-  HOUSING_PROJECT = 'HOUSING_PROJECT'
-}
+export const DraftCode = {
+  ELECTRIFICATION_PROJECT: 'ELECTRIFICATION_PROJECT',
+  GENERAL_PROJECT: 'GENERAL_PROJECT',
+  HOUSING_PROJECT: 'HOUSING_PROJECT'
+} as const;
+export type DraftCode = (typeof DraftCode)[keyof typeof DraftCode];
 
-export enum NoteType {
-  GENERAL = 'General',
-  BRING_FORWARD = 'Bring forward',
-  ENQUIRY = 'Enquiry',
-  ROADMAP = 'Roadmap'
-}
+export const NoteType = {
+  GENERAL: 'General',
+  BRING_FORWARD: 'Bring forward',
+  ENQUIRY: 'Enquiry',
+  ROADMAP: 'Roadmap'
+} as const;
+export type NoteType = (typeof NoteType)[keyof typeof NoteType];
 
-export enum ProjectRelationship {
-  OWNER = 'Property owner',
-  CONSULTANT = 'Project consultant',
-  OTHER = 'Other'
-}
+export const ProjectRelationship = {
+  OWNER: 'Property owner',
+  CONSULTANT: 'Project consultant',
+  OTHER: 'Other'
+} as const;
+export type ProjectRelationship = (typeof ProjectRelationship)[keyof typeof ProjectRelationship];
 
-export enum SubmissionType {
-  ASSISTANCE = 'Assistance',
-  ESCALATION = 'Escalation',
-  GENERAL_ENQUIRY = 'General enquiry',
-  GUIDANCE = 'Guidance',
-  INAPPLICABLE = 'Inapplicable',
-  STATUS_REQUEST = 'Status request'
-}
+export const SubmissionType = {
+  ASSISTANCE: 'Assistance',
+  ESCALATION: 'Escalation',
+  GENERAL_ENQUIRY: 'General enquiry',
+  GUIDANCE: 'Guidance',
+  INAPPLICABLE: 'Inapplicable',
+  STATUS_REQUEST: 'Status request'
+} as const;
+export type SubmissionType = (typeof SubmissionType)[keyof typeof SubmissionType];

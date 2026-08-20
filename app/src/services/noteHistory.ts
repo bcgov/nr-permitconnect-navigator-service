@@ -59,7 +59,7 @@ export const deleteNoteHistoryService = async (noteHistoryId: string): Promise<v
  * @returns A Promise that resolves to the note histories for the given parameters
  */
 export const listBringForwardsService = async (
-  initiativeCode: Exclude<Initiative, Initiative.PCNS> | undefined,
+  initiativeCode: Exclude<Initiative, 'PCNS'> | undefined,
   state: BringForwardType = BringForwardType.UNRESOLVED
 ): Promise<BringForward[]> => {
   return await unitOfWork.execute(async ({ noteHistory, user }) => {
