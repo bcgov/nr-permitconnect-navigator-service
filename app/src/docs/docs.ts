@@ -48,7 +48,7 @@ export function getDocHTML(version = 'v1'): string {
  * @returns The OpenAPI spec
  */
 export function getSpec(): OpenAPISpec | undefined {
-  const rawSpec = readFileSync(join(__dirname, '../../docs/v1.api-spec.yaml'), 'utf8');
+  const rawSpec = readFileSync(join(__dirname, 'v1.api-spec.yaml'), 'utf8');
   const spec = load(rawSpec) as OpenAPISpec;
   spec.servers[0].url = '/api/v1';
   return spec;
