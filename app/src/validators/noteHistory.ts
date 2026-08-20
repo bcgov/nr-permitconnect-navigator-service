@@ -28,9 +28,8 @@ const schema = {
       activityId: activityId
     })
   },
-  updateNoteHistory: {
+  patchNoteHistory: {
     body: Joi.object({
-      activityId: activityId,
       bringForwardDate: Joi.date().iso().allow(null),
       bringForwardState: Joi.string()
         .valid(...BRING_FORWARD_TYPE_LIST)
@@ -39,13 +38,12 @@ const schema = {
       escalateToDirector: Joi.boolean(),
       escalationType: Joi.string().custom(requireValidCode.EscalationType).allow(null),
       note: Joi.string().allow(null),
-      noteHistoryId: uuidv4.allow(null),
       resource: Joi.string()
         .required()
         .valid(Resource.ELECTRIFICATION_PROJECT, Resource.ENQUIRY, Resource.GENERAL_PROJECT, Resource.HOUSING_PROJECT),
       shownToProponent: Joi.boolean(),
-      title: Joi.string().max(255).required(),
-      type: Joi.string().max(255).required()
+      title: Joi.string().max(255),
+      type: Joi.string().max(255)
     }),
     params: Joi.object({
       noteHistoryId: uuidv4.required()
@@ -56,5 +54,5 @@ const schema = {
 export default {
   createNoteHistory: validate(schema.createNoteHistory),
   listNoteHistory: validate(schema.listNoteHistory),
-  updateNoteHistory: validate(schema.updateNoteHistory)
+  patchNoteHistory: validate(schema.patchNoteHistory)
 };

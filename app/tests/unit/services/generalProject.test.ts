@@ -296,19 +296,19 @@ describe('generalProject service', () => {
     });
   });
 
-  describe('updateGeneralProjectService', () => {
+  describe('patchGeneralProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { submittedAt: new Date() };
-      mockRepos.generalProject.update.mockResolvedValueOnce({} as never);
+      const updateData = { generalProjectId: TEST_GENERAL_PROJECT_1.generalProjectId, submittedAt: new Date() };
+      mockRepos.generalProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.generalProject.findFirstOrThrow.mockResolvedValueOnce(TEST_GENERAL_PROJECT_1 as never);
 
-      const response = await generalProjectService.updateGeneralProjectService(
-        updateData,
-        TEST_GENERAL_PROJECT_1.generalProjectId
+      const response = await generalProjectService.patchGeneralProjectService(
+        TEST_GENERAL_PROJECT_1.generalProjectId,
+        updateData
       );
 
-      expect(mockRepos.generalProject.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.generalProject.update).toHaveBeenCalledWith(
+      expect(mockRepos.generalProject.patch).toHaveBeenCalledTimes(1);
+      expect(mockRepos.generalProject.patch).toHaveBeenCalledWith(
         { generalProjectId: TEST_GENERAL_PROJECT_1.generalProjectId },
         updateData
       );

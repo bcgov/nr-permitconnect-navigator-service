@@ -16,9 +16,9 @@ import {
   getHousingProjectStatisticsController,
   listHousingProjectActivityIdsController,
   listHousingProjectsController,
+  patchHousingProjectController,
   searchHousingProjectsController,
   submitHousingProjectDraftController,
-  updateHousingProjectController,
   upsertHousingProjectDraftController
 } from '../../../src/controllers/housingProject.ts';
 import * as activityService from '../../../src/services/activity.ts';
@@ -27,16 +27,16 @@ import * as housingProjectService from '../../../src/services/housingProject.ts'
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
   Draft,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
+  SearchHousingProjectRequest,
   LocalContext,
+  PatchHousingProjectRequest,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -200,7 +200,7 @@ describe('searchHousingProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchHousingProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
 
@@ -222,7 +222,7 @@ describe('searchHousingProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, HousingProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchHousingProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_HOUSING_PROJECT_1 as HousingProject]);
 
@@ -238,28 +238,22 @@ describe('searchHousingProjectsController', () => {
   });
 });
 
-describe('updateHousingProjectController', () => {
-  const updateSpy = vi.spyOn(housingProjectService, 'updateHousingProjectService');
+describe('patchHousingProjectController', () => {
+  const updateSpy = vi.spyOn(housingProjectService, 'patchHousingProjectService');
 
   it('calls the service with update data and projectId then responds 200', async () => {
     const updateData = { projectName: 'Updated Name' };
     const req = {
       params: { housingProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
       body: updateData
-    } as unknown as Request<{ housingProjectId: string }, never, Prisma.housing_projectUpdateInput>;
+    } as unknown as Request<{ housingProjectId: string }, never, PatchHousingProjectRequest>;
 
     updateSpy.mockResolvedValue(TEST_HOUSING_PROJECT_1 as HousingProject);
 
-    await updateHousingProjectController(req, res as unknown as Response);
+    await patchHousingProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        projectName: 'Updated Name',
-        financiallySupported: expect.any(Boolean)
-      }),
-      req.params.housingProjectId
-    );
+    expect(updateSpy).toHaveBeenCalledWith(req.params.housingProjectId, updateData);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_1);
   });

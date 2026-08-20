@@ -16,9 +16,9 @@ import {
   getGeneralProjectStatisticsController,
   listGeneralProjectActivityIdsController,
   listGeneralProjectsController,
+  patchGeneralProjectController,
   searchGeneralProjectsController,
   submitGeneralProjectDraftController,
-  updateGeneralProjectController,
   upsertGeneralProjectDraftController
 } from '../../../src/controllers/generalProject.ts';
 import * as activityService from '../../../src/services/activity.ts';
@@ -27,16 +27,16 @@ import * as generalProjectService from '../../../src/services/generalProject.ts'
 import { Initiative } from '../../../src/utils/enums/application.ts';
 import { DraftCode } from '../../../src/utils/enums/projectCommon.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
   Draft,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
+  SearchGeneralProjectRequest,
   GeneralProjectStatistics,
   LocalContext,
+  PatchGeneralProjectRequest,
   StatisticsFilters
 } from '../../../src/types/index.ts';
 
@@ -200,7 +200,7 @@ describe('searchGeneralProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchGeneralProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 
@@ -222,7 +222,7 @@ describe('searchGeneralProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, GeneralProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchGeneralProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
 
@@ -238,22 +238,22 @@ describe('searchGeneralProjectsController', () => {
   });
 });
 
-describe('updateGeneralProjectController', () => {
-  const updateSpy = vi.spyOn(generalProjectService, 'updateGeneralProjectService');
+describe('patchGeneralProjectController', () => {
+  const updateSpy = vi.spyOn(generalProjectService, 'patchGeneralProjectService');
 
   it('calls the service with update data and projectId then responds 200', async () => {
     const updateData = { projectName: 'Updated Name' };
     const req = {
       params: { generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
       body: updateData
-    } as unknown as Request<{ generalProjectId: string }, never, Prisma.general_projectUpdateInput>;
+    } as unknown as Request<{ generalProjectId: string }, never, PatchGeneralProjectRequest>;
 
     updateSpy.mockResolvedValue(TEST_GENERAL_PROJECT_1 as GeneralProject);
 
-    await updateGeneralProjectController(req, res as unknown as Response);
+    await patchGeneralProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(updateData, req.params.generalProjectId);
+    expect(updateSpy).toHaveBeenCalledWith(req.params.generalProjectId, updateData);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_1);
   });

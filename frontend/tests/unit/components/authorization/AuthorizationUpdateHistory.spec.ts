@@ -11,7 +11,7 @@ import { StorageKey } from '@/utils/enums/application';
 
 import type { User } from '@/types';
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -62,7 +62,7 @@ beforeEach(() => {
 
   vi.clearAllMocks();
 
-  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+  searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {

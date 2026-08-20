@@ -4,7 +4,7 @@ import {
   deleteNoteHistory,
   listBringForwards,
   listNoteHistories,
-  putNoteHistory
+  patchNoteHistory
 } from '@/services/noteHistoryService';
 
 import { appAxios } from '@/services/interceptors';
@@ -22,7 +22,7 @@ vi.mock('@/store', () => ({
 describe('noteHistory service', () => {
   const mockPost = vi.fn();
   const mockGet = vi.fn();
-  const mockPut = vi.fn();
+  const mockPatch = vi.fn();
   const mockDelete = vi.fn();
 
   beforeEach(() => {
@@ -35,7 +35,7 @@ describe('noteHistory service', () => {
     vi.mocked(appAxios).mockReturnValue({
       post: mockPost,
       get: mockGet,
-      put: mockPut,
+      patch: mockPatch,
       delete: mockDelete
     } as never);
   });
@@ -167,8 +167,8 @@ describe('noteHistory service', () => {
     });
   });
 
-  describe('putNoteHistory', () => {
-    it('updates a note history record and returns data', async () => {
+  describe('patchNoteHistory', () => {
+    it('patches a note history record and returns data', async () => {
       const request = {
         noteHistoryId: 'note-history-1',
         note: 'Updated note',
@@ -180,13 +180,13 @@ describe('noteHistory service', () => {
         note: 'Updated note'
       };
 
-      mockPut.mockResolvedValue({
+      mockPatch.mockResolvedValue({
         data: response
       });
 
-      const result = await putNoteHistory(request as never);
+      const result = await patchNoteHistory(request as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPatch).toHaveBeenCalledWith(
         'housing/note/note-history-1',
         {
           note: 'Updated note',
@@ -201,10 +201,10 @@ describe('noteHistory service', () => {
     it('propagates errors', async () => {
       const error = new Error('update failed');
 
-      mockPut.mockRejectedValue(error);
+      mockPatch.mockRejectedValue(error);
 
       await expect(
-        putNoteHistory({
+        patchNoteHistory({
           noteHistoryId: 'note-history-1'
         } as never)
       ).rejects.toThrow(error);
@@ -217,7 +217,7 @@ describe('noteHistory service', () => {
       deleteNoteHistory,
       listBringForwards,
       listNoteHistories,
-      putNoteHistory
+      patchNoteHistory
     });
   });
 });

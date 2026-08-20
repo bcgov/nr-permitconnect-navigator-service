@@ -14,7 +14,6 @@ import type {
   Document,
   Draft,
   ElectrificationProjectBase,
-  Enquiry,
   EnquiryBase,
   GeneralProjectBase,
   HousingProjectBase,
@@ -107,7 +106,7 @@ interface ContactSearchSchema extends ContactBaseSchema {
 export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
 export type GetContactRequest = ListRequestDTO<ContactBase, ContactGetSchema>;
 export type ListContactsRequest = ListRequestDTO<ContactBase, ContactSearchSchema>;
-export type PutContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
+export type UpsertContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
 export type DeleteContactRequest = DeleteRequestDTO<ContactBase, ContactBaseSchema>;
 
 /**
@@ -167,7 +166,7 @@ export type CreateElectrificationProjectRequest = CreateRequestDTO<
   Partial<ElectrificationProjectBase>,
   ElectrificationProjectBaseSchema
 >;
-export type ListElectrificationProjectsRequest = ListRequestDTO<
+export type SearchElectrificationProjectRequest = ListRequestDTO<
   Partial<ElectrificationProjectBase>,
   ElectrificationProjectBaseSchema
 >;
@@ -193,7 +192,7 @@ interface EnquirySearchSchema extends EnquiryBaseSchema {
   query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
 }
 export type CreateEnquiryRequest = PartialFields<
-  Pick<Enquiry, 'contact' | 'enquiryDescription' | 'relatedActivityId' | 'submissionType'>,
+  Pick<EnquiryBase, 'enquiryDescription' | 'relatedActivityId' | 'submissionType'> & { contact: ContactBase },
   'submissionType'
 >;
 export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
@@ -219,7 +218,7 @@ interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBa
   };
 }
 export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
-export type ListGeneralProjectsRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type SearchGeneralProjectRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
 export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
 export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
 
@@ -240,7 +239,7 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
   };
 }
 export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
-export type ListHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
 export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
 export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
@@ -250,7 +249,7 @@ export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
   ids: 'noteHistoryId';
-  immutable: 'noteHistoryId';
+  immutable: 'activityId' | 'noteHistoryId';
   serverGenerated: 'noteHistoryId';
 }
 interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
@@ -264,8 +263,9 @@ interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
 export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
 export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
 export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
-export type PutNoteHistoryRequest = PutRequestDTO<NoteHistoryBase & { resource: Resource }, NoteHistoryBaseSchema> & {
-  note: string;
+export type PatchNoteHistoryRequest = PatchRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & {
+  note: string | undefined;
+  resource: Resource;
 };
 export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
 
@@ -326,7 +326,7 @@ export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
  * User
  */
 
-export interface ListUsersRequest {
+export interface SearchUsersRequest {
   userId?: string[];
   idp?: string[];
   sub?: string;

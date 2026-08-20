@@ -9,13 +9,13 @@ import { roadmapService, userService } from '@/services';
 
 vi.mock('@/services', () => ({
   roadmapService: { getRoadmapNote: vi.fn(), sendRoadmap: vi.fn() },
-  userService: { listUsers: vi.fn() }
+  userService: { searchUsers: vi.fn() }
 }));
 
 describe('ProjectRoadmapTab.vue', () => {
   it('initializes BCC with multiple emails from config and assignee', async () => {
     vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('Roadmap note');
-    vi.mocked(userService.listUsers).mockResolvedValue([
+    vi.mocked(userService.searchUsers).mockResolvedValue([
       {
         userId: 'user1',
         email: 'navigator@bcgov.bc.ca',

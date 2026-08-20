@@ -88,16 +88,14 @@ const schema = {
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
-  updateHousingProject: {
+  patchHousingProject: {
     body: Joi.object({
       consentToFeedback: Joi.boolean(),
-      queuePriority: Joi.number().required().integer().min(0).max(3),
-      submissionType: Joi.string()
-        .required()
-        .valid(...SUBMISSION_TYPE_LIST),
+      queuePriority: Joi.number().integer().min(0).max(3),
+      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
-      projectName: Joi.string().required(),
+      projectName: Joi.string(),
       projectDescription: Joi.string().allow(null),
       singleFamilyUnits: Joi.string()
         .allow(null)
@@ -113,9 +111,7 @@ const schema = {
           .valid(...NUM_RESIDENTIAL_UNITS_LIST),
         otherwise: Joi.string().allow(null)
       }),
-      hasRentalUnits: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
+      hasRentalUnits: Joi.string().valid(...YES_NO_UNSURE_LIST),
       rentalUnits: Joi.when('hasRentalUnits', {
         is: BasicResponse.YES,
         then: Joi.string()
@@ -123,28 +119,20 @@ const schema = {
           .valid(...NUM_RESIDENTIAL_UNITS_LIST),
         otherwise: Joi.string().allow(null)
       }),
-      financiallySupportedBc: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
-      financiallySupportedIndigenous: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
+      financiallySupportedBc: Joi.string().valid(...YES_NO_UNSURE_LIST),
+      financiallySupportedIndigenous: Joi.string().valid(...YES_NO_UNSURE_LIST),
       indigenousDescription: Joi.when('financiallySupportedIndigenous', {
         is: BasicResponse.YES,
         then: Joi.string().required().max(255),
         otherwise: Joi.string().allow(null)
       }),
-      financiallySupportedNonProfit: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
+      financiallySupportedNonProfit: Joi.string().valid(...YES_NO_UNSURE_LIST),
       nonProfitDescription: Joi.when('financiallySupportedNonProfit', {
         is: BasicResponse.YES,
         then: Joi.string().required().max(255),
         otherwise: Joi.string().allow(null)
       }),
-      financiallySupportedHousingCoop: Joi.string()
-        .required()
-        .valid(...YES_NO_UNSURE_LIST),
+      financiallySupportedHousingCoop: Joi.string().valid(...YES_NO_UNSURE_LIST),
       housingCoopDescription: Joi.when('financiallySupportedHousingCoop', {
         is: BasicResponse.YES,
         then: Joi.string().required().max(255),
@@ -157,12 +145,12 @@ const schema = {
       latitude: Joi.number().allow(null).max(255),
       longitude: Joi.number().allow(null).max(255),
       geomarkUrl: Joi.string().allow(null).max(255),
-      naturalDisaster: Joi.boolean().required(),
+      naturalDisaster: Joi.boolean(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
       ...atsValidator.atsEnquirySubmissionFields,
-      ltsaCompleted: Joi.boolean().required(),
-      bcOnlineCompleted: Joi.boolean().required(),
-      aaiUpdated: Joi.boolean().required(),
+      ltsaCompleted: Joi.boolean(),
+      bcOnlineCompleted: Joi.boolean(),
+      aaiUpdated: Joi.boolean(),
       astNotes: Joi.string().allow(null).max(4000),
       assignedUserId: uuidv4.allow(null),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
@@ -180,6 +168,6 @@ export default {
   deleteDraft: validate(schema.deleteDraft),
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),
-  searchHousingProjects: validate(schema.searchHousingProjects),
-  updateHousingProject: validate(schema.updateHousingProject)
+  patchHousingProject: validate(schema.patchHousingProject),
+  searchHousingProjects: validate(schema.searchHousingProjects)
 };

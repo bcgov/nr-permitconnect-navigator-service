@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { ListUsersRequest, User } from '@/types';
+import type { SearchUsersRequest, User } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -11,16 +11,16 @@ import type { ListUsersRequest, User } from '@/types';
 const userRoute = createRouteBuilder('user');
 
 const userRoutes = {
-  root: () => userRoute()
+  search: () => userRoute('search')
 } as const;
 
 /**
- * Lists users using the supplied filters.
+ * Searches users using the supplied filters.
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching users.
  */
-export function listUsers(req: ListUsersRequest): Promise<User[]> {
-  return api.post<User[]>(userRoutes.root(), req);
+export function searchUsers(req: SearchUsersRequest): Promise<User[]> {
+  return api.post<User[]>(userRoutes.search(), req);
 }
 
 /**
@@ -32,5 +32,5 @@ export function listUsers(req: ListUsersRequest): Promise<User[]> {
  * It may be removed once all consumers are migrated to named imports.
  */
 export const userService = {
-  listUsers
+  searchUsers
 };

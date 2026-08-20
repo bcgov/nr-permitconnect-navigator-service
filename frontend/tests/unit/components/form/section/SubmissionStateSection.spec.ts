@@ -22,7 +22,7 @@ import type { User } from '@/types';
 
 // Mocks
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 // Fixtures
 
@@ -71,7 +71,7 @@ function mountSubmissionStateSection(
 
 beforeEach(() => {
   vi.clearAllMocks();
-  listUsersSpy.mockResolvedValue([]);
+  searchUsersSpy.mockResolvedValue([]);
 });
 
 // Tests
@@ -181,7 +181,7 @@ describe('SubmissionStateSection', () => {
 
   describe('assignee loading', () => {
     it('loads the assignee by the project assignedUserId when not an enquiry', async () => {
-      listUsersSpy.mockResolvedValue([{ userId: 'user-1' } as User]);
+      searchUsersSpy.mockResolvedValue([{ userId: 'user-1' } as User]);
 
       mountSubmissionStateSection({
         isEnquiry: false,
@@ -190,7 +190,7 @@ describe('SubmissionStateSection', () => {
       await nextTick();
       await nextTick();
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ userId: ['user-1'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['user-1'] });
     });
 
     it('loads the assignee by the enquiry assignedUserId when isEnquiry is true', async () => {
@@ -201,7 +201,7 @@ describe('SubmissionStateSection', () => {
       await nextTick();
       await nextTick();
 
-      expect(listUsersSpy).toHaveBeenCalledWith({ userId: ['user-2'] });
+      expect(searchUsersSpy).toHaveBeenCalledWith({ userId: ['user-2'] });
     });
 
     it('does not attempt to load an assignee when there is no assignedUserId', async () => {
@@ -209,7 +209,7 @@ describe('SubmissionStateSection', () => {
       await nextTick();
       await nextTick();
 
-      expect(listUsersSpy).not.toHaveBeenCalled();
+      expect(searchUsersSpy).not.toHaveBeenCalled();
     });
   });
 

@@ -14,6 +14,6 @@ router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Search users endpoint */
-router.post('/', hasAuthorization(Resource.USER, Action.READ), userValidator.searchUsers, searchUsersController);
+router.post('/search', hasAuthorization(Resource.USER, Action.READ), userValidator.searchUsers, searchUsersController);
 
 export default router;

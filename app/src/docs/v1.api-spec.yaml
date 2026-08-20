@@ -96,6 +96,32 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a contact
+      operationId: upsertContact
+      tags:
+        - Contact
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-ContactUpsert'
+      responses:
+        '200':
+          description: Contact upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DB-Contact'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /contact/{contactId}:
     get:
       summary: Get a specific contact
@@ -225,71 +251,53 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /contact/search:
-    get:
+    post:
       summary: Search contacts
       description: Returns a list of contacts based on the given queries
       operationId: searchContacts
       tags:
         - Contact
-      parameters:
-        - in: query
-          name: contactApplicantRelationship
-          required: false
-          schema:
-            type: string
-            description: The contact applicant relationship type to filter on
-            example: Property owner
-        - in: query
-          name: contactPreference
-          required: false
-          schema:
-            type: string
-            description: The Contact's contact preference
-            example: Email
-        - in: query
-          name: contactId
-          required: false
-          schema:
-            type: array
-            description: The Contact IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ContactId'
-        - in: query
-          name: email
-          required: false
-          schema:
-            type: string
-            description: The Contact's email to filter on
-            example: JaneDoe@email.com
-        - in: query
-          name: firstName
-          required: false
-          schema:
-            type: string
-            description: The Contact's firstName to filter on
-            example: Jane
-        - in: query
-          name: lastName
-          required: false
-          schema:
-            type: string
-            description: The Contact's lastName to filter on
-            example: Doe
-        - in: query
-          name: phoneNumber
-          required: false
-          schema:
-            type: string
-            description: The Contact's phoneNumber to filter on
-            example: (123) 456-7890
-        - in: query
-          name: userId
-          required: false
-          schema:
-            type: array
-            description: The Contact User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-UserId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                contactApplicantRelationship:
+                  type: string
+                  description: The contact applicant relationship type to filter on
+                  example: Property owner
+                contactPreference:
+                  type: string
+                  description: The Contact's contact preference
+                  example: Email
+                contactId:
+                  type: array
+                  description: The Contact IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ContactId'
+                email:
+                  type: string
+                  description: The Contact's email to filter on
+                  example: JaneDoe@email.com
+                firstName:
+                  type: string
+                  description: The Contact's firstName to filter on
+                  example: Jane
+                lastName:
+                  type: string
+                  description: The Contact's lastName to filter on
+                  example: Doe
+                phoneNumber:
+                  type: string
+                  description: The Contact's phoneNumber to filter on
+                  example: (123) 456-7890
+                userId:
+                  type: array
+                  description: The Contact User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-UserId'
       responses:
         '200':
           description: A list of contacts matching the search criteria
@@ -559,9 +567,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateElectrificationEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchElectrificationEnquiry
       tags:
         - Electrification Enquiry
       parameters:
@@ -571,7 +579,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -611,38 +619,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchElectrificationEnquiries
       tags:
         - Electrification Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -688,9 +695,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateElectrificationNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchElectrificationNoteHistory
       tags:
         - Electrification Note
       parameters:
@@ -700,7 +707,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -816,6 +823,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertElectrificationPermit
+      tags:
+        - Electrification Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitUpsert'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -1023,9 +1056,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a electrification project
-      operationId: updateElectrificationProject
+    patch:
+      summary: Partially update a electrification project
+      operationId: patchElectrificationProject
       tags:
         - Electrification Project
       parameters:
@@ -1035,7 +1068,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-ElectrificationProjectUpdate'
+              $ref: '#/components/schemas/Request-ElectrificationProjectPatch'
       responses:
         '200':
           description: Electrification Project updated successfully
@@ -1075,7 +1108,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/draft:
-    put:
+    post:
       summary: Create or update a draft electrification project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -1103,7 +1136,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft electrification project
       description: Creates or updates an intake and set status to Submitted
       operationId: electrificationProject-updateDraft
@@ -1158,38 +1191,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/project/search:
-    get:
+    post:
       summary: Search electrification projects
       description: Returns a list of electrification projects based on the given queries
       operationId: searchElectrificationProjects
       tags:
         - Electrification Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: electrificationProjectId
-          required: false
-          schema:
-            type: array
-            description: The Electrification Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ElectrificationProjectId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                electrificationProjectId:
+                  type: array
+                  description: The Electrification Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ElectrificationProjectId'
       responses:
         '200':
           description: A list of electrification projects matching the search criteria
@@ -1257,7 +1289,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /electrification/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: electrificationRoadmap
       tags:
@@ -1535,9 +1567,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateGeneralEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchGeneralEnquiry
       tags:
         - General Enquiry
       parameters:
@@ -1547,7 +1579,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -1587,38 +1619,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchGeneralEnquiries
       tags:
         - General Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -1664,9 +1695,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateGeneralNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchGeneralNoteHistory
       tags:
         - General Note
       parameters:
@@ -1676,7 +1707,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -1800,6 +1831,32 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertGeneralPermit
+      tags:
+        - General Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitUpsert'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
   /general/permit/{permitId}:
     get:
       summary: Get a permit
@@ -1911,9 +1968,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a general project
-      operationId: updateGeneralProject
+    patch:
+      summary: Partially update a general project
+      operationId: patchGeneralProject
       tags:
         - General Project
       parameters:
@@ -1923,7 +1980,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-GeneralProjectUpdate'
+              $ref: '#/components/schemas/Request-GeneralProjectPatch'
       responses:
         '200':
           description: General Project updated successfully
@@ -1962,7 +2019,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/draft:
-    put:
+    post:
       summary: Create or update a draft general project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -1990,7 +2047,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft general project
       description: Creates or updates an intake and set status to Submitted
       operationId: generalProject-updateDraft
@@ -2045,46 +2102,42 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/project/search:
-    get:
+    post:
       summary: Search general projects
       description: Returns a list of general projects based on the given queries
       operationId: searchGeneralProjects
       tags:
         - General Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: generalProjectId
-          required: false
-          schema:
-            type: array
-            description: The General Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-GeneralProjectId'
-        - in: query
-          name: submissionType
-          required: false
-          schema:
-            type: array
-            description: The general submission types to filter on
-            items:
-              $ref: '#/components/parameters/Query-SubmissionType'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                generalProjectId:
+                  type: array
+                  description: The General Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-GeneralProjectId'
+                submissionType:
+                  type: array
+                  description: The general submission types to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of general projects matching the search criteria
@@ -2152,7 +2205,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /general/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: generalRoadmap
       tags:
@@ -2430,9 +2483,9 @@ paths:
           $ref: '#/components/responses/NotFound'
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update an enquiry
-      operationId: updateHousingEnquiry
+    patch:
+      summary: Partially update an enquiry
+      operationId: patchHousingEnquiry
       tags:
         - Housing Enquiry
       parameters:
@@ -2442,7 +2495,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/DB-Enquiry'
+              $ref: '#/components/schemas/Request-EnquiryPatch'
       responses:
         '200':
           description: Enquiry updated successfully
@@ -2482,38 +2535,37 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/enquiry/search:
-    get:
+    post:
       summary: Search enquiries
       description: Returns a list of enquiries based on the given queries
       operationId: searchHousingEnquiries
       tags:
         - Housing Enquiry
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: enquiryId
-          required: false
-          schema:
-            type: array
-            description: The Enquiry IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-EnquiryId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                enquiryId:
+                  type: array
+                  description: The Enquiry IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-EnquiryId'
       responses:
         '200':
           description: A list of enquiries matching the search criteria
@@ -2559,9 +2611,9 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/note/{noteHistoryId}:
-    put:
-      summary: Update a note history
-      operationId: updateHousingNoteHistory
+    patch:
+      summary: Partially update a note history
+      operationId: patchHousingNoteHistory
       tags:
         - Housing Note
       parameters:
@@ -2571,7 +2623,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-NoteHistory'
+              $ref: '#/components/schemas/Request-NoteHistoryPatch'
       responses:
         '200':
           description: Note history updated successfully
@@ -2687,6 +2739,32 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Response-Permit'
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        default:
+          $ref: '#/components/responses/Error'
+    post:
+      summary: Create or update a permit
+      operationId: upsertHousingPermit
+      tags:
+        - Housing Permit
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Request-PermitUpsert'
+      responses:
+        '200':
+          description: Permit upserted successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response-Permit'
         "401":
           $ref: "#/components/responses/Unauthorized"
         '403':
@@ -2894,9 +2972,9 @@ paths:
           $ref: "#/components/responses/UnprocessableEntity"
         default:
           $ref: '#/components/responses/Error'
-    put:
-      summary: Update a housing project
-      operationId: updateHousingProject
+    patch:
+      summary: Partially update a housing project
+      operationId: patchHousingProject
       tags:
         - Housing Project
       parameters:
@@ -2906,7 +2984,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Request-HousingProjectUpdate'
+              $ref: '#/components/schemas/Request-HousingProjectPatch'
       responses:
         '200':
           description: Housing Project updated successfully
@@ -2945,7 +3023,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/draft:
-    put:
+    post:
       summary: Create or update a draft housing project
       description: >-
         Creates or updates an intake and set status to Draft
@@ -2973,7 +3051,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/draft/submit:
-    put:
+    post:
       summary: Submit a draft housing project
       description: Creates or updates an intake and set status to Submitted
       operationId: housingProject-updateDraft
@@ -3028,46 +3106,42 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/project/search:
-    get:
+    post:
       summary: Search housing projects
       description: Returns a list of housing projects based on the given queries
       operationId: searchHousingProjects
       tags:
         - Housing Project
-      parameters:
-        - $ref: '#/components/parameters/Query-IncludeUser'
-        - in: query
-          name: activityId
-          required: false
-          schema:
-            type: array
-            description: The Activity IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-ActivityId'
-        - in: query
-          name: createdBy
-          required: false
-          schema:
-            type: array
-            description: The User IDs to filter on
-            items:
-              $ref: '#/components/parameters/Query-CreatedBy'
-        - in: query
-          name: housingProjectId
-          required: false
-          schema:
-            type: array
-            description: The Housing Project IDs to filter on
-            items:
-              $ref: '#/components/parameters/Path-HousingProjectId'
-        - in: query
-          name: submissionType
-          required: false
-          schema:
-            type: array
-            description: The housing submission types to filter on
-            items:
-              $ref: '#/components/parameters/Query-SubmissionType'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                includeUser:
+                  type: boolean
+                  description: Whether to include User data with each entity being returned by the results.
+                activityId:
+                  type: array
+                  description: The Activity IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-ActivityId'
+                createdBy:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-CreatedBy'
+                housingProjectId:
+                  type: array
+                  description: The Housing Project IDs to filter on
+                  items:
+                    $ref: '#/components/parameters/Path-HousingProjectId'
+                submissionType:
+                  type: array
+                  description: The housing submission types to filter on
+                  items:
+                    $ref: '#/components/parameters/Query-SubmissionType'
       responses:
         '200':
           description: A list of housing projects matching the search criteria
@@ -3135,7 +3209,7 @@ paths:
         default:
           $ref: '#/components/responses/Error'
   /housing/roadmap:
-    put:
+    post:
       summary: Send an email with the roadmap data
       operationId: housingRoadmap
       tags:
@@ -3268,13 +3342,62 @@ paths:
                 $ref: '#/components/schemas/DB-SourceSystemKind'
         "401":
           $ref: "#/components/responses/Unauthorized"
-  /user:
-    get:
+  /user/search:
+    post:
       summary: Search users
       description: Gets a list of users based on given parameters
       operationId: searchUsers
       tags:
         - User
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                userId:
+                  type: array
+                  description: The User IDs to filter on
+                  items:
+                    type: string
+                    format: uuid
+                idp:
+                  type: array
+                  description: The identity provider kinds to filter on
+                  items:
+                    type: string
+                sub:
+                  type: string
+                  description: The IDIR/BCeID subject identifier to filter on
+                email:
+                  type: string
+                  description: The User's email to filter on
+                firstName:
+                  type: string
+                  description: The User's firstName to filter on
+                fullName:
+                  type: string
+                  description: The User's full name to filter on
+                lastName:
+                  type: string
+                  description: The User's lastName to filter on
+                active:
+                  type: boolean
+                  description: Whether to filter on active users only
+                group:
+                  type: array
+                  description: The group names to filter on
+                  items:
+                    type: string
+                includeUserGroups:
+                  type: boolean
+                  description: Whether to include group data with each user being returned
+                initiative:
+                  type: array
+                  description: The initiatives to filter on
+                  items:
+                    type: string
       responses:
         '200':
           description: Users
@@ -4541,6 +4664,195 @@ components:
             $ref: '#/components/schemas/DB-Contact'
         basic:
           $ref: '#/components/schemas/Enquiry-Basic'
+    Request-EnquiryPatch:
+      title: Request to Partially Update an Enquiry
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        enquiryId is supplied via the path parameter, not the body.
+      type: object
+      properties:
+        submissionType:
+          type: string
+          description: The submission type of the enquiry
+          example: Guidance
+          nullable: true
+        relatedActivityId:
+          type: string
+          description: Activity ID of a related project
+          example: D95F1DE6
+          maxLength: 255
+          nullable: true
+        enquiryDescription:
+          type: string
+          description: Description of the enquiry
+          example: Enquiry description example.
+          nullable: true
+        assignedUserId:
+          type: string
+          description: User ID assigned to the enquiry
+          format: uuid
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+        enquiryStatus:
+          type: string
+          description: Status of the enquiry
+          example: New
+        submittedMethod:
+          type: string
+          description: Method the enquiry was submitted through
+          example: PCNS
+        addedToAts:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+          example: 1001
+          nullable: true
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
+          nullable: true
+    Request-PermitUpsert:
+      title: Request Permit Upsert
+      type: object
+      required:
+        - permitTypeId
+        - needed
+        - state
+        - stage
+      properties:
+        permitId:
+          type: string
+          format: uuid
+          nullable: true
+          description: UUID for permit. Omit to create a new permit.
+          example: 68a9a188-4d67-46e3-92a4-b57174354231
+        activityId:
+          type: string
+          description: The ID of the activity associated with the permit
+          example: 2DE67F13
+        permitTypeId:
+          type: number
+          description: ID for the associated permit type
+          example: 1
+        issuedPermitId:
+          type: string
+          nullable: true
+          description: ID of the issued permit
+          example: '123'
+        needed:
+          type: string
+          description: Whether permit is needed, or still uner investigation
+          example: 'Yes'
+        state:
+          type: string
+          description: State of the permit
+          example: In progress
+        stage:
+          type: string
+          description: Stage of the permit
+          example: Application submission
+        submittedDate:
+          type: string
+          description: Date the permit was submitted
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        submittedTime:
+          type: string
+          description: Time the permit was submitted
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        decisionDate:
+          type: string
+          description: Date of the permit's decision
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        decisionTime:
+          type: string
+          description: Time of the permit's decision
+          format: timetz
+          nullable: true
+          example: '2024-08-14'
+        statusLastChanged:
+          type: string
+          description: Date of the last time the status of permit was changed
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastChangedTime:
+          type: string
+          description: Time of the last time the status of permit was changed
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+        statusLastVerified:
+          type: string
+          description: Date of the last verified status of permit
+          format: date
+          nullable: true
+          example: '2024-08-14'
+        statusLastVerifiedTime:
+          type: string
+          description: Time of the last verified status of permit
+          format: timetz
+          nullable: true
+          example: '07:00:00.000Z'
+    Request-ContactUpsert:
+      title: Request Contact Upsert
+      type: object
+      required:
+        - email
+        - firstName
+        - phoneNumber
+        - contactApplicantRelationship
+        - contactPreference
+      properties:
+        userId:
+          type: string
+          format: uuid
+          nullable: true
+          description: The ID of the user associated with the contact
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        contactId:
+          type: string
+          format: uuid
+          nullable: true
+          description: The ID of the contact. Omit to create a new contact.
+          example: b76469a3-896c-4435-aa83-b8b87db6f701
+        firstName:
+          type: string
+          description: First name of the contact person
+          example: John
+        lastName:
+          type: string
+          nullable: true
+          description: Last name of the contact person
+          example: Smith
+        phoneNumber:
+          type: string
+          description: Phone number for contact
+          example: (123) 456-7890
+        email:
+          type: string
+          format: email
+          description: Email address for contact
+          example: john.smith@example.com
+        contactApplicantRelationship:
+          type: string
+          enum: [Property owner, Project consultant, Other]
+          description: Relationship of the contact person to the project
+          example: Agent
+        contactPreference:
+          type: string
+          enum: [Phone call, Email, Either]
+          description: Preferred method of contact
+          example: Email
     Request-Document:
       type: object
       properties:
@@ -4617,6 +4929,61 @@ components:
           type: string
           description: A reason for the escalation
           example: Time-sensitive
+    Request-NoteHistoryPatch:
+      title: Request Note History Patch
+      type: object
+      required:
+        - resource
+      properties:
+        type:
+          type: string
+          description: Type of note
+          example: Bring forward
+        title:
+          type: string
+          description: Title of the note
+          example: Some Title
+        bringForwardDate:
+          type: string
+          format: date-time
+          nullable: true
+          description: Date time for when note is to be brought forward
+          example: '2029-08-14T07:00:00.000Z'
+        bringForwardState:
+          type: string
+          nullable: true
+          description: State of a bring forward type note
+          example: Unresolved
+        note:
+          type: string
+          nullable: true
+          description: Optional note to add to the history
+          example: Some new note text
+        shownToProponent:
+          type: boolean
+          description: If the note history is displayed to the proponent
+          example: false
+        escalateToSupervisor:
+          type: boolean
+          description: If the note history is to be escalated to a supervisor
+          example: false
+        escalateToDirector:
+          type: boolean
+          description: If the note history is to be escalated to a director
+          example: false
+        escalationType:
+          type: string
+          nullable: true
+          description: A reason for the escalation
+          example: Time-sensitive
+        resource:
+          type: string
+          description: The type of Resource the note history belongs to
+          enum:
+            - ELECTRIFICATION_PROJECT
+            - ENQUIRY
+            - GENERAL_PROJECT
+            - HOUSING_PROJECT
     Request-PermitNote:
       title: Request Permit Note
       type: object
@@ -4999,53 +5366,122 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-    Request-ElectrificationProjectUpdate:
-      title: Request to Update Electrification Project
+    Request-ElectrificationProjectPatch:
+      title: Request to Partially Update Electrification Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        electrificationProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - housingProjectId
-        - activityId
-        - submittedAt
       properties:
-        electrificationProjectId:
+        projectName:
           type: string
-          description: UUID for the electrification project
+          description: Name of the Project
+          example: New Project
+          maxLength: 255
+        companyNameRegistered:
+          type: string
+          description: Name of the company connected to the project
+          example: QW URBAN FOOD LTD.
+          maxLength: 255
+          nullable: true
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
+          maxLength: 255
+          nullable: true
+        projectType:
+          type: string
+          description: Type of electrification project
+          example: New Connection
+        bcHydroNumber:
+          type: string
+          description: BC Hydro account number
+          example: '1234567890'
+          maxLength: 255
+          nullable: true
+        projectDescription:
+          type: string
+          description: Description of the project. Required when projectType is "Other".
+          example: Project description example.
+          maxLength: 4000
+          nullable: true
+        projectCategory:
+          type: string
+          description: Category of the electrification project
+          example: Generation
+          nullable: true
+        assignedUserId:
+          type: string
+          description: User ID assigned to the electrification project
           format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
+          example: 123e4567-e89b-12d3-a456-426614174000
+          nullable: true
+        hasEpa:
           type: string
-          description: Activity ID
-          example: D95F1DE6
-        submittedAt:
+          description: Whether the project has an Electricity Purchase Agreement
+          example: 'Yes'
+          nullable: true
+        megawatts:
+          type: number
+          description: Project capacity in megawatts
+          example: 25.5
+          nullable: true
+        bcEnvironmentAssessNeeded:
           type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
-    Request-GeneralProjectUpdate:
-      title: Request to Update General Project
+          description: Whether a BC environmental assessment is needed
+          example: 'No'
+          nullable: true
+        locationDescription:
+          type: string
+          description: Description of the location of the project
+          example: Near the river
+          maxLength: 4000
+          nullable: true
+        astNotes:
+          type: string
+          description: Notes from AST
+          example: AST notes here
+          maxLength: 4000
+          nullable: true
+        queuePriority:
+          type: number
+          description: Navigator assigned priority rank
+          format: integer
+          example: 2
+        submissionType:
+          type: string
+          description: The submission type of the project
+          example: Guidance
+        applicationStatus:
+          type: string
+          description: Status of the application
+          example: New
+        addedToAts:
+          type: boolean
+          description: Whether added to ATS
+          example: false
+        atsClientId:
+          type: number
+          description: Client number from ATS
+          example: ATS-001
+          nullable: true
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
+          nullable: true
+        aaiUpdated:
+          type: boolean
+          description: Updated by AAI
+          example: false
+    Request-GeneralProjectPatch:
+      title: Request to Partially Update General Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        generalProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - generalProjectId
-        - activityId
-        - queuePriority
-        - submissionType
-        - submittedAt
-        - projectName
-        - naturalDisaster
-        - addedToAts
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - aaiUpdated
       properties:
-        generalProjectId:
-          type: string
-          description: UUID for the general project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
         queuePriority:
           type: number
           description: Navigator assigned priority rank
@@ -5056,19 +5492,22 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
         projectName:
           type: string
           description: Name of the Project
           example: New Project
+        activityType:
+          type: string
+          description: Type of activity
+          example: General
         projectDescription:
           type: string
           description: Description of the project
@@ -5108,31 +5547,23 @@ components:
           example: http://geomark.com
           maxLength: 255
         naturalDisaster:
-          type: string
+          type: boolean
           description: Is it affected by a natural disaster?
-          example: 'No'
+          example: false
         projectLocationDescription:
           type: string
           description: Description of the location of the project
           example: Near the river
           maxLength: 4000
-        addedToAts:
-          type: boolean
-          description: Whether added to ATS
-          example: false
         atsClientId:
           type: number
           description: Client number from ATS
           example: ATS-001
           maxLength: 255
-        ltsaCompleted:
-          type: boolean
-          description: Ltsa completed
-          example: false
-        bcOnlineCompleted:
-          type: boolean
-          description: BC Online completed
-          example: false
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
         aaiUpdated:
           type: boolean
           description: Updated by AAI
@@ -5144,43 +5575,36 @@ components:
           maxLength: 4000
         assignedUserId:
           type: string
-          description: User ID assigned to the housing project
+          description: User ID assigned to the general project
           format: uuid
           example: 123e4567-e89b-12d3-a456-426614174000
         applicationStatus:
           type: string
           description: Status of the application
           example: New
-    Request-HousingProjectUpdate:
-      title: Request to Update Housing Project
+        region:
+          type: string
+          description: Region of the project
+          example: North
+        area:
+          type: string
+          description: Area of the project
+          example: North East
+        businessArea:
+          type: string
+          description: Business area code
+          example: FLNR
+    Request-HousingProjectPatch:
+      title: Request to Partially Update Housing Project
+      description: >-
+        All properties are optional; only the fields present in the request body are updated.
+        housingProjectId is supplied via the path parameter, not the body.
       type: object
-      required:
-        - housingProjectId
-        - activityId
-        - queuePriority
-        - submissionType
-        - submittedAt
-        - projectName
-        - hasRentalUnits
-        - financiallySupportedBc
-        - financiallySupportedIndigenous
-        - financiallySupportedNonProfit
-        - financiallySupportedHousingCoop
-        - naturalDisaster
-        - addedToAts
-        - ltsaCompleted
-        - bcOnlineCompleted
-        - aaiUpdated
       properties:
-        housingProjectId:
-          type: string
-          description: UUID for the housing project
-          format: uuid
-          example: d95f1de6-698b-4d9d-b938-487eb446ace8
-        activityId:
-          type: string
-          description: Activity ID
-          example: D95F1DE6
+        consentToFeedback:
+          type: boolean
+          description: Whether the applicant consented to being contacted for feedback
+          example: false
         queuePriority:
           type: number
           description: Navigator assigned priority rank
@@ -5191,15 +5615,14 @@ components:
           type: string
           description: The submission type of the project
           example: Guidance
-        submittedAt:
-          type: string
-          description: Date it was submitted
-          format: date-time
-          example: '2024-04-03T00:57:09.070Z'
         companyNameRegistered:
           type: string
           description: Name of the company connected to the project
           example: QW URBAN FOOD LTD.
+        companyIdRegistered:
+          type: string
+          description: Registered ID of the company connected to the project
+          example: BC1234567
         projectName:
           type: string
           description: Name of the Project
@@ -5300,9 +5723,9 @@ components:
           example: http://geomark.com
           maxLength: 255
         naturalDisaster:
-          type: string
+          type: boolean
           description: Is it affected by a natural disaster?
-          example: 'No'
+          example: false
         projectLocationDescription:
           type: string
           description: Description of the location of the project
@@ -5317,6 +5740,10 @@ components:
           description: Client number from ATS
           example: ATS-001
           maxLength: 255
+        atsEnquiryId:
+          type: number
+          description: Enquiry number from ATS
+          example: 1001
         ltsaCompleted:
           type: boolean
           description: Ltsa completed

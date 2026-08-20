@@ -6,22 +6,22 @@ import {
   getGeneralProjectStatisticsService,
   listGeneralProjectActivityIdsService,
   listGeneralProjectsService,
+  patchGeneralProjectService,
   searchGeneralProjects,
-  submitGeneralProjectDraftService,
-  updateGeneralProjectService
+  submitGeneralProjectDraftService
 } from '../services/generalProject.ts';
 import { Initiative } from '../utils/enums/application.ts';
 import { DraftCode } from '../utils/enums/projectCommon.ts';
 import { isTruthy } from '../utils/utils.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
   LocalContext,
+  PatchGeneralProjectRequest,
+  SearchGeneralProjectRequest,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -66,26 +66,23 @@ export const listGeneralProjectsController = async (_req: Request, res: Response
 };
 
 export const searchGeneralProjectsController = async (
-  req: Request<never, never, GeneralProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchGeneralProjectRequest>,
   res: Response<GeneralProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };
 
-export const updateGeneralProjectController = async (
-  req: Request<{ generalProjectId: string }, never, Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>>,
+export const patchGeneralProjectController = async (
+  req: Request<{ generalProjectId: string }, never, PatchGeneralProjectRequest>,
   res: Response
 ) => {
-  const response = await updateGeneralProjectService(
-    {
-      ...req.body
-    },
-    req.params.generalProjectId
-  );
+  const response = await patchGeneralProjectService(req.params.generalProjectId, req.body);
   res.status(200).json(response);
 };
 

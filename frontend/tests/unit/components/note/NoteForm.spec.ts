@@ -27,7 +27,7 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const listUsersSpy = vi.spyOn(userService, 'listUsers');
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
 const TEST_NOTE: Note = {
   noteId: '123',
@@ -108,7 +108,7 @@ afterEach(() => {
 // Currently, modal functionality hidden behind Primevue component Dialog
 describe('NoteForm', () => {
   it('renders', () => {
-    listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+    searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     const wrapper = shallowMount(NoteForm, wrapperSettings());
     expect(wrapper).toBeTruthy();
   });

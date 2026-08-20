@@ -1,7 +1,7 @@
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '../db/database.ts';
-import type { ElectrificationProject, ElectrificationProjectSearchParameters } from '../types/index.ts';
+import type { ElectrificationProject, SearchElectrificationProjectRequest } from '../types/index.ts';
 
 export class ElectrificationProjectRepository extends WritableRepository<
   PrismaTransactionClient['electrification_project']
@@ -10,7 +10,7 @@ export class ElectrificationProjectRepository extends WritableRepository<
     super(tx.electrification_project, principal, true);
   }
 
-  public async search(params: ElectrificationProjectSearchParameters): Promise<ElectrificationProject[]> {
+  public async search(params: SearchElectrificationProjectRequest): Promise<ElectrificationProject[]> {
     return await this.findMany({
       where: {
         AND: [

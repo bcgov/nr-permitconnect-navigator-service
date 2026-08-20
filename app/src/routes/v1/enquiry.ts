@@ -6,8 +6,8 @@ import {
   getEnquiryController,
   listEnquiriesController,
   listRelatedEnquiriesController,
-  searchEnquiriesController,
-  updateEnquiryController
+  patchEnquiryController,
+  searchEnquiriesController
 } from '../../controllers/enquiry.ts';
 import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
 import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
@@ -54,13 +54,13 @@ router.post(
   createEnquiryController
 );
 
-/** Updates an enquiry */
+/** Patches an enquiry */
 router.patch(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.UPDATE),
   hasAccess('enquiryId'),
-  enquiryValidator.updateEnquiry,
-  updateEnquiryController
+  enquiryValidator.patchEnquiry,
+  patchEnquiryController
 );
 
 /** Deletes an enquiry */

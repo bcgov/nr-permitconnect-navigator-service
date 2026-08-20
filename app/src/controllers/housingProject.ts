@@ -6,23 +6,23 @@ import {
   getHousingProjectStatisticsService,
   listHousingProjectActivityIdsService,
   listHousingProjectsService,
+  patchHousingProjectService,
   searchHousingProjects,
-  submitHousingProjectDraftService,
-  updateHousingProjectService
+  submitHousingProjectDraftService
 } from '../services/housingProject.ts';
-import { BasicResponse, Initiative } from '../utils/enums/application.ts';
+import { Initiative } from '../utils/enums/application.ts';
 import { DraftCode } from '../utils/enums/projectCommon.ts';
 import { isTruthy } from '../utils/utils.ts';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
+  SearchHousingProjectRequest,
   LocalContext,
+  PatchHousingProjectRequest,
   StatisticsFilters
 } from '../types/index.ts';
 
@@ -70,32 +70,23 @@ export const listHousingProjectsController = async (_req: Request, res: Response
 };
 
 export const searchHousingProjectsController = async (
-  req: Request<never, never, HousingProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchHousingProjectRequest>,
   res: Response<HousingProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };
 
-export const updateHousingProjectController = async (
-  req: Request<{ housingProjectId: string }, never, Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>>,
+export const patchHousingProjectController = async (
+  req: Request<{ housingProjectId: string }, never, PatchHousingProjectRequest>,
   res: Response
 ) => {
-  const response = await updateHousingProjectService(
-    {
-      ...req.body,
-      financiallySupported: [
-        req.body.financiallySupportedBc,
-        req.body.financiallySupportedIndigenous,
-        req.body.financiallySupportedNonProfit,
-        req.body.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES)
-    },
-    req.params.housingProjectId
-  );
+  const response = await patchHousingProjectService(req.params.housingProjectId, req.body);
   res.status(200).json(response);
 };
 

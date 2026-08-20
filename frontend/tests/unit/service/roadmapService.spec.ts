@@ -13,7 +13,7 @@ vi.mock('@/store', () => ({
 }));
 
 describe('roadmap service', () => {
-  const mockPut = vi.fn();
+  const mockPost = vi.fn();
   const mockGet = vi.fn();
 
   beforeEach(() => {
@@ -24,7 +24,7 @@ describe('roadmap service', () => {
     } as never);
 
     vi.mocked(appAxios).mockReturnValue({
-      put: mockPut,
+      post: mockPost,
       get: mockGet
     } as never);
   });
@@ -35,7 +35,7 @@ describe('roadmap service', () => {
         success: true
       };
 
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: response
       });
 
@@ -50,7 +50,7 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'housing/roadmap',
         {
           activityId: 'activity-1',
@@ -69,7 +69,7 @@ describe('roadmap service', () => {
     });
 
     it('normalizes string email fields', async () => {
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: {}
       });
 
@@ -83,7 +83,7 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'housing/roadmap',
         {
           activityId: 'activity-1',
@@ -99,7 +99,7 @@ describe('roadmap service', () => {
     });
 
     it('splits multiple email addresses', async () => {
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: {}
       });
 
@@ -111,7 +111,7 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'housing/roadmap',
         {
           activityId: 'activity-1',
@@ -126,7 +126,7 @@ describe('roadmap service', () => {
     });
 
     it('defaults cc to an empty array when not supplied', async () => {
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: {}
       });
 
@@ -138,7 +138,7 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'housing/roadmap',
         {
           activityId: 'activity-1',
@@ -153,7 +153,7 @@ describe('roadmap service', () => {
     });
 
     it('does not modify array email fields', async () => {
-      mockPut.mockResolvedValue({
+      mockPost.mockResolvedValue({
         data: {}
       });
 
@@ -167,7 +167,7 @@ describe('roadmap service', () => {
         }
       } as never);
 
-      expect(mockPut).toHaveBeenCalledWith(
+      expect(mockPost).toHaveBeenCalledWith(
         'housing/roadmap',
         {
           activityId: 'activity-1',
@@ -185,7 +185,7 @@ describe('roadmap service', () => {
     it('propagates errors', async () => {
       const error = new Error('send failed');
 
-      mockPut.mockRejectedValue(error);
+      mockPost.mockRejectedValue(error);
 
       await expect(
         sendRoadmap({
