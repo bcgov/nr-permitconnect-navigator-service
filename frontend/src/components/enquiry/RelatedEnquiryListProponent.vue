@@ -151,7 +151,7 @@ onBeforeMount(async () => {
       :header="t('relatedEnquiryListProponent.submittedDate')"
       :sortable="true"
       header-class="header-right"
-      class="!text-right"
+      class="text-right!"
     >
       <template #body="{ data }">
         {{ formatDate(data?.submittedAt) }}

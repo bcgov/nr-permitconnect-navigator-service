@@ -19,13 +19,13 @@ const { t } = useI18n();
 
 <template>
   <div class="grid grid-cols-3 gap-x-5 bg-[var(--p-bcblue-50)] p-5">
-    <Card class="mb-0">
+    <Card class="mb-0 pt-4">
       <template #content>
         <div class="mb-2">{{ t('basicProjectInfoCard.projectNavigator') }}</div>
         <h5 class="m-0 p-0 text-[var(--p-bcblue-950)]">{{ assignee }}</h5>
       </template>
     </Card>
-    <Card class="mb-0 card-bg-bcblue-50">
+    <Card class="mb-0 card-bg-bcblue-50 pt-4">
       <template #content>
         <div class="">
           <div class="mb-2">
@@ -39,7 +39,7 @@ const { t } = useI18n();
         </div>
       </template>
     </Card>
-    <Card class="mb-0 card-bg-bcblue-50">
+    <Card class="mb-0 card-bg-bcblue-50 pt-4">
       <template #content>
         <Button
           variant="link"

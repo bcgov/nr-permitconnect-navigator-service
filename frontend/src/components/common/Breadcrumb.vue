@@ -130,11 +130,13 @@ function getRouteNameFromFirstChild(record: RouteRecordRaw) {
   >
     <template #separator>/</template>
     <template #item="{ item }">
+      <!-- eslint-disable max-len -->
       <router-link
         v-if="item.to"
-        class="breadcrumb-link"
+        class="text-[var(--p-bcblue-850)] font-[family-name:'BC_Sans',sans-serif] font-normal no-underline hover:underline"
         :to="item.to"
       >
+        <!-- eslint-enable max-len -->
         <span v-tooltip.bottom="item.tooltip">
           <span v-tooltip.focus.bottom="item.tooltip">
             {{ item.label }}
@@ -143,7 +145,7 @@ function getRouteNameFromFirstChild(record: RouteRecordRaw) {
       </router-link>
       <span
         v-else
-        class="breadcrumb-current"
+        class="text-[var(--p-greyscale-900)] font-[family-name:'BC_Sans',sans-serif] font-bold"
       >
         {{ item.label }}
       </span>
@@ -155,26 +157,5 @@ function getRouteNameFromFirstChild(record: RouteRecordRaw) {
 .p-breadcrumb {
   border: none;
   padding: 0.125rem;
-}
-
-.p-breadcrumb {
-  border: none;
-  padding: 0.125rem;
-}
-
-.breadcrumb-link {
-  color: #255a90;
-  font-family: 'BC Sans', sans-serif;
-  font-weight: normal;
-  text-decoration: none;
-}
-.breadcrumb-link:hover {
-  text-decoration: underline;
-}
-
-.breadcrumb-current {
-  color: #2d2d2d;
-  font-family: 'BC Sans', sans-serif;
-  font-weight: bold;
 }
 </style>

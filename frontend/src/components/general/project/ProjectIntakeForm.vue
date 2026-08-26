@@ -326,7 +326,7 @@ watch(activeStep, () => {
     <ProjectIntakeAssistance v-if="getEditable && values?.contacts" />
 
     <Stepper :value="activeStep">
-      <StepList class="!mb-6">
+      <StepList class="mb-6!">
         <Step
           :value="0"
           as-child

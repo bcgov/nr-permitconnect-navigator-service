@@ -79,7 +79,9 @@ onBeforeMount(() => {
             </p>
           </div>
         </div>
-        <p class="col-span-12 mt-0 mb-0 enquiry-content">{{ enquiry.enquiryDescription }}</p>
+        <p class="col-span-12 mt-0 mb-0 whitespace-pre text-balance">
+          {{ enquiry.enquiryDescription }}
+        </p>
       </div>
     </template>
   </Card>
@@ -89,10 +91,5 @@ onBeforeMount(() => {
 p {
   margin-top: 0;
   margin-bottom: 0;
-}
-
-.enquiry-content {
-  white-space: pre;
-  text-wrap: balance;
 }
 </style>

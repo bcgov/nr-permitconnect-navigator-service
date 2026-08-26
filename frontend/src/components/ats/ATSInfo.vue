@@ -80,7 +80,7 @@ function onNewATSEnquiry() {
 </script>
 
 <template>
-  <div class="bg-[var(--p-bcblue-50)] rounded px-9 py-6">
+  <div class="bg-[var(--p-bcblue-50)] rounded-sm px-9 py-6">
     <div class="mb-4">
       <span class="section-header mr-2 mt-0 font-bold text-xl text-[var(--p-primary-950)]">
         {{ t('i.ats.atsInfo.atsHeader') }}
@@ -110,7 +110,7 @@ function onNewATSEnquiry() {
         </p>
         <a
           v-if="atsClientId"
-          class="hover-hand"
+          class="cursor-pointer"
           @click="atsUserDetailsModalVisible = true"
         >
           {{ atsClientId }}

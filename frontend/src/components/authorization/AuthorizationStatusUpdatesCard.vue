@@ -47,7 +47,7 @@ const { codeDefinition, codeDisplay, options } = useCodeStore();
         v-if="onHoldCode"
         class="mb-4"
         severity="warn"
-        :pt:content:class="['!px-2', '!py-2.5']"
+        :pt:content:class="['px-2!', 'py-2.5!']"
       >
         <div class="flex items-center gap-2">
           <font-awesome-icon
@@ -201,8 +201,3 @@ const { codeDefinition, codeDisplay, options } = useCodeStore();
     </div>
   </Panel>
 </template>
-<style lang="scss" scoped>
-.cursor-pointer {
-  cursor: pointer;
-}
-</style>

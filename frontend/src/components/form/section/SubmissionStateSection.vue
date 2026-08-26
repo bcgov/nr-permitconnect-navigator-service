@@ -58,7 +58,7 @@ onMounted(async () => {
 <template>
   <div
     ref="formRef"
-    class="bg-[var(--p-bcblue-50)] rounded px-9 py-6"
+    class="bg-[var(--p-bcblue-50)] rounded-sm px-9 py-6"
   >
     <h4 class="section-header mb-4 mt-0">
       {{ t('i.housing.project.projectForm.submissionStateHeader') }}

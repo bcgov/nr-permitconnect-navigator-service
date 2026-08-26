@@ -78,7 +78,7 @@ const errors = computed(() => useFormStore().getFormErrors.some((x) => x.tab ===
   </div>
   <Divider
     v-if="divider"
-    class="!mx-4"
+    class="mx-4!"
   />
 </template>
 

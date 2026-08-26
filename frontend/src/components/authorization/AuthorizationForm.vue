@@ -497,11 +497,12 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
         @click="onDelete"
       />
     </div>
-
+    <!-- eslint-disable max-len -->
     <div
       v-if="authorization?.permitId"
-      class="grid grid-cols-4 gap-x-6 gap-y-6 authorization-details-block pl-6 py-3 mt-8"
+      class="grid grid-cols-4 gap-x-6 gap-y-6 rounded-lg border-[var(--p-greyscale-200)] bg-[var(--p-greyscale-50)] pl-6 py-3 mt-8"
     >
+      <!-- eslint-enable max-len -->
       <div class="flex">
         <span class="font-bold mr-2">
           {{ t('authorization.authorizationForm.agency') }}
@@ -568,13 +569,3 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     </div>
   </Dialog>
 </template>
-
-<style lang="scss" scoped>
-h3 {
-  font-weight: bold;
-}
-.authorization-details-block {
-  background-color: var(--p-greyscale-50);
-  border-radius: 0.5rem;
-}
-</style>

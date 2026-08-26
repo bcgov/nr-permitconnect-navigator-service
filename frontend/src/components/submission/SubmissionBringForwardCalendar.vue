@@ -131,18 +131,3 @@ watchEffect(() => {
     </div>
   </div>
 </template>
-
-<style scoped lang="scss">
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
-
-thead {
-  background-color: #d3d3d3;
-}
-
-tr:nth-child(even) {
-  background-color: #f2f2f2;
-}
-</style>

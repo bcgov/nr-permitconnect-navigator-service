@@ -208,7 +208,7 @@ async function searchAtsUsers() {
       </div>
       <div
         v-if="hasSearched"
-        class="underline text-[var(--p-bcblue-900)] hover-hand"
+        class="underline text-[var(--p-bcblue-900)] cursor-pointer"
         @click="emit('atsUserLink:create')"
       >
         {{ t('i.ats.common.createATSClient') }}

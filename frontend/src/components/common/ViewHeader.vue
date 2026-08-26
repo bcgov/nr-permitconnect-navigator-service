@@ -36,18 +36,9 @@ watchEffect(() => {
     <h1>{{ header }}</h1>
     <img
       v-if="headerImg"
-      class="header-img"
+      class="header-img max-h-[105px] max-w-[137px] w-auto h-auto"
       :src="headerImg"
       alt="Header image"
     />
   </div>
 </template>
-
-<style lang="scss" scoped>
-.header-img {
-  max-height: 105px;
-  max-width: 137px;
-  width: auto;
-  height: auto;
-}
-</style>

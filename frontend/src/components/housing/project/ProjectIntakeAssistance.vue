@@ -88,7 +88,9 @@ async function onAssistanceRequest() {
           icon="fa-solid fa-circle-question"
         />
       </button>
-      <div class="assistance-modal">
+      <!-- eslint-disable max-len -->
+      <div class="overflow-hidden relative bottom-0 right-0 p-4 bg-white border-[3px] border-[var(--p-gold-950)] w-80">
+        <!-- eslint-enable max-len -->
         <div class="font-bold mb-4">{{ t('projectIntakeAssistance.needAssistance') }}</div>
         <div>
           {{ t('projectIntakeAssistance.needAssistanceMessage') }}
@@ -137,19 +139,6 @@ async function onAssistanceRequest() {
     translate: 20rem;
     transition: all 0.75s ease-out;
   }
-}
-
-.assistance-modal {
-  overflow: hidden;
-  position: relative;
-  bottom: 0rem;
-  right: 0rem;
-  padding: 1rem;
-  background-color: white;
-  border-style: solid;
-  border-color: #fdb913;
-  border-width: 3px;
-  width: 20rem;
 }
 
 :deep(.assistance-tab:focus-visible) {

@@ -10,7 +10,7 @@ const { authorizationNotes = undefined } = defineProps<{
 </script>
 
 <template>
-  <div class="gap-x-6 gap-y-6 px-7 mt-4 py-10 border-color px-4 py-5 border border-[0.063rem] rounded-lg">
+  <div class="gap-x-6 gap-y-6 px-7 mt-4 py-10 border-[var(--p-greyscale-200)] px-4 py-5 border-[0.063rem] rounded-lg">
     <div class="mt-4">
       <div v-if="authorizationNotes && authorizationNotes.length > 0">
         <div

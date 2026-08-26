@@ -60,7 +60,7 @@ const toggle = (event: Event) => {
     >
       <font-awesome-icon
         icon="fa-solid fa-user"
-        class="ml-2 app-primary-color no-click"
+        class="ml-2 app-primary-color pointer-events-none"
       />
       {{ getProfile?.name ?? getProfile?.display_name }}
     </Button>
