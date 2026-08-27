@@ -4,6 +4,7 @@ import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
 import { mount } from '@vue/test-utils';
 
+import { Select } from '@/components/form';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import i18n from '@/i18n';
 import { StorageKey } from '@/utils/enums/application';
@@ -59,7 +60,6 @@ const wrapperSettings = (props = {}) => ({
       Message: { template: '<div class="stub-message"><slot /></div>' },
       DatePicker: true,
       InputText: true,
-      Select: true,
       TextArea: true,
       Tooltip: true
     }
@@ -148,9 +148,6 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
 
       const allInputs = [
         wrapper.find('[name="statusLastVerified"]'),
-        wrapper.find('[name="state"]'),
-        wrapper.find('[name="stage"]'),
-        wrapper.find('[name="needed"]'),
         wrapper.find('[name="submittedDate"]'),
         wrapper.find('[name="statusLastChanged"]'),
         wrapper.find('[name="decisionDate"]'),
@@ -163,6 +160,16 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
       allInputs.forEach((input) => {
         expect(input.attributes('disabled')).toBe('true');
       });
+
+      // Check Select components separately
+      const selects = wrapper.findAllComponents(Select);
+      const stateSelect = selects.find((s) => s.props('name') === 'state');
+      const stageSelect = selects.find((s) => s.props('name') === 'stage');
+      const neededSelect = selects.find((s) => s.props('name') === 'needed');
+
+      expect(stateSelect?.props('disabled')).toBe(true);
+      expect(stageSelect?.props('disabled')).toBe(true);
+      expect(neededSelect?.props('disabled')).toBe(true);
     });
 
     it('disables specific fields when peachIntegratedAuthType is true', () => {
@@ -175,12 +182,18 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
         })
       );
 
-      expect(wrapper.find('[name="state"]').attributes('disabled')).toBe('true');
-      expect(wrapper.find('[name="stage"]').attributes('disabled')).toBe('true');
+      const selects = wrapper.findAllComponents(Select);
+      const stateSelect = selects.find((s) => s.props('name') === 'state');
+      const stageSelect = selects.find((s) => s.props('name') === 'stage');
+      const neededSelect = selects.find((s) => s.props('name') === 'needed');
+
+      expect(stateSelect?.props('disabled')).toBe(true);
+      expect(stageSelect?.props('disabled')).toBe(true);
+      expect(neededSelect?.props('disabled')).toBe(false);
+
       expect(wrapper.find('[name="submittedDate"]').attributes('disabled')).toBe('true');
       expect(wrapper.find('[name="statusLastChanged"]').attributes('disabled')).toBe('true');
       expect(wrapper.find('[name="decisionDate"]').attributes('disabled')).toBe('true');
-      expect(wrapper.find('[name="needed"]').attributes('disabled')).toBe('false');
     });
 
     it('disables the "needed" field only when both peach integrated props are true', () => {
@@ -193,7 +206,36 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
         })
       );
 
-      expect(wrapper.find('[name="needed"]').attributes('disabled')).toBe('true');
+      const selects = wrapper.findAllComponents(Select);
+      const neededSelect = selects.find((s) => s.props('name') === 'needed');
+
+      expect(neededSelect?.props('disabled')).toBe(true);
+    });
+  });
+
+  describe('renders all mandatory fields', () => {
+    it('renders Select for needed with correct name and required prop', () => {
+      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+
+      const selects = wrapper.findAllComponents(Select);
+      const neededSelect = selects.find(
+        (select: { props: (arg0: string) => string }) => select.props('name') === 'needed'
+      );
+
+      expect(neededSelect).toBeTruthy();
+      expect(neededSelect?.props('required')).toBe(true);
+    });
+  });
+
+  describe('required fields with asterisks', () => {
+    it('displays asterisk for needed field', () => {
+      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+
+      const labels = wrapper.findAll('label');
+      const neededLabel = labels.find((label) => label.attributes('for') === 'needed');
+      const asterisk = neededLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
     });
   });
 });

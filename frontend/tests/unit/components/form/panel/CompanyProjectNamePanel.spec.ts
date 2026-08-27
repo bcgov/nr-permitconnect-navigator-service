@@ -241,4 +241,28 @@ describe('CompanyProjectNamePanel', () => {
       expect(formStore.setFormError).toHaveBeenLastCalledWith('CompanyProjectNamePanel', 0, false);
     });
   });
+
+  describe('required fields with asterisks', () => {
+    it('displays asterisk in label for projectName', () => {
+      const { wrapper } = mountCompanyProjectNamePanel();
+
+      const labels = wrapper.findAll('label');
+      const projectNameLabel = labels.find((label) => label.attributes('for') === 'companyProjectName.projectName');
+      const asterisk = projectNameLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
+    });
+
+    it('displays asterisk in label for companyNameRegistered when initiative is ELECTRIFICATION', () => {
+      const { wrapper } = mountCompanyProjectNamePanel({ initiative: Initiative.ELECTRIFICATION });
+
+      const labels = wrapper.findAll('label');
+      const companyNameLabel = labels.find(
+        (label) => label.attributes('for') === 'companyProjectName.companyNameRegistered'
+      );
+      const asterisk = companyNameLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
+    });
+  });
 });
