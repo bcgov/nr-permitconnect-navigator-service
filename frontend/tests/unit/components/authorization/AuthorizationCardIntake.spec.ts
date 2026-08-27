@@ -2,9 +2,9 @@ import { createTestingPinia } from '@pinia/testing';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
-import Tooltip from 'primevue/tooltip';
-import { shallowMount } from '@vue/test-utils';
+import { mountWithFormContext } from '../../../mountWithFormContext';
 
+import { InputText, Select } from '@/components/form';
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import { sourceSystemKindService } from '@/services';
 import { SYSTEM_ID } from '@/utils/constants/application';
@@ -27,8 +27,13 @@ const sampleSourceSystemKind: SourceSystemKind = {
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
-    t: vi.fn()
-  })
+    t: (key: string) => key
+  }),
+  createI18n: vi.fn(() => ({
+    global: {
+      t: (key: string) => key
+    }
+  }))
 }));
 
 vi.mock('vue-router', () => ({
@@ -38,29 +43,26 @@ vi.mock('vue-router', () => ({
   })
 }));
 
-const wrapperSettings = () => ({
-  props: {
-    sourceSystemKinds: [sampleSourceSystemKind]
+const wrapperSettings = (options: { editable?: boolean } = {}) => ({
+  fields: ['permitTracking'],
+  componentProps: {
+    sourceSystemKinds: [sampleSourceSystemKind],
+    editable: options.editable ?? true
   },
-  global: {
-    plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
+  plugins: [
+    () =>
+      createTestingPinia({
+        initialState: {
+          auth: {
+            user: {}
           }
-        }),
-      PrimeVue,
-      ConfirmationService,
-      ToastService
-    ],
-    stubs: ['font-awesome-icon'],
-    directives: {
-      Tooltip: Tooltip
-    }
-  }
+        }
+      }),
+    PrimeVue,
+    ConfirmationService,
+    ToastService
+  ],
+  stubs: ['font-awesome-icon']
 });
 
 beforeEach(() => {
@@ -84,8 +86,50 @@ afterEach(() => {
 });
 
 describe('AuthorizationCardIntake', () => {
-  it('renders component', async () => {
-    const wrapper = shallowMount(AuthorizationCardIntake, wrapperSettings());
+  it('renders component', () => {
+    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
     expect(wrapper).toBeTruthy();
+  });
+
+  it('renders a non-empty translated header', () => {
+    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+
+    expect(wrapper.find('h3').text().trim().length).toBeGreaterThan(0);
+  });
+});
+
+describe('renders all mandatory fields', () => {
+  it('renders Select for authorizationType with correct name', () => {
+    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+
+    const selects = wrapper.findAllComponents(Select);
+    const authTypeSelect = selects.find(
+      (select: { props: (arg0: string) => string }) => select.props('name') === 'authorizationType'
+    );
+
+    expect(authTypeSelect).toBeTruthy();
+  });
+
+  it('renders InputText for issuedPermitId with correct name', () => {
+    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+
+    const inputTexts = wrapper.findAllComponents(InputText);
+    const issuedPermitIdInput = inputTexts.find(
+      (input: { props: (arg0: string) => string }) => input.props('name') === 'issuedPermitId'
+    );
+
+    expect(issuedPermitIdInput).toBeTruthy();
+  });
+});
+
+describe('required fields with asterisks', () => {
+  it('displays asterisk for authorizationType field', () => {
+    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+
+    const labels = wrapper.findAll('label');
+    const authTypeLabel = labels.find((label) => label.attributes('for') === 'authorizationType');
+    const asterisk = authTypeLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+    expect(asterisk).toBeTruthy();
   });
 });
