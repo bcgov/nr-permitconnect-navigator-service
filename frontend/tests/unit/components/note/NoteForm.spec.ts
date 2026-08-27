@@ -106,7 +106,7 @@ beforeEach(() => {
   );
 
   vi.clearAllMocks();
-  listUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+  searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
 });
 
 afterEach(() => {
@@ -137,6 +137,7 @@ describe('renders all mandatory fields', () => {
     const titleInput = wrapper.findComponent(InputText);
 
     expect(titleInput.props('name')).toBe('title');
+    expect(titleInput.props('required')).toBe(true);
   });
 
   it('renders TextArea for note with correct name', () => {

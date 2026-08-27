@@ -149,4 +149,16 @@ describe('AppliedPermitsIntakeCard', () => {
       expect(formStore.setFormError).toHaveBeenCalledWith('AppliedPermitsCard', 0, false);
     });
   });
+
+  describe('required fields with asterisks', () => {
+    it('displays asterisk in header for the required card', () => {
+      const { wrapper } = mountAppliedPermitsIntakeCard();
+
+      const header = wrapper.find('h6');
+      const spans = header.findAll('span');
+      const asterisk = spans.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
+    });
+  });
 });

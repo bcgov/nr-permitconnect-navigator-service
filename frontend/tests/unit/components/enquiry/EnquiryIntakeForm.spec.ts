@@ -122,5 +122,16 @@ describe('EnquiryIntakeForm', () => {
 
       expect(wrapper.isVisible()).toBeTruthy();
     });
+
+    it('renders TextAreaCard with required prop', async () => {
+      const settings = wrapperSettings();
+
+      const wrapper = mount(EnquiryIntakeForm, settings);
+      await flushPromises();
+
+      const textAreaCard = wrapper.findComponent({ name: 'TextAreaCard' });
+      expect(textAreaCard.exists()).toBe(true);
+      expect(textAreaCard.props('required')).toBe(true);
+    });
   });
 });
