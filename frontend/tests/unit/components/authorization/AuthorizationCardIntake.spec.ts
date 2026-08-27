@@ -1,7 +1,3 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 import { mountWithFormContext } from '../../../mountWithFormContext';
 
 import { InputText, Select } from '@/components/form';
@@ -32,7 +28,8 @@ vi.mock('vue-i18n', () => ({
   createI18n: vi.fn(() => ({
     global: {
       t: (key: string) => key
-    }
+    },
+    install: vi.fn()
   }))
 }));
 
@@ -44,24 +41,11 @@ vi.mock('vue-router', () => ({
 }));
 
 const wrapperSettings = (options: { editable?: boolean } = {}) => ({
-  fields: ['permitTracking'],
   componentProps: {
     sourceSystemKinds: [sampleSourceSystemKind],
     editable: options.editable ?? true
   },
-  plugins: [
-    () =>
-      createTestingPinia({
-        initialState: {
-          auth: {
-            user: {}
-          }
-        }
-      }),
-    PrimeVue,
-    ConfirmationService,
-    ToastService
-  ],
+  piniaState: { auth: { user: {} } },
   stubs: ['font-awesome-icon']
 });
 
