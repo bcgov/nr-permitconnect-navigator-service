@@ -150,4 +150,16 @@ describe('ResidentialUnitsPanel', () => {
       expect(formStore.setFormError).toHaveBeenLastCalledWith('ResidentialUnitsPanel', 0, false);
     });
   });
+
+  describe('required fields with asterisks', () => {
+    it('displays asterisk in label for hasRentalUnits', () => {
+      const { wrapper } = mountResidentialUnitsPanel();
+
+      const labels = wrapper.findAll('label');
+      const hasRentalUnitsLabel = labels.find((label) => label.attributes('for') === 'units.hasRentalUnits');
+      const asterisk = hasRentalUnitsLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
+    });
+  });
 });

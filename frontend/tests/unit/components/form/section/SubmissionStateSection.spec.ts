@@ -213,6 +213,28 @@ describe('SubmissionStateSection', () => {
     });
   });
 
+  describe('mandatory fields', () => {
+    it('sets required prop on queuePriority for projects', () => {
+      const { wrapper } = mountSubmissionStateSection({ isEnquiry: false });
+
+      const selects = wrapper.findAllComponents(Select);
+      const queuePriority = selects.find((s) => s.props('name') === 'submissionState.queuePriority')!;
+
+      expect(queuePriority.props('required')).toBe(true);
+    });
+
+    it('sets required prop on region and area for GENERAL initiative projects', () => {
+      const { wrapper } = mountSubmissionStateSection({ isEnquiry: false, initiative: Initiative.GENERAL });
+
+      const selects = wrapper.findAllComponents(Select);
+      const region = selects.find((s) => s.props('name') === 'submissionState.region')!;
+      const area = selects.find((s) => s.props('name') === 'submissionState.area')!;
+
+      expect(region.props('required')).toBe(true);
+      expect(area.props('required')).toBe(true);
+    });
+  });
+
   describe('form error reporting', () => {
     it('reports an error to the store when vee-validate has one on its field', async () => {
       const { formStore, form } = mountSubmissionStateSection({ tab: 3 });

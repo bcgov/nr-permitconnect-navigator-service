@@ -646,4 +646,25 @@ describe('EnquiryForm.vue', () => {
       expect(atsInfo.props('phoneNumber')).toBe('555-1234');
     });
   });
+
+  describe('required fields with asterisks', () => {
+    it('displays asterisk for enquiryDescription field in header', async () => {
+      const wrapper = mount(EnquiryForm, wrapperSettings());
+      await flushPromises();
+      await nextTick();
+
+      // Find the h3 containing the enquiry detail header and verify asterisk
+      const headers = wrapper.findAll('h3');
+      let foundAsterisk = false;
+      for (const header of headers) {
+        const spans = header.findAll('span');
+        if (spans.some((span) => span.text() === '*')) {
+          foundAsterisk = true;
+          break;
+        }
+      }
+
+      expect(foundAsterisk).toBe(true);
+    });
+  });
 });
