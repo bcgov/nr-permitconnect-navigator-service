@@ -3,14 +3,21 @@ import {
   createEnquiryService,
   getEnquiryService,
   listEnquiriesService,
+  patchEnquiryService,
   listRelatedEnquiriesService,
-  searchEnquiriesService,
-  updateEnquiryService
+  searchEnquiriesService
 } from '#src/services/enquiry';
 import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
+import type {
+  CreateEnquiryResponse,
+  Enquiry,
+  EnquiryIntake,
+  LocalContext,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '#types';
 
 export const createEnquiryController = async (
   req: Request<never, never, EnquiryIntake>,

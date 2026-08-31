@@ -4,7 +4,7 @@ import { generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
-import { Initiative } from '#src/utils/enums/application';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
@@ -15,7 +15,9 @@ import type {
   HousingProject,
   HousingProjectIntake,
   HousingProjectStatistics,
-  Maybe
+  Maybe,
+  PatchHousingProjectRequest,
+  SearchHousingProjectRequest
 } from '#types';
 
 export const createHousingProjectService = async (

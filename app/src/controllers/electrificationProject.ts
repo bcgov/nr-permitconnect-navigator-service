@@ -8,8 +8,7 @@ import {
   listElectrificationProjectsService,
   patchElectrificationProjectService,
   searchElectrificationProjects,
-  submitElectrificationProjectDraftService,
-  updateElectrificationProjectService
+  submitElectrificationProjectDraftService
 } from '#src/services/electrificationProject';
 import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';

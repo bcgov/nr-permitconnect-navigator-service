@@ -11,15 +11,22 @@ import {
   getEnquiryController,
   listEnquiriesController,
   listRelatedEnquiriesController,
-  searchEnquiriesController,
-  updateEnquiryController
+  patchEnquiryController,
+  searchEnquiriesController
 } from '#src/controllers/enquiry';
 import * as activityService from '#src/services/activity';
 import * as enquiryService from '#src/services/enquiry';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
+import type {
+  CreateEnquiryResponse,
+  Enquiry,
+  EnquiryIntake,
+  LocalContext,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '#types';
 
 vi.mock('config');
 

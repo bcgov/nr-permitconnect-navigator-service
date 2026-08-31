@@ -8,8 +8,7 @@ import {
   listGeneralProjectsService,
   patchGeneralProjectService,
   searchGeneralProjects,
-  submitGeneralProjectDraftService,
-  updateGeneralProjectService
+  submitGeneralProjectDraftService
 } from '#src/services/generalProject';
 import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';

@@ -15,13 +15,13 @@ import {
   getEnquiryService,
   listEnquiriesService,
   listRelatedEnquiriesService,
-  searchEnquiriesService,
-  updateEnquiryService
+  patchEnquiryService,
+  searchEnquiriesService
 } from '#src/services/enquiry';
 import { Initiative } from '#src/utils/enums/application';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
-import type { EnquirySearchParameters } from '#types';
+import type { SearchEnquiriesRequest } from '#types';
 
 vi.mock('config');
 

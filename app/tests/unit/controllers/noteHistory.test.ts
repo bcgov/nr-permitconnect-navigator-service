@@ -4,7 +4,7 @@ import {
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
-  updateNoteHistoryController
+  patchNoteHistoryController
 } from '#src/controllers/noteHistory';
 import * as noteHistoryService from '#src/services/noteHistory';
 import { Resource } from '#src/utils/enums/application';
@@ -12,7 +12,7 @@ import { BringForwardType } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { LocalContext, NoteHistory } from '#types';
+import type { LocalContext, NoteHistory, PatchNoteHistoryRequest } from '#types';
 
 vi.mock('config');
 

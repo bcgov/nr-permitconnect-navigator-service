@@ -5,7 +5,14 @@ import { emailBringForwardNotification } from '#src/domains/noteHistory';
 import { GroupName } from '#src/utils/enums/application';
 import { BringForwardType } from '#src/utils/enums/projectCommon';
 
-import type { BringForward, CurrentAuthorization, CurrentContext, NoteHistory, NoteHistoryBase } from '#types';
+import type {
+  BringForward,
+  CurrentAuthorization,
+  CurrentContext,
+  NoteHistory,
+  NoteHistoryBase,
+  PatchNoteHistoryRequest
+} from '#types';
 import type { Initiative, Resource } from '#src/utils/enums/application';
 
 /**
@@ -126,7 +133,7 @@ export const patchNoteHistoryService = async (
   noteHistoryId: string,
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  data: Omit<PatchNoteHistoryRequest, 'note' | 'resource'>,
+  data: Omit<PatchNoteHistoryRequest, 'noteHistoryId' | 'note' | 'resource'>,
   noteStr: string | undefined,
   resource: Resource
 ): Promise<NoteHistory> => {

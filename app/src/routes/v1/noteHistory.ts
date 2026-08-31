@@ -5,7 +5,7 @@ import {
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
-  updateNoteHistoryController
+  patchNoteHistoryController
 } from '#src/controllers/noteHistory';
 import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';

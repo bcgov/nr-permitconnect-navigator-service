@@ -15,7 +15,9 @@ import type {
   GeneralProject,
   GeneralProjectIntake,
   GeneralProjectStatistics,
-  Maybe
+  Maybe,
+  PatchGeneralProjectRequest,
+  SearchGeneralProjectRequest
 } from '#types';
 
 export const createGeneralProjectService = async (

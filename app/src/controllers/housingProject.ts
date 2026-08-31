@@ -8,10 +8,9 @@ import {
   listHousingProjectsService,
   patchHousingProjectService,
   searchHousingProjects,
-  submitHousingProjectDraftService,
-  updateHousingProjectService
+  submitHousingProjectDraftService
 } from '#src/services/housingProject';
-import { BasicResponse, Initiative } from '#src/utils/enums/application';
+import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';
 import { isTruthy } from '#src/utils/utils';
 

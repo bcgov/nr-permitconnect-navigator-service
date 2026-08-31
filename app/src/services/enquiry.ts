@@ -3,8 +3,15 @@ import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enqu
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
-import type { CurrentAuthorization, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '#types';
+import type {
+  CreateEnquiryResponse,
+  CurrentAuthorization,
+  CurrentContext,
+  Enquiry,
+  EnquiryIntake,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**

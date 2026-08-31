@@ -1,8 +1,10 @@
+import { Prisma } from '@prisma/client';
+
+import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';
-import { jsonToPrismaInputJson } from '../db/utils/utils.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
-import type { HousingProject, HousingProjectSearchParameters } from '#types';
+import type { HousingProject, PatchHousingProjectRequest, SearchHousingProjectRequest } from '#types';
 
 export class HousingProjectRepository extends WritableRepository<PrismaTransactionClient['housing_project']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

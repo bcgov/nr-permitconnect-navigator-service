@@ -13,7 +13,9 @@ import type {
   ElectrificationProject,
   ElectrificationProjectIntake,
   ElectrificationProjectStatistics,
-  Maybe
+  Maybe,
+  PatchElectrificationProjectRequest,
+  SearchElectrificationProjectRequest
 } from '#types';
 
 export const createElectrificationProjectService = async (

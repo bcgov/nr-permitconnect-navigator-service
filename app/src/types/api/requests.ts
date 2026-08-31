@@ -1,9 +1,28 @@
 import type { ParsedQs } from 'qs';
-import type { DeleteRequestDTO, GetRequestDTO, ListRequestDTO, ResourceSchemaConfig, UpsertRequestDTO } from './dto.ts';
-import type { Permit, PermitBase, Stamps } from './resources.ts';
+import type {
+  CreateRequestDTO,
+  DeleteRequestDTO,
+  GetRequestDTO,
+  ListRequestDTO,
+  PatchRequestDTO,
+  ResourceSchemaConfig,
+  UpsertRequestDTO
+} from './dto.ts';
+import type {
+  ContactBase,
+  ElectrificationProjectBase,
+  EnquiryBase,
+  GeneralProjectBase,
+  HousingProjectBase,
+  NoteHistoryBase,
+  Permit,
+  PermitBase,
+  Stamps
+} from './resources.ts';
+import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes.ts';
 import type { PaginationOptions } from '#src/types/common';
-import type { Nullable } from '#src/types/utils';
-import type { GroupName, Initiative } from '#src/utils/enums/application';
+import type { Nullable, PartialFields } from '#src/types/utils';
+import type { GroupName, Initiative, Resource } from '#src/utils/enums/application';
 import type { EmailTemplate } from '#src/utils/templates';
 
 /**

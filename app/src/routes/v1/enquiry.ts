@@ -6,8 +6,8 @@ import {
   getEnquiryController,
   listEnquiriesController,
   listRelatedEnquiriesController,
-  searchEnquiriesController,
-  updateEnquiryController
+  patchEnquiryController,
+  searchEnquiriesController
 } from '#src/controllers/enquiry';
 import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';

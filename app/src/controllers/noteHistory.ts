@@ -3,13 +3,12 @@ import {
   deleteNoteHistoryService,
   listBringForwardsService,
   listNoteHistoriesService,
-  updateNoteHistoryService
+  patchNoteHistoryService
 } from '#src/services/noteHistory';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
-import type { BringForward, LocalContext, NoteHistory } from '#types';
-import type { Resource } from '#src/utils/enums/application';
+import type { BringForward, LocalContext, NoteHistory, PatchNoteHistoryRequest } from '#types';
 import type { BringForwardType } from '#src/utils/enums/projectCommon';
 
 export const createNoteHistoryController = async (
