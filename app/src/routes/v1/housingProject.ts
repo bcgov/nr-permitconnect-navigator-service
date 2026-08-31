@@ -64,7 +64,12 @@ router.get(
 router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
-router.post('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE), upsertHousingProjectDraftController);
+router.post(
+  '/draft',
+  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
+  housingProjectValidator.upsertDraft,
+  upsertHousingProjectDraftController
+);
 
 /** Creates or updates an intake and set status to Submitted */
 router.post(
