@@ -13,7 +13,14 @@ import { Problem } from '#src/utils/index';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { IntakePermitRequest, ListPermitsOptions, LocalContext, Permit, SearchPermitsOptions } from '#types';
+import type {
+  IntakePermitRequest,
+  ListPermitsRequest,
+  LocalContext,
+  Permit,
+  SearchPermitsRequest,
+  UpsertPermitBodyRequest
+} from '#types';
 
 vi.mock('config');
 
@@ -83,7 +90,7 @@ describe('intakePermitsController', () => {
           activityId: '123',
           permitTypeId: 1,
           trackingId: '123',
-          submittedDate: new Date().toISOString()
+          submittedDate: new Date()
         }
       ] satisfies IntakePermitRequest[]
     } as unknown as Request<never, never, IntakePermitRequest[]>;
@@ -104,8 +111,8 @@ describe('listPermitsController', () => {
 
   it('calls the service with options and context then responds 200', async () => {
     const req = {
-      query: { includeNotes: 'true' }
-    } as unknown as Request<never, never, never, Partial<ListPermitsOptions>>;
+      query: { includeNotes: true }
+    } as unknown as Request<never, never, never, ListPermitsRequest>;
 
     listSpy.mockResolvedValue([TEST_PERMIT_1]);
 
@@ -128,7 +135,7 @@ describe('searchPermitsController', () => {
   it('calls the service and responds 200', async () => {
     const req = {
       query: {}
-    } as unknown as Request<never, never, never, SearchPermitsOptions>;
+    } as unknown as Request<never, never, never, SearchPermitsRequest>;
 
     searchSpy.mockResolvedValue({ permits: [TEST_PERMIT_1], totalRecords: 1 } as never);
 
@@ -148,7 +155,7 @@ describe('searchPermitsController', () => {
   it('throws Problem 400 when initiative is PCNS', async () => {
     const req = {
       query: {}
-    } as unknown as Request<never, never, never, SearchPermitsOptions>;
+    } as unknown as Request<never, never, never, SearchPermitsRequest>;
 
     res.locals.currentContext = {
       ...TEST_CURRENT_CONTEXT,
@@ -172,7 +179,7 @@ describe('upsertPermitController', () => {
         permitType: undefined,
         permitNote: undefined
       }
-    } as unknown as Request<never, never, Permit>;
+    } as unknown as Request<never, never, UpsertPermitBodyRequest>;
 
     upsertSpy.mockResolvedValue(TEST_PERMIT_1);
 

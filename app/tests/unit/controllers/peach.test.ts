@@ -3,7 +3,7 @@ import * as peachService from '#src/services/peach';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { PermitTracking } from '#types';
+import type { GetPeachSummaryRequest, PermitTracking } from '#types';
 
 vi.mock('config');
 
@@ -59,7 +59,7 @@ describe('getPeachSummaryController', () => {
 
     const req = {
       body: { permitTrackings }
-    } as unknown as Request<never, never, { permitTrackings: PermitTracking[] }, never>;
+    } as unknown as Request<never, never, GetPeachSummaryRequest, never>;
 
     await getPeachSummaryController(req, res as unknown as Response);
 

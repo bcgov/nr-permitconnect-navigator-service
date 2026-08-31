@@ -152,11 +152,8 @@ describe('draft service', () => {
   describe('upsertDraftService', () => {
     it('updates existing draft when draftId is provided', async () => {
       const draftData = {
-        draftId: TEST_HOUSING_DRAFT.draftId,
-        activityId: TEST_HOUSING_DRAFT.activityId,
-        draftCode: TEST_HOUSING_DRAFT.draftCode,
         data: { updated: 'data' } as Prisma.JsonValue
-      } as DraftBase;
+      };
 
       mockRepos.draft.update.mockResolvedValue(TEST_HOUSING_DRAFT as never);
 
@@ -170,9 +167,8 @@ describe('draft service', () => {
 
       expect(mockRepos.draft.update).toHaveBeenCalledTimes(1);
       expect(mockRepos.draft.update).toHaveBeenCalledWith(
-        { draftId: draftData.draftId },
+        { draftId: TEST_HOUSING_DRAFT.draftId },
         expect.objectContaining({
-          draftCode: draftData.draftCode,
           data: expect.any(Object)
         })
       );

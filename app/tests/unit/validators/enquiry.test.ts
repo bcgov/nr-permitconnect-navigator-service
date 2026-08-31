@@ -14,6 +14,10 @@ function buildApp() {
     res.status(200).json(req.body)
   );
 
+  app.get('/:enquiryId', enquiryValidator.getEnquiry, (req: Request, res: Response) =>
+    res.status(200).json(req.params)
+  );
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   app.use((err: Problem, req: Request, res: Response, next: NextFunction) => {
     res.status(err.status || 500).json({ detail: err.detail });
@@ -45,5 +49,19 @@ describe('patchEnquiry validator', () => {
   it('accepts addedToAts as a boolean when supplied', async () => {
     const res = await request(app).patch(validParams).send({ addedToAts: true });
     expect(res.status).toBe(200);
+  });
+});
+
+describe('getEnquiry validator', () => {
+  const app = buildApp();
+
+  it('passes with a valid uuid enquiryId', async () => {
+    const res = await request(app).get(validParams);
+    expect(res.status).toBe(200);
+  });
+
+  it('rejects a non-uuid enquiryId', async () => {
+    const res = await request(app).get('/not-a-uuid');
+    expect(res.status).toBe(422);
   });
 });

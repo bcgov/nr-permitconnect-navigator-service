@@ -154,9 +154,9 @@ describe('listRelatedEnquiriesController', () => {
 describe('searchEnquiriesController', () => {
   const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiriesService');
 
-  it('coerces includeUser, passes the initiative then responds 200', async () => {
+  it('passes the body and initiative then responds 200', async () => {
     const req = {
-      body: { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: 'true' }
+      body: { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true }
     } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
 

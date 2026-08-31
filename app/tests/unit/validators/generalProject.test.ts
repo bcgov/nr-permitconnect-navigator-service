@@ -45,7 +45,7 @@ describe('patchGeneralProject validator', () => {
   it('rejects addedToAts, which does not exist on general_project', async () => {
     const res = await request(app).patch(validParams).send({ addedToAts: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/"addedToAts" is not allowed/);
+    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'addedToAts'/);
   });
 
   it('passes with atsClientId and atsEnquiryId', async () => {

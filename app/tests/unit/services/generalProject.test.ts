@@ -108,9 +108,9 @@ describe('generalProject service', () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValueOnce(mockDbResponse as never);
 
       const filters = {
-        dateFrom: '2024-01-01',
-        dateTo: '2024-12-31',
-        monthYear: '2024-01',
+        dateFrom: new Date('2024-01-01'),
+        dateTo: new Date('2024-12-31'),
+        monthYear: new Date('2024-01-01'),
         userId: 'user-123'
       };
 
@@ -298,7 +298,7 @@ describe('generalProject service', () => {
 
   describe('patchGeneralProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { generalProjectId: TEST_GENERAL_PROJECT_1.generalProjectId, submittedAt: new Date() };
+      const updateData = { projectName: 'Updated Name' };
       mockRepos.generalProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.generalProject.findFirstOrThrow.mockResolvedValueOnce(TEST_GENERAL_PROJECT_1 as never);
 

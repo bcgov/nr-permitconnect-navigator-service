@@ -4,7 +4,7 @@ import * as atsExternal from '#src/external/ats';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, LocalContext } from '#types';
+import type { CreateAtsClientRequest, CreateAtsEnquiryRequest, LocalContext, SearchAtsUsersRequest } from '#types';
 
 vi.mock('config');
 
@@ -30,8 +30,8 @@ describe('createAtsClientController', () => {
     const mockResp = { status: 201, data: { clientId: 'ats-123' } };
     vi.spyOn(atsExternal, 'createAtsClient').mockResolvedValueOnce(mockResp);
 
-    const body: AtsClientResource = { clientName: 'Test Client' } as unknown as AtsClientResource;
-    const req = { body } as unknown as Request<never, never, AtsClientResource, never>;
+    const body = { clientName: 'Test Client' } as unknown as CreateAtsClientRequest;
+    const req = { body } as unknown as Request<never, never, CreateAtsClientRequest, never>;
 
     await createAtsClientController(req, res as unknown as Response<unknown, LocalContext>);
 
@@ -47,8 +47,8 @@ describe('createAtsEnquiryController', () => {
     const mockResp = { status: 201, data: { enquiryId: 'enq-123' } };
     vi.spyOn(atsExternal, 'createAtsEnquiry').mockResolvedValueOnce(mockResp);
 
-    const body: AtsEnquiryResource = { enquiryData: 'test' } as unknown as AtsEnquiryResource;
-    const req = { body } as unknown as Request<never, never, AtsEnquiryResource, never>;
+    const body = { enquiryData: 'test' } as unknown as CreateAtsEnquiryRequest;
+    const req = { body } as unknown as Request<never, never, CreateAtsEnquiryRequest, never>;
 
     await createAtsEnquiryController(req, res as unknown as Response<unknown, LocalContext>);
 
@@ -64,8 +64,8 @@ describe('searchAtsUsersController', () => {
     const mockResp = { status: 200, data: [{ id: 'user-1', name: 'Test User' }] };
     vi.spyOn(atsExternal, 'searchAtsUsers').mockResolvedValueOnce(mockResp);
 
-    const query: AtsUserSearchParameters = { firstName: 'John' } as unknown as AtsUserSearchParameters;
-    const req = { query } as unknown as Request<never, never, never, AtsUserSearchParameters>;
+    const query = { firstName: 'John' } as unknown as SearchAtsUsersRequest;
+    const req = { query } as unknown as Request<never, never, never, SearchAtsUsersRequest>;
 
     await searchAtsUsersController(req, res as unknown as Response<unknown, LocalContext>);
 
