@@ -1,5 +1,3 @@
-import type { ParsedQs } from 'qs';
-
 interface AddressResource {
   '@type': string;
   addressLine1: string;
@@ -35,12 +33,4 @@ export interface AtsEnquiryResource {
   enquiryMethodCodes: string[];
   enquiryPartnerAgencies: string[];
   enquiryFileNumbers: string[];
-}
-
-export interface AtsUserSearchParameters extends ParsedQs {
-  clientId?: string;
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  phone?: string;
 }

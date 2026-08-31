@@ -1,5 +1,3 @@
-import type { ParsedQs } from 'qs';
-
 export interface ElectrificationProjectStatistics {
   total_submissions: number;
   total_submissions_between: number;
@@ -62,11 +60,4 @@ export interface HousingProjectStatistics {
   inapplicable: number;
   status_request: number;
   multi_permits_needed: number;
-}
-
-export interface StatisticsFilters extends ParsedQs {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
 }
