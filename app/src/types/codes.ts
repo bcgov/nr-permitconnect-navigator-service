@@ -1,6 +1,5 @@
 import { listCodeTablesService } from '#src/services/code';
 
-import type { CustomHelpers, ErrorReport } from 'joi';
 import type * as codeEnums from '#src/db/codes/enums';
 
 export type CodeTableName = keyof typeof codeEnums;
@@ -29,5 +28,3 @@ export type CachedCodeTable = Readonly<{
 export type CodeTablesResult = Awaited<ReturnType<typeof listCodeTablesService>>;
 
 export type CodeCache = Readonly<Record<CodeTableName, CachedCodeTable>>;
-
-export type ValidatorFunction = (value: string, helpers: CustomHelpers) => string | ErrorReport;

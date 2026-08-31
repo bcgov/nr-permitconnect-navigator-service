@@ -1,22 +1,22 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { uuidv4 } from './common.ts';
 import { validate } from '#src/middleware/validation';
 
-const schema = {
+export const schema = {
   searchUsers: {
-    body: Joi.object({
-      userId: Joi.array().items(uuidv4),
-      idp: Joi.array().items(Joi.string().max(255)),
-      sub: Joi.string().max(255),
-      email: Joi.string().max(255),
-      firstName: Joi.string().max(255),
-      fullName: Joi.string().max(255),
-      lastName: Joi.string().max(255),
-      active: Joi.boolean(),
-      group: Joi.array().items(Joi.string().max(255)),
-      includeUserGroups: Joi.boolean(),
-      initiative: Joi.array().items(Joi.string().max(255))
+    body: z.object({
+      userId: z.array(uuidv4).optional(),
+      idp: z.array(z.string().max(255)).optional(),
+      sub: z.string().max(255).optional(),
+      email: z.string().max(255).optional(),
+      firstName: z.string().max(255).optional(),
+      fullName: z.string().max(255).optional(),
+      lastName: z.string().max(255).optional(),
+      active: z.boolean().optional(),
+      group: z.array(z.string().max(255)).optional(),
+      includeUserGroups: z.boolean().optional(),
+      initiative: z.array(z.string().max(255)).optional()
     })
   }
 };

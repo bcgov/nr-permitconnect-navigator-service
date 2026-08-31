@@ -1,44 +1,42 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { activityId, uuidv4 } from './common.ts';
 import { validate } from '#src/middleware/validation';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
-const schema = {
+const role = z.enum(Object.values(ActivityContactRole) as [string, ...string[]]);
+
+export const schema = {
   createActivityContact: {
-    params: Joi.object({
+    params: z.object({
       activityId: activityId,
       contactId: uuidv4
     }),
-    body: Joi.object({
-      role: Joi.string()
-        .required()
-        .valid(...Object.values(ActivityContactRole))
+    body: z.object({
+      role: role
     })
   },
 
   deleteActivityContact: {
-    params: Joi.object({
+    params: z.object({
       activityId: activityId,
       contactId: uuidv4
     })
   },
 
   listActivityContact: {
-    params: Joi.object({
+    params: z.object({
       activityId: activityId
     })
   },
 
   updateActivityContact: {
-    params: Joi.object({
+    params: z.object({
       activityId: activityId,
       contactId: uuidv4
     }),
-    body: Joi.object({
-      role: Joi.string()
-        .required()
-        .valid(...Object.values(ActivityContactRole))
+    body: z.object({
+      role: role
     })
   }
 };
