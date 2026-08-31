@@ -1,8 +1,8 @@
-import { TEST_ENQUIRY_1 } from '../data/index.ts';
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { WritableRepository } from '../../../src/repositories/writable.ts';
+import { TEST_ENQUIRY_1 } from '#tests/unit/data/index';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { WritableRepository } from '#src/repositories/writable';
 
-import type { PrismaTransactionClient } from '../../../src/db/database.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
 
 const PRINCIPAL = 'principal-id';
 

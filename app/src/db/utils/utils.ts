@@ -1,7 +1,7 @@
-import { SYSTEM_ID } from '../../utils/constants/application.ts';
+import { SYSTEM_ID } from '#src/utils/constants/application';
 
 import type { Prisma } from '@prisma/client';
-import type { CurrentContext } from '../../types/index.ts';
+import type { CurrentContext } from '#types';
 
 /**
  * Generates DB create stamps

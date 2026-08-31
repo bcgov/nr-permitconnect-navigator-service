@@ -1,16 +1,16 @@
 import { randomUUID } from 'node:crypto';
 
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { isUserAdmin, removeUserGroups } from '../domains/accessRequest.ts';
-import { createUser } from '../domains/user.ts';
-import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../domains/yars.ts';
-import { assignPermissions } from '../external/coms.ts';
-import { AccessRequestStatus, GroupName, IdentityProviderKind } from '../utils/enums/application.ts';
-import { getLogger } from '../utils/log.ts';
-import Problem from '../utils/problem.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { isUserAdmin, removeUserGroups } from '#src/domains/accessRequest';
+import { createUser } from '#src/domains/user';
+import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '#src/domains/yars';
+import { assignPermissions } from '#src/external/coms';
+import { AccessRequestStatus, GroupName, IdentityProviderKind } from '#src/utils/enums/application';
+import { getLogger } from '#src/utils/log';
+import Problem from '#src/utils/problem';
 
-import type { AccessRequest, CurrentAuthorization, CurrentContext, Group, User } from '../types/index.ts';
-import type { Initiative } from '../utils/enums/application.ts';
+import type { AccessRequest, CurrentAuthorization, CurrentContext, Group, User } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 const log = getLogger(module.filename);
 

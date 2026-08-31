@@ -6,6 +6,7 @@
     "isolatedModules": true,
     "noEmit": false,
     "outDir": "./sbin",
+    "rootDir": ".",
     "resolveJsonModule": true,
     "rewriteRelativeImportExtensions": true,
     "types": [

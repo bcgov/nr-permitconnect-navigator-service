@@ -5,12 +5,12 @@ import atsValidator from './ats.ts';
 import { activityId, email, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { housing } from './housing';
-import { validate } from '../middleware/validation';
-import { YES_NO_UNSURE_LIST } from '../utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '../utils/constants/housing';
-import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '../utils/constants/projectCommon';
-import { BasicResponse } from '../utils/enums/application';
-import { ProjectApplicant } from '../utils/enums/housing.ts';
+import { validate } from '#src/middleware/validation';
+import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
+import { BasicResponse } from '#src/utils/enums/application';
+import { ProjectApplicant } from '#src/utils/enums/housing';
 
 const schema = {
   createHousingProject: {

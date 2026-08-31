@@ -2,10 +2,10 @@ import express from 'express';
 import Joi from 'joi';
 import request from 'supertest';
 
-import { validate } from '../../../src/middleware/validation.ts';
+import { validate } from '#src/middleware/validation';
 
 import type { NextFunction, Request, Response } from 'express';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 function buildApp(schema: object) {
   const app = express();

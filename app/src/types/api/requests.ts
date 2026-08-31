@@ -1,10 +1,10 @@
 import type { ParsedQs } from 'qs';
 import type { DeleteRequestDTO, GetRequestDTO, ListRequestDTO, ResourceSchemaConfig, UpsertRequestDTO } from './dto.ts';
 import type { Permit, PermitBase, Stamps } from './resources.ts';
-import type { PaginationOptions } from '../common.ts';
-import type { Nullable } from '../utils.ts';
-import type { GroupName, Initiative } from '../../utils/enums/application.ts';
-import type { EmailTemplate } from '../../utils/templates';
+import type { PaginationOptions } from '#src/types/common';
+import type { Nullable } from '#src/types/utils';
+import type { GroupName, Initiative } from '#src/utils/enums/application';
+import type { EmailTemplate } from '#src/utils/templates';
 
 /**
  * Permit

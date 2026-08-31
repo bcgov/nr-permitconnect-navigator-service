@@ -1,6 +1,6 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
 
-import type { Document } from '../types/index.ts';
+import type { Document } from '#types';
 
 /**
  * Creates a link between an activity and a previously existing object in COMS

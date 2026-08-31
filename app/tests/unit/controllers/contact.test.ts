@@ -1,4 +1,4 @@
-import { TEST_CONTACT_1, TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT } from '../data/index.ts';
+import { TEST_CONTACT_1, TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
 import {
   deleteContactController,
   getContactController,
@@ -6,12 +6,12 @@ import {
   matchContactsController,
   searchContactsController,
   upsertContactController
-} from '../../../src/controllers/contact.ts';
-import * as contactService from '../../../src/services/contact.ts';
+} from '#src/controllers/contact';
+import * as contactService from '#src/services/contact';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Contact, ContactSearchParameters, LocalContext } from '../../../src/types/index.ts';
+import type { Contact, ContactSearchParameters, LocalContext } from '#types';
 
 vi.mock('config');
 

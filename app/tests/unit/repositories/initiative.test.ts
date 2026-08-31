@@ -1,5 +1,5 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { InitiativeRepository } from '../../../src/repositories/initiative.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { InitiativeRepository } from '#src/repositories/initiative';
 
 // Construct the real repo
 const makeRepo = () => new InitiativeRepository(prismaTxMock, 'principal-id');

@@ -1,11 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-import { DuplicateKeyProblem, NotFoundProblem } from '../db/errors';
-import { differential, Problem } from '../utils';
+import { DuplicateKeyProblem, NotFoundProblem } from '#src/db/errors';
+import { differential, Problem } from '#src/utils/index';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { JwtUser } from '../services/login';
-import type { User } from '../types';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { JwtUser } from '#src/services/login';
+import type { User } from '#types';
 
 export const createUser = async (
   repositories: Pick<Repositories, 'identityProvider' | 'user'>,

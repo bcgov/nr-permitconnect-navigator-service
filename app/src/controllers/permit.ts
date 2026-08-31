@@ -5,10 +5,10 @@ import {
   listPermitsService,
   searchPermitsService,
   upsertPermitService
-} from '../services/permit.ts';
-import { Initiative } from '../utils/enums/application.ts';
-import { Problem } from '../utils/index.ts';
-import { isTruthy } from '../utils/utils.ts';
+} from '#src/services/permit';
+import { Initiative } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
+import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
 import type {
@@ -18,7 +18,7 @@ import type {
   Permit,
   SearchPermitsOptions,
   SearchPermitsResponse
-} from '../types/index.ts';
+} from '#types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
   await deletePermitService(req.params.permitId);

@@ -1,10 +1,10 @@
-import * as peachDomain from '../../../src/domains/peach.ts';
-import * as peachExternal from '../../../src/external/peach.ts';
-import * as peachParser from '../../../src/parsers/peach.ts';
-import * as peachService from '../../../src/services/peach.ts';
-import Problem from '../../../src/utils/problem.ts';
+import * as peachDomain from '#src/domains/peach';
+import * as peachExternal from '#src/external/peach';
+import * as peachParser from '#src/parsers/peach';
+import * as peachService from '#src/services/peach';
+import Problem from '#src/utils/problem';
 
-import type { PermitTracking } from '../../../src/types/index.ts';
+import type { PermitTracking } from '#types';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');

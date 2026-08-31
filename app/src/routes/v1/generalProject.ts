@@ -14,12 +14,12 @@ import {
   submitGeneralProjectDraftController,
   updateGeneralProjectController,
   upsertGeneralProjectDraftController
-} from '../../controllers/generalProject.ts';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
-import { generalProjectValidator } from '../../validators/index.ts';
+} from '#src/controllers/generalProject';
+import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { Action, Resource } from '#src/utils/enums/application';
+import { generalProjectValidator } from '#src/validators/index';
 
 const router = express.Router();
 router.use(requireSomeAuth);

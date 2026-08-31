@@ -7,21 +7,21 @@ import {
   TEST_PERMIT_1,
   TEST_PERMIT_2,
   TEST_PERMIT_NOTE_1
-} from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { PermitStage, PermitState } from '../../../src/db/codes/enums.ts';
+} from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
   listPeachIntegratedTrackings,
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
-} from '../../../src/domains/permit.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import * as chesExternal from '../../../src/external/ches.ts';
-import { Initiative } from '../../../src/utils/enums/application.ts';
-import { PermitNeeded } from '../../../src/utils/enums/permit.ts';
-import { ActivityContactRole } from '../../../src/utils/enums/projectCommon.ts';
+} from '#src/domains/permit';
+import * as projectDomain from '#src/domains/project';
+import * as chesExternal from '#src/external/ches';
+import { Initiative } from '#src/utils/enums/application';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
-import type { PermitUpdateEmailParams } from '../../../src/types/index.ts';
+import type { PermitUpdateEmailParams } from '#types';
 
 vi.mock('config', async () => {
   const actual = await vi.importActual<{ get: (k: string) => unknown; has: (k: string) => boolean }>('config');

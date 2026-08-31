@@ -1,5 +1,5 @@
-import { getPidsController } from '../../../src/controllers/map.ts';
-import * as mapService from '../../../src/services/map.ts';
+import { getPidsController } from '#src/controllers/map';
+import * as mapService from '#src/services/map';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

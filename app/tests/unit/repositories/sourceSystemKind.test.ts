@@ -1,6 +1,6 @@
-import { prismaTxMock } from '../../__mocks__/prismaMock.ts';
-import { SourceSystemKindRepository } from '../../../src/repositories/sourceSystemKind.ts';
-import { PeachIntegratedSystem } from '../../../src/utils/enums/permit.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { SourceSystemKindRepository } from '#src/repositories/sourceSystemKind';
+import { PeachIntegratedSystem } from '#src/utils/enums/permit';
 
 // Test data for sourceSystemKind
 const TEST_SOURCE_SYSTEM_KIND_1 = {

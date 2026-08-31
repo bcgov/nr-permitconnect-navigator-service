@@ -1,11 +1,11 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { GroupName, Initiative } from '../utils/enums/application.ts';
-import { Problem } from '../utils/index.ts';
-import { getCurrentSubject } from '../utils/utils.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { GroupName, Initiative } from '#src/utils/enums/application';
+import { Problem } from '#src/utils/index';
+import { getCurrentSubject } from '#src/utils/utils';
 
 import type { NextFunction, Request, Response } from 'express';
-import type { PrismaTransactionClient } from '../db/database.ts';
-import type { CurrentAuthorization } from '../types/index.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
+import type { CurrentAuthorization } from '#types';
 
 /**
  * Obtains the groups for the current users identity

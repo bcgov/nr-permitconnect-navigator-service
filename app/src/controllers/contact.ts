@@ -7,12 +7,12 @@ import {
   matchContactsExactService,
   searchContactsService,
   upsertContactsService
-} from '../services/contact.ts';
-import { IdentityProviderKind } from '../utils/enums/application.ts';
-import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '../utils/utils.ts';
+} from '#src/services/contact';
+import { IdentityProviderKind } from '#src/utils/enums/application';
+import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
-import type { Contact, ContactSearchParameters, LocalContext } from '../types/index.ts';
+import type { Contact, ContactSearchParameters, LocalContext } from '#types';
 
 export const deleteContactController = async (
   req: Request<{ contactId: string }>,

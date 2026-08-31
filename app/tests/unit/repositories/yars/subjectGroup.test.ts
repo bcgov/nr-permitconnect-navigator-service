@@ -1,6 +1,6 @@
-import { prismaTxMock } from '../../../__mocks__/prismaMock.ts';
-import { SubjectGroupRepository } from '../../../../src/repositories/yars/subjectGroup.ts';
-import { GroupName, Initiative } from '../../../../src/utils/enums/application.ts';
+import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { SubjectGroupRepository } from '#src/repositories/yars/subjectGroup';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
 const makeRepo = () => new SubjectGroupRepository(prismaTxMock, 'principal-id');
 

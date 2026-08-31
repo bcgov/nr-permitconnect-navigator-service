@@ -2,22 +2,22 @@ import config from 'config';
 import { randomUUID } from 'node:crypto';
 
 import { getProjectByActivityId } from './project';
-import { codeTable } from '../db/codes/cache';
-import { PermitStage, PermitState } from '../db/codes/enums';
-import { email } from '../external/ches';
-import { formatDateOnly, toTitleCase } from '../utils';
-import { PermitNeeded } from '../utils/enums/permit';
-import { ActivityContactRole } from '../utils/enums/projectCommon';
+import { codeTable } from '#src/db/codes/cache';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { email } from '#src/external/ches';
+import { formatDateOnly, toTitleCase } from '#src/utils/index';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 import {
   initialPeachPermitUpdateTemplate,
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
-} from '../utils/templates';
+} from '#src/utils/templates';
 import { state } from '../../state';
 
-import type { Repositories } from '../db/unitOfWork';
-import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys, UpsertPermitRequest } from '../types';
-import type { Initiative } from '../utils/enums/application';
+import type { Repositories } from '#src/db/unitOfWork';
+import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys, UpsertPermitRequest } from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 /**
  * Builds a new permit record with default values for a freshly created permit

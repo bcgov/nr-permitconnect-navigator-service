@@ -1,6 +1,6 @@
 import { WritableRepository } from './writable.ts';
 
-import type { PrismaTransactionClient } from '../db/database.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
 
 export class IdentityProviderRepository extends WritableRepository<PrismaTransactionClient['identity_provider']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

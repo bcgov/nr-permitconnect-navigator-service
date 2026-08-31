@@ -1,9 +1,9 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_IDIR_USER_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '../../../src/domains/yars.ts';
-import { GroupName, Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_IDIR_USER_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { assignGroup, getCorrespondingGlobalGroup, getGroups } from '#src/domains/yars';
+import { GroupName, Initiative } from '#src/utils/enums/application';
 
 describe('yars domain', () => {
   beforeEach(() => {

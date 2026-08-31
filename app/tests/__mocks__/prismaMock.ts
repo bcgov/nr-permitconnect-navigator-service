@@ -1,11 +1,11 @@
 import { vi } from 'vitest';
 import { mockDeep, mockReset } from 'vitest-mock-extended';
 
-import * as codeEnums from '../../src/db/codes/enums.ts';
-import prisma from '../../src/db/database.ts';
+import * as codeEnums from '#src/db/codes/enums';
+import prisma from '#src/db/database';
 
 import type { DeepMockProxy } from 'vitest-mock-extended';
-import type { ExtendedClient, PrismaTransactionClient } from '../../src/db/database.ts';
+import type { ExtendedClient, PrismaTransactionClient } from '#src/db/database';
 
 function makeCodeTableMock() {
   const codeTable: Record<

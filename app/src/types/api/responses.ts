@@ -1,4 +1,4 @@
-import type { PermitStage, PermitState, PiesOnHold } from '../../db/codes/enums.ts';
+import type { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
 
 export interface PeachSummary {
   stage: PermitStage;

@@ -1,9 +1,9 @@
-import { WritableRepository } from '../writable.ts';
-import { Initiative } from '../../utils/enums/application.ts';
+import { WritableRepository } from '#src/repositories/writable';
+import { Initiative } from '#src/utils/enums/application';
 
-import type { PrismaTransactionClient } from '../../db/database.ts';
-import type { Group } from '../../types/index.ts';
-import type { GroupName } from '../../utils/enums/application.ts';
+import type { PrismaTransactionClient } from '#src/db/database';
+import type { Group } from '#types';
+import type { GroupName } from '#src/utils/enums/application';
 
 export class SubjectGroupRepository extends WritableRepository<PrismaTransactionClient['subject_group']> {
   constructor(tx: PrismaTransactionClient, principal: string) {

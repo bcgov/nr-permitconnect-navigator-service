@@ -14,12 +14,12 @@ import {
   submitElectrificationProjectDraftController,
   updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
-} from '../../controllers/electrificationProject.ts';
-import { hasAccess, hasAuthorization } from '../../middleware/authorization.ts';
-import { requireSomeAuth } from '../../middleware/requireSomeAuth.ts';
-import { requireSomeGroup } from '../../middleware/requireSomeGroup.ts';
-import { Action, Resource } from '../../utils/enums/application.ts';
-import { electrificationProjectValidator } from '../../validators/index.ts';
+} from '#src/controllers/electrificationProject';
+import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
+import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { Action, Resource } from '#src/utils/enums/application';
+import { electrificationProjectValidator } from '#src/validators/index';
 
 const router = express.Router();
 router.use(requireSomeAuth);

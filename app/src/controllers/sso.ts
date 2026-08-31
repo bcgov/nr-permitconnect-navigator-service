@@ -1,7 +1,7 @@
-import { searchIdirUsers } from '../external/sso.ts';
+import { searchIdirUsers } from '#src/external/sso';
 
 import type { Request, Response } from 'express';
-import type { IdirSearchParameters } from '../types/index.ts';
+import type { IdirSearchParameters } from '#types';
 
 export const searchIdirUsersController = async (
   req: Request<never, never, never, IdirSearchParameters>,

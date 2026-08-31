@@ -68,6 +68,7 @@ spec:
 
           command:
             - /usr/local/bin/node
+            - --conditions=sbin
             - ./node_modules/knex/bin/cli.js
             - migrate:latest
             - --knexfile

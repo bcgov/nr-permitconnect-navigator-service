@@ -1,9 +1,9 @@
-import { findPriorityPermitTracking } from '../domains/peach';
-import { getPeachRecord } from '../external/peach';
-import { summarizePeachRecord } from '../parsers/peach';
-import { Problem } from '../utils';
+import { findPriorityPermitTracking } from '#src/domains/peach';
+import { getPeachRecord } from '#src/external/peach';
+import { summarizePeachRecord } from '#src/parsers/peach';
+import { Problem } from '#src/utils/index';
 
-import type { PermitTracking } from '../types';
+import type { PermitTracking } from '#types';
 
 export const getPeachSummaryService = async (data: PermitTracking[]) => {
   const permitTracking = findPriorityPermitTracking(data);

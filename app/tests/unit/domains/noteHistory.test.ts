@@ -1,13 +1,13 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import { TEST_EMAIL_RESPONSE, TEST_IDIR_USER_1, TEST_NOTE_HISTORY_1 } from '../data/index.ts';
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import { emailBringForwardNotification } from '../../../src/domains/noteHistory.ts';
-import * as projectDomain from '../../../src/domains/project.ts';
-import { GroupName, Initiative, Resource } from '../../../src/utils/enums/application.ts';
-import { NoteType } from '../../../src/utils/enums/projectCommon.ts';
+import { TEST_EMAIL_RESPONSE, TEST_IDIR_USER_1, TEST_NOTE_HISTORY_1 } from '#tests/unit/data/index';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { emailBringForwardNotification } from '#src/domains/noteHistory';
+import * as projectDomain from '#src/domains/project';
+import { GroupName, Initiative, Resource } from '#src/utils/enums/application';
+import { NoteType } from '#src/utils/enums/projectCommon';
 
-import type { NoteHistory } from '../../../src/types/index.ts';
+import type { NoteHistory } from '#types';
 
 vi.mock('../../../src/domains/project.ts');
 vi.mock('../../../src/external/ches.ts');

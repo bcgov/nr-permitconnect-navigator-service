@@ -1,4 +1,4 @@
-import { Problem } from '../utils/index.ts';
+import { Problem } from '#src/utils/index';
 
 import type { NextFunction, Request, Response } from 'express';
 

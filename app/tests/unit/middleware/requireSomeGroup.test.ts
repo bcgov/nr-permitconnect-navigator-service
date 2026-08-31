@@ -1,14 +1,14 @@
 import express from 'express';
 import request from 'supertest';
 
-import { mockRepos } from '../../__mocks__/unitOfWorkMock.ts';
-import * as yarsDomain from '../../../src/domains/yars.ts';
-import * as comsService from '../../../src/external/coms.ts';
-import { requireSomeGroup } from '../../../src/middleware/requireSomeGroup.ts';
-import { GroupName, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
+import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import * as yarsDomain from '#src/domains/yars';
+import * as comsService from '#src/external/coms';
+import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { GroupName, IdentityProviderKind, Initiative } from '#src/utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 function buildAppForRequireSomeGroup(currentContext: unknown) {
   const app = express();

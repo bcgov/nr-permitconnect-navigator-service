@@ -1,4 +1,4 @@
-import { addAuditStamps } from '../utils/migrations/helpers.ts';
+import { addAuditStamps } from '#src/db/utils/migrations/helpers';
 
 import type { Knex } from 'knex';
 

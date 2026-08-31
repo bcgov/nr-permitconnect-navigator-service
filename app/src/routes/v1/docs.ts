@@ -2,7 +2,7 @@ import { Router } from 'express';
 import helmet from 'helmet';
 import { dump } from 'js-yaml';
 
-import { getDocHTML, getSpec } from '../../docs/docs';
+import { getDocHTML, getSpec } from '#src/docs/docs';
 
 import type { Request, Response } from 'express';
 

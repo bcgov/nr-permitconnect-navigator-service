@@ -1,16 +1,16 @@
 import { randomUUID } from 'node:crypto';
 
-import { PermitStage, PermitState } from '../db/codes/enums.ts';
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { findPriorityPermitTracking } from '../domains/peach.ts';
-import { buildNewPermitRecord, sendPermitUpdateNotifications } from '../domains/permit.ts';
-import { upsertPermitTracking } from '../domains/permitTracking.ts';
-import { getPeachRecord } from '../external/peach.ts';
-import { summarizePeachRecord } from '../parsers/peach.ts';
-import { filterActivityResponseByScope } from '../parsers/responseFiltering.ts';
-import { PermitNeeded } from '../utils/enums/permit.ts';
-import Problem from '../utils/problem.ts';
-import { differential, isEmptyObject } from '../utils/utils.ts';
+import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { findPriorityPermitTracking } from '#src/domains/peach';
+import { buildNewPermitRecord, sendPermitUpdateNotifications } from '#src/domains/permit';
+import { upsertPermitTracking } from '#src/domains/permitTracking';
+import { getPeachRecord } from '#src/external/peach';
+import { summarizePeachRecord } from '#src/parsers/peach';
+import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { PermitNeeded } from '#src/utils/enums/permit';
+import Problem from '#src/utils/problem';
+import { differential, isEmptyObject } from '#src/utils/utils';
 
 import type {
   CurrentAuthorization,
@@ -27,8 +27,8 @@ import type {
   SearchPermitsResponse,
   SourceSystemKind,
   UpsertPermitRequest
-} from '../types/index.ts';
-import type { Initiative } from '../utils/enums/application.ts';
+} from '#types';
+import type { Initiative } from '#src/utils/enums/application';
 
 function checkIfPeachIntegratedAuthType(sourceSystem: string, sourceSystemKinds: SourceSystemKind[]): boolean {
   const hasIntegratedSourceSystemKind = sourceSystemKinds.some(

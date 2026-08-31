@@ -2,10 +2,10 @@ import {
   createAccessRequestService,
   getAccessRequestsService,
   processAccessRequestService
-} from '../services/accessRequest.ts';
+} from '#src/services/accessRequest';
 
 import type { Request, Response } from 'express';
-import type { AccessRequest, LocalContext, User } from '../types/index.ts';
+import type { AccessRequest, LocalContext, User } from '#types';
 
 export const createUserAccessRequestController = async (
   req: Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,

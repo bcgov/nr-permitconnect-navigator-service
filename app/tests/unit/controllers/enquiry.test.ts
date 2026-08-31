@@ -3,7 +3,7 @@ import {
   TEST_CURRENT_CONTEXT,
   TEST_ENQUIRY_1,
   TEST_ENQUIRY_INTAKE
-} from '../data/index.ts';
+} from '#tests/unit/data/index';
 import {
   createEnquiryController,
   deleteEnquiryController,
@@ -12,14 +12,14 @@ import {
   listRelatedEnquiriesController,
   searchEnquiriesController,
   updateEnquiryController
-} from '../../../src/controllers/enquiry.ts';
-import * as activityService from '../../../src/services/activity.ts';
-import * as enquiryService from '../../../src/services/enquiry.ts';
+} from '#src/controllers/enquiry';
+import * as activityService from '#src/services/activity';
+import * as enquiryService from '#src/services/enquiry';
 
 import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '../../../src/types/index.ts';
+import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
 
 vi.mock('config');
 

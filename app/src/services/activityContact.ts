@@ -1,16 +1,16 @@
-import { unitOfWork } from '../db/unitOfWork.ts';
-import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '../domains/activityContact.ts';
-import { email } from '../external/ches.ts';
-import { ActivityContactRole } from '../utils/enums/projectCommon.ts';
-import Problem from '../utils/problem.ts';
+import { unitOfWork } from '#src/db/unitOfWork';
+import { getTeamMemberEmailTemplateData, verifyPrimaryChange } from '#src/domains/activityContact';
+import { email } from '#src/external/ches';
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+import Problem from '#src/utils/problem';
 import {
   teamAdminAddedTemplate,
   teamMemberAddedTemplate,
   teamMemberRevokedTemplate,
   teamPrimaryAddedTemplate
-} from '../utils/templates.ts';
+} from '#src/utils/templates';
 
-import type { ActivityContact, CurrentAuthorization, CurrentContext } from '../types/index.ts';
+import type { ActivityContact, CurrentAuthorization, CurrentContext } from '#types';
 
 export const createActivityContactService = async (
   currentAuthorization: CurrentAuthorization,

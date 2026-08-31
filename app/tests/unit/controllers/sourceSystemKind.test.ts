@@ -1,5 +1,5 @@
-import { listSourceSystemKindsController } from '../../../src/controllers/sourceSystemKind.ts';
-import * as sourceSystemKindService from '../../../src/services/sourceSystemKind.ts';
+import { listSourceSystemKindsController } from '#src/controllers/sourceSystemKind';
+import * as sourceSystemKindService from '#src/services/sourceSystemKind';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';

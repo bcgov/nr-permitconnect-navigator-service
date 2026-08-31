@@ -2,7 +2,7 @@ import { AsyncLocalStorage } from 'node:async_hooks';
 
 import type jwt from 'jsonwebtoken';
 import type { Group } from './api/resources.ts';
-import type { AuthType, Initiative } from '../utils/enums/application.ts';
+import type { AuthType, Initiative } from '#src/utils/enums/application';
 
 export const requestContext = new AsyncLocalStorage<{ principal: string }>();
 

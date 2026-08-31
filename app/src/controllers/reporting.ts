@@ -2,7 +2,7 @@ import {
   getElectrificationProjectPermitDataService,
   getGeneralProjectPermitDataService,
   getHousingProjectPermitDataService
-} from '../services/reporting.ts';
+} from '#src/services/reporting';
 
 import type { Request, Response } from 'express';
 

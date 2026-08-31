@@ -2,13 +2,13 @@ import express from 'express';
 import { existsSync, readFileSync } from 'node:fs';
 import request from 'supertest';
 
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import { hasIdentity } from '../../../src/middleware/identity.ts';
-import { AuthType, IdentityProviderKind, Initiative } from '../../../src/utils/enums/application.ts';
+import { TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
+import { hasIdentity } from '#src/middleware/identity';
+import { AuthType, IdentityProviderKind, Initiative } from '#src/utils/enums/application';
 
 import type { NextFunction, Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type Problem from '../../../src/utils/problem.ts';
+import type Problem from '#src/utils/problem';
 
 vi.mock('node:fs', () => ({
   existsSync: vi.fn(),

@@ -1,19 +1,10 @@
-import { TEST_CURRENT_CONTEXT } from '../data/index.ts';
-import {
-  createAtsClientController,
-  createAtsEnquiryController,
-  searchAtsUsersController
-} from '../../../src/controllers/ats.ts';
-import * as atsExternal from '../../../src/external/ats.ts';
+import { TEST_CURRENT_CONTEXT } from '#tests/unit/data/index';
+import { createAtsClientController, createAtsEnquiryController, searchAtsUsersController } from '#src/controllers/ats';
+import * as atsExternal from '#src/external/ats';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type {
-  AtsClientResource,
-  AtsEnquiryResource,
-  AtsUserSearchParameters,
-  LocalContext
-} from '../../../src/types/index.ts';
+import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, LocalContext } from '#types';
 
 vi.mock('config');
 
