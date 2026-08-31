@@ -15,7 +15,7 @@ export const createDocumentService = async (
   documentId: string,
   activityId: string,
   filename: string,
-  mimeType: string,
+  mimeType: string | undefined,
   filesize: number
 ): Promise<Document> => {
   return await unitOfWork.execute(async ({ document, user }) => {

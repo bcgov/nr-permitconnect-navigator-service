@@ -11,8 +11,8 @@ import type { Contact, User } from '#types';
  * An equivalent User model object without timestamp information
  */
 export interface JwtUser {
-  active: boolean;
-  bceidBusinessName: string | null;
+  active?: boolean;
+  bceidBusinessName?: string | null;
   email: string | null;
   firstName: string | null;
   fullName: string | null;

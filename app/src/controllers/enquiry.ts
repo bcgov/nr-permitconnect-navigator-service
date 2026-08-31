@@ -7,7 +7,6 @@ import {
   listRelatedEnquiriesService,
   searchEnquiriesService
 } from '#src/services/enquiry';
-import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
 import type {
@@ -70,7 +69,7 @@ export const searchEnquiriesController = async (
     res.locals.currentContext,
     {
       ...req.body,
-      includeUser: isTruthy(req.body.includeUser)
+      includeUser: req.body.includeUser
     },
     res.locals.currentContext.initiative
   );

@@ -15,6 +15,7 @@ import type {
   GeneralProject,
   GeneralProjectIntake,
   GeneralProjectStatistics,
+  GetProjectStatisticsRequest,
   Maybe,
   PatchGeneralProjectRequest,
   SearchGeneralProjectRequest
@@ -109,14 +110,11 @@ export const listGeneralProjectsService = async (
   });
 };
 
-export const getGeneralProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<GeneralProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getGeneralProjectStatisticsService = async (
+  filters: GetProjectStatisticsRequest
+): Promise<GeneralProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const date_from = val(filters.dateFrom);
   const date_to = val(filters.dateTo);

@@ -96,16 +96,14 @@ export const updateDraftService = async (data: DraftBase): Promise<Draft> => {
  */
 export const upsertDraftService = async (
   draftId: Maybe<string>,
-  data: DraftBase,
+  data: { data: DraftBase['data'] },
   initiativeCode: Initiative,
   draftCode: DraftCode,
   currentContext: CurrentContext
 ): Promise<Draft> => {
   return await unitOfWork.execute(async ({ activity, activityContact, contact, draft, initiative }) => {
-    const update = !!draftId;
-
-    if (update) {
-      return await draft.update({ draftId: data.draftId }, { ...data, data: jsonToPrismaInputJson(data.data) });
+    if (draftId) {
+      return await draft.update({ draftId }, { data: jsonToPrismaInputJson(data.data) });
     } else {
       // Create new draft
       const activityId = (await createActivity({ activity, initiative }, initiativeCode))?.activityId;

@@ -5,10 +5,10 @@ import {
 } from '#src/services/accessRequest';
 
 import type { Request, Response } from 'express';
-import type { AccessRequest, LocalContext, User } from '#types';
+import type { CreateUserAccessRequestRequest, LocalContext, ProcessUserAccessRequestRequest } from '#types';
 
 export const createUserAccessRequestController = async (
-  req: Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>,
+  req: Request<never, never, CreateUserAccessRequestRequest>,
   res: Response<unknown, LocalContext>
 ) => {
   const response = await createAccessRequestService(
@@ -21,7 +21,7 @@ export const createUserAccessRequestController = async (
 };
 
 export const processUserAccessRequestController = async (
-  req: Request<{ accessRequestId: string }, never, { approve: boolean }>,
+  req: Request<{ accessRequestId: string }, never, ProcessUserAccessRequestRequest>,
   res: Response<unknown, LocalContext>
 ) => {
   await processAccessRequestService(res.locals.currentContext, req.params.accessRequestId, req.body.approve);

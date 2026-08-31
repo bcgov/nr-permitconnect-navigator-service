@@ -72,7 +72,7 @@ export const getRoadmapNoteService = async (activityId: string): Promise<string>
 export const sendRoadmapService = async (
   currentContext: CurrentContext,
   activityId: string,
-  selectedFileIds: string[],
+  selectedFileIds: string[] | undefined,
   emailData: Email
 ): Promise<NoteHistory> => {
   if (selectedFileIds?.length) {

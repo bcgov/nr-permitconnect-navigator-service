@@ -9,10 +9,17 @@ import {
   upsertContactsService
 } from '#src/services/contact';
 import { IdentityProviderKind } from '#src/utils/enums/application';
-import { addDashesToUuid, hasIdentity, isTruthy, mixedQueryToArray } from '#src/utils/utils';
+import { addDashesToUuid, hasIdentity, mixedQueryToArray } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
-import type { Contact, ContactSearchParameters, LocalContext } from '#types';
+import type {
+  Contact,
+  GetContactRequest,
+  LocalContext,
+  MatchContactsRequest,
+  SearchContactsRequest,
+  UpsertContactRequest
+} from '#types';
 
 export const deleteContactController = async (
   req: Request<{ contactId: string }>,
@@ -23,10 +30,10 @@ export const deleteContactController = async (
 };
 
 export const getContactController = async (
-  req: Request<{ contactId: string }, never, never, { includeActivities?: boolean }>,
+  req: Request<{ contactId: string }, never, never, GetContactRequest>,
   res: Response<Contact>
 ) => {
-  const response = await getContactService(req.params.contactId, isTruthy(req.query.includeActivities) ?? false);
+  const response = await getContactService(req.params.contactId, req.query.includeActivities ?? false);
   res.status(200).json(response);
 };
 
@@ -39,43 +46,50 @@ export const getCurrentUserContactController = async (req: Request, res: Respons
 };
 
 export const matchContactsController = async (
-  req: Request<never, never, ContactSearchParameters, never>,
+  req: Request<never, never, MatchContactsRequest, never>,
   res: Response<Contact[], LocalContext>
 ) => {
+  const params = {
+    contactId: req.body.contactId ?? undefined,
+    userId: req.body.userId ?? undefined,
+    email: req.body.email ?? undefined,
+    firstName: req.body.firstName ?? undefined,
+    lastName: req.body.lastName ?? undefined,
+    phoneNumber: req.body.phoneNumber ?? undefined
+  };
+
   let response: Contact[];
   if (hasIdentity(IdentityProviderKind.AZUREIDIR, res.locals.currentContext))
-    response = await matchContactsService(req.body);
-  else response = await matchContactsExactService(req.body);
+    response = await matchContactsService(params);
+  else response = await matchContactsExactService(params);
 
   res.status(200).json(response);
 };
 
 export const searchContactsController = async (
-  req: Request<never, never, ContactSearchParameters, never>,
+  req: Request<never, never, SearchContactsRequest, never>,
   res: Response<Contact[]>
 ) => {
-  req.body ??= {};
-
-  const contactIds = mixedQueryToArray(req.body.contactId);
-  const userIds = mixedQueryToArray(req.body.userId);
+  const contactIds = mixedQueryToArray(req.body.contactId ?? undefined);
+  const userIds = mixedQueryToArray(req.body.userId ?? undefined);
 
   const response = await searchContactsService({
     userId: userIds ? userIds.map((id) => addDashesToUuid(id)) : userIds,
     contactId: contactIds ? contactIds.map((id) => addDashesToUuid(id)) : contactIds,
-    email: req.body.email,
-    firstName: req.body.firstName,
-    lastName: req.body.lastName,
-    contactApplicantRelationship: req.body.contactApplicantRelationship,
-    phoneNumber: req.body.phoneNumber,
-    initiative: req.body.initiative,
-    includeActivities: isTruthy(req.body.includeActivities)
+    email: req.body.email ?? undefined,
+    firstName: req.body.firstName ?? undefined,
+    lastName: req.body.lastName ?? undefined,
+    contactApplicantRelationship: req.body.contactApplicantRelationship ?? undefined,
+    phoneNumber: req.body.phoneNumber ?? undefined,
+    initiative: req.body.initiative ?? undefined,
+    includeActivities: req.body.includeActivities
   });
 
   res.status(200).json(response);
 };
 
 export const upsertContactController = async (
-  req: Request<never, never, Contact, never>,
+  req: Request<never, never, UpsertContactRequest, never>,
   res: Response<Contact, LocalContext>
 ) => {
   const contact = { ...req.body, contactId: req.body.contactId ?? randomUUID() };

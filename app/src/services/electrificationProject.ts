@@ -13,6 +13,7 @@ import type {
   ElectrificationProject,
   ElectrificationProjectIntake,
   ElectrificationProjectStatistics,
+  GetProjectStatisticsRequest,
   Maybe,
   PatchElectrificationProjectRequest,
   SearchElectrificationProjectRequest
@@ -75,14 +76,11 @@ export const getElectrificationProjectService = async (
  * @param filters.userId User ID
  * @returns A Promise that resolves to the electrification project statistics
  */
-export const getElectrificationProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<ElectrificationProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getElectrificationProjectStatisticsService = async (
+  filters: GetProjectStatisticsRequest
+): Promise<ElectrificationProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const dFrom = val(filters.dateFrom);
   const dTo = val(filters.dateTo);

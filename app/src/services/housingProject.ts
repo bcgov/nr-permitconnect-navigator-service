@@ -12,6 +12,7 @@ import type {
   ContactBase,
   CurrentAuthorization,
   CurrentContext,
+  GetProjectStatisticsRequest,
   HousingProject,
   HousingProjectIntake,
   HousingProjectStatistics,
@@ -83,14 +84,11 @@ export const getHousingProjectService = async (housingProjectId: string): Promis
  * @param filters.userId User ID
  * @returns A Promise that resolves to the housing project statistics
  */
-export const getHousingProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<HousingProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getHousingProjectStatisticsService = async (
+  filters: GetProjectStatisticsRequest
+): Promise<HousingProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const date_from = val(filters.dateFrom);
   const date_to = val(filters.dateTo);

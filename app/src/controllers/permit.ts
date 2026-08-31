@@ -8,16 +8,16 @@ import {
 } from '#src/services/permit';
 import { Initiative } from '#src/utils/enums/application';
 import { Problem } from '#src/utils/index';
-import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
 import type {
   IntakePermitRequest,
-  ListPermitsOptions,
+  ListPermitsRequest,
   LocalContext,
   Permit,
-  SearchPermitsOptions,
-  SearchPermitsResponse
+  SearchPermitsRequest,
+  SearchPermitsResponse,
+  UpsertPermitBodyRequest
 } from '#types';
 
 export const deletePermitController = async (req: Request<{ permitId: string }>, res: Response) => {
@@ -39,20 +39,15 @@ export const intakePermitsController = async (
 };
 
 export const listPermitsController = async (
-  req: Request<never, never, never, Partial<ListPermitsOptions>>,
+  req: Request<never, never, never, ListPermitsRequest>,
   res: Response<Permit[], LocalContext>
 ) => {
-  const options: ListPermitsOptions = {
-    ...req.query,
-    includeNotes: isTruthy(req.query.includeNotes)
-  };
-
-  const response = await listPermitsService(res.locals.currentAuthorization, res.locals.currentContext, options);
+  const response = await listPermitsService(res.locals.currentAuthorization, res.locals.currentContext, req.query);
   res.status(200).json(response);
 };
 
 export const searchPermitsController = async (
-  req: Request<never, never, never, SearchPermitsOptions>,
+  req: Request<never, never, never, SearchPermitsRequest>,
   res: Response<SearchPermitsResponse, LocalContext>
 ) => {
   // Validate it's not PCNS
@@ -69,7 +64,7 @@ export const searchPermitsController = async (
   res.status(200).json(response);
 };
 
-export const upsertPermitController = async (req: Request<never, never, Permit>, res: Response) => {
+export const upsertPermitController = async (req: Request<never, never, UpsertPermitBodyRequest>, res: Response) => {
   const { permitTracking, permitType, permitNote, ...permit } = req.body;
   const response = await upsertPermitService(permit, permitNote, permitTracking, permitType);
   res.status(200).json(response);

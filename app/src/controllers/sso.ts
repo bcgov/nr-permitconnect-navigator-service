@@ -1,10 +1,10 @@
 import { searchIdirUsers } from '#src/external/sso';
 
 import type { Request, Response } from 'express';
-import type { IdirSearchParameters } from '#types';
+import type { SearchIdirUsersRequest } from '#types';
 
 export const searchIdirUsersController = async (
-  req: Request<never, never, never, IdirSearchParameters>,
+  req: Request<never, never, never, SearchIdirUsersRequest>,
   res: Response
 ) => {
   const response = await searchIdirUsers(req.query);

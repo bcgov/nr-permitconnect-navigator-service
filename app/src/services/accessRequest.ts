@@ -9,7 +9,13 @@ import { AccessRequestStatus, GroupName, IdentityProviderKind } from '#src/utils
 import { getLogger } from '#src/utils/log';
 import Problem from '#src/utils/problem';
 
-import type { AccessRequest, CurrentAuthorization, CurrentContext, Group, User } from '#types';
+import type {
+  AccessRequest,
+  CreateUserAccessRequestRequest,
+  CurrentAuthorization,
+  CurrentContext,
+  Group
+} from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 const log = getLogger(module.filename);
@@ -41,8 +47,8 @@ export const getAccessRequestsService = async (initiative: Initiative): Promise<
 export const createAccessRequestService = async (
   currentContext: CurrentContext,
   currentAuthorization: CurrentAuthorization,
-  accessReq: AccessRequest & { update: boolean },
-  accessUser: User
+  accessReq: CreateUserAccessRequestRequest['accessRequest'],
+  accessUser: CreateUserAccessRequestRequest['user']
 ) => {
   return await unitOfWork.execute(
     async ({ accessRequest, group, identityProvider, initiative, subjectGroup, user }) => {
@@ -70,9 +76,10 @@ export const createAccessRequestService = async (
       // Create or get the user that access is being requested for
       let userResponse;
       const existingUser = !!accessUser.userId;
-      if (!existingUser) userResponse = await createUser({ identityProvider, user }, accessUser);
-      else {
+      if (accessUser.userId) {
         userResponse = await user.findById(accessUser.userId);
+      } else {
+        userResponse = await createUser({ identityProvider, user }, accessUser);
       }
 
       if (!userResponse) throw new Problem(404, { detail: 'User not found' });
@@ -107,8 +114,11 @@ export const createAccessRequestService = async (
         );
 
         // Assign new groups
-        await assignGroup({ group, subjectGroup }, userResponse.sub, accessReq.groupId);
-        const correspondingGlobalGroup = await getCorrespondingGlobalGroup({ initiative, group }, accessReq.groupId);
+        await assignGroup({ group, subjectGroup }, userResponse.sub, accessReq.groupId as number);
+        const correspondingGlobalGroup = await getCorrespondingGlobalGroup(
+          { initiative, group },
+          accessReq.groupId as number
+        );
         await assignGroup({ group, subjectGroup }, userResponse.sub, correspondingGlobalGroup.groupId);
 
         updateComsPerms = true;
@@ -123,8 +133,11 @@ export const createAccessRequestService = async (
       } else if (isAdmin) {
         if (accessReq.grant) {
           // Assign new groups
-          await assignGroup({ group, subjectGroup }, userResponse.sub, accessReq.groupId);
-          const correspondingGlobalGroup = await getCorrespondingGlobalGroup({ initiative, group }, accessReq.groupId);
+          await assignGroup({ group, subjectGroup }, userResponse.sub, accessReq.groupId as number);
+          const correspondingGlobalGroup = await getCorrespondingGlobalGroup(
+            { initiative, group },
+            accessReq.groupId as number
+          );
           await assignGroup({ group, subjectGroup }, userResponse.sub, correspondingGlobalGroup.groupId);
 
           // Mock an access request for the response
@@ -149,13 +162,13 @@ export const createAccessRequestService = async (
         const newAccessRequest = {
           accessRequestId: randomUUID(),
           grant: accessReq.grant,
-          groupId: accessReq.groupId,
+          groupId: accessReq.groupId as number,
           status: AccessRequestStatus.PENDING,
-          userId: accessReq.userId
+          userId: accessReq.userId as string
         };
 
         await accessRequest.create(newAccessRequest);
-        data = accessRequest.findFirst({
+        data = await accessRequest.findFirst({
           where: { accessRequestId: newAccessRequest.accessRequestId },
           include: { group: true }
         });
