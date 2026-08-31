@@ -40,6 +40,7 @@ router.get(
   '/:enquiryId',
   hasAuthorization(Resource.ENQUIRY, Action.READ),
   hasAccess('enquiryId'),
+  enquiryValidator.getEnquiry,
   getEnquiryController
 );
 

@@ -39,11 +39,17 @@ router.delete(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.DELETE),
   hasAccess('noteHistoryId'),
+  noteHistoryValidator.deleteNoteHistory,
   deleteNoteHistoryController
 );
 
 /** Get a list of bring forward note histories */
-router.get('/bring-forward', hasAuthorization(Resource.NOTE, Action.READ), listBringForwardsController);
+router.get(
+  '/bring-forward',
+  hasAuthorization(Resource.NOTE, Action.READ),
+  noteHistoryValidator.listBringForwards,
+  listBringForwardsController
+);
 
 /** Get a list of note histories */
 router.get(

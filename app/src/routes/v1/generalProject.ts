@@ -63,7 +63,12 @@ router.get(
 router.get('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectDraftsController);
 
 /** Creates or updates an intake and set status to Draft */
-router.post('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE), upsertGeneralProjectDraftController);
+router.post(
+  '/draft',
+  hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
+  generalProjectValidator.upsertDraft,
+  upsertGeneralProjectDraftController
+);
 
 /** Creates or updates an intake and set status to Submitted */
 router.post(

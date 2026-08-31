@@ -65,6 +65,7 @@ router.get(
 router.post(
   '/draft',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
+  electrificationProjectValidator.upsertDraft,
   upsertElectrificationProjectDraftController
 );
 

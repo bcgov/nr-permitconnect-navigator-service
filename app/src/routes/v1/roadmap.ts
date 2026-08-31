@@ -17,6 +17,11 @@ router.use(requireSomeGroup);
 router.post('/', hasAuthorization(Resource.ROADMAP, Action.CREATE), roadmapValidator.send, sendRoadmapController);
 
 /** Get the roadmap note for a project */
-router.get('/note', hasAuthorization(Resource.ROADMAP, Action.READ), getRoadmapNoteController);
+router.get(
+  '/note',
+  hasAuthorization(Resource.ROADMAP, Action.READ),
+  roadmapValidator.getRoadmapNote,
+  getRoadmapNoteController
+);
 
 export default router;
