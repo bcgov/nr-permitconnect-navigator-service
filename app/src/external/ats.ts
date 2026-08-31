@@ -4,7 +4,14 @@ import config from 'config';
 import { getCurrentUsername } from '#src/utils/utils';
 
 import type { AxiosInstance } from 'axios';
-import type { AtsClientResource, AtsEnquiryResource, AtsUserSearchParameters, CurrentContext } from '#types';
+import type {
+  AtsClientResource,
+  AtsEnquiryResource,
+  CreateAtsClientRequest,
+  CreateAtsEnquiryRequest,
+  CurrentContext,
+  SearchAtsUsersRequest
+} from '#types';
 
 /**
  * Gets Auth token using ATS client credentials
@@ -52,7 +59,7 @@ function atsAxios(): AxiosInstance {
  * @param params - The optional search parameters
  * @returns A Promise that resolves to the response from the external api
  */
-export const searchAtsUsers = async (params?: AtsUserSearchParameters) => {
+export const searchAtsUsers = async (params?: SearchAtsUsersRequest) => {
   try {
     const { data, status } = await atsAxios().get('/clients', { params: params });
     return { data, status };
@@ -77,13 +84,16 @@ export const searchAtsUsers = async (params?: AtsUserSearchParameters) => {
  * @param currentContext - The current context of the request
  * @returns A Promise that resolves to the response from the external api
  */
-export const createAtsClient = async (atsClient: AtsClientResource, currentContext: CurrentContext) => {
+export const createAtsClient = async (atsClient: CreateAtsClientRequest, currentContext: CurrentContext) => {
   try {
     const identityProvider = currentContext?.tokenPayload?.identity_provider.toUpperCase();
     // Set the createdBy field to current user with \\ as the separator for the domain and username to match Ats DB
-    atsClient.createdBy = `${identityProvider}\\${getCurrentUsername(currentContext)}`;
+    const payload = {
+      ...atsClient,
+      createdBy: `${identityProvider}\\${getCurrentUsername(currentContext)}`
+    } as AtsClientResource;
 
-    const { data, status } = await atsAxios().post('/clients', atsClient);
+    const { data, status } = await atsAxios().post('/clients', payload);
     return { data, status };
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {
@@ -106,13 +116,16 @@ export const createAtsClient = async (atsClient: AtsClientResource, currentConte
    @param currentContext - The current context of the request
  * @returns A Promise that resolves to the response from the external api
  */
-export const createAtsEnquiry = async (atsEnquiry: AtsEnquiryResource, currentContext: CurrentContext) => {
+export const createAtsEnquiry = async (atsEnquiry: CreateAtsEnquiryRequest, currentContext: CurrentContext) => {
   try {
     const identityProvider = currentContext?.tokenPayload?.identity_provider.toUpperCase();
     // Set the createdBy field to current user with \\ as the separator for the domain and username to match Ats DB
-    atsEnquiry.createdBy = `${identityProvider}\\${getCurrentUsername(currentContext)}`;
+    const payload = {
+      ...atsEnquiry,
+      createdBy: `${identityProvider}\\${getCurrentUsername(currentContext)}`
+    } as AtsEnquiryResource;
 
-    const { data, status } = await atsAxios().post('/enquiries', atsEnquiry);
+    const { data, status } = await atsAxios().post('/enquiries', payload);
     return { data, status };
   } catch (e: unknown) {
     if (axios.isAxiosError(e)) {

@@ -2,14 +2,14 @@ import { WritableRepository } from './writable.ts';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { PrismaTransactionClient } from '#src/db/database';
-import type { SearchPermitsOptions } from '#types';
+import type { SearchPermitsRequest } from '#types';
 
 export class PermitRepository extends WritableRepository<PrismaTransactionClient['permit']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.permit, principal, true);
   }
 
-  public async search(initiativeCode: Exclude<Initiative, Initiative.PCNS>, options: SearchPermitsOptions) {
+  public async search(initiativeCode: Exclude<Initiative, Initiative.PCNS>, options: SearchPermitsRequest) {
     // Determine project table based on initiative, exclude PCNS
     const projectTableMap = {
       [Initiative.ELECTRIFICATION]: 'electrificationProject',

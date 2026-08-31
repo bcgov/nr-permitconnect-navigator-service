@@ -17,8 +17,7 @@ import type {
   HousingProjectBase,
   HousingProjectIntake,
   Permit,
-  PermitTrackingBase,
-  UpsertPermitRequest
+  PermitTrackingBase
 } from '#types';
 
 /**
@@ -95,8 +94,8 @@ export const generateHousingProjectData = async (
   if (!activityId) throw new Error('Failed to generate activity ID');
 
   let basic, housing, location, permits;
-  let appliedPermits: UpsertPermitRequest[] = [],
-    investigatePermits: UpsertPermitRequest[] = [];
+  let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [],
+    investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
   const appliedPermitTrackers: PermitTrackingBase[] = [];
 
   if (data.basic) {

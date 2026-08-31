@@ -9,14 +9,7 @@ import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type {
-  CurrentContext,
-  GeneralProjectBase,
-  GeneralProjectIntake,
-  Permit,
-  PermitTrackingBase,
-  UpsertPermitRequest
-} from '#types';
+import type { CurrentContext, GeneralProjectBase, GeneralProjectIntake, Permit, PermitTrackingBase } from '#types';
 
 /**
  * Transforms intake data to match DB schema
@@ -51,8 +44,8 @@ export const generateGeneralProjectData = async (
   if (!activityId) throw new Error('Failed to generate activity ID');
 
   let basic, location, permits;
-  let appliedPermits: UpsertPermitRequest[] = [],
-    investigatePermits: UpsertPermitRequest[] = [];
+  let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [],
+    investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
   const appliedPermitTrackers: PermitTrackingBase[] = [];
 
   if (data.basic) {

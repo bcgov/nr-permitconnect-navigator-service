@@ -7,10 +7,10 @@ import {
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
-import type { ActivityContact, LocalContext } from '#types';
+import type { ActivityContact, CreateActivityContactRequest, LocalContext, UpdateActivityContactRequest } from '#types';
 
 export const createActivityContactController = async (
-  req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,
+  req: Request<{ activityId: string; contactId: string }, never, CreateActivityContactRequest>,
   res: Response<ActivityContact, LocalContext>
 ) => {
   const response = await createActivityContactService(
@@ -18,7 +18,7 @@ export const createActivityContactController = async (
     res.locals.currentContext,
     req.params.activityId,
     req.params.contactId,
-    req.body.role
+    req.body.role as ActivityContactRole
   );
   res.status(201).json(response);
 };
@@ -37,7 +37,7 @@ export const listActivityContactController = async (req: Request<{ activityId: s
 };
 
 export const updateActivityContactController = async (
-  req: Request<{ activityId: string; contactId: string }, never, { role: ActivityContactRole }>,
+  req: Request<{ activityId: string; contactId: string }, never, UpdateActivityContactRequest>,
   res: Response
 ) => {
   const response = await updateActivityContactService(
@@ -45,7 +45,7 @@ export const updateActivityContactController = async (
     res.locals.currentContext,
     req.params.activityId,
     req.params.contactId,
-    req.body.role
+    req.body.role as ActivityContactRole
   );
   res.status(200).json(response);
 };

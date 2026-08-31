@@ -31,9 +31,13 @@ export const buildNewPermitRecord = (params: {
   stage: PermitStage;
   needed: PermitNeeded;
   state: PermitState;
-  submittedDate?: string | null;
+  submittedDate?: Date | string | null;
   submittedTime?: string | null;
-}): UpsertPermitRequest => ({
+}): Omit<UpsertPermitRequest, 'submittedDate'> & {
+  permitId: string;
+  activityId: string;
+  submittedDate?: Date | string | null;
+} => ({
   permitId: params.permitId,
   permitTypeId: params.permitTypeId,
   activityId: params.activityId,

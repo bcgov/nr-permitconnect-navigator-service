@@ -235,7 +235,7 @@ export const searchEnquiriesService = async (
  */
 export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryRequest): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
-    await enquiry.update({ enquiryId }, data);
+    await enquiry.patch({ enquiryId }, data);
     return await enquiry.findFirstOrThrow({
       where: { enquiryId },
       include: { activity: { include: { activityContact: { include: { contact: true } } } } }

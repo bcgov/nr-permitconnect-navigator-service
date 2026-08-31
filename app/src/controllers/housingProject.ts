@@ -17,13 +17,15 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
+  DraftBase,
+  GetProjectStatisticsRequest,
   HousingProject,
   HousingProjectIntake,
   HousingProjectStatistics,
   SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
-  StatisticsFilters
+  UpsertHousingProjectDraftRequest
 } from '#types';
 
 export const createHousingProjectController = async (
@@ -52,7 +54,7 @@ export const getHousingProjectController = async (
 };
 
 export const getHousingProjectStatisticsController = async (
-  req: Request<never, never, never, StatisticsFilters>,
+  req: Request<never, never, never, GetProjectStatisticsRequest>,
   res: Response<HousingProjectStatistics>
 ) => {
   const response = await getHousingProjectStatisticsService(req.query);
@@ -127,13 +129,13 @@ export const submitHousingProjectDraftController = async (
 };
 
 export const upsertHousingProjectDraftController = async (
-  req: Request<never, never, Draft>,
+  req: Request<never, never, UpsertHousingProjectDraftRequest>,
   res: Response<Draft, LocalContext>
 ) => {
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    req.body,
+    { data: req.body.data as DraftBase['data'] },
     Initiative.HOUSING,
     DraftCode.HOUSING_PROJECT,
     res.locals.currentContext

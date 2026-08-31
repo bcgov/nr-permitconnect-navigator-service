@@ -1,15 +1,9 @@
 import { createDocumentService, deleteDocumentService, listDocumentsService } from '#src/services/document';
 
 import type { Request, Response } from 'express';
+import type { CreateDocumentRequest } from '#types';
 
-export const createDocumentController = async (
-  req: Request<
-    never,
-    never,
-    { documentId: string; activityId: string; filename: string; mimeType: string; filesize: number }
-  >,
-  res: Response
-) => {
+export const createDocumentController = async (req: Request<never, never, CreateDocumentRequest>, res: Response) => {
   const response = await createDocumentService(
     req.body.documentId,
     req.body.activityId,

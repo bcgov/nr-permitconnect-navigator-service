@@ -2,7 +2,7 @@ import axios from 'axios';
 import config from 'config';
 
 import type { AxiosInstance } from 'axios';
-import type { IdirSearchParameters } from '#types';
+import type { SearchIdirUsersRequest } from '#types';
 
 /**
  * Gets Auth token using SSO credentials
@@ -50,7 +50,7 @@ function ssoAxios(): AxiosInstance {
  * @param params - The search parameters
  * @returns A Promise that resolves to the response from the external api
  */
-export const searchIdirUsers = async (params?: IdirSearchParameters) => {
+export const searchIdirUsers = async (params?: SearchIdirUsersRequest) => {
   try {
     const env = config.get('server.env');
     const { data, status } = await ssoAxios().get(`/${env}/azure-idir/users`, { params: params });
