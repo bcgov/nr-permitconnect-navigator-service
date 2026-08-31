@@ -11,7 +11,14 @@ import * as contactService from '#src/services/contact';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { Contact, ContactSearchParameters, LocalContext } from '#types';
+import type {
+  Contact,
+  ContactSearchParameters,
+  GetContactRequest,
+  LocalContext,
+  SearchContactsRequest,
+  UpsertContactRequest
+} from '#types';
 
 vi.mock('config');
 
@@ -55,11 +62,11 @@ describe('deleteContactController', () => {
 describe('getContactController', () => {
   const getSpy = vi.spyOn(contactService, 'getContactService');
 
-  it('calls the service with contactId and coerced includeActivities then responds 200', async () => {
+  it('calls the service with contactId and includeActivities then responds 200', async () => {
     const req = {
       params: { contactId: TEST_CONTACT_1.contactId },
-      query: { includeActivities: 'true' }
-    } as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>;
+      query: { includeActivities: true }
+    } as unknown as Request<{ contactId: string }, never, never, GetContactRequest>;
 
     getSpy.mockResolvedValue(TEST_CONTACT_1);
 
@@ -75,7 +82,7 @@ describe('getContactController', () => {
     const req = {
       params: { contactId: TEST_CONTACT_1.contactId },
       query: {}
-    } as unknown as Request<{ contactId: string }, never, never, { includeActivities?: boolean }>;
+    } as unknown as Request<{ contactId: string }, never, never, GetContactRequest>;
 
     getSpy.mockResolvedValue(TEST_CONTACT_1);
 
@@ -158,9 +165,9 @@ describe('searchContactsController', () => {
       body: {
         userId: 'aaaabbbb-cccc-dddd-eeee-ffff00001111',
         email: 'john@example.com',
-        includeActivities: 'true'
+        includeActivities: true
       }
-    } as unknown as Request<never, never, ContactSearchParameters, never>;
+    } as unknown as Request<never, never, SearchContactsRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -177,10 +184,10 @@ describe('searchContactsController', () => {
     expect(res.json).toHaveBeenCalledWith([TEST_CONTACT_1]);
   });
 
-  it('handles undefined body', async () => {
+  it('handles an empty (defaulted) body', async () => {
     const req = {
-      body: undefined
-    } as unknown as Request<never, never, ContactSearchParameters, never>;
+      body: { includeActivities: false, hasActivity: false }
+    } as unknown as Request<never, never, SearchContactsRequest, never>;
 
     searchSpy.mockResolvedValue([]);
 
@@ -188,7 +195,7 @@ describe('searchContactsController', () => {
 
     expect(searchSpy).toHaveBeenCalledWith(
       expect.objectContaining({
-        includeActivities: undefined
+        includeActivities: false
       })
     );
     expect(res.status).toHaveBeenCalledWith(200);
@@ -202,7 +209,7 @@ describe('upsertContactController', () => {
     const contactWithoutId = { ...TEST_CONTACT_1, contactId: undefined };
     const req = {
       body: contactWithoutId
-    } as unknown as Request<never, never, Contact, never>;
+    } as unknown as Request<never, never, UpsertContactRequest, never>;
 
     upsertSpy.mockResolvedValue([TEST_CONTACT_1]);
 
@@ -223,7 +230,7 @@ describe('upsertContactController', () => {
   it('preserves existing contactId', async () => {
     const req = {
       body: TEST_CONTACT_1
-    } as unknown as Request<never, never, Contact, never>;
+    } as unknown as Request<never, never, UpsertContactRequest, never>;
 
     upsertSpy.mockResolvedValue([TEST_CONTACT_1]);
 

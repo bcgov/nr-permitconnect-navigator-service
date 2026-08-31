@@ -95,9 +95,9 @@ describe('electrificationProject service', () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValueOnce(mockDbResponse as never);
 
       const filters = {
-        dateFrom: '2024-01-01',
-        dateTo: '2024-12-31',
-        monthYear: '2024-01',
+        dateFrom: new Date('2024-01-01'),
+        dateTo: new Date('2024-12-31'),
+        monthYear: new Date('2024-01-01'),
         userId: 'user-123'
       };
 
@@ -269,7 +269,7 @@ describe('electrificationProject service', () => {
   describe('patchElectrificationProjectService', () => {
     it('updates project and returns refetched project', async () => {
       const updateData = {
-        submittedAt: new Date()
+        projectName: 'Updated Name'
       };
       mockRepos.electrificationProject.update.mockResolvedValueOnce({} as never);
       mockRepos.electrificationProject.findFirstOrThrow.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
@@ -282,7 +282,7 @@ describe('electrificationProject service', () => {
       expect(mockRepos.electrificationProject.update).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.update).toHaveBeenCalledWith(
         { electrificationProjectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId },
-        { submittedAt: updateData.submittedAt }
+        { projectName: updateData.projectName }
       );
       expect(mockRepos.electrificationProject.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.findFirstOrThrow).toHaveBeenCalledWith({

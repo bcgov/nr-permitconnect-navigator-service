@@ -13,7 +13,12 @@ import * as accessRequestService from '#src/services/accessRequest';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { AccessRequest, LocalContext, User } from '#types';
+import type {
+  AccessRequest,
+  CreateUserAccessRequestRequest,
+  LocalContext,
+  ProcessUserAccessRequestRequest
+} from '#types';
 
 vi.mock('config');
 
@@ -44,7 +49,7 @@ describe('createUserAccessRequestController', () => {
         accessRequest: TEST_ACCESS_REQUEST_1,
         user: TEST_IDIR_USER_1
       }
-    } as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>;
+    } as unknown as Request<never, never, CreateUserAccessRequestRequest>;
 
     createSpy.mockResolvedValue({ isAdmin: false, data: TEST_ACCESS_REQUEST_1 } as never);
 
@@ -67,7 +72,7 @@ describe('createUserAccessRequestController', () => {
         accessRequest: TEST_ACCESS_REQUEST_1,
         user: TEST_IDIR_USER_1
       }
-    } as unknown as Request<never, never, { accessRequest: AccessRequest & { update: boolean }; user: User }>;
+    } as unknown as Request<never, never, CreateUserAccessRequestRequest>;
 
     createSpy.mockResolvedValue({ isAdmin: true, data: TEST_ACCESS_REQUEST_1 } as never);
 
@@ -86,7 +91,7 @@ describe('processUserAccessRequestController', () => {
     const req = {
       params: { accessRequestId: TEST_ACCESS_REQUEST_1.accessRequestId },
       body: { approve: true }
-    } as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>;
+    } as unknown as Request<{ accessRequestId: string }, never, ProcessUserAccessRequestRequest>;
 
     processSpy.mockResolvedValue(undefined);
 
@@ -102,7 +107,7 @@ describe('processUserAccessRequestController', () => {
     const req = {
       params: { accessRequestId: TEST_ACCESS_REQUEST_1.accessRequestId },
       body: { approve: false }
-    } as unknown as Request<{ accessRequestId: string }, never, { approve: boolean }>;
+    } as unknown as Request<{ accessRequestId: string }, never, ProcessUserAccessRequestRequest>;
 
     processSpy.mockResolvedValue(undefined);
 

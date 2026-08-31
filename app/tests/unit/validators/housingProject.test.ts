@@ -54,10 +54,8 @@ describe('patchHousingProject validator', () => {
   });
 
   it('rejects fields not in the patchable schema', async () => {
-    const res = await request(app)
-      .patch(validParams)
-      .send({ geoJson: { type: 'Point' } });
+    const res = await request(app).patch(validParams).send({ notARealField: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/"geoJson" is not allowed/);
+    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
   });
 });

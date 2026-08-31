@@ -1,5 +1,5 @@
 import { PermitStage, PermitState } from '#src/db/codes/enums';
-import { searchPermitsQuerySchema, upsertPermitBodySchema } from '#src/validators/permit';
+import { schema } from '#src/validators/permit';
 
 const permit = () => ({
   permitId: null,
@@ -26,16 +26,16 @@ const permit = () => ({
   deletedBy: null
 });
 
-describe('permit upsertPermitBodySchema', () => {
+describe('permit upsertPermit body schema', () => {
   it('validates when submittedTime is a valid timetz string', () => {
     const body = {
       ...permit(),
       submittedTime: '07:00:00Z'
     };
 
-    const result = upsertPermitBodySchema.validate(body);
+    const result = schema.upsertPermit.body.safeParse(body);
 
-    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 
   it('fails validation when submittedTime is missing Z', () => {
@@ -44,14 +44,14 @@ describe('permit upsertPermitBodySchema', () => {
       submittedTime: '07:00:00'
     };
 
-    const result = upsertPermitBodySchema.validate(body);
+    const result = schema.upsertPermit.body.safeParse(body);
 
-    expect(result.error).toBeDefined();
-    expect(result.error!.details[0].message).toContain('Must be a valid UTC time string');
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0].message).toContain('Must be a valid UTC time string');
   });
 });
 
-describe('permit searchPermitsQuerySchema', () => {
+describe('permit searchPermits query schema', () => {
   it('validates when all query parameters are provided', () => {
     const query = {
       dateRange: ['2024-01-01', '2024-12-31'],
@@ -64,9 +64,9 @@ describe('permit searchPermitsQuerySchema', () => {
       take: '10'
     };
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 
   it('validates when all query parameters are null', () => {
@@ -81,17 +81,17 @@ describe('permit searchPermitsQuerySchema', () => {
       take: null
     };
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 
   it('validates when query is an empty object', () => {
     const query = {};
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 
   it('fails validation when dateRange has more than two elements', () => {
@@ -99,10 +99,9 @@ describe('permit searchPermitsQuerySchema', () => {
       dateRange: ['2024-01-01', '2024-06-01', '2024-12-31']
     };
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeDefined();
-    expect(result.error!.details[0].message).toContain('must contain 2 items');
+    expect(result.success).toBe(false);
   });
 
   it('fails validation when dateRange contains non-string values', () => {
@@ -110,10 +109,9 @@ describe('permit searchPermitsQuerySchema', () => {
       dateRange: [123, 456]
     };
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeDefined();
-    expect(result.error!.details[0].message).toContain('must be a string');
+    expect(result.success).toBe(false);
   });
 
   it('validates with valid dateRange', () => {
@@ -123,8 +121,8 @@ describe('permit searchPermitsQuerySchema', () => {
       take: '50'
     };
 
-    const result = searchPermitsQuerySchema.validate(query);
+    const result = schema.searchPermits.query.safeParse(query);
 
-    expect(result.error).toBeUndefined();
+    expect(result.success).toBe(true);
   });
 });

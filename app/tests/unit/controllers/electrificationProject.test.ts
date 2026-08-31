@@ -37,7 +37,8 @@ import type {
   ElectrificationProjectStatistics,
   LocalContext,
   PatchElectrificationProjectRequest,
-  StatisticsFilters
+  GetProjectStatisticsRequest,
+  UpsertElectrificationProjectDraftRequest
 } from '#types';
 
 vi.mock('config');
@@ -147,7 +148,7 @@ describe('getElectrificationProjectStatisticsController', () => {
 
     const req = {
       query: { applicationsStatus: 'NEW' }
-    } as unknown as Request<never, never, never, StatisticsFilters>;
+    } as unknown as Request<never, never, never, GetProjectStatisticsRequest>;
 
     statsSpy.mockResolvedValue([mockStats]);
 
@@ -366,10 +367,10 @@ describe('upsertElectrificationProjectDraftController', () => {
   it('calls the service with draft data and draft code, responds 201 when creating', async () => {
     const req = {
       body: {
-        ...TEST_ELECTRIFICATION_DRAFT,
+        data: TEST_ELECTRIFICATION_DRAFT.data,
         draftId: undefined
       }
-    } as unknown as Request<never, never, Draft>;
+    } as unknown as Request<never, never, UpsertElectrificationProjectDraftRequest>;
 
     upsertSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
@@ -378,9 +379,7 @@ describe('upsertElectrificationProjectDraftController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(
       undefined,
-      expect.objectContaining({
-        draftId: undefined
-      }),
+      { data: TEST_ELECTRIFICATION_DRAFT.data },
       Initiative.ELECTRIFICATION,
       DraftCode.ELECTRIFICATION_PROJECT,
       TEST_CURRENT_CONTEXT
@@ -391,8 +390,8 @@ describe('upsertElectrificationProjectDraftController', () => {
 
   it('calls the service and responds 200 when updating', async () => {
     const req = {
-      body: TEST_ELECTRIFICATION_DRAFT
-    } as unknown as Request<never, never, Draft>;
+      body: { draftId: TEST_ELECTRIFICATION_DRAFT.draftId, data: TEST_ELECTRIFICATION_DRAFT.data }
+    } as unknown as Request<never, never, UpsertElectrificationProjectDraftRequest>;
 
     upsertSpy.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT);
 
@@ -401,7 +400,7 @@ describe('upsertElectrificationProjectDraftController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(
       TEST_ELECTRIFICATION_DRAFT.draftId,
-      TEST_ELECTRIFICATION_DRAFT,
+      { data: TEST_ELECTRIFICATION_DRAFT.data },
       Initiative.ELECTRIFICATION,
       DraftCode.ELECTRIFICATION_PROJECT,
       TEST_CURRENT_CONTEXT

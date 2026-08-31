@@ -182,7 +182,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '1' };
+      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -193,7 +193,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '2' };
+      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '-1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -204,7 +204,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '0' };
+      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '0' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -215,7 +215,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'invalidField', sortOrder: '1' };
+      const options = { skip: '0', take: '10', sortField: 'invalidField', sortOrder: '1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];

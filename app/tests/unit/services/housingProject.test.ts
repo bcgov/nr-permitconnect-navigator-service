@@ -108,9 +108,9 @@ describe('housingProject service', () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValueOnce(mockDbResponse as never);
 
       const filters = {
-        dateFrom: '2024-01-01',
-        dateTo: '2024-12-31',
-        monthYear: '2024-01',
+        dateFrom: new Date('2024-01-01'),
+        dateTo: new Date('2024-12-31'),
+        monthYear: new Date('2024-01-01'),
         userId: 'user-123'
       };
 
@@ -298,7 +298,7 @@ describe('housingProject service', () => {
 
   describe('patchHousingProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId, submittedAt: new Date() };
+      const updateData = { projectName: 'Updated Name' };
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
       mockRepos.housingProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
