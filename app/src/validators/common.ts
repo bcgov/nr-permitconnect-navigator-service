@@ -1,30 +1,40 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { Regex } from '#src/utils/enums/application';
 
-export const activityId = Joi.string().min(8).max(8);
+export const activityId = z.string().min(8).max(8);
 
-export const dateOnlyString = Joi.string()
-  .pattern(new RegExp(Regex.DATE_ONLY))
-  .custom((value: string | number | Date, helpers) => {
+export const dateOnlyString = z
+  .string()
+  .regex(new RegExp(Regex.DATE_ONLY), '"Must be a valid date in the format YYYY-MM-DD"')
+  .superRefine((value, ctx) => {
     const d = new Date(value);
-    const canonical = d.toISOString().slice(0, 10);
-    if (canonical !== value) {
-      return helpers.error('date.invalid');
+    const canonical = Number.isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
+    if (canonical !== value || d.getTime() > Date.now()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: '"Must be a valid date in the format YYYY-MM-DD"' });
     }
-    if (d.getTime() > Date.now()) {
-      return helpers.error('date.max');
-    }
-    return value;
-  }, 'date-only with max-now')
-  .message('"Must be a valid date in the format YYYY-MM-DD"');
+  });
 
-export const email = Joi.string().pattern(new RegExp(Regex.EMAIL));
+export const email = z.string().regex(new RegExp(Regex.EMAIL));
 
-export const phoneNumber = Joi.string().regex(new RegExp(Regex.PHONE_NUMBER));
+// z.coerce.date().max(new Date()) evaluates new Date() once at schema-definition time, not per
+// request - a fixed "now" baked in at server startup that every later timestamp then fails against.
+// This checks against the real current time on every parse instead.
+export const notInFutureDate = (message: string) =>
+  z.coerce.date().refine((d) => d.getTime() <= Date.now(), { message });
 
-export const timeTzString = Joi.string()
-  .pattern(new RegExp(Regex.TIMETZ))
-  .message('Must be a valid UTC time string (HH:MM:SS(.ffffff)Z)');
+export const phoneNumber = z.string().regex(new RegExp(Regex.PHONE_NUMBER));
 
-export const uuidv4 = Joi.string().guid({ version: 'uuidv4' });
+export const timeTzString = z
+  .string()
+  .regex(new RegExp(Regex.TIMETZ), 'Must be a valid UTC time string (HH:MM:SS(.ffffff)Z)');
+
+export const uuidv4 = z.string().uuid();
+
+// Query string values arrive as strings ("true"/"false"), not real booleans - z.coerce.boolean() would
+// wrongly treat "false" as truthy, so parse the two accepted string forms explicitly.
+export const queryBoolean = z.preprocess((value) => {
+  if (value === 'true') return true;
+  if (value === 'false') return false;
+  return value;
+}, z.boolean());

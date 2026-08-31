@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
@@ -11,108 +11,123 @@ import { PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
 import { ProjectApplicant } from '#src/utils/enums/housing';
 
-const schema = {
+export const schema = {
   createGeneralProject: {
-    body: Joi.object({
-      draftId: uuidv4.allow(null),
-      activityId: Joi.string().min(8).max(8).allow(null),
-      contact: contactSchema,
-      appliedPermits: Joi.array().items(appliedPermit).allow(null),
-      basic: Joi.object({
-        projectApplicantType: Joi.string()
-          .required()
-          .valid(...PROJECT_APPLICANT_LIST),
-        projectName: Joi.string().required().max(255).trim(),
-        projectNumber: Joi.string().max(255).trim(),
-        projectDescription: Joi.string().max(4000).allow(null),
-        registeredId: Joi.string().allow(null),
-        registeredName: Joi.when('projectApplicantType', {
-          is: ProjectApplicant.BUSINESS,
-          then: Joi.string().required().max(255).trim(),
-          otherwise: Joi.string().allow(null)
+    body: z.object({
+      draftId: uuidv4.nullish(),
+      activityId: z.string().min(8).max(8).nullish(),
+      contact: contactSchema.optional(),
+      appliedPermits: z.array(appliedPermit).nullish(),
+      basic: z
+        .object({
+          projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
+          projectName: z.string().max(255).trim(),
+          projectNumber: z.string().max(255).trim().optional(),
+          projectDescription: z.string().max(4000).nullish(),
+          registeredId: z.string().nullish(),
+          registeredName: z.string().nullish()
         })
-      }),
-      general: Joi.object({
-        projectName: Joi.string().required().max(255).trim(),
-        projectDescription: Joi.string().max(4000).allow(null)
-      }),
-      location: Joi.any(),
-      investigatePermits: Joi.array()
-        .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
-        .allow(null),
-      permits: Joi.object({
-        appliedPermits: Joi.array().items(appliedPermit).allow(null),
-        hasAppliedProvincialPermits: Joi.string()
-          .required()
-          .valid(...YES_NO_UNSURE_LIST),
-        investigatePermits: Joi.array()
-          .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
-          .allow(null)
-      })
+        .superRefine((data, ctx) => {
+          const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
+          const value = data.registeredName;
+          const isEmpty = value === undefined || value === null || value === '';
+          if (isBusiness && isEmpty) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['registeredName'],
+              message: '"registeredName" is required'
+            });
+          }
+        })
+        .optional(),
+      general: z
+        .object({
+          projectName: z.string().max(255).trim(),
+          projectDescription: z.string().max(4000).nullish()
+        })
+        .optional(),
+      location: z.unknown(),
+      investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish(),
+      permits: z
+        .object({
+          appliedPermits: z.array(appliedPermit).nullish(),
+          hasAppliedProvincialPermits: z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]),
+          investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish()
+        })
+        .optional()
     })
   },
   deleteGeneralProject: {
-    params: Joi.object({
-      generalProjectId: uuidv4.required()
+    params: z.object({
+      generalProjectId: uuidv4
     })
   },
   deleteDraft: {
-    params: Joi.object({
-      draftId: uuidv4.required()
+    params: z.object({
+      draftId: uuidv4
+    })
+  },
+  upsertDraft: {
+    body: z.object({
+      draftId: uuidv4.nullish(),
+      data: z.unknown()
     })
   },
   getStatistics: {
-    query: Joi.object({
-      dateFrom: Joi.date().allow(null),
-      dateTo: Joi.date().allow(null),
-      monthYear: Joi.date().allow(null),
-      userId: uuidv4.allow(null)
+    query: z.object({
+      dateFrom: z.coerce.date().nullish(),
+      dateTo: z.coerce.date().nullish(),
+      monthYear: z.coerce.date().nullish(),
+      userId: uuidv4.nullish()
     })
   },
   getGeneralProject: {
-    params: Joi.object({
-      generalProjectId: uuidv4.required()
+    params: z.object({
+      generalProjectId: uuidv4
     })
   },
   searchGeneralProjects: {
-    body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
-      createdBy: Joi.array().items(Joi.string()),
-      includeUser: Joi.boolean(),
-      generalProjectId: Joi.array().items(uuidv4),
-      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
+    body: z.object({
+      activityId: z.array(z.string()).optional(),
+      createdBy: z.array(z.string()).optional(),
+      includeUser: z.boolean().optional(),
+      generalProjectId: z.array(uuidv4).optional(),
+      submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
     })
   },
   patchGeneralProject: {
-    body: Joi.object({
-      queuePriority: Joi.number().integer().min(0).max(3),
-      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
-      companyNameRegistered: Joi.string().allow(null),
-      companyIdRegistered: Joi.string().allow(null),
-      projectName: Joi.string(),
-      activityType: Joi.string(),
-      projectDescription: Joi.string().allow(null),
-      streetAddress: Joi.string().allow(null).max(255),
-      locality: Joi.string().allow(null).max(255),
-      province: Joi.string().allow(null).max(255),
-      locationPids: Joi.string().allow(null).max(255),
-      latitude: Joi.number().allow(null).max(255),
-      longitude: Joi.number().allow(null).max(255),
-      geomarkUrl: Joi.string().allow(null).max(255),
-      naturalDisaster: Joi.boolean(),
-      projectLocationDescription: Joi.string().allow(null).max(4000),
-      atsClientId: atsValidator.atsEnquirySubmissionFields.atsClientId,
-      atsEnquiryId: atsValidator.atsEnquirySubmissionFields.atsEnquiryId,
-      aaiUpdated: Joi.boolean(),
-      astNotes: Joi.string().allow(null).max(4000),
-      assignedUserId: uuidv4.allow(null),
-      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      region: Joi.string().allow(null),
-      area: Joi.string().allow(null),
-      businessArea: Joi.string().custom(requireValidCode.BusinessArea).allow(null)
-    }),
-    params: Joi.object({
-      generalProjectId: uuidv4.required()
+    body: z
+      .object({
+        queuePriority: z.number().int().min(0).max(3).optional(),
+        submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
+        companyNameRegistered: z.string().nullish(),
+        companyIdRegistered: z.string().nullish(),
+        projectName: z.string().optional(),
+        activityType: z.string().optional(),
+        projectDescription: z.string().nullish(),
+        streetAddress: z.string().max(255).nullish(),
+        locality: z.string().max(255).nullish(),
+        province: z.string().max(255).nullish(),
+        locationPids: z.string().max(255).nullish(),
+        latitude: z.number().max(255).nullish(),
+        longitude: z.number().max(255).nullish(),
+        geomarkUrl: z.string().max(255).nullish(),
+        geoJson: z.unknown().optional(),
+        naturalDisaster: z.boolean().optional(),
+        projectLocationDescription: z.string().max(4000).nullish(),
+        atsClientId: atsValidator.atsEnquirySubmissionFields.atsClientId,
+        atsEnquiryId: atsValidator.atsEnquirySubmissionFields.atsEnquiryId,
+        aaiUpdated: z.boolean().optional(),
+        astNotes: z.string().max(4000).nullish(),
+        assignedUserId: uuidv4.nullish(),
+        applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+        region: z.string().nullish(),
+        area: z.string().nullish(),
+        businessArea: requireValidCode.BusinessArea(z.string()).nullish()
+      })
+      .strict(),
+    params: z.object({
+      generalProjectId: uuidv4
     })
   }
 };
@@ -121,6 +136,7 @@ export default {
   createGeneralProject: validate(schema.createGeneralProject),
   deleteGeneralProject: validate(schema.deleteGeneralProject),
   deleteDraft: validate(schema.deleteDraft),
+  upsertDraft: validate(schema.upsertDraft),
   getStatistics: validate(schema.getStatistics),
   getGeneralProject: validate(schema.getGeneralProject),
   searchGeneralProjects: validate(schema.searchGeneralProjects),

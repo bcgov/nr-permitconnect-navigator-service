@@ -1,25 +1,25 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { activityId, uuidv4 } from './common.ts';
 import { validate } from '#src/middleware/validation';
 
-const schema = {
+export const schema = {
   createDocument: {
-    body: Joi.object({
+    body: z.object({
       activityId: activityId,
-      documentId: uuidv4.required(),
-      filename: Joi.string().max(255).required(),
-      mimeType: Joi.string().min(0).max(255),
-      filesize: Joi.number().required()
+      documentId: uuidv4,
+      filename: z.string().max(255),
+      mimeType: z.string().max(255).optional(),
+      filesize: z.number()
     })
   },
   deleteDocument: {
-    params: Joi.object({
-      documentId: Joi.string().max(255).required()
+    params: z.object({
+      documentId: z.string().max(255)
     })
   },
   listDocuments: {
-    params: Joi.object({
+    params: z.object({
       activityId: activityId
     })
   }

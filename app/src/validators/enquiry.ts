@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
@@ -10,38 +10,41 @@ import {
   ENQUIRY_TYPE_LIST
 } from '#src/utils/constants/projectCommon';
 
-const schema = {
+export const schema = {
   createEnquiry: {
-    body: Joi.object({
+    body: z.object({
       contact: contactSchema,
-      enquiryDescription: Joi.string().allow(null), // allow null for creating an enquiry from the nav side
-      relatedActivityId: Joi.string().max(255).allow(null),
-      submissionType: Joi.string()
-        .valid(...ENQUIRY_TYPE_LIST)
-        .allow(null)
+      enquiryDescription: z.string().nullish(), // allow null for creating an enquiry from the nav side
+      relatedActivityId: z.string().max(255).nullish(),
+      submissionType: z.enum(ENQUIRY_TYPE_LIST as [string, ...string[]]).nullish()
     })
   },
   deleteEnquiry: {
-    params: Joi.object({
-      enquiryId: uuidv4.required()
+    params: z.object({
+      enquiryId: uuidv4
+    })
+  },
+  getEnquiry: {
+    params: z.object({
+      enquiryId: uuidv4
     })
   },
   searchEnquiries: {
-    body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
-      createdBy: Joi.array().items(Joi.string()),
-      enquiryId: Joi.array().items(Joi.string()),
-      includeUser: Joi.boolean()
+    body: z.object({
+      activityId: z.array(z.string()).optional(),
+      createdBy: z.array(z.string()).optional(),
+      enquiryId: z.array(z.string()).optional(),
+      includeUser: z.boolean().optional()
     })
   },
   patchEnquiry: {
-    body: Joi.object({
-      submissionType: Joi.string().allow(null),
-      relatedActivityId: Joi.string().max(255).allow(null),
-      enquiryDescription: Joi.string().min(0).allow(null),
-      assignedUserId: uuidv4.allow(null),
-      enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      submittedMethod: Joi.string().valid(...ENQUIRY_SUBMITTED_METHOD),
+    body: z.object({
+      submissionType: z.string().nullish(),
+      relatedActivityId: z.string().max(255).nullish(),
+      enquiryDescription: z.string().nullish(),
+      assignedUserId: uuidv4.nullish(),
+      enquiryStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+      submittedMethod: z.enum(ENQUIRY_SUBMITTED_METHOD as [string, ...string[]]).optional(),
       ...atsValidator.atsEnquirySubmissionFields
     })
   }
@@ -50,6 +53,7 @@ const schema = {
 export default {
   createEnquiry: validate(schema.createEnquiry),
   deleteEnquiry: validate(schema.deleteEnquiry),
+  getEnquiry: validate(schema.getEnquiry),
   searchEnquiries: validate(schema.searchEnquiries),
   patchEnquiry: validate(schema.patchEnquiry)
 };

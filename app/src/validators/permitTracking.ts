@@ -1,17 +1,17 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { createStamps } from './stamps.ts';
 
-export const permitTrackingSchema = Joi.array()
-  .items(
-    Joi.object({
-      trackingId: Joi.string().allow(null),
-      permitTrackingId: Joi.number().allow(null),
-      shownToProponent: Joi.boolean().allow(null),
-      sourceSystemKindId: Joi.number().allow(null),
-      sourceSystemKind: Joi.object({}).allow(null),
-      permitId: Joi.string().allow(null),
+export const permitTrackingSchema = z
+  .array(
+    z.object({
+      trackingId: z.string().nullish(),
+      permitTrackingId: z.number().nullish(),
+      shownToProponent: z.boolean().nullish(),
+      sourceSystemKindId: z.number().nullish(),
+      sourceSystemKind: z.object({}).nullish(),
+      permitId: z.string().nullish(),
       ...createStamps
     })
   )
-  .allow(null);
+  .optional();

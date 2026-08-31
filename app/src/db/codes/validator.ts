@@ -1,24 +1,26 @@
+import { z } from 'zod';
+
 import { codeTable } from './cache.ts';
 
-import type { CustomHelpers } from 'joi';
-import type { CodeTableName, ValidatorFunction } from '#types';
+import type { CodeTableName } from '#types';
 
 /**
- * A Proxy that dynamically generates runtime validation functions for code tables.
+ * A Proxy that dynamically generates code-table-membership refinements.
+ * Usage: requireValidCode.PermitState(z.string().max(255)) - wraps a base schema with a code-table check.
  */
-export const requireValidCode = new Proxy({} as Record<CodeTableName, ValidatorFunction>, {
-  get: (_target, prop: string) => {
-    const tableName = prop as CodeTableName;
-
-    // This closure is what Joi executes at runtime
-    return (value: string, helpers: CustomHelpers) => {
-      const validCodes = codeTable[tableName]?.codes || [];
-
-      if (!validCodes.includes(value)) {
-        return helpers.error('any.only', { valids: validCodes });
-      }
-
-      return value;
-    };
+export const requireValidCode = new Proxy(
+  {} as Record<CodeTableName, <T extends z.ZodTypeAny>(base: T) => z.ZodEffects<T>>,
+  {
+    get: (_target, prop: string) => {
+      const tableName = prop as CodeTableName;
+      return <T extends z.ZodTypeAny>(base: T) =>
+        base.refine(
+          (value) => {
+            const validCodes = codeTable[tableName]?.codes || [];
+            return validCodes.includes(value as string);
+          },
+          () => ({ message: `Must be a valid ${tableName} code` })
+        );
+    }
   }
-});
+);

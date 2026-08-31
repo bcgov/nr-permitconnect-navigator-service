@@ -1,4 +1,4 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
@@ -12,151 +12,163 @@ import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/consta
 import { BasicResponse } from '#src/utils/enums/application';
 import { ProjectApplicant } from '#src/utils/enums/housing';
 
-const schema = {
+const unitsList = z.enum(NUM_RESIDENTIAL_UNITS_LIST as [string, ...string[]]);
+const yesNoUnsure = z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]);
+
+export const schema = {
   createHousingProject: {
-    body: Joi.object({
-      draftId: uuidv4.allow(null),
-      activityId: activityId.allow(null),
-      contact: contactSchema,
-      basic: Joi.object({
-        consentToFeedback: Joi.boolean(),
-        projectApplicantType: Joi.string()
-          .required()
-          .valid(...PROJECT_APPLICANT_LIST),
-        projectName: Joi.string().required().max(255).trim(),
-        projectDescription: Joi.string().max(4000).allow(null),
-        registeredId: Joi.string().allow(null),
-        registeredName: Joi.when('projectApplicantType', {
-          is: ProjectApplicant.BUSINESS,
-          then: Joi.string().required().max(255).trim(),
-          otherwise: Joi.string().allow(null)
+    body: z.object({
+      draftId: uuidv4.nullish(),
+      activityId: activityId.nullish(),
+      contact: contactSchema.optional(),
+      basic: z
+        .object({
+          consentToFeedback: z.boolean().optional(),
+          projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
+          projectName: z.string().max(255).trim(),
+          projectDescription: z.string().max(4000).nullish(),
+          registeredId: z.string().nullish(),
+          registeredName: z.string().nullish()
         })
-      }),
-      housing: housing,
-      location: Joi.any(),
-      permits: Joi.object({
-        appliedPermits: Joi.array().items(appliedPermit).allow(null),
-        hasAppliedProvincialPermits: Joi.string()
-          .required()
-          .valid(...YES_NO_UNSURE_LIST),
-        investigatePermits: Joi.array()
-          .items(Joi.object({ permitTypeId: Joi.number().allow(null) }))
-          .allow(null)
-      })
+        .superRefine((data, ctx) => {
+          const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
+          const value = data.registeredName;
+          const isEmpty = value === undefined || value === null || value === '';
+          if (isBusiness && isEmpty) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: ['registeredName'],
+              message: '"registeredName" is required'
+            });
+          }
+        })
+        .optional(),
+      housing: housing.optional(),
+      location: z.unknown(),
+      permits: z
+        .object({
+          appliedPermits: z.array(appliedPermit).nullish(),
+          hasAppliedProvincialPermits: yesNoUnsure,
+          investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish()
+        })
+        .optional()
     })
   },
   emailConfirmation: {
-    body: Joi.object({
-      bcc: Joi.array().items(email).allow(null),
-      bodyType: Joi.string().required().allow(null),
-      body: Joi.string().required(),
-      cc: Joi.array().items(email),
-      from: email.required(),
-      subject: Joi.string().required(),
-      to: Joi.array().items(email).required()
+    body: z.object({
+      bcc: z.array(email).nullish(),
+      bodyType: z.string(),
+      body: z.string(),
+      cc: z.array(email).optional(),
+      from: email,
+      subject: z.string(),
+      to: z.array(email)
     })
   },
   deleteHousingProject: {
-    params: Joi.object({
-      housingProjectId: uuidv4.required()
+    params: z.object({
+      housingProjectId: uuidv4
     })
   },
   deleteDraft: {
-    params: Joi.object({
-      draftId: uuidv4.required()
+    params: z.object({
+      draftId: uuidv4
+    })
+  },
+  upsertDraft: {
+    body: z.object({
+      draftId: uuidv4.nullish(),
+      data: z.unknown()
     })
   },
   getStatistics: {
-    query: Joi.object({
-      dateFrom: Joi.date().allow(null),
-      dateTo: Joi.date().allow(null),
-      monthYear: Joi.date().allow(null),
-      userId: uuidv4.allow(null)
+    query: z.object({
+      dateFrom: z.coerce.date().nullish(),
+      dateTo: z.coerce.date().nullish(),
+      monthYear: z.coerce.date().nullish(),
+      userId: uuidv4.nullish()
     })
   },
   getHousingProject: {
-    params: Joi.object({
-      housingProjectId: uuidv4.required()
+    params: z.object({
+      housingProjectId: uuidv4
     })
   },
   searchHousingProjects: {
-    body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
-      createdBy: Joi.array().items(Joi.string()),
-      includeUser: Joi.boolean(),
-      housingProjectId: Joi.array().items(uuidv4),
-      submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
+    body: z.object({
+      activityId: z.array(z.string()).optional(),
+      createdBy: z.array(z.string()).optional(),
+      includeUser: z.boolean().optional(),
+      housingProjectId: z.array(uuidv4).optional(),
+      submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
     })
   },
   patchHousingProject: {
-    body: Joi.object({
-      consentToFeedback: Joi.boolean(),
-      queuePriority: Joi.number().integer().min(0).max(3),
-      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
-      companyNameRegistered: Joi.string().allow(null),
-      companyIdRegistered: Joi.string().allow(null),
-      projectName: Joi.string(),
-      projectDescription: Joi.string().allow(null),
-      singleFamilyUnits: Joi.string()
-        .allow(null)
-        .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-      multiFamilyUnits: Joi.string()
-        .allow(null)
-        .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-      otherUnitsDescription: Joi.string().allow(null).max(255),
-      otherUnits: Joi.when('otherUnitsDescription', {
-        is: BasicResponse.YES,
-        then: Joi.string()
-          .required()
-          .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-        otherwise: Joi.string().allow(null)
+    body: z
+      .object({
+        consentToFeedback: z.boolean().optional(),
+        financiallySupported: z.boolean().optional(),
+        queuePriority: z.number().int().min(0).max(3).optional(),
+        submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
+        companyNameRegistered: z.string().nullish(),
+        companyIdRegistered: z.string().nullish(),
+        projectName: z.string().optional(),
+        projectDescription: z.string().nullish(),
+        singleFamilyUnits: unitsList.nullish(),
+        multiFamilyUnits: unitsList.nullish(),
+        otherUnitsDescription: z.string().max(255).nullish(),
+        otherUnits: unitsList.nullish(),
+        hasRentalUnits: yesNoUnsure.optional(),
+        rentalUnits: unitsList.nullish(),
+        financiallySupportedBc: yesNoUnsure.optional(),
+        financiallySupportedIndigenous: yesNoUnsure.optional(),
+        indigenousDescription: z.string().max(255).nullish(),
+        financiallySupportedNonProfit: yesNoUnsure.optional(),
+        nonProfitDescription: z.string().max(255).nullish(),
+        financiallySupportedHousingCoop: yesNoUnsure.optional(),
+        housingCoopDescription: z.string().max(255).nullish(),
+        streetAddress: z.string().max(255).nullish(),
+        locality: z.string().max(255).nullish(),
+        province: z.string().max(255).nullish(),
+        locationPids: z.string().max(255).nullish(),
+        latitude: z.number().max(255).nullish(),
+        longitude: z.number().max(255).nullish(),
+        geomarkUrl: z.string().max(255).nullish(),
+        geoJson: z.unknown().optional(),
+        naturalDisaster: z.boolean().optional(),
+        projectLocationDescription: z.string().max(4000).nullish(),
+        ...atsValidator.atsEnquirySubmissionFields,
+        ltsaCompleted: z.boolean().optional(),
+        bcOnlineCompleted: z.boolean().optional(),
+        aaiUpdated: z.boolean().optional(),
+        astNotes: z.string().max(4000).nullish(),
+        assignedUserId: uuidv4.nullish(),
+        applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional()
+      })
+      .strict()
+      .superRefine((data, ctx) => {
+        // Joi .when(..., { otherwise: allow(null) }) - deliberately not `forbidden()` here,
+        // unlike housing.ts's create-time rule. Only enforce the "required when condition met" half.
+        const requiredWhen: [
+          boolean,
+          'otherUnits' | 'rentalUnits' | 'indigenousDescription' | 'nonProfitDescription' | 'housingCoopDescription'
+        ][] = [
+          [data.otherUnitsDescription === BasicResponse.YES, 'otherUnits'],
+          [data.hasRentalUnits === BasicResponse.YES, 'rentalUnits'],
+          [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription'],
+          [data.financiallySupportedNonProfit === BasicResponse.YES, 'nonProfitDescription'],
+          [data.financiallySupportedHousingCoop === BasicResponse.YES, 'housingCoopDescription']
+        ];
+        for (const [conditionMet, field] of requiredWhen) {
+          const value = data[field];
+          const isEmpty = value === undefined || value === null || value === '';
+          if (conditionMet && isEmpty) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: `"${field}" is required` });
+          }
+        }
       }),
-      hasRentalUnits: Joi.string().valid(...YES_NO_UNSURE_LIST),
-      rentalUnits: Joi.when('hasRentalUnits', {
-        is: BasicResponse.YES,
-        then: Joi.string()
-          .required()
-          .valid(...NUM_RESIDENTIAL_UNITS_LIST),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedBc: Joi.string().valid(...YES_NO_UNSURE_LIST),
-      financiallySupportedIndigenous: Joi.string().valid(...YES_NO_UNSURE_LIST),
-      indigenousDescription: Joi.when('financiallySupportedIndigenous', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedNonProfit: Joi.string().valid(...YES_NO_UNSURE_LIST),
-      nonProfitDescription: Joi.when('financiallySupportedNonProfit', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
-      financiallySupportedHousingCoop: Joi.string().valid(...YES_NO_UNSURE_LIST),
-      housingCoopDescription: Joi.when('financiallySupportedHousingCoop', {
-        is: BasicResponse.YES,
-        then: Joi.string().required().max(255),
-        otherwise: Joi.string().allow(null)
-      }),
-      streetAddress: Joi.string().allow(null).max(255),
-      locality: Joi.string().allow(null).max(255),
-      province: Joi.string().allow(null).max(255),
-      locationPids: Joi.string().allow(null).max(255),
-      latitude: Joi.number().allow(null).max(255),
-      longitude: Joi.number().allow(null).max(255),
-      geomarkUrl: Joi.string().allow(null).max(255),
-      naturalDisaster: Joi.boolean(),
-      projectLocationDescription: Joi.string().allow(null).max(4000),
-      ...atsValidator.atsEnquirySubmissionFields,
-      ltsaCompleted: Joi.boolean(),
-      bcOnlineCompleted: Joi.boolean(),
-      aaiUpdated: Joi.boolean(),
-      astNotes: Joi.string().allow(null).max(4000),
-      assignedUserId: uuidv4.allow(null),
-      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST)
-    }),
-    params: Joi.object({
-      housingProjectId: uuidv4.required()
+    params: z.object({
+      housingProjectId: uuidv4
     })
   }
 };
@@ -166,6 +178,7 @@ export default {
   emailConfirmation: validate(schema.emailConfirmation),
   deleteHousingProject: validate(schema.deleteHousingProject),
   deleteDraft: validate(schema.deleteDraft),
+  upsertDraft: validate(schema.upsertDraft),
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),
   patchHousingProject: validate(schema.patchHousingProject),

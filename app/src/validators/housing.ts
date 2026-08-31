@@ -1,74 +1,59 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '#src/utils/constants/housing';
 import { BasicResponse } from '#src/utils/enums/application';
 
-export const housing = Joi.object({
-  financiallySupportedBc: Joi.string()
-    .required()
-    .valid(...YES_NO_UNSURE_LIST),
-  financiallySupportedIndigenous: Joi.string()
-    .required()
-    .valid(...YES_NO_UNSURE_LIST),
-  financiallySupportedNonProfit: Joi.string()
-    .required()
-    .valid(...YES_NO_UNSURE_LIST),
-  financiallySupportedHousingCoop: Joi.string()
-    .required()
-    .valid(...YES_NO_UNSURE_LIST),
-  hasRentalUnits: Joi.string()
-    .required()
-    .valid(...YES_NO_UNSURE_LIST),
-  housingCoopDescription: Joi.when('financiallySupportedHousingCoop', {
-    is: BasicResponse.YES,
-    then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.forbidden()
-  }),
-  indigenousDescription: Joi.when('financiallySupportedIndigenous', {
-    is: BasicResponse.YES,
-    then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.forbidden()
-  }),
-  multiFamilySelected: Joi.boolean().allow(null),
-  multiFamilyUnits: Joi.when('multiFamilySelected', {
-    is: true,
-    then: Joi.string()
-      .valid(...NUM_RESIDENTIAL_UNITS_LIST)
-      .required(),
-    otherwise: Joi.forbidden()
-  }),
-  nonProfitDescription: Joi.when('financiallySupportedNonProfit', {
-    is: BasicResponse.YES,
-    then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.forbidden()
-  }),
-  otherSelected: Joi.boolean().allow(null),
-  otherUnits: Joi.when('otherSelected', {
-    is: true,
-    then: Joi.string()
-      .valid(...NUM_RESIDENTIAL_UNITS_LIST)
-      .required(),
-    otherwise: Joi.forbidden()
-  }),
-  otherUnitsDescription: Joi.when('otherSelected', {
-    is: true,
-    then: Joi.string().required().max(255).trim(),
-    otherwise: Joi.forbidden()
-  }),
-  rentalUnits: Joi.when('hasRentalUnits', {
-    is: BasicResponse.YES,
-    then: Joi.string()
-      .valid(...NUM_RESIDENTIAL_UNITS_LIST)
-      .required(),
-    otherwise: Joi.forbidden()
-  }),
-  singleFamilySelected: Joi.boolean().allow(null),
-  singleFamilyUnits: Joi.when('singleFamilySelected', {
-    is: true,
-    then: Joi.string()
-      .valid(...NUM_RESIDENTIAL_UNITS_LIST)
-      .required(),
-    otherwise: Joi.forbidden()
-  })
-}).or('singleFamilySelected', 'multiFamilySelected', 'otherSelected');
+const yesNoUnsure = z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]);
+const unitsList = z.enum(NUM_RESIDENTIAL_UNITS_LIST as [string, ...string[]]);
+
+const baseHousing = z.object({
+  financiallySupportedBc: yesNoUnsure,
+  financiallySupportedIndigenous: yesNoUnsure,
+  financiallySupportedNonProfit: yesNoUnsure,
+  financiallySupportedHousingCoop: yesNoUnsure,
+  hasRentalUnits: yesNoUnsure,
+  housingCoopDescription: z.string().max(255).trim().optional(),
+  indigenousDescription: z.string().max(255).trim().optional(),
+  multiFamilySelected: z.boolean().nullish(),
+  multiFamilyUnits: unitsList.optional(),
+  nonProfitDescription: z.string().max(255).trim().optional(),
+  otherSelected: z.boolean().nullish(),
+  otherUnits: unitsList.optional(),
+  otherUnitsDescription: z.string().max(255).trim().optional(),
+  rentalUnits: unitsList.optional(),
+  singleFamilySelected: z.boolean().nullish(),
+  singleFamilyUnits: unitsList.optional()
+});
+
+type HousingShape = z.infer<typeof baseHousing>;
+
+export const housing = baseHousing.superRefine((data, ctx) => {
+  const conditionals: [boolean, keyof HousingShape][] = [
+    [data.financiallySupportedHousingCoop === BasicResponse.YES, 'housingCoopDescription'],
+    [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription'],
+    [data.financiallySupportedNonProfit === BasicResponse.YES, 'nonProfitDescription'],
+    [data.multiFamilySelected === true, 'multiFamilyUnits'],
+    [data.otherSelected === true, 'otherUnits'],
+    [data.otherSelected === true, 'otherUnitsDescription'],
+    [data.hasRentalUnits === BasicResponse.YES, 'rentalUnits'],
+    [data.singleFamilySelected === true, 'singleFamilyUnits']
+  ];
+  for (const [conditionMet, field] of conditionals) {
+    const value = data[field];
+    const isEmpty = value === undefined || value === null || value === '';
+    if (conditionMet && isEmpty) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: `"${field}" is required` });
+    } else if (!conditionMet && !isEmpty) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: `"${field}" is not allowed` });
+    }
+  }
+
+  // Joi's .or() is presence-based, not truthiness-based - check key existence, not value
+  if (!('singleFamilySelected' in data) && !('multiFamilySelected' in data) && !('otherSelected' in data)) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'must contain at least one of singleFamilySelected, multiFamilySelected, otherSelected'
+    });
+  }
+});

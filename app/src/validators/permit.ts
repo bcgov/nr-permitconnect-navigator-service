@@ -1,6 +1,6 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
-import { activityId, dateOnlyString, timeTzString, uuidv4 } from './common.ts';
+import { activityId, dateOnlyString, notInFutureDate, queryBoolean, timeTzString, uuidv4 } from './common.ts';
 import { paginationOptions } from './paginationOptions.ts';
 import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
@@ -9,75 +9,73 @@ import { createStamps } from './stamps.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
 
-const sharedPermitSchema = {
-  permitType: permitTypeSchema,
-  permitId: Joi.string().allow(null),
-  permitTypeId: Joi.number().max(255).required(),
-  activityId: activityId,
-  issuedPermitId: Joi.string().allow(null),
-  permitNote: Joi.array().items(Joi.object(sharedPermitNoteSchema).allow(null)).allow(null),
-  permitTracking: permitTrackingSchema,
-  needed: Joi.string().max(255).required(),
-  state: Joi.string().max(255).required().custom(requireValidCode.PermitState),
-  stage: Joi.string().max(255).required().custom(requireValidCode.PermitStage),
-  onHoldCode: Joi.string().max(255).allow(null).custom(requireValidCode.PiesOnHold),
-  submittedDate: dateOnlyString.allow(null),
-  submittedTime: timeTzString.allow(null),
-  decisionDate: dateOnlyString.allow(null),
-  decisionTime: timeTzString.allow(null),
-  statusLastChanged: dateOnlyString.allow(null),
-  statusLastChangedTime: timeTzString.allow(null),
-  statusLastVerified: dateOnlyString.allow(null),
-  statusLastVerifiedTime: timeTzString.allow(null),
-  targetDate: Joi.date().iso().allow(null),
-  targetDateDescription: Joi.string().allow(null).max(255),
-  technicalReviewer: Joi.string().allow(null).max(255),
-  ...createStamps
-};
-
-const schema = {
+export const schema = {
   deletePermit: {
-    params: Joi.object({
-      permitId: uuidv4.required()
+    params: z.object({
+      permitId: uuidv4
     })
   },
   getPermit: {
-    params: Joi.object({
-      permitId: uuidv4.required()
+    params: z.object({
+      permitId: uuidv4
     })
   },
   intakePermit: {
-    body: Joi.array()
-      .items({
-        permitTypeId: Joi.number().max(255).required(),
-        activityId: activityId.required(),
-        trackingId: Joi.string().allow(null),
-        submittedDate: Joi.date().max('now').allow(null)
-      })
+    body: z
+      .array(
+        z.object({
+          permitTypeId: z.number().max(255),
+          activityId: activityId,
+          trackingId: z.string().nullish(),
+          submittedDate: notInFutureDate('"submittedDate" must be smaller than or equal to now').nullish()
+        })
+      )
       .min(1)
-      .required()
   },
   listPermits: {
-    query: Joi.object({
-      activityId: Joi.string().min(8).max(8).allow(null),
-      includeNotes: Joi.boolean().allow(null)
+    query: z.object({
+      activityId: z.string().min(8).max(8).nullish(),
+      includeNotes: queryBoolean.nullish()
     })
   },
   searchPermits: {
-    query: Joi.object({
-      dateRange: Joi.array().items(Joi.string()).length(2).allow(null),
-      permitTypeId: Joi.string().allow(null),
-      searchTag: Joi.string().allow(null),
-      sourceSystemKindId: Joi.string().allow(null)
-    }).concat(paginationOptions)
+    query: z
+      .object({
+        dateRange: z.array(z.string()).length(2).nullish(),
+        permitTypeId: z.string().nullish(),
+        searchTag: z.string().nullish(),
+        sourceSystemKindId: z.string().nullish()
+      })
+      .merge(paginationOptions)
   },
   upsertPermit: {
-    body: Joi.object(sharedPermitSchema)
+    body: z.object({
+      permitType: permitTypeSchema.optional(),
+      permitId: z.string().nullish(),
+      permitTypeId: z.number().max(255),
+      activityId: activityId.optional(),
+      issuedPermitId: z.string().nullish(),
+      permitNote: z.array(z.object(sharedPermitNoteSchema).nullable()).nullish(),
+      permitTracking: permitTrackingSchema,
+      needed: z.string().max(255),
+      state: requireValidCode.PermitState(z.string().max(255)),
+      stage: requireValidCode.PermitStage(z.string().max(255)),
+      onHoldCode: requireValidCode.PiesOnHold(z.string().max(255)).nullish(),
+      submittedDate: dateOnlyString.nullish(),
+      submittedTime: timeTzString.nullish(),
+      decisionDate: dateOnlyString.nullish(),
+      decisionTime: timeTzString.nullish(),
+      statusLastChanged: dateOnlyString.nullish(),
+      statusLastChangedTime: timeTzString.nullish(),
+      statusLastVerified: dateOnlyString.nullish(),
+      statusLastVerifiedTime: timeTzString.nullish(),
+      targetDate: z.coerce.date().nullish(),
+      targetDateDescription: z.string().max(255).nullish(),
+      technicalReviewer: z.string().max(255).nullish(),
+      ...createStamps
+    })
   }
 };
-
-export const upsertPermitBodySchema = schema.upsertPermit.body;
-export const searchPermitsQuerySchema = schema.searchPermits.query;
 
 export default {
   deletePermit: validate(schema.deletePermit),

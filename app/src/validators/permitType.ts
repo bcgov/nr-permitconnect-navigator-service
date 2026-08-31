@@ -1,31 +1,29 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { validate } from '#src/middleware/validation';
 import { Initiative } from '#src/utils/enums/application';
 
-export const permitTypeSchema = Joi.object({
-  permitTypeId: Joi.number().max(255).required(),
-  agency: Joi.string().max(255).required(),
-  division: Joi.string().max(255).allow(null),
-  branch: Joi.string().max(255).allow(null),
-  businessDomain: Joi.string().max(255).allow(null),
-  type: Joi.string().max(255).required(),
-  family: Joi.string().max(255).allow(null),
-  name: Joi.string().max(255).required(),
-  nameSubtype: Joi.string().max(255).allow(null),
-  acronym: Joi.string().max(255).allow(null),
-  infoUrl: Joi.string().max(255).allow(null),
-  trackedInAts: Joi.boolean().required(),
-  sourceSystem: Joi.string().max(255).allow(null),
-  sourceSystemAcronym: Joi.string().max(255).allow(null)
+export const permitTypeSchema = z.object({
+  permitTypeId: z.number().max(255),
+  agency: z.string().max(255),
+  division: z.string().max(255).nullish(),
+  branch: z.string().max(255).nullish(),
+  businessDomain: z.string().max(255).nullish(),
+  type: z.string().max(255),
+  family: z.string().max(255).nullish(),
+  name: z.string().max(255),
+  nameSubtype: z.string().max(255).nullish(),
+  acronym: z.string().max(255).nullish(),
+  infoUrl: z.string().max(255).nullish(),
+  trackedInAts: z.boolean(),
+  sourceSystem: z.string().max(255).nullish(),
+  sourceSystemAcronym: z.string().max(255).nullish()
 });
 
-const schema = {
+export const schema = {
   listPermitTypes: {
-    query: Joi.object({
-      initiative: Joi.string()
-        .valid(...Object.keys(Initiative))
-        .allow(null)
+    query: z.object({
+      initiative: z.enum(Object.keys(Initiative) as [string, ...string[]]).nullish()
     })
   }
 };
