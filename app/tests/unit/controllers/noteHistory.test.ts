@@ -4,7 +4,7 @@ import {
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
-  updateNoteHistoryController
+  patchNoteHistoryController
 } from '#src/controllers/noteHistory';
 import * as noteHistoryService from '#src/services/noteHistory';
 import { Resource } from '#src/utils/enums/application';
@@ -12,7 +12,7 @@ import { BringForwardType } from '#src/utils/enums/projectCommon';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { LocalContext, NoteHistory } from '#types';
+import type { LocalContext, NoteHistory, PatchNoteHistoryRequest } from '#types';
 
 vi.mock('config');
 
@@ -113,34 +113,33 @@ describe('listNoteHistoriesController', () => {
   });
 });
 
-describe('updateNoteHistoryController', () => {
-  const updateSpy = vi.spyOn(noteHistoryService, 'updateNoteHistoryService');
+describe('patchNoteHistoryController', () => {
+  const patchSpy = vi.spyOn(noteHistoryService, 'patchNoteHistoryService');
 
-  it('calls the service with history data and note then responds 200', async () => {
+  it('calls the service with id, patch data, note, and resource then responds 200', async () => {
+    const body = {
+      ...TEST_NOTE_HISTORY_1,
+      note: 'updated note',
+      resource: Resource.ENQUIRY
+    };
+    const { note, resource, ...historyData } = body;
     const req = {
       params: { noteHistoryId: 'nh-123' },
-      body: {
-        ...TEST_NOTE_HISTORY_1,
-        note: 'updated note',
-        resource: Resource.ENQUIRY
-      }
-    } as unknown as Request<
-      { noteHistoryId: string },
-      never,
-      NoteHistory & { note: string | undefined; resource: Resource }
-    >;
+      body
+    } as unknown as Request<{ noteHistoryId: string }, never, PatchNoteHistoryRequest>;
 
-    updateSpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
+    patchSpy.mockResolvedValue(TEST_NOTE_HISTORY_1);
 
-    await updateNoteHistoryController(req, res as unknown as Response<unknown, LocalContext>);
+    await patchNoteHistoryController(req, res as unknown as Response<unknown, LocalContext>);
 
-    expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(
+    expect(patchSpy).toHaveBeenCalledTimes(1);
+    expect(patchSpy).toHaveBeenCalledWith(
+      'nh-123',
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
       TEST_CURRENT_CONTEXT,
-      expect.objectContaining({ noteHistoryId: 'nh-123' }),
-      'updated note',
-      Resource.ENQUIRY
+      historyData,
+      note,
+      resource
     );
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_NOTE_HISTORY_1);

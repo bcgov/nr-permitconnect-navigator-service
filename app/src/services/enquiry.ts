@@ -3,8 +3,15 @@ import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enqu
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
-import type { CurrentAuthorization, CurrentContext, Enquiry, EnquiryIntake, EnquirySearchParameters } from '#types';
+import type {
+  CreateEnquiryResponse,
+  CurrentAuthorization,
+  CurrentContext,
+  Enquiry,
+  EnquiryIntake,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -16,7 +23,7 @@ import type { Initiative } from '#src/utils/enums/application';
 export const createEnquiryService = async (
   currentContext: CurrentContext,
   intakeData: EnquiryIntake
-): Promise<Enquiry> => {
+): Promise<CreateEnquiryResponse> => {
   return await unitOfWork.execute(
     async ({
       activity,
@@ -198,18 +205,14 @@ export const listRelatedEnquiriesService = async (
  * Search and filter for specific enquiries
  * @param currentAuthorization - Authorizations assigned to the current authorized user
  * @param currentContext - Context data of current request
- * @param params Optional filtering parameters
- * @param params.activityId Optional array of uuids representing the activity ID
- * @param params.createdBy Optional array of uuids representing users who created enquiries
- * @param params.enquiryId Optional array of uuids representing the enquiry ID
- * @param params.includeUser Optional boolean representing whether the linked user should be included
- * @param initiative Initiative to search in
+ * @param params - Optional filtering parameters
+ * @param initiative - Initiative to search in
  * @returns A Promise that resolves to an array of enquiries from search params
  */
 export const searchEnquiriesService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: EnquirySearchParameters,
+  params: SearchEnquiriesRequest,
   initiative: Initiative
 ): Promise<Enquiry[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
@@ -226,14 +229,11 @@ export const searchEnquiriesService = async (
 
 /**
  * Updates a specific enquiry
- * @param data Enquiry to update
  * @param enquiryId ID of the enquiry to update
+ * @param data Enquiry to update
  * @returns A Promise that resolves to the updated enquiry
  */
-export const updateEnquiryService = async (
-  data: Omit<Prisma.enquiryUpdateInput, 'enquiryId'>,
-  enquiryId: string
-): Promise<Enquiry> => {
+export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryRequest): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
     await enquiry.update({ enquiryId }, data);
     return await enquiry.findFirstOrThrow({

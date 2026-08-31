@@ -54,7 +54,6 @@ const { options } = useCodeStore();
 
 // Form Schema
 const formSchema = object({
-  activityId: string(),
   bringForwardDate: mixed()
     .nullable()
     .when('type', {
@@ -107,7 +106,6 @@ const shownToProponent: Ref<boolean> = ref(false);
 function initializeFormValues() {
   if (noteHistory) {
     initialFormValues.value = {
-      activityId: noteHistory.activityId,
       bringForwardDate: noteHistory?.bringForwardDate ? new Date(noteHistory.bringForwardDate) : null,
       bringForwardState: noteHistory?.bringForwardState ?? undefined,
       escalateToSupervisor: noteHistory?.escalateToSupervisor,
@@ -180,9 +178,8 @@ async function onSubmit(data: GenericObject) {
       });
     } else {
       if (!resource?.value) throw new Error(t('note.noteForm.resourceNotDef'));
-      await noteHistoryService.putNoteHistory({
+      await noteHistoryService.patchNoteHistory({
         ...body,
-        activityId,
         note: data.note,
         resource: resource.value
       });
@@ -203,7 +200,7 @@ function onTypeChange(e: SelectChangeEvent) {
 
 async function fetchCreatedBy() {
   const userIds = Array.from(new Set(noteHistory?.note?.map((n) => n.createdBy).filter(Boolean))) as [];
-  const users = await userService.listUsers({ userId: userIds });
+  const users = await userService.searchUsers({ userId: userIds });
   users.forEach((u: User) => {
     createdByFullNames.value[u.userId] = u.fullName;
   });

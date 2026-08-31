@@ -3,19 +3,25 @@ import {
   createEnquiryService,
   getEnquiryService,
   listEnquiriesService,
+  patchEnquiryService,
   listRelatedEnquiriesService,
-  searchEnquiriesService,
-  updateEnquiryService
+  searchEnquiriesService
 } from '#src/services/enquiry';
 import { isTruthy } from '#src/utils/utils';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
-import type { Enquiry, EnquiryIntake, EnquirySearchParameters, LocalContext } from '#types';
+import type {
+  CreateEnquiryResponse,
+  Enquiry,
+  EnquiryIntake,
+  LocalContext,
+  PatchEnquiryRequest,
+  SearchEnquiriesRequest
+} from '#types';
 
 export const createEnquiryController = async (
   req: Request<never, never, EnquiryIntake>,
-  res: Response<Enquiry, LocalContext>
+  res: Response<CreateEnquiryResponse, LocalContext>
 ) => {
   // Provide an empty body if POST body is given undefined
   req.body ??= {} as EnquiryIntake;
@@ -54,25 +60,27 @@ export const listRelatedEnquiriesController = async (
 };
 
 export const searchEnquiriesController = async (
-  req: Request<never, never, EnquirySearchParameters | undefined, never>,
+  req: Request<never, never, SearchEnquiriesRequest, never>,
   res: Response<Enquiry[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchEnquiriesService(
     res.locals.currentAuthorization,
     res.locals.currentContext,
     {
       ...req.body,
-      includeUser: isTruthy(req.body?.includeUser)
+      includeUser: isTruthy(req.body.includeUser)
     },
     res.locals.currentContext.initiative
   );
   res.status(200).json(response);
 };
 
-export const updateEnquiryController = async (
-  req: Request<{ enquiryId: string }, never, Omit<Prisma.enquiryUpdateInput, 'enquiryId'>>,
+export const patchEnquiryController = async (
+  req: Request<{ enquiryId: string }, never, PatchEnquiryRequest>,
   res: Response
 ) => {
-  const response = await updateEnquiryService(req.body, req.params.enquiryId);
+  const response = await patchEnquiryService(req.params.enquiryId, req.body);
   res.status(200).json(response);
 };

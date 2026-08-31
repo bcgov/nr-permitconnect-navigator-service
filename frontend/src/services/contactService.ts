@@ -1,7 +1,13 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { Contact, DeleteContactRequest, GetContactRequest, ListContactsRequest, PutContactRequest } from '@/types';
+import type {
+  Contact,
+  DeleteContactRequest,
+  GetContactRequest,
+  ListContactsRequest,
+  UpsertContactRequest
+} from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -69,12 +75,12 @@ export function searchContacts(req: ListContactsRequest): Promise<Contact[]> {
 }
 
 /**
- * Updates the current contact.
- * @param req - The request payload containing updated contact data.
- * @returns A promise resolving to the updated `Contact` resource.
+ * Creates or updates a contact.
+ * @param req - The request payload containing the contact data.
+ * @returns A promise resolving to the saved `Contact` resource.
  */
-export function putContact(req: PutContactRequest): Promise<Contact> {
-  return api.put<Contact>(contactRoutes.root(), req);
+export function upsertContact(req: UpsertContactRequest): Promise<Contact> {
+  return api.post<Contact>(contactRoutes.root(), req);
 }
 
 /**
@@ -91,5 +97,5 @@ export const contactService = {
   deleteContact,
   matchContacts,
   searchContacts,
-  putContact
+  upsertContact
 };

@@ -14,7 +14,7 @@ import type {
   HousingProject,
   PatchHousingProjectRequest,
   ProjectStatistics,
-  ListHousingProjectRequest,
+  SearchHousingProjectRequest,
   SubmitDraftHousingProjectRequest,
   UpsertDraftRequest
 } from '@/types';
@@ -148,7 +148,7 @@ export function patchProject(req: PatchHousingProjectRequest): Promise<HousingPr
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export function searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]> {
+export function searchProjects(req: SearchHousingProjectRequest): Promise<HousingProject[]> {
   return api.post<HousingProject[]>(housingProjectRoutes.search(), req);
 }
 
@@ -160,7 +160,7 @@ export function searchProjects(req: ListHousingProjectRequest): Promise<HousingP
 export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
   const { ...body } = req;
 
-  return api.put<HousingProject>(housingProjectRoutes.submitDraft(), body);
+  return api.post<HousingProject>(housingProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -171,7 +171,7 @@ export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<Hous
 export function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  return api.put<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
+  return api.post<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
 }
 
 /**
@@ -187,7 +187,7 @@ export interface HousingProjectService extends DraftableProjectService<HousingPr
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<HousingProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: ListHousingProjectRequest): Promise<HousingProject[]>;
+  searchProjects(req: SearchHousingProjectRequest): Promise<HousingProject[]>;
   submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }

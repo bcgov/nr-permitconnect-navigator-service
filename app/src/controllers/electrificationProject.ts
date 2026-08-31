@@ -6,23 +6,23 @@ import {
   getElectrificationProjectStatisticsService,
   listElectrificationProjectActivityIdsService,
   listElectrificationProjectsService,
+  patchElectrificationProjectService,
   searchElectrificationProjects,
-  submitElectrificationProjectDraftService,
-  updateElectrificationProjectService
+  submitElectrificationProjectDraftService
 } from '#src/services/electrificationProject';
 import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';
 import { isTruthy } from '#src/utils/utils';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type {
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters,
   ElectrificationProjectStatistics,
   LocalContext,
+  PatchElectrificationProjectRequest,
+  SearchElectrificationProjectRequest,
   StatisticsFilters
 } from '#types';
 
@@ -76,30 +76,23 @@ export const listElectrificationProjectsController = async (
 };
 
 export const searchElectrificationProjectsController = async (
-  req: Request<never, never, ElectrificationProjectSearchParameters | undefined, never>,
+  req: Request<never, never, SearchElectrificationProjectRequest>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
+  req.body ??= {};
+
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
-    includeUser: isTruthy(req.body?.includeUser)
+    includeUser: isTruthy(req.body.includeUser)
   });
   res.status(200).json(response);
 };
 
-export const updateElectrificationProjectController = async (
-  req: Request<
-    { electrificationProjectId: string },
-    never,
-    Omit<Prisma.electrification_projectUpdateInput, 'electrificationProjectId'>
-  >,
+export const patchElectrificationProjectController = async (
+  req: Request<{ electrificationProjectId: string }, never, PatchElectrificationProjectRequest>,
   res: Response
 ) => {
-  const response = await updateElectrificationProjectService(
-    {
-      ...req.body
-    },
-    req.params.electrificationProjectId
-  );
+  const response = await patchElectrificationProjectService(req.params.electrificationProjectId, req.body);
   res.status(200).json(response);
 };
 

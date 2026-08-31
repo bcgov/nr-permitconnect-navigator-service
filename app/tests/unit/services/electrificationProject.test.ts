@@ -266,21 +266,23 @@ describe('electrificationProject service', () => {
     });
   });
 
-  describe('updateElectrificationProjectService', () => {
+  describe('patchElectrificationProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { submittedAt: new Date() };
+      const updateData = {
+        submittedAt: new Date()
+      };
       mockRepos.electrificationProject.update.mockResolvedValueOnce({} as never);
       mockRepos.electrificationProject.findFirstOrThrow.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
 
-      const response = await electrificationProjectService.updateElectrificationProjectService(
-        updateData,
-        TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId
+      const response = await electrificationProjectService.patchElectrificationProjectService(
+        TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId,
+        updateData
       );
 
       expect(mockRepos.electrificationProject.update).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.update).toHaveBeenCalledWith(
         { electrificationProjectId: TEST_ELECTRIFICATION_PROJECT_1.electrificationProjectId },
-        updateData
+        { submittedAt: updateData.submittedAt }
       );
       expect(mockRepos.electrificationProject.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.findFirstOrThrow).toHaveBeenCalledWith({

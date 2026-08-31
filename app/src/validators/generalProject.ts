@@ -83,16 +83,14 @@ const schema = {
       submissionType: Joi.array().items(...SUBMISSION_TYPE_LIST)
     })
   },
-  updateGeneralProject: {
+  patchGeneralProject: {
     body: Joi.object({
-      queuePriority: Joi.number().required().integer().min(0).max(3),
-      submissionType: Joi.string()
-        .required()
-        .valid(...SUBMISSION_TYPE_LIST),
+      queuePriority: Joi.number().integer().min(0).max(3),
+      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
       companyNameRegistered: Joi.string().allow(null),
       companyIdRegistered: Joi.string().allow(null),
-      projectName: Joi.string().required(),
-      activityType: Joi.string().required(),
+      projectName: Joi.string(),
+      activityType: Joi.string(),
       projectDescription: Joi.string().allow(null),
       streetAddress: Joi.string().allow(null).max(255),
       locality: Joi.string().allow(null).max(255),
@@ -101,11 +99,11 @@ const schema = {
       latitude: Joi.number().allow(null).max(255),
       longitude: Joi.number().allow(null).max(255),
       geomarkUrl: Joi.string().allow(null).max(255),
-      naturalDisaster: Joi.boolean().required(),
+      naturalDisaster: Joi.boolean(),
       projectLocationDescription: Joi.string().allow(null).max(4000),
-      ...atsValidator.atsEnquirySubmissionFields,
-      addedToAts: Joi.optional(),
-      aaiUpdated: Joi.boolean().required(),
+      atsClientId: atsValidator.atsEnquirySubmissionFields.atsClientId,
+      atsEnquiryId: atsValidator.atsEnquirySubmissionFields.atsEnquiryId,
+      aaiUpdated: Joi.boolean(),
       astNotes: Joi.string().allow(null).max(4000),
       assignedUserId: uuidv4.allow(null),
       applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
@@ -126,5 +124,5 @@ export default {
   getStatistics: validate(schema.getStatistics),
   getGeneralProject: validate(schema.getGeneralProject),
   searchGeneralProjects: validate(schema.searchGeneralProjects),
-  updateGeneralProject: validate(schema.updateGeneralProject)
+  patchGeneralProject: validate(schema.patchGeneralProject)
 };

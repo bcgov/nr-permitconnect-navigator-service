@@ -3,13 +3,12 @@ import {
   deleteNoteHistoryService,
   listBringForwardsService,
   listNoteHistoriesService,
-  updateNoteHistoryService
+  patchNoteHistoryService
 } from '#src/services/noteHistory';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { Request, Response } from 'express';
-import type { BringForward, LocalContext, NoteHistory } from '#types';
-import type { Resource } from '#src/utils/enums/application';
+import type { BringForward, LocalContext, NoteHistory, PatchNoteHistoryRequest } from '#types';
 import type { BringForwardType } from '#src/utils/enums/projectCommon';
 
 export const createNoteHistoryController = async (
@@ -46,15 +45,16 @@ export const listNoteHistoriesController = async (
   res.status(200).json(response);
 };
 
-export const updateNoteHistoryController = async (
-  req: Request<{ noteHistoryId: string }, never, NoteHistory & { note: string | undefined; resource: Resource }>,
+export const patchNoteHistoryController = async (
+  req: Request<{ noteHistoryId: string }, never, PatchNoteHistoryRequest>,
   res: Response<NoteHistory, LocalContext>
 ) => {
-  const { note, resource, ...history } = req.body;
-  const response = await updateNoteHistoryService(
+  const { note, resource, ...data } = req.body;
+  const response = await patchNoteHistoryService(
+    req.params.noteHistoryId,
     res.locals.currentAuthorization,
     res.locals.currentContext,
-    { ...history, noteHistoryId: req.params.noteHistoryId },
+    data,
     note,
     resource
   );

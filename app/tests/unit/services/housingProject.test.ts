@@ -296,24 +296,25 @@ describe('housingProject service', () => {
     });
   });
 
-  describe('updateHousingProjectService', () => {
+  describe('patchHousingProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { submittedAt: new Date() };
-      mockRepos.housingProject.update.mockResolvedValueOnce({} as never);
+      const updateData = { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId, submittedAt: new Date() };
+      mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
+      mockRepos.housingProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
 
-      const response = await housingProjectService.updateHousingProjectService(
-        updateData,
-        TEST_HOUSING_PROJECT_1.housingProjectId
-      );
-
-      expect(mockRepos.housingProject.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.housingProject.update).toHaveBeenCalledWith(
-        { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId },
+      const response = await housingProjectService.patchHousingProjectService(
+        TEST_HOUSING_PROJECT_1.housingProjectId,
         updateData
       );
-      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledTimes(1);
-      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledWith({
+
+      expect(mockRepos.housingProject.patch).toHaveBeenCalledTimes(1);
+      expect(mockRepos.housingProject.patch).toHaveBeenCalledWith(
+        { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId },
+        { ...updateData, financiallySupported: expect.any(Boolean) }
+      );
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenCalledTimes(2);
+      expect(mockRepos.housingProject.findFirstOrThrow).toHaveBeenLastCalledWith({
         where: {
           housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId
         },

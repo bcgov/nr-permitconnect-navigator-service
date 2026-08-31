@@ -408,7 +408,7 @@ onBeforeMount(async () => {
   const response: SourceSystemKind[] = await sourceSystemKindService.listSourceSystemKinds();
   sourceSystemKinds.value = response.sort(sortForDisplayOrder);
   if (authorization?.updatedBy) {
-    updatedBy.value = (await userService.listUsers({ userId: [authorization?.updatedBy] }))[0];
+    updatedBy.value = (await userService.searchUsers({ userId: [authorization?.updatedBy] }))[0];
   }
 });
 

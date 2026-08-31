@@ -14,9 +14,10 @@ import type {
   CurrentContext,
   GeneralProject,
   GeneralProjectIntake,
-  GeneralProjectSearchParameters,
   GeneralProjectStatistics,
-  Maybe
+  Maybe,
+  PatchGeneralProjectRequest,
+  SearchGeneralProjectRequest
 } from '#types';
 
 export const createGeneralProjectService = async (
@@ -148,7 +149,7 @@ export const getGeneralProjectStatisticsService = async (filters: {
 export const searchGeneralProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: GeneralProjectSearchParameters
+  params: SearchGeneralProjectRequest
 ): Promise<GeneralProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
     const result = await generalProject.search(params);
@@ -209,21 +210,16 @@ export const submitGeneralProjectDraftService = async (
 
 /**
  * Updates a specific general project
- * @param data General project to update
  * @param generalProjectId ID of the project to update
+ * @param data General project to update
  * @returns A Promise that resolves to the updated general project
  */
-export const updateGeneralProjectService = async (
-  data: Omit<Prisma.general_projectUpdateInput, 'generalProjectId'>,
-  generalProjectId: string
+export const patchGeneralProjectService = async (
+  generalProjectId: string,
+  data: PatchGeneralProjectRequest
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(async ({ generalProject }) => {
-    await generalProject.update(
-      {
-        generalProjectId
-      },
-      data
-    );
+    await generalProject.patch({ generalProjectId }, data);
 
     return await generalProject.findFirstOrThrow({
       where: {

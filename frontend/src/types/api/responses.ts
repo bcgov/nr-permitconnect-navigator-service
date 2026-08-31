@@ -1,10 +1,12 @@
 import type { BasicResponse } from '@/utils/enums/application';
-import type { ActivityContact, Group } from './resources';
+import type { ActivityContact, Contact, Enquiry, Group } from './resources';
 import type { SsoIdirUserAttributes } from '../oidc';
 import type { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import type { CodeTableName } from '../common';
 import type { PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
 import type { Code, Permission } from '../ui';
+
+export type CreateEnquiryResponse = Enquiry & { contact: Contact };
 
 export interface CreateObjectResponse {
   id: string;

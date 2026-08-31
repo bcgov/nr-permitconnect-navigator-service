@@ -86,7 +86,7 @@ export function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsRe
  * @returns A promise resolving to the saved permit.
  */
 export function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
-  return api.put<Permit>(permitRoutes.root(), req);
+  return api.post<Permit>(permitRoutes.root(), req);
 }
 
 /**

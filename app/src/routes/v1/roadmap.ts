@@ -14,7 +14,7 @@ router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Send an email with the roadmap data */
-router.put('/', hasAuthorization(Resource.ROADMAP, Action.CREATE), roadmapValidator.send, sendRoadmapController);
+router.post('/', hasAuthorization(Resource.ROADMAP, Action.CREATE), roadmapValidator.send, sendRoadmapController);
 
 /** Get the roadmap note for a project */
 router.get('/note', hasAuthorization(Resource.ROADMAP, Action.READ), getRoadmapNoteController);

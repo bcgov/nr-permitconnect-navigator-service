@@ -11,7 +11,7 @@ import { setEmptyStringsToNull } from '@/utils/utils';
 import { contactSchema } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
-import type { Contact, PutContactRequest } from '@/types';
+import type { Contact, UpsertContactRequest } from '@/types';
 
 // Props
 const { contact, editable } = defineProps<{
@@ -43,8 +43,8 @@ const initialFormValues = ref({
 // Actions
 const onSubmit = async (values: GenericObject) => {
   try {
-    const req: PutContactRequest = setEmptyStringsToNull(values);
-    const result = await contactService.putContact(req);
+    const req: UpsertContactRequest = setEmptyStringsToNull(values);
+    const result = await contactService.upsertContact(req);
 
     formRef.value?.resetForm({
       values: {

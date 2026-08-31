@@ -15,13 +15,13 @@ import {
   getEnquiryService,
   listEnquiriesService,
   listRelatedEnquiriesService,
-  searchEnquiriesService,
-  updateEnquiryService
+  patchEnquiryService,
+  searchEnquiriesService
 } from '#src/services/enquiry';
 import { Initiative } from '#src/utils/enums/application';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
-import type { EnquirySearchParameters } from '#types';
+import type { SearchEnquiriesRequest } from '#types';
 
 vi.mock('config');
 
@@ -217,7 +217,7 @@ describe('enquiry service', () => {
 
   describe('searchEnquiriesService', () => {
     it('searches enquiries via the repository and filters by scope', async () => {
-      const params: EnquirySearchParameters = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
+      const params: SearchEnquiriesRequest = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
       const enquiries = [TEST_ENQUIRY_1];
       mockRepos.enquiry.search.mockResolvedValue(enquiries as never);
       filterSpy.mockResolvedValue(enquiries as never);
@@ -241,16 +241,19 @@ describe('enquiry service', () => {
     });
   });
 
-  describe('updateEnquiryService', () => {
+  describe('patchEnquiryService', () => {
     it('updates the enquiry then returns the refreshed record', async () => {
       const data = { enquiryDescription: 'Updated description' };
       mockRepos.enquiry.update.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.findFirstOrThrow.mockResolvedValue(TEST_ENQUIRY_1 as never);
 
-      const result = await updateEnquiryService(data, TEST_ENQUIRY_1.enquiryId);
+      const result = await patchEnquiryService(TEST_ENQUIRY_1.enquiryId, data);
 
       expect(mockRepos.enquiry.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.enquiry.update).toHaveBeenCalledWith({ enquiryId: TEST_ENQUIRY_1.enquiryId }, data);
+      expect(mockRepos.enquiry.update).toHaveBeenCalledWith(
+        { enquiryId: TEST_ENQUIRY_1.enquiryId },
+        { enquiryDescription: 'Updated description' }
+      );
       expect(mockRepos.enquiry.findFirstOrThrow).toHaveBeenCalledTimes(1);
       expect(mockRepos.enquiry.findFirstOrThrow).toHaveBeenCalledWith({
         where: { enquiryId: TEST_ENQUIRY_1.enquiryId },

@@ -16,9 +16,9 @@ import {
   getElectrificationProjectStatisticsController,
   listElectrificationProjectActivityIdsController,
   listElectrificationProjectsController,
+  patchElectrificationProjectController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
-  updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
 } from '#src/controllers/electrificationProject';
 import * as activityService from '#src/services/activity';
@@ -27,16 +27,16 @@ import * as electrificationProjectService from '#src/services/electrificationPro
 import { Initiative } from '#src/utils/enums/application';
 import { DraftCode } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
   Draft,
   ElectrificationProject,
   ElectrificationProjectIntake,
-  ElectrificationProjectSearchParameters,
+  SearchElectrificationProjectRequest,
   ElectrificationProjectStatistics,
   LocalContext,
+  PatchElectrificationProjectRequest,
   StatisticsFilters
 } from '#types';
 
@@ -206,7 +206,7 @@ describe('searchElectrificationProjectsController', () => {
   it('calls the service with search params and context then responds 200', async () => {
     const req = {
       body: { projectName: 'test' }
-    } as unknown as Request<never, never, ElectrificationProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 
@@ -231,7 +231,7 @@ describe('searchElectrificationProjectsController', () => {
   it('coerces includeUser query parameter to boolean', async () => {
     const req = {
       body: { includeUser: 'true' }
-    } as unknown as Request<never, never, ElectrificationProjectSearchParameters | undefined, never>;
+    } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
     searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
 
@@ -250,22 +250,22 @@ describe('searchElectrificationProjectsController', () => {
   });
 });
 
-describe('updateElectrificationProjectController', () => {
-  const updateSpy = vi.spyOn(electrificationProjectService, 'updateElectrificationProjectService');
+describe('patchElectrificationProjectController', () => {
+  const updateSpy = vi.spyOn(electrificationProjectService, 'patchElectrificationProjectService');
 
   it('calls the service with update data and projectId then responds 200', async () => {
     const updateData = { projectName: 'Updated Name' };
     const req = {
       params: { electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b' },
       body: updateData
-    } as unknown as Request<{ electrificationProjectId: string }, never, Prisma.electrification_projectUpdateInput>;
+    } as unknown as Request<{ electrificationProjectId: string }, never, PatchElectrificationProjectRequest>;
 
     updateSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject);
 
-    await updateElectrificationProjectController(req, res as unknown as Response);
+    await patchElectrificationProjectController(req, res as unknown as Response);
 
     expect(updateSpy).toHaveBeenCalledTimes(1);
-    expect(updateSpy).toHaveBeenCalledWith(updateData, req.params.electrificationProjectId);
+    expect(updateSpy).toHaveBeenCalledWith(req.params.electrificationProjectId, updateData);
     expect(res.status).toHaveBeenCalledWith(200);
     expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1);
   });

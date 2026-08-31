@@ -10,9 +10,9 @@ import {
   getElectrificationProjectStatisticsController,
   listElectrificationProjectActivityIdsController,
   listElectrificationProjectsController,
+  patchElectrificationProjectController,
   searchElectrificationProjectsController,
   submitElectrificationProjectDraftController,
-  updateElectrificationProjectController,
   upsertElectrificationProjectDraftController
 } from '#src/controllers/electrificationProject';
 import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
@@ -62,14 +62,14 @@ router.get(
 );
 
 /** Creates or updates an intake and set status to Draft */
-router.put(
+router.post(
   '/draft',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   upsertElectrificationProjectDraftController
 );
 
 /** Creates or updates an intake and set status to Submitted */
-router.put(
+router.post(
   '/draft/submit',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
   electrificationProjectValidator.createElectrificationProject,
@@ -102,13 +102,13 @@ router.get(
   getElectrificationProjectController
 );
 
-/** Updates a electrification project*/
+/** Patches a electrification project*/
 router.patch(
   '/:electrificationProjectId',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.UPDATE),
   hasAccess('electrificationProjectId'),
-  electrificationProjectValidator.updateElectrificationProject,
-  updateElectrificationProjectController
+  electrificationProjectValidator.patchElectrificationProject,
+  patchElectrificationProjectController
 );
 
 /** Deletes an electrification project */

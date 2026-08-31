@@ -34,7 +34,7 @@ const schema = {
       includeUser: Joi.boolean()
     })
   },
-  updateEnquiry: {
+  patchEnquiry: {
     body: Joi.object({
       submissionType: Joi.string().allow(null),
       relatedActivityId: Joi.string().max(255).allow(null),
@@ -51,5 +51,5 @@ export default {
   createEnquiry: validate(schema.createEnquiry),
   deleteEnquiry: validate(schema.deleteEnquiry),
   searchEnquiries: validate(schema.searchEnquiries),
-  updateEnquiry: validate(schema.updateEnquiry)
+  patchEnquiry: validate(schema.patchEnquiry)
 };

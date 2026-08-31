@@ -8,7 +8,7 @@ import type {
   ListBringForwardsRequest,
   ListNoteHistoriesRequest,
   NoteHistory,
-  PutNoteHistoryRequest
+  PatchNoteHistoryRequest
 } from '@/types';
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -70,14 +70,14 @@ export function listNoteHistories(req: ListNoteHistoriesRequest): Promise<NoteHi
 }
 
 /**
- * Updates a note history record.
- * @param req - The request payload containing the note history ID and updated fields.
+ * Patches a note history record.
+ * @param req - The request payload containing the note history ID and fields to update.
  * @returns A promise resolving to the updated `NoteHistory` resource.
  */
-export function putNoteHistory(req: PutNoteHistoryRequest): Promise<NoteHistory> {
+export function patchNoteHistory(req: PatchNoteHistoryRequest): Promise<NoteHistory> {
   const { noteHistoryId, ...body } = req;
 
-  return api.put<NoteHistory>(noteRoutes.byId(noteHistoryId), body);
+  return api.patch<NoteHistory>(noteRoutes.byId(noteHistoryId), body);
 }
 
 /**
@@ -93,5 +93,5 @@ export const noteHistoryService = {
   deleteNoteHistory,
   listBringForwards,
   listNoteHistories,
-  putNoteHistory
+  patchNoteHistory
 };

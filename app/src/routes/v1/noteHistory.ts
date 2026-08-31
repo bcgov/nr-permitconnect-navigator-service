@@ -5,7 +5,7 @@ import {
   deleteNoteHistoryController,
   listBringForwardsController,
   listNoteHistoriesController,
-  updateNoteHistoryController
+  patchNoteHistoryController
 } from '#src/controllers/noteHistory';
 import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
@@ -25,13 +25,13 @@ router.post(
   createNoteHistoryController
 );
 
-/** Update a note history */
-router.put(
+/** Patch a note history */
+router.patch(
   '/:noteHistoryId',
   hasAuthorization(Resource.NOTE, Action.UPDATE),
   hasAccess('noteHistoryId'),
-  noteHistoryValidator.updateNoteHistory,
-  updateNoteHistoryController
+  noteHistoryValidator.patchNoteHistory,
+  patchNoteHistoryController
 );
 
 /** Delete a note history */

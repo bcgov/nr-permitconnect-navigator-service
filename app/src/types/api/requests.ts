@@ -1,10 +1,169 @@
 import type { ParsedQs } from 'qs';
-import type { DeleteRequestDTO, GetRequestDTO, ListRequestDTO, ResourceSchemaConfig, UpsertRequestDTO } from './dto.ts';
-import type { Permit, PermitBase, Stamps } from './resources.ts';
+import type {
+  CreateRequestDTO,
+  DeleteRequestDTO,
+  GetRequestDTO,
+  ListRequestDTO,
+  PatchRequestDTO,
+  ResourceSchemaConfig,
+  UpsertRequestDTO
+} from './dto.ts';
+import type {
+  ContactBase,
+  ElectrificationProjectBase,
+  EnquiryBase,
+  GeneralProjectBase,
+  HousingProjectBase,
+  NoteHistoryBase,
+  Permit,
+  PermitBase,
+  Stamps
+} from './resources.ts';
+import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes.ts';
 import type { PaginationOptions } from '#src/types/common';
-import type { Nullable } from '#src/types/utils';
-import type { GroupName, Initiative } from '#src/utils/enums/application';
+import type { Nullable, PartialFields } from '#src/types/utils';
+import type { GroupName, Initiative, Resource } from '#src/utils/enums/application';
 import type { EmailTemplate } from '#src/utils/templates';
+
+/**
+ * Contact
+ */
+
+interface ContactBaseSchema extends ResourceSchemaConfig<ContactBase> {
+  ids: 'contactId';
+  immutable: 'contactId';
+  serverGenerated: 'contactId';
+}
+
+export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
+export type UpsertContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
+
+/**
+ * Electrification Project
+ */
+
+interface ElectrificationProjectBaseSchema extends ResourceSchemaConfig<ElectrificationProjectBase> {
+  ids: 'electrificationProjectId';
+  immutable: 'activityId' | 'electrificationProjectId';
+  serverGenerated: 'activityId' | 'electrificationProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    electrificationProjectId: string[];
+    projectType: string[];
+    projectCategory: string[];
+  };
+}
+
+export type CreateElectrificationProjectRequest = CreateRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ElectrificationProjectBaseSchema
+>;
+export type SearchElectrificationProjectRequest = ListRequestDTO<
+  Partial<ElectrificationProjectBase>,
+  ElectrificationProjectBaseSchema
+>;
+export type PatchElectrificationProjectRequest = PatchRequestDTO<
+  ElectrificationProjectBase,
+  ElectrificationProjectBaseSchema
+>;
+export type SubmitDraftElectrificationProjectRequest = ElectrificationProjectIntake;
+
+/**
+ * Enquiry
+ */
+
+interface EnquiryBaseSchema extends ResourceSchemaConfig<EnquiryBase> {
+  ids: 'enquiryId';
+  immutable: 'activityId' | 'enquiryId';
+  serverGenerated: 'activityId' | 'enquiryId';
+}
+interface EnquiryListRelatedSchema extends EnquiryBaseSchema {
+  scope: 'activityId';
+}
+interface EnquirySearchSchema extends EnquiryBaseSchema {
+  query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
+}
+export type CreateEnquiryRequest = PartialFields<
+  Pick<EnquiryBase, 'enquiryDescription' | 'relatedActivityId' | 'submissionType'> & { contact: ContactBase },
+  'submissionType'
+>;
+export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquiryListRelatedSchema>;
+export type SearchEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquirySearchSchema>;
+export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+
+/**
+ * General Project
+ */
+
+interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBase> {
+  ids: 'generalProjectId';
+  immutable: 'activityId' | 'generalProjectId';
+  serverGenerated: 'activityId' | 'generalProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    generalProjectId: string[];
+    submissionType: string[];
+  };
+}
+
+export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type SearchGeneralProjectRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
+export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
+export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
+
+/**
+ * Housing Project
+ */
+
+interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBase> {
+  ids: 'housingProjectId';
+  immutable: 'activityId' | 'housingProjectId';
+  serverGenerated: 'activityId' | 'housingProjectId';
+  query: {
+    activityId: string[];
+    createdBy: string[];
+    includeUser: boolean;
+    housingProjectId: string[];
+    submissionType: string[];
+  };
+}
+
+export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
+export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
+export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
+
+/**
+ * Note History
+ */
+
+interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
+  ids: 'noteHistoryId';
+  immutable: 'activityId' | 'noteHistoryId';
+  serverGenerated: 'noteHistoryId';
+}
+interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
+  query: {
+    bringForwardState: Nullable<string>;
+  };
+}
+interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
+  scope: 'activityId';
+}
+export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
+export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
+export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
+export type PatchNoteHistoryRequest = PatchRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & {
+  note: string | undefined;
+  resource: Resource;
+};
+export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
 
 /**
  * Permit
@@ -41,15 +200,6 @@ export interface ContactSearchParameters {
   includeActivities?: boolean;
 }
 
-export interface ElectrificationProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  electrificationProjectId?: string[];
-  projectType?: string[];
-  projectCategory?: string[];
-  includeUser?: boolean;
-}
-
 export interface Email {
   bcc?: string[];
   bodyType: string;
@@ -70,29 +220,6 @@ export interface EmailAttachment {
   contentType: string;
   encoding: string;
   filename: string;
-}
-
-export interface EnquirySearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  enquiryId?: string[];
-  includeUser?: boolean;
-}
-
-export interface GeneralProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  generalProjectId?: string[];
-  submissionType?: string[];
-  includeUser?: boolean;
-}
-
-export interface HousingProjectSearchParameters {
-  activityId?: string[];
-  createdBy?: string[];
-  housingProjectId?: string[];
-  submissionType?: string[];
-  includeUser?: boolean;
 }
 
 export interface IdirSearchParameters extends ParsedQs {

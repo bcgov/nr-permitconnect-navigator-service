@@ -14,7 +14,7 @@ import type {
   GeneralProject,
   PatchGeneralProjectRequest,
   ProjectStatistics,
-  ListGeneralProjectsRequest,
+  SearchGeneralProjectRequest,
   UpsertDraftRequest,
   SubmitDraftGeneralProjectRequest
 } from '@/types';
@@ -148,7 +148,7 @@ export async function patchProject(req: PatchGeneralProjectRequest): Promise<Gen
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]> {
+export async function searchProjects(req: SearchGeneralProjectRequest): Promise<GeneralProject[]> {
   return api.post<GeneralProject[]>(generalProjectRoutes.search(), req);
 }
 
@@ -160,7 +160,7 @@ export async function searchProjects(req: ListGeneralProjectsRequest): Promise<G
 export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject> {
   const { ...body } = req;
 
-  return api.put<GeneralProject>(generalProjectRoutes.submitDraft(), body);
+  return api.post<GeneralProject>(generalProjectRoutes.submitDraft(), body);
 }
 
 /**
@@ -171,7 +171,7 @@ export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promis
 export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
-  return api.put<Draft<FormSchemaType>>(generalProjectRoutes.draft(), body);
+  return api.post<Draft<FormSchemaType>>(generalProjectRoutes.draft(), body);
 }
 
 /**
@@ -187,7 +187,7 @@ export interface GeneralProjectService extends DraftableProjectService<GeneralPr
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<GeneralProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: ListGeneralProjectsRequest): Promise<GeneralProject[]>;
+  searchProjects(req: SearchGeneralProjectRequest): Promise<GeneralProject[]>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }

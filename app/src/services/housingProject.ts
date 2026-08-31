@@ -4,7 +4,7 @@ import { generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
-import { Initiative } from '#src/utils/enums/application';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
@@ -14,9 +14,10 @@ import type {
   CurrentContext,
   HousingProject,
   HousingProjectIntake,
-  HousingProjectSearchParameters,
   HousingProjectStatistics,
-  Maybe
+  Maybe,
+  PatchHousingProjectRequest,
+  SearchHousingProjectRequest
 } from '#types';
 
 export const createHousingProjectService = async (
@@ -167,7 +168,7 @@ export const listHousingProjectsService = async (
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: HousingProjectSearchParameters
+  params: SearchHousingProjectRequest
 ): Promise<HousingProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);
@@ -231,21 +232,30 @@ export const submitHousingProjectDraftService = async (
 };
 
 /**
- * Updates a specific housing project
- * @param data Housing project to update
+ * Patches a specific housing project
  * @param housingProjectId ID of the project to update
+ * @param data Housing project to update
  * @returns A Promise that resolves to the updated housing project
  */
-export const updateHousingProjectService = async (
-  data: Omit<Prisma.housing_projectUpdateInput, 'housingProjectId'>,
-  housingProjectId: string
+export const patchHousingProjectService = async (
+  housingProjectId: string,
+  data: PatchHousingProjectRequest
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
-    await housingProject.update(
+    const current = await housingProject.findFirstOrThrow({ where: { housingProjectId } });
+
+    const financiallySupported = [
+      data.financiallySupportedBc ?? current.financiallySupportedBc,
+      data.financiallySupportedIndigenous ?? current.financiallySupportedIndigenous,
+      data.financiallySupportedNonProfit ?? current.financiallySupportedNonProfit,
+      data.financiallySupportedHousingCoop ?? current.financiallySupportedHousingCoop
+    ].includes(BasicResponse.YES);
+
+    await housingProject.patch(
       {
         housingProjectId
       },
-      data
+      { ...data, financiallySupported }
     );
 
     return await housingProject.findFirstOrThrow({

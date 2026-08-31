@@ -51,8 +51,7 @@ export type PutRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
 >;
 
 export type PatchRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
-  Pick<T, S['ids']> &
-    Partial<Omit<ClientWritable<T>, S['ids'] | (S['immutable'] extends keyof T ? S['immutable'] : never)>>
+  Partial<Omit<ClientWritable<T>, S['ids'] | (S['immutable'] extends keyof T ? S['immutable'] : never)>>
 >;
 
 export type UpsertRequestDTO<T, S extends ResourceSchemaConfig<T>> = Simplify<
