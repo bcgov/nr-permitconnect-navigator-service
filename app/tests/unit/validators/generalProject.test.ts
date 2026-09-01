@@ -10,6 +10,9 @@ function buildApp() {
   const app = express();
   app.use(express.json());
 
+  app.post('/', generalProjectValidator.createGeneralProject, (req: Request, res: Response) =>
+    res.status(200).json(req.body)
+  );
   app.patch('/:generalProjectId', generalProjectValidator.patchGeneralProject, (req: Request, res: Response) =>
     res.status(200).json(req.body)
   );
@@ -23,6 +26,32 @@ function buildApp() {
 }
 
 const validParams = '/5183f223-526a-44cf-8b6a-80f90c4e802b';
+
+describe('createGeneralProject validator', () => {
+  const app = buildApp();
+
+  it('requires registeredName when projectApplicantType is Business', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project' } });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"registeredName" is required/);
+  });
+
+  it('passes when projectApplicantType is Business and registeredName is provided', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project', registeredName: 'Acme' } });
+    expect(res.status).toBe(200);
+  });
+
+  it('does not require registeredName when projectApplicantType is Individual', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Individual', projectName: 'Test Project' } });
+    expect(res.status).toBe(200);
+  });
+});
 
 describe('patchGeneralProject validator', () => {
   const app = buildApp();

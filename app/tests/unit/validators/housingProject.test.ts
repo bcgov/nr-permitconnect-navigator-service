@@ -10,6 +10,9 @@ function buildApp() {
   const app = express();
   app.use(express.json());
 
+  app.post('/', housingProjectValidator.createHousingProject, (req: Request, res: Response) =>
+    res.status(200).json(req.body)
+  );
   app.patch('/:housingProjectId', housingProjectValidator.patchHousingProject, (req: Request, res: Response) =>
     res.status(200).json(req.body)
   );
@@ -23,6 +26,32 @@ function buildApp() {
 }
 
 const validParams = '/5183f223-526a-44cf-8b6a-80f90c4e802b';
+
+describe('createHousingProject validator', () => {
+  const app = buildApp();
+
+  it('requires registeredName when projectApplicantType is Business', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project' } });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"registeredName" is required/);
+  });
+
+  it('passes when projectApplicantType is Business and registeredName is provided', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project', registeredName: 'Acme' } });
+    expect(res.status).toBe(200);
+  });
+
+  it('does not require registeredName when projectApplicantType is Individual', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ basic: { projectApplicantType: 'Individual', projectName: 'Test Project' } });
+    expect(res.status).toBe(200);
+  });
+});
 
 describe('patchHousingProject validator', () => {
   const app = buildApp();
@@ -51,6 +80,30 @@ describe('patchHousingProject validator', () => {
     const res = await request(app).patch(validParams).send({ otherUnitsDescription: 'Yes' });
     expect(res.status).toBe(422);
     expect(res.body.detail).toMatch(/"otherUnits" is required/);
+  });
+
+  it('still enforces rentalUnits when hasRentalUnits is Yes', async () => {
+    const res = await request(app).patch(validParams).send({ hasRentalUnits: 'Yes' });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"rentalUnits" is required/);
+  });
+
+  it('still enforces indigenousDescription when financiallySupportedIndigenous is Yes', async () => {
+    const res = await request(app).patch(validParams).send({ financiallySupportedIndigenous: 'Yes' });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"indigenousDescription" is required/);
+  });
+
+  it('still enforces nonProfitDescription when financiallySupportedNonProfit is Yes', async () => {
+    const res = await request(app).patch(validParams).send({ financiallySupportedNonProfit: 'Yes' });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"nonProfitDescription" is required/);
+  });
+
+  it('still enforces housingCoopDescription when financiallySupportedHousingCoop is Yes', async () => {
+    const res = await request(app).patch(validParams).send({ financiallySupportedHousingCoop: 'Yes' });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"housingCoopDescription" is required/);
   });
 
   it('rejects fields not in the patchable schema', async () => {

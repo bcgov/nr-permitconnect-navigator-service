@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
-import { uuidv4 } from './common.ts';
+import { activityId, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
@@ -15,9 +15,8 @@ export const schema = {
   createGeneralProject: {
     body: z.object({
       draftId: uuidv4.nullish(),
-      activityId: z.string().min(8).max(8).nullish(),
+      activityId: activityId.nullish(),
       contact: contactSchema.optional(),
-      appliedPermits: z.array(appliedPermit).nullish(),
       basic: z
         .object({
           projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
@@ -47,7 +46,6 @@ export const schema = {
         })
         .optional(),
       location: z.unknown(),
-      investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish(),
       permits: z
         .object({
           appliedPermits: z.array(appliedPermit).nullish(),
@@ -70,7 +68,7 @@ export const schema = {
   upsertDraft: {
     body: z.object({
       draftId: uuidv4.nullish(),
-      data: z.unknown()
+      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
     })
   },
   getStatistics: {

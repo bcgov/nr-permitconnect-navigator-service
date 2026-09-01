@@ -164,7 +164,7 @@ export const createAccessRequestService = async (
           grant: accessReq.grant,
           groupId: accessReq.groupId as number,
           status: AccessRequestStatus.PENDING,
-          userId: accessReq.userId as string
+          userId: userResponse.userId
         };
 
         await accessRequest.create(newAccessRequest);

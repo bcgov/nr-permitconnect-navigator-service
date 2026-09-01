@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import atsValidator from './ats.ts';
-import { activityId, email, uuidv4 } from './common.ts';
+import { activityId, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
@@ -44,17 +44,6 @@ export const schema = {
         }
       })
   },
-  emailConfirmation: {
-    body: z.object({
-      bcc: z.array(email).nullish(),
-      bodyType: z.string(),
-      body: z.string(),
-      cc: z.array(email).optional(),
-      from: email,
-      subject: z.string(),
-      to: z.array(email)
-    })
-  },
   deleteElectrificationProject: {
     params: z.object({
       electrificationProjectId: uuidv4
@@ -68,7 +57,7 @@ export const schema = {
   upsertDraft: {
     body: z.object({
       draftId: uuidv4.nullish(),
-      data: z.unknown()
+      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
     })
   },
   getStatistics: {
@@ -116,6 +105,7 @@ export const schema = {
         ...atsValidator.atsEnquirySubmissionFields,
         aaiUpdated: z.boolean().optional()
       })
+      .strict()
       .superRefine((data, ctx) => {
         const isOther = data.projectType === ProjectType.OTHER;
         const value = data.projectDescription;
@@ -136,7 +126,6 @@ export const schema = {
 
 export default {
   createElectrificationProject: validate(schema.createElectrificationProject),
-  emailConfirmation: validate(schema.emailConfirmation),
   deleteElectrificationProject: validate(schema.deleteElectrificationProject),
   deleteDraft: validate(schema.deleteDraft),
   upsertDraft: validate(schema.upsertDraft),

@@ -3,6 +3,12 @@ import { Problem } from '#src/utils/index';
 import type { NextFunction, Request, Response } from 'express';
 import type { ZodIssue, ZodType } from 'zod';
 
+// e.g. prop="body", issue.path=["email"] -> "body.email: Required"; path=[] -> "body: Required"
+const formatIssue = (prop: string, issue: ZodIssue) => {
+  const field = issue.path.length ? `${prop}.${issue.path.join('.')}` : prop;
+  return `${field}: ${issue.message}`;
+};
+
 /**
  * Performs express request validation against a specified `schema`
  * @param schema An object containing zod validation schema definitions
@@ -24,7 +30,11 @@ export const validate = (schema: Record<string, ZodType>) => {
     if (validationErrors.length) {
       new Problem(
         422,
-        { detail: validationErrors.flatMap(([, issues]) => issues.map((issue) => issue.message)).join('; ') },
+        {
+          detail: validationErrors
+            .flatMap(([prop, issues]) => issues.map((issue) => formatIssue(prop, issue)))
+            .join('; ')
+        },
         { errors: Object.fromEntries(validationErrors) }
       ).send(req, res);
     } else {

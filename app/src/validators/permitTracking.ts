@@ -9,9 +9,18 @@ export const permitTrackingSchema = z
       permitTrackingId: z.number().nullish(),
       shownToProponent: z.boolean().nullish(),
       sourceSystemKindId: z.number().nullish(),
-      sourceSystemKind: z.object({}).nullish(),
+      sourceSystemKind: z
+        .object({
+          sourceSystemKindId: z.number(),
+          description: z.string(),
+          integrated: z.boolean().optional(),
+          kind: z.string().nullish(),
+          sourceSystem: z.string(),
+          ...createStamps
+        })
+        .nullish(),
       permitId: z.string().nullish(),
       ...createStamps
     })
   )
-  .optional();
+  .nullish();
