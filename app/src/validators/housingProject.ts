@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
-import { activityId, email, uuidv4 } from './common.ts';
+import { activityId, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { housing } from './housing';
 import { validate } from '#src/middleware/validation';
@@ -54,17 +54,6 @@ export const schema = {
         .optional()
     })
   },
-  emailConfirmation: {
-    body: z.object({
-      bcc: z.array(email).nullish(),
-      bodyType: z.string(),
-      body: z.string(),
-      cc: z.array(email).optional(),
-      from: email,
-      subject: z.string(),
-      to: z.array(email)
-    })
-  },
   deleteHousingProject: {
     params: z.object({
       housingProjectId: uuidv4
@@ -78,7 +67,7 @@ export const schema = {
   upsertDraft: {
     body: z.object({
       draftId: uuidv4.nullish(),
-      data: z.unknown()
+      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
     })
   },
   getStatistics: {
@@ -117,9 +106,9 @@ export const schema = {
         singleFamilyUnits: unitsList.nullish(),
         multiFamilyUnits: unitsList.nullish(),
         otherUnitsDescription: z.string().max(255).nullish(),
-        otherUnits: unitsList.nullish(),
+        otherUnits: z.string().max(255).nullish(),
         hasRentalUnits: yesNoUnsure.optional(),
-        rentalUnits: unitsList.nullish(),
+        rentalUnits: z.string().max(255).nullish(),
         financiallySupportedBc: yesNoUnsure.optional(),
         financiallySupportedIndigenous: yesNoUnsure.optional(),
         indigenousDescription: z.string().max(255).nullish(),
@@ -147,23 +136,31 @@ export const schema = {
       })
       .strict()
       .superRefine((data, ctx) => {
-        // Joi .when(..., { otherwise: allow(null) }) - deliberately not `forbidden()` here,
-        // unlike housing.ts's create-time rule. Only enforce the "required when condition met" half.
+        // each field is required, and constrained to allowedValues if given, only when its "Yes" flag is set
+        const unitsValues = NUM_RESIDENTIAL_UNITS_LIST as readonly string[];
         const requiredWhen: [
           boolean,
-          'otherUnits' | 'rentalUnits' | 'indigenousDescription' | 'nonProfitDescription' | 'housingCoopDescription'
+          'otherUnits' | 'rentalUnits' | 'indigenousDescription' | 'nonProfitDescription' | 'housingCoopDescription',
+          readonly string[] | undefined
         ][] = [
-          [data.otherUnitsDescription === BasicResponse.YES, 'otherUnits'],
-          [data.hasRentalUnits === BasicResponse.YES, 'rentalUnits'],
-          [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription'],
-          [data.financiallySupportedNonProfit === BasicResponse.YES, 'nonProfitDescription'],
-          [data.financiallySupportedHousingCoop === BasicResponse.YES, 'housingCoopDescription']
+          [data.otherUnitsDescription === BasicResponse.YES, 'otherUnits', unitsValues],
+          [data.hasRentalUnits === BasicResponse.YES, 'rentalUnits', unitsValues],
+          [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription', undefined],
+          [data.financiallySupportedNonProfit === BasicResponse.YES, 'nonProfitDescription', undefined],
+          [data.financiallySupportedHousingCoop === BasicResponse.YES, 'housingCoopDescription', undefined]
         ];
-        for (const [conditionMet, field] of requiredWhen) {
+        for (const [conditionMet, field, allowedValues] of requiredWhen) {
+          if (!conditionMet) continue;
           const value = data[field];
           const isEmpty = value === undefined || value === null || value === '';
-          if (conditionMet && isEmpty) {
+          if (isEmpty) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, path: [field], message: `"${field}" is required` });
+          } else if (allowedValues && !allowedValues.includes(value)) {
+            ctx.addIssue({
+              code: z.ZodIssueCode.custom,
+              path: [field],
+              message: `"${field}" must be one of [${allowedValues.join(', ')}]`
+            });
           }
         }
       }),
@@ -175,7 +172,6 @@ export const schema = {
 
 export default {
   createHousingProject: validate(schema.createHousingProject),
-  emailConfirmation: validate(schema.emailConfirmation),
   deleteHousingProject: validate(schema.deleteHousingProject),
   deleteDraft: validate(schema.deleteDraft),
   upsertDraft: validate(schema.upsertDraft),

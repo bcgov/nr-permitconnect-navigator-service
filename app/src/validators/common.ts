@@ -29,7 +29,7 @@ export const timeTzString = z
   .string()
   .regex(new RegExp(Regex.TIMETZ), 'Must be a valid UTC time string (HH:MM:SS(.ffffff)Z)');
 
-export const uuidv4 = z.string().uuid();
+export const uuidv4 = z.string().regex(new RegExp(Regex.UUIDV4), 'Must be a valid uuidv4');
 
 // Query string values arrive as strings ("true"/"false"), not real booleans - z.coerce.boolean() would
 // wrongly treat "false" as truthy, so parse the two accepted string forms explicitly.

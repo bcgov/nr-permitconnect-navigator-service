@@ -124,7 +124,7 @@ describe('access request service', () => {
           grant: navigatorAccessReq.grant,
           groupId: navigatorAccessReq.groupId,
           status: AccessRequestStatus.PENDING,
-          userId: navigatorAccessReq.userId
+          userId: testAccessUser.userId
         })
       );
       expect(result.isAdmin).toBe(false);

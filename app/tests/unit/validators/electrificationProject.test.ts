@@ -10,6 +10,9 @@ function buildApp() {
   const app = express();
   app.use(express.json());
 
+  app.post('/', electrificationProjectValidator.createElectrificationProject, (req: Request, res: Response) =>
+    res.status(200).json(req.body)
+  );
   app.patch(
     '/:electrificationProjectId',
     electrificationProjectValidator.patchElectrificationProject,
@@ -25,6 +28,32 @@ function buildApp() {
 }
 
 const validParams = '/5183f223-526a-44cf-8b6a-80f90c4e802b';
+
+describe('createElectrificationProject validator', () => {
+  const app = buildApp();
+
+  it('requires projectDescription when projectType is OTHER', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ project: { projectType: 'OTHER' } });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/"projectDescription" is required/);
+  });
+
+  it('passes when projectType is OTHER and projectDescription is provided', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ project: { projectType: 'OTHER' }, basic: { projectName: 'Test', projectDescription: 'desc' } });
+    expect(res.status).toBe(200);
+  });
+
+  it('does not require projectDescription for a non-OTHER projectType', async () => {
+    const res = await request(app)
+      .post('/')
+      .send({ project: { projectType: 'IPP_SOLAR' } });
+    expect(res.status).toBe(200);
+  });
+});
 
 describe('patchElectrificationProject validator', () => {
   const app = buildApp();

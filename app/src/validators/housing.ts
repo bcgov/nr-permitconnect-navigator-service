@@ -49,7 +49,6 @@ export const housing = baseHousing.superRefine((data, ctx) => {
     }
   }
 
-  // Joi's .or() is presence-based, not truthiness-based - check key existence, not value
   if (!('singleFamilySelected' in data) && !('multiFamilySelected' in data) && !('otherSelected' in data)) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
