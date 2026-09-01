@@ -44,6 +44,7 @@ spec:
               imagePullPolicy: {{ .Values.image.pullPolicy }}
               command:
                 - /usr/local/bin/node
+                - --conditions=sbin
                 - sbin/peachSync.js
               resources:
                 {{- toYaml .Values.peachSync.resources | nindent 16 }}
