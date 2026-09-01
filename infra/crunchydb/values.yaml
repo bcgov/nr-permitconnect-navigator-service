@@ -1,7 +1,7 @@
 # Values passed to the bcgov/crunchy-postgres subchart.
 crunchy-postgres:
-  # -- Sets the cluster name; charts/pcns hardcodes pcns-primary/-pgbouncer/-pguser-pcns to match.
-  fullnameOverride: pcns
+  # -- Sets the cluster name; charts/pcns hardcodes crunchy-primary/-pgbouncer/-pguser-crunchy to match.
+  fullnameOverride: crunchy
 
   # -- CrunchyDB image used for PostgreSQL instance pods.
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547
@@ -103,6 +103,6 @@ crunchy-postgres-tools:
     networkPolicy:
       enabled: false      # pcns chart owns the app ingress policy
     podNetworkPolicy:
-      enabled: true       # allows app -> pgBouncer within the namespace
+      enabled: false      # Keep disabled: subchart renders an unconstrained permit-all policy
     route:
       enabled: false      # pcns chart owns its route

@@ -67,11 +67,11 @@ jobs:
         shell: bash
         run: |
           ns=${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
-          if ! oc get postgrescluster pcns -n "$ns" >/dev/null 2>&1; then
-            echo "::error::PostgresCluster 'pcns' not found in $ns. Run the Database workflow first."
+          if ! oc get postgrescluster crunchy -n "$ns" >/dev/null 2>&1; then
+            echo "::error::PostgresCluster 'crunchy' not found in $ns. Run the Database workflow first."
             exit 1
           fi
-          oc wait --for=condition=ProxyAvailable postgrescluster/pcns -n "$ns" --timeout=5m
+          oc wait --for=condition=ProxyAvailable postgrescluster/crunchy -n "$ns" --timeout=5m
 
       - name: Helm Deploy
         shell: bash

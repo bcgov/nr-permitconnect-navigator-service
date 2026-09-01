@@ -25,7 +25,7 @@ Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 | crunchy-postgres-tools.provisioner.serviceAccount.enabled | bool | `false` |  |
 | crunchy-postgres.crunchyImage | string | `"artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547"` | CrunchyDB image used for PostgreSQL instance pods. |
 | crunchy-postgres.dataSource.enabled | bool | `false` |  |
-| crunchy-postgres.fullnameOverride | string | `"pcns"` | Sets the cluster name; charts/pcns hardcodes pcns-primary/-pgbouncer/-pguser-pcns to match. |
+| crunchy-postgres.fullnameOverride | string | `"crunchy"` | Sets the cluster name; charts/pcns hardcodes crunchy-primary/-pgbouncer/-pguser-crunchy to match. |
 | crunchy-postgres.imagePullPolicy | string | `"IfNotPresent"` |  |
 | crunchy-postgres.instances.dataVolumeClaimSpec.storage | string | `"2Gi"` |  |
 | crunchy-postgres.instances.dataVolumeClaimSpec.storageClassName | string | `"netapp-block-standard"` |  |

@@ -137,19 +137,28 @@ jobs:
       - name: Remove PR Deployment
         shell: bash
         run: |
-          helm uninstall --namespace ${{ vars.NAMESPACE_PREFIX }}-dev pr-${{ github.event.number }} --timeout 10m --wait
-          oc delete --namespace ${{ vars.NAMESPACE_PREFIX }}-dev cm,secret --selector app.kubernetes.io/instance=pr-${{ github.event.number }}
+          NS="${{ vars.NAMESPACE_PREFIX }}-dev"
+          RELEASE="pr-${{ github.event.number }}"
+
+          if helm status "$RELEASE" --namespace "$NS" >/dev/null 2>&1; then
+            helm uninstall --namespace "$NS" "$RELEASE" --timeout 10m --wait
+          fi
+
+          oc delete --namespace "$NS" cm,secret \
+            --selector app.kubernetes.io/instance="$RELEASE" \
+            --ignore-not-found=true
 
       - name: Drop PR Database
+        if: always()
         shell: bash
         run: |
-          NS=${{ vars.NAMESPACE_PREFIX }}-dev
-          DB=pr-${{ github.event.number }}
+          NS="${{ vars.NAMESPACE_PREFIX }}-dev"
+          DB="pr-${{ github.event.number }}"
           POD=$(oc get pod -n "$NS" -o name --no-headers \
-            -l postgres-operator.crunchydata.com/cluster=pcns,postgres-operator.crunchydata.com/role=master | head -1)
+            -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=master | head -1)
 
           if [ -z "$POD" ]; then
-            echo "::warning::No pcns primary found in $NS; leaving database $DB in place."
+            echo "::warning::No crunchy primary found in $NS; leaving database $DB in place."
             exit 0
           fi
 
@@ -158,12 +167,14 @@ jobs:
             -c "DROP DATABASE IF EXISTS \"${DB}\" WITH (FORCE);"
 
       - name: Remove Release Comment on PR
+        if: always()
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
           header: release
           delete: true
 
       - name: Remove Github Deployment Environment
+        if: always()
         uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476 # v4.0.0
         with:
           environment: pr

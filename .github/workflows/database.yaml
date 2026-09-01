@@ -40,8 +40,8 @@ jobs:
         shell: bash
         run: |
           NS="${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}"
-          oc wait --for=condition=PostgresDataInitialized postgrescluster/pcns -n "$NS" --timeout=45m
-          oc wait --for=condition=ProxyAvailable          postgrescluster/pcns -n "$NS" --timeout=10m
+          oc wait --for=condition=PostgresDataInitialized postgrescluster/crunchy -n "$NS" --timeout=45m
+          oc wait --for=condition=ProxyAvailable          postgrescluster/crunchy -n "$NS" --timeout=10m
 
       # PR databases all share one role; the password is generated once and reused.
       - name: Ensure PR database role
@@ -50,26 +50,28 @@ jobs:
         run: |
           NS="${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}"
 
-          if ! oc get secret pcns-pr-user -n "$NS" >/dev/null 2>&1; then
-            oc create secret generic pcns-pr-user -n "$NS" \
+          if ! oc get secret crunchy-pr-user -n "$NS" >/dev/null 2>&1; then
+            oc create secret generic crunchy-pr-user -n "$NS" \
               --from-literal=user=pruser \
               --from-literal=password="$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)"
           fi
 
-          PW=$(oc get secret pcns-pr-user -n "$NS" -o jsonpath='{.data.password}' | base64 -d)
+          PW=$(oc get secret crunchy-pr-user -n "$NS" -o jsonpath='{.data.password}' | base64 -d)
           echo "::add-mask::$PW"
           POD=$(oc get pod -n "$NS" -o name \
-            -l postgres-operator.crunchydata.com/cluster=pcns,postgres-operator.crunchydata.com/role=master | head -1)
+            -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=master | head -1)
 
           if [ -z "$POD" ]; then
-            echo "::error::No pcns primary found in $NS."
+            echo "::error::No crunchy primary found in $NS."
             exit 1
           fi
 
-          oc exec -i -n "$NS" "$POD" -c database -- \
+                    oc exec -i -n "$NS" "$POD" -c database -- \
             psql -U postgres -v ON_ERROR_STOP=1 -v pw="$PW" <<'SQL'
           SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', 'pruser', :'pw')
            WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'pruser')
+          \gexec
+          SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', 'pruser', :'pw')
           \gexec
           SQL
 
@@ -78,7 +80,7 @@ jobs:
         if: inputs.environment == 'prod'
         shell: bash
         run: |
-          oc patch postgrescluster pcns \
+          oc patch postgrescluster crunchy \
             -n "${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}" \
             --type=merge \
-            -p '{"spec":{"backups":{"pgbackrest":{"global":{"repo2-retention-full":"30","repo2-retention-full-type":"count"}}}}}'
+            -p '{"spec":{"backups":{"pgbackrest":{"global":{"repo2-retention-full":"365","repo2-retention-full-type":"count"}}}}}'
