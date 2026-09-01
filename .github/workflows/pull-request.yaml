@@ -47,6 +47,7 @@ jobs:
       job_name: pr-${{ github.event.number }}
       namespace_prefix: ${{ vars.NAMESPACE_PREFIX }}
       namespace_environment: dev
+      database_name: pr-${{ github.event.number }}
     secrets:
       openshift_server: ${{ secrets.OPENSHIFT_SERVER }}
       openshift_token: ${{ secrets.OPENSHIFT_TOKEN }}
@@ -139,6 +140,23 @@ jobs:
           helm uninstall --namespace ${{ vars.NAMESPACE_PREFIX }}-dev pr-${{ github.event.number }} --timeout 10m --wait
           oc delete --namespace ${{ vars.NAMESPACE_PREFIX }}-dev cm,secret --selector app.kubernetes.io/instance=pr-${{ github.event.number }}
 
+      - name: Drop PR Database
+        shell: bash
+        run: |
+          NS=${{ vars.NAMESPACE_PREFIX }}-dev
+          DB=pr-${{ github.event.number }}
+          POD=$(oc get pod -n "$NS" -o name --no-headers \
+            -l postgres-operator.crunchydata.com/cluster=pcns,postgres-operator.crunchydata.com/role=master | head -1)
+
+          if [ -z "$POD" ]; then
+            echo "::warning::No pcns primary found in $NS; leaving database $DB in place."
+            exit 0
+          fi
+
+          oc exec -n "$NS" "$POD" -c database -- \
+            psql -U postgres -d postgres -v ON_ERROR_STOP=1 \
+            -c "DROP DATABASE IF EXISTS \"${DB}\" WITH (FORCE);"
+
       - name: Remove Release Comment on PR
         uses: marocchino/sticky-pull-request-comment@5770ad5eb8f42dd2c4f34da00c94c5381e49af88 # v3.0.5
         with:
@@ -146,7 +164,7 @@ jobs:
           delete: true
 
       - name: Remove Github Deployment Environment
-        uses: strumwolf/delete-deployment-environment@v4
+        uses: strumwolf/delete-deployment-environment@035f6d27c8b8951729f4d71b2d3d6a7975139476 # v4.0.0
         with:
           environment: pr
           onlyRemoveDeployments: true

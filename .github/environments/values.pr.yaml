@@ -1,17 +1,8 @@
 ---
-patroni:
-  enabled: true
-  replicaCount: 2
-  resources:
-    # limits:
-    #   cpu: 250m
-    #   memory: 384Mi
-    requests:
-      cpu: 20m
-      memory: 192Mi
-  persistentVolume:
-    enabled: false
-
 peachSync:
   enabled: false
   suspend: true
+
+database:
+  # Shared role backing every PR database; created once per namespace outside Helm.
+  secretName: pcns-pr-user

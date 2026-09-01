@@ -1,0 +1,108 @@
+# Values passed to the bcgov/crunchy-postgres subchart.
+crunchy-postgres:
+  # -- Sets the cluster name; charts/pcns hardcodes pcns-primary/-pgbouncer/-pguser-pcns to match.
+  fullnameOverride: pcns
+
+  # -- CrunchyDB image used for PostgreSQL instance pods.
+  crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547
+  # -- PostgreSQL major version.
+  postgresVersion: 18
+  imagePullPolicy: IfNotPresent
+  openshift: true
+
+  standby:
+    enabled: false
+
+  instances:
+    name: ha
+    replicas: 2
+    dataVolumeClaimSpec:
+      storage: 2Gi
+      storageClassName: netapp-block-standard
+    requests:
+      cpu: 10m
+      memory: 256Mi
+    limits:
+      cpu: 250m
+      memory: 512Mi
+    replicaCertCopy:
+      requests:
+        cpu: 1m
+        memory: 32Mi
+
+  # Restore-from-backup source; enable only for a DR/prod cutover.
+  dataSource:
+    enabled: false
+
+  pgBackRest:
+    # Applied to repo1 AND repo2; the Database workflow patches repo2 (s3) to 30 in prod.
+    retention: "7"
+    retentionFullType: count
+    repo1:
+      enabled: true
+    repos:
+      schedules:
+        full: "0 8 * * *"
+        incremental: "0 0,12,20 * * *"
+      volume:
+        accessModes: "ReadWriteOnce"
+        storage: 2Gi
+        storageClassName: netapp-file-backup
+    repoHost:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+    sidecars:
+      requests:
+        cpu: 1m
+        memory: 64Mi
+    # Prod-only; requires the s3-pgbackrest secret to exist in the namespace already.
+    s3:
+      enabled: false
+
+  patroni:
+    postgresql:
+      pg_hba: "host all all 0.0.0.0/0 scram-sha-256"
+      parameters:
+        shared_buffers: 16MB
+        wal_buffers: "64kB"
+        min_wal_size: 32MB
+        max_wal_size: 64MB
+        max_slot_wal_keep_size: 128MB
+
+  proxy:
+    pgBouncer:
+      replicas: 2
+      requests:
+        cpu: 10m
+        memory: 64Mi
+      limits:
+        cpu: 100m
+        memory: 128Mi
+
+  pgmonitor:
+    enabled: false
+
+# Values passed to the bcgov/crunchy-postgres-tools subchart (namespace networking).
+crunchy-postgres-tools:
+  fullnameOverride: crunchydb-tools
+  deploymentName: pcns
+
+  # Service accounts are namespace/CI infra you don't manage from this release.
+  deployer:
+    serviceAccount:
+      enabled: false
+  provisioner:
+    serviceAccount:
+      enabled: false
+  linter:
+    serviceAccount:
+      enabled: false
+
+  networking:
+    networkPolicy:
+      enabled: false      # pcns chart owns the app ingress policy
+    podNetworkPolicy:
+      enabled: true       # allows app -> pgBouncer within the namespace
+    route:
+      enabled: false      # pcns chart owns its route

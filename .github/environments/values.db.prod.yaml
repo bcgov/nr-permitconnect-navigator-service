@@ -1,0 +1,43 @@
+crunchy-postgres:
+  instances:
+    dataVolumeClaimSpec:
+      storage: 3Gi
+    requests:
+      cpu: 150m
+      memory: 1Gi
+    limits:
+      cpu: 500m
+      memory: 1536Mi
+  patroni:
+    postgresql:
+      parameters:
+        shared_buffers: 192MB
+        wal_buffers: 8MB
+        min_wal_size: 128MB
+        max_wal_size: 256MB
+        max_slot_wal_keep_size: 512MB
+  pgBackRest:
+    repos:
+      volume:
+        storage: 3Gi
+    repoHost:
+      requests:
+        cpu: 50m
+        memory: 128Mi
+    s3:
+      enabled: true
+      # Secret is created elsewhere so helm upgrade/uninstall can't blank or delete the credentials.
+      createS3Secret: false
+      s3Secret: s3-pgbackrest
+      s3Path: /padprd
+      s3UriStyle: path
+      bucket: pcnspr
+      endpoint: https://nrs.objectstore.gov.bc.ca
+      region: ca-central-1
+      fullSchedule: "0 9 * * *"
+      incrementalSchedule: "0 1,13,21 * * *"
+  proxy:
+    pgBouncer:
+      limits:
+        cpu: 200m
+        memory: 256Mi

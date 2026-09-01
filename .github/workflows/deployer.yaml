@@ -31,6 +31,11 @@ on:
         description: 'Openshift Namespace environment suffix'
         required: true
         type: string
+      database_name:
+        description: 'Database name override; set for PR-scoped databases'
+        required: false
+        type: string
+        default: ''
     secrets:
       openshift_server:
         description: 'Openshift API Endpoint'
@@ -58,18 +63,36 @@ jobs:
           oc_token: ${{ secrets.openshift_token }}
           oc_namespace: ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
 
+      - name: Verify database is available
+        shell: bash
+        run: |
+          ns=${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
+          if ! oc get postgrescluster pcns -n "$ns" >/dev/null 2>&1; then
+            echo "::error::PostgresCluster 'pcns' not found in $ns. Run the Database workflow first."
+            exit 1
+          fi
+          oc wait --for=condition=ProxyAvailable postgrescluster/pcns -n "$ns" --timeout=5m
+
       - name: Helm Deploy
         shell: bash
-        run: >-
-          helm upgrade --install --atomic ${{ inputs.job_name }} ${{ inputs.app_name }}
-          --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }}
-          --repo https://bcgov.github.io/nr-permitconnect-navigator-service/
-          --values ./.github/environments/values.${{ inputs.environment }}.yaml
-          --set image.repository=ghcr.io/${{ github.repository_owner }}
-          --set image.tag=${{ inputs.image_tag }}
-          --set route.host=${{ inputs.acronym }}-${{ inputs.namespace_environment }}-${{ inputs.job_name }}.apps.silver.devops.gov.bc.ca
-          --timeout 10m
-          --wait
+        env:
+          DATABASE_NAME: ${{ inputs.database_name }}
+        run: |
+          EXTRA_ARGS=()
+          if [ -n "$DATABASE_NAME" ]; then
+            EXTRA_ARGS+=(--set "database.name=${DATABASE_NAME}")
+          fi
+
+          helm upgrade --install --atomic ${{ inputs.job_name }} ${{ inputs.app_name }} \
+            --namespace ${{ inputs.namespace_prefix }}-${{ inputs.namespace_environment }} \
+            --repo https://bcgov.github.io/nr-permitconnect-navigator-service/ \
+            --values ./.github/environments/values.${{ inputs.environment }}.yaml \
+            --set image.repository=ghcr.io/${{ github.repository_owner }} \
+            --set image.tag=${{ inputs.image_tag }} \
+            --set route.host=${{ inputs.acronym }}-${{ inputs.namespace_environment }}-${{ inputs.job_name }}.apps.silver.devops.gov.bc.ca \
+            "${EXTRA_ARGS[@]}" \
+            --timeout 10m \
+            --wait
 
       - name: Wait on Deployment
         shell: bash

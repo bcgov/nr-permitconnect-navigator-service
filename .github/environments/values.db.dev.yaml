@@ -1,0 +1,8 @@
+crunchy-postgres:
+  instances:
+    dataVolumeClaimSpec:
+      storage: 4Gi
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1Gi
