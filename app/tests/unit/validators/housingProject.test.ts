@@ -42,7 +42,7 @@ describe('createHousingProject validator', () => {
   it('rejects unrecognized fields', async () => {
     const res = await request(app).post('/').send({ notARealField: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "notARealField"/);
   });
 });
 
@@ -248,6 +248,6 @@ describe('patchHousingProject validator', () => {
   it('rejects fields not in the patchable schema', async () => {
     const res = await request(app).patch(validParams).send({ notARealField: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "notARealField"/);
   });
 });
