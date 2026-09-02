@@ -76,6 +76,11 @@ export const schema = {
       })
       .strict()
   },
+  getDraft: {
+    params: z.object({
+      draftId: uuidv4
+    })
+  },
   upsertDraft: {
     body: z
       .object({
@@ -199,6 +204,7 @@ export default {
   submitHousingProjectDraft: validate(schema.submitHousingProjectDraft),
   deleteHousingProject: validate(schema.deleteHousingProject),
   deleteDraft: validate(schema.deleteDraft),
+  getDraft: validate(schema.getDraft),
   upsertDraft: validate(schema.upsertDraft),
   getStatistics: validate(schema.getStatistics),
   getHousingProject: validate(schema.getHousingProject),

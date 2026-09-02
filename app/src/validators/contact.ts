@@ -69,7 +69,7 @@ export const schema = {
         includeActivities: z.boolean().default(false)
       })
       .strict()
-      .default({})
+      .default({ hasActivity: false, includeActivities: false })
   },
   upsertContact: {
     body: z
