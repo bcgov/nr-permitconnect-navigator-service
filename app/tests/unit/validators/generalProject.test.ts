@@ -42,7 +42,7 @@ describe('createGeneralProject validator', () => {
   it('rejects unrecognized fields', async () => {
     const res = await request(app).post('/').send({ notARealField: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "notARealField"/);
   });
 });
 
@@ -156,7 +156,7 @@ describe('submitGeneralProjectDraft validator', () => {
         general: { projectName: 'Test Project', projectDescription: 'Desc' }
       });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'general'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "general"/);
   });
 });
 
@@ -181,7 +181,7 @@ describe('patchGeneralProject validator', () => {
   it('rejects addedToAts, which does not exist on general_project', async () => {
     const res = await request(app).patch(validParams).send({ addedToAts: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'addedToAts'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "addedToAts"/);
   });
 
   it('passes with atsClientId and atsEnquiryId', async () => {

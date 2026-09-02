@@ -46,7 +46,7 @@ describe('createElectrificationProject validator', () => {
   it('rejects unrecognized fields', async () => {
     const res = await request(app).post('/').send({ notARealField: true });
     expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
+    expect(res.body.detail).toMatch(/Unrecognized key: "notARealField"/);
   });
 });
 
