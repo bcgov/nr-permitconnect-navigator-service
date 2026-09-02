@@ -77,7 +77,7 @@ jobs:
 
       # The subchart writes one retention value to both repos; S3 keeps a longer history.
       - name: Apply repo2 retention
-        if: inputs.environment == 'prod'
+        if: inputs.environment == 'prod' || inputs.environment == 'dev' # TODO: Temporary, remove dev case once functionality confirmed
         shell: bash
         run: |
           oc patch postgrescluster crunchy \
