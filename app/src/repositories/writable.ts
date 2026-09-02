@@ -18,6 +18,8 @@ export interface SoftDeleteFields {
 
 type CreateData<D> = Prisma.Args<D, 'create'>['data'];
 type UpdateData<D> = Prisma.Args<D, 'update'>['data'];
+type UpdateManyData<D> = Prisma.Args<D, 'updateMany'>['data'];
+type UpdateManyWhere<D> = Prisma.Args<D, 'updateMany'>['where'];
 type WhereUnique<D> = Prisma.Args<D, 'findUnique'>['where'];
 type DeleteUnique<D> = Prisma.Args<D, 'delete'>['where'];
 type DeleteManyWhere<D> = Prisma.Args<D, 'deleteMany'>['where'];
@@ -31,9 +33,10 @@ type DefaultModel<D> = Prisma.Result<D, object, 'findUniqueOrThrow'>;
 interface WritableModelDelegate<D> extends ReadableModelDelegate<D> {
   create(args: { data: CreateData<D> }): Promise<DefaultModel<D>>;
   update(args: { where: WhereUnique<D>; data: UpdateData<D> }): Promise<DefaultModel<D>>;
+  updateMany(args: { where: UpdateManyWhere<D>; data: UpdateManyData<D> }): Promise<Prisma.BatchPayload>;
   upsert(args: { where: WhereUnique<D>; create: CreateData<D>; update: UpdateData<D> }): Promise<DefaultModel<D>>;
   delete(args: { where: DeleteUnique<D> }): Promise<DefaultModel<D>>;
-  deleteMany(args: { where: DeleteManyWhere<D> }): Promise<DefaultModel<D>>;
+  deleteMany(args: { where: DeleteManyWhere<D> }): Promise<Prisma.BatchPayload>;
 }
 
 export abstract class WritableRepository<TDelegate> extends ReadableRepository<TDelegate> {
@@ -128,10 +131,10 @@ export abstract class WritableRepository<TDelegate> extends ReadableRepository<T
   public async deleteMany(
     where: DeleteManyWhere<TDelegate>,
     options?: { hard?: boolean }
-  ): Promise<DefaultModel<TDelegate>> {
+  ): Promise<Prisma.BatchPayload> {
     if (this.softDeleteEnabled && !options?.hard) {
       return this.execute(() =>
-        this.model.update({
+        this.model.updateMany({
           where,
           data: { ...this.withUpdateAudit({}), ...this.withSoftDelete() }
         })

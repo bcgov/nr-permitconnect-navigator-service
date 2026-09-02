@@ -144,12 +144,12 @@ describe('WritableRepository', () => {
   describe('deleteMany', () => {
     it('soft deletes (update with audit + soft-delete stamps) when soft delete is enabled', async () => {
       const repo = new TestWritableRepository(true);
-      prismaTxMock.enquiry.update.mockResolvedValueOnce(TEST_ENQUIRY_1);
+      prismaTxMock.enquiry.updateMany.mockResolvedValueOnce({ count: 1 });
 
       const result = await repo.deleteMany({ enquiryStatus: 'NEW' });
 
-      expect(prismaTxMock.enquiry.update).toHaveBeenCalledTimes(1);
-      expect(prismaTxMock.enquiry.update).toHaveBeenCalledWith({
+      expect(prismaTxMock.enquiry.updateMany).toHaveBeenCalledTimes(1);
+      expect(prismaTxMock.enquiry.updateMany).toHaveBeenCalledWith({
         where: { enquiryStatus: 'NEW' },
         data: {
           updatedAt: expect.any(Date),
@@ -159,7 +159,7 @@ describe('WritableRepository', () => {
         }
       });
       expect(prismaTxMock.enquiry.deleteMany).not.toHaveBeenCalled();
-      expect(result).toStrictEqual(TEST_ENQUIRY_1);
+      expect(result).toStrictEqual({ count: 1 });
     });
 
     it('hard deletes when the hard option is set even with soft delete enabled', async () => {
@@ -170,7 +170,7 @@ describe('WritableRepository', () => {
 
       expect(prismaTxMock.enquiry.deleteMany).toHaveBeenCalledTimes(1);
       expect(prismaTxMock.enquiry.deleteMany).toHaveBeenCalledWith({ where: { enquiryStatus: 'NEW' } });
-      expect(prismaTxMock.enquiry.update).not.toHaveBeenCalled();
+      expect(prismaTxMock.enquiry.updateMany).not.toHaveBeenCalled();
     });
 
     it('hard deletes when soft delete is disabled', async () => {
@@ -181,7 +181,7 @@ describe('WritableRepository', () => {
 
       expect(prismaTxMock.enquiry.deleteMany).toHaveBeenCalledTimes(1);
       expect(prismaTxMock.enquiry.deleteMany).toHaveBeenCalledWith({ where: { enquiryStatus: 'NEW' } });
-      expect(prismaTxMock.enquiry.update).not.toHaveBeenCalled();
+      expect(prismaTxMock.enquiry.updateMany).not.toHaveBeenCalled();
     });
   });
 });
