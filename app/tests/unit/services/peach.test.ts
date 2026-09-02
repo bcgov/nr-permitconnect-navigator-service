@@ -64,7 +64,7 @@ describe('peach service', () => {
       );
     });
 
-    it('throws 422 if PEACH summary cannot be derived', async () => {
+    it('throws 500 if PEACH summary cannot be derived from fetched PEACH data', async () => {
       const validTracking = {
         trackingId: 'TRACK-123',
         sourceSystemKind: { sourceSystem: 'VFCBC' }
@@ -75,7 +75,7 @@ describe('peach service', () => {
       summarizePeachRecordSpy.mockReturnValueOnce(undefined as never);
 
       await expect(peachService.getPeachSummaryService([validTracking])).rejects.toThrow(
-        new Problem(422, { detail: 'No status data could be derived from the PEACH record that was found.' })
+        new Problem(500, { detail: 'No status data could be derived from the PEACH record that was found.' })
       );
     });
 
