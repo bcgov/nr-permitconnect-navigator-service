@@ -1,0 +1,64 @@
+name: Lint Charts
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - 'infra/**'
+      - '.github/environments/values*.yaml'
+      - '.github/workflows/charts-lint.yaml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: Helm Lint
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Lint charts
+        run: |
+          helm dependency build ./infra/crunchydb
+          helm lint ./infra/crunchydb
+          helm lint ./charts/pcns --set route.host=example.local
+
+      - name: Render every environment
+        run: |
+          for env in dev test prod; do
+            helm template crunchydb ./infra/crunchydb \
+              --values ./.github/environments/values.db.${env}.yaml > /dev/null
+
+            helm template pcns ./charts/pcns \
+              --values ./.github/environments/values.${env}.yaml \
+              --set route.host=example.local > /dev/null
+          done
+
+      - name: Render a PR release
+        run: |
+          helm template pr-1 ./charts/pcns \
+            --values ./.github/environments/values.pr.yaml \
+            --set route.host=example.local \
+            --set database.name=pr-1 > /dev/null
+
+      - name: Require a chart version bump
+        run: |
+          if git diff --quiet origin/master -- charts/pcns; then
+            echo "No pcns chart changes."
+            exit 0
+          fi
+
+          old=$(git show origin/master:charts/pcns/Chart.yaml | grep -oP '^version:\s*\K\S+')
+          new=$(grep -oP '^version:\s*\K\S+' charts/pcns/Chart.yaml)
+
+          if [ "$old" = "$new" ]; then
+            echo "::error::charts/pcns changed but Chart.yaml version is still $old. Bump it or chart-releaser will skip the release."
+            exit 1
+          fi

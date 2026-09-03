@@ -16,6 +16,7 @@ sbin
 
 # Ignore Helm subcharts
 charts/**/charts
+infra/**/charts
 Chart.lock
 
 # local env files

@@ -1,0 +1,86 @@
+name: Database
+
+on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [dev, test, prod]
+        required: true
+
+jobs:
+  deploy:
+    name: Deploy CrunchyDB to ${{ inputs.environment }}
+    environment:
+      name: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
+        with:
+          oc_server: ${{ secrets.OPENSHIFT_SERVER }}
+          oc_token: ${{ secrets.OPENSHIFT_TOKEN }}
+          oc_namespace: ${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}
+
+      - name: Build chart dependencies
+        run: helm dependency update ./infra/crunchydb
+
+      - name: Helm Deploy
+        run: >-
+          helm upgrade --install crunchydb ./infra/crunchydb
+          --namespace ${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}
+          --values ./.github/environments/values.db.${{ inputs.environment }}.yaml
+          --timeout 20m
+          --wait
+
+      - name: Wait for cluster convergence
+        shell: bash
+        run: |
+          NS="${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}"
+          oc wait --for=condition=PostgresDataInitialized postgrescluster/crunchy -n "$NS" --timeout=45m
+          oc wait --for=condition=ProxyAvailable          postgrescluster/crunchy -n "$NS" --timeout=10m
+
+      # PR databases all share one role; the password is generated once and reused.
+      - name: Ensure PR database role
+        if: inputs.environment == 'dev'
+        shell: bash
+        run: |
+          NS="${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}"
+
+          if ! oc get secret crunchy-pr-user -n "$NS" >/dev/null 2>&1; then
+            oc create secret generic crunchy-pr-user -n "$NS" \
+              --from-literal=user=pruser \
+              --from-literal=password="$(openssl rand -base64 24 | tr -d '/+=' | head -c 32)"
+          fi
+
+          PW=$(oc get secret crunchy-pr-user -n "$NS" -o jsonpath='{.data.password}' | base64 -d)
+          echo "::add-mask::$PW"
+          POD=$(oc get pod -n "$NS" -o name \
+            -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=master | head -1)
+
+          if [ -z "$POD" ]; then
+            echo "::error::No crunchy primary found in $NS."
+            exit 1
+          fi
+
+                    oc exec -i -n "$NS" "$POD" -c database -- \
+            psql -U postgres -v ON_ERROR_STOP=1 -v pw="$PW" <<'SQL'
+          SELECT format('CREATE ROLE %I LOGIN PASSWORD %L', 'pruser', :'pw')
+           WHERE NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'pruser')
+          \gexec
+          SELECT format('ALTER ROLE %I WITH LOGIN PASSWORD %L', 'pruser', :'pw')
+          \gexec
+          SQL
+
+      # The subchart writes one retention value to both repos; S3 keeps a longer history.
+      - name: Apply repo2 retention
+        if: inputs.environment == 'prod' || inputs.environment == 'dev' # TODO: Temporary, remove dev case once functionality confirmed
+        shell: bash
+        run: |
+          oc patch postgrescluster crunchy \
+            -n "${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}" \
+            --type=merge \
+            -p '{"spec":{"backups":{"pgbackrest":{"global":{"repo2-retention-full":"365","repo2-retention-full-type":"count"}}}}}'
