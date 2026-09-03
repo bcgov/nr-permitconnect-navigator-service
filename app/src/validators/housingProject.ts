@@ -5,6 +5,7 @@ import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
 import { housing } from './housing';
+import { location } from './location.ts';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
@@ -17,80 +18,98 @@ const yesNoUnsure = z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]);
 
 export const schema = {
   createHousingProject: {
-    body: z.object({
-      draftId: uuidv4.nullish(),
-      activityId: activityId.nullish(),
-      contact: contactSchema.optional(),
-      basic: z
-        .object({
-          consentToFeedback: z.boolean().optional(),
-          projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
-          projectName: z.string().max(255).trim(),
-          projectDescription: z.string().max(4000).nullish(),
-          registeredId: z.string().nullish(),
-          registeredName: z.string().nullish()
-        })
-        .superRefine((data, ctx) => {
-          const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
-          const value = data.registeredName;
-          const isEmpty = value === undefined || value === null || value === '';
-          if (isBusiness && isEmpty) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['registeredName'],
-              message: '"registeredName" is required'
-            });
-          }
-        })
-        .optional(),
-      housing: housing.optional(),
-      location: z.unknown(),
-      permits: z
-        .object({
-          appliedPermits: z.array(appliedPermit).nullish(),
-          hasAppliedProvincialPermits: yesNoUnsure,
-          investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish()
-        })
-        .optional()
-    })
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        activityId: activityId.nullish(),
+        contact: contactSchema.optional(),
+        basic: z
+          .object({
+            consentToFeedback: z.boolean().optional(),
+            projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
+            projectName: z.string().max(255).trim(),
+            projectDescription: z.string().max(4000).nullish(),
+            registeredId: z.string().nullish(),
+            registeredName: z.string().nullish()
+          })
+          .strict()
+          .superRefine((data, ctx) => {
+            const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
+            const value = data.registeredName;
+            const isEmpty = value === undefined || value === null || value === '';
+            if (isBusiness && isEmpty) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['registeredName'],
+                message: '"registeredName" is required'
+              });
+            }
+          })
+          .optional(),
+        housing: housing.optional(),
+        location: location.optional(),
+        permits: z
+          .object({
+            appliedPermits: z.array(appliedPermit).nullish(),
+            hasAppliedProvincialPermits: yesNoUnsure,
+            investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() }).strict()).nullish()
+          })
+          .strict()
+          .optional()
+      })
+      .strict()
+      .default({})
   },
   deleteHousingProject: {
-    params: z.object({
-      housingProjectId: uuidv4
-    })
+    params: z
+      .object({
+        housingProjectId: uuidv4
+      })
+      .strict()
   },
   deleteDraft: {
-    params: z.object({
-      draftId: uuidv4
-    })
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
   },
   upsertDraft: {
-    body: z.object({
-      draftId: uuidv4.nullish(),
-      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
-    })
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
+      })
+      .strict()
   },
   getStatistics: {
-    query: z.object({
-      dateFrom: z.coerce.date().nullish(),
-      dateTo: z.coerce.date().nullish(),
-      monthYear: z.coerce.date().nullish(),
-      userId: uuidv4.nullish()
-    })
+    query: z
+      .object({
+        dateFrom: z.coerce.date().nullish(),
+        dateTo: z.coerce.date().nullish(),
+        monthYear: z.coerce.date().nullish(),
+        userId: uuidv4.nullish()
+      })
+      .strict()
   },
   getHousingProject: {
-    params: z.object({
-      housingProjectId: uuidv4
-    })
+    params: z
+      .object({
+        housingProjectId: uuidv4
+      })
+      .strict()
   },
   searchHousingProjects: {
-    body: z.object({
-      activityId: z.array(z.string()).optional(),
-      createdBy: z.array(z.string()).optional(),
-      includeUser: z.boolean().optional(),
-      housingProjectId: z.array(uuidv4).optional(),
-      submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
-    })
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional(),
+        housingProjectId: z.array(uuidv4).optional(),
+        submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
+      })
+      .strict()
+      .default({})
   },
   patchHousingProject: {
     body: z
@@ -164,9 +183,11 @@ export const schema = {
           }
         }
       }),
-    params: z.object({
-      housingProjectId: uuidv4
-    })
+    params: z
+      .object({
+        housingProjectId: uuidv4
+      })
+      .strict()
   }
 };
 

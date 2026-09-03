@@ -4,6 +4,7 @@ import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { contactSchema } from './contact.ts';
+import { location } from './location.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
@@ -13,85 +14,104 @@ import { ProjectApplicant } from '#src/utils/enums/housing';
 
 export const schema = {
   createGeneralProject: {
-    body: z.object({
-      draftId: uuidv4.nullish(),
-      activityId: activityId.nullish(),
-      contact: contactSchema.optional(),
-      basic: z
-        .object({
-          projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
-          projectName: z.string().max(255).trim(),
-          projectNumber: z.string().max(255).trim().optional(),
-          projectDescription: z.string().max(4000).nullish(),
-          registeredId: z.string().nullish(),
-          registeredName: z.string().nullish()
-        })
-        .superRefine((data, ctx) => {
-          const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
-          const value = data.registeredName;
-          const isEmpty = value === undefined || value === null || value === '';
-          if (isBusiness && isEmpty) {
-            ctx.addIssue({
-              code: z.ZodIssueCode.custom,
-              path: ['registeredName'],
-              message: '"registeredName" is required'
-            });
-          }
-        })
-        .optional(),
-      general: z
-        .object({
-          projectName: z.string().max(255).trim(),
-          projectDescription: z.string().max(4000).nullish()
-        })
-        .optional(),
-      location: z.unknown(),
-      permits: z
-        .object({
-          appliedPermits: z.array(appliedPermit).nullish(),
-          hasAppliedProvincialPermits: z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]),
-          investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() })).nullish()
-        })
-        .optional()
-    })
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        activityId: activityId.nullish(),
+        contact: contactSchema.optional(),
+        basic: z
+          .object({
+            projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
+            projectName: z.string().max(255).trim(),
+            projectNumber: z.string().max(255).trim().optional(),
+            projectDescription: z.string().max(4000).nullish(),
+            registeredId: z.string().nullish(),
+            registeredName: z.string().nullish()
+          })
+          .strict()
+          .superRefine((data, ctx) => {
+            const isBusiness = data.projectApplicantType === ProjectApplicant.BUSINESS;
+            const value = data.registeredName;
+            const isEmpty = value === undefined || value === null || value === '';
+            if (isBusiness && isEmpty) {
+              ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                path: ['registeredName'],
+                message: '"registeredName" is required'
+              });
+            }
+          })
+          .optional(),
+        general: z
+          .object({
+            projectName: z.string().max(255).trim(),
+            projectDescription: z.string().max(4000).nullish()
+          })
+          .strict()
+          .optional(),
+        location: location.optional(),
+        permits: z
+          .object({
+            appliedPermits: z.array(appliedPermit).nullish(),
+            hasAppliedProvincialPermits: z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]),
+            investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() }).strict()).nullish()
+          })
+          .strict()
+          .optional()
+      })
+      .strict()
+      .default({})
   },
   deleteGeneralProject: {
-    params: z.object({
-      generalProjectId: uuidv4
-    })
+    params: z
+      .object({
+        generalProjectId: uuidv4
+      })
+      .strict()
   },
   deleteDraft: {
-    params: z.object({
-      draftId: uuidv4
-    })
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
   },
   upsertDraft: {
-    body: z.object({
-      draftId: uuidv4.nullish(),
-      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
-    })
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
+      })
+      .strict()
   },
   getStatistics: {
-    query: z.object({
-      dateFrom: z.coerce.date().nullish(),
-      dateTo: z.coerce.date().nullish(),
-      monthYear: z.coerce.date().nullish(),
-      userId: uuidv4.nullish()
-    })
+    query: z
+      .object({
+        dateFrom: z.coerce.date().nullish(),
+        dateTo: z.coerce.date().nullish(),
+        monthYear: z.coerce.date().nullish(),
+        userId: uuidv4.nullish()
+      })
+      .strict()
   },
   getGeneralProject: {
-    params: z.object({
-      generalProjectId: uuidv4
-    })
+    params: z
+      .object({
+        generalProjectId: uuidv4
+      })
+      .strict()
   },
   searchGeneralProjects: {
-    body: z.object({
-      activityId: z.array(z.string()).optional(),
-      createdBy: z.array(z.string()).optional(),
-      includeUser: z.boolean().optional(),
-      generalProjectId: z.array(uuidv4).optional(),
-      submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
-    })
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional(),
+        generalProjectId: z.array(uuidv4).optional(),
+        submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
+      })
+      .strict()
+      .default({})
   },
   patchGeneralProject: {
     body: z
@@ -124,9 +144,11 @@ export const schema = {
         businessArea: requireValidCode.BusinessArea(z.string()).nullish()
       })
       .strict(),
-    params: z.object({
-      generalProjectId: uuidv4
-    })
+    params: z
+      .object({
+        generalProjectId: uuidv4
+      })
+      .strict()
   }
 };
 

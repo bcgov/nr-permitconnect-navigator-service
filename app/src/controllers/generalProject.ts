@@ -27,13 +27,15 @@ import type {
   UpsertGeneralProjectDraftRequest
 } from '#types';
 
+// TODO: GeneralProjectIntake is hand-written, not z.infer'd from the zod schema - it can drift from
+// what's actually validated (e.g. schema.createGeneralProject.body has `location: z.unknown()` and
+// optional contact/basic/permits, while this interface claims them required/structured). Swapping to
+// a real inferred type also needs a fix in the shared ContactRepository (Prisma checked/unchecked
+// create-input union), so it's not containable to this file alone.
 export const createGeneralProjectController = async (
   req: Request<never, never, GeneralProjectIntake>,
   res: Response<GeneralProject, LocalContext>
 ) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as GeneralProjectIntake;
-
   const result = await createGeneralProjectService(req.body, res.locals.currentContext);
   res.status(201).json(result);
 };
@@ -71,8 +73,6 @@ export const searchGeneralProjectsController = async (
   req: Request<never, never, SearchGeneralProjectRequest>,
   res: Response<GeneralProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -111,6 +111,7 @@ export const getGeneralProjectDraftsController = async (req: Request, res: Respo
   res.status(200).json(response);
 };
 
+// TODO: same GeneralProjectIntake-vs-zod-schema drift as createGeneralProjectController above.
 export const submitGeneralProjectDraftController = async (
   req: Request<never, never, GeneralProjectIntake>,
   res: Response<GeneralProject, LocalContext>

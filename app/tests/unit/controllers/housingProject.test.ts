@@ -79,9 +79,9 @@ describe('createHousingProjectController', () => {
     expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_CREATE);
   });
 
-  it('provides empty body when POST body is undefined', async () => {
+  it('creates a project from an empty body (schema defaults an omitted POST body to {})', async () => {
     const req = {
-      body: undefined
+      body: {}
     } as unknown as Request<never, never, HousingProjectIntake>;
 
     createSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);

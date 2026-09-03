@@ -28,7 +28,7 @@ const baseHousing = z.object({
 
 type HousingShape = z.infer<typeof baseHousing>;
 
-export const housing = baseHousing.superRefine((data, ctx) => {
+export const housing = baseHousing.strict().superRefine((data, ctx) => {
   const conditionals: [boolean, keyof HousingShape][] = [
     [data.financiallySupportedHousingCoop === BasicResponse.YES, 'housingCoopDescription'],
     [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription'],

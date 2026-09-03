@@ -21,6 +21,7 @@ export const schema = {
             registeredId: z.string().max(255).trim().nullish(),
             registeredName: z.string().max(255).trim().nullish()
           })
+          .strict()
           .optional(),
         contact: contactSchema.optional(),
         draftId: uuidv4.nullish(),
@@ -29,8 +30,10 @@ export const schema = {
             bcHydroNumber: z.string().max(255).trim().nullish(),
             projectType: requireValidCode.ElectrificationProjectType(z.string())
           })
+          .strict()
           .optional()
       })
+      .strict()
       .superRefine((data, ctx) => {
         const isOther = data.project?.projectType === ProjectType.OTHER;
         const value = data.basic?.projectDescription;
@@ -43,45 +46,59 @@ export const schema = {
           });
         }
       })
+      .default({})
   },
   deleteElectrificationProject: {
-    params: z.object({
-      electrificationProjectId: uuidv4
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   },
   deleteDraft: {
-    params: z.object({
-      draftId: uuidv4
-    })
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
   },
   upsertDraft: {
-    body: z.object({
-      draftId: uuidv4.nullish(),
-      data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
-    })
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
+      })
+      .strict()
   },
   getStatistics: {
-    query: z.object({
-      dateFrom: z.coerce.date().nullish(),
-      dateTo: z.coerce.date().nullish(),
-      monthYear: z.coerce.date().nullish(),
-      userId: uuidv4.nullish()
-    })
+    query: z
+      .object({
+        dateFrom: z.coerce.date().nullish(),
+        dateTo: z.coerce.date().nullish(),
+        monthYear: z.coerce.date().nullish(),
+        userId: uuidv4.nullish()
+      })
+      .strict()
   },
   getElectrificationProject: {
-    params: z.object({
-      electrificationProjectId: uuidv4
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   },
   searchElectrificationProjects: {
-    body: z.object({
-      activityId: z.array(z.string()).optional(),
-      createdBy: z.array(z.string()).optional(),
-      includeUser: z.boolean().optional(),
-      electrificationProjectId: z.array(uuidv4).optional(),
-      projectType: z.array(requireValidCode.ElectrificationProjectType(z.string())).optional(),
-      projectCategory: z.array(requireValidCode.ElectrificationProjectCategory(z.string())).optional()
-    })
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional(),
+        electrificationProjectId: z.array(uuidv4).optional(),
+        projectType: z.array(requireValidCode.ElectrificationProjectType(z.string())).optional(),
+        projectCategory: z.array(requireValidCode.ElectrificationProjectCategory(z.string())).optional()
+      })
+      .strict()
+      .default({})
   },
   patchElectrificationProject: {
     body: z
@@ -118,9 +135,11 @@ export const schema = {
           });
         }
       }),
-    params: z.object({
-      electrificationProjectId: uuidv4
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   }
 };
 

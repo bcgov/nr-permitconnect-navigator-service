@@ -5,21 +5,27 @@ import { GroupName, Initiative } from '#src/utils/enums/application';
 
 export const schema = {
   getGroups: {
-    query: z.object({
-      initiative: z.enum(Object.values(Initiative) as [string, ...string[]])
-    })
+    query: z
+      .object({
+        initiative: z.enum(Object.values(Initiative) as [string, ...string[]])
+      })
+      .strict()
   },
   listPermissions: {
-    query: z.object({
-      initiative: z.enum(Object.values(Initiative) as [string, ...string[]]),
-      groupName: z.enum(Object.values(GroupName) as [string, ...string[]])
-    })
+    query: z
+      .object({
+        initiative: z.enum(Object.values(Initiative) as [string, ...string[]]),
+        groupName: z.enum(Object.values(GroupName) as [string, ...string[]])
+      })
+      .strict()
   },
   deleteSubjectGroup: {
-    body: z.object({
-      sub: z.string(),
-      groupId: z.number()
-    })
+    body: z
+      .object({
+        sub: z.string(),
+        groupId: z.number()
+      })
+      .strict()
   }
 };
 
