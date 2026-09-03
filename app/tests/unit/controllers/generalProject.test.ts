@@ -79,9 +79,9 @@ describe('createGeneralProjectController', () => {
     expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_CREATE);
   });
 
-  it('provides empty body when POST body is undefined', async () => {
+  it('creates a project from an empty body (schema defaults an omitted POST body to {})', async () => {
     const req = {
-      body: undefined
+      body: {}
     } as unknown as Request<never, never, GeneralProjectIntake>;
 
     createSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);

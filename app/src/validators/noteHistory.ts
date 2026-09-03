@@ -10,55 +10,67 @@ const bringForwardState = z.enum(BRING_FORWARD_TYPE_LIST as [string, ...string[]
 
 export const schema = {
   deleteNoteHistory: {
-    params: z.object({
-      noteHistoryId: uuidv4
-    })
+    params: z
+      .object({
+        noteHistoryId: uuidv4
+      })
+      .strict()
   },
   createNoteHistory: {
-    body: z.object({
-      activityId: activityId,
-      bringForwardDate: z.coerce.date().nullish(),
-      bringForwardState: bringForwardState.nullish(),
-      escalateToSupervisor: z.boolean().optional(),
-      escalateToDirector: z.boolean().optional(),
-      escalationType: requireValidCode.EscalationType(z.string()).nullish(),
-      note: z.string(),
-      shownToProponent: z.boolean().optional(),
-      title: z.string().max(255),
-      type: z.string().max(255)
-    })
+    body: z
+      .object({
+        activityId: activityId,
+        bringForwardDate: z.coerce.date().nullish(),
+        bringForwardState: bringForwardState.nullish(),
+        escalateToSupervisor: z.boolean().optional(),
+        escalateToDirector: z.boolean().optional(),
+        escalationType: requireValidCode.EscalationType(z.string()).nullish(),
+        note: z.string(),
+        shownToProponent: z.boolean().optional(),
+        title: z.string().max(255),
+        type: z.string().max(255)
+      })
+      .strict()
   },
   listBringForwards: {
-    query: z.object({
-      bringForwardState: bringForwardState.optional()
-    })
+    query: z
+      .object({
+        bringForwardState: bringForwardState.optional()
+      })
+      .strict()
   },
   listNoteHistory: {
-    params: z.object({
-      activityId: activityId
-    })
+    params: z
+      .object({
+        activityId: activityId
+      })
+      .strict()
   },
   patchNoteHistory: {
-    body: z.object({
-      bringForwardDate: z.coerce.date().nullish(),
-      bringForwardState: bringForwardState.nullish(),
-      escalateToSupervisor: z.boolean().optional(),
-      escalateToDirector: z.boolean().optional(),
-      escalationType: requireValidCode.EscalationType(z.string()).nullish(),
-      note: z.string().nullish(),
-      resource: z.enum([
-        Resource.ELECTRIFICATION_PROJECT,
-        Resource.ENQUIRY,
-        Resource.GENERAL_PROJECT,
-        Resource.HOUSING_PROJECT
-      ] as [Resource, ...Resource[]]),
-      shownToProponent: z.boolean().optional(),
-      title: z.string().max(255).optional(),
-      type: z.string().max(255).optional()
-    }),
-    params: z.object({
-      noteHistoryId: uuidv4
-    })
+    body: z
+      .object({
+        bringForwardDate: z.coerce.date().nullish(),
+        bringForwardState: bringForwardState.nullish(),
+        escalateToSupervisor: z.boolean().optional(),
+        escalateToDirector: z.boolean().optional(),
+        escalationType: requireValidCode.EscalationType(z.string()).nullish(),
+        note: z.string().nullish(),
+        resource: z.enum([
+          Resource.ELECTRIFICATION_PROJECT,
+          Resource.ENQUIRY,
+          Resource.GENERAL_PROJECT,
+          Resource.HOUSING_PROJECT
+        ] as [Resource, ...Resource[]]),
+        shownToProponent: z.boolean().optional(),
+        title: z.string().max(255).optional(),
+        type: z.string().max(255).optional()
+      })
+      .strict(),
+    params: z
+      .object({
+        noteHistoryId: uuidv4
+      })
+      .strict()
   }
 };
 

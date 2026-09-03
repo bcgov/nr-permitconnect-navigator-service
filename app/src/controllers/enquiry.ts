@@ -62,8 +62,6 @@ export const searchEnquiriesController = async (
   req: Request<never, never, SearchEnquiriesRequest, never>,
   res: Response<Enquiry[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchEnquiriesService(
     res.locals.currentAuthorization,
     res.locals.currentContext,

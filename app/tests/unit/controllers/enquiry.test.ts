@@ -174,8 +174,8 @@ describe('searchEnquiriesController', () => {
     expect(res.json).toHaveBeenCalledWith(enquiries);
   });
 
-  it('leaves includeUser undefined when the body is undefined', async () => {
-    const req = { body: undefined } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
+  it('leaves includeUser undefined for an empty body (schema defaults an omitted POST body to {})', async () => {
+    const req = { body: {} } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
 
     searchEnquiriesSpy.mockResolvedValue(enquiries);

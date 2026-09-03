@@ -34,4 +34,8 @@ export const ORG_BOOK_QUERY_PARAMS = {
 
 export const PROJECT_APPLICANT_LIST = [ProjectApplicant.BUSINESS, ProjectApplicant.INDIVIDUAL];
 
-export const PROJECT_LOCATION_LIST = [ProjectLocation.LOCATION_COORDINATES, ProjectLocation.STREET_ADDRESS];
+export const PROJECT_LOCATION_LIST = [
+  ProjectLocation.LOCATION_COORDINATES,
+  ProjectLocation.STREET_ADDRESS,
+  ProjectLocation.PIN_OR_DRAW
+];

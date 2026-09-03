@@ -28,13 +28,15 @@ import type {
   UpsertElectrificationProjectDraftRequest
 } from '#types';
 
+// TODO: ElectrificationProjectIntake is hand-written, not z.infer'd from the zod schema - it can drift
+// from what's actually validated (e.g. schema.createElectrificationProject.body has optional
+// contact/basic/project, while this interface claims some required). Swapping to a real inferred type
+// also needs a fix in the shared ContactRepository (Prisma checked/unchecked create-input union), so
+// it's not containable to this file alone.
 export const createElectrificationProjectController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
   res: Response<ElectrificationProject, LocalContext>
 ) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as ElectrificationProjectIntake;
-
   const result = await createElectrificationProjectService(req.body, res.locals.currentContext);
   res.status(201).json(result);
 };
@@ -81,8 +83,6 @@ export const searchElectrificationProjectsController = async (
   req: Request<never, never, SearchElectrificationProjectRequest>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -124,6 +124,7 @@ export const getElectrificationProjectDraftsController = async (req: Request, re
   res.status(200).json(response);
 };
 
+// TODO: same ElectrificationProjectIntake-vs-zod-schema drift as createElectrificationProjectController above.
 export const submitElectrificationProjectDraftController = async (
   req: Request<never, never, ElectrificationProjectIntake>,
   res: Response<ElectrificationProject, LocalContext>

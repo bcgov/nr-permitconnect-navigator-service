@@ -5,27 +5,33 @@ import { validate } from '#src/middleware/validation';
 
 export const schema = {
   getRoadmapNote: {
-    query: z.object({
-      activityId: activityId
-    })
+    query: z
+      .object({
+        activityId: activityId
+      })
+      .strict()
   },
   send: {
-    body: z.object({
-      activityId: activityId,
-      selectedFileIds: z.array(uuidv4).optional(),
-      emailData: z.object({
-        bcc: z.array(email).optional(),
-        bodyType: z.string(),
-        body: z.string(),
-        cc: z.array(email).optional(),
-        delayTS: z.number().optional(),
-        from: email,
-        priority: z.string().optional(),
-        subject: z.string(),
-        tag: z.string().optional(),
-        to: z.array(email)
+    body: z
+      .object({
+        activityId: activityId,
+        selectedFileIds: z.array(uuidv4).optional(),
+        emailData: z
+          .object({
+            bcc: z.array(email).optional(),
+            bodyType: z.string(),
+            body: z.string(),
+            cc: z.array(email).optional(),
+            delayTS: z.number().optional(),
+            from: email,
+            priority: z.string().optional(),
+            subject: z.string(),
+            tag: z.string().optional(),
+            to: z.array(email)
+          })
+          .strict()
       })
-    })
+      .strict()
   }
 };
 

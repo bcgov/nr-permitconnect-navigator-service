@@ -28,13 +28,15 @@ import type {
   UpsertHousingProjectDraftRequest
 } from '#types';
 
+// TODO: HousingProjectIntake is hand-written, not z.infer'd from the zod schema - it can drift from
+// what's actually validated (e.g. schema.createHousingProject.body has `location: z.unknown()` and
+// optional contact/basic/housing, while this interface claims them required/structured). Swapping to
+// a real inferred type also needs a fix in the shared ContactRepository (Prisma checked/unchecked
+// create-input union), so it's not containable to this file alone.
 export const createHousingProjectController = async (
   req: Request<never, never, HousingProjectIntake>,
   res: Response<HousingProject, LocalContext>
 ) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as HousingProjectIntake;
-
   const result = await createHousingProjectService(req.body, res.locals.currentContext);
   res.status(201).json(result);
 };
@@ -75,8 +77,6 @@ export const searchHousingProjectsController = async (
   req: Request<never, never, SearchHousingProjectRequest>,
   res: Response<HousingProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -115,6 +115,7 @@ export const getHousingProjectDraftsController = async (req: Request, res: Respo
   res.status(200).json(response);
 };
 
+// TODO: same HousingProjectIntake-vs-zod-schema drift as createHousingProjectController above.
 export const submitHousingProjectDraftController = async (
   req: Request<never, never, HousingProjectIntake>,
   res: Response<HousingProject, LocalContext>
