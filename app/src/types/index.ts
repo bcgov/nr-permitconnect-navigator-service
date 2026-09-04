@@ -3,7 +3,6 @@ export type * from './common.ts';
 export type * from './context.ts';
 export type * from './codes.ts';
 export type * from './domain.ts';
-export type * from './intakes.ts';
 export type * from './utils.ts';
 
 export type * from './api/filters.ts';

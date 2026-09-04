@@ -4,19 +4,22 @@ import {
   TEST_ACTIVITY_HOUSING,
   TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
-  TEST_HOUSING_PROJECT_INTAKE,
-  TEST_PERMIT_1
+  TEST_HOUSING_PROJECT_INTAKE
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import * as activityDomain from '#src/domains/activity';
-import { assignPriority, generateHousingProjectData } from '#src/domains/housingProject';
+import { assignPriority, createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
+import { getCurrentUsername } from '#src/utils/index';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { NumResidentialUnits } from '#src/utils/enums/housing';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { HousingProject, Permit } from '#types';
+import type { HousingProject, SubmitHousingProjectDraftRequest } from '#types';
+
+type AppliedPermitInput = NonNullable<SubmitHousingProjectDraftRequest['permits']['appliedPermits']>[number];
+type InvestigatePermitInput = NonNullable<SubmitHousingProjectDraftRequest['permits']['investigatePermits']>[number];
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {
@@ -189,6 +192,74 @@ describe('housingProject domain', () => {
     });
   });
 
+  describe('createHousingProjectData', () => {
+    it('should create activity and link contact', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
+      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
+      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+
+      const result = await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(activityDomain.createActivity).toHaveBeenCalledWith(
+        {
+          activity: mockRepos.activity,
+          initiative: mockRepos.initiative
+        },
+        Initiative.HOUSING
+      );
+      expect(mockRepos.contact.search).toHaveBeenCalledWith({
+        userId: [TEST_CURRENT_CONTEXT.userId]
+      });
+      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
+        activityId: TEST_ACTIVITY_HOUSING.activityId,
+        contactId: TEST_CONTACT_1.contactId,
+        role: 'PRIMARY'
+      });
+      expect(result.housingProject.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
+    });
+
+    it('should skip linking a contact when none exists for the user', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
+      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+
+      await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when activity creation fails', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
+
+      await expect(createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to generate activity ID'
+      );
+    });
+
+    it('should throw error when submittedBy cannot be determined', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
+      vi.mocked(getCurrentUsername).mockReturnValueOnce(undefined);
+
+      await expect(createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to determine submittedBy'
+      );
+    });
+
+    it('should return a blank project shell with defaults and no permits', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
+      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+
+      const result = await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(result.housingProject.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.housingProject.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.housingProject.submittedBy).toBe('test-user');
+      expect(result.housingProject.housingProjectId).toBeDefined();
+      expect(result.appliedPermits).toEqual([]);
+      expect(result.investigatePermits).toEqual([]);
+      expect(result.appliedPermitTrackers).toEqual([]);
+    });
+  });
+
   describe('generateHousingProjectData', () => {
     it('should create activity and link contact when activityId not provided', async () => {
       vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
@@ -218,6 +289,19 @@ describe('housingProject domain', () => {
         role: 'PRIMARY'
       });
       expect(result.housingProject.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
+    });
+
+    it('should throw error when submittedBy cannot be determined', async () => {
+      vi.mocked(getCurrentUsername).mockReturnValueOnce(undefined);
+
+      const intake = {
+        ...TEST_HOUSING_PROJECT_INTAKE,
+        activityId: 'ACTI1234'
+      };
+
+      await expect(generateHousingProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to determine submittedBy'
+      );
     });
 
     it('should use provided activityId and skip activity creation', async () => {
@@ -268,16 +352,12 @@ describe('housingProject domain', () => {
           singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
           multiFamilyUnits: BasicResponse.NO,
           otherUnits: BasicResponse.NO,
-          otherUnitsDescription: null,
           hasRentalUnits: BasicResponse.NO,
-          rentalUnits: null,
+          rentalUnits: BasicResponse.NO,
           financiallySupportedBc: BasicResponse.NO,
           financiallySupportedIndigenous: BasicResponse.NO,
           financiallySupportedNonProfit: BasicResponse.NO,
-          financiallySupportedHousingCoop: BasicResponse.NO,
-          indigenousDescription: null,
-          nonProfitDescription: null,
-          housingCoopDescription: null
+          financiallySupportedHousingCoop: BasicResponse.NO
         }
       };
 
@@ -310,13 +390,10 @@ describe('housingProject domain', () => {
         permits: {
           appliedPermits: [
             {
-              ...TEST_PERMIT_1,
-              permitId: 'PERM001',
               permitTypeId: 1,
               submittedDate: new Date(),
-              submittedTime: '10:00',
               permitTracking: [{ trackingId: 'TRACK001', statusCode: 'SUBMITTED' } as never]
-            } as unknown as Permit
+            } as unknown as AppliedPermitInput
           ],
           hasAppliedProvincialPermits: BasicResponse.YES,
           investigatePermits: []
@@ -327,12 +404,12 @@ describe('housingProject domain', () => {
 
       expect(result.appliedPermits).toHaveLength(1);
       const permit = result.appliedPermits[0];
-      expect(permit.permitId).toBe('PERM001');
+      expect(permit.permitId).toBeDefined();
       expect(permit.stage).toBe(PermitStage.APPLICATION_SUBMISSION);
       expect(permit.needed).toBe(PermitNeeded.YES);
 
       expect(result.appliedPermitTrackers).toHaveLength(1);
-      expect(result.appliedPermitTrackers[0].permitId).toBe('PERM001');
+      expect(result.appliedPermitTrackers[0].permitId).toBe(permit.permitId);
     });
 
     it('should transform investigate permits correctly', async () => {
@@ -344,11 +421,8 @@ describe('housingProject domain', () => {
           hasAppliedProvincialPermits: BasicResponse.NO,
           investigatePermits: [
             {
-              ...TEST_PERMIT_1,
-              permitId: undefined,
-              permitTypeId: 2,
-              submittedTime: '14:00'
-            } as unknown as Permit
+              permitTypeId: 2
+            } as unknown as InvestigatePermitInput
           ]
         }
       };

@@ -75,7 +75,7 @@ router.post(
 router.post(
   '/draft/submit',
   hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.createHousingProject,
+  housingProjectValidator.submitHousingProjectDraft,
   submitHousingProjectDraftController
 );
 

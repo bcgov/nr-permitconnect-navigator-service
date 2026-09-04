@@ -4,11 +4,11 @@ import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
 import type {
+  CreateEnquiryRequest,
   CreateEnquiryResponse,
   CurrentAuthorization,
   CurrentContext,
   Enquiry,
-  EnquiryIntake,
   PatchEnquiryRequest,
   SearchEnquiriesRequest
 } from '#types';
@@ -22,7 +22,7 @@ import type { Initiative } from '#src/utils/enums/application';
  */
 export const createEnquiryService = async (
   currentContext: CurrentContext,
-  intakeData: EnquiryIntake
+  intakeData: CreateEnquiryRequest
 ): Promise<CreateEnquiryResponse> => {
   return await unitOfWork.execute(
     async ({
@@ -90,7 +90,7 @@ export const createEnquiryService = async (
         },
         { ...result, contact: contactResponse },
         currentContext.initiative,
-        intakeData.relatedActivityId
+        intakeData.relatedActivityId ?? undefined
       );
 
       return { ...result, contact: contactResponse };

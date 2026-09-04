@@ -9,7 +9,7 @@ import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/uti
 import { confirmationTemplateEnquiry } from '#src/utils/templates';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { ContactBase, CurrentContext, Enquiry, EnquiryBase, EnquiryIntake, ProjectRepositoryKeys } from '#types';
+import type { ContactBase, CreateEnquiryRequest, CurrentContext, Enquiry, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 export async function emailEnquiryConfirmation(
@@ -90,41 +90,40 @@ export async function emailEnquiryConfirmation(
  */
 export const generateEnquiryData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
-  data: EnquiryIntake,
+  data: CreateEnquiryRequest,
   currentContext: CurrentContext
 ) => {
-  let activityId = data.activityId;
-
-  // Create activity and link contact if required
-  if (!activityId) {
-    activityId = (
-      await createActivity(
-        { activity: repositories.activity, initiative: repositories.initiative },
-        currentContext.initiative
-      )
-    )?.activityId;
-
-    const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
-    if (contacts[0]) {
-      await repositories.activityContact.create({
-        activityId,
-        contactId: contacts[0].contactId,
-        role: ActivityContactRole.PRIMARY
-      });
-    }
-  }
+  // No activityId is ever sent for a new enquiry - always create a new activity.
+  const activityId = (
+    await createActivity(
+      { activity: repositories.activity, initiative: repositories.initiative },
+      currentContext.initiative
+    )
+  )?.activityId;
 
   if (!activityId) throw new Error('Failed to generate activity ID');
 
+  const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
+  if (contacts[0]) {
+    await repositories.activityContact.create({
+      activityId,
+      contactId: contacts[0].contactId,
+      role: ActivityContactRole.PRIMARY
+    });
+  }
+
+  const submittedBy = getCurrentUsername(currentContext);
+  if (!submittedBy) throw new Error('Failed to determine submittedBy');
+
   // Put new enquiry together
   return {
-    enquiryId: data.enquiryId ?? randomUUID(),
-    activityId: activityId,
-    relatedActivityId: data.relatedActivityId,
-    enquiryDescription: data.enquiryDescription,
-    submittedAt: data.submittedAt ? new Date(data.submittedAt) : new Date(),
-    submittedBy: getCurrentUsername(currentContext),
-    enquiryStatus: data.enquiryStatus ?? ApplicationStatus.NEW,
-    submissionType: data?.submissionType ?? SubmissionType.GENERAL_ENQUIRY
-  } as EnquiryBase;
+    enquiryId: randomUUID(),
+    activityId,
+    relatedActivityId: data.relatedActivityId ?? null,
+    enquiryDescription: data.enquiryDescription ?? null,
+    submittedAt: new Date(),
+    submittedBy,
+    enquiryStatus: ApplicationStatus.NEW,
+    submissionType: data.submissionType ?? SubmissionType.GENERAL_ENQUIRY
+  };
 };

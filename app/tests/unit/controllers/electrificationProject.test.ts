@@ -32,12 +32,12 @@ import type { Mock } from 'vitest';
 import type {
   Draft,
   ElectrificationProject,
-  ElectrificationProjectIntake,
   SearchElectrificationProjectRequest,
   ElectrificationProjectStatistics,
   LocalContext,
   PatchElectrificationProjectRequest,
   GetProjectStatisticsRequest,
+  SubmitElectrificationProjectDraftRequest,
   UpsertElectrificationProjectDraftRequest
 } from '#types';
 
@@ -64,32 +64,17 @@ beforeEach(() => {
 describe('createElectrificationProjectController', () => {
   const createSpy = vi.spyOn(electrificationProjectService, 'createElectrificationProjectService');
 
-  it('calls the service with body and context then responds 201', async () => {
-    const req = {
-      body: TEST_ELECTRIFICATION_INTAKE
-    } as unknown as Request<never, never, ElectrificationProjectIntake>;
+  it('calls the service with context (body is always empty and ignored) then responds 201', async () => {
+    const req = {} as unknown as Request;
 
     createSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
 
     await createElectrificationProjectController(req, res as unknown as Response<ElectrificationProject, LocalContext>);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(TEST_ELECTRIFICATION_INTAKE, TEST_CURRENT_CONTEXT);
+    expect(createSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_CREATE);
-  });
-
-  it('creates a project from an empty body (schema defaults an omitted POST body to {})', async () => {
-    const req = {
-      body: {}
-    } as unknown as Request<never, never, ElectrificationProjectIntake>;
-
-    createSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
-
-    await createElectrificationProjectController(req, res as unknown as Response<ElectrificationProject, LocalContext>);
-
-    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
-    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
@@ -340,7 +325,7 @@ describe('submitElectrificationProjectDraftController', () => {
         ...TEST_ELECTRIFICATION_INTAKE,
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
       }
-    } as unknown as Request<never, never, ElectrificationProjectIntake>;
+    } as unknown as Request<never, never, SubmitElectrificationProjectDraftRequest>;
 
     submitSpy.mockResolvedValue(TEST_ELECTRIFICATION_PROJECT_CREATE);
 

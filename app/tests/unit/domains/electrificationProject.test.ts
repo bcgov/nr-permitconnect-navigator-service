@@ -8,7 +8,10 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import * as activityDomain from '#src/domains/activity';
-import { generateElectrificationProjectData } from '#src/domains/electrificationProject';
+import {
+  createElectrificationProjectData,
+  generateElectrificationProjectData
+} from '#src/domains/electrificationProject';
 import { Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
@@ -118,18 +121,71 @@ describe('electrificationProject domain', () => {
         activityId: 'ACTI1234',
         basic: {
           ...TEST_ELECTRIFICATION_INTAKE.basic,
-          registeredId: undefined,
-          registeredName: undefined
+          registeredId: undefined
         }
       };
 
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
       expect(result.companyIdRegistered).toBeNull();
-      expect(result.companyNameRegistered).toBeNull();
       expect(result.aaiUpdated).toBe(false);
       expect(result.addedToAts).toBe(false);
       expect(result.queuePriority).toBeNull();
+    });
+  });
+
+  describe('createElectrificationProjectData', () => {
+    it('should create activity and link contact', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
+      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
+      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+
+      const result = await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(activityDomain.createActivity).toHaveBeenCalledWith(
+        {
+          activity: mockRepos.activity,
+          initiative: mockRepos.initiative
+        },
+        Initiative.ELECTRIFICATION
+      );
+      expect(mockRepos.contact.search).toHaveBeenCalledWith({
+        userId: [TEST_CURRENT_CONTEXT.userId]
+      });
+      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
+        activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
+        contactId: TEST_CONTACT_1.contactId,
+        role: 'PRIMARY'
+      });
+      expect(result.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
+    });
+
+    it('should skip linking a contact when none exists for the user', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
+      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+
+      await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when activity creation fails', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
+
+      await expect(createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to generate activity ID'
+      );
+    });
+
+    it('should return a blank project shell with defaults', async () => {
+      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
+      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+
+      const result = await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(result.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.electrificationProjectId).toBeDefined();
     });
   });
 });

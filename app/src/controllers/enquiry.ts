@@ -10,21 +10,18 @@ import {
 
 import type { Request, Response } from 'express';
 import type {
+  CreateEnquiryRequest,
   CreateEnquiryResponse,
   Enquiry,
-  EnquiryIntake,
   LocalContext,
   PatchEnquiryRequest,
   SearchEnquiriesRequest
 } from '#types';
 
 export const createEnquiryController = async (
-  req: Request<never, never, EnquiryIntake>,
+  req: Request<never, never, CreateEnquiryRequest>,
   res: Response<CreateEnquiryResponse, LocalContext>
 ) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as EnquiryIntake;
-
   const response = await createEnquiryService(res.locals.currentContext, req.body);
   res.status(201).json(response);
 };

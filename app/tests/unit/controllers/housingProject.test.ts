@@ -32,12 +32,12 @@ import type { Mock } from 'vitest';
 import type {
   Draft,
   HousingProject,
-  HousingProjectIntake,
   HousingProjectStatistics,
   SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
   GetProjectStatisticsRequest,
+  SubmitHousingProjectDraftRequest,
   UpsertHousingProjectDraftRequest
 } from '#types';
 
@@ -64,32 +64,17 @@ beforeEach(() => {
 describe('createHousingProjectController', () => {
   const createSpy = vi.spyOn(housingProjectService, 'createHousingProjectService');
 
-  it('calls the service with body and context then responds 201', async () => {
-    const req = {
-      body: TEST_HOUSING_PROJECT_INTAKE
-    } as unknown as Request<never, never, HousingProjectIntake>;
+  it('calls the service with context (body is always empty and ignored) then responds 201', async () => {
+    const req = {} as unknown as Request;
 
     createSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
 
     await createHousingProjectController(req, res as unknown as Response<HousingProject, LocalContext>);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_INTAKE, TEST_CURRENT_CONTEXT);
+    expect(createSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_HOUSING_PROJECT_CREATE);
-  });
-
-  it('creates a project from an empty body (schema defaults an omitted POST body to {})', async () => {
-    const req = {
-      body: {}
-    } as unknown as Request<never, never, HousingProjectIntake>;
-
-    createSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
-
-    await createHousingProjectController(req, res as unknown as Response<HousingProject, LocalContext>);
-
-    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
-    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
@@ -328,7 +313,7 @@ describe('submitHousingProjectDraftController', () => {
         ...TEST_HOUSING_PROJECT_INTAKE,
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
       }
-    } as unknown as Request<never, never, HousingProjectIntake>;
+    } as unknown as Request<never, never, SubmitHousingProjectDraftRequest>;
 
     submitSpy.mockResolvedValue(TEST_HOUSING_PROJECT_CREATE);
 

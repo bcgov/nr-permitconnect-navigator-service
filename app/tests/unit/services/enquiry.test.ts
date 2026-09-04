@@ -51,7 +51,7 @@ describe('enquiry service', () => {
     it('generates data, creates the enquiry, upserts the contact and links related contacts', async () => {
       const relatedContact = { activityId: TEST_ENQUIRY_INTAKE.relatedActivityId, contactId: 'other-contact-id' };
 
-      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1);
+      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.create.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.contact.upsert.mockResolvedValue(TEST_CONTACT_1 as never);
       mockRepos.contact.search.mockResolvedValue([TEST_CONTACT_1] as never);
@@ -124,7 +124,7 @@ describe('enquiry service', () => {
     it('skips related contact linking when there is no relatedActivityId', async () => {
       const intakeNoRelated = { ...TEST_ENQUIRY_INTAKE, relatedActivityId: undefined };
 
-      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1);
+      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.create.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.contact.upsert.mockResolvedValue(TEST_CONTACT_1 as never);
       emailEnquiryConfirmationSpy.mockResolvedValue(undefined);
