@@ -12,8 +12,12 @@ import { userService } from '@/services';
 import { StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
+
 import type { Note, NoteHistory, User } from '@/types';
 import { enquiryRouteNameKey, projectEnquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
+
+// Mocks
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -22,11 +26,10 @@ vi.mock('vue-i18n', () => ({
 }));
 
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+  useRouter: () => mockRouter
 }));
+
+// Fixtures
 
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
@@ -60,7 +63,7 @@ const TEST_NOTE_HISTORY: NoteHistory = {
 
 const wrapperSettings = (options: { noteHistory?: NoteHistory; editable?: boolean } = {}) => ({
   props: {
-    noteHistory: options.noteHistory ?? TEST_NOTE_HISTORY,
+    noteHistory: 'noteHistory' in options ? options.noteHistory : TEST_NOTE_HISTORY,
     editable: options.editable ?? true
   },
   global: {
@@ -95,6 +98,7 @@ const wrapperSettings = (options: { noteHistory?: NoteHistory; editable?: boolea
 });
 
 beforeEach(() => {
+  resetMockRouter();
   sessionStorage.setItem(
     StorageKey.CONFIG,
     JSON.stringify({
@@ -113,65 +117,60 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
-// Currently, modal functionality hidden behind Primevue component Dialog
+// Tests
+
 describe('NoteForm', () => {
-  it('renders', () => {
-    const wrapper = mount(NoteForm, wrapperSettings());
-    expect(wrapper).toBeTruthy();
-  });
-});
+  describe('rendering', () => {
+    describe('mandatory fields', () => {
+      it('renders Select for type with correct name', () => {
+        const wrapper = mount(NoteForm, wrapperSettings());
 
-describe('renders all mandatory fields', () => {
-  it('renders Select for type with correct name', () => {
-    const wrapper = mount(NoteForm, wrapperSettings());
+        const selects = wrapper.findAllComponents(Select);
+        const typeSelect = selects.find((select) => select.props('name') === 'type');
 
-    const selects = wrapper.findAllComponents(Select);
-    const typeSelect = selects.find((select) => select.props('name') === 'type');
+        expect(typeSelect).toBeTruthy();
+      });
 
-    expect(typeSelect).toBeTruthy();
-  });
+      it('renders InputText for title with correct name', () => {
+        const wrapper = mount(NoteForm, wrapperSettings());
 
-  it('renders InputText for title with correct name', () => {
-    const wrapper = mount(NoteForm, wrapperSettings());
+        const titleInput = wrapper.findComponent(InputText);
 
-    const titleInput = wrapper.findComponent(InputText);
+        expect(titleInput.props('name')).toBe('title');
+        expect(titleInput.props('required')).toBe(true);
+      });
+      describe('Note', () => {
+        it('renders', () => {
+          const wrapper = mount(NoteForm, wrapperSettings());
 
-    expect(titleInput.props('name')).toBe('title');
-    expect(titleInput.props('required')).toBe(true);
-  });
+          const noteTextArea = wrapper.findComponent(TextArea);
 
-  it('renders TextArea for note with correct name', () => {
-    const wrapper = mount(NoteForm, wrapperSettings());
+          expect(noteTextArea.props('name')).toBe('note');
+        });
+        it('displays an asterisk when creating a note', () => {
+          const wrapper = mount(NoteForm, wrapperSettings({ noteHistory: undefined }));
 
-    const noteTextArea = wrapper.findComponent(TextArea);
+          const headings = wrapper.findAll('h6');
+          const noteHeading = headings.find((h) => h.text().includes('note.noteForm.note'));
+          const asterisk = noteHeading?.findAll('span')?.find((span) => span.text() === '*');
 
-    expect(noteTextArea.props('name')).toBe('note');
-  });
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      it('renders DatePicker for bringForwardDate when type is BRING_FORWARD', async () => {
+        const wrapper = mount(
+          NoteForm,
+          wrapperSettings({
+            noteHistory: { ...TEST_NOTE_HISTORY, type: NoteType.BRING_FORWARD }
+          })
+        );
 
-  it('renders DatePicker for bringForwardDate when type is BRING_FORWARD', async () => {
-    const wrapper = mount(
-      NoteForm,
-      wrapperSettings({
-        noteHistory: { ...TEST_NOTE_HISTORY, type: NoteType.BRING_FORWARD }
-      })
-    );
+        await nextTick();
 
-    await nextTick();
+        const datePicker = wrapper.findComponent(DatePicker);
 
-    const datePicker = wrapper.findComponent(DatePicker);
-
-    expect(datePicker.props('name')).toBe('bringForwardDate');
-  });
-});
-
-describe('required fields with asterisks', () => {
-  it('displays asterisk for note field', () => {
-    const wrapper = mount(NoteForm, wrapperSettings());
-
-    const headings = wrapper.findAll('h6');
-    const noteHeading = headings.find((h) => h.text().includes('note.noteForm.note'));
-    const asterisk = noteHeading?.findAll('span')?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
+        expect(datePicker.props('name')).toBe('bringForwardDate');
+      });
+    });
   });
 });

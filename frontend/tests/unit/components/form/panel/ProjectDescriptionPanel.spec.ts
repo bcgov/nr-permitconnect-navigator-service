@@ -31,23 +31,23 @@ beforeEach(() => {
 
 describe('ProjectDescriptionPanel', () => {
   describe('rendering', () => {
-    it('renders TextArea bound to projectDescription.description', () => {
-      const { wrapper } = mountProjectDescriptionPanel();
+    describe('projectDescription', () => {
+      it('renders', () => {
+        const { wrapper } = mountProjectDescriptionPanel();
 
-      const textArea = wrapper.findComponent(TextArea);
-      expect(textArea.exists()).toBe(true);
-      expect(textArea.props('name')).toBe('projectDescription.description');
-    });
-  });
+        const textArea = wrapper.findComponent(TextArea);
+        expect(textArea.exists()).toBe(true);
+        expect(textArea.props('name')).toBe('projectDescription.description');
+      });
 
-  describe('required fields with asterisks', () => {
-    it('displays asterisk in header for project description', () => {
-      const { wrapper } = mountProjectDescriptionPanel();
+      it('displays asterisk', () => {
+        const { wrapper } = mountProjectDescriptionPanel();
 
-      const header = wrapper.find('h3');
-      const asterisk = header.findAll('span').find((span) => span.text() === '*');
+        const header = wrapper.find('h3');
+        const asterisk = header.findAll('span').find((span) => span.text() === '*');
 
-      expect(asterisk).toBeTruthy();
+        expect(asterisk).toBeTruthy();
+      });
     });
   });
 });

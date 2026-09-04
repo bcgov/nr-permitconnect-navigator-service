@@ -88,11 +88,24 @@ describe('ProjectTypeCard', () => {
         expect(wrapper.findComponent(RadioList).props('disabled')).toBe(expectedDisabled);
       }
     );
+    describe('mandatory fields', () => {
+      describe('header', () => {
+        it('renders', () => {
+          const { wrapper } = mountProjectTypeCard();
 
-    it('renders a non-empty translated header', () => {
-      const { wrapper } = mountProjectTypeCard();
+          expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+        });
 
-      expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+        it('displays asterisk', () => {
+          const { wrapper } = mountProjectTypeCard();
+
+          const header = wrapper.find('h6');
+          const spans = header.findAll('span');
+          const asterisk = spans.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
     });
   });
 
@@ -146,18 +159,6 @@ describe('ProjectTypeCard', () => {
       await nextTick();
 
       expect(formStore.setFormError).toHaveBeenCalledWith('ProjectTypeCard', 0, false);
-    });
-  });
-
-  describe('required fields with asterisks', () => {
-    it('displays asterisk in header for the required card', () => {
-      const { wrapper } = mountProjectTypeCard();
-
-      const header = wrapper.find('h6');
-      const spans = header.findAll('span');
-      const asterisk = spans.find((span) => span.text() === '*');
-
-      expect(asterisk).toBeTruthy();
     });
   });
 });
