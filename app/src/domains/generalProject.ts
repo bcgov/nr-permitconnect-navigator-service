@@ -12,7 +12,7 @@ import type { Repositories } from '#src/db/unitOfWork';
 import type {
   CurrentContext,
   GeneralProjectCreateInput,
-  PermitTrackingBase,
+  PermitTrackingCreateInput,
   SubmitGeneralProjectDraftRequest
 } from '#types';
 
@@ -53,7 +53,7 @@ export const createGeneralProjectData = async (
     } satisfies GeneralProjectCreateInput,
     appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
     investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
-    appliedPermitTrackers: [] as PermitTrackingBase[]
+    appliedPermitTrackers: [] as PermitTrackingCreateInput[]
   };
 };
 
@@ -119,14 +119,21 @@ export const generateGeneralProjectData = async (
 
   let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [];
   let investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
-  const appliedPermitTrackers: PermitTrackingBase[] = [];
+  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
 
   if (data.permits.appliedPermits?.length) {
     appliedPermits = data.permits.appliedPermits.map((x) => {
       const permitId = randomUUID();
 
       // Add each tracker for this permit with the proper permitId
-      x.permitTracking?.forEach((pt) => appliedPermitTrackers.push({ ...pt, permitId } as PermitTrackingBase));
+      x.permitTracking?.forEach((pt) =>
+        appliedPermitTrackers.push({
+          ...pt,
+          permitId,
+          permitTrackingId: pt.permitTrackingId ?? undefined,
+          shownToProponent: pt.shownToProponent ?? undefined
+        } satisfies PermitTrackingCreateInput)
+      );
 
       return buildNewPermitRecord({
         permitId,
