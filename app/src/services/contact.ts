@@ -1,6 +1,6 @@
 import { unitOfWork } from '#src/db/unitOfWork';
 
-import type { Contact, ContactBase, ContactSearchParameters, RequiredFields, UpsertContactRequest } from '#types';
+import type { Contact, ContactCreateInput, ContactSearchParameters, RequiredFields, UpsertContactInput } from '#types';
 
 /**
  * Deletes a specific contact from the PCNS database.
@@ -33,9 +33,9 @@ export const getContactService = async (contactId: string, includeActivities: bo
  * @param data - The contact objects to be created
  * @returns A promise that resolves when the operation is complete
  */
-export const createContactsService = async (data: ContactBase[]): Promise<Contact[]> => {
+export const createContactsService = async (data: ContactCreateInput[]): Promise<Contact[]> => {
   return await unitOfWork.execute(async ({ contact }) => {
-    return await Promise.all(data.map(async (x: ContactBase) => contact.create(x)));
+    return await Promise.all(data.map(async (x: ContactCreateInput) => contact.create(x)));
   });
 };
 
@@ -152,7 +152,7 @@ export const searchContactsService = async (params: ContactSearchParameters): Pr
  * @returns A promise that resolves when the operation is complete
  */
 export const upsertContactsService = async (
-  data: RequiredFields<UpsertContactRequest, 'contactId'>[]
+  data: RequiredFields<UpsertContactInput, 'contactId'>[]
 ): Promise<Contact[]> => {
   return await unitOfWork.execute(async ({ contact }) => {
     return await Promise.all(data.map(async (x) => contact.upsert({ contactId: x.contactId }, x, x)));

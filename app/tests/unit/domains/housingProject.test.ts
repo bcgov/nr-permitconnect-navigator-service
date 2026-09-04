@@ -1,11 +1,6 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import {
-  TEST_ACTIVITY_HOUSING,
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_HOUSING_PROJECT_INTAKE
-} from '#tests/unit/data/index';
+import { TEST_ACTIVITY_HOUSING, TEST_CURRENT_CONTEXT, TEST_HOUSING_PROJECT_INTAKE } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import * as activityDomain from '#src/domains/activity';
@@ -198,42 +193,25 @@ describe('housingProject domain', () => {
   });
 
   describe('createHousingProjectData', () => {
-    it('should create activity and link contact', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+    it('should build a project from the ensured activity', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_HOUSING.activityId
+      );
 
       const result = await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        {
-          activity: mockRepos.activity,
-          initiative: mockRepos.initiative
-        },
-        Initiative.HOUSING
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.HOUSING,
+        TEST_CURRENT_CONTEXT
       );
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({
-        userId: [TEST_CURRENT_CONTEXT.userId]
-      });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
-        activityId: TEST_ACTIVITY_HOUSING.activityId,
-        contactId: TEST_CONTACT_1.contactId,
-        role: 'PRIMARY'
-      });
       expect(result.housingProject.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
     });
 
-    it('should skip linking a contact when none exists for the user', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
-
-      await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
-
-      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
-    });
-
     it('should throw error when activity creation fails', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
       await expect(createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
         'Failed to generate activity ID'
@@ -241,7 +219,9 @@ describe('housingProject domain', () => {
     });
 
     it('should throw error when submittedBy cannot be determined', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_HOUSING.activityId
+      );
       vi.mocked(getCurrentUsername).mockReturnValueOnce(undefined);
 
       await expect(createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
@@ -250,8 +230,9 @@ describe('housingProject domain', () => {
     });
 
     it('should return a blank project shell with defaults and no permits', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_HOUSING.activityId
+      );
 
       const result = await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 
@@ -266,10 +247,10 @@ describe('housingProject domain', () => {
   });
 
   describe('generateHousingProjectData', () => {
-    it('should create activity and link contact when activityId not provided', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_HOUSING as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+    it('should build a project from the ensured activity when activityId not provided', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_HOUSING.activityId
+      );
 
       const intake = {
         ...TEST_HOUSING_PROJECT_INTAKE,
@@ -278,21 +259,12 @@ describe('housingProject domain', () => {
 
       const result = await generateHousingProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        {
-          activity: mockRepos.activity,
-          initiative: mockRepos.initiative
-        },
-        Initiative.HOUSING
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.HOUSING,
+        TEST_CURRENT_CONTEXT,
+        null
       );
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({
-        userId: [TEST_CURRENT_CONTEXT.userId]
-      });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
-        activityId: TEST_ACTIVITY_HOUSING.activityId,
-        contactId: TEST_CONTACT_1.contactId,
-        role: 'PRIMARY'
-      });
       expect(result.housingProject.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
     });
 
@@ -317,13 +289,14 @@ describe('housingProject domain', () => {
 
       const result = await generateHousingProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).not.toHaveBeenCalled();
+      expect(mockRepos.activity.create).not.toHaveBeenCalled();
       expect(result.housingProject.activityId).toBe('ACTI1234');
     });
 
     it('should throw error when activity creation fails', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
       const intake = {
         ...TEST_HOUSING_PROJECT_INTAKE,

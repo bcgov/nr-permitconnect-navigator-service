@@ -3,6 +3,8 @@ import { mockReset } from 'vitest-mock-extended';
 
 import {
   TEST_ACTIVITY_HOUSING,
+  TEST_CONTACT_1,
+  TEST_CURRENT_CONTEXT,
   TEST_INITIATIVE_HOUSING,
   TEST_NOTE_HISTORY_1,
   TEST_NOTE_HISTORY_2,
@@ -11,7 +13,7 @@ import {
   TEST_PERMIT_3
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
-import { createActivity, deleteActivity } from '#src/domains/activity';
+import { createActivity, deleteActivity, ensureActivityWithPrimaryContact } from '#src/domains/activity';
 import { Initiative } from '#src/utils/enums/application';
 
 describe('activity domain', () => {
@@ -67,6 +69,82 @@ describe('activity domain', () => {
       expect(mockRepos.activity.findUnique).toHaveBeenCalledTimes(2);
       expect(mockRepos.activity.create).toHaveBeenCalled();
       expect(result.initiativeId).toBe('init-456');
+    });
+  });
+
+  describe('ensureActivityWithPrimaryContact', () => {
+    it('reuses an existing activity ID without creating anything', async () => {
+      const result = await ensureActivityWithPrimaryContact(
+        mockRepos,
+        Initiative.HOUSING,
+        TEST_CURRENT_CONTEXT,
+        'EXISTING1'
+      );
+
+      expect(result).toBe('EXISTING1');
+      expect(mockRepos.activity.create).not.toHaveBeenCalled();
+      expect(mockRepos.contact.search).not.toHaveBeenCalled();
+      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
+    });
+
+    it('creates a new activity and links the primary contact when none is given', async () => {
+      mockRepos.activity.findUnique.mockResolvedValue(null);
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue({
+        ...TEST_INITIATIVE_HOUSING,
+        initiativeId: 'init-123',
+        code: Initiative.HOUSING
+      });
+      mockRepos.activity.create.mockResolvedValue({
+        ...TEST_ACTIVITY_HOUSING,
+        activityId: 'ACTI0001',
+        initiativeId: 'init-123'
+      });
+      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
+      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+
+      const result = await ensureActivityWithPrimaryContact(mockRepos, Initiative.HOUSING, TEST_CURRENT_CONTEXT);
+
+      expect(result).toBe('ACTI0001');
+      expect(mockRepos.contact.search).toHaveBeenCalledWith({ userId: [TEST_CURRENT_CONTEXT.userId] });
+      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
+        activityId: 'ACTI0001',
+        contactId: TEST_CONTACT_1.contactId,
+        role: 'PRIMARY'
+      });
+    });
+
+    it('skips linking a contact when none exists for the user', async () => {
+      mockRepos.activity.findUnique.mockResolvedValue(null);
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue({
+        ...TEST_INITIATIVE_HOUSING,
+        initiativeId: 'init-123',
+        code: Initiative.HOUSING
+      });
+      mockRepos.activity.create.mockResolvedValue({
+        ...TEST_ACTIVITY_HOUSING,
+        activityId: 'ACTI0001',
+        initiativeId: 'init-123'
+      });
+      mockRepos.contact.search.mockResolvedValueOnce([]);
+
+      await ensureActivityWithPrimaryContact(mockRepos, Initiative.HOUSING, TEST_CURRENT_CONTEXT);
+
+      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
+    });
+
+    it('throws when activity creation fails', async () => {
+      mockRepos.activity.findUnique.mockResolvedValue(null);
+      mockRepos.initiative.findFirstOrThrow.mockResolvedValue({
+        ...TEST_INITIATIVE_HOUSING,
+        initiativeId: 'init-123',
+        code: Initiative.HOUSING
+      });
+      mockRepos.activity.create.mockResolvedValue(undefined as never);
+      mockRepos.contact.search.mockResolvedValueOnce([]);
+
+      await expect(
+        ensureActivityWithPrimaryContact(mockRepos, Initiative.HOUSING, TEST_CURRENT_CONTEXT)
+      ).rejects.toThrow('Failed to generate activity ID');
     });
   });
 

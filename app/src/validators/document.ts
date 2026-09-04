@@ -9,7 +9,7 @@ export const schema = {
       .object({
         activityId: activityId,
         documentId: uuidv4,
-        filename: z.string().max(255),
+        filename: z.string().min(1).max(255),
         mimeType: z.string().max(255).optional(),
         filesize: z.number()
       })

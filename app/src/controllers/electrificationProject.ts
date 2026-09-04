@@ -17,10 +17,10 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
-  DraftBase,
+  DraftCreateInput,
   ElectrificationProject,
   ElectrificationProjectStatistics,
-  GetProjectStatisticsRequest,
+  GetElectrificationProjectStatisticsRequest,
   LocalContext,
   PatchElectrificationProjectRequest,
   SearchElectrificationProjectRequest,
@@ -54,7 +54,7 @@ export const getElectrificationProjectController = async (
 };
 
 export const getElectrificationProjectStatisticsController = async (
-  req: Request<never, never, never, GetProjectStatisticsRequest>,
+  req: Request<never, never, never, GetElectrificationProjectStatisticsRequest>,
   res: Response<ElectrificationProjectStatistics>
 ) => {
   const response = await getElectrificationProjectStatisticsService(req.query);
@@ -139,7 +139,7 @@ export const upsertElectrificationProjectDraftController = async (
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    { data: req.body.data as DraftBase['data'] },
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.ELECTRIFICATION,
     DraftCode.ELECTRIFICATION_PROJECT,
     res.locals.currentContext

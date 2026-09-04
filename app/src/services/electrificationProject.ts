@@ -14,11 +14,11 @@ import type {
   CurrentContext,
   ElectrificationProject,
   ElectrificationProjectStatistics,
-  GetProjectStatisticsRequest,
+  GetElectrificationProjectStatisticsInput,
   Maybe,
-  PatchElectrificationProjectRequest,
-  SearchElectrificationProjectRequest,
-  SubmitElectrificationProjectDraftRequest
+  PatchElectrificationProjectInput,
+  SearchElectrificationProjectInput,
+  SubmitElectrificationProjectDraftInput
 } from '#types';
 
 export const createElectrificationProjectService = async (
@@ -77,7 +77,7 @@ export const getElectrificationProjectService = async (
  * @returns A Promise that resolves to the electrification project statistics
  */
 export const getElectrificationProjectStatisticsService = async (
-  filters: GetProjectStatisticsRequest
+  filters: GetElectrificationProjectStatisticsInput
 ): Promise<ElectrificationProjectStatistics[]> => {
   // Return a single quoted ISO string or null for the given date
   const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
@@ -158,7 +158,7 @@ export const listElectrificationProjectsService = async (
 export const searchElectrificationProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchElectrificationProjectRequest
+  params: SearchElectrificationProjectInput
 ): Promise<ElectrificationProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
     const result = await electrificationProject.search(params);
@@ -174,8 +174,8 @@ export const searchElectrificationProjects = async (
 
 export const submitElectrificationProjectDraftService = async (
   draftId: Maybe<string>,
-  data: SubmitElectrificationProjectDraftRequest,
-  contactData: SubmitElectrificationProjectDraftRequest['contact'],
+  data: SubmitElectrificationProjectDraftInput,
+  contactData: SubmitElectrificationProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
@@ -216,7 +216,7 @@ export const submitElectrificationProjectDraftService = async (
  */
 export const patchElectrificationProjectService = async (
   electrificationProjectId: string,
-  data: PatchElectrificationProjectRequest
+  data: PatchElectrificationProjectInput
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(async ({ electrificationProject }) => {
     await electrificationProject.update(

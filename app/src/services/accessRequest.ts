@@ -9,13 +9,7 @@ import { AccessRequestStatus, GroupName, IdentityProviderKind } from '#src/utils
 import { getLogger } from '#src/utils/log';
 import Problem from '#src/utils/problem';
 
-import type {
-  AccessRequest,
-  CreateUserAccessRequestRequest,
-  CurrentAuthorization,
-  CurrentContext,
-  Group
-} from '#types';
+import type { AccessRequest, CreateUserAccessRequestInput, CurrentAuthorization, CurrentContext, Group } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 const log = getLogger(module.filename);
@@ -47,8 +41,8 @@ export const getAccessRequestsService = async (initiative: Initiative): Promise<
 export const createAccessRequestService = async (
   currentContext: CurrentContext,
   currentAuthorization: CurrentAuthorization,
-  accessReq: CreateUserAccessRequestRequest['accessRequest'],
-  accessUser: CreateUserAccessRequestRequest['user']
+  accessReq: CreateUserAccessRequestInput['accessRequest'],
+  accessUser: CreateUserAccessRequestInput['user']
 ) => {
   return await unitOfWork.execute(
     async ({ accessRequest, group, identityProvider, initiative, subjectGroup, user }) => {

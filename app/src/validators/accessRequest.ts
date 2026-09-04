@@ -10,12 +10,12 @@ export const schema = {
         user: z
           .object({
             userId: uuidv4.nullish(),
-            idp: z.string().max(255),
-            sub: z.string().max(255),
-            email: z.string().max(255),
-            firstName: z.string().max(255),
-            fullName: z.string().max(255),
-            lastName: z.string().max(255),
+            idp: z.string().min(1).max(255),
+            sub: z.string().min(1).max(255),
+            email: z.string().min(1).max(255),
+            firstName: z.string().min(1).max(255),
+            fullName: z.string().min(1).max(255),
+            lastName: z.string().min(1).max(255),
             bceidBusinessName: z.string().max(255).nullish(),
             active: z.boolean().optional()
           })

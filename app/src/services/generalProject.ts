@@ -12,11 +12,11 @@ import type {
   CurrentContext,
   GeneralProject,
   GeneralProjectStatistics,
-  GetProjectStatisticsRequest,
+  GetGeneralProjectStatisticsInput,
   Maybe,
-  PatchGeneralProjectRequest,
-  SearchGeneralProjectRequest,
-  SubmitGeneralProjectDraftRequest
+  PatchGeneralProjectInput,
+  SearchGeneralProjectInput,
+  SubmitGeneralProjectDraftInput
 } from '#types';
 
 export const createGeneralProjectService = async (currentContext: CurrentContext): Promise<GeneralProject> => {
@@ -103,7 +103,7 @@ export const listGeneralProjectsService = async (
 };
 
 export const getGeneralProjectStatisticsService = async (
-  filters: GetProjectStatisticsRequest
+  filters: GetGeneralProjectStatisticsInput
 ): Promise<GeneralProjectStatistics[]> => {
   // Return a single quoted ISO string or null for the given date
   const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
@@ -139,7 +139,7 @@ export const getGeneralProjectStatisticsService = async (
 export const searchGeneralProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchGeneralProjectRequest
+  params: SearchGeneralProjectInput
 ): Promise<GeneralProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
     const result = await generalProject.search(params);
@@ -155,8 +155,8 @@ export const searchGeneralProjects = async (
 
 export const submitGeneralProjectDraftService = async (
   draftId: Maybe<string>,
-  data: SubmitGeneralProjectDraftRequest,
-  contactData: SubmitGeneralProjectDraftRequest['contact'],
+  data: SubmitGeneralProjectDraftInput,
+  contactData: SubmitGeneralProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(
@@ -203,7 +203,7 @@ export const submitGeneralProjectDraftService = async (
  */
 export const patchGeneralProjectService = async (
   generalProjectId: string,
-  data: PatchGeneralProjectRequest
+  data: PatchGeneralProjectInput
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(async ({ generalProject }) => {
     await generalProject.patch({ generalProjectId }, data);

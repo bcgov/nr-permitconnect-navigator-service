@@ -2,7 +2,6 @@ import { mockReset } from 'vitest-mock-extended';
 
 import {
   TEST_ACTIVITY_ELECTRIFICATION,
-  TEST_CONTACT_1,
   TEST_CURRENT_CONTEXT,
   TEST_ELECTRIFICATION_INTAKE
 } from '#tests/unit/data/index';
@@ -39,9 +38,10 @@ describe('electrificationProject domain', () => {
   });
 
   describe('generateElectrificationProjectData', () => {
-    it('should create activity and link contact when activityId not provided', async () => {
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
+    it('should build a project from the ensured activity when activityId not provided', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
       const intake = {
         ...TEST_ELECTRIFICATION_INTAKE
@@ -49,21 +49,12 @@ describe('electrificationProject domain', () => {
 
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        {
-          activity: mockRepos.activity,
-          initiative: mockRepos.initiative
-        },
-        Initiative.ELECTRIFICATION
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.ELECTRIFICATION,
+        TEST_CURRENT_CONTEXT,
+        intake.activityId
       );
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({
-        userId: [TEST_CURRENT_CONTEXT.userId]
-      });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
-        activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-        contactId: TEST_CONTACT_1.contactId,
-        role: 'PRIMARY'
-      });
       expect(result.electrificationProjectId).toBeDefined();
       expect(result.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
     });
@@ -76,13 +67,14 @@ describe('electrificationProject domain', () => {
 
       const result = await generateElectrificationProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).not.toHaveBeenCalled();
+      expect(mockRepos.activity.create).not.toHaveBeenCalled();
       expect(result.activityId).toBe('ACTI1234');
     });
 
     it('should throw error when activity creation fails', async () => {
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
       const intake = {
         ...TEST_ELECTRIFICATION_INTAKE,
@@ -95,7 +87,9 @@ describe('electrificationProject domain', () => {
     });
 
     it('should populate all project fields from intake data', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
       const intake = {
         ...TEST_ELECTRIFICATION_INTAKE,
@@ -135,42 +129,25 @@ describe('electrificationProject domain', () => {
   });
 
   describe('createElectrificationProjectData', () => {
-    it('should create activity and link contact', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+    it('should build a project from the ensured activity', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
       const result = await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        {
-          activity: mockRepos.activity,
-          initiative: mockRepos.initiative
-        },
-        Initiative.ELECTRIFICATION
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.ELECTRIFICATION,
+        TEST_CURRENT_CONTEXT
       );
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({
-        userId: [TEST_CURRENT_CONTEXT.userId]
-      });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
-        activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-        contactId: TEST_CONTACT_1.contactId,
-        role: 'PRIMARY'
-      });
       expect(result.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
     });
 
-    it('should skip linking a contact when none exists for the user', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
-
-      await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
-
-      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
-    });
-
     it('should throw error when activity creation fails', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
       await expect(createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
         'Failed to generate activity ID'
@@ -178,8 +155,9 @@ describe('electrificationProject domain', () => {
     });
 
     it('should return a blank project shell with defaults', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
       const result = await createElectrificationProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 

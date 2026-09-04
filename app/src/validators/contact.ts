@@ -14,7 +14,7 @@ export const contactSchema = z
     userId: uuidv4.nullish(),
     contactPreference: contactPreference.optional(),
     email: email,
-    firstName: z.string().max(255),
+    firstName: z.string().min(1).max(255),
     lastName: z.string().max(255).nullish(),
     phoneNumber: phoneNumber,
     contactApplicantRelationship: projectRelationship
@@ -76,8 +76,8 @@ export const schema = {
       .object({
         userId: uuidv4.nullish(),
         contactId: uuidv4.nullish(),
-        email: z.string().max(255),
-        firstName: z.string().max(255),
+        email: email,
+        firstName: z.string().min(1).max(255),
         lastName: z.string().max(255).nullish(),
         phoneNumber: phoneNumber,
         contactApplicantRelationship: projectRelationship,

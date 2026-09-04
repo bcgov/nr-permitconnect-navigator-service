@@ -32,8 +32,8 @@ export const schema = {
           .object({
             consentToFeedback: z.boolean(),
             projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
-            projectName: z.string().max(255).trim(),
-            projectDescription: z.string().max(4000),
+            projectName: z.string().min(1).max(255).trim(),
+            projectDescription: z.string().min(1).max(4000),
             registeredId: z.string().nullish(),
             registeredName: z.string().nullish()
           })
@@ -157,14 +157,15 @@ export const schema = {
       })
       .strict()
       .superRefine((data, ctx) => {
-        // each field is required, and constrained to allowedValues if given, only when its "Yes" flag is set
+        // each field is required, and constrained to allowedValues if given, only when its trigger condition holds
+        // (otherUnits triggers on otherUnitsDescription being non-empty free text, the rest on a "Yes" flag)
         const unitsValues = NUM_RESIDENTIAL_UNITS_LIST as readonly string[];
         const requiredWhen: [
           boolean,
           'otherUnits' | 'rentalUnits' | 'indigenousDescription' | 'nonProfitDescription' | 'housingCoopDescription',
           readonly string[] | undefined
         ][] = [
-          [data.otherUnitsDescription === BasicResponse.YES, 'otherUnits', unitsValues],
+          [!!data.otherUnitsDescription, 'otherUnits', unitsValues],
           [data.hasRentalUnits === BasicResponse.YES, 'rentalUnits', unitsValues],
           [data.financiallySupportedIndigenous === BasicResponse.YES, 'indigenousDescription', undefined],
           [data.financiallySupportedNonProfit === BasicResponse.YES, 'nonProfitDescription', undefined],

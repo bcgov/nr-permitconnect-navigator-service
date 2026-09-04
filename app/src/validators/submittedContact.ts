@@ -10,7 +10,7 @@ import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '#src/utils/c
 export const submittedContactSchema = z
   .object({
     contactId: uuidv4,
-    firstName: z.string().max(255),
+    firstName: z.string().min(1).max(255),
     lastName: z.string().max(255).nullish(),
     email,
     phoneNumber,

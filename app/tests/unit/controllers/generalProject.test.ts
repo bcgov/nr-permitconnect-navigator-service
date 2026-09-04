@@ -36,7 +36,7 @@ import type {
   GeneralProjectStatistics,
   LocalContext,
   PatchGeneralProjectRequest,
-  GetProjectStatisticsRequest,
+  GetGeneralProjectStatisticsRequest,
   SubmitGeneralProjectDraftRequest,
   UpsertGeneralProjectDraftRequest
 } from '#types';
@@ -133,7 +133,7 @@ describe('getGeneralProjectStatisticsController', () => {
 
     const req = {
       query: { applicationsStatus: 'NEW' }
-    } as unknown as Request<never, never, never, GetProjectStatisticsRequest>;
+    } as unknown as Request<never, never, never, GetGeneralProjectStatisticsRequest>;
 
     statsSpy.mockResolvedValue([mockStats]);
 

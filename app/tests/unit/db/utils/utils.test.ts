@@ -10,9 +10,12 @@ describe('jsonToPrismaInputJson', () => {
     expect(jsonToPrismaInputJson(value)).toEqual(value);
   });
 
+  it('passes through undefined unchanged (field not sent, not invalid data)', () => {
+    expect(jsonToPrismaInputJson(undefined)).toBeUndefined();
+  });
+
   it('throws for values with no JSON representation', () => {
     expect(() => jsonToPrismaInputJson(() => undefined)).toThrow('Value is not valid JSON');
-    expect(() => jsonToPrismaInputJson(undefined)).toThrow('Value is not valid JSON');
   });
 
   it('throws for circular references', () => {

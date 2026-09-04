@@ -4,13 +4,13 @@ import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
 import type {
-  CreateEnquiryRequest,
+  CreateEnquiryInput,
   CreateEnquiryResponse,
   CurrentAuthorization,
   CurrentContext,
   Enquiry,
-  PatchEnquiryRequest,
-  SearchEnquiriesRequest
+  PatchEnquiryInput,
+  SearchEnquiriesInput
 } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
@@ -22,7 +22,7 @@ import type { Initiative } from '#src/utils/enums/application';
  */
 export const createEnquiryService = async (
   currentContext: CurrentContext,
-  intakeData: CreateEnquiryRequest
+  intakeData: CreateEnquiryInput
 ): Promise<CreateEnquiryResponse> => {
   return await unitOfWork.execute(
     async ({
@@ -212,7 +212,7 @@ export const listRelatedEnquiriesService = async (
 export const searchEnquiriesService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchEnquiriesRequest,
+  params: SearchEnquiriesInput,
   initiative: Initiative
 ): Promise<Enquiry[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
@@ -233,7 +233,7 @@ export const searchEnquiriesService = async (
  * @param data Enquiry to update
  * @returns A Promise that resolves to the updated enquiry
  */
-export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryRequest): Promise<Enquiry> => {
+export const patchEnquiryService = async (enquiryId: string, data: PatchEnquiryInput): Promise<Enquiry> => {
   return await unitOfWork.execute(async ({ enquiry }) => {
     await enquiry.patch({ enquiryId }, data);
     return await enquiry.findFirstOrThrow({

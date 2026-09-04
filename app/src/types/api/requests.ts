@@ -64,8 +64,9 @@ export type SearchElectrificationProjectRequest = z.infer<
 export type PatchElectrificationProjectRequest = z.infer<
   typeof electrificationProjectSchema.patchElectrificationProject.body
 >;
-// Identical getStatistics query shape shared by electrification/general/housing project validators.
-export type GetProjectStatisticsRequest = z.infer<typeof electrificationProjectSchema.getStatistics.query>;
+export type GetElectrificationProjectStatisticsRequest = z.infer<
+  typeof electrificationProjectSchema.getStatistics.query
+>;
 export type UpsertElectrificationProjectDraftRequest = z.infer<typeof electrificationProjectSchema.upsertDraft.body>;
 export type SubmitElectrificationProjectDraftRequest = z.infer<
   typeof electrificationProjectSchema.submitElectrificationProjectDraft.body
@@ -85,6 +86,7 @@ export type PatchEnquiryRequest = z.infer<typeof enquirySchema.patchEnquiry.body
 
 export type SearchGeneralProjectRequest = z.infer<typeof generalProjectSchema.searchGeneralProjects.body>;
 export type PatchGeneralProjectRequest = z.infer<typeof generalProjectSchema.patchGeneralProject.body>;
+export type GetGeneralProjectStatisticsRequest = z.infer<typeof generalProjectSchema.getStatistics.query>;
 export type UpsertGeneralProjectDraftRequest = z.infer<typeof generalProjectSchema.upsertDraft.body>;
 export type SubmitGeneralProjectDraftRequest = z.infer<typeof generalProjectSchema.submitGeneralProjectDraft.body>;
 
@@ -94,6 +96,7 @@ export type SubmitGeneralProjectDraftRequest = z.infer<typeof generalProjectSche
 
 export type SearchHousingProjectRequest = z.infer<typeof housingProjectSchema.searchHousingProjects.body>;
 export type PatchHousingProjectRequest = z.infer<typeof housingProjectSchema.patchHousingProject.body>;
+export type GetHousingProjectStatisticsRequest = z.infer<typeof housingProjectSchema.getStatistics.query>;
 export type UpsertHousingProjectDraftRequest = z.infer<typeof housingProjectSchema.upsertDraft.body>;
 export type SubmitHousingProjectDraftRequest = z.infer<typeof housingProjectSchema.submitHousingProjectDraft.body>;
 

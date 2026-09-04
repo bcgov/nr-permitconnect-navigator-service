@@ -7,11 +7,11 @@ import { BringForwardType } from '#src/utils/enums/projectCommon';
 
 import type {
   BringForward,
-  CreateNoteHistoryRequest,
+  CreateNoteHistoryInput,
   CurrentAuthorization,
   CurrentContext,
   NoteHistory,
-  PatchNoteHistoryRequest
+  PatchNoteHistoryInput
 } from '#types';
 import type { Initiative, Resource } from '#src/utils/enums/application';
 
@@ -22,7 +22,7 @@ import type { Initiative, Resource } from '#src/utils/enums/application';
  * @returns A Promise that resolves to the created resource
  */
 export const createNoteHistoryService = async (
-  data: Omit<CreateNoteHistoryRequest, 'note'>,
+  data: Omit<CreateNoteHistoryInput, 'note'>,
   noteStr: string
 ): Promise<NoteHistory> => {
   return await unitOfWork.execute(async ({ note, noteHistory }) => {
@@ -136,7 +136,7 @@ export const patchNoteHistoryService = async (
   noteHistoryId: string,
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  data: Omit<PatchNoteHistoryRequest, 'noteHistoryId' | 'note' | 'resource'>,
+  data: Omit<PatchNoteHistoryInput, 'noteHistoryId' | 'note' | 'resource'>,
   noteStr: string | undefined,
   resource: Resource
 ): Promise<NoteHistory> => {
