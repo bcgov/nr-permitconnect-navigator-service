@@ -1,9 +1,4 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import Tooltip from 'primevue/tooltip';
-import { flushPromises, mount, RouterLinkStub } from '@vue/test-utils';
+import { flushPromises } from '@vue/test-utils';
 
 import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
 import { contactService, housingProjectService } from '@/services';
@@ -11,6 +6,8 @@ import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import type { Contact, HousingProject } from '@/types';
+import { mountComponent } from '../../../mountComponent';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
 import {
   enquiryConfirmRouteNameKey,
   enquiryPermitConfirmRouteNameKey,
@@ -19,17 +16,22 @@ import {
 } from '@/utils/keys';
 import { ref } from 'vue';
 
+// Mocks
+
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
     t: (key: string) => key // returns the key as the translation
-  })
+  }),
+  createI18n: vi.fn(() => ({
+    global: {
+      t: (key: string) => key
+    },
+    install: vi.fn()
+  }))
 }));
 
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  }),
+  useRouter: () => mockRouter,
   useRoute: () => ({
     params: {},
     query: {}
@@ -37,6 +39,9 @@ vi.mock('vue-router', () => ({
   onBeforeRouteUpdate: vi.fn(),
   onBeforeRouteLeave: vi.fn()
 }));
+
+// Fixtures
+
 const sampleContact: Contact = {
   contactId: 'contact123',
   userId: 'user123',
@@ -52,6 +57,8 @@ const sampleContact: Contact = {
   updatedAt: new Date().toISOString()
 };
 
+// Mount
+
 const listActivityIds = vi.spyOn(housingProjectService, 'listActivityIds');
 const listProjects = vi.spyOn(housingProjectService, 'listProjects');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
@@ -60,43 +67,29 @@ listActivityIds.mockResolvedValue(['someActivityid']);
 listProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
 searchContactsSpy.mockResolvedValue([sampleContact]);
 
-const wrapperSettings = () => ({
-  global: {
-    plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
-      PrimeVue,
-      ConfirmationService,
-      ToastService
-    ],
+function mountEnquiryIntakeForm() {
+  const { wrapper } = mountComponent(EnquiryIntakeForm, {
+    piniaState: { auth: { user: {} } },
     provide: {
-      [enquiryConfirmRouteNameKey as symbol]: ref('route-name'),
-      [enquiryPermitConfirmRouteNameKey as symbol]: ref('route-name'),
-      [enquiryProjectConfirmRouteNameKey as symbol]: ref('route-name'),
-      [enquiryRouteNameKey as symbol]: ref('route-name')
+      [enquiryConfirmRouteNameKey]: ref('route-name'),
+      [enquiryPermitConfirmRouteNameKey]: ref('route-name'),
+      [enquiryProjectConfirmRouteNameKey]: ref('route-name'),
+      [enquiryRouteNameKey]: ref('route-name')
     },
     stubs: {
-      RouterLink: RouterLinkStub,
-      'font-awesome-icon': true,
       CollectionDisclaimer: true,
       FormNavigationGuard: true,
       ContactCardIntakeForm: true,
       TextAreaCard: true,
       'i18n-t': true
-    },
-    directives: {
-      Tooltip: Tooltip
     }
-  }
-});
+  });
+
+  return { wrapper };
+}
 
 beforeEach(() => {
+  resetMockRouter();
   sessionStorage.setItem(
     StorageKey.CONFIG,
     JSON.stringify({
@@ -114,13 +107,24 @@ afterEach(() => {
   sessionStorage.clear();
 });
 
+// Tests
+
 describe('EnquiryIntakeForm', () => {
   describe('component', async () => {
     it('renders component', async () => {
-      const wrapper = mount(EnquiryIntakeForm, wrapperSettings());
+      const { wrapper } = mountEnquiryIntakeForm();
       await flushPromises();
 
       expect(wrapper.isVisible()).toBeTruthy();
+    });
+
+    it('renders TextAreaCard with required prop', async () => {
+      const { wrapper } = mountEnquiryIntakeForm();
+      await flushPromises();
+
+      const textAreaCard = wrapper.findComponent({ name: 'TextAreaCard' });
+      expect(textAreaCard.exists()).toBe(true);
+      expect(textAreaCard.props('required')).toBe(true);
     });
   });
 });

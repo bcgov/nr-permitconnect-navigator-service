@@ -95,12 +95,14 @@ onMounted(async () => {
           :label="t('i.housing.project.projectForm.projectStateLabel')"
           :disabled="!getEditable"
           :options="APPLICATION_STATUS_LIST"
+          required
         />
         <Select
           name="submissionState.submissionType"
           :label="t('i.housing.project.projectForm.submissionTypeLabel')"
           :disabled="!getEditable"
           :options="SUBMISSION_TYPE_LIST"
+          required
         />
         <Select
           name="submissionState.queuePriority"

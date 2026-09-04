@@ -79,6 +79,20 @@ describe('AppliedPermitsIntakeCard', () => {
         expect(wrapper.findComponent(AppliedPermitsCard).exists()).toBe(true);
       }
     );
+
+    describe('mandatory fields', () => {
+      describe('header', () => {
+        it('displays asterisk', () => {
+          const { wrapper } = mountAppliedPermitsIntakeCard();
+
+          const header = wrapper.find('h6');
+          const spans = header.findAll('span');
+          const asterisk = spans.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+    });
   });
 
   describe('answer change', () => {

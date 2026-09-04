@@ -88,16 +88,41 @@ beforeEach(() => {
 
 describe('CompanyProjectNamePanel', () => {
   describe('rendering', () => {
-    it('renders an InputText bound to companyProjectName.projectName', () => {
-      const { wrapper } = mountCompanyProjectNamePanel();
+    describe('mandatory fields', () => {
+      describe('projectName', () => {
+        it('renders', () => {
+          const { wrapper } = mountCompanyProjectNamePanel();
 
-      expect(wrapper.findComponent(InputText).props('name')).toBe('companyProjectName.projectName');
-    });
+          expect(wrapper.findComponent(InputText).props('name')).toBe('companyProjectName.projectName');
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountCompanyProjectNamePanel();
 
-    it('renders an AutoComplete bound to companyProjectName.companyNameRegistered', () => {
-      const { wrapper } = mountCompanyProjectNamePanel();
+          const labels = wrapper.findAll('label');
+          const projectNameLabel = labels.find((label) => label.attributes('for') === 'companyProjectName.projectName');
+          const asterisk = projectNameLabel?.findAll('span')?.find((span) => span.text() === '*');
 
-      expect(wrapper.findComponent(AutoComplete).props('name')).toBe('companyProjectName.companyNameRegistered');
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      describe('companyNameRegistered', () => {
+        it('renders', () => {
+          const { wrapper } = mountCompanyProjectNamePanel();
+
+          expect(wrapper.findComponent(AutoComplete).props('name')).toBe('companyProjectName.companyNameRegistered');
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountCompanyProjectNamePanel({ initiative: Initiative.ELECTRIFICATION });
+
+          const labels = wrapper.findAll('label');
+          const companyNameLabel = labels.find(
+            (label) => label.attributes('for') === 'companyProjectName.companyNameRegistered'
+          );
+          const asterisk = companyNameLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
     });
 
     it('requires the AutoComplete only for the ELECTRIFICATION initiative', () => {

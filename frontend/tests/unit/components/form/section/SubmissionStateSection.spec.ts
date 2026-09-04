@@ -177,6 +177,37 @@ describe('SubmissionStateSection', () => {
         expect(names).not.toContain('submissionState.queuePriority');
       });
     });
+    describe('mandatory fields', () => {
+      it('sets required props and displays asterisks for mandatory project fields', () => {
+        const { wrapper } = mountSubmissionStateSection({ isEnquiry: false });
+
+        const selects = wrapper.findAllComponents(Select);
+        const applicationStatus = selects.find((s) => s.props('name') === 'submissionState.applicationStatus')!;
+        const submissionType = selects.find((s) => s.props('name') === 'submissionState.submissionType')!;
+        const queuePriority = selects.find((s) => s.props('name') === 'submissionState.queuePriority')!;
+
+        expect(applicationStatus.props('required')).toBe(true);
+        expect(submissionType.props('required')).toBe(true);
+        expect(queuePriority.props('required')).toBe(true);
+
+        const labels = wrapper.findAll('label');
+        for (const name of ['submissionState.applicationStatus', 'submissionState.submissionType']) {
+          const label = labels.find((element) => element.attributes('for') === name);
+          expect(label?.findAll('span').some((span) => span.text() === '*')).toBe(true);
+        }
+      });
+
+      it('sets required prop on region and area for GENERAL initiative projects', () => {
+        const { wrapper } = mountSubmissionStateSection({ isEnquiry: false, initiative: Initiative.GENERAL });
+
+        const selects = wrapper.findAllComponents(Select);
+        const region = selects.find((s) => s.props('name') === 'submissionState.region')!;
+        const area = selects.find((s) => s.props('name') === 'submissionState.area')!;
+
+        expect(region.props('required')).toBe(true);
+        expect(area.props('required')).toBe(true);
+      });
+    });
   });
 
   describe('assignee loading', () => {

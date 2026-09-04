@@ -61,6 +61,15 @@ describe('ResidentialUnitsPanel', () => {
       expect(selectByName('units.rentalUnits').props('options')).toEqual(NUM_RESIDENTIAL_UNITS_LIST);
       expect(selectByName('units.otherUnits').props('options')).toEqual(NUM_RESIDENTIAL_UNITS_LIST);
     });
+    it('displays asterisk in label for hasRentalUnits', () => {
+      const { wrapper } = mountResidentialUnitsPanel();
+
+      const labels = wrapper.findAll('label');
+      const hasRentalUnitsLabel = labels.find((label) => label.attributes('for') === 'units.hasRentalUnits');
+      const asterisk = hasRentalUnitsLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+      expect(asterisk).toBeTruthy();
+    });
 
     it('renders an InputText bound to units.otherUnitsDescription', () => {
       const { wrapper } = mountResidentialUnitsPanel();

@@ -136,6 +136,18 @@ describe('AppliedPermitsCard', () => {
 
       expect(wrapper.findComponent(Select).props('loading')).toBe(true);
     });
+
+    describe('mandatory fields', () => {
+      describe('permitTypeId', () => {
+        it('displays asterisk', () => {
+          const { wrapper } = mountAppliedPermitsCard({ initialAppliedPermits: [{ permitTypeId: 1 }] });
+
+          const select = wrapper.findComponent(Select);
+
+          expect(select.props('placeholder')).toContain('*');
+        });
+      });
+    });
   });
 
   describe('editable state', () => {
