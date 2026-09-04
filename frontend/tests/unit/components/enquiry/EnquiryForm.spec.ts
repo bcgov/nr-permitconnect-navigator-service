@@ -1,12 +1,7 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
 import { flushPromises, mount } from '@vue/test-utils';
 import { nextTick, ref } from 'vue';
 
 import EnquiryForm from '@/components/enquiry/EnquiryForm.vue';
-import i18n from '@/i18n';
 import { electrificationProjectService, enquiryService, housingProjectService, userService } from '@/services';
 import {
   ApplicationStatus,
@@ -18,15 +13,19 @@ import {
 } from '@/utils/enums/projectCommon';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
 import { PRIMEVUE_STUBS, VEE_FORM_STUB } from '../../../helpers';
+import { mountComponent } from '../../../mountComponent';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
 
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
 
-const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
-const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
-const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityIds');
-const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
-const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
+// Mocks
+
+vi.mock('vue-router', () => ({
+  useRouter: () => mockRouter
+}));
+
+// Fixtures
 
 const currentDate = new Date().toISOString();
 
@@ -52,43 +51,32 @@ const activityIdMockData = ['activity1', 'activity2'];
 const testAtsEnquiryPartnerAgencies = 'Electrification';
 const testAtsEnquiryTypeCode = 'Electrification - Enquiry Only';
 
-vi.mock(import('vue-router'), async (importOriginal) => {
-  const actual = await importOriginal();
-  return {
-    ...actual,
-    push: vi.fn(),
-    onBeforeRouteLeave: vi.fn()
-  };
-});
+// Mount
 
-const wrapperSettings = (
-  testEnquiryProp = testEnquiry,
-  editableProp?: boolean,
-  projectServiceMock: Ref<ProjectService<Project>> = ref(housingProjectService),
+const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+const patchEnquirySpy = vi.spyOn(enquiryService, 'patchEnquiry');
+const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityIds');
+const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
+const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
+
+function mountEnquiryForm({
+  enquiry = testEnquiry,
+  editable,
+  projectService = ref(housingProjectService),
   atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
   atsEnquiryTypeCode = testAtsEnquiryTypeCode
-) => ({
-  props: {
-    editable: editableProp,
-    enquiry: testEnquiryProp
-  },
-  global: {
-    plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
-      PrimeVue,
-      ConfirmationService,
-      ToastService,
-      i18n
-    ],
+}: {
+  enquiry?: Enquiry;
+  editable?: boolean;
+  projectService?: Ref<ProjectService<Project>>;
+  atsEnquiryPartnerAgencies?: string;
+  atsEnquiryTypeCode?: string;
+} = {}) {
+  const { wrapper } = mountComponent(EnquiryForm, {
+    props: { editable, enquiry },
+    piniaState: {},
     provide: {
-      [projectServiceKey]: projectServiceMock,
+      [projectServiceKey]: projectService,
       [atsEnquiryPartnerAgenciesKey]: atsEnquiryPartnerAgencies,
       [atsEnquiryTypeCodeKey]: atsEnquiryTypeCode
     },
@@ -107,11 +95,16 @@ const wrapperSettings = (
       SubmissionStateSection: true,
       ...PRIMEVUE_STUBS
     }
-  }
-});
+  });
+
+  return { wrapper };
+}
+
+// Tests
 
 describe('EnquiryForm.vue', () => {
   beforeEach(() => {
+    resetMockRouter();
     vi.clearAllMocks();
     vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
     vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
@@ -146,7 +139,7 @@ describe('EnquiryForm.vue', () => {
           ]
         }
       } as unknown as typeof testEnquiry;
-      const wrapper = mount(EnquiryForm, wrapperSettings(mountEnquiry));
+      const { wrapper } = mountEnquiryForm({ enquiry: mountEnquiry });
       await flushPromises();
       await nextTick();
 
@@ -154,7 +147,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('renders the form only when initialFormValues is set', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings());
+      const { wrapper } = mountEnquiryForm();
       await flushPromises();
       await nextTick();
 
@@ -164,7 +157,7 @@ describe('EnquiryForm.vue', () => {
 
     it('searches for users onMount when assignedUserId exists', async () => {
       const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUserId' };
-      mount(EnquiryForm, wrapperSettings(mountEnquiry));
+      mountEnquiryForm({ enquiry: mountEnquiry });
       await flushPromises();
       await nextTick();
 
@@ -174,7 +167,7 @@ describe('EnquiryForm.vue', () => {
 
     it('gets housing activity Ids onMount', async () => {
       const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUserId' };
-      mount(EnquiryForm, wrapperSettings(mountEnquiry, true, ref(housingProjectService)));
+      mountEnquiryForm({ enquiry: mountEnquiry, editable: true, projectService: ref(housingProjectService) });
       await flushPromises();
       await nextTick();
 
@@ -183,18 +176,40 @@ describe('EnquiryForm.vue', () => {
 
     it('gets electrification activity Ids onMount', async () => {
       const mountEnquiry = { ...testEnquiry, assignedUserId: 'testAssignedUserId' };
-      mount(EnquiryForm, wrapperSettings(mountEnquiry, true, ref(electrificationProjectService)));
+      mountEnquiryForm({ enquiry: mountEnquiry, editable: true, projectService: ref(electrificationProjectService) });
       await flushPromises();
       await nextTick();
 
       expect(listElectrificationActivityIdsSpy).toHaveBeenCalledTimes(1);
+    });
+    describe('mandatory fields', () => {
+      describe('enquiryDescription', () => {
+        it('displays asterisk', async () => {
+          const { wrapper } = mountEnquiryForm();
+          await flushPromises();
+          await nextTick();
+
+          // Find the h3 containing the enquiry detail header and verify asterisk
+          const headers = wrapper.findAll('h3');
+          let foundAsterisk = false;
+          for (const header of headers) {
+            const spans = header.findAll('span');
+            if (spans.some((span) => span.text() === '*')) {
+              foundAsterisk = true;
+              break;
+            }
+          }
+
+          expect(foundAsterisk).toBe(true);
+        });
+      });
     });
   });
 
   describe('Form Buttons - DOM Directed Testing', () => {
     it('displays Save and Cancel buttons when enquiry is not completed', async () => {
       const notCompletedEnquiry = { ...testEnquiry, enquiryStatus: ApplicationStatus.NEW };
-      const wrapper = mount(EnquiryForm, wrapperSettings(notCompletedEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ enquiry: notCompletedEnquiry, editable: true });
       await flushPromises();
       await nextTick();
 
@@ -205,7 +220,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('disables Save button when editable prop is false', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, false));
+      const { wrapper } = mountEnquiryForm({ editable: false });
       await flushPromises();
       await nextTick();
 
@@ -216,7 +231,7 @@ describe('EnquiryForm.vue', () => {
 
     it('hides Save and Cancel buttons when enquiry is completed', async () => {
       const completedEnquiry = { ...testEnquiry, enquiryStatus: ApplicationStatus.COMPLETED };
-      const wrapper = mount(EnquiryForm, wrapperSettings(completedEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ enquiry: completedEnquiry, editable: true });
       await flushPromises();
       await nextTick();
 
@@ -233,7 +248,7 @@ describe('EnquiryForm.vue', () => {
         ...testEnquiry,
         enquiryDescription: 'Test enquiry details'
       };
-      const wrapper = mount(EnquiryForm, wrapperSettings(enquiryWithDescription));
+      const { wrapper } = mountEnquiryForm({ enquiry: enquiryWithDescription });
       await flushPromises();
       await nextTick();
 
@@ -245,7 +260,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('disables enquiry description field when not editable', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, false));
+      const { wrapper } = mountEnquiryForm({ editable: false });
       await flushPromises();
       await nextTick();
 
@@ -254,7 +269,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('enables enquiry description field when editable', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -299,7 +314,7 @@ describe('EnquiryForm.vue', () => {
     }
 
     it('calls updateEnquiry service when form is submitted', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -325,7 +340,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('emits enquiryForm:saved event after successful submission', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -338,7 +353,7 @@ describe('EnquiryForm.vue', () => {
 
     it('passes correct enquiryId to updateEnquiry on form submission', async () => {
       const testEnquiryCustom = { ...testEnquiry, enquiryId: 'custom-enquiry-id' };
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiryCustom, true));
+      const { wrapper } = mountEnquiryForm({ enquiry: testEnquiryCustom, editable: true });
       await flushPromises();
       await nextTick();
 
@@ -354,7 +369,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('maps assigned user id from submissionState.assignedUser', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -377,7 +392,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('sets atsClientId to null when a related activity id is submitted', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -402,7 +417,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('coerces empty-string relatedActivityId to null on submit', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -428,7 +443,7 @@ describe('EnquiryForm.vue', () => {
 
     it('does not emit saved event when updateEnquiry fails', async () => {
       vi.mocked(enquiryService.patchEnquiry).mockRejectedValueOnce(new Error('save failed'));
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -442,7 +457,7 @@ describe('EnquiryForm.vue', () => {
 
   describe('Cancel Functionality - DOM Directed Testing', () => {
     it('displays cancel message when CancelButton emits clicked', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -459,7 +474,7 @@ describe('EnquiryForm.vue', () => {
       vi.useFakeTimers();
       const scrollIntoViewSpy = vi.spyOn(HTMLElement.prototype, 'scrollIntoView').mockImplementation(() => undefined);
 
-      const wrapper = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -480,7 +495,7 @@ describe('EnquiryForm.vue', () => {
 
   describe('Related Activity Selection - DOM Directed Testing', () => {
     it('loads related activity options from project service', async () => {
-      const component = mount(EnquiryForm, wrapperSettings());
+      const { wrapper: component } = mountEnquiryForm();
       await flushPromises();
       await nextTick();
 
@@ -491,7 +506,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('filters related activity options on EditableSelect input', async () => {
-      const component = mount(EnquiryForm, wrapperSettings());
+      const { wrapper: component } = mountEnquiryForm();
       await flushPromises();
       await nextTick();
 
@@ -525,7 +540,7 @@ describe('EnquiryForm.vue', () => {
         } as HousingProject
       ]);
 
-      const component = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper: component } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -548,7 +563,7 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('does not search projects when related activity change value is empty', async () => {
-      const component = mount(EnquiryForm, wrapperSettings(testEnquiry, true));
+      const { wrapper: component } = mountEnquiryForm({ editable: true });
       await flushPromises();
       await nextTick();
 
@@ -564,7 +579,7 @@ describe('EnquiryForm.vue', () => {
   describe('Completion Status - DOM Directed Testing', () => {
     it('hides FormNavigationGuard when enquiry is completed', async () => {
       const completedEnquiry = { ...testEnquiry, enquiryStatus: ApplicationStatus.COMPLETED };
-      const wrapper = mount(EnquiryForm, wrapperSettings(completedEnquiry));
+      const { wrapper } = mountEnquiryForm({ enquiry: completedEnquiry });
       await flushPromises();
       await nextTick();
 
@@ -574,7 +589,7 @@ describe('EnquiryForm.vue', () => {
 
     it('shows FormNavigationGuard when enquiry is not completed', async () => {
       const notCompletedEnquiry = { ...testEnquiry, enquiryStatus: ApplicationStatus.IN_PROGRESS };
-      const wrapper = mount(EnquiryForm, wrapperSettings(notCompletedEnquiry));
+      const { wrapper } = mountEnquiryForm({ enquiry: notCompletedEnquiry });
       await flushPromises();
       await nextTick();
 
@@ -585,7 +600,7 @@ describe('EnquiryForm.vue', () => {
 
   describe('Nested Components - DOM Directed Testing', () => {
     it('renders core child components', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings());
+      const { wrapper } = mountEnquiryForm();
       await flushPromises();
       await nextTick();
 
@@ -603,7 +618,7 @@ describe('EnquiryForm.vue', () => {
         atsClientId: 12345,
         atsEnquiryId: 67890
       };
-      const wrapper = mount(EnquiryForm, wrapperSettings(enquiryWithATS));
+      const { wrapper } = mountEnquiryForm({ enquiry: enquiryWithATS });
       await flushPromises();
       await nextTick();
 
@@ -635,7 +650,7 @@ describe('EnquiryForm.vue', () => {
           ]
         }
       } as unknown as typeof testEnquiry;
-      const wrapper = mount(EnquiryForm, wrapperSettings(enquiryWithContact));
+      const { wrapper } = mountEnquiryForm({ enquiry: enquiryWithContact });
       await flushPromises();
       await nextTick();
 
@@ -644,27 +659,6 @@ describe('EnquiryForm.vue', () => {
       expect(atsInfo.props('lastName')).toBe('Doe');
       expect(atsInfo.props('email')).toBe('john@example.com');
       expect(atsInfo.props('phoneNumber')).toBe('555-1234');
-    });
-  });
-
-  describe('required fields with asterisks', () => {
-    it('displays asterisk for enquiryDescription field in header', async () => {
-      const wrapper = mount(EnquiryForm, wrapperSettings());
-      await flushPromises();
-      await nextTick();
-
-      // Find the h3 containing the enquiry detail header and verify asterisk
-      const headers = wrapper.findAll('h3');
-      let foundAsterisk = false;
-      for (const header of headers) {
-        const spans = header.findAll('span');
-        if (spans.some((span) => span.text() === '*')) {
-          foundAsterisk = true;
-          break;
-        }
-      }
-
-      expect(foundAsterisk).toBe(true);
     });
   });
 });

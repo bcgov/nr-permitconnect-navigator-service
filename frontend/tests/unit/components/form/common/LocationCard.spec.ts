@@ -8,6 +8,8 @@ import { ProjectLocation } from '@/utils/enums/projectCommon';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
+// Mount
+
 function mountLocationCard(
   options: {
     formType?: FormType;
@@ -23,7 +25,6 @@ function mountLocationCard(
     piniaState: { form: { formType, formState } },
     componentProps: { activeStep, ...(tab === undefined ? {} : { tab }) },
     formProps: { initialValues },
-    fields: ['location.latitude', 'location.longitude'],
     stubs: {
       Map: {
         template: '<div></div>',
@@ -45,98 +46,99 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('LocationCard', () => {
-  it('renders', () => {
-    const { wrapper } = mountLocationCard();
-    expect(wrapper).toBeTruthy();
-  });
+  describe('rendering', () => {
+    describe('projectLocation', () => {
+      it('renders', () => {
+        const { wrapper } = mountLocationCard();
 
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountLocationCard();
+        const radioLists = wrapper.findAllComponents(RadioList);
+        const projectLocationRadio = radioLists.find((radio) => radio.props('name') === 'location.projectLocation');
 
-    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
-  });
-});
-
-describe('renders all mandatory fields', () => {
-  it('renders RadioList for projectLocation with correct name', () => {
-    const { wrapper } = mountLocationCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const projectLocationRadio = radioLists.find((radio) => radio.props('name') === 'location.projectLocation');
-
-    expect(projectLocationRadio).toBeTruthy();
-  });
-
-  it('renders InputNumber for latitude when projectLocation is LOCATION_COORDINATES', async () => {
-    const { wrapper } = mountLocationCard({
-      initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+        expect(projectLocationRadio).toBeTruthy();
+      });
     });
+    describe('mandatory fields', () => {
+      describe('header', () => {
+        it('renders', () => {
+          const { wrapper } = mountLocationCard();
 
-    await nextTick();
+          expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountLocationCard();
 
-    const inputNumbers = wrapper.findAllComponents(InputNumber);
-    const latitudeInput = inputNumbers.find(
-      (input) => input.props('name') === 'location.latitude' && !input.props('disabled')
-    );
+          const header = wrapper.find('h6');
+          const spans = header.findAll('span');
+          const asterisk = spans.find((span) => span.text() === '*');
 
-    expect(latitudeInput).toBeTruthy();
-  });
+          expect(asterisk).toBeTruthy();
+        });
+      });
 
-  it('renders InputNumber for longitude when projectLocation is LOCATION_COORDINATES', async () => {
-    const { wrapper } = mountLocationCard({
-      initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+      describe('latitude', () => {
+        it('renders', async () => {
+          const { wrapper } = mountLocationCard({
+            initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+          });
+
+          await nextTick();
+
+          const inputNumbers = wrapper.findAllComponents(InputNumber);
+          const latitudeInput = inputNumbers.find(
+            (input) => input.props('name') === 'location.latitude' && !input.props('disabled')
+          );
+
+          expect(latitudeInput).toBeTruthy();
+        });
+        it('is required when projectLocation is LOCATION_COORDINATES', async () => {
+          const { wrapper } = mountLocationCard({
+            initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+          });
+
+          await nextTick();
+
+          const inputNumbers = wrapper.findAllComponents(InputNumber);
+          const latitudeInput = inputNumbers.find(
+            (input) => input.props('name') === 'location.latitude' && !input.props('disabled')
+          );
+
+          expect(latitudeInput?.props('required')).toBe(true);
+        });
+      });
+
+      describe('longitude', () => {
+        it('renders', async () => {
+          const { wrapper } = mountLocationCard({
+            initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+          });
+
+          await nextTick();
+
+          const inputNumbers = wrapper.findAllComponents(InputNumber);
+          const longitudeInput = inputNumbers.find(
+            (input) => input.props('name') === 'location.longitude' && !input.props('disabled')
+          );
+
+          expect(longitudeInput).toBeTruthy();
+        });
+        it('is required when projectLocation is LOCATION_COORDINATES', async () => {
+          const { wrapper } = mountLocationCard({
+            initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
+          });
+
+          await nextTick();
+
+          const inputNumbers = wrapper.findAllComponents(InputNumber);
+          const longitudeInput = inputNumbers.find(
+            (input) => input.props('name') === 'location.longitude' && !input.props('disabled')
+          );
+
+          expect(longitudeInput?.props('required')).toBe(true);
+        });
+      });
     });
-
-    await nextTick();
-
-    const inputNumbers = wrapper.findAllComponents(InputNumber);
-    const longitudeInput = inputNumbers.find(
-      (input) => input.props('name') === 'location.longitude' && !input.props('disabled')
-    );
-
-    expect(longitudeInput).toBeTruthy();
-  });
-});
-
-describe('required fields with asterisks', () => {
-  it('displays asterisk in header for the required card', () => {
-    const { wrapper } = mountLocationCard();
-
-    const header = wrapper.find('h6');
-    const spans = header.findAll('span');
-    const asterisk = spans.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  it('latitude field is required when projectLocation is LOCATION_COORDINATES', async () => {
-    const { wrapper } = mountLocationCard({
-      initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
-    });
-
-    await nextTick();
-
-    const inputNumbers = wrapper.findAllComponents(InputNumber);
-    const latitudeInput = inputNumbers.find(
-      (input) => input.props('name') === 'location.latitude' && !input.props('disabled')
-    );
-
-    expect(latitudeInput?.props('required')).toBe(true);
-  });
-
-  it('longitude field is required when projectLocation is LOCATION_COORDINATES', async () => {
-    const { wrapper } = mountLocationCard({
-      initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
-    });
-
-    await nextTick();
-
-    const inputNumbers = wrapper.findAllComponents(InputNumber);
-    const longitudeInput = inputNumbers.find(
-      (input) => input.props('name') === 'location.longitude' && !input.props('disabled')
-    );
-
-    expect(longitudeInput?.props('required')).toBe(true);
   });
 });

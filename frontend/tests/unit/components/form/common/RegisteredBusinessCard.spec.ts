@@ -5,6 +5,8 @@ import { FormState, FormType } from '@/utils/enums/projectCommon';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
+// Mount
+
 function mountRegisteredBusinessCard(options: { formType?: FormType; formState?: FormState; tab?: number } = {}) {
   const { formType = FormType.NEW, formState = FormState.UNLOCKED, tab } = options;
 
@@ -22,32 +24,30 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('RegisteredBusinessCard', () => {
-  it('renders', () => {
-    const { wrapper } = mountRegisteredBusinessCard();
-    expect(wrapper).toBeTruthy();
+  describe('rendering', () => {
+    it('projectApplicantType', () => {
+      const { wrapper } = mountRegisteredBusinessCard();
+
+      const radioLists = wrapper.findAllComponents(RadioList);
+      const applicantTypeRadio = radioLists.find((radio) => radio.props('name') === 'basic.projectApplicantType');
+
+      expect(applicantTypeRadio).toBeTruthy();
+    });
   });
-});
+  describe('mandatory fields', () => {
+    describe('header', () => {
+      it('displays asterisk', () => {
+        const { wrapper } = mountRegisteredBusinessCard();
 
-describe('renders all mandatory fields', () => {
-  it('renders RadioList for projectApplicantType with correct name', () => {
-    const { wrapper } = mountRegisteredBusinessCard();
+        const header = wrapper.find('h6');
+        const spans = header.findAll('span');
+        const asterisk = spans.find((span) => span.text() === '*');
 
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const applicantTypeRadio = radioLists.find((radio) => radio.props('name') === 'basic.projectApplicantType');
-
-    expect(applicantTypeRadio).toBeTruthy();
-  });
-});
-
-describe('required fields with asterisks', () => {
-  it('displays asterisk in header for the required card', () => {
-    const { wrapper } = mountRegisteredBusinessCard();
-
-    const header = wrapper.find('h6');
-    const spans = header.findAll('span');
-    const asterisk = spans.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
+        expect(asterisk).toBeTruthy();
+      });
+    });
   });
 });

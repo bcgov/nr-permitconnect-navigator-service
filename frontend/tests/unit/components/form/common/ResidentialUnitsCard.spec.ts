@@ -7,6 +7,8 @@ import { FormState, FormType } from '@/utils/enums/projectCommon';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
+// Mount
+
 function mountResidentialUnitsCard(
   options: {
     formType?: FormType;
@@ -32,162 +34,169 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('ResidentialUnitsCard', () => {
-  it('renders', () => {
-    const { wrapper } = mountResidentialUnitsCard();
-    expect(wrapper).toBeTruthy();
-  });
+  describe('rendering', () => {
+    describe('mandatory fields', () => {
+      describe('header', () => {
+        it('renders', () => {
+          const { wrapper } = mountResidentialUnitsCard();
 
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountResidentialUnitsCard();
+          expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountResidentialUnitsCard();
 
-    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
-  });
-});
+          const header = wrapper.find('h6');
+          const spans = header.findAll('span');
+          const asterisk = spans.find((span) => span.text() === '*');
 
-describe('renders all mandatory fields', () => {
-  it('renders Checkbox for singleFamilySelected with correct name', () => {
-    const { wrapper } = mountResidentialUnitsCard();
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      it('singleFamilySelected', () => {
+        const { wrapper } = mountResidentialUnitsCard();
 
-    const checkboxes = wrapper.findAllComponents(Checkbox);
-    const singleFamilyCheckbox = checkboxes.find(
-      (checkbox) => checkbox.props('name') === 'housing.singleFamilySelected'
-    );
+        const checkboxes = wrapper.findAllComponents(Checkbox);
+        const singleFamilyCheckbox = checkboxes.find(
+          (checkbox) => checkbox.props('name') === 'housing.singleFamilySelected'
+        );
 
-    expect(singleFamilyCheckbox).toBeTruthy();
-  });
+        expect(singleFamilyCheckbox).toBeTruthy();
+      });
 
-  it('renders Checkbox for multiFamilySelected with correct name', () => {
-    const { wrapper } = mountResidentialUnitsCard();
+      it('multiFamilySelected', () => {
+        const { wrapper } = mountResidentialUnitsCard();
 
-    const checkboxes = wrapper.findAllComponents(Checkbox);
-    const multiFamilyCheckbox = checkboxes.find((checkbox) => checkbox.props('name') === 'housing.multiFamilySelected');
+        const checkboxes = wrapper.findAllComponents(Checkbox);
+        const multiFamilyCheckbox = checkboxes.find(
+          (checkbox) => checkbox.props('name') === 'housing.multiFamilySelected'
+        );
 
-    expect(multiFamilyCheckbox).toBeTruthy();
-  });
+        expect(multiFamilyCheckbox).toBeTruthy();
+      });
 
-  it('renders Checkbox for otherSelected with correct name', () => {
-    const { wrapper } = mountResidentialUnitsCard();
+      it('otherSelected', () => {
+        const { wrapper } = mountResidentialUnitsCard();
 
-    const checkboxes = wrapper.findAllComponents(Checkbox);
-    const otherCheckbox = checkboxes.find((checkbox) => checkbox.props('name') === 'housing.otherSelected');
+        const checkboxes = wrapper.findAllComponents(Checkbox);
+        const otherCheckbox = checkboxes.find((checkbox) => checkbox.props('name') === 'housing.otherSelected');
 
-    expect(otherCheckbox).toBeTruthy();
-  });
+        expect(otherCheckbox).toBeTruthy();
+      });
+      describe('singleFamilyUnits', () => {
+        it('renders', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { singleFamilySelected: true } }
+          });
 
-  it('renders Select for singleFamilyUnits when singleFamilySelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { singleFamilySelected: true } }
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const singleFamilyUnitsSelect = selects.find(
+            (select) => select.props('name') === 'housing.singleFamilyUnits'
+          );
+
+          expect(singleFamilyUnitsSelect).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { singleFamilySelected: true } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const singleFamilyUnitsSelect = selects.find(
+            (select) => select.props('name') === 'housing.singleFamilyUnits'
+          );
+
+          expect(singleFamilyUnitsSelect?.props('placeholder')).toContain('*');
+        });
+      });
+      describe('multiFamilyUnits', () => {
+        it('renders', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { multiFamilySelected: true } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const multiFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.multiFamilyUnits');
+
+          expect(multiFamilyUnitsSelect).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { multiFamilySelected: true } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const multiFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.multiFamilyUnits');
+
+          expect(multiFamilyUnitsSelect?.props('placeholder')).toContain('*');
+        });
+      });
+      describe('otherUnitsDescription', () => {
+        it('renders', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { otherSelected: true } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const otherUnitsDescInput = inputTexts.find(
+            (input) => input.props('name') === 'housing.otherUnitsDescription'
+          );
+
+          expect(otherUnitsDescInput).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { otherSelected: true } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const otherUnitsDescInput = inputTexts.find(
+            (input) => input.props('name') === 'housing.otherUnitsDescription'
+          );
+
+          expect(otherUnitsDescInput?.props('placeholder')).toContain('*');
+        });
+      });
+      describe('otherUnits', () => {
+        it('renders', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { otherSelected: true } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const otherUnitsSelect = selects.find((select) => select.props('name') === 'housing.otherUnits');
+
+          expect(otherUnitsSelect).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountResidentialUnitsCard({
+            initialValues: { housing: { otherSelected: true } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const otherUnitsSelect = selects.find((select) => select.props('name') === 'housing.otherUnits');
+
+          expect(otherUnitsSelect?.props('placeholder')).toContain('*');
+        });
+      });
     });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const singleFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.singleFamilyUnits');
-
-    expect(singleFamilyUnitsSelect).toBeTruthy();
-  });
-
-  it('renders Select for multiFamilyUnits when multiFamilySelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { multiFamilySelected: true } }
-    });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const multiFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.multiFamilyUnits');
-
-    expect(multiFamilyUnitsSelect).toBeTruthy();
-  });
-
-  it('renders InputText for otherUnitsDescription when otherSelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { otherSelected: true } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const otherUnitsDescInput = inputTexts.find((input) => input.props('name') === 'housing.otherUnitsDescription');
-
-    expect(otherUnitsDescInput).toBeTruthy();
-  });
-
-  it('renders Select for otherUnits when otherSelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { otherSelected: true } }
-    });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const otherUnitsSelect = selects.find((select) => select.props('name') === 'housing.otherUnits');
-
-    expect(otherUnitsSelect).toBeTruthy();
-  });
-});
-
-describe('required fields with asterisks', () => {
-  it('displays asterisk in header for the required card', () => {
-    const { wrapper } = mountResidentialUnitsCard();
-
-    const header = wrapper.find('h6');
-    const spans = header.findAll('span');
-    const asterisk = spans.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  it('displays asterisk in placeholder for singleFamilyUnits when singleFamilySelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { singleFamilySelected: true } }
-    });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const singleFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.singleFamilyUnits');
-
-    expect(singleFamilyUnitsSelect?.props('placeholder')).toContain('*');
-  });
-
-  it('displays asterisk in placeholder for multiFamilyUnits when multiFamilySelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { multiFamilySelected: true } }
-    });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const multiFamilyUnitsSelect = selects.find((select) => select.props('name') === 'housing.multiFamilyUnits');
-
-    expect(multiFamilyUnitsSelect?.props('placeholder')).toContain('*');
-  });
-
-  it('displays asterisk in placeholder for otherUnitsDescription when otherSelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { otherSelected: true } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const otherUnitsDescInput = inputTexts.find((input) => input.props('name') === 'housing.otherUnitsDescription');
-
-    expect(otherUnitsDescInput?.props('placeholder')).toContain('*');
-  });
-
-  it('displays asterisk in placeholder for otherUnits when otherSelected is true', async () => {
-    const { wrapper } = mountResidentialUnitsCard({
-      initialValues: { housing: { otherSelected: true } }
-    });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const otherUnitsSelect = selects.find((select) => select.props('name') === 'housing.otherUnits');
-
-    expect(otherUnitsSelect?.props('placeholder')).toContain('*');
   });
 });

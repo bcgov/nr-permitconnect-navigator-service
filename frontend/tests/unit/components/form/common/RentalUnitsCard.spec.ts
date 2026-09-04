@@ -8,6 +8,8 @@ import { FormState, FormType } from '@/utils/enums/projectCommon';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
+// Mount
+
 function mountRentalUnitsCard(
   options: {
     formType?: FormType;
@@ -33,64 +35,63 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('RentalUnitsCard', () => {
-  it('renders', () => {
-    const { wrapper } = mountRentalUnitsCard();
-    expect(wrapper).toBeTruthy();
-  });
+  describe('rendering', () => {
+    describe('header', () => {
+      it('renders', () => {
+        const { wrapper } = mountRentalUnitsCard();
 
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountRentalUnitsCard();
+        expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+      });
+      it('displays asterisk', () => {
+        const { wrapper } = mountRentalUnitsCard();
 
-    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
-  });
-});
+        const header = wrapper.find('h6');
+        const spans = header.findAll('span');
+        const asterisk = spans.find((span) => span.text() === '*');
 
-describe('renders all mandatory fields', () => {
-  it('renders RadioList for hasRentalUnits with correct name', () => {
-    const { wrapper } = mountRentalUnitsCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const hasRentalUnitsRadio = radioLists.find((radio) => radio.props('name') === 'housing.hasRentalUnits');
-
-    expect(hasRentalUnitsRadio).toBeTruthy();
-  });
-
-  it('renders Select for rentalUnits when hasRentalUnits is YES', async () => {
-    const { wrapper } = mountRentalUnitsCard({
-      initialValues: { housing: { hasRentalUnits: BasicResponse.YES } }
+        expect(asterisk).toBeTruthy();
+      });
     });
 
-    await nextTick();
+    describe('mandatory fields', () => {
+      describe('hasRentalUnits', () => {
+        it('renders', () => {
+          const { wrapper } = mountRentalUnitsCard();
 
-    const selects = wrapper.findAllComponents(Select);
-    const rentalUnitsSelect = selects.find((select) => select.props('name') === 'housing.rentalUnits');
+          const radioLists = wrapper.findAllComponents(RadioList);
+          const hasRentalUnitsRadio = radioLists.find((radio) => radio.props('name') === 'housing.hasRentalUnits');
 
-    expect(rentalUnitsSelect).toBeTruthy();
-  });
-});
+          expect(hasRentalUnitsRadio).toBeTruthy();
+        });
 
-describe('required fields with asterisks', () => {
-  it('displays asterisk in header for the required card', () => {
-    const { wrapper } = mountRentalUnitsCard();
+        it('renders Select for rentalUnits when hasRentalUnits is YES', async () => {
+          const { wrapper } = mountRentalUnitsCard({
+            initialValues: { housing: { hasRentalUnits: BasicResponse.YES } }
+          });
 
-    const header = wrapper.find('h6');
-    const spans = header.findAll('span');
-    const asterisk = spans.find((span) => span.text() === '*');
+          await nextTick();
 
-    expect(asterisk).toBeTruthy();
-  });
+          const selects = wrapper.findAllComponents(Select);
+          const rentalUnitsSelect = selects.find((select) => select.props('name') === 'housing.rentalUnits');
 
-  it('displays asterisk in placeholder for rentalUnits when hasRentalUnits is YES', async () => {
-    const { wrapper } = mountRentalUnitsCard({
-      initialValues: { housing: { hasRentalUnits: BasicResponse.YES } }
+          expect(rentalUnitsSelect).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountRentalUnitsCard({
+            initialValues: { housing: { hasRentalUnits: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const selects = wrapper.findAllComponents(Select);
+          const rentalUnitsSelect = selects.find((select) => select.props('name') === 'housing.rentalUnits');
+
+          expect(rentalUnitsSelect?.props('placeholder')).toContain('*');
+        });
+      });
     });
-
-    await nextTick();
-
-    const selects = wrapper.findAllComponents(Select);
-    const rentalUnitsSelect = selects.find((select) => select.props('name') === 'housing.rentalUnits');
-
-    expect(rentalUnitsSelect?.props('placeholder')).toContain('*');
   });
 });

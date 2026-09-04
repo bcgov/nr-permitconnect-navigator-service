@@ -1,14 +1,21 @@
-import { mountWithFormContext } from '../../../mountWithFormContext';
-
 import { InputText, Select } from '@/components/form';
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
 import { sourceSystemKindService } from '@/services';
 import { SYSTEM_ID } from '@/utils/constants/application';
-import { StorageKey } from '@/utils/enums/application';
+import { i18n } from '@/i18n';
+
+import { mountWithFormContext } from '../../../mountWithFormContext';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
 
 import type { SourceSystemKind } from '@/types';
 
-const listSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'listSourceSystemKinds');
+// Mocks
+
+vi.mock('vue-router', () => ({
+  useRouter: () => mockRouter
+}));
+
+// Fixtures
 
 const sampleSourceSystemKind: SourceSystemKind = {
   description: 'ATS Project Number',
@@ -21,99 +28,72 @@ const sampleSourceSystemKind: SourceSystemKind = {
   permitTypeIds: [26]
 };
 
-vi.mock('vue-i18n', () => ({
-  useI18n: () => ({
-    t: (key: string) => key
-  }),
-  createI18n: vi.fn(() => ({
-    global: {
-      t: (key: string) => key
-    },
-    install: vi.fn()
-  }))
-}));
+// Mount
 
-vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
-}));
+const listSourceSystemKindsSpy = vi.spyOn(sourceSystemKindService, 'listSourceSystemKinds');
 
-const wrapperSettings = (options: { editable?: boolean } = {}) => ({
-  componentProps: {
-    sourceSystemKinds: [sampleSourceSystemKind],
-    editable: options.editable ?? true
-  },
-  piniaState: { auth: { user: {} } },
-  stubs: ['font-awesome-icon']
-});
+function mountAuthorizationCardIntake(options: { editable?: boolean } = {}) {
+  const { wrapper } = mountWithFormContext(AuthorizationCardIntake, {
+    componentProps: { sourceSystemKinds: [sampleSourceSystemKind], editable: options.editable ?? true },
+    piniaState: {}
+  });
+
+  return { wrapper };
+}
 
 beforeEach(() => {
-  sessionStorage.setItem(
-    StorageKey.CONFIG,
-    JSON.stringify({
-      oidc: {
-        authority: 'abc',
-        clientId: '123'
-      }
-    })
-  );
-
+  resetMockRouter();
   vi.clearAllMocks();
 
   listSourceSystemKindsSpy.mockResolvedValue([sampleSourceSystemKind] as SourceSystemKind[]);
 });
 
-afterEach(() => {
-  sessionStorage.clear();
-});
+// Tests
 
 describe('AuthorizationCardIntake', () => {
-  it('renders component', () => {
-    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
-    expect(wrapper).toBeTruthy();
-  });
+  describe('rendering', () => {
+    it('renders a non-empty translated header', () => {
+      const tSpy = vi.spyOn(i18n, 't');
+      const { wrapper } = mountAuthorizationCardIntake();
 
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+      expect(tSpy).toHaveBeenCalledWith('authorization.authorizationCardIntake.authorizationTypeID');
+      expect(wrapper.find('h3').text().trim().length).toBeGreaterThan(0);
+    });
 
-    expect(wrapper.find('h3').text().trim().length).toBeGreaterThan(0);
-  });
-});
+    it('renders InputText for issuedPermitId with correct name', () => {
+      const { wrapper } = mountAuthorizationCardIntake();
 
-describe('renders all mandatory fields', () => {
-  it('renders Select for authorizationType with correct name', () => {
-    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+      const inputTexts = wrapper.findAllComponents(InputText);
+      const issuedPermitIdInput = inputTexts.find(
+        (input: { props: (arg0: string) => string }) => input.props('name') === 'issuedPermitId'
+      );
 
-    const selects = wrapper.findAllComponents(Select);
-    const authTypeSelect = selects.find(
-      (select: { props: (arg0: string) => string }) => select.props('name') === 'authorizationType'
-    );
+      expect(issuedPermitIdInput).toBeTruthy();
+    });
 
-    expect(authTypeSelect).toBeTruthy();
-  });
+    describe('mandatory fields', () => {
+      describe('authorizationType', () => {
+        it('renders with correct name', () => {
+          const { wrapper } = mountAuthorizationCardIntake();
 
-  it('renders InputText for issuedPermitId with correct name', () => {
-    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+          const selects = wrapper.findAllComponents(Select);
+          const authTypeSelect = selects.find(
+            (select: { props: (arg0: string) => string }) => select.props('name') === 'authorizationType'
+          );
 
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const issuedPermitIdInput = inputTexts.find(
-      (input: { props: (arg0: string) => string }) => input.props('name') === 'issuedPermitId'
-    );
+          expect(authTypeSelect).toBeTruthy();
+        });
 
-    expect(issuedPermitIdInput).toBeTruthy();
-  });
-});
+        it('displays asterisk', () => {
+          const { wrapper } = mountAuthorizationCardIntake();
 
-describe('required fields with asterisks', () => {
-  it('displays asterisk for authorizationType field', () => {
-    const { wrapper } = mountWithFormContext(AuthorizationCardIntake, wrapperSettings());
+          const labels = wrapper.findAll('label');
+          const authTypeLabel = labels.find((label) => label.attributes('for') === 'authorizationType');
+          const asterisk = authTypeLabel?.findAll('span')?.find((span) => span.text() === '*');
 
-    const labels = wrapper.findAll('label');
-    const authTypeLabel = labels.find((label) => label.attributes('for') === 'authorizationType');
-    const asterisk = authTypeLabel?.findAll('span')?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
+          expect(asterisk).toBeTruthy();
+        });
+      });
+    });
   });
 });

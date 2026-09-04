@@ -8,6 +8,8 @@ import { FormState, FormType } from '@/utils/enums/projectCommon';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
+// Mount
+
 function mountFinanciallySupportedCard(
   options: {
     formType?: FormType;
@@ -33,184 +35,181 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('FinanciallySupportedCard', () => {
-  it('renders', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-    expect(wrapper).toBeTruthy();
-  });
+  describe('renders', () => {
+    it('non-empty translated header', () => {
+      const { wrapper } = mountFinanciallySupportedCard();
 
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
-  });
-});
-
-describe('renders all mandatory fields', () => {
-  it('renders RadioList for financiallySupportedBc with correct name', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const bcHousingRadio = radioLists.find((radio) => radio.props('name') === 'housing.financiallySupportedBc');
-
-    expect(bcHousingRadio).toBeTruthy();
-  });
-
-  it('renders RadioList for financiallySupportedIndigenous with correct name', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const indigenousRadio = radioLists.find(
-      (radio) => radio.props('name') === 'housing.financiallySupportedIndigenous'
-    );
-
-    expect(indigenousRadio).toBeTruthy();
-  });
-
-  it('renders RadioList for financiallySupportedNonProfit with correct name', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const nonProfitRadio = radioLists.find((radio) => radio.props('name') === 'housing.financiallySupportedNonProfit');
-
-    expect(nonProfitRadio).toBeTruthy();
-  });
-
-  it('renders RadioList for financiallySupportedHousingCoop with correct name', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const radioLists = wrapper.findAllComponents(RadioList);
-    const housingCoopRadio = radioLists.find(
-      (radio) => radio.props('name') === 'housing.financiallySupportedHousingCoop'
-    );
-
-    expect(housingCoopRadio).toBeTruthy();
-  });
-
-  it('renders InputText for indigenousDescription when financiallySupportedIndigenous is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
+      expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
     });
 
-    await nextTick();
+    describe('mandatory fields', () => {
+      describe('financiallySupportedBc', () => {
+        it('renders', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
 
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const indigenousInput = inputTexts.find((input) => input.props('name') === 'housing.indigenousDescription');
+          const radioLists = wrapper.findAllComponents(RadioList);
+          const bcHousingRadio = radioLists.find((radio) => radio.props('name') === 'housing.financiallySupportedBc');
 
-    expect(indigenousInput).toBeTruthy();
-  });
+          expect(bcHousingRadio).toBeTruthy();
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
 
-  it('renders InputText for nonProfitDescription when financiallySupportedNonProfit is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
+          const legends = wrapper.findAll('legend');
+          const bcHousingLegend = legends.find((legend) => legend.text().includes('BC Housing'));
+          const spans = bcHousingLegend?.findAll('span');
+          const asterisk = spans?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      describe('financiallySupportedIndigenous', () => {
+        it('renders', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const radioLists = wrapper.findAllComponents(RadioList);
+          const indigenousRadio = radioLists.find(
+            (radio) => radio.props('name') === 'housing.financiallySupportedIndigenous'
+          );
+
+          expect(indigenousRadio).toBeTruthy();
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const legends = wrapper.findAll('legend');
+          const indigenousLegend = legends.find((legend) => legend.text().includes('Indigenous Housing Provider'));
+          const spans = indigenousLegend?.findAll('span');
+          const asterisk = spans?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      describe('financiallySupportedNonProfit', () => {
+        it('renders', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const radioLists = wrapper.findAllComponents(RadioList);
+          const nonProfitRadio = radioLists.find(
+            (radio) => radio.props('name') === 'housing.financiallySupportedNonProfit'
+          );
+
+          expect(nonProfitRadio).toBeTruthy();
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const legends = wrapper.findAll('legend');
+          const nonProfitLegend = legends.find((legend) => legend.text().includes('Non-profit housing society'));
+          const spans = nonProfitLegend?.findAll('span');
+          const asterisk = spans?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      describe('financiallySupportedHousingCoop', () => {
+        it('renders', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const radioLists = wrapper.findAllComponents(RadioList);
+          const housingCoopRadio = radioLists.find(
+            (radio) => radio.props('name') === 'housing.financiallySupportedHousingCoop'
+          );
+
+          expect(housingCoopRadio).toBeTruthy();
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountFinanciallySupportedCard();
+
+          const legends = wrapper.findAll('legend');
+          const housingCoopLegend = legends.find((legend) => legend.text().includes('Housing co-operative'));
+          const spans = housingCoopLegend?.findAll('span');
+          const asterisk = spans?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      describe('indigenousDescription when financiallySupportedIndigenous is YES', () => {
+        it('renders', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const indigenousInput = inputTexts.find((input) => input.props('name') === 'housing.indigenousDescription');
+
+          expect(indigenousInput).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const indigenousInput = inputTexts.find((input) => input.props('name') === 'housing.indigenousDescription');
+
+          expect(indigenousInput?.props('placeholder')).toContain('*');
+        });
+      });
+      describe('nonProfitDescription when financiallySupportedNonProfit is YES', () => {
+        it('renders', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const nonProfitInput = inputTexts.find((input) => input.props('name') === 'housing.nonProfitDescription');
+
+          expect(nonProfitInput).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const nonProfitInput = inputTexts.find((input) => input.props('name') === 'housing.nonProfitDescription');
+
+          expect(nonProfitInput?.props('placeholder')).toContain('*');
+        });
+      });
+      describe('housingCoopDescription when financiallySupportedHousingCoop is YES', () => {
+        it('renders', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const housingCoopInput = inputTexts.find((input) => input.props('name') === 'housing.housingCoopDescription');
+
+          expect(housingCoopInput).toBeTruthy();
+        });
+        it('displays asterisk', async () => {
+          const { wrapper } = mountFinanciallySupportedCard({
+            initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }
+          });
+
+          await nextTick();
+
+          const inputTexts = wrapper.findAllComponents(InputText);
+          const housingCoopInput = inputTexts.find((input) => input.props('name') === 'housing.housingCoopDescription');
+
+          expect(housingCoopInput?.props('placeholder')).toContain('*');
+        });
+      });
     });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const nonProfitInput = inputTexts.find((input) => input.props('name') === 'housing.nonProfitDescription');
-
-    expect(nonProfitInput).toBeTruthy();
-  });
-
-  it('renders InputText for housingCoopDescription when financiallySupportedHousingCoop is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const housingCoopInput = inputTexts.find((input) => input.props('name') === 'housing.housingCoopDescription');
-
-    expect(housingCoopInput).toBeTruthy();
-  });
-});
-
-describe('required fields with asterisks', () => {
-  it('displays asterisk in legend for financiallySupportedBc', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const legends = wrapper.findAll('legend');
-    const bcHousingLegend = legends.find((legend) => legend.text().includes('BC Housing'));
-    const spans = bcHousingLegend?.findAll('span');
-    const asterisk = spans?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  it('displays asterisk in legend for financiallySupportedIndigenous', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const legends = wrapper.findAll('legend');
-    const indigenousLegend = legends.find((legend) => legend.text().includes('Indigenous Housing Provider'));
-    const spans = indigenousLegend?.findAll('span');
-    const asterisk = spans?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  it('displays asterisk in legend for financiallySupportedNonProfit', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const legends = wrapper.findAll('legend');
-    const nonProfitLegend = legends.find((legend) => legend.text().includes('Non-profit housing society'));
-    const spans = nonProfitLegend?.findAll('span');
-    const asterisk = spans?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  it('displays asterisk in legend for financiallySupportedHousingCoop', () => {
-    const { wrapper } = mountFinanciallySupportedCard();
-
-    const legends = wrapper.findAll('legend');
-    const housingCoopLegend = legends.find((legend) => legend.text().includes('Housing co-operative'));
-    const spans = housingCoopLegend?.findAll('span');
-    const asterisk = spans?.find((span) => span.text() === '*');
-
-    expect(asterisk).toBeTruthy();
-  });
-
-  // eslint-disable-next-line max-len
-  it('displays asterisk in placeholder for indigenousDescription when financiallySupportedIndigenous is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const indigenousInput = inputTexts.find((input) => input.props('name') === 'housing.indigenousDescription');
-
-    expect(indigenousInput?.props('placeholder')).toContain('*');
-  });
-
-  // eslint-disable-next-line max-len
-  it('displays asterisk in placeholder for nonProfitDescription when financiallySupportedNonProfit is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const nonProfitInput = inputTexts.find((input) => input.props('name') === 'housing.nonProfitDescription');
-
-    expect(nonProfitInput?.props('placeholder')).toContain('*');
-  });
-
-  // eslint-disable-next-line max-len
-  it('displays asterisk in placeholder for housingCoopDescription when financiallySupportedHousingCoop is YES', async () => {
-    const { wrapper } = mountFinanciallySupportedCard({
-      initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }
-    });
-
-    await nextTick();
-
-    const inputTexts = wrapper.findAllComponents(InputText);
-    const housingCoopInput = inputTexts.find((input) => input.props('name') === 'housing.housingCoopDescription');
-
-    expect(housingCoopInput?.props('placeholder')).toContain('*');
   });
 });

@@ -68,121 +68,118 @@ describe('FinanciallySupportedPanel', () => {
       expect(inputTextByName('finance.nonProfitDescription').exists()).toBe(true);
       expect(inputTextByName('finance.housingCoopDescription').exists()).toBe(true);
     });
-  });
 
-  describe('mandatory fields', () => {
-    it('sets required prop on financiallySupportedBc', () => {
-      const { selectByName } = mountFinanciallySupportedPanel();
+    describe('mandatory fields', () => {
+      describe('financiallySupportedBc', () => {
+        it('sets required prop', () => {
+          const { selectByName } = mountFinanciallySupportedPanel();
 
-      expect(selectByName('finance.financiallySupportedBc').props('required')).toBe(true);
-    });
+          expect(selectByName('finance.financiallySupportedBc').props('required')).toBe(true);
+        });
+        it('displays asterisk', () => {
+          const { wrapper } = mountFinanciallySupportedPanel();
 
-    it('disables indigenousDescription when financiallySupportedIndigenous is not Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedIndigenous: BasicResponse.NO }
+          const labels = wrapper.findAll('label');
+          const bcHousingLabel = labels.find((label) => label.attributes('for') === 'finance.financiallySupportedBc');
+          const asterisk = bcHousingLabel?.findAll('span')?.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+      it('disables indigenousDescription when financiallySupportedIndigenous is not Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedIndigenous: BasicResponse.NO }
+        });
+
+        await nextTick();
+
+        expect(inputTextByName('finance.indigenousDescription').props('disabled')).toBe(true);
       });
 
-      await nextTick();
+      it('enables indigenousDescription when financiallySupportedIndigenous is Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedIndigenous: BasicResponse.YES }
+        });
 
-      expect(inputTextByName('finance.indigenousDescription').props('disabled')).toBe(true);
-    });
+        await nextTick();
 
-    it('enables indigenousDescription when financiallySupportedIndigenous is Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedIndigenous: BasicResponse.YES }
+        expect(inputTextByName('finance.indigenousDescription').props('disabled')).toBe(false);
       });
 
-      await nextTick();
+      it('disables nonProfitDescription when financiallySupportedNonProfit is not Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedNonProfit: BasicResponse.NO }
+        });
 
-      expect(inputTextByName('finance.indigenousDescription').props('disabled')).toBe(false);
-    });
+        await nextTick();
 
-    it('disables nonProfitDescription when financiallySupportedNonProfit is not Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedNonProfit: BasicResponse.NO }
+        expect(inputTextByName('finance.nonProfitDescription').props('disabled')).toBe(true);
       });
 
-      await nextTick();
+      it('enables nonProfitDescription when financiallySupportedNonProfit is Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedNonProfit: BasicResponse.YES }
+        });
 
-      expect(inputTextByName('finance.nonProfitDescription').props('disabled')).toBe(true);
-    });
+        await nextTick();
 
-    it('enables nonProfitDescription when financiallySupportedNonProfit is Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedNonProfit: BasicResponse.YES }
+        expect(inputTextByName('finance.nonProfitDescription').props('disabled')).toBe(false);
       });
 
-      await nextTick();
+      it('disables housingCoopDescription when financiallySupportedHousingCoop is not Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedHousingCoop: BasicResponse.NO }
+        });
 
-      expect(inputTextByName('finance.nonProfitDescription').props('disabled')).toBe(false);
-    });
+        await nextTick();
 
-    it('disables housingCoopDescription when financiallySupportedHousingCoop is not Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedHousingCoop: BasicResponse.NO }
+        expect(inputTextByName('finance.housingCoopDescription').props('disabled')).toBe(true);
       });
 
-      await nextTick();
+      it('enables housingCoopDescription when financiallySupportedHousingCoop is Yes', async () => {
+        const { inputTextByName } = mountFinanciallySupportedPanel({
+          initialValues: { financiallySupportedHousingCoop: BasicResponse.YES }
+        });
 
-      expect(inputTextByName('finance.housingCoopDescription').props('disabled')).toBe(true);
-    });
+        await nextTick();
 
-    it('enables housingCoopDescription when financiallySupportedHousingCoop is Yes', async () => {
-      const { inputTextByName } = mountFinanciallySupportedPanel({
-        initialValues: { financiallySupportedHousingCoop: BasicResponse.YES }
+        expect(inputTextByName('finance.housingCoopDescription').props('disabled')).toBe(false);
+      });
+      it('displays asterisk in heading for financiallySupportedIndigenous', () => {
+        const { wrapper } = mountFinanciallySupportedPanel();
+
+        const headings = wrapper.findAll('h6');
+        const indigenousHeading = headings.find(
+          (h) => h.text().includes('Indigenous Housing Provider') || h.text().includes('indigenousHousingProvider')
+        );
+        const asterisk = indigenousHeading?.findAll('span')?.find((span) => span.text() === '*');
+
+        expect(asterisk).toBeTruthy();
       });
 
-      await nextTick();
+      it('displays asterisk in heading for financiallySupportedNonProfit', () => {
+        const { wrapper } = mountFinanciallySupportedPanel();
 
-      expect(inputTextByName('finance.housingCoopDescription').props('disabled')).toBe(false);
-    });
-  });
+        const headings = wrapper.findAll('h6');
+        const nonProfitHeading = headings.find(
+          (h) => h.text().includes('Non-profit housing society') || h.text().includes('nonProfitHousingSociety')
+        );
+        const asterisk = nonProfitHeading?.findAll('span')?.find((span) => span.text() === '*');
 
-  describe('required fields with asterisks', () => {
-    it('displays asterisk in label for financiallySupportedBc', () => {
-      const { wrapper } = mountFinanciallySupportedPanel();
+        expect(asterisk).toBeTruthy();
+      });
 
-      const labels = wrapper.findAll('label');
-      const bcHousingLabel = labels.find((label) => label.attributes('for') === 'finance.financiallySupportedBc');
-      const asterisk = bcHousingLabel?.findAll('span')?.find((span) => span.text() === '*');
+      it('displays asterisk in heading for financiallySupportedHousingCoop', () => {
+        const { wrapper } = mountFinanciallySupportedPanel();
 
-      expect(asterisk).toBeTruthy();
-    });
+        const headings = wrapper.findAll('h6');
+        const housingCoopHeading = headings.find(
+          (h) => h.text().includes('Housing co-operative') || h.text().includes('housingCoop')
+        );
+        const asterisk = housingCoopHeading?.findAll('span')?.find((span) => span.text() === '*');
 
-    it('displays asterisk in heading for financiallySupportedIndigenous', () => {
-      const { wrapper } = mountFinanciallySupportedPanel();
-
-      const headings = wrapper.findAll('h6');
-      const indigenousHeading = headings.find(
-        (h) => h.text().includes('Indigenous Housing Provider') || h.text().includes('indigenousHousingProvider')
-      );
-      const asterisk = indigenousHeading?.findAll('span')?.find((span) => span.text() === '*');
-
-      expect(asterisk).toBeTruthy();
-    });
-
-    it('displays asterisk in heading for financiallySupportedNonProfit', () => {
-      const { wrapper } = mountFinanciallySupportedPanel();
-
-      const headings = wrapper.findAll('h6');
-      const nonProfitHeading = headings.find(
-        (h) => h.text().includes('Non-profit housing society') || h.text().includes('nonProfitHousingSociety')
-      );
-      const asterisk = nonProfitHeading?.findAll('span')?.find((span) => span.text() === '*');
-
-      expect(asterisk).toBeTruthy();
-    });
-
-    it('displays asterisk in heading for financiallySupportedHousingCoop', () => {
-      const { wrapper } = mountFinanciallySupportedPanel();
-
-      const headings = wrapper.findAll('h6');
-      const housingCoopHeading = headings.find(
-        (h) => h.text().includes('Housing co-operative') || h.text().includes('housingCoop')
-      );
-      const asterisk = housingCoopHeading?.findAll('span')?.find((span) => span.text() === '*');
-
-      expect(asterisk).toBeTruthy();
+        expect(asterisk).toBeTruthy();
+      });
     });
   });
 });

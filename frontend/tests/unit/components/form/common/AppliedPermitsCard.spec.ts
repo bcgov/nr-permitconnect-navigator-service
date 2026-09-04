@@ -136,6 +136,18 @@ describe('AppliedPermitsCard', () => {
 
       expect(wrapper.findComponent(Select).props('loading')).toBe(true);
     });
+
+    describe('mandatory fields', () => {
+      describe('permitTypeId', () => {
+        it('displays asterisk', () => {
+          const { wrapper } = mountAppliedPermitsCard({ initialAppliedPermits: [{ permitTypeId: 1 }] });
+
+          const select = wrapper.findComponent(Select);
+
+          expect(select.props('placeholder')).toContain('*');
+        });
+      });
+    });
   });
 
   describe('editable state', () => {
@@ -180,16 +192,6 @@ describe('AppliedPermitsCard', () => {
 
       expect(wrapper.findAllComponents(Select)).toHaveLength(1);
       expect(wrapper.findComponent(Select).props('name')).toBe('permits.appliedPermits[0].permitTypeId');
-    });
-  });
-
-  describe('required fields with asterisks', () => {
-    it('displays asterisk in placeholder for permitTypeId Select', () => {
-      const { wrapper } = mountAppliedPermitsCard({ initialAppliedPermits: [{ permitTypeId: 1 }] });
-
-      const select = wrapper.findComponent(Select);
-
-      expect(select.props('placeholder')).toContain('*');
     });
   });
 });

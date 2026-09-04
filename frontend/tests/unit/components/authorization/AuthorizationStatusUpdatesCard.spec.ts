@@ -1,20 +1,14 @@
-import { createTestingPinia } from '@pinia/testing';
-import PrimeVue from 'primevue/config';
-import ConfirmationService from 'primevue/confirmationservice';
-import ToastService from 'primevue/toastservice';
-import { mount } from '@vue/test-utils';
-
 import { Select } from '@/components/form';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
-import i18n from '@/i18n';
-import { StorageKey } from '@/utils/enums/application';
 import { PRIMEVUE_STUBS, t } from '../../../helpers';
 
+import { mountWithFormContext } from '../../../mountWithFormContext';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
+
+// Mocks
+
 vi.mock('vue-router', () => ({
-  useRouter: () => ({
-    push: vi.fn(),
-    replace: vi.fn()
-  })
+  useRouter: () => mockRouter
 }));
 
 vi.mock('@/store', () => ({
@@ -32,30 +26,18 @@ vi.mock('@/store', () => ({
   })
 }));
 
-const wrapperSettings = (props = {}) => ({
-  props: {
-    editable: true,
-    validStageOptions: [],
-    ...props
-  },
-  global: {
-    plugins: [
-      () =>
-        createTestingPinia({
-          initialState: {
-            auth: {
-              user: {}
-            }
-          }
-        }),
-      i18n,
-      PrimeVue,
-      ConfirmationService,
-      ToastService
-    ],
+// Mount
+
+function mountAuthorizationStatusUpdatesCard(props = {}) {
+  const { wrapper } = mountWithFormContext(AuthorizationStatusUpdatesCard, {
+    componentProps: {
+      editable: true,
+      validStageOptions: [],
+      ...props
+    },
+    piniaState: {},
     stubs: {
       ...PRIMEVUE_STUBS,
-      'font-awesome-icon': { template: '<i />' },
       Panel: { template: '<div class="stub-panel"><slot name="header" /><slot /></div>' },
       Message: { template: '<div class="stub-message"><slot /></div>' },
       DatePicker: true,
@@ -63,21 +45,16 @@ const wrapperSettings = (props = {}) => ({
       TextArea: true,
       Tooltip: true
     }
-  }
-});
+  });
+
+  return { wrapper };
+}
+
+// Tests
 
 describe('AuthorizationStatusUpdatesCard.vue', () => {
   beforeEach(() => {
-    sessionStorage.setItem(
-      StorageKey.CONFIG,
-      JSON.stringify({
-        oidc: {
-          authority: 'abc',
-          clientId: '123'
-        }
-      })
-    );
-
+    resetMockRouter();
     vi.clearAllMocks();
   });
 
@@ -87,16 +64,15 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
 
   describe('DOM Rendering & Layout', () => {
     it('renders component without errors', () => {
-      const wrapper = mount(
-        AuthorizationStatusUpdatesCard,
-        wrapperSettings({ validStageOptions: [{ label: 'Submission', value: 'SUBMISSION' }] })
-      );
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({
+        validStageOptions: [{ label: 'Submission', value: 'SUBMISSION' }]
+      });
       expect(wrapper.exists()).toBe(true);
       expect(wrapper.html()).toContain(t('authorization.authorizationStatusUpdatesCard.statusUpdates'));
     });
 
     it('displays the on-hold warning message when onHoldCode is provided', () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings({ onHoldCode: 'MISSING_INFORMATION' }));
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({ onHoldCode: 'MISSING_INFORMATION' });
 
       const message = wrapper.find('.stub-message');
       expect(message.exists()).toBe(true);
@@ -113,38 +89,37 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
     });
 
     it('conditionally renders the target date description field', async () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings({ showTargetDateDescription: false }));
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({ showTargetDateDescription: false });
+      const card = wrapper.findComponent(AuthorizationStatusUpdatesCard);
 
-      let targetDescField = wrapper.find('[name="targetDateDescription"]');
+      const targetDescField = card.find('[name="targetDateDescription"]');
       expect(targetDescField.exists()).toBe(false);
 
-      await wrapper.setProps({ showTargetDateDescription: true });
+      const { wrapper: visibleWrapper } = mountAuthorizationStatusUpdatesCard({ showTargetDateDescription: true });
+      const visibleCard = visibleWrapper.findComponent(AuthorizationStatusUpdatesCard);
 
-      targetDescField = wrapper.find('[name="targetDateDescription"]');
-      expect(targetDescField.exists()).toBe(true);
+      expect(visibleCard.find('[name="targetDateDescription"]').exists()).toBe(true);
     });
   });
 
   describe('Interactions & Emits', () => {
     it('emits "update:setVerifiedDate" when the "Update to Today" link is clicked', async () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+      const { wrapper } = mountAuthorizationStatusUpdatesCard();
+      const card = wrapper.findComponent(AuthorizationStatusUpdatesCard);
 
-      const updateLink = wrapper.find('a');
+      const updateLink = card.find('a');
       await updateLink.trigger('click');
 
-      expect(wrapper.emitted('update:setVerifiedDate')).toHaveLength(1);
+      expect(card.emitted('update:setVerifiedDate')).toHaveLength(1);
     });
   });
 
   describe('Form Field Disabled States', () => {
     it('disables all fields when editable is false', () => {
-      const wrapper = mount(
-        AuthorizationStatusUpdatesCard,
-        wrapperSettings({
-          editable: false,
-          showTargetDateDescription: true
-        })
-      );
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({
+        editable: false,
+        showTargetDateDescription: true
+      });
 
       const allInputs = [
         wrapper.find('[name="statusLastVerified"]'),
@@ -173,14 +148,11 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
     });
 
     it('disables specific fields when peachIntegratedAuthType is true', () => {
-      const wrapper = mount(
-        AuthorizationStatusUpdatesCard,
-        wrapperSettings({
-          editable: true,
-          peachIntegratedAuthType: true,
-          peachIntegratedTrackingId: false
-        })
-      );
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({
+        editable: true,
+        peachIntegratedAuthType: true,
+        peachIntegratedTrackingId: false
+      });
 
       const selects = wrapper.findAllComponents(Select);
       const stateSelect = selects.find((s) => s.props('name') === 'state');
@@ -197,14 +169,11 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
     });
 
     it('disables the "needed" field only when both peach integrated props are true', () => {
-      const wrapper = mount(
-        AuthorizationStatusUpdatesCard,
-        wrapperSettings({
-          editable: true,
-          peachIntegratedAuthType: true,
-          peachIntegratedTrackingId: true
-        })
-      );
+      const { wrapper } = mountAuthorizationStatusUpdatesCard({
+        editable: true,
+        peachIntegratedAuthType: true,
+        peachIntegratedTrackingId: true
+      });
 
       const selects = wrapper.findAllComponents(Select);
       const neededSelect = selects.find((s) => s.props('name') === 'needed');
@@ -213,23 +182,23 @@ describe('AuthorizationStatusUpdatesCard.vue', () => {
     });
   });
 
-  describe('renders all mandatory fields', () => {
-    it('renders Select for needed with correct name and required prop', () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+  describe('mandatory fields', () => {
+    describe('needed', () => {
+      it('renders with correct name', () => {
+        const { wrapper } = mountAuthorizationStatusUpdatesCard();
 
-      const selects = wrapper.findAllComponents(Select);
-      const neededSelect = selects.find(
-        (select: { props: (arg0: string) => string }) => select.props('name') === 'needed'
-      );
+        const selects = wrapper.findAllComponents(Select);
+        const neededSelect = selects.find(
+          (select: { props: (arg0: string) => string }) => select.props('name') === 'needed'
+        );
 
-      expect(neededSelect).toBeTruthy();
-      expect(neededSelect?.props('required')).toBe(true);
+        expect(neededSelect).toBeTruthy();
+        expect(neededSelect?.props('required')).toBe(true);
+      });
     });
-  });
 
-  describe('required fields with asterisks', () => {
-    it('displays asterisk for needed field', () => {
-      const wrapper = mount(AuthorizationStatusUpdatesCard, wrapperSettings());
+    it('displays asterisk', () => {
+      const { wrapper } = mountAuthorizationStatusUpdatesCard();
 
       const labels = wrapper.findAll('label');
       const neededLabel = labels.find((label) => label.attributes('for') === 'needed');

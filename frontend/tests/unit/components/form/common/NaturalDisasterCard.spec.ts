@@ -7,6 +7,8 @@ import { useFormStore } from '@/store';
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 import { FormType, FormState } from '@/utils/enums/projectCommon';
 
+// Mount
+
 function mountNaturalDisasterCard(options: { formType?: FormType; formState?: FormState; tab?: number } = {}) {
   const { formType = FormType.NEW, formState = FormState.UNLOCKED, tab } = options;
 
@@ -24,33 +26,49 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+// Tests
+
 describe('NaturalDisasterCard', () => {
-  it('renders a RadioList bound to location.naturalDisaster', () => {
-    const { wrapper } = mountNaturalDisasterCard();
+  describe('renders', () => {
+    it('location.naturalDisaster', () => {
+      const { wrapper } = mountNaturalDisasterCard();
 
-    const radioList = wrapper.findComponent(RadioList);
-    expect(radioList.exists()).toBe(true);
-    expect(radioList.props('name')).toBe('location.naturalDisaster');
+      const radioList = wrapper.findComponent(RadioList);
+      expect(radioList.exists()).toBe(true);
+      expect(radioList.props('name')).toBe('location.naturalDisaster');
+    });
+
+    it.each([
+      { editable: true, expectedDisabled: false, formType: FormType.NEW, formState: FormState.UNLOCKED },
+      { editable: false, expectedDisabled: true, formType: FormType.SUBMISSION, formState: FormState.LOCKED }
+    ])(
+      'passes disabled=$expectedDisabled to the RadioList when getEditable is $editable',
+      ({ formType, formState, expectedDisabled }) => {
+        const { wrapper } = mountNaturalDisasterCard({ formType, formState });
+
+        expect(wrapper.findComponent(RadioList).props('disabled')).toBe(expectedDisabled);
+      }
+    );
+    describe('mandatory fields', () => {
+      describe('header', () => {
+        it('renders', () => {
+          const { wrapper } = mountNaturalDisasterCard();
+
+          expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
+        });
+
+        it('displays asterisk', () => {
+          const { wrapper } = mountNaturalDisasterCard();
+
+          const header = wrapper.find('h6');
+          const spans = header.findAll('span');
+          const asterisk = spans.find((span) => span.text() === '*');
+
+          expect(asterisk).toBeTruthy();
+        });
+      });
+    });
   });
-
-  it.each([
-    { editable: true, expectedDisabled: false, formType: FormType.NEW, formState: FormState.UNLOCKED },
-    { editable: false, expectedDisabled: true, formType: FormType.SUBMISSION, formState: FormState.LOCKED }
-  ])(
-    'passes disabled=$expectedDisabled to the RadioList when getEditable is $editable',
-    ({ formType, formState, expectedDisabled }) => {
-      const { wrapper } = mountNaturalDisasterCard({ formType, formState });
-
-      expect(wrapper.findComponent(RadioList).props('disabled')).toBe(expectedDisabled);
-    }
-  );
-
-  it('renders a non-empty translated header', () => {
-    const { wrapper } = mountNaturalDisasterCard();
-
-    expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
-  });
-
   describe('form error reporting', () => {
     it('reports an error to the store when vee-validate has one on its field', async () => {
       const { formStore, form } = mountNaturalDisasterCard({ tab: 2 });
@@ -80,18 +98,6 @@ describe('NaturalDisasterCard', () => {
       await nextTick();
 
       expect(formStore.setFormError).toHaveBeenCalledWith('NaturalDisasterCard', 0, false);
-    });
-  });
-
-  describe('required fields with asterisks', () => {
-    it('displays asterisk in header for the required card', () => {
-      const { wrapper } = mountNaturalDisasterCard();
-
-      const header = wrapper.find('h6');
-      const spans = header.findAll('span');
-      const asterisk = spans.find((span) => span.text() === '*');
-
-      expect(asterisk).toBeTruthy();
     });
   });
 });
