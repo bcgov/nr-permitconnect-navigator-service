@@ -52,7 +52,19 @@ export function generateNullDeleteStamps() {
   };
 }
 
-export function jsonToPrismaInputJson(json: Prisma.JsonValue): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
+export function jsonToPrismaInputJson(json: unknown): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
-  return json;
+
+  // json comes in as unknown (validators use z.unknown() for this field) - confirm it's actually
+  // JSON-serializable before handing it to Prisma. JSON.stringify throws on circular refs/BigInt,
+  // and returns undefined for values with no JSON representation (function, symbol, undefined).
+  let serialized: string | undefined;
+  try {
+    serialized = JSON.stringify(json);
+  } catch {
+    // fall through to the undefined check below
+  }
+  if (serialized === undefined) throw new Error('Value is not valid JSON');
+
+  return json as Prisma.InputJsonValue;
 }

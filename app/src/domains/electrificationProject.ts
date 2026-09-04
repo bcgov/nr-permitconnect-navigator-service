@@ -5,7 +5,11 @@ import { Initiative } from '#src/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { CurrentContext, ElectrificationProjectBase, SubmitElectrificationProjectDraftRequest } from '#types';
+import type {
+  CurrentContext,
+  ElectrificationProjectCreateInput,
+  SubmitElectrificationProjectDraftRequest
+} from '#types';
 
 /**
  * Builds a blank electrification project shell (POST / always sends an empty body - the frontend
@@ -17,7 +21,7 @@ import type { CurrentContext, ElectrificationProjectBase, SubmitElectrificationP
 export const createElectrificationProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
   currentContext: CurrentContext
-): Promise<ElectrificationProjectBase> => {
+) => {
   const [activity, contacts] = await Promise.all([
     createActivity(
       { activity: repositories.activity, initiative: repositories.initiative },
@@ -43,7 +47,7 @@ export const createElectrificationProjectData = async (
     submittedAt: new Date(),
     applicationStatus: ApplicationStatus.NEW,
     submissionType: SubmissionType.GUIDANCE
-  } as ElectrificationProjectBase;
+  } satisfies ElectrificationProjectCreateInput;
 };
 
 /**
@@ -83,7 +87,7 @@ export const generateElectrificationProjectData = async (
   if (!activityId) throw new Error('Failed to generate activity ID');
 
   // Put new electrification project together
-  const electrificationProjectData: ElectrificationProjectBase = {
+  const electrificationProjectData = {
     companyIdRegistered: data.basic.registeredId ?? null,
     companyNameRegistered: data.basic.registeredName,
     projectName: data.basic.projectName,
@@ -97,23 +101,8 @@ export const generateElectrificationProjectData = async (
     applicationStatus: ApplicationStatus.NEW,
     aaiUpdated: false,
     addedToAts: false,
-    projectCategory: null,
-    locationDescription: null,
-    hasEpa: null,
-    megawatts: null,
-    bcEnvironmentAssessNeeded: null,
-    assignedUserId: null,
-    astNotes: null,
-    queuePriority: null,
-    atsClientId: null,
-    atsEnquiryId: null,
-    createdBy: null,
-    createdAt: null,
-    updatedBy: null,
-    updatedAt: null,
-    deletedBy: null,
-    deletedAt: null
-  };
+    queuePriority: null
+  } satisfies ElectrificationProjectCreateInput;
 
   return electrificationProjectData;
 };

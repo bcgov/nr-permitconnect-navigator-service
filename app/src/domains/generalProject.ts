@@ -8,9 +8,13 @@ import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
 import type { Repositories } from '#src/db/unitOfWork';
-import type { CurrentContext, GeneralProjectBase, PermitTrackingBase, SubmitGeneralProjectDraftRequest } from '#types';
+import type {
+  CurrentContext,
+  GeneralProjectCreateInput,
+  PermitTrackingBase,
+  SubmitGeneralProjectDraftRequest
+} from '#types';
 
 /**
  * Builds a blank general project shell (POST / always sends an empty body - the frontend
@@ -46,7 +50,7 @@ export const createGeneralProjectData = async (
       submittedAt: new Date(),
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE
-    } as GeneralProjectBase,
+    } satisfies GeneralProjectCreateInput,
     appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
     investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
     appliedPermitTrackers: [] as PermitTrackingBase[]
@@ -100,14 +104,10 @@ export const generateGeneralProjectData = async (
     projectLocation: data.location.projectLocation,
     projectLocationDescription: data.location.projectLocationDescription ?? null,
     geomarkUrl: data.location.geomarkUrl ?? null,
-    // jsonToPrismaInputJson returns the write-side JSON type; GeneralProjectBase is a read-payload
-    // type expecting JsonValue.
-    geoJson: jsonToPrismaInputJson(data.location.geoJson as Prisma.JsonValue) as unknown as Prisma.JsonValue,
+    geoJson: jsonToPrismaInputJson(data.location.geoJson),
     locationPids: data.location.ltsaPidLookup ?? null,
-    // Prisma's write-side create input accepts a plain number for a Decimal column; GeneralProjectBase
-    // is a read-payload type, so it types these as Decimal.
-    latitude: (data.location.latitude ?? null) as unknown as Prisma.Decimal | null,
-    longitude: (data.location.longitude ?? null) as unknown as Prisma.Decimal | null,
+    latitude: data.location.latitude ?? null,
+    longitude: data.location.longitude ?? null,
     streetAddress: data.location.streetAddress ?? null,
     locality: data.location.locality ?? null,
     province: data.location.province ?? null
@@ -164,27 +164,10 @@ export const generateGeneralProjectData = async (
       submittedAt: new Date(),
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE,
-      // createdAt/createdBy are dead here - WritableRepository.create() always overwrites them via
-      // withCreateAudit(), but satisfies requires every GeneralProjectBase key present.
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null,
       aaiUpdated: false,
       assignedUserId: null,
-      queuePriority: null,
-      relatedPermits: null,
-      astNotes: null,
-      atsClientId: null,
-      checkProvincialPermits: null,
-      atsEnquiryId: null,
-      region: null,
-      area: null,
-      activityType: null,
-      businessArea: null
-    } satisfies GeneralProjectBase,
+      queuePriority: null
+    } satisfies GeneralProjectCreateInput,
     appliedPermits,
     investigatePermits,
     appliedPermitTrackers

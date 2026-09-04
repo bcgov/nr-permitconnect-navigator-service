@@ -7,7 +7,6 @@ import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
-import type { Prisma } from '@prisma/client';
 import type {
   CurrentAuthorization,
   CurrentContext,
@@ -31,10 +30,7 @@ export const createHousingProjectService = async (currentContext: CurrentContext
       } = await createHousingProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new housing project
-      const response = await housingProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
@@ -192,10 +188,7 @@ export const submitHousingProjectDraftService = async (
       } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new housing project
-      const response = await housingProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(
