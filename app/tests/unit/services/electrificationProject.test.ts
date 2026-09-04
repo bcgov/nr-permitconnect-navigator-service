@@ -36,7 +36,7 @@ describe('electrificationProject service', () => {
 
   describe('createElectrificationProjectService', () => {
     it('calls createElectrificationProjectData domain, creates project, and returns result', async () => {
-      createDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1);
+      createDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
 
       const response = await electrificationProjectService.createElectrificationProjectService(TEST_CURRENT_CONTEXT);
@@ -197,7 +197,7 @@ describe('electrificationProject service', () => {
       const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
       const projectResponse = { ...TEST_ELECTRIFICATION_PROJECT_1, contact: contactResponse };
 
-      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1);
+      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(projectResponse as never);
       mockRepos.draft.delete.mockResolvedValueOnce({} as never);
       mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
@@ -246,7 +246,7 @@ describe('electrificationProject service', () => {
       const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
       const projectResponse = { ...TEST_ELECTRIFICATION_PROJECT_1, contact: contactResponse };
 
-      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1);
+      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(projectResponse as never);
       mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
       emailSpy.mockResolvedValueOnce(undefined);

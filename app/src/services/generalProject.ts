@@ -7,7 +7,6 @@ import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
 
-import type { Prisma } from '@prisma/client';
 import type {
   CurrentAuthorization,
   CurrentContext,
@@ -31,10 +30,7 @@ export const createGeneralProjectService = async (currentContext: CurrentContext
       } = await createGeneralProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new general project
-      const response = await generalProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await generalProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
@@ -173,10 +169,7 @@ export const submitGeneralProjectDraftService = async (
       } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new general project
-      const response = await generalProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await generalProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));

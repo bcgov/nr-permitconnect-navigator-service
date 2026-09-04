@@ -9,14 +9,19 @@ import {
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import * as activityDomain from '#src/domains/activity';
-import { assignPriority, createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
+import {
+  assignPriority,
+  createHousingProjectData,
+  generateHousingProjectData,
+  type HousingPriorityInput
+} from '#src/domains/housingProject';
 import { getCurrentUsername } from '#src/utils/index';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { NumResidentialUnits } from '#src/utils/enums/housing';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { HousingProject, SubmitHousingProjectDraftRequest } from '#types';
+import type { SubmitHousingProjectDraftRequest } from '#types';
 
 type AppliedPermitInput = NonNullable<SubmitHousingProjectDraftRequest['permits']['appliedPermits']>[number];
 type InvestigatePermitInput = NonNullable<SubmitHousingProjectDraftRequest['permits']['investigatePermits']>[number];
@@ -55,7 +60,7 @@ describe('housingProject domain', () => {
 
   describe('assignPriority', () => {
     it('should assign priority 1 when single family units > 50', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         singleFamilyUnits: NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED
       };
 
@@ -65,7 +70,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 1 when multi family units > 50', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         multiFamilyUnits: NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED
       };
 
@@ -75,7 +80,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 1 when has rental units', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         hasRentalUnits: BasicResponse.YES,
         singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
         multiFamilyUnits: BasicResponse.NO,
@@ -88,7 +93,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 1 when financially supported by BC', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         financiallySupportedBc: BasicResponse.YES,
         singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
         multiFamilyUnits: BasicResponse.NO,
@@ -102,7 +107,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 1 when indigenous led', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         financiallySupportedIndigenous: BasicResponse.YES,
         singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
         multiFamilyUnits: BasicResponse.NO,
@@ -117,7 +122,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 2 when single family 10-49 units', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         singleFamilyUnits: NumResidentialUnits.TEN_TO_FOURTY_NINE,
         multiFamilyUnits: BasicResponse.NO,
         otherUnits: BasicResponse.NO,
@@ -132,7 +137,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 2 when multi family 10-49 units', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         multiFamilyUnits: NumResidentialUnits.TEN_TO_FOURTY_NINE,
         singleFamilyUnits: BasicResponse.NO,
         otherUnits: BasicResponse.NO,
@@ -147,7 +152,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 2 when multi family 1-9 units', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         multiFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
         singleFamilyUnits: BasicResponse.NO,
         otherUnits: BasicResponse.NO,
@@ -162,7 +167,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 2 when other units 1-9', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         otherUnits: NumResidentialUnits.ONE_TO_NINE,
         singleFamilyUnits: BasicResponse.NO,
         multiFamilyUnits: BasicResponse.NO,
@@ -177,7 +182,7 @@ describe('housingProject domain', () => {
     });
 
     it('should assign priority 3 for everything else', () => {
-      const project: Partial<HousingProject> = {
+      const project: HousingPriorityInput = {
         singleFamilyUnits: BasicResponse.NO,
         multiFamilyUnits: BasicResponse.NO,
         otherUnits: BasicResponse.NO,

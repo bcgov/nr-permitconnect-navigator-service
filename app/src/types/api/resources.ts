@@ -45,6 +45,7 @@ export type ElectrificationProject = ElectrificationProjectBase & {
   projectId?: string;
   user?: User | null;
 };
+export type ElectrificationProjectCreateInput = Prisma.electrification_projectUncheckedCreateInput;
 
 const electrificationProjectCategoryCodeBase =
   Prisma.validator<Prisma.electrification_project_category_codeDefaultArgs>()({});
@@ -74,6 +75,7 @@ export type EscalationTypeCode = EscalationTypeCodeBase; // nosonar
 const generalProjectBase = Prisma.validator<Prisma.general_projectDefaultArgs>()({});
 export type GeneralProjectBase = Prisma.general_projectGetPayload<typeof generalProjectBase>;
 export type GeneralProject = GeneralProjectBase & { activity?: Activity; projectId?: string; user?: User | null };
+export type GeneralProjectCreateInput = Prisma.general_projectUncheckedCreateInput;
 
 const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
@@ -82,6 +84,7 @@ export type HousingProject = HousingProjectBase & {
   projectId?: string;
   user?: User | null;
 };
+export type HousingProjectCreateInput = Prisma.housing_projectUncheckedCreateInput;
 
 const identityProviderBase = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
 export type IdentityProviderBase = Prisma.identity_providerGetPayload<typeof identityProviderBase>;

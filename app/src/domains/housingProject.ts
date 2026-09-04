@@ -10,22 +10,31 @@ import { NumResidentialUnits } from '#src/utils/enums/housing';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
 import type { Repositories } from '#src/db/unitOfWork';
 import type {
   CurrentContext,
-  HousingProject,
-  HousingProjectBase,
+  HousingProjectCreateInput,
   PermitTrackingBase,
   SubmitHousingProjectDraftRequest
 } from '#types';
+
+export type HousingPriorityInput = Pick<
+  HousingProjectCreateInput,
+  | 'singleFamilyUnits'
+  | 'multiFamilyUnits'
+  | 'otherUnits'
+  | 'hasRentalUnits'
+  | 'financiallySupportedBc'
+  | 'financiallySupportedIndigenous'
+  | 'queuePriority'
+>;
 
 /**
  * Assigns a priority level to a housing project based on given criteria
  * Criteria defined below
  * @param housingProject Housing data
  */
-export const assignPriority = (housingProject: Partial<HousingProject>) => {
+export const assignPriority = (housingProject: HousingPriorityInput) => {
   const matchesPriorityOneCriteria = // Priority 1 Criteria:
     // 1. More than 50 units (any)
     housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
@@ -98,8 +107,9 @@ export const createHousingProjectData = async (
       submittedAt: new Date(),
       submittedBy,
       applicationStatus: ApplicationStatus.NEW,
-      submissionType: SubmissionType.GUIDANCE
-    } as HousingProjectBase,
+      submissionType: SubmissionType.GUIDANCE,
+      queuePriority: null
+    } satisfies HousingProjectCreateInput,
     appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
     investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
     appliedPermitTrackers: [] as PermitTrackingBase[]
@@ -177,14 +187,10 @@ export const generateHousingProjectData = async (
     projectLocation: data.location.projectLocation,
     projectLocationDescription: data.location.projectLocationDescription ?? null,
     geomarkUrl: data.location.geomarkUrl ?? null,
-    // jsonToPrismaInputJson returns the write-side JSON type; HousingProjectBase is a read-payload
-    // type expecting JsonValue - same read/write split as latitude/longitude above.
-    geoJson: jsonToPrismaInputJson(data.location.geoJson as Prisma.JsonValue) as unknown as Prisma.JsonValue,
+    geoJson: jsonToPrismaInputJson(data.location.geoJson),
     locationPids: data.location.ltsaPidLookup ?? null,
-    // Prisma's write-side create input accepts a plain number for a Decimal column; HousingProjectBase
-    // is a read-payload type, so it types these as Decimal - cast is narrowly for that mismatch.
-    latitude: (data.location.latitude ?? null) as unknown as Prisma.Decimal | null,
-    longitude: (data.location.longitude ?? null) as unknown as Prisma.Decimal | null,
+    latitude: data.location.latitude ?? null,
+    longitude: data.location.longitude ?? null,
     locality: data.location.locality ?? null,
     province: data.location.province ?? null,
     streetAddress: data.location.streetAddress ?? null
@@ -243,31 +249,16 @@ export const generateHousingProjectData = async (
       submittedBy,
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE,
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null,
       aaiUpdated: false,
-      assignedUserId: null,
-      queuePriority: null,
-      relatedPermits: null,
-      astNotes: null,
       astUpdated: false,
-      addedToAts: false,
-      atsClientId: null,
-      ltsaCompleted: false,
-      bcOnlineCompleted: false,
+      queuePriority: null,
       financiallySupported: [
         data.housing.financiallySupportedBc,
         data.housing.financiallySupportedIndigenous,
         data.housing.financiallySupportedNonProfit,
         data.housing.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES),
-      checkProvincialPermits: null,
-      atsEnquiryId: null
-    } satisfies HousingProjectBase,
+      ].includes(BasicResponse.YES)
+    } satisfies HousingProjectCreateInput,
     appliedPermits,
     investigatePermits,
     appliedPermitTrackers
