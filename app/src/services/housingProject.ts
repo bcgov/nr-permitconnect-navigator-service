@@ -10,13 +10,13 @@ import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 import type {
   CurrentAuthorization,
   CurrentContext,
-  GetProjectStatisticsRequest,
+  GetHousingProjectStatisticsInput,
   HousingProject,
   HousingProjectStatistics,
   Maybe,
-  PatchHousingProjectRequest,
-  SearchHousingProjectRequest,
-  SubmitHousingProjectDraftRequest
+  PatchHousingProjectInput,
+  SearchHousingProjectInput,
+  SubmitHousingProjectDraftInput
 } from '#types';
 
 export const createHousingProjectService = async (currentContext: CurrentContext): Promise<HousingProject> => {
@@ -77,7 +77,7 @@ export const getHousingProjectService = async (housingProjectId: string): Promis
  * @returns A Promise that resolves to the housing project statistics
  */
 export const getHousingProjectStatisticsService = async (
-  filters: GetProjectStatisticsRequest
+  filters: GetHousingProjectStatisticsInput
 ): Promise<HousingProjectStatistics[]> => {
   // Return a single quoted ISO string or null for the given date
   const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
@@ -158,7 +158,7 @@ export const listHousingProjectsService = async (
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchHousingProjectRequest
+  params: SearchHousingProjectInput
 ): Promise<HousingProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);
@@ -174,8 +174,8 @@ export const searchHousingProjects = async (
 
 export const submitHousingProjectDraftService = async (
   draftId: Maybe<string>,
-  data: SubmitHousingProjectDraftRequest,
-  contactData: SubmitHousingProjectDraftRequest['contact'],
+  data: SubmitHousingProjectDraftInput,
+  contactData: SubmitHousingProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(
@@ -226,7 +226,7 @@ export const submitHousingProjectDraftService = async (
  */
 export const patchHousingProjectService = async (
   housingProjectId: string,
-  data: PatchHousingProjectRequest
+  data: PatchHousingProjectInput
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
     const current = await housingProject.findFirstOrThrow({ where: { housingProjectId } });

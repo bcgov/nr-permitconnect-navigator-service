@@ -215,8 +215,8 @@ describe('patchHousingProject validator', () => {
     expect(res.status).toBe(422);
   });
 
-  it('still enforces otherUnits when otherUnitsDescription is Yes', async () => {
-    const res = await request(app).patch(validParams).send({ otherUnitsDescription: 'Yes' });
+  it('still enforces otherUnits when otherUnitsDescription is non-empty free text', async () => {
+    const res = await request(app).patch(validParams).send({ otherUnitsDescription: 'Houseboats' });
     expect(res.status).toBe(422);
     expect(res.body.detail).toMatch(/"otherUnits" is required/);
   });

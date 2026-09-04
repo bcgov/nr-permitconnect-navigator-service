@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
+import { ActivityContactRole } from '#src/utils/enums/projectCommon';
+
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Activity } from '#types';
+import type { Activity, CurrentContext } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -34,6 +36,43 @@ export const createActivity = async (
   });
 
   return response;
+};
+
+/**
+ * Reuses an existing activity ID if given, otherwise creates a new activity and links the current
+ * user's contact to it as the primary contact. Consolidates the create-activity-then-link-contact
+ * sequence duplicated across the project/enquiry intake domains.
+ * @param repositories - The required repositories
+ * @param initiative - The initiative code the activity will belong to
+ * @param currentContext - The current context of the request
+ * @param existingActivityId - An activity ID to reuse (e.g. a draft that already has one), if any
+ * @returns The activity ID, new or reused
+ */
+export const ensureActivityWithPrimaryContact = async (
+  repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
+  initiative: Initiative,
+  currentContext: CurrentContext,
+  existingActivityId?: string | null
+): Promise<string> => {
+  if (existingActivityId) return existingActivityId;
+
+  const [activity, contacts] = await Promise.all([
+    createActivity({ activity: repositories.activity, initiative: repositories.initiative }, initiative),
+    repositories.contact.search({ userId: [currentContext.userId!] })
+  ]);
+
+  const activityId = activity?.activityId;
+  if (!activityId) throw new Error('Failed to generate activity ID');
+
+  if (contacts[0]) {
+    await repositories.activityContact.create({
+      activityId,
+      contactId: contacts[0].contactId,
+      role: ActivityContactRole.PRIMARY
+    });
+  }
+
+  return activityId;
 };
 
 /**

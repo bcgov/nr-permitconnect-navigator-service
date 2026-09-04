@@ -27,9 +27,9 @@ export const schema = {
         basic: z
           .object({
             projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
-            projectName: z.string().max(255).trim(),
+            projectName: z.string().min(1).max(255).trim(),
             projectNumber: z.string().max(255).trim().optional(),
-            projectDescription: z.string().max(4000),
+            projectDescription: z.string().min(1).max(4000),
             registeredId: z.string().nullish(),
             registeredName: z.string().nullish()
           })

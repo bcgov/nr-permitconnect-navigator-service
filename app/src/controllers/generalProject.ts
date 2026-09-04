@@ -17,9 +17,9 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
-  DraftBase,
+  DraftCreateInput,
   GeneralProject,
-  GetProjectStatisticsRequest,
+  GetGeneralProjectStatisticsRequest,
   LocalContext,
   PatchGeneralProjectRequest,
   SearchGeneralProjectRequest,
@@ -44,7 +44,7 @@ export const getGeneralProjectController = async (req: Request<{ generalProjectI
 };
 
 export const getGeneralProjectStatisticsController = async (
-  req: Request<never, never, never, GetProjectStatisticsRequest>,
+  req: Request<never, never, never, GetGeneralProjectStatisticsRequest>,
   res: Response
 ) => {
   const response = await getGeneralProjectStatisticsService(req.query);
@@ -123,7 +123,7 @@ export const upsertGeneralProjectDraftController = async (
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    { data: req.body.data as DraftBase['data'] },
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.GENERAL,
     DraftCode.GENERAL_PROJECT,
     res.locals.currentContext

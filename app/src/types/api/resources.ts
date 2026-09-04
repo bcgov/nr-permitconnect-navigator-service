@@ -3,6 +3,10 @@
  * File may be deprecated once we upgrade to Prisma 7 as contains a lot more auto generation of types for you
  */
 
+// *CreateInput = Prisma.xUncheckedCreateInput. Only for repository-layer create() calls feeding Prisma
+// directly - domain/service create paths use these so plain JS values (number, unknown) work without
+// casting to Decimal/JsonValue. Not for read payloads (*Base) or request/service-layer types (see domain.ts).
+
 import { Prisma } from '@prisma/client';
 
 import type { GroupName, Initiative as InitiativeEnum } from '#src/utils/enums/application';
@@ -29,10 +33,12 @@ export type BusinessAreaCode = BusinessAreaCodeBase; // nosonar
 const contactBase = Prisma.validator<Prisma.contactDefaultArgs>()({});
 export type ContactBase = Prisma.contactGetPayload<typeof contactBase>;
 export type Contact = ContactBase & { activityContact?: ActivityContact[]; user?: User | null };
+export type ContactCreateInput = Prisma.contactUncheckedCreateInput;
 
 const draftBase = Prisma.validator<Prisma.draftDefaultArgs>()({});
 export type DraftBase = Prisma.draftGetPayload<typeof draftBase>;
 export type Draft = DraftBase & { activity?: Activity };
+export type DraftCreateInput = Prisma.draftUncheckedCreateInput;
 
 const documentBase = Prisma.validator<Prisma.documentDefaultArgs>()({});
 export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;

@@ -19,13 +19,13 @@ export const schema = {
         emailData: z
           .object({
             bcc: z.array(email).optional(),
-            bodyType: z.string(),
-            body: z.string(),
+            bodyType: z.string().min(1),
+            body: z.string().min(1),
             cc: z.array(email).optional(),
             delayTS: z.number().optional(),
             from: email,
             priority: z.string().optional(),
-            subject: z.string(),
+            subject: z.string().min(1),
             tag: z.string().optional(),
             to: z.array(email)
           })

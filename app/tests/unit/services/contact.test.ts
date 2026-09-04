@@ -62,7 +62,7 @@ describe('contact service', () => {
     it('should create multiple contacts', async () => {
       mockRepos.contact.create.mockResolvedValue(TEST_CONTACT_1 as never);
 
-      const payload = [TEST_CONTACT_1, TEST_CONTACT_1];
+      const payload = [TEST_CONTACT_1, TEST_CONTACT_1] as never;
       const result = await createContactsService(payload);
 
       expect(mockRepos.contact.create).toHaveBeenCalledTimes(2);

@@ -21,8 +21,7 @@ import {
 import { Initiative } from '#src/utils/enums/application';
 import { ActivityContactRole, DraftCode } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
-import type { DraftBase } from '#types';
+import type { DraftCreateInput } from '#types';
 
 vi.mock('config');
 
@@ -41,8 +40,8 @@ describe('draft service', () => {
         draftId: TEST_ELECTRIFICATION_DRAFT.draftId,
         activityId: TEST_ELECTRIFICATION_DRAFT.activityId,
         draftCode: TEST_ELECTRIFICATION_DRAFT.draftCode,
-        data: { test: 'data' } as Prisma.JsonValue
-      } as DraftBase;
+        data: { test: 'data' }
+      } as DraftCreateInput;
 
       mockRepos.draft.create.mockResolvedValue(TEST_ELECTRIFICATION_DRAFT as never);
 
@@ -130,8 +129,8 @@ describe('draft service', () => {
         draftId: TEST_HOUSING_DRAFT.draftId,
         activityId: TEST_HOUSING_DRAFT.activityId,
         draftCode: TEST_HOUSING_DRAFT.draftCode,
-        data: { updated: 'data' } as Prisma.JsonValue
-      } as DraftBase;
+        data: { updated: 'data' }
+      } as DraftCreateInput;
 
       mockRepos.draft.update.mockResolvedValue(TEST_HOUSING_DRAFT as never);
 
@@ -152,7 +151,7 @@ describe('draft service', () => {
   describe('upsertDraftService', () => {
     it('updates existing draft when draftId is provided', async () => {
       const draftData = {
-        data: { updated: 'data' } as Prisma.JsonValue
+        data: { updated: 'data' }
       };
 
       mockRepos.draft.update.mockResolvedValue(TEST_HOUSING_DRAFT as never);
@@ -180,8 +179,8 @@ describe('draft service', () => {
         draftId: 'new-draft-id',
         activityId: 'new-activity-id',
         draftCode: DraftCode.HOUSING_PROJECT,
-        data: { new: 'data' } as Prisma.JsonValue
-      } as DraftBase;
+        data: { new: 'data' }
+      } as DraftCreateInput;
 
       createActivitySpy.mockResolvedValue({ activityId: 'new-activity-id' } as never);
       mockRepos.draft.create.mockResolvedValue(TEST_HOUSING_DRAFT);
@@ -233,8 +232,8 @@ describe('draft service', () => {
         draftId: 'new-draft-id',
         activityId: 'new-activity-id',
         draftCode: DraftCode.HOUSING_PROJECT,
-        data: { new: 'data' } as Prisma.JsonValue
-      } as DraftBase;
+        data: { new: 'data' }
+      } as DraftCreateInput;
 
       createActivitySpy.mockResolvedValue({ activityId: 'new-activity-id' } as never);
       mockRepos.draft.create.mockResolvedValue(TEST_HOUSING_DRAFT as never);

@@ -25,10 +25,10 @@ export const schema = {
         escalateToSupervisor: z.boolean().optional(),
         escalateToDirector: z.boolean().optional(),
         escalationType: requireValidCode.EscalationType(z.string()).nullish(),
-        note: z.string(),
+        note: z.string().min(1),
         shownToProponent: z.boolean().optional(),
-        title: z.string().max(255),
-        type: z.string().max(255)
+        title: z.string().min(1).max(255),
+        type: z.string().min(1).max(255)
       })
       .strict()
   },

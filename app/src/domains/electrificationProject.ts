@@ -1,15 +1,11 @@
 import { randomUUID } from 'node:crypto';
 
-import { createActivity } from './activity';
+import { ensureActivityWithPrimaryContact } from './activity';
 import { Initiative } from '#src/utils/enums/application';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type {
-  CurrentContext,
-  ElectrificationProjectCreateInput,
-  SubmitElectrificationProjectDraftRequest
-} from '#types';
+import type { CurrentContext, ElectrificationProjectCreateInput, SubmitElectrificationProjectDraftInput } from '#types';
 
 /**
  * Builds a blank electrification project shell (POST / always sends an empty body - the frontend
@@ -22,24 +18,7 @@ export const createElectrificationProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
   currentContext: CurrentContext
 ) => {
-  const [activity, contacts] = await Promise.all([
-    createActivity(
-      { activity: repositories.activity, initiative: repositories.initiative },
-      Initiative.ELECTRIFICATION
-    ),
-    repositories.contact.search({ userId: [currentContext.userId!] })
-  ]);
-  const activityId = activity?.activityId;
-
-  if (!activityId) throw new Error('Failed to generate activity ID');
-
-  if (contacts[0]) {
-    await repositories.activityContact.create({
-      activityId,
-      contactId: contacts[0].contactId,
-      role: ActivityContactRole.PRIMARY
-    });
-  }
+  const activityId = await ensureActivityWithPrimaryContact(repositories, Initiative.ELECTRIFICATION, currentContext);
 
   return {
     electrificationProjectId: randomUUID(),
@@ -59,32 +38,16 @@ export const createElectrificationProjectData = async (
  */
 export const generateElectrificationProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
-  data: SubmitElectrificationProjectDraftRequest,
+  data: SubmitElectrificationProjectDraftInput,
   currentContext: CurrentContext
 ) => {
-  let activityId = data.activityId;
-
   // Create activity and link contact if required (a draft may already have one)
-  if (!activityId) {
-    const [activity, contacts] = await Promise.all([
-      createActivity(
-        { activity: repositories.activity, initiative: repositories.initiative },
-        Initiative.ELECTRIFICATION
-      ),
-      repositories.contact.search({ userId: [currentContext.userId!] })
-    ]);
-    activityId = activity?.activityId;
-
-    if (contacts[0]) {
-      await repositories.activityContact.create({
-        activityId,
-        contactId: contacts[0].contactId,
-        role: ActivityContactRole.PRIMARY
-      });
-    }
-  }
-
-  if (!activityId) throw new Error('Failed to generate activity ID');
+  const activityId = await ensureActivityWithPrimaryContact(
+    repositories,
+    Initiative.ELECTRIFICATION,
+    currentContext,
+    data.activityId
+  );
 
   // Put new electrification project together
   const electrificationProjectData = {

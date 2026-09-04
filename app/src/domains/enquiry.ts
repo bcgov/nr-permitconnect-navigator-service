@@ -1,15 +1,15 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
-import { createActivity } from './activity';
+import { ensureActivityWithPrimaryContact } from './activity';
 import { getProjectByActivityId } from './project';
 import { email } from '#src/external/ches';
 import { getCurrentUsername, toTitleCase } from '#src/utils/index';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 import { confirmationTemplateEnquiry } from '#src/utils/templates';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { ContactBase, CreateEnquiryRequest, CurrentContext, Enquiry, ProjectRepositoryKeys } from '#types';
+import type { ContactBase, CreateEnquiryInput, CurrentContext, Enquiry, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 export async function emailEnquiryConfirmation(
@@ -90,27 +90,11 @@ export async function emailEnquiryConfirmation(
  */
 export const generateEnquiryData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
-  data: CreateEnquiryRequest,
+  data: CreateEnquiryInput,
   currentContext: CurrentContext
 ) => {
   // No activityId is ever sent for a new enquiry - always create a new activity.
-  const activityId = (
-    await createActivity(
-      { activity: repositories.activity, initiative: repositories.initiative },
-      currentContext.initiative
-    )
-  )?.activityId;
-
-  if (!activityId) throw new Error('Failed to generate activity ID');
-
-  const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
-  if (contacts[0]) {
-    await repositories.activityContact.create({
-      activityId,
-      contactId: contacts[0].contactId,
-      role: ActivityContactRole.PRIMARY
-    });
-  }
+  const activityId = await ensureActivityWithPrimaryContact(repositories, currentContext.initiative, currentContext);
 
   const submittedBy = getCurrentUsername(currentContext);
   if (!submittedBy) throw new Error('Failed to determine submittedBy');

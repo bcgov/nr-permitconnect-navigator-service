@@ -13,10 +13,10 @@ export const permitTrackingSchema = z
         sourceSystemKind: z
           .object({
             sourceSystemKindId: z.number(),
-            description: z.string(),
+            description: z.string().min(1),
             integrated: z.boolean().optional(),
             kind: z.string().nullish(),
-            sourceSystem: z.string(),
+            sourceSystem: z.string().min(1),
             ...createStamps
           })
           .strict()

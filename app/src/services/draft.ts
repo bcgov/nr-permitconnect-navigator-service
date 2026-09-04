@@ -6,7 +6,7 @@ import { createActivity } from '#src/domains/activity';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
-import type { CurrentAuthorization, CurrentContext, Draft, DraftBase, Maybe } from '#types';
+import type { CurrentAuthorization, CurrentContext, Draft, DraftCreateInput, Maybe } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 import type { DraftCode } from '#src/utils/enums/projectCommon';
 
@@ -15,13 +15,14 @@ import type { DraftCode } from '#src/utils/enums/projectCommon';
  * @param data Draft data
  * @returns A Promise that resolves to the created draft
  */
-export const createDraftService = async (data: DraftBase): Promise<Draft> => {
+export const createDraftService = async (data: DraftCreateInput): Promise<Draft> => {
   return await unitOfWork.execute(async ({ draft }) => {
     return draft.create({
       draftId: data.draftId,
       activityId: data.activityId,
       draftCode: data.draftCode,
-      data: jsonToPrismaInputJson(data.data)
+      // data.data is a required DraftCreateInput field, never undefined here
+      data: jsonToPrismaInputJson(data.data)!
     });
   });
 };
@@ -79,7 +80,7 @@ export const listDraftsService = async (
  * @param data - Draft data
  * @returns A Promise that resolves to the updated draft
  */
-export const updateDraftService = async (data: DraftBase): Promise<Draft> => {
+export const updateDraftService = async (data: DraftCreateInput): Promise<Draft> => {
   return await unitOfWork.execute(async ({ draft }) => {
     return await draft.update({ draftId: data.draftId }, { ...data, data: jsonToPrismaInputJson(data.data) });
   });
@@ -96,7 +97,7 @@ export const updateDraftService = async (data: DraftBase): Promise<Draft> => {
  */
 export const upsertDraftService = async (
   draftId: Maybe<string>,
-  data: { data: DraftBase['data'] },
+  data: { data: DraftCreateInput['data'] },
   initiativeCode: Initiative,
   draftCode: DraftCode,
   currentContext: CurrentContext
@@ -112,7 +113,8 @@ export const upsertDraftService = async (
         draftId: randomUUID(),
         activityId,
         draftCode,
-        data: jsonToPrismaInputJson(data.data)
+        // data.data is required here (type { data: DraftCreateInput['data'] }), never undefined
+        data: jsonToPrismaInputJson(data.data)!
       });
 
       // Link contact to activity

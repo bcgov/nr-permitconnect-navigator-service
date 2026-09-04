@@ -22,7 +22,7 @@ export const schema = {
   deleteSubjectGroup: {
     body: z
       .object({
-        sub: z.string(),
+        sub: z.string().min(1),
         groupId: z.number()
       })
       .strict()

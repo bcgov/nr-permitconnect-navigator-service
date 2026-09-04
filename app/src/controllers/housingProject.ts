@@ -17,8 +17,8 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
-  DraftBase,
-  GetProjectStatisticsRequest,
+  DraftCreateInput,
+  GetHousingProjectStatisticsRequest,
   HousingProject,
   HousingProjectStatistics,
   SearchHousingProjectRequest,
@@ -48,7 +48,7 @@ export const getHousingProjectController = async (
 };
 
 export const getHousingProjectStatisticsController = async (
-  req: Request<never, never, never, GetProjectStatisticsRequest>,
+  req: Request<never, never, never, GetHousingProjectStatisticsRequest>,
   res: Response<HousingProjectStatistics>
 ) => {
   const response = await getHousingProjectStatisticsService(req.query);
@@ -127,7 +127,7 @@ export const upsertHousingProjectDraftController = async (
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    { data: req.body.data as DraftBase['data'] },
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.HOUSING,
     DraftCode.HOUSING_PROJECT,
     res.locals.currentContext

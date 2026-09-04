@@ -66,7 +66,7 @@ export const schema = {
         issuedPermitId: z.string().nullish(),
         permitNote: z.array(z.object(sharedPermitNoteSchema).strict().nullable()).nullish(),
         permitTracking: permitTrackingSchema,
-        needed: z.string().max(255),
+        needed: z.string().min(1).max(255),
         state: requireValidCode.PermitState(z.string().max(255)),
         stage: requireValidCode.PermitStage(z.string().max(255)),
         onHoldCode: requireValidCode.PiesOnHold(z.string().max(255)).nullish(),
