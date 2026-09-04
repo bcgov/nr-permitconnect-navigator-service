@@ -19,24 +19,16 @@ import type {
   Draft,
   DraftBase,
   GeneralProject,
-  GeneralProjectIntake,
   GetProjectStatisticsRequest,
   LocalContext,
   PatchGeneralProjectRequest,
   SearchGeneralProjectRequest,
+  SubmitGeneralProjectDraftRequest,
   UpsertGeneralProjectDraftRequest
 } from '#types';
 
-// TODO: GeneralProjectIntake is hand-written, not z.infer'd from the zod schema - it can drift from
-// what's actually validated (e.g. schema.createGeneralProject.body has `location: z.unknown()` and
-// optional contact/basic/permits, while this interface claims them required/structured). Swapping to
-// a real inferred type also needs a fix in the shared ContactRepository (Prisma checked/unchecked
-// create-input union), so it's not containable to this file alone.
-export const createGeneralProjectController = async (
-  req: Request<never, never, GeneralProjectIntake>,
-  res: Response<GeneralProject, LocalContext>
-) => {
-  const result = await createGeneralProjectService(req.body, res.locals.currentContext);
+export const createGeneralProjectController = async (_req: Request, res: Response<GeneralProject, LocalContext>) => {
+  const result = await createGeneralProjectService(res.locals.currentContext);
   res.status(201).json(result);
 };
 
@@ -111,9 +103,8 @@ export const getGeneralProjectDraftsController = async (req: Request, res: Respo
   res.status(200).json(response);
 };
 
-// TODO: same GeneralProjectIntake-vs-zod-schema drift as createGeneralProjectController above.
 export const submitGeneralProjectDraftController = async (
-  req: Request<never, never, GeneralProjectIntake>,
+  req: Request<never, never, SubmitGeneralProjectDraftRequest>,
   res: Response<GeneralProject, LocalContext>
 ) => {
   const response = await submitGeneralProjectDraftService(

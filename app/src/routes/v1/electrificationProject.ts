@@ -73,7 +73,7 @@ router.post(
 router.post(
   '/draft/submit',
   hasAuthorization(Resource.ELECTRIFICATION_PROJECT, Action.CREATE),
-  electrificationProjectValidator.createElectrificationProject,
+  electrificationProjectValidator.submitElectrificationProjectDraft,
   submitElectrificationProjectDraftController
 );
 

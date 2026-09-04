@@ -25,6 +25,7 @@ vi.mock('../../../src/db/database.ts', () => ({
   }
 }));
 
+const createDataSpy = vi.spyOn(generalProjectDomain, 'createGeneralProjectData');
 const generateDataSpy = vi.spyOn(generalProjectDomain, 'generateGeneralProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
@@ -37,7 +38,7 @@ describe('generalProject service', () => {
   });
 
   describe('createGeneralProjectService', () => {
-    it('calls generateGeneralProjectData domain, creates project and permits, and returns result', async () => {
+    it('calls createGeneralProjectData domain, creates project and permits, and returns result', async () => {
       const projectData = { ...TEST_GENERAL_PROJECT_CREATE, geoJson: JSON.stringify({}) };
       const generatedData = {
         generalProject: projectData,
@@ -46,25 +47,21 @@ describe('generalProject service', () => {
         appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
       };
 
-      generateDataSpy.mockResolvedValueOnce(generatedData as never);
+      createDataSpy.mockResolvedValueOnce(generatedData as never);
       mockRepos.generalProject.create.mockResolvedValueOnce(TEST_GENERAL_PROJECT_1 as never);
       mockRepos.permit.upsert.mockResolvedValue({} as never);
       upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
-      const response = await generalProjectService.createGeneralProjectService(
-        TEST_GENERAL_PROJECT_INTAKE,
-        TEST_CURRENT_CONTEXT
-      );
+      const response = await generalProjectService.createGeneralProjectService(TEST_CURRENT_CONTEXT);
 
-      expect(generateDataSpy).toHaveBeenCalledTimes(1);
-      expect(generateDataSpy).toHaveBeenCalledWith(
+      expect(createDataSpy).toHaveBeenCalledTimes(1);
+      expect(createDataSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           activity: mockRepos.activity,
           activityContact: mockRepos.activityContact,
           contact: mockRepos.contact,
           initiative: mockRepos.initiative
         }),
-        TEST_GENERAL_PROJECT_INTAKE,
         TEST_CURRENT_CONTEXT
       );
       expect(mockRepos.generalProject.create).toHaveBeenCalledTimes(1);
@@ -230,7 +227,7 @@ describe('generalProject service', () => {
       const response = await generalProjectService.submitGeneralProjectDraftService(
         draftId,
         TEST_GENERAL_PROJECT_INTAKE,
-        TEST_CONTACT_1,
+        TEST_GENERAL_PROJECT_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 
@@ -253,9 +250,9 @@ describe('generalProject service', () => {
       expect(mockRepos.draft.delete).toHaveBeenCalledWith({ draftId });
       expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(1);
       expect(mockRepos.contact.upsert).toHaveBeenCalledWith(
-        { contactId: TEST_CONTACT_1.contactId },
-        TEST_CONTACT_1,
-        TEST_CONTACT_1
+        { contactId: TEST_GENERAL_PROJECT_INTAKE.contact.contactId },
+        TEST_GENERAL_PROJECT_INTAKE.contact,
+        TEST_GENERAL_PROJECT_INTAKE.contact
       );
       expect(emailSpy).toHaveBeenCalledTimes(1);
       expect(emailSpy).toHaveBeenCalledWith(
@@ -287,7 +284,7 @@ describe('generalProject service', () => {
       const response = await generalProjectService.submitGeneralProjectDraftService(
         null,
         TEST_GENERAL_PROJECT_INTAKE,
-        TEST_CONTACT_1,
+        TEST_GENERAL_PROJECT_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 

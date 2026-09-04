@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { validate } from '#src/middleware/validation';
 import {
   APPLICATION_STATUS_LIST,
@@ -14,7 +14,7 @@ export const schema = {
   createEnquiry: {
     body: z
       .object({
-        contact: contactSchema,
+        contact: submittedContactSchema,
         enquiryDescription: z.string().nullish(), // allow null for creating an enquiry from the nav side
         relatedActivityId: z.string().max(255).nullish(),
         submissionType: z.enum(ENQUIRY_TYPE_LIST as [string, ...string[]]).nullish()

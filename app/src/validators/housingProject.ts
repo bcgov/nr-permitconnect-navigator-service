@@ -3,9 +3,9 @@ import { z } from 'zod';
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
 import { housing } from './housing';
 import { location } from './location.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
@@ -17,18 +17,23 @@ const unitsList = z.enum(NUM_RESIDENTIAL_UNITS_LIST as [string, ...string[]]);
 const yesNoUnsure = z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]);
 
 export const schema = {
+  // POST / always sends an empty body
   createHousingProject: {
+    body: z.object({}).strict().default({})
+  },
+  // POST /draft/submit carries the full intake payload
+  submitHousingProjectDraft: {
     body: z
       .object({
         draftId: uuidv4.nullish(),
         activityId: activityId.nullish(),
-        contact: contactSchema.optional(),
+        contact: submittedContactSchema,
         basic: z
           .object({
-            consentToFeedback: z.boolean().optional(),
+            consentToFeedback: z.boolean(),
             projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
             projectName: z.string().max(255).trim(),
-            projectDescription: z.string().max(4000).nullish(),
+            projectDescription: z.string().max(4000),
             registeredId: z.string().nullish(),
             registeredName: z.string().nullish()
           })
@@ -44,21 +49,18 @@ export const schema = {
                 message: '"registeredName" is required'
               });
             }
-          })
-          .optional(),
-        housing: housing.optional(),
-        location: location.optional(),
+          }),
+        housing,
+        location,
         permits: z
           .object({
             appliedPermits: z.array(appliedPermit).nullish(),
             hasAppliedProvincialPermits: yesNoUnsure,
-            investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() }).strict()).nullish()
+            investigatePermits: z.array(z.object({ permitTypeId: z.number() }).strict()).nullish()
           })
           .strict()
-          .optional()
       })
       .strict()
-      .default({})
   },
   deleteHousingProject: {
     params: z
@@ -193,6 +195,7 @@ export const schema = {
 
 export default {
   createHousingProject: validate(schema.createHousingProject),
+  submitHousingProjectDraft: validate(schema.submitHousingProjectDraft),
   deleteHousingProject: validate(schema.deleteHousingProject),
   deleteDraft: validate(schema.deleteDraft),
   upsertDraft: validate(schema.upsertDraft),

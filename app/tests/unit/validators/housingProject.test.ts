@@ -13,6 +13,9 @@ function buildApp() {
   app.post('/', housingProjectValidator.createHousingProject, (req: Request, res: Response) =>
     res.status(200).json(req.body)
   );
+  app.post('/draft/submit', housingProjectValidator.submitHousingProjectDraft, (req: Request, res: Response) =>
+    res.status(200).json(req.body)
+  );
   app.patch('/:housingProjectId', housingProjectValidator.patchHousingProject, (req: Request, res: Response) =>
     res.status(200).json(req.body)
   );
@@ -30,26 +33,162 @@ const validParams = '/5183f223-526a-44cf-8b6a-80f90c4e802b';
 describe('createHousingProject validator', () => {
   const app = buildApp();
 
+  it('accepts an empty body', async () => {
+    const res = await request(app).post('/').send({});
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({});
+  });
+
+  it('rejects unrecognized fields', async () => {
+    const res = await request(app).post('/').send({ notARealField: true });
+    expect(res.status).toBe(422);
+    expect(res.body.detail).toMatch(/Unrecognized key\(s\) in object: 'notARealField'/);
+  });
+});
+
+describe('submitHousingProjectDraft validator', () => {
+  const app = buildApp();
+
+  const validContact = {
+    contactId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+    email: 'test@example.com',
+    firstName: 'Jane',
+    phoneNumber: '778-555-1234',
+    contactApplicantRelationship: 'Property owner',
+    contactPreference: 'Email'
+  };
+  const validHousing = {
+    financiallySupportedBc: 'No',
+    financiallySupportedIndigenous: 'No',
+    financiallySupportedNonProfit: 'No',
+    financiallySupportedHousingCoop: 'No',
+    hasRentalUnits: 'No',
+    singleFamilySelected: true,
+    singleFamilyUnits: '1-9'
+  };
+  const validLocation = {
+    naturalDisaster: 'No',
+    projectLocation: 'Location coordinates',
+    latitude: 49,
+    longitude: -123
+  };
+  const validPermits = { hasAppliedProvincialPermits: 'No' };
+
+  function validBody(basic: Record<string, unknown>) {
+    return {
+      contact: validContact,
+      basic,
+      housing: validHousing,
+      location: validLocation,
+      permits: validPermits
+    };
+  }
+
   it('requires registeredName when projectApplicantType is Business', async () => {
     const res = await request(app)
-      .post('/')
-      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project' } });
+      .post('/draft/submit')
+      .send(
+        validBody({
+          consentToFeedback: true,
+          projectApplicantType: 'Business',
+          projectName: 'Test Project',
+          projectDescription: 'Desc'
+        })
+      );
     expect(res.status).toBe(422);
     expect(res.body.detail).toMatch(/"registeredName" is required/);
   });
 
   it('passes when projectApplicantType is Business and registeredName is provided', async () => {
     const res = await request(app)
-      .post('/')
-      .send({ basic: { projectApplicantType: 'Business', projectName: 'Test Project', registeredName: 'Acme' } });
+      .post('/draft/submit')
+      .send(
+        validBody({
+          consentToFeedback: true,
+          projectApplicantType: 'Business',
+          projectName: 'Test Project',
+          projectDescription: 'Desc',
+          registeredName: 'Acme'
+        })
+      );
     expect(res.status).toBe(200);
   });
 
   it('does not require registeredName when projectApplicantType is Individual', async () => {
     const res = await request(app)
-      .post('/')
-      .send({ basic: { projectApplicantType: 'Individual', projectName: 'Test Project' } });
+      .post('/draft/submit')
+      .send(
+        validBody({
+          consentToFeedback: true,
+          projectApplicantType: 'Individual',
+          projectName: 'Test Project',
+          projectDescription: 'Desc'
+        })
+      );
     expect(res.status).toBe(200);
+  });
+
+  it('requires basic, contact, housing, location, and permits', async () => {
+    const res = await request(app).post('/draft/submit').send({});
+    expect(res.status).toBe(422);
+  });
+
+  it('requires contactId on contact', async () => {
+    const contactWithoutId: Record<string, unknown> = { ...validContact };
+    delete contactWithoutId.contactId;
+    const res = await request(app)
+      .post('/draft/submit')
+      .send({
+        contact: contactWithoutId,
+        basic: {
+          consentToFeedback: true,
+          projectApplicantType: 'Individual',
+          projectName: 'Test Project',
+          projectDescription: 'Desc'
+        },
+        housing: validHousing,
+        location: validLocation,
+        permits: validPermits
+      });
+    expect(res.status).toBe(422);
+  });
+
+  it('requires contactPreference on contact', async () => {
+    const contactWithoutPreference: Record<string, unknown> = { ...validContact };
+    delete contactWithoutPreference.contactPreference;
+    const res = await request(app)
+      .post('/draft/submit')
+      .send({
+        contact: contactWithoutPreference,
+        basic: {
+          consentToFeedback: true,
+          projectApplicantType: 'Individual',
+          projectName: 'Test Project',
+          projectDescription: 'Desc'
+        },
+        housing: validHousing,
+        location: validLocation,
+        permits: validPermits
+      });
+    expect(res.status).toBe(422);
+  });
+
+  it('rejects unrecognized fields on contact', async () => {
+    const res = await request(app)
+      .post('/draft/submit')
+      .send({
+        contact: { ...validContact, notARealField: true },
+        basic: {
+          consentToFeedback: true,
+          projectApplicantType: 'Individual',
+          projectName: 'Test Project',
+          projectDescription: 'Desc'
+        },
+        housing: validHousing,
+        location: validLocation,
+        permits: validPermits
+      });
+    expect(res.status).toBe(422);
   });
 });
 

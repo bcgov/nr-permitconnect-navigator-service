@@ -23,6 +23,7 @@ vi.mock('../../../src/db/database.ts', () => ({
   }
 }));
 
+const createDataSpy = vi.spyOn(electrificationProjectDomain, 'createElectrificationProjectData');
 const generateDataSpy = vi.spyOn(electrificationProjectDomain, 'generateElectrificationProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
@@ -34,24 +35,20 @@ describe('electrificationProject service', () => {
   });
 
   describe('createElectrificationProjectService', () => {
-    it('calls generateElectrificationProjectData domain, creates project, and returns result', async () => {
-      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1);
+    it('calls createElectrificationProjectData domain, creates project, and returns result', async () => {
+      createDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
 
-      const response = await electrificationProjectService.createElectrificationProjectService(
-        TEST_ELECTRIFICATION_INTAKE,
-        TEST_CURRENT_CONTEXT
-      );
+      const response = await electrificationProjectService.createElectrificationProjectService(TEST_CURRENT_CONTEXT);
 
-      expect(generateDataSpy).toHaveBeenCalledTimes(1);
-      expect(generateDataSpy).toHaveBeenCalledWith(
+      expect(createDataSpy).toHaveBeenCalledTimes(1);
+      expect(createDataSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           activity: mockRepos.activity,
           activityContact: mockRepos.activityContact,
           contact: mockRepos.contact,
           initiative: mockRepos.initiative
         }),
-        TEST_ELECTRIFICATION_INTAKE,
         TEST_CURRENT_CONTEXT
       );
       expect(mockRepos.electrificationProject.create).toHaveBeenCalledTimes(1);
@@ -209,7 +206,7 @@ describe('electrificationProject service', () => {
       const response = await electrificationProjectService.submitElectrificationProjectDraftService(
         draftId,
         TEST_ELECTRIFICATION_INTAKE,
-        TEST_CONTACT_1,
+        TEST_ELECTRIFICATION_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 
@@ -230,9 +227,9 @@ describe('electrificationProject service', () => {
       expect(mockRepos.draft.delete).toHaveBeenCalledWith({ draftId });
       expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(1);
       expect(mockRepos.contact.upsert).toHaveBeenCalledWith(
-        { contactId: TEST_CONTACT_1.contactId },
-        TEST_CONTACT_1,
-        TEST_CONTACT_1
+        { contactId: TEST_ELECTRIFICATION_INTAKE.contact.contactId },
+        TEST_ELECTRIFICATION_INTAKE.contact,
+        TEST_ELECTRIFICATION_INTAKE.contact
       );
       expect(emailSpy).toHaveBeenCalledTimes(1);
       expect(emailSpy).toHaveBeenCalledWith(
@@ -257,7 +254,7 @@ describe('electrificationProject service', () => {
       const response = await electrificationProjectService.submitElectrificationProjectDraftService(
         null,
         TEST_ELECTRIFICATION_INTAKE,
-        TEST_CONTACT_1,
+        TEST_ELECTRIFICATION_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 

@@ -1,6 +1,6 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateGeneralProjectData } from '#src/domains/generalProject';
+import { createGeneralProjectData, generateGeneralProjectData } from '#src/domains/generalProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
@@ -9,22 +9,18 @@ import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   GeneralProject,
-  GeneralProjectIntake,
   GeneralProjectStatistics,
   GetProjectStatisticsRequest,
   Maybe,
   PatchGeneralProjectRequest,
-  SearchGeneralProjectRequest
+  SearchGeneralProjectRequest,
+  SubmitGeneralProjectDraftRequest
 } from '#types';
 
-export const createGeneralProjectService = async (
-  data: GeneralProjectIntake,
-  currentContext: CurrentContext
-): Promise<GeneralProject> => {
+export const createGeneralProjectService = async (currentContext: CurrentContext): Promise<GeneralProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, generalProject, initiative, permit, permitTracking }) => {
       const {
@@ -32,7 +28,7 @@ export const createGeneralProjectService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+      } = await createGeneralProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new general project
       const response = await generalProject.create({
@@ -163,8 +159,8 @@ export const searchGeneralProjects = async (
 
 export const submitGeneralProjectDraftService = async (
   draftId: Maybe<string>,
-  data: GeneralProjectIntake,
-  contactData: ContactBase,
+  data: SubmitGeneralProjectDraftRequest,
+  contactData: SubmitGeneralProjectDraftRequest['contact'],
   currentContext: CurrentContext
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(

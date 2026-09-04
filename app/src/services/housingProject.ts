@@ -1,6 +1,6 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateHousingProjectData } from '#src/domains/housingProject';
+import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
@@ -9,22 +9,18 @@ import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
 import type { Prisma } from '@prisma/client';
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   GetProjectStatisticsRequest,
   HousingProject,
-  HousingProjectIntake,
   HousingProjectStatistics,
   Maybe,
   PatchHousingProjectRequest,
-  SearchHousingProjectRequest
+  SearchHousingProjectRequest,
+  SubmitHousingProjectDraftRequest
 } from '#types';
 
-export const createHousingProjectService = async (
-  data: HousingProjectIntake,
-  currentContext: CurrentContext
-): Promise<HousingProject> => {
+export const createHousingProjectService = async (currentContext: CurrentContext): Promise<HousingProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, housingProject, initiative, permit, permitTracking }) => {
       const {
@@ -32,7 +28,7 @@ export const createHousingProjectService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+      } = await createHousingProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new housing project
       const response = await housingProject.create({
@@ -182,8 +178,8 @@ export const searchHousingProjects = async (
 
 export const submitHousingProjectDraftService = async (
   draftId: Maybe<string>,
-  data: HousingProjectIntake,
-  contactData: ContactBase,
+  data: SubmitHousingProjectDraftRequest,
+  contactData: SubmitHousingProjectDraftRequest['contact'],
   currentContext: CurrentContext
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(

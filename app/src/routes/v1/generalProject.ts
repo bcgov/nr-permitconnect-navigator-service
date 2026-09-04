@@ -74,7 +74,7 @@ router.post(
 router.post(
   '/draft/submit',
   hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
-  generalProjectValidator.createGeneralProject,
+  generalProjectValidator.submitGeneralProjectDraft,
   submitGeneralProjectDraftController
 );
 

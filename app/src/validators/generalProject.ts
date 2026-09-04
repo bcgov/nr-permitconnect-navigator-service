@@ -3,8 +3,8 @@ import { z } from 'zod';
 import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
 import { location } from './location.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
@@ -13,18 +13,23 @@ import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/consta
 import { ProjectApplicant } from '#src/utils/enums/housing';
 
 export const schema = {
+  // POST / always sends an empty body (frontend creates a blank project, then fills it in via patch).
   createGeneralProject: {
+    body: z.object({}).strict().default({})
+  },
+  // POST /draft/submit carries the full intake payload from the general ProjectIntakeForm.vue.
+  submitGeneralProjectDraft: {
     body: z
       .object({
         draftId: uuidv4.nullish(),
         activityId: activityId.nullish(),
-        contact: contactSchema.optional(),
+        contact: submittedContactSchema,
         basic: z
           .object({
             projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
             projectName: z.string().max(255).trim(),
             projectNumber: z.string().max(255).trim().optional(),
-            projectDescription: z.string().max(4000).nullish(),
+            projectDescription: z.string().max(4000),
             registeredId: z.string().nullish(),
             registeredName: z.string().nullish()
           })
@@ -40,27 +45,17 @@ export const schema = {
                 message: '"registeredName" is required'
               });
             }
-          })
-          .optional(),
-        general: z
-          .object({
-            projectName: z.string().max(255).trim(),
-            projectDescription: z.string().max(4000).nullish()
-          })
-          .strict()
-          .optional(),
-        location: location.optional(),
+          }),
+        location,
         permits: z
           .object({
             appliedPermits: z.array(appliedPermit).nullish(),
             hasAppliedProvincialPermits: z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]),
-            investigatePermits: z.array(z.object({ permitTypeId: z.number().nullish() }).strict()).nullish()
+            investigatePermits: z.array(z.object({ permitTypeId: z.number() }).strict()).nullish()
           })
           .strict()
-          .optional()
       })
       .strict()
-      .default({})
   },
   deleteGeneralProject: {
     params: z
@@ -154,6 +149,7 @@ export const schema = {
 
 export default {
   createGeneralProject: validate(schema.createGeneralProject),
+  submitGeneralProjectDraft: validate(schema.submitGeneralProjectDraft),
   deleteGeneralProject: validate(schema.deleteGeneralProject),
   deleteDraft: validate(schema.deleteDraft),
   upsertDraft: validate(schema.upsertDraft),

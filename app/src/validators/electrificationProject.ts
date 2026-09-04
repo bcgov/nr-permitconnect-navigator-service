@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_LIST } from '#src/utils/constants/application';
@@ -10,7 +10,12 @@ import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/consta
 import { ProjectType } from '#src/utils/enums/electrification';
 
 export const schema = {
+  // POST / always sends an empty body (frontend creates a blank project, then fills it in via patch).
   createElectrificationProject: {
+    body: z.object({}).strict().default({})
+  },
+  // POST /draft/submit carries the full intake payload from ProjectIntakeForm.vue.
+  submitElectrificationProjectDraft: {
     body: z
       .object({
         activityId: activityId.nullish(),
@@ -19,11 +24,10 @@ export const schema = {
             projectDescription: z.string().max(4000).nullish(),
             projectName: z.string().max(255).trim(),
             registeredId: z.string().max(255).trim().nullish(),
-            registeredName: z.string().max(255).trim().nullish()
+            registeredName: z.string().max(255).trim()
           })
-          .strict()
-          .optional(),
-        contact: contactSchema.optional(),
+          .strict(),
+        contact: submittedContactSchema,
         draftId: uuidv4.nullish(),
         project: z
           .object({
@@ -31,12 +35,11 @@ export const schema = {
             projectType: requireValidCode.ElectrificationProjectType(z.string())
           })
           .strict()
-          .optional()
       })
       .strict()
       .superRefine((data, ctx) => {
-        const isOther = data.project?.projectType === ProjectType.OTHER;
-        const value = data.basic?.projectDescription;
+        const isOther = data.project.projectType === ProjectType.OTHER;
+        const value = data.basic.projectDescription;
         const isEmpty = value === undefined || value === null || value === '';
         if (isOther && isEmpty) {
           ctx.addIssue({
@@ -46,7 +49,6 @@ export const schema = {
           });
         }
       })
-      .default({})
   },
   deleteElectrificationProject: {
     params: z
@@ -145,6 +147,7 @@ export const schema = {
 
 export default {
   createElectrificationProject: validate(schema.createElectrificationProject),
+  submitElectrificationProjectDraft: validate(schema.submitElectrificationProjectDraft),
   deleteElectrificationProject: validate(schema.deleteElectrificationProject),
   deleteDraft: validate(schema.deleteDraft),
   upsertDraft: validate(schema.upsertDraft),

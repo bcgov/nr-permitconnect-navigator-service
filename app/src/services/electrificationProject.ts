@@ -1,33 +1,33 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateElectrificationProjectData } from '#src/domains/electrificationProject';
+import {
+  createElectrificationProjectData,
+  generateElectrificationProjectData
+} from '#src/domains/electrificationProject';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   ElectrificationProject,
-  ElectrificationProjectIntake,
   ElectrificationProjectStatistics,
   GetProjectStatisticsRequest,
   Maybe,
   PatchElectrificationProjectRequest,
-  SearchElectrificationProjectRequest
+  SearchElectrificationProjectRequest,
+  SubmitElectrificationProjectDraftRequest
 } from '#types';
 
 export const createElectrificationProjectService = async (
-  data: ElectrificationProjectIntake,
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, electrificationProject, initiative }) => {
-      const electrificationProjectData = await generateElectrificationProjectData(
+      const electrificationProjectData = await createElectrificationProjectData(
         { activity, activityContact, contact, initiative },
-        data,
         currentContext
       );
 
@@ -174,8 +174,8 @@ export const searchElectrificationProjects = async (
 
 export const submitElectrificationProjectDraftService = async (
   draftId: Maybe<string>,
-  data: ElectrificationProjectIntake,
-  contactData: ContactBase,
+  data: SubmitElectrificationProjectDraftRequest,
+  contactData: SubmitElectrificationProjectDraftRequest['contact'],
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(

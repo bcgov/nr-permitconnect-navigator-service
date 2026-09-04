@@ -13,7 +13,7 @@ import {
   Initiative
 } from '#src/utils/enums/application';
 import { ProjectType } from '#src/utils/enums/electrification';
-import { NumResidentialUnits } from '#src/utils/enums/housing';
+import { NumResidentialUnits, ProjectApplicant } from '#src/utils/enums/housing';
 import { PeachIntegratedSystem, PermitNeeded } from '#src/utils/enums/permit';
 import {
   ActivityContactRole,
@@ -33,23 +33,20 @@ import type {
   ActivityContact,
   CodingEvent,
   Contact,
+  CreateEnquiryRequest,
   CurrentAuthorization,
   CurrentContext,
   Document,
   Draft,
   ElectrificationProject,
   ElectrificationProjectBase,
-  ElectrificationProjectIntake,
   Email,
   Enquiry,
-  EnquiryIntake,
   GeneralProject,
   GeneralProjectBase,
-  GeneralProjectIntake,
   Group,
   HousingProject,
   HousingProjectBase,
-  HousingProjectIntake,
   Initiative as InitiativeModel,
   Note,
   NoteHistory,
@@ -59,6 +56,9 @@ import type {
   PermitNote,
   PermitTracking,
   PermitType,
+  SubmitElectrificationProjectDraftRequest,
+  SubmitGeneralProjectDraftRequest,
+  SubmitHousingProjectDraftRequest,
   User
 } from '#types';
 
@@ -210,7 +210,7 @@ export const TEST_ELECTRIFICATION_DRAFT: Draft = {
   deletedAt: null
 };
 
-export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
+export const TEST_ELECTRIFICATION_INTAKE: SubmitElectrificationProjectDraftRequest = {
   basic: {
     projectName: 'NAME',
     projectDescription: 'DESCRIPTION',
@@ -221,7 +221,15 @@ export const TEST_ELECTRIFICATION_INTAKE: ElectrificationProjectIntake = {
     projectType: ProjectType.IPP_WIND,
     bcHydroNumber: '12345'
   },
-  contact: TEST_CONTACT_1,
+  contact: {
+    contactId: TEST_CONTACT_1.contactId,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'John.Doe@example.com',
+    phoneNumber: '123-456-7890',
+    contactApplicantRelationship: ProjectRelationship.OWNER,
+    contactPreference: ContactPreference.EMAIL
+  },
   draftId: null
 };
 
@@ -338,8 +346,16 @@ export const TEST_ENQUIRY_1: Enquiry = {
   deletedAt: null
 };
 
-export const TEST_ENQUIRY_INTAKE: EnquiryIntake = {
-  contact: TEST_CONTACT_1,
+export const TEST_ENQUIRY_INTAKE: CreateEnquiryRequest = {
+  contact: {
+    contactId: TEST_CONTACT_1.contactId,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'John.Doe@example.com',
+    phoneNumber: '123-456-7890',
+    contactApplicantRelationship: ProjectRelationship.OWNER,
+    contactPreference: ContactPreference.EMAIL
+  },
   submissionType: SubmissionType.GENERAL_ENQUIRY,
   relatedActivityId: 'ACTI1234',
   enquiryDescription: 'Test enquiry description'
@@ -459,19 +475,24 @@ export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   deletedAt: null
 };
 
-export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
+export const TEST_GENERAL_PROJECT_INTAKE: SubmitGeneralProjectDraftRequest = {
   activityId: null,
-  submittedAt: new Date().toISOString(),
-  applicationStatus: ApplicationStatus.NEW,
   basic: {
     projectName: 'NAME',
-    projectNumber: null,
     projectDescription: 'DESCRIPTION',
-    projectApplicantType: null,
+    projectApplicantType: ProjectApplicant.INDIVIDUAL,
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
   },
-  contact: TEST_CONTACT_1,
+  contact: {
+    contactId: TEST_CONTACT_1.contactId,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'John.Doe@example.com',
+    phoneNumber: '123-456-7890',
+    contactApplicantRelationship: ProjectRelationship.OWNER,
+    contactPreference: ContactPreference.EMAIL
+  },
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   location: {
     geoJson: null,
@@ -481,16 +502,14 @@ export const TEST_GENERAL_PROJECT_INTAKE: GeneralProjectIntake = {
     longitude: null,
     locality: 'Place',
     ltsaPidLookup: null,
-    locationPids: null,
     projectLocation: 'Location',
     projectLocationDescription: 'Location description',
     province: 'AA',
     streetAddress: '123 Street'
   },
-  submissionType: SubmissionType.GUIDANCE,
   permits: {
     appliedPermits: [],
-    hasAppliedProvincialPermits: null,
+    hasAppliedProvincialPermits: BasicResponse.NO,
     investigatePermits: []
   }
 };
@@ -660,17 +679,25 @@ export const TEST_HOUSING_PROJECT_CREATE: HousingProject = {
   deletedAt: null
 };
 
-export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
+export const TEST_HOUSING_PROJECT_INTAKE: SubmitHousingProjectDraftRequest = {
   activityId: null,
   basic: {
     consentToFeedback: false,
-    projectApplicantType: null,
+    projectApplicantType: ProjectApplicant.INDIVIDUAL,
     projectName: 'NAME',
     projectDescription: 'DESCRIPTION',
     registeredId: 'FM0281610',
     registeredName: 'COMPANY'
   },
-  contact: TEST_CONTACT_1,
+  contact: {
+    contactId: TEST_CONTACT_1.contactId,
+    firstName: 'John',
+    lastName: 'Doe',
+    email: 'John.Doe@example.com',
+    phoneNumber: '123-456-7890',
+    contactApplicantRelationship: ProjectRelationship.OWNER,
+    contactPreference: ContactPreference.EMAIL
+  },
   draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102',
   housing: {
     financiallySupportedBc: BasicResponse.NO,
@@ -680,10 +707,6 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
     hasRentalUnits: BasicResponse.NO,
     multiFamilyUnits: BasicResponse.NO,
     otherUnits: BasicResponse.NO,
-    housingCoopDescription: null,
-    indigenousDescription: null,
-    nonProfitDescription: null,
-    otherUnitsDescription: null,
     rentalUnits: BasicResponse.NO,
     singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE
   },
@@ -702,7 +725,7 @@ export const TEST_HOUSING_PROJECT_INTAKE: HousingProjectIntake = {
   },
   permits: {
     appliedPermits: [],
-    hasAppliedProvincialPermits: null,
+    hasAppliedProvincialPermits: BasicResponse.NO,
     investigatePermits: []
   }
 };
