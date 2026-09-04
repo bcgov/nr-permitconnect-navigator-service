@@ -16,7 +16,7 @@ import {
 import { state } from '../../state';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys, UpsertPermitRequest } from '#types';
+import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -33,11 +33,7 @@ export const buildNewPermitRecord = (params: {
   state: PermitState;
   submittedDate?: Date | string | null;
   submittedTime?: string | null;
-}): Omit<UpsertPermitRequest, 'submittedDate'> & {
-  permitId: string;
-  activityId: string;
-  submittedDate?: Date | string | null;
-} => ({
+}): PermitCreateInput => ({
   permitId: params.permitId,
   permitTypeId: params.permitTypeId,
   activityId: params.activityId,

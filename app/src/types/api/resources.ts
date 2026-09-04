@@ -118,6 +118,11 @@ type PermitDateTimeKeys =
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
 export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & Record<PermitDateTimeKeys, string | null>;
+// permitStatusDatesTransform (db/extensions/permitStatusDates.ts) accepts these 8 fields as date/time
+// strings on write and converts them to Date before insert - same string override as PermitBase, but
+// applied to the create-input shape instead of the read shape.
+export type PermitCreateInput = Omit<Prisma.permitUncheckedCreateInput, PermitDateTimeKeys> &
+  Record<PermitDateTimeKeys, string | Date | null | undefined>;
 interface PermitRelations {
   activity: Activity;
   permitNote: PermitNote[];
@@ -141,6 +146,8 @@ export type PermitStateCode = PermitStateCodeBase; // nosonar
 const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
 export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
 export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSystemKind | null };
+export type PermitTrackingCreateInput = Prisma.permit_trackingUncheckedCreateInput;
+export type PermitTrackingUpsertInput = PermitTrackingCreateInput; // nosonar
 
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;
