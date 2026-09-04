@@ -75,7 +75,7 @@ describe('permit service', () => {
           activityId: TEST_PERMIT_1.activityId,
           permitTypeId: TEST_PERMIT_1.permitTypeId,
           trackingId: 'REC-1',
-          submittedDate: '2024-01-01'
+          submittedDate: new Date('2024-01-01')
         },
         {
           activityId: TEST_PERMIT_1.activityId,
@@ -253,7 +253,12 @@ describe('permit service', () => {
       mockRepos.permit.findUniqueOrThrow.mockResolvedValueOnce(TEST_PERMIT_1 as never);
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({} as never);
 
-      const response = await permitService.upsertPermitService(TEST_PERMIT_1, undefined, [], TEST_PERMIT_TYPE_1);
+      const response = await permitService.upsertPermitService(
+        TEST_PERMIT_1 as never,
+        undefined,
+        [],
+        TEST_PERMIT_TYPE_1
+      );
 
       expect(mockRepos.sourceSystemKind.list).toHaveBeenCalled();
       expect(mockRepos.permit.upsert).toHaveBeenCalledWith(
@@ -274,7 +279,12 @@ describe('permit service', () => {
 
       const trackingData = [{ permitTrackingId: 1, trackingId: 'track-1' }];
 
-      await permitService.upsertPermitService(TEST_PERMIT_1, undefined, trackingData as never, TEST_PERMIT_TYPE_1);
+      await permitService.upsertPermitService(
+        TEST_PERMIT_1 as never,
+        undefined,
+        trackingData as never,
+        TEST_PERMIT_TYPE_1
+      );
 
       expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
       expect(upsertPermitTrackingSpy).toHaveBeenCalledWith(
@@ -293,7 +303,7 @@ describe('permit service', () => {
       summarizePeachRecordSpy.mockReturnValueOnce(undefined as never);
 
       await expect(
-        permitService.upsertPermitService(TEST_PERMIT_1, undefined, trackingData as never, {
+        permitService.upsertPermitService(TEST_PERMIT_1 as never, undefined, trackingData as never, {
           ...TEST_PERMIT_TYPE_1,
           sourceSystem: 'VFCBC'
         })
@@ -318,7 +328,7 @@ describe('permit service', () => {
       sendNotificationsSpy.mockResolvedValueOnce(undefined);
 
       await permitService.upsertPermitService(
-        newPermit,
+        newPermit as never,
         [{ permitId: newPermit.permitId, note: '   ' } as never], // Empty/whitespace note
         trackingData as never,
         { ...TEST_PERMIT_TYPE_1, sourceSystem: 'VFCBC' }
@@ -345,7 +355,7 @@ describe('permit service', () => {
       sendNotificationsSpy.mockResolvedValueOnce(undefined);
 
       await permitService.upsertPermitService(
-        newPermit,
+        newPermit as never,
         [{ permitId: TEST_PERMIT_1.permitId, note: 'Status changed' } as never],
         [],
         TEST_PERMIT_TYPE_1
@@ -362,7 +372,7 @@ describe('permit service', () => {
       mockRepos.permitTracking.deleteMany.mockResolvedValueOnce({ count: 0 } as never);
 
       await permitService.upsertPermitService(
-        TEST_PERMIT_1,
+        TEST_PERMIT_1 as never,
         [{ permitId: TEST_PERMIT_1.permitId, note: '  ' } as never],
         [],
         TEST_PERMIT_TYPE_1

@@ -51,7 +51,7 @@ describe('enquiry service', () => {
     it('generates data, creates the enquiry, upserts the contact and links related contacts', async () => {
       const relatedContact = { activityId: TEST_ENQUIRY_INTAKE.relatedActivityId, contactId: 'other-contact-id' };
 
-      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1);
+      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.create.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.contact.upsert.mockResolvedValue(TEST_CONTACT_1 as never);
       mockRepos.contact.search.mockResolvedValue([TEST_CONTACT_1] as never);
@@ -124,7 +124,7 @@ describe('enquiry service', () => {
     it('skips related contact linking when there is no relatedActivityId', async () => {
       const intakeNoRelated = { ...TEST_ENQUIRY_INTAKE, relatedActivityId: undefined };
 
-      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1);
+      generateEnquiryDataSpy.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.create.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.contact.upsert.mockResolvedValue(TEST_CONTACT_1 as never);
       emailEnquiryConfirmationSpy.mockResolvedValue(undefined);
@@ -244,13 +244,13 @@ describe('enquiry service', () => {
   describe('patchEnquiryService', () => {
     it('updates the enquiry then returns the refreshed record', async () => {
       const data = { enquiryDescription: 'Updated description' };
-      mockRepos.enquiry.update.mockResolvedValue(TEST_ENQUIRY_1 as never);
+      mockRepos.enquiry.patch.mockResolvedValue(TEST_ENQUIRY_1 as never);
       mockRepos.enquiry.findFirstOrThrow.mockResolvedValue(TEST_ENQUIRY_1 as never);
 
       const result = await patchEnquiryService(TEST_ENQUIRY_1.enquiryId, data);
 
-      expect(mockRepos.enquiry.update).toHaveBeenCalledTimes(1);
-      expect(mockRepos.enquiry.update).toHaveBeenCalledWith(
+      expect(mockRepos.enquiry.patch).toHaveBeenCalledTimes(1);
+      expect(mockRepos.enquiry.patch).toHaveBeenCalledWith(
         { enquiryId: TEST_ENQUIRY_1.enquiryId },
         { enquiryDescription: 'Updated description' }
       );

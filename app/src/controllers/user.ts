@@ -1,11 +1,11 @@
 import { searchUsersService } from '#src/services/user';
-import { isTruthy } from '#src/utils/utils';
 
 import type { Request, Response } from 'express';
-import type { User, UserSearchParameters } from '#types';
+import type { GroupName, Initiative } from '#src/utils/enums/application';
+import type { SearchUsersRequest, User } from '#types';
 
 export const searchUsersController = async (
-  req: Request<never, never, UserSearchParameters, never>,
+  req: Request<never, never, SearchUsersRequest, never>,
   res: Response<User[]>
 ) => {
   const response = await searchUsersService({
@@ -16,10 +16,10 @@ export const searchUsersController = async (
     firstName: req.body.firstName,
     fullName: req.body.fullName,
     lastName: req.body.lastName,
-    active: isTruthy(req.body.active),
-    group: req.body.group,
-    initiative: req.body.initiative,
-    includeUserGroups: isTruthy(req.body.includeUserGroups)
+    active: req.body.active,
+    group: req.body.group as GroupName[] | undefined,
+    initiative: req.body.initiative as Initiative[] | undefined,
+    includeUserGroups: req.body.includeUserGroups
   });
 
   res.status(200).json(response);

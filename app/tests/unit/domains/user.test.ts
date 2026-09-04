@@ -2,7 +2,6 @@ import { mockReset } from 'vitest-mock-extended';
 
 import { TEST_IDIR_USER_1 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
-import { DuplicateKeyProblem } from '#src/db/errors';
 import { createUser, updateUser } from '#src/domains/user';
 import { IdentityProviderKind } from '#src/utils/enums/application';
 
@@ -15,13 +14,9 @@ describe('user domain', () => {
   });
 
   describe('createUser', () => {
-    it('should return existing user if user with same sub already exists', async () => {
-      // Mocking the constraint violation thrown by the database
-      const duplicateError = Object.create(DuplicateKeyProblem.prototype);
-      duplicateError.isConstraint = vi.fn().mockReturnValue(true);
-
-      mockRepos.user.create.mockRejectedValue(duplicateError);
-      mockRepos.user.findBySub.mockResolvedValue(TEST_IDIR_USER_1 as never);
+    it('should return the existing user when a user with the same sub already exists', async () => {
+      // createIfNotExists upserts on sub - a pre-existing row comes back as-is, no error thrown
+      mockRepos.user.createIfNotExists.mockResolvedValue(TEST_IDIR_USER_1 as never);
 
       const jwtData: JwtUser = {
         sub: TEST_IDIR_USER_1.sub,
@@ -37,7 +32,10 @@ describe('user domain', () => {
       const result = await createUser(mockRepos, jwtData);
 
       expect(result).toEqual(TEST_IDIR_USER_1);
-      expect(mockRepos.user.findBySub).toHaveBeenCalledWith(TEST_IDIR_USER_1.sub);
+      expect(mockRepos.user.createIfNotExists).toHaveBeenCalledWith(
+        { sub: TEST_IDIR_USER_1.sub },
+        expect.objectContaining({ sub: TEST_IDIR_USER_1.sub })
+      );
       expect(mockRepos.identityProvider.createIfNotExists).toHaveBeenCalledWith(
         { idp: IdentityProviderKind.AZUREIDIR },
         { idp: IdentityProviderKind.AZUREIDIR }
@@ -50,7 +48,7 @@ describe('user domain', () => {
         userId: 'new-user-id'
       };
 
-      mockRepos.user.create.mockResolvedValue(newUser as never);
+      mockRepos.user.createIfNotExists.mockResolvedValue(newUser as never);
 
       const jwtData: JwtUser = {
         sub: 'new-sub-123',
@@ -66,7 +64,8 @@ describe('user domain', () => {
       const result = await createUser(mockRepos, jwtData);
 
       expect(result).toEqual(newUser);
-      expect(mockRepos.user.create).toHaveBeenCalledWith(
+      expect(mockRepos.user.createIfNotExists).toHaveBeenCalledWith(
+        { sub: 'new-sub-123' },
         expect.objectContaining({
           bceidBusinessName: null,
           userId: expect.any(String),
@@ -83,7 +82,7 @@ describe('user domain', () => {
 
     it('should create identity provider if idp is provided and does not exist', async () => {
       const newUser = { ...TEST_IDIR_USER_1, userId: 'new-user-id' };
-      mockRepos.user.create.mockResolvedValue(newUser as never);
+      mockRepos.user.createIfNotExists.mockResolvedValue(newUser as never);
 
       const jwtData: JwtUser = {
         sub: 'new-sub-456',
@@ -106,7 +105,7 @@ describe('user domain', () => {
 
     it('should not create identity provider if idp is not provided', async () => {
       const newUser = { ...TEST_IDIR_USER_1, userId: 'new-user-id', idp: null };
-      mockRepos.user.create.mockResolvedValue(newUser as never);
+      mockRepos.user.createIfNotExists.mockResolvedValue(newUser as never);
 
       const jwtData: JwtUser = {
         sub: 'new-sub-999',
@@ -126,7 +125,7 @@ describe('user domain', () => {
 
     it('should set active status to true for new user', async () => {
       const newUser = { ...TEST_IDIR_USER_1, userId: 'new-user-id', active: true };
-      mockRepos.user.create.mockResolvedValue(newUser as never);
+      mockRepos.user.createIfNotExists.mockResolvedValue(newUser as never);
 
       const jwtData: JwtUser = {
         sub: 'new-sub-active',
@@ -141,38 +140,8 @@ describe('user domain', () => {
 
       await createUser(mockRepos, jwtData);
 
-      const createCall = mockRepos.user.create.mock.calls[0]?.[0];
+      const createCall = mockRepos.user.createIfNotExists.mock.calls[0]?.[1];
       expect(createCall?.active).toBe(true);
-    });
-
-    it('should throw 500 when sub duplicate exists but user cannot be found', async () => {
-      const duplicateError = Object.create(DuplicateKeyProblem.prototype);
-      duplicateError.isConstraint = vi.fn().mockReturnValue(true);
-
-      mockRepos.user.create.mockRejectedValue(duplicateError);
-      mockRepos.user.findBySub.mockResolvedValue(null as never);
-
-      const jwtData: JwtUser = {
-        sub: 'ghost-sub',
-        email: 'test@example.com',
-        fullName: 'Test User',
-        firstName: 'Test',
-        lastName: 'User',
-        idp: null,
-        bceidBusinessName: null,
-        active: true
-      };
-
-      try {
-        await createUser(mockRepos, jwtData);
-        expect(true).toBe(false); // Fail if it reaches here
-      } catch (error: unknown) {
-        const problem = error as { status: number; detail: string };
-        expect(problem.status).toBe(500);
-        expect(problem.detail).toBe(
-          'User creation failed with a duplicate "sub", but no matching user could be found.'
-        );
-      }
     });
   });
 

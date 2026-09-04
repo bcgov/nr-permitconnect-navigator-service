@@ -20,9 +20,9 @@ import * as enquiryService from '#src/services/enquiry';
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
 import type {
+  CreateEnquiryRequest,
   CreateEnquiryResponse,
   Enquiry,
-  EnquiryIntake,
   LocalContext,
   PatchEnquiryRequest,
   SearchEnquiriesRequest
@@ -53,7 +53,7 @@ describe('createEnquiryController', () => {
   const TEST_CREATE_ENQUIRY_RESPONSE: CreateEnquiryResponse = { ...TEST_ENQUIRY_1, contact: TEST_CONTACT_1 };
 
   it('calls the service with the current context and body then responds 201', async () => {
-    const req = { body: TEST_ENQUIRY_INTAKE } as unknown as Request<never, never, EnquiryIntake>;
+    const req = { body: TEST_ENQUIRY_INTAKE } as unknown as Request<never, never, CreateEnquiryRequest>;
 
     createEnquirySpy.mockResolvedValue(TEST_CREATE_ENQUIRY_RESPONSE);
 
@@ -61,18 +61,6 @@ describe('createEnquiryController', () => {
 
     expect(createEnquirySpy).toHaveBeenCalledTimes(1);
     expect(createEnquirySpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, TEST_ENQUIRY_INTAKE);
-    expect(res.status).toHaveBeenCalledWith(201);
-    expect(res.json).toHaveBeenCalledWith(TEST_CREATE_ENQUIRY_RESPONSE);
-  });
-
-  it('defaults the body to an empty object when undefined', async () => {
-    const req = { body: undefined } as unknown as Request<never, never, EnquiryIntake>;
-
-    createEnquirySpy.mockResolvedValue(TEST_CREATE_ENQUIRY_RESPONSE);
-
-    await createEnquiryController(req, res as unknown as Response<CreateEnquiryResponse, LocalContext>);
-
-    expect(createEnquirySpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT, {});
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_CREATE_ENQUIRY_RESPONSE);
   });
@@ -154,9 +142,9 @@ describe('listRelatedEnquiriesController', () => {
 describe('searchEnquiriesController', () => {
   const searchEnquiriesSpy = vi.spyOn(enquiryService, 'searchEnquiriesService');
 
-  it('coerces includeUser, passes the initiative then responds 200', async () => {
+  it('passes the body and initiative then responds 200', async () => {
     const req = {
-      body: { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: 'true' }
+      body: { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true }
     } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
 
@@ -174,8 +162,8 @@ describe('searchEnquiriesController', () => {
     expect(res.json).toHaveBeenCalledWith(enquiries);
   });
 
-  it('leaves includeUser undefined when the body is undefined', async () => {
-    const req = { body: undefined } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
+  it('leaves includeUser undefined for an empty body (schema defaults an omitted POST body to {})', async () => {
+    const req = { body: {} } as unknown as Request<never, never, SearchEnquiriesRequest, never>;
     const enquiries: Enquiry[] = [TEST_ENQUIRY_1];
 
     searchEnquiriesSpy.mockResolvedValue(enquiries);

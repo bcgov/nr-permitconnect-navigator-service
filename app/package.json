@@ -87,7 +87,6 @@
     "express-rate-limit": "8.7.0",
     "express-winston": "4.2.0",
     "helmet": "8.3.0",
-    "joi": "18.2.5",
     "js-yaml": "5.4.1",
     "jsonwebtoken": "9.0.3",
     "jwks-rsa": "4.1.0",
@@ -97,7 +96,8 @@
     "pg": "8.23.0",
     "proj4": "2.21.0",
     "tsx": "4.23.12",
-    "winston-transport": "4.9.0"
+    "winston-transport": "4.9.0",
+    "zod": "3.25.76"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
@@ -133,9 +133,9 @@
     "schema": "src/db/prisma/schema.prisma"
   },
   "allowScripts": {
-    "prisma@6.16.1": true,
-    "@prisma/client@6.16.1": true,
-    "@prisma/engines@6.16.1": true,
+    "prisma@6.19.3": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
     "@prisma/engines@4.16.2": true
   }
 }

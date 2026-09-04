@@ -1,20 +1,17 @@
 import { getRoadmapNoteService, sendRoadmapService } from '#src/services/roadmap';
 
 import type { Request, Response } from 'express';
-import type { Email } from '#types';
+import type { GetRoadmapNoteRequest, SendRoadmapRequest } from '#types';
 
 export const getRoadmapNoteController = async (
-  req: Request<never, never, never, { activityId: string }>,
+  req: Request<never, never, never, GetRoadmapNoteRequest>,
   res: Response
 ) => {
   const response = await getRoadmapNoteService(req.query.activityId);
   res.status(200).json(response);
 };
 
-export const sendRoadmapController = async (
-  req: Request<never, never, { activityId: string; selectedFileIds: string[]; emailData: Email }>,
-  res: Response
-) => {
+export const sendRoadmapController = async (req: Request<never, never, SendRoadmapRequest>, res: Response) => {
   const response = await sendRoadmapService(
     res.locals.currentContext,
     req.body.activityId,

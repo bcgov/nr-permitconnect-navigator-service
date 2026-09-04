@@ -14,7 +14,12 @@ router.use(hasIdentity(IdentityProviderKind.AZUREIDIR));
 router.use(requireSomeGroup);
 
 /** Search clients in ATS */
-router.get('/clients', hasAuthorization(Resource.ATS, Action.READ), searchAtsUsersController);
+router.get(
+  '/clients',
+  hasAuthorization(Resource.ATS, Action.READ),
+  atsValidator.searchATSUsers,
+  searchAtsUsersController
+);
 
 /** Creates a client in ATS */
 router.post(

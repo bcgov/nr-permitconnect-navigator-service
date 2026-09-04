@@ -1,58 +1,70 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { validate } from '#src/middleware/validation';
 import { BasicResponse } from '#src/utils/enums/application';
 
 const addressBody = {
-  '@type': Joi.string().valid('AddressResource'),
-  addressLine1: Joi.string().max(255).allow(null),
-  city: Joi.string().max(255).allow(null),
-  provinceCode: Joi.string().max(255).allow(null),
-  primaryPhone: Joi.string().max(255).allow(null),
-  email: Joi.string().max(255).allow(null)
+  '@type': z.literal('AddressResource').optional(),
+  addressLine1: z.string().min(1).max(255).nullish(),
+  city: z.string().min(1).max(255).nullish(),
+  provinceCode: z.string().min(1).max(255).nullish(),
+  primaryPhone: z.string().min(1).max(255).nullish(),
+  email: z.string().min(1).max(255).nullish()
 };
 
 const clientBody = {
-  '@type': Joi.string().valid('ClientResource'),
-  firstName: Joi.string().max(255).required(),
-  surName: Joi.string().max(255).required(),
-  regionName: Joi.string().max(255).required(),
-  optOutOfBCStatSurveyInd: Joi.string().valid(BasicResponse.NO.toUpperCase()),
-  address: Joi.object(addressBody).allow(null)
+  '@type': z.literal('ClientResource').optional(),
+  firstName: z.string().min(1).max(255),
+  surName: z.string().min(1).max(255),
+  regionName: z.string().min(1).max(255),
+  optOutOfBCStatSurveyInd: z.literal(BasicResponse.NO.toUpperCase()).optional(),
+  address: z.object(addressBody).strict().nullish()
 };
 
 const enquiryBody = {
-  '@type': Joi.string().valid('EnquiryResource'),
-  clientId: Joi.number().min(0).required(),
-  contactFirstName: Joi.string().max(255).required(),
-  contactSurname: Joi.string().max(255).required(),
-  regionName: Joi.string().max(255).required(),
-  notes: Joi.string().max(4000).required(),
-  subRegionalOffice: Joi.string().max(255).required(),
-  enquiryTypeCodes: Joi.array().items(Joi.string().max(255)).required(),
-  enquiryMethodCodes: Joi.array().items(Joi.string().max(255)).required(),
-  enquiryPartnerAgencies: Joi.array().items(Joi.string().max(255)).required(),
-  enquiryFileNumbers: Joi.array().items(Joi.string().max(255)).required()
+  '@type': z.literal('EnquiryResource').optional(),
+  clientId: z.number().min(0),
+  contactFirstName: z.string().min(1).max(255),
+  contactSurname: z.string().min(1).max(255),
+  regionName: z.string().min(1).max(255),
+  notes: z.string().min(1).max(4000),
+  subRegionalOffice: z.string().min(1).max(255),
+  enquiryTypeCodes: z.array(z.string().min(1).max(255)),
+  enquiryMethodCodes: z.array(z.string().min(1).max(255)),
+  enquiryPartnerAgencies: z.array(z.string().min(1).max(255)),
+  enquiryFileNumbers: z.array(z.string().min(1).max(255))
 };
 
-const atsEnquirySubmissionFields = {
-  addedToAts: Joi.boolean(),
+export const atsEnquirySubmissionFields = {
+  addedToAts: z.boolean().optional(),
   // ATS DDL: CLIENT_ID NUMBER(38,0) - may contain up to 38 digits
-  atsClientId: Joi.number().integer().min(0).allow(null),
-  atsEnquiryId: Joi.number().integer().min(0).allow(null)
+  atsClientId: z.number().int().min(0).nullish(),
+  atsEnquiryId: z.number().int().min(0).nullish()
 };
 
-const schema = {
+export const schema = {
   createATSClient: {
-    body: Joi.object(clientBody)
+    body: z.object(clientBody).strict()
   },
   createATSEnquiry: {
-    body: Joi.object(enquiryBody)
+    body: z.object(enquiryBody).strict()
+  },
+  searchATSUsers: {
+    query: z
+      .object({
+        clientId: z.string().max(255).optional(),
+        email: z.string().max(255).optional(),
+        firstName: z.string().max(255).optional(),
+        lastName: z.string().max(255).optional(),
+        phone: z.string().max(255).optional()
+      })
+      .strict()
   }
 };
 
 export default {
   createATSClient: validate(schema.createATSClient),
   atsEnquirySubmissionFields,
-  createATSEnquiry: validate(schema.createATSEnquiry)
+  createATSEnquiry: validate(schema.createATSEnquiry),
+  searchATSUsers: validate(schema.searchATSUsers)
 };

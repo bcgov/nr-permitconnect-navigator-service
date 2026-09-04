@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { createActivity } from './activity';
+import { ensureActivityWithPrimaryContact } from './activity';
 import { buildNewPermitRecord } from './permit';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
@@ -8,25 +8,33 @@ import { getCurrentUsername } from '#src/utils/index';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { NumResidentialUnits } from '#src/utils/enums/housing';
 import { PermitNeeded } from '#src/utils/enums/permit';
-import { ActivityContactRole, ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
+import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
 import type {
   CurrentContext,
-  HousingProject,
-  HousingProjectBase,
-  HousingProjectIntake,
-  Permit,
-  PermitTrackingBase,
-  UpsertPermitRequest
+  HousingProjectCreateInput,
+  PermitTrackingCreateInput,
+  SubmitHousingProjectDraftInput
 } from '#types';
+
+export type HousingPriorityInput = Pick<
+  HousingProjectCreateInput,
+  | 'singleFamilyUnits'
+  | 'multiFamilyUnits'
+  | 'otherUnits'
+  | 'hasRentalUnits'
+  | 'financiallySupportedBc'
+  | 'financiallySupportedIndigenous'
+  | 'queuePriority'
+>;
 
 /**
  * Assigns a priority level to a housing project based on given criteria
  * Criteria defined below
  * @param housingProject Housing data
  */
-export const assignPriority = (housingProject: Partial<HousingProject>) => {
+export const assignPriority = (housingProject: HousingPriorityInput) => {
   const matchesPriorityOneCriteria = // Priority 1 Criteria:
     // 1. More than 50 units (any)
     housingProject.singleFamilyUnits === NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED ||
@@ -63,7 +71,43 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
 };
 
 /**
- * Transforms intake data to match DB schema
+ * Builds a blank housing project shell (POST / always sends an empty body - the frontend
+ * fills fields in afterward via patch, or via submitHousingProjectData for a full intake).
+ * @param repositories - The required repositories
+ * @param currentContext - The current context of the request
+ * @returns A new, mostly-empty project and permit data
+ */
+export const createHousingProjectData = async (
+  repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
+  currentContext: CurrentContext
+) => {
+  const activityId = await ensureActivityWithPrimaryContact(repositories, Initiative.HOUSING, currentContext);
+
+  const submittedBy = getCurrentUsername(currentContext);
+  if (!submittedBy) throw new Error('Failed to determine submittedBy');
+
+  const housingProjectData = {
+    housingProject: {
+      housingProjectId: randomUUID(),
+      activityId,
+      submittedAt: new Date(),
+      submittedBy,
+      applicationStatus: ApplicationStatus.NEW,
+      submissionType: SubmissionType.GUIDANCE,
+      queuePriority: null
+    } satisfies HousingProjectCreateInput,
+    appliedPermits: [] as ReturnType<typeof buildNewPermitRecord>[],
+    investigatePermits: [] as ReturnType<typeof buildNewPermitRecord>[],
+    appliedPermitTrackers: [] as PermitTrackingCreateInput[]
+  };
+
+  assignPriority(housingProjectData.housingProject);
+
+  return housingProjectData;
+};
+
+/**
+ * Transforms a full intake submission to match DB schema
  * @param repositories - The required repositories
  * @param data - Intake data
  * @param currentContext - The current context of the request
@@ -71,117 +115,104 @@ export const assignPriority = (housingProject: Partial<HousingProject>) => {
  */
 export const generateHousingProjectData = async (
   repositories: Pick<Repositories, 'activity' | 'activityContact' | 'contact' | 'initiative'>,
-  data: HousingProjectIntake,
+  data: SubmitHousingProjectDraftInput,
   currentContext: CurrentContext
 ) => {
-  let activityId = data.activityId;
+  // Create activity and link contact if required (a draft may already have one)
+  const activityId = await ensureActivityWithPrimaryContact(
+    repositories,
+    Initiative.HOUSING,
+    currentContext,
+    data.activityId
+  );
 
-  // Create activity and link contact if required
-  if (!activityId) {
-    activityId = (
-      await createActivity({ activity: repositories.activity, initiative: repositories.initiative }, Initiative.HOUSING)
-    )?.activityId;
+  const submittedBy = getCurrentUsername(currentContext);
+  if (!submittedBy) throw new Error('Failed to determine submittedBy');
 
-    const contacts = await repositories.contact.search({ userId: [currentContext.userId!] });
-    if (contacts[0]) {
-      await repositories.activityContact.create({
-        activityId,
-        contactId: contacts[0].contactId,
-        role: ActivityContactRole.PRIMARY
-      });
-    }
-  }
+  const basic = {
+    consentToFeedback: data.basic.consentToFeedback,
+    projectApplicantType: data.basic.projectApplicantType,
+    companyIdRegistered: data.basic.registeredId ?? null,
+    companyNameRegistered: data.basic.registeredName ?? null,
+    projectName: data.basic.projectName,
+    projectDescription: data.basic.projectDescription
+  };
 
-  if (!activityId) throw new Error('Failed to generate activity ID');
+  const housing = {
+    singleFamilyUnits: data.housing.singleFamilyUnits ?? null,
+    multiFamilyUnits: data.housing.multiFamilyUnits ?? null,
+    otherUnitsDescription: data.housing.otherUnitsDescription ?? null,
+    otherUnits: data.housing.otherUnits ?? null,
+    hasRentalUnits: data.housing.hasRentalUnits,
+    financiallySupportedBc: data.housing.financiallySupportedBc,
+    financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
+    financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
+    financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
+    rentalUnits: data.housing.rentalUnits ?? null,
+    indigenousDescription: data.housing.indigenousDescription ?? null,
+    nonProfitDescription: data.housing.nonProfitDescription ?? null,
+    housingCoopDescription: data.housing.housingCoopDescription ?? null
+  };
 
-  let basic, housing, location, permits;
-  let appliedPermits: UpsertPermitRequest[] = [],
-    investigatePermits: UpsertPermitRequest[] = [];
-  const appliedPermitTrackers: PermitTrackingBase[] = [];
+  const location = {
+    naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
+    projectLocation: data.location.projectLocation,
+    projectLocationDescription: data.location.projectLocationDescription ?? null,
+    geomarkUrl: data.location.geomarkUrl ?? null,
+    geoJson: jsonToPrismaInputJson(data.location.geoJson),
+    locationPids: data.location.ltsaPidLookup ?? null,
+    latitude: data.location.latitude ?? null,
+    longitude: data.location.longitude ?? null,
+    locality: data.location.locality ?? null,
+    province: data.location.province ?? null,
+    streetAddress: data.location.streetAddress ?? null
+  };
 
-  if (data.basic) {
-    basic = {
-      consentToFeedback: data.basic.consentToFeedback ?? false,
-      projectApplicantType: data.basic.projectApplicantType,
-      companyIdRegistered: data.basic.registeredId,
-      companyNameRegistered: data.basic.registeredName,
-      projectName: data.basic.projectName,
-      projectDescription: data.basic.projectDescription
-    };
-  }
+  const permits = {
+    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
+  };
 
-  if (data.housing) {
-    housing = {
-      singleFamilyUnits: data.housing.singleFamilyUnits,
-      multiFamilyUnits: data.housing.multiFamilyUnits,
-      otherUnitsDescription: data.housing.otherUnitsDescription,
-      otherUnits: data.housing.otherUnits,
-      hasRentalUnits: data.housing.hasRentalUnits,
-      financiallySupportedBc: data.housing.financiallySupportedBc,
-      financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
-      financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
-      financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-      rentalUnits: data.housing.rentalUnits,
-      indigenousDescription: data.housing.indigenousDescription,
-      nonProfitDescription: data.housing.nonProfitDescription,
-      housingCoopDescription: data.housing.housingCoopDescription
-    };
-  }
+  let appliedPermits: ReturnType<typeof buildNewPermitRecord>[] = [];
+  let investigatePermits: ReturnType<typeof buildNewPermitRecord>[] = [];
+  const appliedPermitTrackers: PermitTrackingCreateInput[] = [];
 
-  if (data.location) {
-    location = {
-      naturalDisaster: (data.location.naturalDisaster as BasicResponse) === BasicResponse.YES,
-      projectLocation: data.location.projectLocation,
-      projectLocationDescription: data.location.projectLocationDescription,
-      geomarkUrl: data.location.geomarkUrl,
-      geoJson: jsonToPrismaInputJson(data.location.geoJson),
-      locationPids: data.location.ltsaPidLookup,
-      latitude: data.location.latitude,
-      longitude: data.location.longitude,
-      locality: data.location.locality,
-      province: data.location.province,
-      streetAddress: data.location.streetAddress
-    };
-  }
+  if (data.permits.appliedPermits?.length) {
+    appliedPermits = data.permits.appliedPermits.map((x) => {
+      const permitId = randomUUID();
 
-  if (data.permits) {
-    permits = {
-      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-    };
-
-    if (data.permits.appliedPermits?.length) {
-      appliedPermits = data.permits.appliedPermits.map((x: Permit) => {
-        const permitId = x.permitId ?? randomUUID();
-
-        // Add each tracker for this permit with the proper permitId
-        x.permitTracking?.forEach((pt) => appliedPermitTrackers.push({ ...pt, permitId }));
-
-        return buildNewPermitRecord({
+      // Add each tracker for this permit with the proper permitId
+      x.permitTracking?.forEach((pt) =>
+        appliedPermitTrackers.push({
+          ...pt,
           permitId,
-          permitTypeId: x.permitTypeId,
-          activityId,
-          stage: PermitStage.APPLICATION_SUBMISSION,
-          needed: PermitNeeded.YES,
-          state: PermitState.IN_PROGRESS,
-          submittedDate: x.submittedDate,
-          submittedTime: x.submittedTime
-        });
-      });
-    }
-
-    if (data.permits.investigatePermits?.length) {
-      investigatePermits = data.permits.investigatePermits.map((x: Permit) =>
-        buildNewPermitRecord({
-          permitId: x.permitId ?? randomUUID(),
-          permitTypeId: x.permitTypeId,
-          activityId,
-          stage: PermitStage.PRE_SUBMISSION,
-          needed: PermitNeeded.UNDER_INVESTIGATION,
-          state: PermitState.NONE,
-          submittedTime: x.submittedTime
-        })
+          permitTrackingId: pt.permitTrackingId ?? undefined,
+          shownToProponent: pt.shownToProponent ?? undefined
+        } satisfies PermitTrackingCreateInput)
       );
-    }
+
+      return buildNewPermitRecord({
+        permitId,
+        permitTypeId: x.permitTypeId,
+        activityId,
+        stage: PermitStage.APPLICATION_SUBMISSION,
+        needed: PermitNeeded.YES,
+        state: PermitState.IN_PROGRESS,
+        submittedDate: x.submittedDate
+      });
+    });
+  }
+
+  if (data.permits.investigatePermits?.length) {
+    investigatePermits = data.permits.investigatePermits.map((x) =>
+      buildNewPermitRecord({
+        permitId: randomUUID(),
+        permitTypeId: x.permitTypeId,
+        activityId,
+        stage: PermitStage.PRE_SUBMISSION,
+        needed: PermitNeeded.UNDER_INVESTIGATION,
+        state: PermitState.NONE
+      })
+    );
   }
 
   // Put new housing project together
@@ -194,34 +225,19 @@ export const generateHousingProjectData = async (
       housingProjectId: randomUUID(),
       activityId: activityId,
       submittedAt: new Date(),
-      submittedBy: getCurrentUsername(currentContext),
+      submittedBy,
       applicationStatus: ApplicationStatus.NEW,
       submissionType: SubmissionType.GUIDANCE,
-      createdAt: null,
-      createdBy: null,
-      updatedAt: null,
-      updatedBy: null,
-      deletedAt: null,
-      deletedBy: null,
       aaiUpdated: false,
-      assignedUserId: null,
-      queuePriority: null,
-      relatedPermits: null,
-      astNotes: null,
       astUpdated: false,
-      addedToAts: false,
-      atsClientId: null,
-      ltsaCompleted: false,
-      bcOnlineCompleted: false,
+      queuePriority: null,
       financiallySupported: [
-        data.housing?.financiallySupportedBc,
-        data.housing?.financiallySupportedIndigenous,
-        data.housing?.financiallySupportedNonProfit,
-        data.housing?.financiallySupportedHousingCoop
-      ].includes(BasicResponse.YES),
-      checkProvincialPermits: null,
-      atsEnquiryId: null
-    } as HousingProjectBase,
+        data.housing.financiallySupportedBc,
+        data.housing.financiallySupportedIndigenous,
+        data.housing.financiallySupportedNonProfit,
+        data.housing.financiallySupportedHousingCoop
+      ].includes(BasicResponse.YES)
+    } satisfies HousingProjectCreateInput,
     appliedPermits,
     investigatePermits,
     appliedPermitTrackers

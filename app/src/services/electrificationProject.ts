@@ -1,32 +1,33 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateElectrificationProjectData } from '#src/domains/electrificationProject';
+import {
+  createElectrificationProjectData,
+  generateElectrificationProjectData
+} from '#src/domains/electrificationProject';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   ElectrificationProject,
-  ElectrificationProjectIntake,
   ElectrificationProjectStatistics,
+  GetElectrificationProjectStatisticsInput,
   Maybe,
-  PatchElectrificationProjectRequest,
-  SearchElectrificationProjectRequest
+  PatchElectrificationProjectInput,
+  SearchElectrificationProjectInput,
+  SubmitElectrificationProjectDraftInput
 } from '#types';
 
 export const createElectrificationProjectService = async (
-  data: ElectrificationProjectIntake,
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, electrificationProject, initiative }) => {
-      const electrificationProjectData = await generateElectrificationProjectData(
+      const electrificationProjectData = await createElectrificationProjectData(
         { activity, activityContact, contact, initiative },
-        data,
         currentContext
       );
 
@@ -75,14 +76,11 @@ export const getElectrificationProjectService = async (
  * @param filters.userId User ID
  * @returns A Promise that resolves to the electrification project statistics
  */
-export const getElectrificationProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<ElectrificationProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getElectrificationProjectStatisticsService = async (
+  filters: GetElectrificationProjectStatisticsInput
+): Promise<ElectrificationProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const dFrom = val(filters.dateFrom);
   const dTo = val(filters.dateTo);
@@ -160,7 +158,7 @@ export const listElectrificationProjectsService = async (
 export const searchElectrificationProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchElectrificationProjectRequest
+  params: SearchElectrificationProjectInput
 ): Promise<ElectrificationProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
     const result = await electrificationProject.search(params);
@@ -176,8 +174,8 @@ export const searchElectrificationProjects = async (
 
 export const submitElectrificationProjectDraftService = async (
   draftId: Maybe<string>,
-  data: ElectrificationProjectIntake,
-  contactData: ContactBase,
+  data: SubmitElectrificationProjectDraftInput,
+  contactData: SubmitElectrificationProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
@@ -218,7 +216,7 @@ export const submitElectrificationProjectDraftService = async (
  */
 export const patchElectrificationProjectService = async (
   electrificationProjectId: string,
-  data: PatchElectrificationProjectRequest
+  data: PatchElectrificationProjectInput
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(async ({ electrificationProject }) => {
     await electrificationProject.update(

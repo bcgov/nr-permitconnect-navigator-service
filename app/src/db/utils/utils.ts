@@ -52,7 +52,24 @@ export function generateNullDeleteStamps() {
   };
 }
 
-export function jsonToPrismaInputJson(json: Prisma.JsonValue): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue {
+/**
+ * Converts an unknown value (validators use z.unknown() for JSON fields) into a Prisma JSON input.
+ * `undefined` passes through unchanged since Prisma treats it as "omit this field," not invalid data.
+ * Otherwise returns the parsed JSON round-trip (not the original value), since JSON.stringify
+ * silently drops/coerces values with no JSON representation (undefined props, functions,
+ * NaN/Infinity->null) that would otherwise slip past this check unmodified.
+ * @param json - the raw value to convert
+ * @returns the Prisma JSON input, or undefined if `json` was undefined
+ */
+export function jsonToPrismaInputJson(json: unknown): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue | undefined {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
-  return json;
+  if (json === undefined) return undefined;
+
+  try {
+    const serialized = JSON.stringify(json);
+    if (serialized === undefined) throw new Error('Value is not valid JSON');
+    return JSON.parse(serialized) as Prisma.InputJsonValue;
+  } catch {
+    throw new Error('Value is not valid JSON');
+  }
 }

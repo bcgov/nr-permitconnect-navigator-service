@@ -3,7 +3,7 @@ import * as ssoExternal from '#src/external/sso';
 
 import type { Request, Response } from 'express';
 import type { Mock } from 'vitest';
-import type { IdirSearchParameters } from '#types';
+import type { SearchIdirUsersRequest } from '#types';
 
 vi.mock('config');
 
@@ -28,8 +28,8 @@ describe('searchIdirUsersController', () => {
     const mockResp = { status: 200, data: [{ id: 'user-1', name: 'Test User' }] };
     vi.spyOn(ssoExternal, 'searchIdirUsers').mockResolvedValueOnce(mockResp);
 
-    const query: IdirSearchParameters = { firstName: 'Jane', lastName: 'Doe' } as unknown as IdirSearchParameters;
-    const req = { query } as unknown as Request<never, never, never, IdirSearchParameters>;
+    const query: SearchIdirUsersRequest = { firstName: 'Jane', lastName: 'Doe' };
+    const req = { query } as unknown as Request<never, never, never, SearchIdirUsersRequest>;
 
     await searchIdirUsersController(req, res as unknown as Response);
 

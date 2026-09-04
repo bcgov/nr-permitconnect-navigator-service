@@ -1,8 +1,10 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
-export const paginationOptions = Joi.object({
-  skip: Joi.string().allow(null),
-  sortField: Joi.string().allow(null),
-  sortOrder: Joi.string().allow(null).valid('-1', '0', '1'),
-  take: Joi.string().allow(null)
-});
+export const paginationOptions = z
+  .object({
+    skip: z.string().nullish(),
+    sortField: z.string().nullish(),
+    sortOrder: z.enum(['-1', '0', '1']).nullish(),
+    take: z.string().nullish()
+  })
+  .strict();

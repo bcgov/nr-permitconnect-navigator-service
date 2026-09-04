@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-import { DuplicateKeyProblem, NotFoundProblem } from '#src/db/errors';
-import { differential, Problem } from '#src/utils/index';
+import { NotFoundProblem } from '#src/db/errors';
+import { differential } from '#src/utils/index';
 
 import type { Repositories } from '#src/db/unitOfWork';
 import type { JwtUser } from '#src/services/login';
@@ -27,22 +27,9 @@ export const createUser = async (
     active: true
   };
 
-  try {
-    return await repositories.user.create(newUser);
-  } catch (error) {
-    if (error instanceof DuplicateKeyProblem && error.isConstraint('sub')) {
-      const user = await repositories.user.findBySub(data.sub);
-      if (!user)
-        throw new Problem(500, {
-          type: '/problems/invariant-violation',
-          title: 'Invariant Violation',
-          detail: 'User creation failed with a duplicate "sub", but no matching user could be found.'
-        });
-      return user;
-    }
-
-    throw error;
-  }
+  // Postgres aborts the whole transaction on a constraint violation, so a duplicate 'sub'
+  // can't be caught-and-retried within the same transaction - upsert on the unique key instead.
+  return await repositories.user.createIfNotExists({ sub: data.sub }, newUser);
 };
 
 export const updateUser = async (

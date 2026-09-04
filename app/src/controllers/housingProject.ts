@@ -17,23 +17,19 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
+  DraftCreateInput,
+  GetHousingProjectStatisticsRequest,
   HousingProject,
-  HousingProjectIntake,
   HousingProjectStatistics,
   SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
-  StatisticsFilters
+  SubmitHousingProjectDraftRequest,
+  UpsertHousingProjectDraftRequest
 } from '#types';
 
-export const createHousingProjectController = async (
-  req: Request<never, never, HousingProjectIntake>,
-  res: Response<HousingProject, LocalContext>
-) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as HousingProjectIntake;
-
-  const result = await createHousingProjectService(req.body, res.locals.currentContext);
+export const createHousingProjectController = async (_req: Request, res: Response<HousingProject, LocalContext>) => {
+  const result = await createHousingProjectService(res.locals.currentContext);
   res.status(201).json(result);
 };
 
@@ -52,7 +48,7 @@ export const getHousingProjectController = async (
 };
 
 export const getHousingProjectStatisticsController = async (
-  req: Request<never, never, never, StatisticsFilters>,
+  req: Request<never, never, never, GetHousingProjectStatisticsRequest>,
   res: Response<HousingProjectStatistics>
 ) => {
   const response = await getHousingProjectStatisticsService(req.query);
@@ -73,8 +69,6 @@ export const searchHousingProjectsController = async (
   req: Request<never, never, SearchHousingProjectRequest>,
   res: Response<HousingProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -114,7 +108,7 @@ export const getHousingProjectDraftsController = async (req: Request, res: Respo
 };
 
 export const submitHousingProjectDraftController = async (
-  req: Request<never, never, HousingProjectIntake>,
+  req: Request<never, never, SubmitHousingProjectDraftRequest>,
   res: Response<HousingProject, LocalContext>
 ) => {
   const response = await submitHousingProjectDraftService(
@@ -127,13 +121,13 @@ export const submitHousingProjectDraftController = async (
 };
 
 export const upsertHousingProjectDraftController = async (
-  req: Request<never, never, Draft>,
+  req: Request<never, never, UpsertHousingProjectDraftRequest>,
   res: Response<Draft, LocalContext>
 ) => {
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    req.body,
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.HOUSING,
     DraftCode.HOUSING_PROJECT,
     res.locals.currentContext

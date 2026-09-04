@@ -15,18 +15,16 @@ import { differential, isEmptyObject } from '#src/utils/utils';
 import type {
   CurrentAuthorization,
   CurrentContext,
-  IntakePermitRequest,
-  ListPermitsOptions,
+  IntakePermitInput,
+  ListPermitsInput,
   Permit,
-  PermitBase,
-  PermitNote,
   PermitTracking,
-  PermitTrackingBase,
-  PermitType,
-  SearchPermitsOptions,
+  PermitTrackingUpsertInput,
+  SearchPermitsInput,
   SearchPermitsResponse,
   SourceSystemKind,
-  UpsertPermitRequest
+  UpsertPermitBodyInput,
+  UpsertPermitInput
 } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
@@ -89,7 +87,7 @@ export const getPermitService = async (permitId: string): Promise<Permit> => {
 export const intakePermitService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  data: IntakePermitRequest[]
+  data: IntakePermitInput[]
 ): Promise<Permit[]> => {
   return await unitOfWork.execute(async ({ activityContact, permit, permitTracking }) => {
     // Validate the calling user is a delegate for every activity in the permit request list
@@ -104,7 +102,7 @@ export const intakePermitService = async (
         })
       ).map((x) => x.activityId);
 
-      const permitActivities = data.map((x: IntakePermitRequest) => x.activityId);
+      const permitActivities = data.map((x: IntakePermitInput) => x.activityId);
 
       if (!permitActivities.every((activityId) => userActivities.includes(activityId))) {
         throw new Problem(403, {
@@ -114,13 +112,13 @@ export const intakePermitService = async (
     }
 
     // Build new permit and tracking ID arrays
-    const appliedPermitTrackers: PermitTrackingBase[] = [];
+    const appliedPermitTrackers: PermitTrackingUpsertInput[] = [];
 
-    const appliedPermits: UpsertPermitRequest[] = data.map((x: IntakePermitRequest) => {
+    const appliedPermits = data.map((x: IntakePermitInput) => {
       const permitId = randomUUID();
 
       // Add each tracker for this permit with the proper permitId
-      if (x.trackingId) appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingBase);
+      if (x.trackingId) appliedPermitTrackers.push({ trackingId: x.trackingId, permitId } as PermitTrackingUpsertInput);
 
       return buildNewPermitRecord({
         permitId,
@@ -153,7 +151,7 @@ export const intakePermitService = async (
 export const listPermitsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  options?: ListPermitsOptions
+  options?: ListPermitsInput
 ): Promise<Permit[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
     const result = await permit.findMany({
@@ -202,7 +200,7 @@ export const searchPermitsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
   initiative: Exclude<Initiative, Initiative.PCNS>,
-  options: SearchPermitsOptions
+  options: SearchPermitsInput
 ): Promise<SearchPermitsResponse> => {
   return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
     const result = await permit.search(initiative, options);
@@ -231,10 +229,10 @@ export const searchPermitsService = async (
  * @returns A Promise that resolves to the created/updated permit
  */
 export const upsertPermitService = async (
-  permitData: PermitBase,
-  permitNoteData: PermitNote[] | undefined,
-  permitTrackingData: PermitTracking[] | undefined,
-  permitTypeData: PermitType | undefined
+  permitData: UpsertPermitInput,
+  permitNoteData: UpsertPermitBodyInput['permitNote'],
+  permitTrackingData: UpsertPermitBodyInput['permitTracking'],
+  permitTypeData: UpsertPermitBodyInput['permitType']
 ): Promise<Permit> => {
   return await unitOfWork.execute(
     async ({
@@ -249,7 +247,7 @@ export const upsertPermitService = async (
       user
     }) => {
       // Add permit ID and stamp data if necessary
-      const upsertPermitData: PermitBase = {
+      const upsertPermitData: UpsertPermitInput & { permitId: string } = {
         ...permitData,
         permitId: permitData.permitId || randomUUID()
       };
@@ -259,7 +257,7 @@ export const upsertPermitService = async (
         permitTypeData?.sourceSystem ?? '',
         sourceSystemKinds
       );
-      const peachIntegratedTracking = findPriorityPermitTracking(permitTrackingData);
+      const peachIntegratedTracking = findPriorityPermitTracking(permitTrackingData as PermitTracking[] | undefined);
       let isValidPeachPermit = false;
 
       if (isPeachIntegratedAuth && !!peachIntegratedTracking) {
@@ -273,7 +271,7 @@ export const upsertPermitService = async (
       }
 
       // Add data to tracking IDs if necessary
-      permitTrackingData?.forEach((x: PermitTracking) => {
+      permitTrackingData?.forEach((x) => {
         x.permitId = x.permitId ?? permitData.permitId;
         x.shownToProponent = x.shownToProponent ?? false;
       });
@@ -286,7 +284,9 @@ export const upsertPermitService = async (
         {
           permitId: upsertPermitData.permitId
         },
-        upsertPermitData,
+        // activityId is optional in the request schema (updates may omit it) but required for a create -
+        // matches original pre-migration Joi behavior, which had the same gap.
+        upsertPermitData as typeof upsertPermitData & { activityId: string },
         upsertPermitData
       );
       const data = await permit.findUniqueOrThrow({
@@ -298,7 +298,7 @@ export const upsertPermitService = async (
         {
           permitId: upsertPermitData.permitId,
           permitTrackingId: {
-            notIn: permitTrackingData?.map((x: PermitTracking) => x.permitTrackingId).filter(Boolean)
+            notIn: permitTrackingData?.map((x) => x.permitTrackingId).filter((id): id is number => id != null)
           }
         },
         { hard: true }
@@ -309,11 +309,11 @@ export const upsertPermitService = async (
           permitTrackingData.map(async (p) => {
             const permitTrackingUpsert = {
               permitId: data.permitId,
-              permitTrackingId: p.permitTrackingId,
+              permitTrackingId: p.permitTrackingId ?? undefined,
               trackingId: p.trackingId,
-              shownToProponent: p.shownToProponent,
+              shownToProponent: p.shownToProponent ?? undefined,
               sourceSystemKindId: p.sourceSystemKindId
-            } as PermitTrackingBase;
+            } satisfies PermitTrackingUpsertInput;
 
             return await upsertPermitTracking({ permitTracking }, permitTrackingUpsert);
           })
@@ -325,7 +325,7 @@ export const upsertPermitService = async (
       const diff = differential(before, after);
 
       const statusChanged = !isEmptyObject(diff);
-      const permitNoteText = (permitNoteData?.[0].note ?? '').trim();
+      const permitNoteText = (permitNoteData?.[0]?.note ?? '').trim();
       const isEmptyPermitNote = permitNoteText.length === 0;
 
       // Prevent creating notes and sending an update email if the above call fails

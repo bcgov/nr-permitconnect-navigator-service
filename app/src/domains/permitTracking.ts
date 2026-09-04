@@ -1,5 +1,5 @@
 import type { Repositories } from '#src/db/unitOfWork';
-import type { PermitTracking, PermitTrackingBase } from '#types';
+import type { PermitTracking, PermitTrackingUpsertInput } from '#types';
 
 /**
  * Upsert Permit Tracking
@@ -9,7 +9,7 @@ import type { PermitTracking, PermitTrackingBase } from '#types';
  */
 export const upsertPermitTracking = async (
   repositories: Pick<Repositories, 'permitTracking'>,
-  data: PermitTrackingBase
+  data: PermitTrackingUpsertInput
 ): Promise<PermitTracking> => {
   if (data.permitTrackingId) {
     return await repositories.permitTracking.update({ permitTrackingId: data.permitTrackingId }, data);

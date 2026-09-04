@@ -13,6 +13,7 @@ import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import * as activityDomain from '#src/domains/activity';
 import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enquiry';
 import * as projectDomain from '#src/domains/project';
+import { getCurrentUsername } from '#src/utils/index';
 import { Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
@@ -152,98 +153,78 @@ describe('enquiry domain', () => {
   });
 
   describe('generateEnquiryData', () => {
-    it('should use provided activityId and return enquiry data', async () => {
-      const intakeWithId = { ...TEST_ENQUIRY_INTAKE, activityId: 'EXISTING_ACTI' };
+    it('should always create a new activity (no activityId in the request shape)', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
-      const result = await generateEnquiryData(mockRepos, intakeWithId, TEST_CURRENT_CONTEXT);
+      const result = await generateEnquiryData(mockRepos, TEST_ENQUIRY_INTAKE, TEST_CURRENT_CONTEXT);
 
-      expect(result.activityId).toBe('EXISTING_ACTI');
-      expect(result.submittedBy).toBe('test-user'); // Using the mocked utils return
-      expect(result.enquiryStatus).toBe(ApplicationStatus.NEW);
-      expect(result.submissionType).toBe(SubmissionType.GENERAL_ENQUIRY);
-      // Ensure search is NOT called when activityId is already provided
-      expect(mockRepos.contact.search).not.toHaveBeenCalled();
-    });
-
-    it('should create activity when activityId not provided', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-
-      const intakeWithoutId = { ...TEST_ENQUIRY_INTAKE, activityId: undefined };
-
-      const result = await generateEnquiryData(mockRepos, intakeWithoutId, TEST_CURRENT_CONTEXT);
-
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        { activity: mockRepos.activity, initiative: mockRepos.initiative },
-        TEST_CURRENT_CONTEXT.initiative
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        TEST_CURRENT_CONTEXT.initiative,
+        TEST_CURRENT_CONTEXT
       );
       expect(result.activityId).toBe(TEST_ACTIVITY_ELECTRIFICATION.activityId);
     });
 
-    it('should link contact to activity when contact found and activity created', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
-
-      const intakeWithoutId = { ...TEST_ENQUIRY_INTAKE, activityId: undefined };
-
-      await generateEnquiryData(mockRepos, intakeWithoutId, TEST_CURRENT_CONTEXT);
-
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({ userId: [TEST_CURRENT_CONTEXT.userId] });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityId: TEST_ACTIVITY_ELECTRIFICATION.activityId,
-          contactId: TEST_CONTACT_1.contactId
-        })
-      );
-    });
-
-    it('should not link contact if search returns empty', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_ELECTRIFICATION as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
-
-      const intakeWithoutId = { ...TEST_ENQUIRY_INTAKE, activityId: undefined };
-
-      await generateEnquiryData(mockRepos, intakeWithoutId, TEST_CURRENT_CONTEXT);
-
-      expect(mockRepos.activityContact.create).not.toHaveBeenCalled();
-    });
-
     it('should throw error if activity creation fails', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
-      const intakeWithoutId = { ...TEST_ENQUIRY_INTAKE, activityId: undefined };
-
-      await expect(generateEnquiryData(mockRepos, intakeWithoutId, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+      await expect(generateEnquiryData(mockRepos, TEST_ENQUIRY_INTAKE, TEST_CURRENT_CONTEXT)).rejects.toThrow(
         'Failed to generate activity ID'
       );
     });
 
-    it('should use provided enquiryId or generate one', async () => {
-      const intakeWithId = { ...TEST_ENQUIRY_INTAKE, activityId: 'EXISTING_ACTI', enquiryId: 'EXISTING_ID' };
-      const result1 = await generateEnquiryData(mockRepos, intakeWithId, TEST_CURRENT_CONTEXT);
+    it('should throw error when submittedBy cannot be determined', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
+      vi.mocked(getCurrentUsername).mockReturnValueOnce(undefined);
 
-      expect(result1.enquiryId).toBe('EXISTING_ID');
-
-      const intakeWithoutId = { ...TEST_ENQUIRY_INTAKE, activityId: 'EXISTING_ACTI', enquiryId: undefined };
-      const result2 = await generateEnquiryData(mockRepos, intakeWithoutId, TEST_CURRENT_CONTEXT);
-
-      expect(result2.enquiryId).toBeDefined();
-      expect(result2.enquiryId).not.toBe('EXISTING_ID');
+      await expect(generateEnquiryData(mockRepos, TEST_ENQUIRY_INTAKE, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to determine submittedBy'
+      );
     });
 
-    it('should use provided submittedAt or current date', async () => {
-      const customDate = new Date('2024-01-15');
-      const intakeWithDate = {
-        ...TEST_ENQUIRY_INTAKE,
-        activityId: 'EXISTING_ACTI',
-        submittedAt: customDate.toISOString()
-      };
+    it('should generate a random enquiryId and set submittedAt/submittedBy/enquiryStatus', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValue(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
 
-      const result = await generateEnquiryData(mockRepos, intakeWithDate, TEST_CURRENT_CONTEXT);
+      const result1 = await generateEnquiryData(mockRepos, TEST_ENQUIRY_INTAKE, TEST_CURRENT_CONTEXT);
+      const result2 = await generateEnquiryData(mockRepos, TEST_ENQUIRY_INTAKE, TEST_CURRENT_CONTEXT);
 
-      expect(result.submittedAt).toEqual(new Date(customDate));
+      expect(result1.enquiryId).toBeDefined();
+      expect(result1.enquiryId).not.toBe(result2.enquiryId);
+      expect(result1.submittedAt).toBeInstanceOf(Date);
+      expect(result1.submittedBy).toBe('test-user');
+      expect(result1.enquiryStatus).toBe(ApplicationStatus.NEW);
+    });
+
+    it('should default submissionType when not provided', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
+
+      const intake = { ...TEST_ENQUIRY_INTAKE, submissionType: undefined };
+      const result = await generateEnquiryData(mockRepos, intake, TEST_CURRENT_CONTEXT);
+
+      expect(result.submissionType).toBe(SubmissionType.GENERAL_ENQUIRY);
+    });
+
+    it('should default relatedActivityId and enquiryDescription to null when omitted', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_ELECTRIFICATION.activityId
+      );
+
+      const intake = { ...TEST_ENQUIRY_INTAKE, relatedActivityId: undefined, enquiryDescription: undefined };
+      const result = await generateEnquiryData(mockRepos, intake, TEST_CURRENT_CONTEXT);
+
+      expect(result.relatedActivityId).toBeNull();
+      expect(result.enquiryDescription).toBeNull();
     });
   });
 });

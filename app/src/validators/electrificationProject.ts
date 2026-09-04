@@ -1,120 +1,156 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import atsValidator from './ats.ts';
-import { activityId, email, uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
+import { activityId, uuidv4 } from './common.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
 import { YES_NO_LIST } from '#src/utils/constants/application';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
 import { ProjectType } from '#src/utils/enums/electrification';
 
-const schema = {
+export const schema = {
+  // POST / always sends an empty body (frontend creates a blank project, then fills it in via patch).
   createElectrificationProject: {
-    body: Joi.object({
-      activityId: activityId.allow(null),
-      basic: {
-        projectDescription: Joi.when('project.projectType', {
-          is: ProjectType.OTHER,
-          then: Joi.string().required().max(4000),
-          otherwise: Joi.string().max(4000).allow(null)
-        }),
-        projectName: Joi.string().required().max(255).trim(),
-        registeredId: Joi.string().max(255).trim().allow(null),
-        registeredName: Joi.string().max(255).trim().allow(null)
-      },
-      contact: contactSchema,
-      draftId: uuidv4.allow(null),
-      project: {
-        bcHydroNumber: Joi.string().max(255).trim().allow(null),
-        projectType: Joi.string().required().custom(requireValidCode.ElectrificationProjectType)
-      }
-    })
+    body: z.object({}).strict().default({})
   },
-  emailConfirmation: {
-    body: Joi.object({
-      bcc: Joi.array().items(email).allow(null),
-      bodyType: Joi.string().required().allow(null),
-      body: Joi.string().required(),
-      cc: Joi.array().items(email),
-      from: email.required(),
-      subject: Joi.string().required(),
-      to: Joi.array().items(email).required()
-    })
+  // POST /draft/submit carries the full intake payload from ProjectIntakeForm.vue.
+  submitElectrificationProjectDraft: {
+    body: z
+      .object({
+        activityId: activityId.nullish(),
+        basic: z
+          .object({
+            projectDescription: z.string().max(4000).nullish(),
+            projectName: z.string().max(255).trim(),
+            registeredId: z.string().max(255).trim().nullish(),
+            registeredName: z.string().max(255).trim()
+          })
+          .strict(),
+        contact: submittedContactSchema,
+        draftId: uuidv4.nullish(),
+        project: z
+          .object({
+            bcHydroNumber: z.string().max(255).trim().nullish(),
+            projectType: requireValidCode.ElectrificationProjectType(z.string())
+          })
+          .strict()
+      })
+      .strict()
+      .superRefine((data, ctx) => {
+        const isOther = data.project.projectType === ProjectType.OTHER;
+        const value = data.basic.projectDescription;
+        const isEmpty = value === undefined || value === null || value === '';
+        if (isOther && isEmpty) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['basic', 'projectDescription'],
+            message: '"projectDescription" is required'
+          });
+        }
+      })
   },
   deleteElectrificationProject: {
-    params: Joi.object({
-      electrificationProjectId: uuidv4.required()
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   },
   deleteDraft: {
-    params: Joi.object({
-      draftId: uuidv4.required()
-    })
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
+  },
+  upsertDraft: {
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
+      })
+      .strict()
   },
   getStatistics: {
-    query: Joi.object({
-      dateFrom: Joi.date().allow(null),
-      dateTo: Joi.date().allow(null),
-      monthYear: Joi.date().allow(null),
-      userId: uuidv4.allow(null)
-    })
+    query: z
+      .object({
+        dateFrom: z.coerce.date().nullish(),
+        dateTo: z.coerce.date().nullish(),
+        monthYear: z.coerce.date().nullish(),
+        userId: uuidv4.nullish()
+      })
+      .strict()
   },
   getElectrificationProject: {
-    params: Joi.object({
-      electrificationProjectId: uuidv4.required()
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   },
   searchElectrificationProjects: {
-    body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
-      createdBy: Joi.array().items(Joi.string()),
-      includeUser: Joi.boolean(),
-      electrificationProjectId: Joi.array().items(uuidv4),
-      projectType: Joi.array().items(Joi.string().custom(requireValidCode.ElectrificationProjectType)),
-      projectCategory: Joi.array().items(Joi.string().custom(requireValidCode.ElectrificationProjectCategory))
-    })
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional(),
+        electrificationProjectId: z.array(uuidv4).optional(),
+        projectType: z.array(requireValidCode.ElectrificationProjectType(z.string())).optional(),
+        projectCategory: z.array(requireValidCode.ElectrificationProjectCategory(z.string())).optional()
+      })
+      .strict()
+      .default({})
   },
   patchElectrificationProject: {
-    body: Joi.object({
-      projectName: Joi.string().max(255).trim(),
-      companyNameRegistered: Joi.string().max(255).trim().allow(null),
-      companyIdRegistered: Joi.string().max(255).trim().allow(null),
-      projectType: Joi.string().custom(requireValidCode.ElectrificationProjectType),
-      bcHydroNumber: Joi.string().max(255).trim().allow(null),
-      projectDescription: Joi.when('projectType', {
-        is: ProjectType.OTHER,
-        then: Joi.string().required().max(4000),
-        otherwise: Joi.string().max(4000).allow(null)
+    body: z
+      .object({
+        projectName: z.string().max(255).trim().optional(),
+        companyNameRegistered: z.string().max(255).trim().nullish(),
+        companyIdRegistered: z.string().max(255).trim().nullish(),
+        projectType: requireValidCode.ElectrificationProjectType(z.string()).optional(),
+        bcHydroNumber: z.string().max(255).trim().nullish(),
+        projectDescription: z.string().max(4000).nullish(),
+        projectCategory: requireValidCode.ElectrificationProjectCategory(z.string()).nullish(),
+        assignedUserId: uuidv4.nullish(),
+        hasEpa: z.enum(YES_NO_LIST as [string, ...string[]]).nullish(),
+        megawatts: z.number().positive().nullish(),
+        bcEnvironmentAssessNeeded: z.enum(YES_NO_LIST as [string, ...string[]]).nullish(),
+        locationDescription: z.string().max(4000).nullish(),
+        astNotes: z.string().max(4000).nullish(),
+        queuePriority: z.number().int().min(0).max(3).optional(),
+        submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
+        applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+        ...atsValidator.atsEnquirySubmissionFields,
+        aaiUpdated: z.boolean().optional()
+      })
+      .strict()
+      .superRefine((data, ctx) => {
+        const isOther = data.projectType === ProjectType.OTHER;
+        const value = data.projectDescription;
+        const isEmpty = value === undefined || value === null || value === '';
+        if (isOther && isEmpty) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['projectDescription'],
+            message: '"projectDescription" is required'
+          });
+        }
       }),
-      projectCategory: Joi.string().custom(requireValidCode.ElectrificationProjectCategory).allow(null),
-      assignedUserId: uuidv4.allow(null),
-      hasEpa: Joi.string()
-        .valid(...YES_NO_LIST)
-        .allow(null),
-      megawatts: Joi.number().positive().allow(null),
-      bcEnvironmentAssessNeeded: Joi.string()
-        .valid(...YES_NO_LIST)
-        .allow(null),
-      locationDescription: Joi.string().max(4000).allow(null),
-      astNotes: Joi.string().max(4000).allow(null),
-      queuePriority: Joi.number().integer().min(0).max(3),
-      submissionType: Joi.string().valid(...SUBMISSION_TYPE_LIST),
-      applicationStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      ...atsValidator.atsEnquirySubmissionFields,
-      aaiUpdated: Joi.boolean()
-    }),
-    params: Joi.object({
-      electrificationProjectId: uuidv4.required()
-    })
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
   }
 };
 
 export default {
   createElectrificationProject: validate(schema.createElectrificationProject),
-  emailConfirmation: validate(schema.emailConfirmation),
+  submitElectrificationProjectDraft: validate(schema.submitElectrificationProjectDraft),
   deleteElectrificationProject: validate(schema.deleteElectrificationProject),
   deleteDraft: validate(schema.deleteDraft),
+  upsertDraft: validate(schema.upsertDraft),
   getStatistics: validate(schema.getStatistics),
   getElectrificationProject: validate(schema.getElectrificationProject),
   searcElectrificationProjects: validate(schema.searchElectrificationProjects),

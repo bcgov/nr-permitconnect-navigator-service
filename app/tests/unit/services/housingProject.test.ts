@@ -25,6 +25,7 @@ vi.mock('../../../src/db/database.ts', () => ({
   }
 }));
 
+const createDataSpy = vi.spyOn(housingProjectDomain, 'createHousingProjectData');
 const generateDataSpy = vi.spyOn(housingProjectDomain, 'generateHousingProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
@@ -37,7 +38,7 @@ describe('housingProject service', () => {
   });
 
   describe('createHousingProjectService', () => {
-    it('calls generateHousingProjectData domain, creates project and permits, and returns result', async () => {
+    it('calls createHousingProjectData domain, creates project and permits, and returns result', async () => {
       const projectData = { ...TEST_HOUSING_PROJECT_CREATE, geoJson: JSON.stringify({}) };
       const generatedData = {
         housingProject: projectData,
@@ -46,25 +47,21 @@ describe('housingProject service', () => {
         appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
       };
 
-      generateDataSpy.mockResolvedValueOnce(generatedData as never);
+      createDataSpy.mockResolvedValueOnce(generatedData as never);
       mockRepos.housingProject.create.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
       mockRepos.permit.upsert.mockResolvedValue({} as never);
       upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
-      const response = await housingProjectService.createHousingProjectService(
-        TEST_HOUSING_PROJECT_INTAKE,
-        TEST_CURRENT_CONTEXT
-      );
+      const response = await housingProjectService.createHousingProjectService(TEST_CURRENT_CONTEXT);
 
-      expect(generateDataSpy).toHaveBeenCalledTimes(1);
-      expect(generateDataSpy).toHaveBeenCalledWith(
+      expect(createDataSpy).toHaveBeenCalledTimes(1);
+      expect(createDataSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           activity: mockRepos.activity,
           activityContact: mockRepos.activityContact,
           contact: mockRepos.contact,
           initiative: mockRepos.initiative
         }),
-        TEST_HOUSING_PROJECT_INTAKE,
         TEST_CURRENT_CONTEXT
       );
       expect(mockRepos.housingProject.create).toHaveBeenCalledTimes(1);
@@ -108,9 +105,9 @@ describe('housingProject service', () => {
       vi.mocked(prisma.$queryRaw).mockResolvedValueOnce(mockDbResponse as never);
 
       const filters = {
-        dateFrom: '2024-01-01',
-        dateTo: '2024-12-31',
-        monthYear: '2024-01',
+        dateFrom: new Date('2024-01-01'),
+        dateTo: new Date('2024-12-31'),
+        monthYear: new Date('2024-01-01'),
         userId: 'user-123'
       };
 
@@ -230,7 +227,7 @@ describe('housingProject service', () => {
       const response = await housingProjectService.submitHousingProjectDraftService(
         draftId,
         TEST_HOUSING_PROJECT_INTAKE,
-        TEST_CONTACT_1,
+        TEST_HOUSING_PROJECT_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 
@@ -253,9 +250,9 @@ describe('housingProject service', () => {
       expect(mockRepos.draft.delete).toHaveBeenCalledWith({ draftId });
       expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(1);
       expect(mockRepos.contact.upsert).toHaveBeenCalledWith(
-        { contactId: TEST_CONTACT_1.contactId },
-        TEST_CONTACT_1,
-        TEST_CONTACT_1
+        { contactId: TEST_HOUSING_PROJECT_INTAKE.contact.contactId },
+        TEST_HOUSING_PROJECT_INTAKE.contact,
+        TEST_HOUSING_PROJECT_INTAKE.contact
       );
       expect(emailSpy).toHaveBeenCalledTimes(1);
       expect(emailSpy).toHaveBeenCalledWith(
@@ -287,7 +284,7 @@ describe('housingProject service', () => {
       const response = await housingProjectService.submitHousingProjectDraftService(
         null,
         TEST_HOUSING_PROJECT_INTAKE,
-        TEST_CONTACT_1,
+        TEST_HOUSING_PROJECT_INTAKE.contact,
         TEST_CURRENT_CONTEXT
       );
 
@@ -298,7 +295,7 @@ describe('housingProject service', () => {
 
   describe('patchHousingProjectService', () => {
     it('updates project and returns refetched project', async () => {
-      const updateData = { housingProjectId: TEST_HOUSING_PROJECT_1.housingProjectId, submittedAt: new Date() };
+      const updateData = { projectName: 'Updated Name' };
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
       mockRepos.housingProject.patch.mockResolvedValueOnce({} as never);
       mockRepos.housingProject.findFirstOrThrow.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
