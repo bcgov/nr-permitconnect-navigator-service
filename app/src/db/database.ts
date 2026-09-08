@@ -12,7 +12,7 @@ const log = getLogger(module.filename);
 const db = {
   host: config.get<string>('server.db.host'),
   user: config.get<string>('server.db.username'),
-  password: config.get<string>('server.db.password'),
+  password: encodeURIComponent(config.get<string>('server.db.password')),
   database: config.get<string>('server.db.database'),
   port: config.get<string>('server.db.port'),
   poolMax: config.get<string>('server.db.poolMax')

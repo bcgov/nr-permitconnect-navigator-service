@@ -4,7 +4,10 @@ import type * as DatabaseModule from '#src/db/database';
 
 vi.mock('config', () => ({
   default: {
-    get: vi.fn().mockReturnValue('test'),
+    get: vi.fn().mockImplementation((key: string) => {
+      if (key === 'server.db.password') return 'p@ss:w/o?r#d%';
+      return 'test';
+    }),
     has: vi.fn().mockReturnValue(false)
   }
 }));
@@ -104,5 +107,17 @@ describe('checkDatabaseSchema', () => {
     });
 
     freezeSpy.mockRestore();
+  });
+});
+
+describe('datasourceUrl', () => {
+  it('encodes reserved characters in the database password when constructing datasourceUrl', async () => {
+    const { PrismaClient: FreshPrismaClient } = await import('@prisma/client');
+
+    expect(FreshPrismaClient).toHaveBeenCalledWith(
+      expect.objectContaining({
+        datasourceUrl: 'postgresql://test:p%40ss%3Aw%2Fo%3Fr%23d%25@test:test/test?&connection_limit=test'
+      })
+    );
   });
 });

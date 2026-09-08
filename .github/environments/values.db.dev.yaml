@@ -1,0 +1,20 @@
+crunchy-postgres:
+  instances:
+    dataVolumeClaimSpec:
+      storage: 4Gi
+    requests:
+      memory: 512Mi
+    limits:
+      memory: 1Gi
+  pgBackRest: # TODO: Temporary, remove once functionality is confirmed
+    s3:
+      enabled: true
+      createS3Secret: false
+      s3Secret: s3-pgbackrest
+      s3Path: /dev/crunchydb
+      s3UriStyle: path
+      bucket: pcnsts
+      endpoint: https://nrs.objectstore.gov.bc.ca
+      region: ca-central-1
+      fullSchedule: "0 9 * * *"
+      incrementalSchedule: "0 1,13,21 * * *"

@@ -1,0 +1,108 @@
+{{- $cluster := required "database.clusterName is required" .Values.database.clusterName -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "pcns.fullname" . }}-db-permissions
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
+  annotations:
+    helm.sh/hook: pre-install,pre-upgrade
+    helm.sh/hook-weight: "10"
+    helm.sh/hook-delete-policy: before-hook-creation,hook-succeeded
+spec:
+  backoffLimit: 6
+  activeDeadlineSeconds: 480
+  template:
+    metadata:
+      labels:
+        {{- include "pcns.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: Never
+
+      # Gates the main container so its secretKeyRefs resolve only once PGO has created them.
+      initContainers:
+        - name: wait-for-cluster
+          image: {{ .Values.database.bootstrapImage }}
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              for i in $(seq 1 60); do
+                pg_isready -h {{ printf "%s-primary" $cluster }} -p 5432 -q && exit 0
+                sleep 5
+              done
+              echo "timed out waiting for {{ $cluster }}-primary" >&2
+              exit 1
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              cpu: 100m
+              memory: 64Mi
+
+      containers:
+        - name: grant-database-permissions
+          image: {{ .Values.database.bootstrapImage }}
+          imagePullPolicy: IfNotPresent
+          resources:
+            requests:
+              cpu: 10m
+              memory: 64Mi
+            limits:
+              cpu: 100m
+              memory: 128Mi
+          env:
+            # pgBouncer rejects superuser logins, so connect to the primary directly.
+            - name: PGHOST
+              value: {{ printf "%s-primary" $cluster | quote }}
+            - name: PGPORT
+              value: "5432"
+            - name: PGDATABASE
+              value: postgres
+            - name: PGUSER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-pguser-postgres" $cluster }}
+                  key: user
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ printf "%s-pguser-postgres" $cluster }}
+                  key: password
+            - name: APP_DATABASE
+            {{- if .Values.database.name }}
+              value: {{ .Values.database.name | quote }}
+            {{- else }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.secretKeys.database | default "dbname" }}
+            {{- end }}
+            - name: APP_USER
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.database.secretName }}
+                  key: {{ .Values.database.secretKeys.username | default "user" }}
+          command:
+            - /bin/sh
+            - -ec
+            - |
+              until pg_isready -q; do
+                sleep 5
+              done
+
+              # No-op for the long-lived environments; provisions the database for per-PR releases.
+              if ! psql -tAc "SELECT 1 FROM pg_database WHERE datname = '$APP_DATABASE'" | grep -q 1; then
+                psql -v ON_ERROR_STOP=1 \
+                  -c "CREATE DATABASE \"$APP_DATABASE\" OWNER \"$APP_USER\";"
+              fi
+
+              psql -v ON_ERROR_STOP=1 \
+                -d "$APP_DATABASE" \
+                -c "GRANT ALL ON SCHEMA public TO \"$APP_USER\";"
+
+              psql -v ON_ERROR_STOP=1 \
+                -d postgres \
+                -c "ALTER DATABASE \"$APP_DATABASE\" OWNER TO \"$APP_USER\";"
