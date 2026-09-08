@@ -7,102 +7,145 @@ crunchy-postgres:
   crunchyImage: artifacts.developer.gov.bc.ca/bcgov-docker-local/crunchy-postgres:ubi9-18.1-2547
   # -- PostgreSQL major version.
   postgresVersion: 18
+  # -- Image pull policy for database containers.
   imagePullPolicy: IfNotPresent
+  # -- Enables OpenShift-specific security contexts and configurations.
   openshift: true
 
   standby:
+    # -- Enable standby cluster configuration for DR replication.
     enabled: false
 
   instances:
+    # -- Instance set name.
     name: ha
+    # -- Number of PostgreSQL high-availability replicas.
     replicas: 2
     dataVolumeClaimSpec:
+      # -- Persistent storage size for PostgreSQL data and WAL.
       storage: 2Gi
+      # -- Storage class name for PostgreSQL data volume.
       storageClassName: netapp-block-standard
     requests:
-      cpu: 10m
+      # -- CPU request for PostgreSQL instance pod (scheduler floor is 10m).
+      cpu: 50m
+      # -- Memory request for PostgreSQL instance pod.
       memory: 256Mi
     limits:
-      cpu: 250m
+      # -- CPU limit for PostgreSQL instance pod.
+      cpu: 500m
+      # -- Memory limit for PostgreSQL instance pod.
       memory: 512Mi
     replicaCertCopy:
       requests:
-        cpu: 1m
+        # -- CPU request for TLS certificate copy init container.
+        cpu: 10m
+        # -- Memory request for TLS certificate copy init container.
         memory: 32Mi
 
-  # Restore-from-backup source; enable only for a DR/prod cutover.
   dataSource:
+    # -- Restore-from-backup source; enable only for a DR/prod cutover.
     enabled: false
 
   pgBackRest:
-    # Applied to repo1 AND repo2; the Database workflow patches repo2 (s3) to 30 in prod.
+    # -- Backup retention count; the Database workflow patches repo2 (S3) to 365 in prod.
     retention: "7"
+    # -- Type of full backup retention tracking (count or time).
     retentionFullType: count
     repo1:
+      # -- Enable local PVC backup repository (repo1).
       enabled: true
     repos:
       schedules:
+        # -- Cron schedule for automated full backups.
         full: "0 8 * * *"
+        # -- Cron schedule for automated incremental backups.
         incremental: "0 0,12,20 * * *"
       volume:
+        # -- PVC access mode for local backup volume.
         accessModes: "ReadWriteOnce"
+        # -- Storage size for local backup volume.
         storage: 2Gi
+        # -- Storage class for local backup volume.
         storageClassName: netapp-file-backup
     repoHost:
       requests:
-        cpu: 1m
+        # -- CPU request for pgBackRest dedicated repo host pod.
+        cpu: 10m
+        # -- Memory request for pgBackRest dedicated repo host pod.
         memory: 64Mi
     sidecars:
       requests:
-        cpu: 1m
+        # -- CPU request for pgBackRest sidecar containers.
+        cpu: 10m
+        # -- Memory request for pgBackRest sidecar containers.
         memory: 64Mi
-    # Prod-only; requires the s3-pgbackrest secret to exist in the namespace already.
     s3:
+      # -- Prod S3 backup repository (repo2); requires the s3-pgbackrest secret in the namespace.
       enabled: false
 
   patroni:
     postgresql:
+      # -- Host-based authentication rules for PostgreSQL.
       pg_hba: "host all all 0.0.0.0/0 scram-sha-256"
       parameters:
+        # -- Shared buffer memory for PostgreSQL engine.
         shared_buffers: 16MB
+        # -- Write-ahead log buffer size.
         wal_buffers: "64kB"
+        # -- Minimum WAL size retention on disk.
         min_wal_size: 32MB
+        # -- Maximum WAL size threshold triggering checkpoints.
         max_wal_size: 64MB
+        # -- Maximum replication slot WAL retention size.
         max_slot_wal_keep_size: 128MB
 
   proxy:
     pgBouncer:
+      # -- Number of pgBouncer connection pooler replicas.
       replicas: 2
       requests:
+        # -- CPU request for pgBouncer proxy container.
         cpu: 10m
+        # -- Memory request for pgBouncer proxy container.
         memory: 64Mi
       limits:
+        # -- CPU limit for pgBouncer proxy container.
         cpu: 100m
+        # -- Memory limit for pgBouncer proxy container.
         memory: 128Mi
 
   pgmonitor:
+    # -- Enable pgMonitor metric exporter sidecars.
     enabled: false
 
 # Values passed to the bcgov/crunchy-postgres-tools subchart (namespace networking).
 crunchy-postgres-tools:
+  # -- Subchart release name override.
   fullnameOverride: crunchydb-tools
+  # -- Target deployment name.
   deploymentName: pcns
 
-  # Service accounts are namespace/CI infra you don't manage from this release.
   deployer:
     serviceAccount:
+      # -- Service accounts are namespace/CI infra you don't manage from this release.
       enabled: false
   provisioner:
     serviceAccount:
+      # -- Service accounts are namespace/CI infra you don't manage from this release.
       enabled: false
   linter:
     serviceAccount:
+      # -- Service accounts are namespace/CI infra you don't manage from this release.
       enabled: false
 
   networking:
     networkPolicy:
-      enabled: false      # pcns chart owns the app ingress policy
+      # -- pcns chart owns the app ingress network policy.
+      enabled: false
     podNetworkPolicy:
-      enabled: false      # Keep disabled: subchart renders an unconstrained permit-all policy
+      # -- Keep disabled: subchart renders an unconstrained permit-all policy.
+      enabled: false
     route:
-      enabled: false      # pcns chart owns its route
+      # -- pcns chart owns its OpenShift route.
+      enabled: false

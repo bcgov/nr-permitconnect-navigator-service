@@ -123,9 +123,13 @@ jobs:
       deployments: write
     runs-on: ubuntu-latest
     timeout-minutes: 12
+    env:
+      DB: pr-${{ github.event.number }}
+      NS: ${{ vars.NAMESPACE_PREFIX }}-dev
+      RELEASE: pr-${{ github.event.number }}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v7
+      - name: Checkout repository
+        uses: actions/checkout@v7.0.1
 
       - name: Login to OpenShift Cluster
         uses: bcgov/action-oc-runner@111868d1fc50db0a40417ba321d865ef5c931bbd # v1.7.0
@@ -137,8 +141,8 @@ jobs:
       - name: Remove PR Deployment
         shell: bash
         run: |
-          NS="${{ vars.NAMESPACE_PREFIX }}-dev"
-          RELEASE="pr-${{ github.event.number }}"
+          # Uninstall PR Helm release and cleanup instance ConfigMaps and Secrets
+          set -euo pipefail
 
           if helm status "$RELEASE" --namespace "$NS" >/dev/null 2>&1; then
             helm uninstall --namespace "$NS" "$RELEASE" --timeout 10m --wait
@@ -152,8 +156,9 @@ jobs:
         if: always()
         shell: bash
         run: |
-          NS="${{ vars.NAMESPACE_PREFIX }}-dev"
-          DB="pr-${{ github.event.number }}"
+          # Terminate connections and drop ephemeral PR database from Crunchy primary
+          set -euo pipefail
+
           POD=$(oc get pod -n "$NS" -o name --no-headers \
             -l postgres-operator.crunchydata.com/cluster=crunchy,postgres-operator.crunchydata.com/role=master | head -1)
 
