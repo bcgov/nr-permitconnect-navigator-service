@@ -141,7 +141,7 @@ crunchy-postgres-tools:
 
   networking:
     networkPolicy:
-      # -- PCNS chart owns the app to crunchy ingress network policy. Internal crunchy ingress is owned by crunchy cluster.
+      # -- Internal crunchy and app to crunchy ingress is owned by crunchy cluster. PCNS chart owns the app ingress network policy.
       enabled: false
     podNetworkPolicy:
       # -- Keep disabled: subchart renders an unconstrained permit-all policy.
