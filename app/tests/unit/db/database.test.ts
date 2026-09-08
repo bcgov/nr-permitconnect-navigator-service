@@ -12,7 +12,6 @@ vi.mock('config', () => ({
   }
 }));
 
-// THIS IS ONLY A TEST
 const prismaInternalMock = mockDeep<DatabaseModule.ExtendedClient>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (prismaInternalMock as any).$extends = vi.fn().mockReturnValue(prismaInternalMock);
