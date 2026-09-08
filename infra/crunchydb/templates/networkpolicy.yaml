@@ -1,0 +1,21 @@
+{{- if .Values.networkPolicy.enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" }}-internal
+  labels:
+    postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+      ports:
+        - protocol: TCP
+          port: 5432
+{{- end }}
