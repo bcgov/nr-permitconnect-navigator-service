@@ -2,7 +2,7 @@ apiVersion: v2
 name: crunchydb
 description: Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 type: application
-version: 0.0.1
+version: 0.0.2
 appVersion: "18"
 dependencies:
   - name: crunchy-postgres
