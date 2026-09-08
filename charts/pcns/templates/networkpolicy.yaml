@@ -17,4 +17,44 @@ spec:
           protocol: TCP
   podSelector:
     matchLabels: {{- include "pcns.selectorLabels" . | nindent 6 }}
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ .Values.database.clusterName }}-internal
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      postgres-operator.crunchydata.com/cluster: {{ .Values.database.clusterName | quote }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              postgres-operator.crunchydata.com/cluster: {{ .Values.database.clusterName | quote }}
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-{{ include "pcns.fullname" . }}-to-{{ .Values.database.clusterName }}
+  labels:
+    {{- include "pcns.labels" . | nindent 4 }}
+spec:
+  podSelector:
+    matchLabels:
+      postgres-operator.crunchydata.com/cluster: {{ .Values.database.clusterName | quote }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: {{ include "pcns.name" . }}
+      ports:
+        - protocol: TCP
+          port: 5432
 {{- end }}
