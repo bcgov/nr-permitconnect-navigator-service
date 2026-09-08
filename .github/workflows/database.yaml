@@ -54,7 +54,7 @@ jobs:
           # Wait for CrunchyDB cluster initialization and pgBouncer proxy availability
           set -euo pipefail
           NS="${{ vars.NAMESPACE_PREFIX }}-${{ inputs.environment }}"
-          oc wait --for=condition=PostgresDataInitialized postgrescluster/crunchy -n "$NS" --timeout=45m
+          oc wait --for=condition=PGBackRestReplicaCreate postgrescluster/crunchy -n "$NS" --timeout=45m
           oc wait --for=condition=ProxyAvailable          postgrescluster/crunchy -n "$NS" --timeout=10m
 
       # PR databases all share one role; the password is generated once and reused.
