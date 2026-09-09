@@ -85,6 +85,7 @@ export interface HousingProjectIntake {
   };
   location: {
     geomarkUrl?: string | null;
+    geoJson?: GeoJSON;
     latitude?: number | null;
     locality?: string | null;
     longitude?: number | null;

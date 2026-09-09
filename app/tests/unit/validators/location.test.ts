@@ -39,6 +39,32 @@ describe('locationSchema', () => {
     expect(success).toBe(true);
   });
 
+  it('should validate a pin-or-draw location with coordinates and no geoJson', () => {
+    const data = {
+      naturalDisaster: BasicResponse.NO,
+      projectLocation: ProjectLocation.PIN_OR_DRAW,
+      latitude: 49,
+      longitude: -123
+    };
+
+    const { success } = location.safeParse(data);
+    expect(success).toBe(true);
+  });
+
+  it('should require either coordinates or geoJson for pin-or-draw', () => {
+    const data = {
+      naturalDisaster: BasicResponse.NO,
+      projectLocation: ProjectLocation.PIN_OR_DRAW
+    };
+
+    const result = location.safeParse(data);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      const paths = result.error.issues.map((issue) => issue.path.join('.'));
+      expect(paths).toEqual(expect.arrayContaining(['geoJson']));
+    }
+  });
+
   it('should require streetAddress, locality, and province for street address', () => {
     const data = {
       naturalDisaster: BasicResponse.NO,

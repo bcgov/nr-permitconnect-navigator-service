@@ -36,4 +36,15 @@ export const location = z
         }
       }
     }
+    if (data.projectLocation === ProjectLocation.PIN_OR_DRAW) {
+      const hasCoordinates = data.latitude != null && data.longitude != null;
+      const hasGeoJson = data.geoJson != null;
+      if (!hasCoordinates && !hasGeoJson) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ['geoJson'],
+          message: 'Either coordinates or a drawn location (geoJson) is required'
+        });
+      }
+    }
   });
