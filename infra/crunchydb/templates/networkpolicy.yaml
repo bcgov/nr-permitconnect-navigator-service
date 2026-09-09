@@ -18,7 +18,13 @@ spec:
               postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
       ports:
         - protocol: TCP
-          port: 5432
+          port: 5432 # PostgreSQL streaming and replication
+        - protocol: TCP
+          port: 8432 # pgBackRest TLS server for backups and WAL archiving
+        - protocol: TCP
+          port: 8008 # Patroni REST API for HA and leader elections
+        - protocol: TCP
+          port: 2022 # Custom SSH daemon for file sync and legacy pgBackRest
 
 ---
 apiVersion: networking.k8s.io/v1
