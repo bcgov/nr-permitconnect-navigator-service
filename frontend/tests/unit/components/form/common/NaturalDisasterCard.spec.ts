@@ -29,13 +29,15 @@ beforeEach(() => {
 // Tests
 
 describe('NaturalDisasterCard', () => {
-  describe('renders', () => {
-    it('location.naturalDisaster', () => {
-      const { wrapper } = mountNaturalDisasterCard();
+  describe('rendering', () => {
+    describe('naturalDisaster', () => {
+      it('binds a RadioList to location.naturalDisaster', () => {
+        const { wrapper } = mountNaturalDisasterCard();
 
-      const radioList = wrapper.findComponent(RadioList);
-      expect(radioList.exists()).toBe(true);
-      expect(radioList.props('name')).toBe('location.naturalDisaster');
+        const radioList = wrapper.findComponent(RadioList);
+        expect(radioList.exists()).toBe(true);
+        expect(radioList.props('name')).toBe('location.naturalDisaster');
+      });
     });
 
     it.each([
@@ -49,9 +51,10 @@ describe('NaturalDisasterCard', () => {
         expect(wrapper.findComponent(RadioList).props('disabled')).toBe(expectedDisabled);
       }
     );
+
     describe('mandatory fields', () => {
       describe('header', () => {
-        it('renders', () => {
+        it('renders a non-empty translated header', () => {
           const { wrapper } = mountNaturalDisasterCard();
 
           expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
@@ -69,6 +72,7 @@ describe('NaturalDisasterCard', () => {
       });
     });
   });
+
   describe('form error reporting', () => {
     it('reports an error to the store when vee-validate has one on its field', async () => {
       const { formStore, form } = mountNaturalDisasterCard({ tab: 2 });

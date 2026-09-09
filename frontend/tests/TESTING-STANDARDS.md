@@ -235,6 +235,11 @@ Notes:
   whole codebase: `rendering`, `validation`, `user interaction`, or a
   specific named behavior (e.g. `form error reporting`). Don't let each
   file invent its own taxonomy.
+- **Blank line after every `describe`/`it` block's closing `});`**,
+  except the last one before its parent block's own closing brace (no
+  blank line right before a `}` / `});`). Run `npm run format:tests`
+  (`frontend/format-test-blank-lines.mjs`) to auto-fix this across all
+  `tests/unit/**/*.spec.ts` files.
 
 ## Known gotchas
 

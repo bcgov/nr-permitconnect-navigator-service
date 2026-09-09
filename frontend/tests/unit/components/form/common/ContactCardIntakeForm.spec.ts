@@ -27,15 +27,16 @@ beforeEach(() => {
 // Tests
 
 describe('ContactCardIntakeForm', () => {
-  describe('renders', () => {
+  describe('rendering', () => {
     it('renders a non-empty translated header', () => {
       const { wrapper } = mountContactCardIntakeForm();
 
       expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
     });
+
     describe('mandatory fields', () => {
       describe('firstName', () => {
-        it('renders', () => {
+        it('renders an InputText bound to contacts.firstName', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
           const inputTexts = wrapper.findAllComponents(InputText);
@@ -43,6 +44,7 @@ describe('ContactCardIntakeForm', () => {
 
           expect(firstNameInput).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
@@ -54,8 +56,9 @@ describe('ContactCardIntakeForm', () => {
           expect(asterisk?.text()).toBe('*');
         });
       });
+
       describe('phoneNumber', () => {
-        it('renders', () => {
+        it('renders an InputMask bound to contacts.phoneNumber with a phone number mask', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
           const phoneInput = wrapper.findComponent(InputMask);
@@ -63,6 +66,7 @@ describe('ContactCardIntakeForm', () => {
           expect(phoneInput.props('name')).toBe('contacts.phoneNumber');
           expect(phoneInput.props('mask')).toBe('(999) 999-9999');
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
@@ -74,8 +78,9 @@ describe('ContactCardIntakeForm', () => {
           expect(asterisk?.text()).toBe('*');
         });
       });
+
       describe('email', () => {
-        it('renders', () => {
+        it('renders an InputText bound to contacts.email', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
           const inputTexts = wrapper.findAllComponents(InputText);
@@ -83,6 +88,7 @@ describe('ContactCardIntakeForm', () => {
 
           expect(emailInput).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
@@ -94,8 +100,9 @@ describe('ContactCardIntakeForm', () => {
           expect(asterisk?.text()).toBe('*');
         });
       });
+
       describe('contactApplicantRelationship', () => {
-        it('renders', () => {
+        it('renders a Select bound to contacts.contactApplicantRelationship', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
           const selects = wrapper.findAllComponents(Select);
@@ -105,6 +112,7 @@ describe('ContactCardIntakeForm', () => {
 
           expect(relationshipSelect).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
@@ -118,8 +126,9 @@ describe('ContactCardIntakeForm', () => {
           expect(asterisk?.text()).toBe('*');
         });
       });
+
       describe('contactPreference', () => {
-        it('renders', () => {
+        it('renders a Select bound to contacts.contactPreference', () => {
           const { wrapper } = mountContactCardIntakeForm();
 
           const selects = wrapper.findAllComponents(Select);
@@ -127,6 +136,7 @@ describe('ContactCardIntakeForm', () => {
 
           expect(preferenceSelect).toBeTruthy();
         });
+
         it('displays asterisk for contactPreference field', () => {
           const { wrapper } = mountContactCardIntakeForm();
 

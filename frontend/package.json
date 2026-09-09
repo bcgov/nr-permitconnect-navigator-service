@@ -11,6 +11,7 @@
     "clean": "rimraf coverage dist",
     "debug": "vite --mode debug",
     "format": "prettier ./src --write",
+    "format:tests": "node ./format-test-blank-lines.mjs",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
     "preview": "vite preview",

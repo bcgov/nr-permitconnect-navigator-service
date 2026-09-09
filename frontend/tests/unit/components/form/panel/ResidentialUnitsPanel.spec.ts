@@ -61,6 +61,7 @@ describe('ResidentialUnitsPanel', () => {
       expect(selectByName('units.rentalUnits').props('options')).toEqual(NUM_RESIDENTIAL_UNITS_LIST);
       expect(selectByName('units.otherUnits').props('options')).toEqual(NUM_RESIDENTIAL_UNITS_LIST);
     });
+
     it('displays asterisk in label for hasRentalUnits', () => {
       const { wrapper } = mountResidentialUnitsPanel();
 

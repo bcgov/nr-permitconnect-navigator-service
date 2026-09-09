@@ -155,7 +155,10 @@ onBeforeMount(async () => {
 });
 
 onMounted(() => {
-  onLatLongInput();
+  const location = values.value?.location;
+  if (location?.latitude || location?.longitude) {
+    onLatLongInput();
+  }
 });
 
 watchEffect(() => {

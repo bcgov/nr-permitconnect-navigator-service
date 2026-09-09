@@ -27,8 +27,8 @@ beforeEach(() => {
 // Tests
 
 describe('ProjectNameCard', () => {
-  describe('renders', () => {
-    it('header', () => {
+  describe('rendering', () => {
+    it('renders a non-empty translated header', () => {
       const { wrapper } = mountProjectNameCard();
 
       expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
@@ -36,7 +36,7 @@ describe('ProjectNameCard', () => {
 
     describe('mandatory fields', () => {
       describe('projectName', () => {
-        it('renders', () => {
+        it('renders an InputText bound to basic.projectName', () => {
           const { wrapper } = mountProjectNameCard();
 
           const inputTexts = wrapper.findAllComponents(InputText);

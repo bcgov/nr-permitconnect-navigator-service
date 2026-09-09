@@ -28,15 +28,18 @@ beforeEach(() => {
 
 describe('RegisteredBusinessCard', () => {
   describe('rendering', () => {
-    it('projectApplicantType', () => {
-      const { wrapper } = mountRegisteredBusinessCard();
+    describe('projectApplicantType', () => {
+      it('binds a RadioList to basic.projectApplicantType', () => {
+        const { wrapper } = mountRegisteredBusinessCard();
 
-      const radioLists = wrapper.findAllComponents(RadioList);
-      const applicantTypeRadio = radioLists.find((radio) => radio.props('name') === 'basic.projectApplicantType');
+        const radioLists = wrapper.findAllComponents(RadioList);
+        const applicantTypeRadio = radioLists.find((radio) => radio.props('name') === 'basic.projectApplicantType');
 
-      expect(applicantTypeRadio).toBeTruthy();
+        expect(applicantTypeRadio).toBeTruthy();
+      });
     });
   });
+
   describe('mandatory fields', () => {
     describe('header', () => {
       it('displays asterisk', () => {

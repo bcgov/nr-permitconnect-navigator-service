@@ -50,18 +50,14 @@ function mountAuthorizationStatusUpdatesCard(props = {}) {
   return { wrapper };
 }
 
+beforeEach(() => {
+  resetMockRouter();
+  vi.clearAllMocks();
+});
+
 // Tests
 
 describe('AuthorizationStatusUpdatesCard.vue', () => {
-  beforeEach(() => {
-    resetMockRouter();
-    vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    sessionStorage.clear();
-  });
-
   describe('DOM Rendering & Layout', () => {
     it('renders component without errors', () => {
       const { wrapper } = mountAuthorizationStatusUpdatesCard({

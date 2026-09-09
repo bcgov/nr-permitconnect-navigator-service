@@ -39,7 +39,7 @@ beforeEach(() => {
 
 describe('ProjectDescriptionCard', () => {
   describe('rendering', () => {
-    it('header', () => {
+    it('renders a non-empty translated header', () => {
       const { wrapper } = mountProjectDescriptionCard();
 
       expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ describe('ProjectDescriptionCard', () => {
 
     describe('mandatory fields', () => {
       describe('projectDescription', () => {
-        it('renders', () => {
+        it('renders a TextArea bound to basic.projectDescription', () => {
           const { wrapper } = mountProjectDescriptionCard();
 
           const textAreas = wrapper.findAllComponents(TextArea);
@@ -68,6 +68,7 @@ describe('ProjectDescriptionCard', () => {
 
         expect(asterisk).toBeTruthy();
       });
+
       it('displays an asterisk for ELECTRIFICATION projects with type OTHER', () => {
         const { wrapper } = mountProjectDescriptionCard({
           initiative: Initiative.ELECTRIFICATION,
