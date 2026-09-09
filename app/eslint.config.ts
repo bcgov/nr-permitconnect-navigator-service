@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['coverage/**', 'dist/**', 'vitest.config.ts', 'node_modules/**', 'sbin/**']
+    ignores: ['coverage/**', 'dist/**', 'vitest.config.ts', 'node_modules/**', 'sbin/**', 'src/db/generated/**']
   },
   {
     files: ['**/*.{js,ts}'],
@@ -36,7 +36,7 @@ export default defineConfig([
       'max-len': ['warn', { code: 120, comments: 120, ignoreUrls: true }],
       'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
       'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'warn',
-      quotes: ['error', 'single'],
+      quotes: ['error', 'single', { avoidEscape: true }],
       semi: ['error', 'always']
     }
   },

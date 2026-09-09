@@ -1,13 +1,17 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#src/db/generated/client/client';
 
 import { captureExtension } from './captureExtension.ts';
 import filterDeletedTransform from '#src/db/extensions/filterDeleted';
 
 const ext = captureExtension(filterDeletedTransform);
 
-const SOFT_DELETED_MODELS = Prisma.dmmf.datamodel.models
-  .filter((m) => m.fields.some((f) => f.name === 'deletedAt'))
-  .map((m) => m.name);
+// Naming convention: `{Model[0].toUpperCase()}{model.slice(1)}ScalarFieldEnum` (Prisma's generated export name).
+const scalarFieldEnums = Prisma as unknown as Record<string, Record<string, string> | undefined>;
+
+const SOFT_DELETED_MODELS = Object.values(Prisma.ModelName).filter((name) => {
+  const fieldEnum = scalarFieldEnums[`${name[0].toUpperCase()}${name.slice(1)}ScalarFieldEnum`];
+  return fieldEnum !== undefined && 'deletedAt' in fieldEnum;
+});
 
 const EXCLUDED_OPERATIONS = ['create', 'createMany', 'createManyAndReturn'];
 
@@ -305,9 +309,7 @@ describe('filterDeleted extension', () => {
     it('skips filtering for models without deletedAt field', async () => {
       const query = vi.fn().mockResolvedValue('ok');
       // 'identity_provider' is an example of a model without deletedAt
-      const hasDeletedAt = Prisma.dmmf.datamodel.models
-        .find((m) => m.name === 'identity_provider')
-        ?.fields.some((f) => f.name === 'deletedAt');
+      const hasDeletedAt = SOFT_DELETED_MODELS.includes('identity_provider');
 
       await ext.query.$allModels.$allOperations({
         model: 'identity_provider',

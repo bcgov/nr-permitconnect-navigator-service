@@ -33,8 +33,7 @@ let transactionWrapperMock: ReturnType<typeof vi.fn> | undefined;
 vi.mock('../../src/db/database', () => ({
   __esModule: true,
   default: mockDeep<ExtendedClient>(),
-  checkDatabaseHealth: vi.fn(),
-  checkDatabaseSchema: vi.fn()
+  checkDatabaseHealth: vi.fn()
 }));
 
 vi.mock('../../src/db/utils/transactionWrapper', () => {

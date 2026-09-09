@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';

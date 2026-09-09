@@ -1,6 +1,6 @@
 import { NotFoundProblem } from '#src/db/errors';
 
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '#prismaClient';
 
 /**
  * Typed view of a Prisma model delegate. Each method is generic
