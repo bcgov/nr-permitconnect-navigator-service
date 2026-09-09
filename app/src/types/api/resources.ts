@@ -3,6 +3,10 @@
  * File may be deprecated once we upgrade to Prisma 7 as contains a lot more auto generation of types for you
  */
 
+// *CreateInput = Prisma.xUncheckedCreateInput. Only for repository-layer create() calls feeding Prisma
+// directly - domain/service create paths use these so plain JS values (number, unknown) work without
+// casting to Decimal/JsonValue. Not for read payloads (*Base) or request/service-layer types (see domain.ts).
+
 import { Prisma } from '@prisma/client';
 
 import type { GroupName, Initiative as InitiativeEnum } from '#src/utils/enums/application';
@@ -29,10 +33,12 @@ export type BusinessAreaCode = BusinessAreaCodeBase; // nosonar
 const contactBase = Prisma.validator<Prisma.contactDefaultArgs>()({});
 export type ContactBase = Prisma.contactGetPayload<typeof contactBase>;
 export type Contact = ContactBase & { activityContact?: ActivityContact[]; user?: User | null };
+export type ContactCreateInput = Prisma.contactUncheckedCreateInput;
 
 const draftBase = Prisma.validator<Prisma.draftDefaultArgs>()({});
 export type DraftBase = Prisma.draftGetPayload<typeof draftBase>;
 export type Draft = DraftBase & { activity?: Activity };
+export type DraftCreateInput = Prisma.draftUncheckedCreateInput;
 
 const documentBase = Prisma.validator<Prisma.documentDefaultArgs>()({});
 export type DocumentBase = Prisma.documentGetPayload<typeof documentBase>;
@@ -45,6 +51,7 @@ export type ElectrificationProject = ElectrificationProjectBase & {
   projectId?: string;
   user?: User | null;
 };
+export type ElectrificationProjectCreateInput = Prisma.electrification_projectUncheckedCreateInput;
 
 const electrificationProjectCategoryCodeBase =
   Prisma.validator<Prisma.electrification_project_category_codeDefaultArgs>()({});
@@ -74,6 +81,7 @@ export type EscalationTypeCode = EscalationTypeCodeBase; // nosonar
 const generalProjectBase = Prisma.validator<Prisma.general_projectDefaultArgs>()({});
 export type GeneralProjectBase = Prisma.general_projectGetPayload<typeof generalProjectBase>;
 export type GeneralProject = GeneralProjectBase & { activity?: Activity; projectId?: string; user?: User | null };
+export type GeneralProjectCreateInput = Prisma.general_projectUncheckedCreateInput;
 
 const housingProjectBase = Prisma.validator<Prisma.housing_projectDefaultArgs>()({});
 export type HousingProjectBase = Prisma.housing_projectGetPayload<typeof housingProjectBase>;
@@ -82,6 +90,7 @@ export type HousingProject = HousingProjectBase & {
   projectId?: string;
   user?: User | null;
 };
+export type HousingProjectCreateInput = Prisma.housing_projectUncheckedCreateInput;
 
 const identityProviderBase = Prisma.validator<Prisma.identity_providerDefaultArgs>()({});
 export type IdentityProviderBase = Prisma.identity_providerGetPayload<typeof identityProviderBase>;
@@ -115,6 +124,11 @@ type PermitDateTimeKeys =
 const permitBase = Prisma.validator<Prisma.permitDefaultArgs>()({});
 type PermitBasePrisma = Prisma.permitGetPayload<typeof permitBase>;
 export type PermitBase = Omit<PermitBasePrisma, PermitDateTimeKeys> & Record<PermitDateTimeKeys, string | null>;
+// permitStatusDatesTransform (db/extensions/permitStatusDates.ts) accepts these 8 fields as date/time
+// strings on write and converts them to Date before insert - same string override as PermitBase, but
+// applied to the create-input shape instead of the read shape.
+export type PermitCreateInput = Omit<Prisma.permitUncheckedCreateInput, PermitDateTimeKeys> &
+  Record<PermitDateTimeKeys, string | Date | null | undefined>;
 interface PermitRelations {
   activity: Activity;
   permitNote: PermitNote[];
@@ -138,6 +152,8 @@ export type PermitStateCode = PermitStateCodeBase; // nosonar
 const permitTrackingBase = Prisma.validator<Prisma.permit_trackingDefaultArgs>()({});
 export type PermitTrackingBase = Prisma.permit_trackingGetPayload<typeof permitTrackingBase>;
 export type PermitTracking = PermitTrackingBase & { sourceSystemKind?: SourceSystemKind | null };
+export type PermitTrackingCreateInput = Prisma.permit_trackingUncheckedCreateInput;
+export type PermitTrackingUpsertInput = PermitTrackingCreateInput; // nosonar
 
 const permitTypeBase = Prisma.validator<Prisma.permit_typeDefaultArgs>()({});
 export type PermitTypeBase = Prisma.permit_typeGetPayload<typeof permitTypeBase>;

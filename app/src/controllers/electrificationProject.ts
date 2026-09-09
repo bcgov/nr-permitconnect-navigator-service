@@ -17,23 +17,22 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
+  DraftCreateInput,
   ElectrificationProject,
-  ElectrificationProjectIntake,
   ElectrificationProjectStatistics,
+  GetElectrificationProjectStatisticsRequest,
   LocalContext,
   PatchElectrificationProjectRequest,
   SearchElectrificationProjectRequest,
-  StatisticsFilters
+  SubmitElectrificationProjectDraftRequest,
+  UpsertElectrificationProjectDraftRequest
 } from '#types';
 
 export const createElectrificationProjectController = async (
-  req: Request<never, never, ElectrificationProjectIntake>,
+  _req: Request,
   res: Response<ElectrificationProject, LocalContext>
 ) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as ElectrificationProjectIntake;
-
-  const result = await createElectrificationProjectService(req.body, res.locals.currentContext);
+  const result = await createElectrificationProjectService(res.locals.currentContext);
   res.status(201).json(result);
 };
 
@@ -55,7 +54,7 @@ export const getElectrificationProjectController = async (
 };
 
 export const getElectrificationProjectStatisticsController = async (
-  req: Request<never, never, never, StatisticsFilters>,
+  req: Request<never, never, never, GetElectrificationProjectStatisticsRequest>,
   res: Response<ElectrificationProjectStatistics>
 ) => {
   const response = await getElectrificationProjectStatisticsService(req.query);
@@ -79,8 +78,6 @@ export const searchElectrificationProjectsController = async (
   req: Request<never, never, SearchElectrificationProjectRequest>,
   res: Response<ElectrificationProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -123,7 +120,7 @@ export const getElectrificationProjectDraftsController = async (req: Request, re
 };
 
 export const submitElectrificationProjectDraftController = async (
-  req: Request<never, never, ElectrificationProjectIntake>,
+  req: Request<never, never, SubmitElectrificationProjectDraftRequest>,
   res: Response<ElectrificationProject, LocalContext>
 ) => {
   const response = await submitElectrificationProjectDraftService(
@@ -136,13 +133,13 @@ export const submitElectrificationProjectDraftController = async (
 };
 
 export const upsertElectrificationProjectDraftController = async (
-  req: Request<never, never, Draft>,
+  req: Request<never, never, UpsertElectrificationProjectDraftRequest>,
   res: Response<Draft, LocalContext>
 ) => {
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    req.body,
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.ELECTRIFICATION,
     DraftCode.ELECTRIFICATION_PROJECT,
     res.locals.currentContext

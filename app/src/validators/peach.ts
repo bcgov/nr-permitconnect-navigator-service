@@ -1,33 +1,38 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import { createStamps } from './stamps.ts';
 import { validate } from '#src/middleware/validation';
 
-const schema = {
+export const schema = {
   getPeachSummary: {
-    body: Joi.object({
-      permitTrackings: Joi.array()
-        .min(1)
-        .required()
-        .items(
-          Joi.object({
-            trackingId: Joi.string().allow(null),
-            permitTrackingId: Joi.number().allow(null),
-            permitId: Joi.string().allow(null),
-            shownToProponent: Joi.boolean().allow(null),
-            sourceSystemKindId: Joi.number().allow(null),
-            sourceSystemKind: Joi.object({
-              sourceSystemKindId: Joi.number().required(),
-              description: Joi.string().required(),
-              integrated: Joi.boolean(),
-              kind: Joi.string().allow(null),
-              sourceSystem: Joi.string().required(),
-              ...createStamps
-            }).required(),
-            ...createStamps
-          })
-        )
-    })
+    body: z
+      .object({
+        permitTrackings: z
+          .array(
+            z
+              .object({
+                trackingId: z.string().nullish(),
+                permitTrackingId: z.number().nullish(),
+                permitId: z.string().nullish(),
+                shownToProponent: z.boolean().nullish(),
+                sourceSystemKindId: z.number().nullish(),
+                sourceSystemKind: z
+                  .object({
+                    sourceSystemKindId: z.number(),
+                    description: z.string().min(1),
+                    integrated: z.boolean().optional(),
+                    kind: z.string().nullish(),
+                    sourceSystem: z.string().min(1),
+                    ...createStamps
+                  })
+                  .strict(),
+                ...createStamps
+              })
+              .strict()
+          )
+          .min(1)
+      })
+      .strict()
   }
 };
 

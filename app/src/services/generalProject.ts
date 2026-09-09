@@ -1,29 +1,25 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateGeneralProjectData } from '#src/domains/generalProject';
+import { createGeneralProjectData, generateGeneralProjectData } from '#src/domains/generalProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
 
-import type { Prisma } from '@prisma/client';
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
   GeneralProject,
-  GeneralProjectIntake,
   GeneralProjectStatistics,
+  GetGeneralProjectStatisticsInput,
   Maybe,
-  PatchGeneralProjectRequest,
-  SearchGeneralProjectRequest
+  PatchGeneralProjectInput,
+  SearchGeneralProjectInput,
+  SubmitGeneralProjectDraftInput
 } from '#types';
 
-export const createGeneralProjectService = async (
-  data: GeneralProjectIntake,
-  currentContext: CurrentContext
-): Promise<GeneralProject> => {
+export const createGeneralProjectService = async (currentContext: CurrentContext): Promise<GeneralProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, generalProject, initiative, permit, permitTracking }) => {
       const {
@@ -31,13 +27,10 @@ export const createGeneralProjectService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+      } = await createGeneralProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new general project
-      const response = await generalProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await generalProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
@@ -109,14 +102,11 @@ export const listGeneralProjectsService = async (
   });
 };
 
-export const getGeneralProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<GeneralProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getGeneralProjectStatisticsService = async (
+  filters: GetGeneralProjectStatisticsInput
+): Promise<GeneralProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const date_from = val(filters.dateFrom);
   const date_to = val(filters.dateTo);
@@ -149,7 +139,7 @@ export const getGeneralProjectStatisticsService = async (filters: {
 export const searchGeneralProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchGeneralProjectRequest
+  params: SearchGeneralProjectInput
 ): Promise<GeneralProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
     const result = await generalProject.search(params);
@@ -165,8 +155,8 @@ export const searchGeneralProjects = async (
 
 export const submitGeneralProjectDraftService = async (
   draftId: Maybe<string>,
-  data: GeneralProjectIntake,
-  contactData: ContactBase,
+  data: SubmitGeneralProjectDraftInput,
+  contactData: SubmitGeneralProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(
@@ -179,10 +169,7 @@ export const submitGeneralProjectDraftService = async (
       } = await generateGeneralProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new general project
-      const response = await generalProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await generalProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
@@ -216,7 +203,7 @@ export const submitGeneralProjectDraftService = async (
  */
 export const patchGeneralProjectService = async (
   generalProjectId: string,
-  data: PatchGeneralProjectRequest
+  data: PatchGeneralProjectInput
 ): Promise<GeneralProject> => {
   return await unitOfWork.execute(async ({ generalProject }) => {
     await generalProject.patch({ generalProjectId }, data);

@@ -1,8 +1,8 @@
-import Joi from 'joi';
+import { z } from 'zod';
 
 import atsValidator from './ats.ts';
 import { uuidv4 } from './common.ts';
-import { contactSchema } from './contact.ts';
+import { submittedContactSchema } from './submittedContact.ts';
 import { validate } from '#src/middleware/validation';
 import {
   APPLICATION_STATUS_LIST,
@@ -10,46 +10,61 @@ import {
   ENQUIRY_TYPE_LIST
 } from '#src/utils/constants/projectCommon';
 
-const schema = {
+export const schema = {
   createEnquiry: {
-    body: Joi.object({
-      contact: contactSchema,
-      enquiryDescription: Joi.string().allow(null), // allow null for creating an enquiry from the nav side
-      relatedActivityId: Joi.string().max(255).allow(null),
-      submissionType: Joi.string()
-        .valid(...ENQUIRY_TYPE_LIST)
-        .allow(null)
-    })
+    body: z
+      .object({
+        contact: submittedContactSchema,
+        enquiryDescription: z.string().nullish(), // allow null for creating an enquiry from the nav side
+        relatedActivityId: z.string().max(255).nullish(),
+        submissionType: z.enum(ENQUIRY_TYPE_LIST as [string, ...string[]]).nullish()
+      })
+      .strict()
   },
   deleteEnquiry: {
-    params: Joi.object({
-      enquiryId: uuidv4.required()
-    })
+    params: z
+      .object({
+        enquiryId: uuidv4
+      })
+      .strict()
+  },
+  getEnquiry: {
+    params: z
+      .object({
+        enquiryId: uuidv4
+      })
+      .strict()
   },
   searchEnquiries: {
-    body: Joi.object({
-      activityId: Joi.array().items(Joi.string()),
-      createdBy: Joi.array().items(Joi.string()),
-      enquiryId: Joi.array().items(Joi.string()),
-      includeUser: Joi.boolean()
-    })
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        enquiryId: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional()
+      })
+      .strict()
+      .default({})
   },
   patchEnquiry: {
-    body: Joi.object({
-      submissionType: Joi.string().allow(null),
-      relatedActivityId: Joi.string().max(255).allow(null),
-      enquiryDescription: Joi.string().min(0).allow(null),
-      assignedUserId: uuidv4.allow(null),
-      enquiryStatus: Joi.string().valid(...APPLICATION_STATUS_LIST),
-      submittedMethod: Joi.string().valid(...ENQUIRY_SUBMITTED_METHOD),
-      ...atsValidator.atsEnquirySubmissionFields
-    })
+    body: z
+      .object({
+        submissionType: z.string().nullish(),
+        relatedActivityId: z.string().max(255).nullish(),
+        enquiryDescription: z.string().nullish(),
+        assignedUserId: uuidv4.nullish(),
+        enquiryStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+        submittedMethod: z.enum(ENQUIRY_SUBMITTED_METHOD as [string, ...string[]]).optional(),
+        ...atsValidator.atsEnquirySubmissionFields
+      })
+      .strict()
   }
 };
 
 export default {
   createEnquiry: validate(schema.createEnquiry),
   deleteEnquiry: validate(schema.deleteEnquiry),
+  getEnquiry: validate(schema.getEnquiry),
   searchEnquiries: validate(schema.searchEnquiries),
   patchEnquiry: validate(schema.patchEnquiry)
 };

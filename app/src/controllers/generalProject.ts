@@ -17,22 +17,18 @@ import { isTruthy } from '#src/utils/utils';
 import type { Request, Response } from 'express';
 import type {
   Draft,
+  DraftCreateInput,
   GeneralProject,
-  GeneralProjectIntake,
+  GetGeneralProjectStatisticsRequest,
   LocalContext,
   PatchGeneralProjectRequest,
   SearchGeneralProjectRequest,
-  StatisticsFilters
+  SubmitGeneralProjectDraftRequest,
+  UpsertGeneralProjectDraftRequest
 } from '#types';
 
-export const createGeneralProjectController = async (
-  req: Request<never, never, GeneralProjectIntake>,
-  res: Response<GeneralProject, LocalContext>
-) => {
-  // Provide an empty body if POST body is given undefined
-  req.body ??= {} as GeneralProjectIntake;
-
-  const result = await createGeneralProjectService(req.body, res.locals.currentContext);
+export const createGeneralProjectController = async (_req: Request, res: Response<GeneralProject, LocalContext>) => {
+  const result = await createGeneralProjectService(res.locals.currentContext);
   res.status(201).json(result);
 };
 
@@ -48,7 +44,7 @@ export const getGeneralProjectController = async (req: Request<{ generalProjectI
 };
 
 export const getGeneralProjectStatisticsController = async (
-  req: Request<never, never, never, StatisticsFilters>,
+  req: Request<never, never, never, GetGeneralProjectStatisticsRequest>,
   res: Response
 ) => {
   const response = await getGeneralProjectStatisticsService(req.query);
@@ -69,8 +65,6 @@ export const searchGeneralProjectsController = async (
   req: Request<never, never, SearchGeneralProjectRequest>,
   res: Response<GeneralProject[], LocalContext>
 ) => {
-  req.body ??= {};
-
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
     includeUser: isTruthy(req.body.includeUser)
@@ -110,7 +104,7 @@ export const getGeneralProjectDraftsController = async (req: Request, res: Respo
 };
 
 export const submitGeneralProjectDraftController = async (
-  req: Request<never, never, GeneralProjectIntake>,
+  req: Request<never, never, SubmitGeneralProjectDraftRequest>,
   res: Response<GeneralProject, LocalContext>
 ) => {
   const response = await submitGeneralProjectDraftService(
@@ -123,13 +117,13 @@ export const submitGeneralProjectDraftController = async (
 };
 
 export const upsertGeneralProjectDraftController = async (
-  req: Request<never, never, Draft>,
+  req: Request<never, never, UpsertGeneralProjectDraftRequest>,
   res: Response<Draft, LocalContext>
 ) => {
   const update = !!req.body.draftId;
   const response = await upsertDraftService(
     req.body.draftId,
-    req.body,
+    { data: req.body.data as DraftCreateInput['data'] },
     Initiative.GENERAL,
     DraftCode.GENERAL_PROJECT,
     res.locals.currentContext

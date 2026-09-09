@@ -32,12 +32,13 @@ import type { Mock } from 'vitest';
 import type {
   Draft,
   GeneralProject,
-  GeneralProjectIntake,
   SearchGeneralProjectRequest,
   GeneralProjectStatistics,
   LocalContext,
   PatchGeneralProjectRequest,
-  StatisticsFilters
+  GetGeneralProjectStatisticsRequest,
+  SubmitGeneralProjectDraftRequest,
+  UpsertGeneralProjectDraftRequest
 } from '#types';
 
 vi.mock('config');
@@ -63,32 +64,17 @@ beforeEach(() => {
 describe('createGeneralProjectController', () => {
   const createSpy = vi.spyOn(generalProjectService, 'createGeneralProjectService');
 
-  it('calls the service with body and context then responds 201', async () => {
-    const req = {
-      body: TEST_GENERAL_PROJECT_INTAKE
-    } as unknown as Request<never, never, GeneralProjectIntake>;
+  it('calls the service with context (body is always empty and ignored) then responds 201', async () => {
+    const req = {} as unknown as Request;
 
     createSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
 
     await createGeneralProjectController(req, res as unknown as Response<GeneralProject, LocalContext>);
 
     expect(createSpy).toHaveBeenCalledTimes(1);
-    expect(createSpy).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_INTAKE, TEST_CURRENT_CONTEXT);
+    expect(createSpy).toHaveBeenCalledWith(TEST_CURRENT_CONTEXT);
     expect(res.status).toHaveBeenCalledWith(201);
     expect(res.json).toHaveBeenCalledWith(TEST_GENERAL_PROJECT_CREATE);
-  });
-
-  it('provides empty body when POST body is undefined', async () => {
-    const req = {
-      body: undefined
-    } as unknown as Request<never, never, GeneralProjectIntake>;
-
-    createSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
-
-    await createGeneralProjectController(req, res as unknown as Response<GeneralProject, LocalContext>);
-
-    expect(createSpy).toHaveBeenCalledWith({}, TEST_CURRENT_CONTEXT);
-    expect(res.status).toHaveBeenCalledWith(201);
   });
 });
 
@@ -147,7 +133,7 @@ describe('getGeneralProjectStatisticsController', () => {
 
     const req = {
       query: { applicationsStatus: 'NEW' }
-    } as unknown as Request<never, never, never, StatisticsFilters>;
+    } as unknown as Request<never, never, never, GetGeneralProjectStatisticsRequest>;
 
     statsSpy.mockResolvedValue([mockStats]);
 
@@ -327,7 +313,7 @@ describe('submitGeneralProjectDraftController', () => {
         ...TEST_GENERAL_PROJECT_INTAKE,
         draftId: '0a339ab8-4a87-42d9-8d83-5f169de4a102'
       }
-    } as unknown as Request<never, never, GeneralProjectIntake>;
+    } as unknown as Request<never, never, SubmitGeneralProjectDraftRequest>;
 
     submitSpy.mockResolvedValue(TEST_GENERAL_PROJECT_CREATE);
 
@@ -351,10 +337,10 @@ describe('upsertGeneralProjectDraftController', () => {
   it('calls the service with draft data and draft code, responds 201 when creating', async () => {
     const req = {
       body: {
-        ...TEST_GENERAL_DRAFT,
+        data: TEST_GENERAL_DRAFT.data,
         draftId: undefined
       }
-    } as unknown as Request<never, never, Draft>;
+    } as unknown as Request<never, never, UpsertGeneralProjectDraftRequest>;
 
     upsertSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
 
@@ -363,9 +349,7 @@ describe('upsertGeneralProjectDraftController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(
       undefined,
-      expect.objectContaining({
-        draftId: undefined
-      }),
+      { data: TEST_GENERAL_DRAFT.data },
       Initiative.GENERAL,
       DraftCode.GENERAL_PROJECT,
       TEST_CURRENT_CONTEXT
@@ -376,8 +360,8 @@ describe('upsertGeneralProjectDraftController', () => {
 
   it('calls the service and responds 200 when updating', async () => {
     const req = {
-      body: TEST_GENERAL_DRAFT
-    } as unknown as Request<never, never, Draft>;
+      body: { draftId: TEST_GENERAL_DRAFT.draftId, data: TEST_GENERAL_DRAFT.data }
+    } as unknown as Request<never, never, UpsertGeneralProjectDraftRequest>;
 
     upsertSpy.mockResolvedValue(TEST_GENERAL_DRAFT);
 
@@ -386,7 +370,7 @@ describe('upsertGeneralProjectDraftController', () => {
     expect(upsertSpy).toHaveBeenCalledTimes(1);
     expect(upsertSpy).toHaveBeenCalledWith(
       TEST_GENERAL_DRAFT.draftId,
-      TEST_GENERAL_DRAFT,
+      { data: TEST_GENERAL_DRAFT.data },
       Initiative.GENERAL,
       DraftCode.GENERAL_PROJECT,
       TEST_CURRENT_CONTEXT

@@ -17,8 +17,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeUndefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(true);
   });
 
   it('should not validate the housing schema with invalid data', () => {
@@ -41,15 +41,15 @@ describe('housingSchema', () => {
       singleFamilyUnits: ''
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should not accept empty object', () => {
     const data = {};
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should not exceed maximum length', () => {
@@ -66,8 +66,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should accept when singleFamilySelected and otherSelected are true', () => {
@@ -86,8 +86,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeUndefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(true);
   });
 
   it('should only accept otherUnitsDescription when otherSelected is true', () => {
@@ -104,8 +104,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should not accept otherUnitsDescription when otherSelected is null', () => {
@@ -121,8 +121,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should only accept a certain set of values for otherUnits', () => {
@@ -139,8 +139,8 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 
   it('should not accept when none of singleFamilySelected, otherSelected, multiFamilySelected are selected', () => {
@@ -154,7 +154,7 @@ describe('housingSchema', () => {
       rentalUnits: NumResidentialUnits.ONE_TO_NINE
     };
 
-    const { error } = housing.validate(data);
-    expect(error).toBeDefined();
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
   });
 });

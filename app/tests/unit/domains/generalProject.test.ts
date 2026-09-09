@@ -1,21 +1,18 @@
 import { mockReset } from 'vitest-mock-extended';
 
-import {
-  TEST_ACTIVITY_GENERAL,
-  TEST_CONTACT_1,
-  TEST_CURRENT_CONTEXT,
-  TEST_GENERAL_PROJECT_INTAKE,
-  TEST_PERMIT_1
-} from '#tests/unit/data/index';
+import { TEST_ACTIVITY_GENERAL, TEST_CURRENT_CONTEXT, TEST_GENERAL_PROJECT_INTAKE } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import * as activityDomain from '#src/domains/activity';
-import { generateGeneralProjectData } from '#src/domains/generalProject';
-import { Initiative } from '#src/utils/enums/application';
+import { createGeneralProjectData, generateGeneralProjectData } from '#src/domains/generalProject';
+import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
-import type { Permit } from '#types';
+import type { SubmitGeneralProjectDraftRequest } from '#types';
+
+type AppliedPermitInput = NonNullable<SubmitGeneralProjectDraftRequest['permits']['appliedPermits']>[number];
+type InvestigatePermitInput = NonNullable<SubmitGeneralProjectDraftRequest['permits']['investigatePermits']>[number];
 
 vi.mock('../../../src/external/ches');
 vi.mock('config', async () => {
@@ -42,11 +39,53 @@ describe('generalProject domain', () => {
     mockReset(mockRepos);
   });
 
+  describe('createGeneralProjectData', () => {
+    it('should build a project from the ensured activity', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_GENERAL.activityId
+      );
+
+      const result = await createGeneralProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.GENERAL,
+        TEST_CURRENT_CONTEXT
+      );
+      expect(result.generalProject.activityId).toBe(TEST_ACTIVITY_GENERAL.activityId);
+    });
+
+    it('should throw error when activity creation fails', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
+
+      await expect(createGeneralProjectData(mockRepos, TEST_CURRENT_CONTEXT)).rejects.toThrow(
+        'Failed to generate activity ID'
+      );
+    });
+
+    it('should return a blank project shell with defaults and no permits', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_GENERAL.activityId
+      );
+
+      const result = await createGeneralProjectData(mockRepos, TEST_CURRENT_CONTEXT);
+
+      expect(result.generalProject.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.generalProject.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.generalProject.generalProjectId).toBeDefined();
+      expect(result.appliedPermits).toEqual([]);
+      expect(result.investigatePermits).toEqual([]);
+      expect(result.appliedPermitTrackers).toEqual([]);
+    });
+  });
+
   describe('generateGeneralProjectData', () => {
-    it('should create activity and link contact when activityId not provided', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(TEST_ACTIVITY_GENERAL as never);
-      mockRepos.contact.search.mockResolvedValueOnce([TEST_CONTACT_1] as never);
-      mockRepos.activityContact.create.mockResolvedValueOnce({} as never);
+    it('should build a project from the ensured activity when activityId not provided', async () => {
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
+        TEST_ACTIVITY_GENERAL.activityId
+      );
 
       const intake = {
         ...TEST_GENERAL_PROJECT_INTAKE,
@@ -55,21 +94,12 @@ describe('generalProject domain', () => {
 
       const result = await generateGeneralProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).toHaveBeenCalledWith(
-        {
-          activity: mockRepos.activity,
-          initiative: mockRepos.initiative
-        },
-        Initiative.GENERAL
+      expect(activityDomain.ensureActivityWithPrimaryContact).toHaveBeenCalledWith(
+        mockRepos,
+        Initiative.GENERAL,
+        TEST_CURRENT_CONTEXT,
+        null
       );
-      expect(mockRepos.contact.search).toHaveBeenCalledWith({
-        userId: [TEST_CURRENT_CONTEXT.userId]
-      });
-      expect(mockRepos.activityContact.create).toHaveBeenCalledWith({
-        activityId: TEST_ACTIVITY_GENERAL.activityId,
-        contactId: TEST_CONTACT_1.contactId,
-        role: 'PRIMARY'
-      });
       expect(result.generalProject.activityId).toBe(TEST_ACTIVITY_GENERAL.activityId);
     });
 
@@ -81,13 +111,14 @@ describe('generalProject domain', () => {
 
       const result = await generateGeneralProjectData(mockRepos, intake, TEST_CURRENT_CONTEXT);
 
-      expect(activityDomain.createActivity).not.toHaveBeenCalled();
+      expect(mockRepos.activity.create).not.toHaveBeenCalled();
       expect(result.generalProject.activityId).toBe('ACTI1234');
     });
 
     it('should throw error when activity creation fails', async () => {
-      vi.spyOn(activityDomain, 'createActivity').mockResolvedValue(undefined as never);
-      mockRepos.contact.search.mockResolvedValueOnce([] as never);
+      vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockRejectedValueOnce(
+        new Error('Failed to generate activity ID')
+      );
 
       const intake = {
         ...TEST_GENERAL_PROJECT_INTAKE,
@@ -134,6 +165,7 @@ describe('generalProject domain', () => {
         activityId: 'ACTI1234',
         permits: {
           appliedPermits: [],
+          hasAppliedProvincialPermits: BasicResponse.NO,
           investigatePermits: []
         }
       };
@@ -152,14 +184,11 @@ describe('generalProject domain', () => {
         permits: {
           appliedPermits: [
             {
-              ...TEST_PERMIT_1,
-              permitId: undefined,
               permitTypeId: 1,
-              submittedDate: new Date().toISOString(), // Mock ISO date
-              submittedTime: '10:00',
-              permitTracking: []
-            } as unknown as Permit
+              submittedDate: new Date()
+            } as unknown as AppliedPermitInput
           ],
+          hasAppliedProvincialPermits: BasicResponse.NO,
           investigatePermits: []
         }
       };
@@ -181,12 +210,11 @@ describe('generalProject domain', () => {
         activityId: 'ACTI1234',
         permits: {
           appliedPermits: [],
+          hasAppliedProvincialPermits: BasicResponse.NO,
           investigatePermits: [
             {
-              permitId: 'PERM001',
-              permitTypeId: 2,
-              submittedTime: '14:00'
-            } as never
+              permitTypeId: 2
+            } as unknown as InvestigatePermitInput
           ]
         }
       };
@@ -195,7 +223,7 @@ describe('generalProject domain', () => {
 
       expect(result.investigatePermits).toHaveLength(1);
       const permit = result.investigatePermits[0];
-      expect(permit.permitId).toBe('PERM001');
+      expect(permit.permitId).toBeDefined();
       expect(permit.stage).toBe(PermitStage.PRE_SUBMISSION);
       expect(permit.needed).toBe(PermitNeeded.UNDER_INVESTIGATION);
       expect(permit.state).toBe(PermitState.NONE);

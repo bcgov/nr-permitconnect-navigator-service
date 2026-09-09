@@ -1,289 +1,162 @@
-import type { ParsedQs } from 'qs';
-import type {
-  CreateRequestDTO,
-  DeleteRequestDTO,
-  GetRequestDTO,
-  ListRequestDTO,
-  PatchRequestDTO,
-  ResourceSchemaConfig,
-  UpsertRequestDTO
-} from './dto.ts';
-import type {
-  ContactBase,
-  ElectrificationProjectBase,
-  EnquiryBase,
-  GeneralProjectBase,
-  HousingProjectBase,
-  NoteHistoryBase,
-  Permit,
-  PermitBase,
-  Stamps
-} from './resources.ts';
-import type { ElectrificationProjectIntake, GeneralProjectIntake, HousingProjectIntake } from '../intakes.ts';
-import type { PaginationOptions } from '#src/types/common';
-import type { Nullable, PartialFields } from '#src/types/utils';
-import type { GroupName, Initiative, Resource } from '#src/utils/enums/application';
-import type { EmailTemplate } from '#src/utils/templates';
+import type { z } from 'zod';
+import type { schema as accessRequestSchema } from '#src/validators/accessRequest';
+import type { schema as activityContactSchema } from '#src/validators/activityContact';
+import type { schema as atsSchema } from '#src/validators/ats';
+import type { schema as contactSchema } from '#src/validators/contact';
+import type { schema as documentSchema } from '#src/validators/document';
+import type { schema as electrificationProjectSchema } from '#src/validators/electrificationProject';
+import type { schema as enquirySchema } from '#src/validators/enquiry';
+import type { schema as generalProjectSchema } from '#src/validators/generalProject';
+import type { schema as housingProjectSchema } from '#src/validators/housingProject';
+import type { schema as noteHistorySchema } from '#src/validators/noteHistory';
+import type { schema as peachSchema } from '#src/validators/peach';
+import type { schema as permitSchema } from '#src/validators/permit';
+import type { schema as permitTypeSchema } from '#src/validators/permitType';
+import type { schema as roadmapSchema } from '#src/validators/roadmap';
+import type { schema as ssoSchema } from '#src/validators/sso';
+import type { schema as userSchema } from '#src/validators/user';
+import type { schema as yarsSchema } from '#src/validators/yars';
+
+/**
+ * Access Request
+ */
+
+export type CreateUserAccessRequestRequest = z.infer<typeof accessRequestSchema.createUserAccessRequest.body>;
+export type ProcessUserAccessRequestRequest = z.infer<typeof accessRequestSchema.processUserAccessRequest.body>;
+
+/**
+ * Activity Contact
+ */
+
+export type CreateActivityContactRequest = z.infer<typeof activityContactSchema.createActivityContact.body>;
+export type UpdateActivityContactRequest = z.infer<typeof activityContactSchema.updateActivityContact.body>;
+
+/**
+ * ATS
+ */
+
+export type CreateAtsClientRequest = z.infer<typeof atsSchema.createATSClient.body>;
+export type CreateAtsEnquiryRequest = z.infer<typeof atsSchema.createATSEnquiry.body>;
+export type SearchAtsUsersRequest = z.infer<typeof atsSchema.searchATSUsers.query>;
 
 /**
  * Contact
  */
 
-interface ContactBaseSchema extends ResourceSchemaConfig<ContactBase> {
-  ids: 'contactId';
-  immutable: 'contactId';
-  serverGenerated: 'contactId';
-}
+export type GetContactRequest = z.infer<typeof contactSchema.getContact.query>;
+export type MatchContactsRequest = z.infer<typeof contactSchema.matchContacts.body>;
+export type SearchContactsRequest = z.infer<typeof contactSchema.searchContacts.body>;
+export type UpsertContactRequest = z.infer<typeof contactSchema.upsertContact.body>;
 
-export type CreateContactRequest = CreateRequestDTO<ContactBase, ContactBaseSchema>;
-export type UpsertContactRequest = UpsertRequestDTO<ContactBase, ContactBaseSchema>;
+/**
+ * Document
+ */
+
+export type CreateDocumentRequest = z.infer<typeof documentSchema.createDocument.body>;
 
 /**
  * Electrification Project
  */
 
-interface ElectrificationProjectBaseSchema extends ResourceSchemaConfig<ElectrificationProjectBase> {
-  ids: 'electrificationProjectId';
-  immutable: 'activityId' | 'electrificationProjectId';
-  serverGenerated: 'activityId' | 'electrificationProjectId';
-  query: {
-    activityId: string[];
-    createdBy: string[];
-    includeUser: boolean;
-    electrificationProjectId: string[];
-    projectType: string[];
-    projectCategory: string[];
-  };
-}
-
-export type CreateElectrificationProjectRequest = CreateRequestDTO<
-  Partial<ElectrificationProjectBase>,
-  ElectrificationProjectBaseSchema
+export type SearchElectrificationProjectRequest = z.infer<
+  typeof electrificationProjectSchema.searchElectrificationProjects.body
 >;
-export type SearchElectrificationProjectRequest = ListRequestDTO<
-  Partial<ElectrificationProjectBase>,
-  ElectrificationProjectBaseSchema
+export type PatchElectrificationProjectRequest = z.infer<
+  typeof electrificationProjectSchema.patchElectrificationProject.body
 >;
-export type PatchElectrificationProjectRequest = PatchRequestDTO<
-  ElectrificationProjectBase,
-  ElectrificationProjectBaseSchema
+export type GetElectrificationProjectStatisticsRequest = z.infer<
+  typeof electrificationProjectSchema.getStatistics.query
 >;
-export type SubmitDraftElectrificationProjectRequest = ElectrificationProjectIntake;
+export type UpsertElectrificationProjectDraftRequest = z.infer<typeof electrificationProjectSchema.upsertDraft.body>;
+export type SubmitElectrificationProjectDraftRequest = z.infer<
+  typeof electrificationProjectSchema.submitElectrificationProjectDraft.body
+>;
 
 /**
  * Enquiry
  */
 
-interface EnquiryBaseSchema extends ResourceSchemaConfig<EnquiryBase> {
-  ids: 'enquiryId';
-  immutable: 'activityId' | 'enquiryId';
-  serverGenerated: 'activityId' | 'enquiryId';
-}
-interface EnquiryListRelatedSchema extends EnquiryBaseSchema {
-  scope: 'activityId';
-}
-interface EnquirySearchSchema extends EnquiryBaseSchema {
-  query: { activityId: string[]; createdBy: string[]; enquiryId: string[]; includeUser: boolean };
-}
-export type CreateEnquiryRequest = PartialFields<
-  Pick<EnquiryBase, 'enquiryDescription' | 'relatedActivityId' | 'submissionType'> & { contact: ContactBase },
-  'submissionType'
->;
-export type GetEnquiryRequest = GetRequestDTO<EnquiryBase, EnquiryBaseSchema>;
-export type ListRelatedEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquiryListRelatedSchema>;
-export type SearchEnquiriesRequest = ListRequestDTO<EnquiryBase, EnquirySearchSchema>;
-export type PatchEnquiryRequest = PatchRequestDTO<EnquiryBase, EnquiryBaseSchema>;
-export type DeleteEnquiryRequest = DeleteRequestDTO<EnquiryBase, EnquiryBaseSchema>;
+export type CreateEnquiryRequest = z.infer<typeof enquirySchema.createEnquiry.body>;
+export type SearchEnquiriesRequest = z.infer<typeof enquirySchema.searchEnquiries.body>;
+export type PatchEnquiryRequest = z.infer<typeof enquirySchema.patchEnquiry.body>;
 
 /**
  * General Project
  */
 
-interface GeneralProjectBaseSchema extends ResourceSchemaConfig<GeneralProjectBase> {
-  ids: 'generalProjectId';
-  immutable: 'activityId' | 'generalProjectId';
-  serverGenerated: 'activityId' | 'generalProjectId';
-  query: {
-    activityId: string[];
-    createdBy: string[];
-    includeUser: boolean;
-    generalProjectId: string[];
-    submissionType: string[];
-  };
-}
-
-export type CreateGeneralProjectRequest = CreateRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
-export type SearchGeneralProjectRequest = ListRequestDTO<Partial<GeneralProjectBase>, GeneralProjectBaseSchema>;
-export type PatchGeneralProjectRequest = PatchRequestDTO<GeneralProjectBase, GeneralProjectBaseSchema>;
-export type SubmitDraftGeneralProjectRequest = GeneralProjectIntake;
+export type SearchGeneralProjectRequest = z.infer<typeof generalProjectSchema.searchGeneralProjects.body>;
+export type PatchGeneralProjectRequest = z.infer<typeof generalProjectSchema.patchGeneralProject.body>;
+export type GetGeneralProjectStatisticsRequest = z.infer<typeof generalProjectSchema.getStatistics.query>;
+export type UpsertGeneralProjectDraftRequest = z.infer<typeof generalProjectSchema.upsertDraft.body>;
+export type SubmitGeneralProjectDraftRequest = z.infer<typeof generalProjectSchema.submitGeneralProjectDraft.body>;
 
 /**
  * Housing Project
  */
 
-interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBase> {
-  ids: 'housingProjectId';
-  immutable: 'activityId' | 'housingProjectId';
-  serverGenerated: 'activityId' | 'housingProjectId';
-  query: {
-    activityId: string[];
-    createdBy: string[];
-    includeUser: boolean;
-    housingProjectId: string[];
-    submissionType: string[];
-  };
-}
-
-export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
-export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
-export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
-export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
+export type SearchHousingProjectRequest = z.infer<typeof housingProjectSchema.searchHousingProjects.body>;
+export type PatchHousingProjectRequest = z.infer<typeof housingProjectSchema.patchHousingProject.body>;
+export type GetHousingProjectStatisticsRequest = z.infer<typeof housingProjectSchema.getStatistics.query>;
+export type UpsertHousingProjectDraftRequest = z.infer<typeof housingProjectSchema.upsertDraft.body>;
+export type SubmitHousingProjectDraftRequest = z.infer<typeof housingProjectSchema.submitHousingProjectDraft.body>;
 
 /**
  * Note History
  */
 
-interface NoteHistoryBaseSchema extends ResourceSchemaConfig<NoteHistoryBase> {
-  ids: 'noteHistoryId';
-  immutable: 'activityId' | 'noteHistoryId';
-  serverGenerated: 'noteHistoryId';
-}
-interface NoteHistoryBringForwardSchema extends NoteHistoryBaseSchema {
-  query: {
-    bringForwardState: Nullable<string>;
-  };
-}
-interface NoteHistoryQuerySchema extends NoteHistoryBaseSchema {
-  scope: 'activityId';
-}
-export type CreateNoteHistoryRequest = CreateRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & { note: string };
-export type ListBringForwardsRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryBringForwardSchema>;
-export type ListNoteHistoriesRequest = ListRequestDTO<NoteHistoryBase, NoteHistoryQuerySchema>;
-export type PatchNoteHistoryRequest = PatchRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema> & {
-  note: string | undefined;
-  resource: Resource;
-};
-export type DeleteNoteHistoryRequest = DeleteRequestDTO<NoteHistoryBase, NoteHistoryBaseSchema>;
+export type CreateNoteHistoryRequest = z.infer<typeof noteHistorySchema.createNoteHistory.body>;
+export type ListBringForwardsRequest = z.infer<typeof noteHistorySchema.listBringForwards.query>;
+export type PatchNoteHistoryRequest = z.infer<typeof noteHistorySchema.patchNoteHistory.body>;
+
+/**
+ * Peach
+ */
+
+export type GetPeachSummaryRequest = z.infer<typeof peachSchema.getPeachSummary.body>;
 
 /**
  * Permit
  */
 
-interface PermitSchema extends ResourceSchemaConfig<PermitBase> {
-  ids: 'permitId';
-  immutable: 'permitId';
-  serverGenerated: 'permitId';
-  query: {
-    activityId: string;
-    dateRange: [Date, Date];
-    includeNotes: boolean;
-    permitTypeId: number;
-    searchTag: string;
-    sourceSystemKindId: number;
-  };
-}
-export type DeletePermitRequest = DeleteRequestDTO<Permit, PermitSchema>;
-export type GetPermitRequest = GetRequestDTO<Permit, PermitSchema>;
-export type ListPermitsRequest = ListRequestDTO<Permit, PermitSchema>;
-export type UpsertPermitRequest = UpsertRequestDTO<PermitBase, PermitSchema>;
+// Full validated request body, as received by the controller (includes the nested relations below).
+export type UpsertPermitBodyRequest = z.infer<typeof permitSchema.upsertPermit.body>;
+// permitType, permitNote, and permitTracking are read-only relations (validated but never written this way) -
+// omitted to match how domains/*.ts and services/permit.ts already construct and pass these objects straight
+// to Prisma's unchecked write input, which needs relation scalars/nested-writes, not the validated read shape.
+export type UpsertPermitRequest = Omit<UpsertPermitBodyRequest, 'permitType' | 'permitNote' | 'permitTracking'>;
+export type IntakePermitRequest = z.infer<typeof permitSchema.intakePermit.body>[number];
+export type ListPermitsRequest = z.infer<typeof permitSchema.listPermits.query>;
+export type SearchPermitsRequest = z.infer<typeof permitSchema.searchPermits.query>;
 
-export interface ContactSearchParameters {
-  contactApplicantRelationship?: string;
-  contactPreference?: string;
-  contactId?: string[];
-  email?: string;
-  firstName?: string;
-  lastName?: string;
-  phoneNumber?: string;
-  userId?: string[];
-  initiative?: Initiative;
-  includeActivities?: boolean;
-}
+/**
+ * Permit Type
+ */
 
-export interface Email {
-  bcc?: string[];
-  bodyType: string;
-  body: string;
-  cc?: string[];
-  delayTS?: number;
-  encoding?: string;
-  from: string;
-  priority?: string;
-  subject: string;
-  to: string[];
-  tag?: string;
-  attachments?: EmailAttachment[];
-}
+export type ListPermitTypesRequest = z.infer<typeof permitTypeSchema.listPermitTypes.query>;
 
-export interface EmailAttachment {
-  content: string;
-  contentType: string;
-  encoding: string;
-  filename: string;
-}
+/**
+ * Roadmap
+ */
 
-export interface IdirSearchParameters extends ParsedQs {
-  firstName: string;
-  lastName: string;
-  email: string;
-}
+export type GetRoadmapNoteRequest = z.infer<typeof roadmapSchema.getRoadmapNote.query>;
+export type SendRoadmapRequest = z.infer<typeof roadmapSchema.send.body>;
 
-export interface IntakePermitRequest {
-  activityId: string;
-  permitTypeId: number;
-  trackingId?: Nullable<string>;
-  submittedDate?: string;
-}
+/**
+ * SSO
+ */
 
-export interface ListPermitsOptions extends Partial<Stamps> {
-  activityId?: string;
-  includeNotes?: boolean;
-}
+export type SearchIdirUsersRequest = z.infer<typeof ssoSchema.searchIdirUsers.query>;
 
-export interface PermitSearchParams {
-  permitId?: string[];
-  activityId?: string[];
-  permitTypeId?: number[];
-  stage?: string[];
-  state?: string[];
-  sourceSystems?: string[];
-  includePermitNotes?: boolean;
-  includePermitTracking?: boolean;
-  includePermitType?: boolean;
-  onlyPeachIntegratedTrackings?: boolean;
-}
+/**
+ * User
+ */
 
-export interface PermitUpdateEmailParams {
-  permit: Permit;
-  initiative: Initiative;
-  dearName: string;
-  projectId: string;
-  toEmails: string[];
-  emailTemplate: EmailTemplate;
-}
+export type SearchUsersRequest = z.infer<typeof userSchema.searchUsers.body>;
 
-export interface SearchPermitsOptions extends PaginationOptions {
-  dateRange?: [Date, Date];
-  permitTypeId?: string;
-  searchTag?: string;
-  sourceSystemKindId?: string;
-}
+/**
+ * Yars
+ */
 
-export interface UpdatedPermitWithNote {
-  permit: Permit;
-  note: string | undefined;
-}
-
-export interface UserSearchParameters {
-  userId?: string[];
-  idp?: string[];
-  group?: GroupName[];
-  sub?: string;
-  email?: string;
-  firstName?: string;
-  fullName?: string;
-  lastName?: string;
-  active?: boolean;
-  includeUserGroups?: boolean;
-  initiative?: Initiative[];
-}
+export type GetGroupsRequest = z.infer<typeof yarsSchema.getGroups.query>;
+export type ListPermissionsRequest = z.infer<typeof yarsSchema.listPermissions.query>;
+export type DeleteSubjectGroupRequest = z.infer<typeof yarsSchema.deleteSubjectGroup.body>;

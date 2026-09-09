@@ -1,29 +1,25 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
-import { generateHousingProjectData } from '#src/domains/housingProject';
+import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
-import type { Prisma } from '@prisma/client';
 import type {
-  ContactBase,
   CurrentAuthorization,
   CurrentContext,
+  GetHousingProjectStatisticsInput,
   HousingProject,
-  HousingProjectIntake,
   HousingProjectStatistics,
   Maybe,
-  PatchHousingProjectRequest,
-  SearchHousingProjectRequest
+  PatchHousingProjectInput,
+  SearchHousingProjectInput,
+  SubmitHousingProjectDraftInput
 } from '#types';
 
-export const createHousingProjectService = async (
-  data: HousingProjectIntake,
-  currentContext: CurrentContext
-): Promise<HousingProject> => {
+export const createHousingProjectService = async (currentContext: CurrentContext): Promise<HousingProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, housingProject, initiative, permit, permitTracking }) => {
       const {
@@ -31,13 +27,10 @@ export const createHousingProjectService = async (
         appliedPermits,
         investigatePermits,
         appliedPermitTrackers
-      } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+      } = await createHousingProjectData({ activity, activityContact, contact, initiative }, currentContext);
 
       // Create new housing project
-      const response = await housingProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
@@ -83,14 +76,11 @@ export const getHousingProjectService = async (housingProjectId: string): Promis
  * @param filters.userId User ID
  * @returns A Promise that resolves to the housing project statistics
  */
-export const getHousingProjectStatisticsService = async (filters: {
-  dateFrom: string;
-  dateTo: string;
-  monthYear: string;
-  userId: string;
-}): Promise<HousingProjectStatistics[]> => {
-  // Return a single quoted string or null for the given value
-  const val = (value: string) => (value ? `'${value}'` : null);
+export const getHousingProjectStatisticsService = async (
+  filters: GetHousingProjectStatisticsInput
+): Promise<HousingProjectStatistics[]> => {
+  // Return a single quoted ISO string or null for the given date
+  const val = (value?: Date | null) => (value ? `'${value.toISOString()}'` : null);
 
   const date_from = val(filters.dateFrom);
   const date_to = val(filters.dateTo);
@@ -168,7 +158,7 @@ export const listHousingProjectsService = async (
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  params: SearchHousingProjectRequest
+  params: SearchHousingProjectInput
 ): Promise<HousingProject[]> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);
@@ -184,8 +174,8 @@ export const searchHousingProjects = async (
 
 export const submitHousingProjectDraftService = async (
   draftId: Maybe<string>,
-  data: HousingProjectIntake,
-  contactData: ContactBase,
+  data: SubmitHousingProjectDraftInput,
+  contactData: SubmitHousingProjectDraftInput['contact'],
   currentContext: CurrentContext
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(
@@ -198,10 +188,7 @@ export const submitHousingProjectDraftService = async (
       } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
 
       // Create new housing project
-      const response = await housingProject.create({
-        ...project,
-        geoJson: project.geoJson as Prisma.InputJsonValue
-      });
+      const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
       await Promise.all(
@@ -239,7 +226,7 @@ export const submitHousingProjectDraftService = async (
  */
 export const patchHousingProjectService = async (
   housingProjectId: string,
-  data: PatchHousingProjectRequest
+  data: PatchHousingProjectInput
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(async ({ housingProject }) => {
     const current = await housingProject.findFirstOrThrow({ where: { housingProjectId } });

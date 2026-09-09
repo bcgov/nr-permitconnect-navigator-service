@@ -17,5 +17,6 @@ export enum ProjectApplicant {
 
 export enum ProjectLocation {
   STREET_ADDRESS = 'Street address',
-  LOCATION_COORDINATES = 'Location coordinates'
+  LOCATION_COORDINATES = 'Location coordinates',
+  PIN_OR_DRAW = 'Pin or draw your location'
 }

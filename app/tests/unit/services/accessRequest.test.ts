@@ -22,7 +22,7 @@ import {
 import { AccessRequestStatus, IdentityProviderKind } from '#src/utils/enums/application';
 import Problem from '#src/utils/problem';
 
-import type { AccessRequest, User } from '#types';
+import type { AccessRequest, CreateUserAccessRequestRequest, User } from '#types';
 
 vi.mock('config');
 vi.mock('../../../src/external/coms.ts', () => ({
@@ -79,6 +79,7 @@ describe('access request service', () => {
 
   describe('createAccessRequestService', () => {
     const testAccessUser: User = { ...TEST_IDIR_USER_1 };
+    const testAccessUserInput = testAccessUser as CreateUserAccessRequestRequest['user'];
     const testAccessReq = {
       accessRequestId: 'req-1',
       userId: 'user-1',
@@ -110,7 +111,7 @@ describe('access request service', () => {
         TEST_CURRENT_CONTEXT,
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         navigatorAccessReq,
-        testAccessUser
+        testAccessUserInput
       );
 
       expect(getGroupsSpy).toHaveBeenCalledWith(
@@ -123,7 +124,7 @@ describe('access request service', () => {
           grant: navigatorAccessReq.grant,
           groupId: navigatorAccessReq.groupId,
           status: AccessRequestStatus.PENDING,
-          userId: navigatorAccessReq.userId
+          userId: testAccessUser.userId
         })
       );
       expect(result.isAdmin).toBe(false);
@@ -170,7 +171,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
           navigatorAccessReq,
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(404, { detail: 'User not found' }));
     });
@@ -188,7 +189,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_ADMIN,
           invalidReq as never,
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(422, { detail: 'Must provide a group to grant' }));
     });
@@ -206,7 +207,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
           unrequestableReq,
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(403, { detail: 'Cannot modify requested group' }));
     });
@@ -224,7 +225,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
           unrequestableReq,
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(409, { detail: 'User already exists' }));
     });
@@ -242,7 +243,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
           navigatorReq,
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(409, { detail: 'User is already assigned this group' }));
     });
@@ -258,7 +259,7 @@ describe('access request service', () => {
           TEST_CURRENT_CONTEXT,
           TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
           { ...testAccessReq, groupId: 1 },
-          testAccessUser
+          testAccessUserInput
         )
       ).rejects.toThrow(new Problem(409, { detail: 'User must be an IDIR user to be assigned this group' }));
     });
@@ -284,7 +285,7 @@ describe('access request service', () => {
         TEST_CURRENT_CONTEXT,
         TEST_CURRENT_AUTH_CONTEXT_ADMIN,
         testAccessReq,
-        testAccessUser
+        testAccessUserInput
       );
 
       expect(assignGroupSpy).toHaveBeenCalledTimes(2);
@@ -305,7 +306,7 @@ describe('access request service', () => {
         TEST_CURRENT_CONTEXT,
         TEST_CURRENT_AUTH_CONTEXT_ADMIN,
         removeReq,
-        testAccessUser
+        testAccessUserInput
       );
 
       expect(removeUserGroupsSpy).toHaveBeenCalledTimes(1);
@@ -336,7 +337,7 @@ describe('access request service', () => {
         TEST_CURRENT_CONTEXT,
         TEST_CURRENT_AUTH_CONTEXT_ADMIN,
         updateReq,
-        testAccessUser
+        testAccessUserInput
       );
 
       expect(removeUserGroupsSpy).toHaveBeenCalledTimes(1);
@@ -359,7 +360,7 @@ describe('access request service', () => {
         TEST_CURRENT_CONTEXT,
         TEST_CURRENT_AUTH_CONTEXT_ADMIN,
         testAccessReq,
-        testAccessUser
+        testAccessUserInput
       );
 
       expect(mockedAssignPermissions).toHaveBeenCalled();

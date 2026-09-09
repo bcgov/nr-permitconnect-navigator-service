@@ -16,7 +16,7 @@ import {
 import { state } from '../../state';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Permit, PermitUpdateEmailParams, ProjectRepositoryKeys, UpsertPermitRequest } from '#types';
+import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -31,9 +31,9 @@ export const buildNewPermitRecord = (params: {
   stage: PermitStage;
   needed: PermitNeeded;
   state: PermitState;
-  submittedDate?: string | null;
+  submittedDate?: Date | string | null;
   submittedTime?: string | null;
-}): UpsertPermitRequest => ({
+}): PermitCreateInput => ({
   permitId: params.permitId,
   permitTypeId: params.permitTypeId,
   activityId: params.activityId,

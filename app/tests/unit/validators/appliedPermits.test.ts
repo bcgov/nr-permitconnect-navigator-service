@@ -9,8 +9,8 @@ describe('appliedPermitsSchema', () => {
       submittedDate: '2021-01-01',
       trackingId: 'test'
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeDefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(false);
   });
 
   it('should not accept null for permitTypeId', () => {
@@ -19,8 +19,8 @@ describe('appliedPermitsSchema', () => {
       submittedDate: '2021-01-01',
       trackingId: 'test tracking id'
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeDefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(false);
   });
 
   it('should be a valid schema', () => {
@@ -30,8 +30,8 @@ describe('appliedPermitsSchema', () => {
       permitTracking: [{ trackingId: '123' }],
       submittedDate: '2021-01-01'
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeUndefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(true);
   });
 
   it('should only accept one of New, Applied or Completed for stage', () => {
@@ -40,8 +40,8 @@ describe('appliedPermitsSchema', () => {
       stage: 'Test',
       submittedDate: '2021-01-01'
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeDefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(false);
   });
 
   it('should only accept a valid date for submitted date', () => {
@@ -50,25 +50,25 @@ describe('appliedPermitsSchema', () => {
       stage: PermitStage.APPLICATION_SUBMISSION,
       submittedDate: 'not-a-date'
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeDefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(false);
   });
 
   it('should only accept a date lower than current date', () => {
     const appliedPermits = {
       permitTypeId: 123,
       stage: PermitStage.APPLICATION_SUBMISSION,
-      submittedDate: new Date(Date.now() + 1000).toISOString()
+      submittedDate: new Date(Date.now() + 1000 * 60 * 60).toISOString()
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeDefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(false);
   });
 
   it('should allow nulls for fields except permit type id', () => {
     const appliedPermits = {
       permitTypeId: 123
     };
-    const result = appliedPermit.validate(appliedPermits);
-    expect(result.error).toBeUndefined();
+    const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(true);
   });
 });

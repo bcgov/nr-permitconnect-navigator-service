@@ -1,12 +1,18 @@
+import { Prisma } from '@prisma/client';
+
 import { WritableRepository } from './writable.ts';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { PrismaTransactionClient } from '#src/db/database';
-import type { SearchEnquiriesRequest } from '#types';
+import type { PatchEnquiryRequest, SearchEnquiriesRequest } from '#types';
 
 export class EnquiryRepository extends WritableRepository<PrismaTransactionClient['enquiry']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
     super(tx.enquiry, principal, true);
+  }
+
+  public async patch(where: { enquiryId: string }, data: PatchEnquiryRequest) {
+    return this.update(where, data as Prisma.enquiryUncheckedUpdateInput);
   }
 
   public async search(params: SearchEnquiriesRequest, initiativeCode?: Initiative) {
