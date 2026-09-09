@@ -1,20 +1,41 @@
 {{- if .Values.networkPolicy.enabled }}
+{{- $cluster := index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" -}}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-{{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" }}-internal
+  name: allow-{{ $cluster }}-internal
   labels:
-    postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+    postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
 spec:
   podSelector:
     matchLabels:
-      postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+      postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
   ingress:
     - from:
         - podSelector:
             matchLabels:
-              postgres-operator.crunchydata.com/cluster: {{ index .Values "crunchy-postgres" "fullnameOverride" | default "crunchy" | quote }}
+              postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
+      ports:
+        - protocol: TCP
+          port: 5432
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-pcns-to-{{ $cluster }}
+  labels:
+    postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
+spec:
+  podSelector:
+    matchLabels:
+      postgres-operator.crunchydata.com/cluster: {{ $cluster | quote }}
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: nr-permitconnect-navigator-service
       ports:
         - protocol: TCP
           port: 5432
