@@ -61,8 +61,8 @@ describe('Docs Router', () => {
         res: express.Response
       ) => string;
 
-      expect(imgNonceFn(null, mockRes)).toBe("'nonce-test-nonce'"); // eslint-disable-line quotes
-      expect(mediaNonceFn(null, mockRes)).toBe("'nonce-test-nonce'"); // eslint-disable-line quotes
+      expect(imgNonceFn(null, mockRes)).toBe("'nonce-test-nonce'");
+      expect(mediaNonceFn(null, mockRes)).toBe("'nonce-test-nonce'");
     });
   });
 

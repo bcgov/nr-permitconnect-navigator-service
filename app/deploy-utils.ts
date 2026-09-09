@@ -24,6 +24,9 @@ try {
     case 'docs':
       copyDocs();
       break;
+    case 'prisma-client':
+      copyPrismaClient();
+      break;
     case 'purge':
       console.log(`Purging "${DIST_DIR}"...`);
       if (existsSync(DIST_DIR)) rmSync(DIST_DIR, { recursive: true });
@@ -79,6 +82,14 @@ function copyDocs() {
     copyFileSync(`./src/docs/${V1_DOCS}`, `./sbin/src/docs/${V1_DOCS}`);
   }
   console.log('OpenAPI docs have been copied.');
+}
+
+function copyPrismaClient() {
+  console.log('Copying generated Prisma client...');
+  if (existsSync(SBIN_DIR) && existsSync('./src/db/generated')) {
+    copyDirRecursiveSync('./src/db/generated', './sbin/src/db');
+  }
+  console.log('Generated Prisma client has been copied.');
 }
 
 /**

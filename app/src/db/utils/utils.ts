@@ -1,6 +1,6 @@
 import { SYSTEM_ID } from '#src/utils/constants/application';
 
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '#prismaClient';
 import type { CurrentContext } from '#types';
 
 /**
@@ -61,7 +61,7 @@ export function generateNullDeleteStamps() {
  * @param json - the raw value to convert
  * @returns the Prisma JSON input, or undefined if `json` was undefined
  */
-export function jsonToPrismaInputJson(json: unknown): Prisma.NullTypes.JsonNull | Prisma.InputJsonValue | undefined {
+export function jsonToPrismaInputJson(json: unknown): typeof Prisma.JsonNull | Prisma.InputJsonValue | undefined {
   if (json === null) return null as unknown as Prisma.JsonNullValueInput;
   if (json === undefined) return undefined;
 
