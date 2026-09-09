@@ -177,6 +177,7 @@ describe('SubmissionStateSection', () => {
         expect(names).not.toContain('submissionState.queuePriority');
       });
     });
+
     describe('mandatory fields', () => {
       it('sets required props and displays asterisks for mandatory project fields', () => {
         const { wrapper } = mountSubmissionStateSection({ isEnquiry: false });

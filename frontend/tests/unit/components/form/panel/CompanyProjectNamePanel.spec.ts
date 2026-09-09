@@ -90,11 +90,12 @@ describe('CompanyProjectNamePanel', () => {
   describe('rendering', () => {
     describe('mandatory fields', () => {
       describe('projectName', () => {
-        it('renders', () => {
+        it('renders an InputText bound to companyProjectName.projectName', () => {
           const { wrapper } = mountCompanyProjectNamePanel();
 
           expect(wrapper.findComponent(InputText).props('name')).toBe('companyProjectName.projectName');
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountCompanyProjectNamePanel();
 
@@ -105,12 +106,14 @@ describe('CompanyProjectNamePanel', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       describe('companyNameRegistered', () => {
-        it('renders', () => {
+        it('renders an AutoComplete bound to companyProjectName.companyNameRegistered', () => {
           const { wrapper } = mountCompanyProjectNamePanel();
 
           expect(wrapper.findComponent(AutoComplete).props('name')).toBe('companyProjectName.companyNameRegistered');
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountCompanyProjectNamePanel({ initiative: Initiative.ELECTRIFICATION });
 

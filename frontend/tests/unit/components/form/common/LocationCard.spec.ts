@@ -51,7 +51,7 @@ beforeEach(() => {
 describe('LocationCard', () => {
   describe('rendering', () => {
     describe('projectLocation', () => {
-      it('renders', () => {
+      it('renders a RadioList bound to location.projectLocation', () => {
         const { wrapper } = mountLocationCard();
 
         const radioLists = wrapper.findAllComponents(RadioList);
@@ -60,13 +60,15 @@ describe('LocationCard', () => {
         expect(projectLocationRadio).toBeTruthy();
       });
     });
+
     describe('mandatory fields', () => {
       describe('header', () => {
-        it('renders', () => {
+        it('renders a non-empty translated header', () => {
           const { wrapper } = mountLocationCard();
 
           expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountLocationCard();
 
@@ -79,7 +81,7 @@ describe('LocationCard', () => {
       });
 
       describe('latitude', () => {
-        it('renders', async () => {
+        it('renders an enabled InputNumber bound to location.latitude', async () => {
           const { wrapper } = mountLocationCard({
             initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
           });
@@ -93,6 +95,7 @@ describe('LocationCard', () => {
 
           expect(latitudeInput).toBeTruthy();
         });
+
         it('is required when projectLocation is LOCATION_COORDINATES', async () => {
           const { wrapper } = mountLocationCard({
             initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
@@ -110,7 +113,7 @@ describe('LocationCard', () => {
       });
 
       describe('longitude', () => {
-        it('renders', async () => {
+        it('renders an enabled InputNumber bound to location.longitude', async () => {
           const { wrapper } = mountLocationCard({
             initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }
           });
@@ -124,6 +127,7 @@ describe('LocationCard', () => {
 
           expect(longitudeInput).toBeTruthy();
         });
+
         it('is required when projectLocation is LOCATION_COORDINATES', async () => {
           const { wrapper } = mountLocationCard({
             initialValues: { location: { projectLocation: ProjectLocation.LOCATION_COORDINATES } }

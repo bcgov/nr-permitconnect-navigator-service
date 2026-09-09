@@ -38,8 +38,8 @@ beforeEach(() => {
 // Tests
 
 describe('FinanciallySupportedCard', () => {
-  describe('renders', () => {
-    it('non-empty translated header', () => {
+  describe('rendering', () => {
+    it('renders a non-empty translated header', () => {
       const { wrapper } = mountFinanciallySupportedCard();
 
       expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
@@ -47,7 +47,7 @@ describe('FinanciallySupportedCard', () => {
 
     describe('mandatory fields', () => {
       describe('financiallySupportedBc', () => {
-        it('renders', () => {
+        it('renders a RadioList bound to housing.financiallySupportedBc', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
           const radioLists = wrapper.findAllComponents(RadioList);
@@ -55,6 +55,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(bcHousingRadio).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
@@ -66,8 +67,9 @@ describe('FinanciallySupportedCard', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       describe('financiallySupportedIndigenous', () => {
-        it('renders', () => {
+        it('renders a RadioList bound to housing.financiallySupportedIndigenous', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
           const radioLists = wrapper.findAllComponents(RadioList);
@@ -77,6 +79,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(indigenousRadio).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
@@ -88,8 +91,9 @@ describe('FinanciallySupportedCard', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       describe('financiallySupportedNonProfit', () => {
-        it('renders', () => {
+        it('renders a RadioList bound to housing.financiallySupportedNonProfit', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
           const radioLists = wrapper.findAllComponents(RadioList);
@@ -99,6 +103,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(nonProfitRadio).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
@@ -110,8 +115,9 @@ describe('FinanciallySupportedCard', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       describe('financiallySupportedHousingCoop', () => {
-        it('renders', () => {
+        it('renders a RadioList bound to housing.financiallySupportedHousingCoop', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
           const radioLists = wrapper.findAllComponents(RadioList);
@@ -121,6 +127,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(housingCoopRadio).toBeTruthy();
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountFinanciallySupportedCard();
 
@@ -132,8 +139,9 @@ describe('FinanciallySupportedCard', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       describe('indigenousDescription when financiallySupportedIndigenous is YES', () => {
-        it('renders', async () => {
+        it('renders an InputText bound to housing.indigenousDescription', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
           });
@@ -145,6 +153,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(indigenousInput).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedIndigenous: BasicResponse.YES } }
@@ -158,8 +167,9 @@ describe('FinanciallySupportedCard', () => {
           expect(indigenousInput?.props('placeholder')).toContain('*');
         });
       });
+
       describe('nonProfitDescription when financiallySupportedNonProfit is YES', () => {
-        it('renders', async () => {
+        it('renders an InputText bound to housing.nonProfitDescription', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
           });
@@ -171,6 +181,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(nonProfitInput).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedNonProfit: BasicResponse.YES } }
@@ -184,8 +195,9 @@ describe('FinanciallySupportedCard', () => {
           expect(nonProfitInput?.props('placeholder')).toContain('*');
         });
       });
+
       describe('housingCoopDescription when financiallySupportedHousingCoop is YES', () => {
-        it('renders', async () => {
+        it('renders an InputText bound to housing.housingCoopDescription', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }
           });
@@ -197,6 +209,7 @@ describe('FinanciallySupportedCard', () => {
 
           expect(housingCoopInput).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountFinanciallySupportedCard({
             initialValues: { housing: { financiallySupportedHousingCoop: BasicResponse.YES } }

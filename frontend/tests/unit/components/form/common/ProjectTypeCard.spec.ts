@@ -88,9 +88,10 @@ describe('ProjectTypeCard', () => {
         expect(wrapper.findComponent(RadioList).props('disabled')).toBe(expectedDisabled);
       }
     );
+
     describe('mandatory fields', () => {
       describe('header', () => {
-        it('renders', () => {
+        it('renders a non-empty translated header', () => {
           const { wrapper } = mountProjectTypeCard();
 
           expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);

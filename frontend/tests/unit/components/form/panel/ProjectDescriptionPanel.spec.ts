@@ -32,7 +32,7 @@ beforeEach(() => {
 describe('ProjectDescriptionPanel', () => {
   describe('rendering', () => {
     describe('projectDescription', () => {
-      it('renders', () => {
+      it('renders a TextArea bound to projectDescription.description', () => {
         const { wrapper } = mountProjectDescriptionPanel();
 
         const textArea = wrapper.findComponent(TextArea);

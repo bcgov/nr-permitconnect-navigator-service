@@ -40,11 +40,12 @@ describe('ResidentialUnitsCard', () => {
   describe('rendering', () => {
     describe('mandatory fields', () => {
       describe('header', () => {
-        it('renders', () => {
+        it('renders a non-empty translated header', () => {
           const { wrapper } = mountResidentialUnitsCard();
 
           expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountResidentialUnitsCard();
 
@@ -55,38 +56,46 @@ describe('ResidentialUnitsCard', () => {
           expect(asterisk).toBeTruthy();
         });
       });
-      it('singleFamilySelected', () => {
-        const { wrapper } = mountResidentialUnitsCard();
 
-        const checkboxes = wrapper.findAllComponents(Checkbox);
-        const singleFamilyCheckbox = checkboxes.find(
-          (checkbox) => checkbox.props('name') === 'housing.singleFamilySelected'
-        );
+      describe('singleFamilySelected', () => {
+        it('binds a Checkbox to housing.singleFamilySelected', () => {
+          const { wrapper } = mountResidentialUnitsCard();
 
-        expect(singleFamilyCheckbox).toBeTruthy();
+          const checkboxes = wrapper.findAllComponents(Checkbox);
+          const singleFamilyCheckbox = checkboxes.find(
+            (checkbox) => checkbox.props('name') === 'housing.singleFamilySelected'
+          );
+
+          expect(singleFamilyCheckbox).toBeTruthy();
+        });
       });
 
-      it('multiFamilySelected', () => {
-        const { wrapper } = mountResidentialUnitsCard();
+      describe('multiFamilySelected', () => {
+        it('binds a Checkbox to housing.multiFamilySelected', () => {
+          const { wrapper } = mountResidentialUnitsCard();
 
-        const checkboxes = wrapper.findAllComponents(Checkbox);
-        const multiFamilyCheckbox = checkboxes.find(
-          (checkbox) => checkbox.props('name') === 'housing.multiFamilySelected'
-        );
+          const checkboxes = wrapper.findAllComponents(Checkbox);
+          const multiFamilyCheckbox = checkboxes.find(
+            (checkbox) => checkbox.props('name') === 'housing.multiFamilySelected'
+          );
 
-        expect(multiFamilyCheckbox).toBeTruthy();
+          expect(multiFamilyCheckbox).toBeTruthy();
+        });
       });
 
-      it('otherSelected', () => {
-        const { wrapper } = mountResidentialUnitsCard();
+      describe('otherSelected', () => {
+        it('binds a Checkbox to housing.otherSelected', () => {
+          const { wrapper } = mountResidentialUnitsCard();
 
-        const checkboxes = wrapper.findAllComponents(Checkbox);
-        const otherCheckbox = checkboxes.find((checkbox) => checkbox.props('name') === 'housing.otherSelected');
+          const checkboxes = wrapper.findAllComponents(Checkbox);
+          const otherCheckbox = checkboxes.find((checkbox) => checkbox.props('name') === 'housing.otherSelected');
 
-        expect(otherCheckbox).toBeTruthy();
+          expect(otherCheckbox).toBeTruthy();
+        });
       });
+
       describe('singleFamilyUnits', () => {
-        it('renders', async () => {
+        it('renders a Select bound to housing.singleFamilyUnits', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { singleFamilySelected: true } }
           });
@@ -100,6 +109,7 @@ describe('ResidentialUnitsCard', () => {
 
           expect(singleFamilyUnitsSelect).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { singleFamilySelected: true } }
@@ -115,8 +125,9 @@ describe('ResidentialUnitsCard', () => {
           expect(singleFamilyUnitsSelect?.props('placeholder')).toContain('*');
         });
       });
+
       describe('multiFamilyUnits', () => {
-        it('renders', async () => {
+        it('renders a Select bound to housing.multiFamilyUnits', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { multiFamilySelected: true } }
           });
@@ -128,6 +139,7 @@ describe('ResidentialUnitsCard', () => {
 
           expect(multiFamilyUnitsSelect).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { multiFamilySelected: true } }
@@ -141,8 +153,9 @@ describe('ResidentialUnitsCard', () => {
           expect(multiFamilyUnitsSelect?.props('placeholder')).toContain('*');
         });
       });
+
       describe('otherUnitsDescription', () => {
-        it('renders', async () => {
+        it('renders an InputText bound to housing.otherUnitsDescription', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { otherSelected: true } }
           });
@@ -156,6 +169,7 @@ describe('ResidentialUnitsCard', () => {
 
           expect(otherUnitsDescInput).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { otherSelected: true } }
@@ -171,8 +185,9 @@ describe('ResidentialUnitsCard', () => {
           expect(otherUnitsDescInput?.props('placeholder')).toContain('*');
         });
       });
+
       describe('otherUnits', () => {
-        it('renders', async () => {
+        it('renders a Select bound to housing.otherUnits', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { otherSelected: true } }
           });
@@ -184,6 +199,7 @@ describe('ResidentialUnitsCard', () => {
 
           expect(otherUnitsSelect).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountResidentialUnitsCard({
             initialValues: { housing: { otherSelected: true } }

@@ -40,11 +40,12 @@ beforeEach(() => {
 describe('RentalUnitsCard', () => {
   describe('rendering', () => {
     describe('header', () => {
-      it('renders', () => {
+      it('renders a non-empty translated header', () => {
         const { wrapper } = mountRentalUnitsCard();
 
         expect(wrapper.find('h6').text().trim().length).toBeGreaterThan(0);
       });
+
       it('displays asterisk', () => {
         const { wrapper } = mountRentalUnitsCard();
 
@@ -58,7 +59,7 @@ describe('RentalUnitsCard', () => {
 
     describe('mandatory fields', () => {
       describe('hasRentalUnits', () => {
-        it('renders', () => {
+        it('renders a RadioList bound to housing.hasRentalUnits', () => {
           const { wrapper } = mountRentalUnitsCard();
 
           const radioLists = wrapper.findAllComponents(RadioList);
@@ -79,6 +80,7 @@ describe('RentalUnitsCard', () => {
 
           expect(rentalUnitsSelect).toBeTruthy();
         });
+
         it('displays asterisk', async () => {
           const { wrapper } = mountRentalUnitsCard({
             initialValues: { housing: { hasRentalUnits: BasicResponse.YES } }

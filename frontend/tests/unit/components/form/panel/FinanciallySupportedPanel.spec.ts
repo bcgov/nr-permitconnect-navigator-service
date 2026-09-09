@@ -76,6 +76,7 @@ describe('FinanciallySupportedPanel', () => {
 
           expect(selectByName('finance.financiallySupportedBc').props('required')).toBe(true);
         });
+
         it('displays asterisk', () => {
           const { wrapper } = mountFinanciallySupportedPanel();
 
@@ -86,6 +87,7 @@ describe('FinanciallySupportedPanel', () => {
           expect(asterisk).toBeTruthy();
         });
       });
+
       it('disables indigenousDescription when financiallySupportedIndigenous is not Yes', async () => {
         const { inputTextByName } = mountFinanciallySupportedPanel({
           initialValues: { financiallySupportedIndigenous: BasicResponse.NO }
@@ -145,6 +147,7 @@ describe('FinanciallySupportedPanel', () => {
 
         expect(inputTextByName('finance.housingCoopDescription').props('disabled')).toBe(false);
       });
+
       it('displays asterisk in heading for financiallySupportedIndigenous', () => {
         const { wrapper } = mountFinanciallySupportedPanel();
 

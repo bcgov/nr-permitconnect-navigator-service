@@ -194,6 +194,7 @@ describe('ProjectTeamAddModal.vue', () => {
 
       expect(wrapper.html()).toContain(t('projectTeamAddModal.contactAlreadyExists'));
     });
+
     it('disables "Add User" button if user is already in the selected list', async () => {
       vi.mocked(contactService.matchContacts).mockResolvedValue([mockContact]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings());

@@ -59,19 +59,23 @@ const listHousingActivityIdsSpy = vi.spyOn(housingProjectService, 'listActivityI
 const listElectrificationActivityIdsSpy = vi.spyOn(electrificationProjectService, 'listActivityIds');
 const searchHousingProjectsSpy = vi.spyOn(housingProjectService, 'searchProjects');
 
-function mountEnquiryForm({
-  enquiry = testEnquiry,
-  editable,
-  projectService = ref(housingProjectService),
-  atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
-  atsEnquiryTypeCode = testAtsEnquiryTypeCode
-}: {
-  enquiry?: Enquiry;
-  editable?: boolean;
-  projectService?: Ref<ProjectService<Project>>;
-  atsEnquiryPartnerAgencies?: string;
-  atsEnquiryTypeCode?: string;
-} = {}) {
+function mountEnquiryForm(
+  options: {
+    enquiry?: Enquiry;
+    editable?: boolean;
+    projectService?: Ref<ProjectService<Project>>;
+    atsEnquiryPartnerAgencies?: string;
+    atsEnquiryTypeCode?: string;
+  } = {}
+) {
+  const {
+    enquiry = testEnquiry,
+    editable,
+    projectService = ref(housingProjectService),
+    atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
+    atsEnquiryTypeCode = testAtsEnquiryTypeCode
+  } = options;
+
   const { wrapper } = mountComponent(EnquiryForm, {
     props: { editable, enquiry },
     piniaState: {},
@@ -100,22 +104,22 @@ function mountEnquiryForm({
   return { wrapper };
 }
 
+beforeEach(() => {
+  resetMockRouter();
+  vi.clearAllMocks();
+  vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+  vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
+    enquiryId: 'enquiry123',
+    activityId: 'activity456'
+  } as Enquiry);
+  vi.mocked(housingProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
+  vi.mocked(electrificationProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
+  vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
+});
+
 // Tests
 
 describe('EnquiryForm.vue', () => {
-  beforeEach(() => {
-    resetMockRouter();
-    vi.clearAllMocks();
-    vi.mocked(userService.searchUsers).mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
-    vi.mocked(enquiryService.patchEnquiry).mockResolvedValue({
-      enquiryId: 'enquiry123',
-      activityId: 'activity456'
-    } as Enquiry);
-    vi.mocked(housingProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
-    vi.mocked(electrificationProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
-    vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
-  });
-
   describe('Rendering and Initialization', () => {
     it('renders primary contact name when form initializes', async () => {
       const mountEnquiry = {
@@ -182,6 +186,7 @@ describe('EnquiryForm.vue', () => {
 
       expect(listElectrificationActivityIdsSpy).toHaveBeenCalledTimes(1);
     });
+
     describe('mandatory fields', () => {
       describe('enquiryDescription', () => {
         it('displays asterisk', async () => {
