@@ -26,7 +26,7 @@ import {
   SubmissionType
 } from '#src/utils/enums/projectCommon';
 
-import type { Prisma } from '@prisma/client';
+import type { Prisma } from '#prismaClient';
 import type {
   AccessRequest,
   Activity,

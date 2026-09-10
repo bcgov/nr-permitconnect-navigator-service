@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#src/db/generated/client/client';
 
 import { prismaTxMock } from '#tests/__mocks__/prismaMock';
 import prisma from '#src/db/database';

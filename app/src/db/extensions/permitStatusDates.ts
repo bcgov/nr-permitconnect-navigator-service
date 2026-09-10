@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { Regex } from '#src/utils/enums/application';
 

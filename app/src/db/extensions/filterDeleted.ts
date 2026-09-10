@@ -1,36 +1,27 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
+
+import { modelRelations, type RelationInfo } from '#src/db/generators/output/relations.generated';
 
 const excludeOperations = new Set(['create', 'createMany', 'createManyAndReturn']);
 
-const softDeleteModels = new Set(
-  Prisma.dmmf.datamodel.models.filter((m) => m.fields.some((f) => f.name === 'deletedAt')).map((m) => m.name)
+// Naming convention: `{Model[0].toUpperCase()}{model.slice(1)}ScalarFieldEnum` (Prisma's generated export name).
+const scalarFieldEnums = Prisma as unknown as Record<string, Record<string, string> | undefined>;
+
+const softDeleteModels = new Set<string>(
+  Object.values(Prisma.ModelName).filter((name) => {
+    const fieldEnum = scalarFieldEnums[`${name[0].toUpperCase()}${name.slice(1)}ScalarFieldEnum`];
+    return fieldEnum !== undefined && 'deletedAt' in fieldEnum;
+  })
 );
-
-interface RelationInfo {
-  targetModel: string;
-  isList: boolean;
-}
-
-const modelRelations = new Map<string, Map<string, RelationInfo>>();
-
-for (const model of Prisma.dmmf.datamodel.models) {
-  const relations = new Map<string, RelationInfo>();
-  for (const field of model.fields) {
-    if (field.kind === 'object' && field.relationName) {
-      relations.set(field.name, { targetModel: field.type, isList: field.isList });
-    }
-  }
-  modelRelations.set(model.name, relations);
-}
 
 function processRelationArgs(
   relationArgs: Record<string, unknown>,
-  relations: Map<string, RelationInfo>
+  relations: Record<string, RelationInfo>
 ): Record<string, unknown> {
   const newRelationArgs = { ...relationArgs };
 
   for (const [relKey, relVal] of Object.entries(newRelationArgs)) {
-    const relationInfo = relations.get(relKey);
+    const relationInfo = relations[relKey];
 
     if (relationInfo && relVal) {
       const childArgs = typeof relVal === 'boolean' ? {} : { ...(relVal as Record<string, unknown>) };
@@ -55,7 +46,7 @@ function applySoftDeleteFilter(
     };
   }
 
-  const relations = modelRelations.get(modelName);
+  const relations = modelRelations[modelName];
   if (!relations) {
     return nextArgs;
   }

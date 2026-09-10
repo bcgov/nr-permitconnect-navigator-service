@@ -11,6 +11,10 @@
       "sbin": "./sbin/src/types/index.js",
       "default": "./src/types/index.ts"
     },
+    "#prismaClient": {
+      "sbin": "./sbin/src/db/generated/client/client.js",
+      "default": "./src/db/generated/client/client.ts"
+    },
     "#src/*": {
       "sbin": "./sbin/src/*.js",
       "default": "./src/*.ts"
@@ -23,7 +27,8 @@
     "clean:all": "tsx ./deploy-utils.ts clean",
     "clean": "rimraf coverage dist sbin",
     "format": "prettier ./src --write",
-    "prisma:enums": "tsx ./src/db/codes/generate.ts",
+    "prisma:enums": "tsx ./src/db/generators/codeEnums.ts",
+    "prisma:relations": "tsx ./src/db/generators/relations.ts",
     "knex:local": "tsx ./node_modules/knex/bin/cli.js",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
@@ -37,7 +42,7 @@
     "peach:sync": "node sbin/peachSync.js",
     "peach:sync:local": "tsx ./peachSync.ts",
     "postbuild:all": "npm run build",
-    "postbuild": "tsx ./deploy-utils.ts docs",
+    "postbuild": "tsx ./deploy-utils.ts docs && tsx ./deploy-utils.ts prisma-client",
     "postclean:all": "npm run clean",
     "postprisma:case": "npm run prisma:sync",
     "postprisma:migrate:rollback": "npm run prisma:sync",
@@ -55,6 +60,7 @@
     "pretest": "npm run lint",
     "prisma:case": "prisma-case-format -f \"./src/db/prisma/schema.prisma\" --table-case=snake --field-case=camel --enum-case=snake",
     "prisma:generate": "prisma generate",
+    "postprisma:generate": "npm run prisma:relations",
     "prisma:migrate:rollback": "npm run knex:local migrate:rollback",
     "prisma:migrate:down": "npm run knex:local migrate:down",
     "prisma:migrate:up": "npm run knex:local migrate:up",
@@ -75,7 +81,8 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@prisma/client": "6.19.3",
+    "@prisma/adapter-pg": "^7.10.0",
+    "@prisma/client": "^7.10.0",
     "@tsconfig/node24": "24.0.5",
     "@types/proj4": "2.19.0",
     "axios": "1.20.0",
@@ -101,6 +108,7 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
+    "@prisma/internals": "7.10.0",
     "@types/compression": "1.8.1",
     "@types/config": "4.4.0",
     "@types/cors": "2.8.19",
@@ -119,7 +127,7 @@
     "eslint-plugin-jsdoc": "64.2.1",
     "eslint-plugin-prettier": "5.5.6",
     "prettier": "3.9.6",
-    "prisma": "6.19.3",
+    "prisma": "^7.10.0",
     "prisma-case-format": "2.2.1",
     "rimraf": "6.1.3",
     "supertest": "7.2.2",
@@ -129,13 +137,10 @@
     "vitest": "4.1.11",
     "vitest-mock-extended": "5.1.1"
   },
-  "prisma": {
-    "schema": "src/db/prisma/schema.prisma"
-  },
   "allowScripts": {
-    "prisma@6.19.3": true,
-    "@prisma/client@6.19.3": true,
-    "@prisma/engines@6.19.3": true,
-    "@prisma/engines@4.16.2": true
+    "esbuild@0.28.1": true,
+    "prisma@7.10.0": true,
+    "@prisma/engines@7.10.0": true,
+    "@prisma/engines@4.16.2": false
   }
 }

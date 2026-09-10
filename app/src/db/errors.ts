@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { Problem } from '#src/utils/index';
 

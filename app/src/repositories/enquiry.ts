@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { WritableRepository } from './writable.ts';
 import { Initiative } from '#src/utils/enums/application';

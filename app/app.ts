@@ -51,7 +51,7 @@ app.use(
     contentSecurityPolicy: {
       directives: {
         'default-src': [
-          "'self'", // eslint-disable-line
+          "'self'",
           new URL(config.get('frontend.oidc.authority')).origin,
           new URL(config.get('frontend.coms.apiPath')).origin,
           new URL(config.get('frontend.geocoder.apiPath')).origin,
