@@ -4,7 +4,7 @@ import config from 'config';
 import { Problem } from '#src/utils/index';
 
 import type { AxiosInstance, AxiosRequestConfig } from 'axios';
-import type { Record as PeachRecord } from '#types';
+import type { PiesRecord } from '#types';
 
 /**
  * Gets Auth token using PEACH client credentials
@@ -51,14 +51,14 @@ function peachAxios(options: AxiosRequestConfig = {}): AxiosInstance {
 }
 
 /**
- * Get a specific PEACH Record
- * @param recordId Id of the record
+ * Get a specific PIES Record from PEACH
+ * @param assetId Id of the record
  * @param systemId System for the record
- * @returns A Promise that resolves to a PEACH Record
+ * @returns A Promise that resolves to a PIES Record
  */
-export const getPeachRecord = async (recordId: string, systemId?: string): Promise<PeachRecord> => {
+export const getPiesRecord = async (assetId: string, systemId?: string): Promise<PiesRecord> => {
   try {
-    const { data } = await peachAxios().get('/records', { params: { record_id: recordId, system_id: systemId } });
+    const { data } = await peachAxios().get('/records', { params: { asset_id: assetId, system_id: systemId } });
     return data;
   } catch (e) {
     if (axios.isAxiosError(e)) {

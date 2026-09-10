@@ -3,15 +3,15 @@ import pLimit from 'p-limit';
 import { listPeachIntegratedTrackings } from './permit.ts';
 import { PiesOnHold } from '#src/db/codes/enums';
 import { generateUpdateStamps } from '#src/db/utils/utils';
-import { getPeachRecord } from '#src/external/peach';
-import { parsePeachRecords } from '#src/parsers/peach';
+import { getPiesRecord } from '#src/external/peach';
+import { parsePiesRecords } from '#src/parsers/peach';
 import { PeachIntegratedSystem } from '#src/utils/enums/permit';
 import { combineDateTime, compareDates, omit } from '#src/utils/index';
 import { getLogger } from '#src/utils/log';
 
 import type { PermitStage, PermitState } from '#src/db/codes/enums';
 import type { Repositories } from '#src/db/unitOfWork';
-import type { PeachSummary, PermitTracking, Record as PeachRecord, UpdatedPermitWithNote } from '#types';
+import type { PeachSummary, PermitTracking, PiesRecord, UpdatedPermitWithNote } from '#types';
 
 const log = getLogger(module.filename);
 const limit = pLimit(5);
@@ -78,10 +78,10 @@ export const syncPeachRecords = async (
 
   // Uses rate limiting with p-limit to avoid overwhelming PEACH with requests, limit is set to 5.
   const results = await Promise.allSettled(
-    systemRecordPermits.map((srp) => limit(() => getPeachRecord(srp.recordId, srp.systemId)))
+    systemRecordPermits.map((srp) => limit(() => getPiesRecord(srp.recordId, srp.systemId)))
   );
 
-  const records: PeachRecord[] = [];
+  const records: PiesRecord[] = [];
   const errors: { index: number; reason: unknown }[] = [];
   results.forEach((result, index) => {
     if (result.status === 'fulfilled') records.push(result.value);
@@ -101,7 +101,7 @@ export const syncPeachRecords = async (
     }
   }
 
-  const parsedRecords: Record<string, PeachSummary> = parsePeachRecords(records);
+  const parsedRecords: Record<string, PeachSummary> = parsePiesRecords(records);
 
   const updatedPermits: UpdatedPermitWithNote[] = [];
 
