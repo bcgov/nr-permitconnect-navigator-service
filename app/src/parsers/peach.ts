@@ -11,7 +11,7 @@ import type {
   NullableDateTimeStrings,
   PeachSummary,
   ProcessEvent,
-  Record as PeachRecord
+  PiesRecord
 } from '#types';
 
 const log = getLogger(module.filename);
@@ -370,7 +370,7 @@ function piesEventToDateParts(piesEvent: PiesEvent): DateTimeStrings {
  * Sorts (in place) the given record's event sets into descending order
  * @param record PEACH record to have its event sets sorted
  */
-function sortRecordEvents(record: PeachRecord) {
+function sortRecordEvents(record: PiesRecord) {
   if (record.process_event_set) {
     record.process_event_set.sort((a, b) => compareProcessEvents(a, b, true));
   }
@@ -417,7 +417,7 @@ export function compareProcessEvents(a: ProcessEvent, b: ProcessEvent, desc = fa
  * @param record Full PEACH record to summarize
  * @returns A peach summary containing the derived stage, state, and key dates, if no stage or state return null
  */
-export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
+export function summarizePiesRecord(record: PiesRecord): PeachSummary | null {
   // Sort the record's events - latest to earliest
   sortRecordEvents(record);
 
@@ -439,13 +439,13 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
   const useOnHoldEvent = isActiveOnHoldEvent && compareDates(onHoldStartDate, processStartDate) >= 0;
 
   if (latestOnHoldEvent && useOnHoldEvent) {
-    // We want to no-op and log any time we see one we don't have in our pies_on_hold_code table.
+    // We want to no-op and log any time we see a code we don't have in our pies_on_hold_code table.
     // As a way to flag us to update our code table to match PIES documentation.
     // This will not be needed once on hold reasons have been solidified by DWG/PDT.
     if (!codeTable.PiesOnHold.codes.includes(latestOnHoldEvent.coding.code)) {
       log.warn(
         `Encountered unknown PEACH on hold code ${latestOnHoldEvent.coding.code}
-        for Record ${record.system_id}:${record.record_id}.`
+        for Asset ${record.system_id}:${record.asset_id}.`
       );
       return null;
     }
@@ -483,12 +483,12 @@ export function summarizePeachRecord(record: PeachRecord): PeachSummary | null {
  * @param records Readonly list of PEACH records to parse.
  * @returns A map of peach summaries keyed by the system id and record id
  */
-export function parsePeachRecords(records: readonly PeachRecord[]): Record<string, PeachSummary> {
+export function parsePiesRecords(records: readonly PiesRecord[]): Record<string, PeachSummary> {
   const parsedRecords: Record<string, PeachSummary> = {};
   for (const record of records) {
-    const summary = summarizePeachRecord(record);
+    const summary = summarizePiesRecord(record);
     if (!summary) continue;
-    parsedRecords[record.system_id + record.record_id] = summary;
+    parsedRecords[record.system_id + record.asset_id] = summary;
   }
   return parsedRecords;
 }

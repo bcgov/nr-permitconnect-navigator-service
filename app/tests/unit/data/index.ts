@@ -50,7 +50,7 @@ import type {
   Initiative as InitiativeModel,
   Note,
   NoteHistory,
-  Record as PeachRecord,
+  PiesRecord,
   PeachSummary,
   Permit,
   PermitNote,
@@ -826,13 +826,13 @@ export const TEST_PEACH_ON_HOLD_EVENT_2: CodingEvent = {
   }
 };
 
-export const TEST_PEACH_RECORD_1: PeachRecord = {
+export const TEST_PEACH_RECORD_1: PiesRecord = {
   transaction_id: '11111111-1111-4111-8111-111111111111',
   version: '0.1.0',
-  kind: 'Record',
-  record_kind: 'Permit',
+  kind: 'RECORD',
+  asset_kind: 'PERMIT',
   system_id: PeachIntegratedSystem.VFCBC,
-  record_id: 'REC-SUB',
+  asset_id: 'REC-SUB',
   process_event_set: [
     {
       event: { start_date: '2024-01-29' },
@@ -856,13 +856,13 @@ export const TEST_PEACH_RECORD_1: PeachRecord = {
   on_hold_event_set: []
 };
 
-export const TEST_PEACH_RECORD_2: PeachRecord = {
+export const TEST_PEACH_RECORD_2: PiesRecord = {
   transaction_id: '22222222-2222-4222-8222-222222222222',
   version: '0.1.0',
-  kind: 'Record',
-  record_kind: 'Permit',
+  kind: 'RECORD',
+  asset_kind: 'PERMIT',
   system_id: PeachIntegratedSystem.VFCBC,
-  record_id: 'REC-DECISION',
+  asset_id: 'REC-DECISION',
   process_event_set: [
     {
       event: { start_datetime: '2024-03-01T12:00:00.000Z' },
@@ -877,13 +877,13 @@ export const TEST_PEACH_RECORD_2: PeachRecord = {
   on_hold_event_set: []
 };
 
-export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
+export const TEST_PEACH_RECORD_REJECTED: PiesRecord = {
   transaction_id: '33333333-3333-4333-8333-333333333333',
   version: '0.1.0',
-  kind: 'Record',
-  record_kind: 'Permit',
+  kind: 'RECORD',
+  asset_kind: 'PERMIT',
   system_id: PeachIntegratedSystem.VFCBC,
-  record_id: 'REC-REJECTED',
+  asset_id: 'REC-REJECTED',
   process_event_set: [
     {
       event: { start_date: '2024-04-01' },
@@ -907,13 +907,13 @@ export const TEST_PEACH_RECORD_REJECTED: PeachRecord = {
   on_hold_event_set: []
 };
 
-export const TEST_PEACH_RECORD_UNMAPPED: PeachRecord = {
+export const TEST_PEACH_RECORD_UNMAPPED: PiesRecord = {
   transaction_id: '44444444-4444-4444-8444-444444444444',
   version: '0.1.0',
-  kind: 'Record',
-  record_kind: 'Permit',
+  kind: 'RECORD',
+  asset_kind: 'PERMIT',
   system_id: PeachIntegratedSystem.VFCBC,
-  record_id: 'REC-UNMAPPED',
+  asset_id: 'REC-UNMAPPED',
   process_event_set: [
     {
       event: { start_datetime: '2024-06-01T00:00:00.000Z' },
