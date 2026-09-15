@@ -24,8 +24,8 @@ vi.mock('config', async () => {
 });
 
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
-const getPeachRecordSpy = vi.spyOn(peachExternal, 'getPeachRecord');
-const summarizePeachRecordSpy = vi.spyOn(peachParser, 'summarizePeachRecord');
+const getPiesRecordSpy = vi.spyOn(peachExternal, 'getPiesRecord');
+const summarizePiesRecordSpy = vi.spyOn(peachParser, 'summarizePiesRecord');
 
 describe('peach service', () => {
   beforeEach(() => {
@@ -71,8 +71,8 @@ describe('peach service', () => {
       } as PermitTracking;
 
       findPriorityPermitTrackingSpy.mockReturnValueOnce(validTracking);
-      getPeachRecordSpy.mockResolvedValueOnce({} as never);
-      summarizePeachRecordSpy.mockReturnValueOnce(undefined as never);
+      getPiesRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePiesRecordSpy.mockReturnValueOnce(undefined as never);
 
       await expect(peachService.getPeachSummaryService([validTracking])).rejects.toThrow(
         new Problem(500, { detail: 'No status data could be derived from the PEACH record that was found.' })
@@ -87,12 +87,12 @@ describe('peach service', () => {
       const mockSummary = { status: 'APPROVED' };
 
       findPriorityPermitTrackingSpy.mockReturnValueOnce(validTracking);
-      getPeachRecordSpy.mockResolvedValueOnce({} as never);
-      summarizePeachRecordSpy.mockReturnValueOnce(mockSummary as never);
+      getPiesRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePiesRecordSpy.mockReturnValueOnce(mockSummary as never);
 
       const result = await peachService.getPeachSummaryService([validTracking]);
 
-      expect(getPeachRecordSpy).toHaveBeenCalledWith('TRACK-123', 'VFCBC');
+      expect(getPiesRecordSpy).toHaveBeenCalledWith('TRACK-123', 'VFCBC');
       expect(result).toStrictEqual(mockSummary);
     });
   });

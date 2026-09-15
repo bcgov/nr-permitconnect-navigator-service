@@ -236,7 +236,7 @@ describe('AuthorizationForm.vue', () => {
 
       vi.mocked(peachService.getPeachSummary).mockRejectedValue({
         status: 404,
-        response: { data: { extra: { peachError: { record_id: '1', system_id: '1' } } } },
+        response: { data: { extra: { peachError: { asset_id: '1', system_id: '1' } } } },
         isAxiosError: true
       });
 

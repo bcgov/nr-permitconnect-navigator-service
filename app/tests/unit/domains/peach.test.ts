@@ -242,8 +242,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({
+      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
         [PeachIntegratedSystem.VFCBC + 'REC-SUB']: TEST_PEACH_SUMMARY
       } as never);
 
@@ -251,8 +251,8 @@ describe('peach domain', () => {
 
       const result = await syncPeachRecords(mockRepos);
 
-      expect(peachExternal.getPeachRecord).toHaveBeenCalledWith('REC-SUB', PeachIntegratedSystem.VFCBC);
-      expect(peachParser.parsePeachRecords).toHaveBeenCalled();
+      expect(peachExternal.getPiesRecord).toHaveBeenCalledWith('REC-SUB', PeachIntegratedSystem.VFCBC);
+      expect(peachParser.parsePiesRecords).toHaveBeenCalled();
       expect(result.length).toBeGreaterThanOrEqual(0);
     });
 
@@ -273,8 +273,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({});
+      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({});
 
       const result = await syncPeachRecords(mockRepos);
 
@@ -308,8 +308,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({
+      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
         [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
       } as never);
 
@@ -339,8 +339,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockRejectedValue(new Error('PEACH fetch failed'));
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({});
+      vi.spyOn(peachExternal, 'getPiesRecord').mockRejectedValue(new Error('PEACH fetch failed'));
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({});
 
       const result = await syncPeachRecords(mockRepos);
 
@@ -375,8 +375,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({
+      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
         [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
       } as never);
 
@@ -421,8 +421,8 @@ describe('peach domain', () => {
       };
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit] as never);
-      vi.spyOn(peachExternal, 'getPeachRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({
+      vi.spyOn(peachExternal, 'getPiesRecord').mockResolvedValue(TEST_PEACH_RECORD_1 as never);
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
         [PeachIntegratedSystem.VFCBC + 'REC-SUB']: peachSummary
       } as never);
 
@@ -464,11 +464,11 @@ describe('peach domain', () => {
 
       vi.spyOn(permitDomain, 'listPeachIntegratedTrackings').mockResolvedValue([permit1, permit2] as never);
 
-      const getPeachRecordSpy = vi.spyOn(peachExternal, 'getPeachRecord');
-      getPeachRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1 as never);
-      getPeachRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_2 as never);
+      const getPiesRecordSpy = vi.spyOn(peachExternal, 'getPiesRecord');
+      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_1 as never);
+      getPiesRecordSpy.mockResolvedValueOnce(TEST_PEACH_RECORD_2 as never);
 
-      vi.spyOn(peachParser, 'parsePeachRecords').mockReturnValue({
+      vi.spyOn(peachParser, 'parsePiesRecords').mockReturnValue({
         [PeachIntegratedSystem.VFCBC + 'REC-1']: { ...TEST_PEACH_SUMMARY, stage: PermitStage.APPLICATION_SUBMISSION },
         [PeachIntegratedSystem.WMA + 'REC-2']: TEST_PEACH_SUMMARY
       } as never);
@@ -477,7 +477,7 @@ describe('peach domain', () => {
 
       const result = await syncPeachRecords(mockRepos);
 
-      expect(peachExternal.getPeachRecord).toHaveBeenCalledTimes(2);
+      expect(peachExternal.getPiesRecord).toHaveBeenCalledTimes(2);
       expect(result).toBeDefined();
     });
   });

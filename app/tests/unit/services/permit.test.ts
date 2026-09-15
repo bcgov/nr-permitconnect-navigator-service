@@ -27,8 +27,8 @@ const sendNotificationsSpy = vi.spyOn(permitDomain, 'sendPermitUpdateNotificatio
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
-const getPeachRecordSpy = vi.spyOn(externalPeach, 'getPeachRecord');
-const summarizePeachRecordSpy = vi.spyOn(peachParser, 'summarizePeachRecord');
+const getPiesRecordSpy = vi.spyOn(externalPeach, 'getPiesRecord');
+const summarizePiesRecordSpy = vi.spyOn(peachParser, 'summarizePiesRecord');
 
 describe('permit service', () => {
   beforeEach(() => {
@@ -299,8 +299,8 @@ describe('permit service', () => {
 
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([integratedSystem] as never);
       findPriorityPermitTrackingSpy.mockReturnValueOnce(trackingData[0] as never);
-      getPeachRecordSpy.mockResolvedValueOnce({} as never);
-      summarizePeachRecordSpy.mockReturnValueOnce(undefined as never);
+      getPiesRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePiesRecordSpy.mockReturnValueOnce(undefined as never);
 
       await expect(
         permitService.upsertPermitService(TEST_PERMIT_1 as never, undefined, trackingData as never, {
@@ -318,8 +318,8 @@ describe('permit service', () => {
 
       mockRepos.sourceSystemKind.list.mockResolvedValueOnce([integratedSystem] as never);
       findPriorityPermitTrackingSpy.mockReturnValueOnce(trackingData[0] as never);
-      getPeachRecordSpy.mockResolvedValueOnce({} as never);
-      summarizePeachRecordSpy.mockReturnValueOnce({} as never); // Returns valid truthy summary
+      getPiesRecordSpy.mockResolvedValueOnce({} as never);
+      summarizePiesRecordSpy.mockReturnValueOnce({} as never); // Returns valid truthy summary
 
       mockRepos.permit.findFirst.mockResolvedValueOnce(oldPermit as never);
       mockRepos.permit.upsert.mockResolvedValueOnce(newPermit as never);

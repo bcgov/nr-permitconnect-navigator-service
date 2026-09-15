@@ -5,8 +5,8 @@ import { unitOfWork } from '#src/db/unitOfWork';
 import { findPriorityPermitTracking } from '#src/domains/peach';
 import { buildNewPermitRecord, sendPermitUpdateNotifications } from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
-import { getPeachRecord } from '#src/external/peach';
-import { summarizePeachRecord } from '#src/parsers/peach';
+import { getPiesRecord } from '#src/external/peach';
+import { summarizePiesRecord } from '#src/parsers/peach';
 import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import Problem from '#src/utils/problem';
@@ -261,11 +261,11 @@ export const upsertPermitService = async (
       let isValidPeachPermit = false;
 
       if (isPeachIntegratedAuth && !!peachIntegratedTracking) {
-        const peachRecord = await getPeachRecord(
+        const peachRecord = await getPiesRecord(
           peachIntegratedTracking.trackingId!,
           peachIntegratedTracking.sourceSystemKind!.sourceSystem
         );
-        const peachSummary = summarizePeachRecord(peachRecord);
+        const peachSummary = summarizePiesRecord(peachRecord);
         isValidPeachPermit = !!peachSummary;
         if (!isValidPeachPermit) throw new Problem(400, { detail: 'Invalid Peach record summary' });
       }

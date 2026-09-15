@@ -7,7 +7,7 @@ import {
   TEST_PEACH_RECORD_UNMAPPED
 } from '#tests/unit/data/index';
 import { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
-import { compareProcessEvents, parsePeachRecords, summarizePeachRecord } from '#src/parsers/peach';
+import { compareProcessEvents, parsePiesRecords, summarizePiesRecord } from '#src/parsers/peach';
 import { PeachIntegratedSystem } from '#src/utils/enums/permit';
 
 import type { ProcessEvent } from '#types';
@@ -82,10 +82,10 @@ describe('peachRecordParser', () => {
     });
   });
 
-  describe('summarizePeachRecord', () => {
+  describe('summarizePiesRecord', () => {
     it('maps TECH_REVIEW_COMMENT/REFERRAL to Technical review/In progess and sets sub/status dates', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_1);
-      const summary = summarizePeachRecord(peachRecord);
+      const summary = summarizePiesRecord(peachRecord);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -105,7 +105,7 @@ describe('peachRecordParser', () => {
 
     it('maps DECISION/ALLOWED to Post Decision/Approved and sets decision/status dates', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_2);
-      const summary = summarizePeachRecord(peachRecord);
+      const summary = summarizePiesRecord(peachRecord);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -125,7 +125,7 @@ describe('peachRecordParser', () => {
 
     it('uses previous stage for terminal REJECTED and maps to Technical review/Rejected', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_REJECTED);
-      const summary = summarizePeachRecord(peachRecord);
+      const summary = summarizePiesRecord(peachRecord);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -144,28 +144,23 @@ describe('peachRecordParser', () => {
 
     it('returns null summary for an unmapped PEACH combination', () => {
       const peachRecord = structuredClone(TEST_PEACH_RECORD_UNMAPPED);
-      const summary = summarizePeachRecord(peachRecord);
+      const summary = summarizePiesRecord(peachRecord);
 
       expect(summary).toBe(null);
     });
 
-    it('returns null when both event sets are undefined or empty', () => {
-      const recordUndefined = structuredClone(TEST_PEACH_RECORD_1);
-      delete recordUndefined.process_event_set;
-      delete recordUndefined.on_hold_event_set;
-      expect(summarizePeachRecord(recordUndefined)).toBeNull();
-
+    it('returns null when both event sets are empty', () => {
       const recordEmpty = structuredClone(TEST_PEACH_RECORD_1);
       recordEmpty.process_event_set = [];
       recordEmpty.on_hold_event_set = [];
-      expect(summarizePeachRecord(recordEmpty)).toBeNull();
+      expect(summarizePiesRecord(recordEmpty)).toBeNull();
     });
 
     it('returns null for a terminal stage missing a previous event', () => {
       const record = structuredClone(TEST_PEACH_RECORD_REJECTED);
       record.process_event_set = [record.process_event_set![1]];
 
-      expect(summarizePeachRecord(record)).toBeNull();
+      expect(summarizePiesRecord(record)).toBeNull();
     });
 
     it('process event sets status when there is no active on hold events (with end date/time)', () => {
@@ -180,7 +175,7 @@ describe('peachRecordParser', () => {
       };
       record.on_hold_event_set = [olderEndedOnHoldEventDate, endedOnHoldEventDate];
 
-      const summary1 = summarizePeachRecord(record);
+      const summary1 = summarizePiesRecord(record);
       expect(summary1).not.toBeNull();
       if (!summary1) throw new Error('Expected PEACH summary');
 
@@ -197,7 +192,7 @@ describe('peachRecordParser', () => {
       };
       record.on_hold_event_set = [olderEndedOnHoldEventDateTime, endedOnHoldEventDateTime];
 
-      const summary2 = summarizePeachRecord(record);
+      const summary2 = summarizePiesRecord(record);
       expect(summary2).not.toBeNull();
       if (!summary2) throw new Error('Expected PEACH summary');
 
@@ -210,7 +205,7 @@ describe('peachRecordParser', () => {
       const oldOnHoldEvent = { ...TEST_PEACH_ON_HOLD_EVENT_1, event: { start_date: '2024-01-15' } };
       record.on_hold_event_set = [oldOnHoldEvent];
 
-      const summary = summarizePeachRecord(record);
+      const summary = summarizePiesRecord(record);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -223,7 +218,7 @@ describe('peachRecordParser', () => {
       const record = structuredClone(TEST_PEACH_RECORD_1);
       record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_1];
 
-      const summary = summarizePeachRecord(record);
+      const summary = summarizePiesRecord(record);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -235,10 +230,10 @@ describe('peachRecordParser', () => {
 
     it('returns null if there is an on-hold event but no process events', () => {
       const record = structuredClone(TEST_PEACH_RECORD_1);
-      record.process_event_set = undefined;
+      record.process_event_set = [];
       record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_1];
 
-      expect(summarizePeachRecord(record)).toBeNull();
+      expect(summarizePiesRecord(record)).toBeNull();
     });
 
     it('returns null if an active MISSING_INFORMATION event is tied to an unmapped process stage', () => {
@@ -261,7 +256,7 @@ describe('peachRecordParser', () => {
         }
       ];
 
-      expect(summarizePeachRecord(record)).toBeNull();
+      expect(summarizePiesRecord(record)).toBeNull();
     });
 
     it('maps APPLICANT_REQUEST + INITIAL_SUBMISSION_REVIEW to Application submission/Pending applicant action', () => {
@@ -288,7 +283,7 @@ describe('peachRecordParser', () => {
         }
       ];
 
-      const summary = summarizePeachRecord(record);
+      const summary = summarizePiesRecord(record);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -310,7 +305,7 @@ describe('peachRecordParser', () => {
         }
       ];
 
-      const summary = summarizePeachRecord(record);
+      const summary = summarizePiesRecord(record);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -343,7 +338,7 @@ describe('peachRecordParser', () => {
         }
       ];
 
-      const summary = summarizePeachRecord(record);
+      const summary = summarizePiesRecord(record);
 
       expect(summary).not.toBeNull();
       if (!summary) throw new Error('Expected PEACH summary');
@@ -356,18 +351,18 @@ describe('peachRecordParser', () => {
       const record = structuredClone(TEST_PEACH_RECORD_1);
       record.on_hold_event_set = [TEST_PEACH_ON_HOLD_EVENT_2];
 
-      expect(summarizePeachRecord(record)).toBeNull();
+      expect(summarizePiesRecord(record)).toBeNull();
     });
   });
 
-  describe('parsePeachRecords', () => {
-    it('indexes by system_id + record_id and summarizes each record with mapped stage/state', () => {
+  describe('parsePiesRecords', () => {
+    it('indexes by system_id + asset_id and summarizes each record with mapped stage/state', () => {
       const peachRecord1 = structuredClone(TEST_PEACH_RECORD_1);
       const peachRecord2 = structuredClone(TEST_PEACH_RECORD_2);
-      const map = parsePeachRecords([peachRecord1, peachRecord2]);
+      const map = parsePiesRecords([peachRecord1, peachRecord2]);
 
-      const key1 = `${PeachIntegratedSystem.VFCBC}${peachRecord1.record_id}`;
-      const key2 = `${PeachIntegratedSystem.VFCBC}${peachRecord2.record_id}`;
+      const key1 = `${PeachIntegratedSystem.VFCBC}${peachRecord1.asset_id}`;
+      const key2 = `${PeachIntegratedSystem.VFCBC}${peachRecord2.asset_id}`;
 
       expect(Object.keys(map)).toHaveLength(2);
       expect(Object.keys(map)).toEqual(expect.arrayContaining([key1, key2]));
@@ -396,21 +391,21 @@ describe('peachRecordParser', () => {
     it('returns only the records that have mapped statuses', () => {
       const peachRecordUnmapped = structuredClone(TEST_PEACH_RECORD_UNMAPPED);
       const peachRecord = structuredClone(TEST_PEACH_RECORD_2);
-      const map = parsePeachRecords([peachRecordUnmapped, peachRecord]);
+      const map = parsePiesRecords([peachRecordUnmapped, peachRecord]);
 
-      const key = `${PeachIntegratedSystem.VFCBC}${peachRecord.record_id}`;
+      const key = `${PeachIntegratedSystem.VFCBC}${peachRecord.asset_id}`;
 
       expect(Object.keys(map)).toHaveLength(1);
       expect(Object.keys(map)).toEqual(expect.arrayContaining([key]));
 
-      const keyUnmapped = `${PeachIntegratedSystem.VFCBC}${peachRecordUnmapped.record_id}`;
+      const keyUnmapped = `${PeachIntegratedSystem.VFCBC}${peachRecordUnmapped.asset_id}`;
       const s1 = map[keyUnmapped];
 
       expect(s1).toBe(undefined);
     });
 
     it('returns an empty object when given an empty record list', () => {
-      const map = parsePeachRecords([]);
+      const map = parsePiesRecords([]);
       expect(map).toEqual({});
     });
   });

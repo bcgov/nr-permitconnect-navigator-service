@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-import { getPeachRecord } from '#src/external/peach';
+import { getPiesRecord } from '#src/external/peach';
 import Problem from '#src/utils/problem';
 
 import type { InternalAxiosRequestConfig } from 'axios';
@@ -49,7 +49,7 @@ describe('peach external service', () => {
   describe('peachAxios interceptor (getToken)', () => {
     it('fetches a token and appends it to the Authorization header', async () => {
       mockedAxiosInstance.get.mockResolvedValueOnce({ data: {} });
-      await getPeachRecord('rec-1');
+      await getPiesRecord('rec-1');
 
       const interceptorCallback = mockedAxiosInstance.interceptors.request.use.mock.calls[0][0];
 
@@ -76,7 +76,7 @@ describe('peach external service', () => {
 
     it('sets an empty Authorization header if token is null or missing', async () => {
       mockedAxiosInstance.get.mockResolvedValueOnce({ data: {} });
-      await getPeachRecord('rec-1');
+      await getPiesRecord('rec-1');
 
       const interceptorCallback = mockedAxiosInstance.interceptors.request.use.mock.calls[0][0];
 
@@ -91,12 +91,12 @@ describe('peach external service', () => {
     });
   });
 
-  describe('getPeachRecord', () => {
-    it('calls GET /records with record_id and system_id params and returns data', async () => {
-      const expected = { record_id: 'rec-1', system_id: 'sys-1' };
+  describe('getPiesRecord', () => {
+    it('calls GET /records with asset_id and system_id params and returns data', async () => {
+      const expected = { asset_id: 'rec-1', system_id: 'sys-1' };
       mockedAxiosInstance.get.mockResolvedValueOnce({ data: expected });
 
-      const result = await getPeachRecord('rec-1', 'sys-1');
+      const result = await getPiesRecord('rec-1', 'sys-1');
 
       expect(mockedAxios.create).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -106,19 +106,19 @@ describe('peach external service', () => {
       );
 
       expect(mockedAxiosInstance.get).toHaveBeenCalledWith('/records', {
-        params: { record_id: 'rec-1', system_id: 'sys-1' }
+        params: { asset_id: 'rec-1', system_id: 'sys-1' }
       });
       expect(result).toStrictEqual(expected);
     });
 
     it('omits systemId by passing undefined when not provided', async () => {
-      const expected = { record_id: 'rec-2' };
+      const expected = { asset_id: 'rec-2' };
       mockedAxiosInstance.get.mockResolvedValueOnce({ data: expected });
 
-      const result = await getPeachRecord('rec-2');
+      const result = await getPiesRecord('rec-2');
 
       expect(mockedAxiosInstance.get).toHaveBeenCalledWith('/records', {
-        params: { record_id: 'rec-2', system_id: undefined }
+        params: { asset_id: 'rec-2', system_id: undefined }
       });
       expect(result).toStrictEqual(expected);
     });
@@ -133,7 +133,7 @@ describe('peach external service', () => {
       mockedAxiosInstance.get.mockRejectedValueOnce(axiosErrorMock);
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
-      await expect(getPeachRecord('rec-x')).rejects.toThrow(
+      await expect(getPiesRecord('rec-x')).rejects.toThrow(
         new Problem(404, { detail: 'not found' }, { extra: { peachError: { detail: 'not found' } } })
       );
     });
@@ -142,7 +142,7 @@ describe('peach external service', () => {
       mockedAxiosInstance.get.mockRejectedValueOnce({});
       mockedAxios.isAxiosError.mockReturnValueOnce(true);
 
-      await expect(getPeachRecord('rec-y')).rejects.toThrow(
+      await expect(getPiesRecord('rec-y')).rejects.toThrow(
         new Problem(500, { detail: undefined }, { extra: { peachError: undefined } })
       );
     });
@@ -151,7 +151,7 @@ describe('peach external service', () => {
       mockedAxiosInstance.get.mockRejectedValueOnce(new Error('boom'));
       mockedAxios.isAxiosError.mockReturnValueOnce(false);
 
-      await expect(getPeachRecord('rec-z')).rejects.toThrow(new Problem(500, { detail: 'Server Error' }));
+      await expect(getPiesRecord('rec-z')).rejects.toThrow(new Problem(500, { detail: 'Server Error' }));
     });
   });
 });

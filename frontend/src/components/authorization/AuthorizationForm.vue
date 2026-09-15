@@ -181,7 +181,7 @@ async function getPeachSummary(permitTrackings: PermitTracking[]) {
   } catch (e) {
     if (isAxiosError(e)) {
       const systemRecordNotFound =
-        e.response?.data.extra?.peachError.record_id && e.response.data.extra?.peachError.system_id;
+        e.response?.data.extra?.peachError.asset_id && e.response.data.extra?.peachError.system_id;
 
       if (e.status === 404 && systemRecordNotFound) {
         noPeachDataModalVisible.value = isPeachEnabled.value; // Change to `true` once toggle removed
