@@ -9,6 +9,11 @@ generator zod {
   output   = "../generated/zod"
 }
 
+generator relations {
+  provider = "tsx ./src/db/generators/relationsGenerator.ts"
+  output   = "../generated/relations"
+}
+
 datasource db {
   provider = "postgresql"
   schemas  = ["public", "yars"]
