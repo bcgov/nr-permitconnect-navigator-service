@@ -100,20 +100,20 @@ route:
   wildcardPolicy: None
 
 resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-  # limits:
+  # The Prisma query compiler runs as a WASM module loaded into the Node
+  # heap, so Node sizes its default heap off this memory limit — keep the
+  # limit generous enough to cover that plus real query load, or the
+  # process heap-OOMs.
+  limits:
     # -- Limit Peak CPU (in millicores ex. 1000m)
-    # cpu: 200m
+    cpu: 500m
     # -- Limit Peak Memory (in gigabytes Gi or megabytes Mi ex. 2Gi)
-    # memory: 256Mi
+    memory: 384Mi
   requests:
     # -- Requested CPU (in millicores ex. 500m)
     cpu: 10m
     # -- Requested Memory (in gigabytes Gi or megabytes Mi ex. 500Mi)
-    memory: 128Mi
+    memory: 256Mi
 
 config:
   # -- Set to true if you want to let Helm manage and overwrite your configmaps.
@@ -250,7 +250,13 @@ peachSync:
   activeDeadlineSeconds: 1800
   terminationGracePeriodSeconds: 30
 
+  # Same Prisma-backed app image as the main deployment, so it needs the same
+  # headroom for the query compiler's WASM-in-heap footprint — see the
+  # `resources` comment above.
   resources:
+    limits:
+      cpu: 500m
+      memory: 384Mi
     requests:
       cpu: 10m
-      memory: 128Mi
+      memory: 256Mi

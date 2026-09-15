@@ -13,29 +13,16 @@ router.get(
   '/',
   helmet.contentSecurityPolicy({
     directives: {
-      'connect-src': [
-        "'self'", // eslint-disable-line quotes
-        'https://raw.githubusercontent.com'
-      ],
+      'connect-src': ["'self'", 'https://raw.githubusercontent.com'],
       'img-src': [
-        "'self'", // eslint-disable-line quotes
+        "'self'",
         'data:',
         (_req, res): string => `'nonce-${(res as Response).locals.cspNonce}'`,
         'https://cdn.redoc.ly'
       ],
-      'media-src': [
-        "'self'", // eslint-disable-line quotes
-        'data:',
-        (_req, res): string => `'nonce-${(res as Response).locals.cspNonce}'`
-      ],
-      'script-src': [
-        'blob:',
-        "'unsafe-eval'" // eslint-disable-line quotes
-      ],
-      'script-src-elem': [
-        'https://cdn.redoc.ly',
-        "'unsafe-inline'" // eslint-disable-line quotes
-      ]
+      'media-src': ["'self'", 'data:', (_req, res): string => `'nonce-${(res as Response).locals.cspNonce}'`],
+      'script-src': ['blob:', "'unsafe-eval'"],
+      'script-src-elem': ['https://cdn.redoc.ly', "'unsafe-inline'"]
     }
   }),
   (_req: Request, res: Response): void => {

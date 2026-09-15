@@ -1,6 +1,7 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { PrismaPg } from '@prisma/adapter-pg';
 import config from 'config';
 
+import { PrismaClient } from '#prismaClient';
 import filterDeletedTransform from './extensions/filterDeleted.ts';
 import numericTransform from './extensions/numeric.ts';
 import permitStatusDatesTransform from './extensions/permitStatusDates.ts';
@@ -20,6 +21,8 @@ const db = {
 
 const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;
 
+const adapter = new PrismaPg({ connectionString: datasourceUrl });
+
 // Note: These two types are a workaround for using Prisma's TransactionClient type while also extending the client.
 // The interface is necessary for function args to not show an expanded type
 // see - https://github.com/prisma/prisma/issues/20738
@@ -32,7 +35,7 @@ const prisma = new PrismaClient({
   // TODO: https://www.prisma.io/docs/orm/prisma-client/observability-and-logging/logging#event-based-logging
   log: ['error', 'warn'],
   errorFormat: 'pretty',
-  datasourceUrl: datasourceUrl
+  adapter
 })
   .$extends(permitStatusDatesTransform)
   .$extends(filterDeletedTransform)
@@ -57,51 +60,4 @@ export async function checkDatabaseHealth(): Promise<boolean> {
     log.error('Database is unhealthy', error);
     return false;
   }
-}
-
-/**
- * Checks if the database schema matches the expected structure.
- * @returns A promise that resolves to `true` if the  database schema matches
- * the expected structure, or `false` otherwise.
- * Will log an error and return `false` if the database introspection fails.
- */
-export function checkDatabaseSchema(): boolean {
-  const expected = Object.freeze({
-    schemas: ['public', 'yars'],
-    tables: [
-      'access_request',
-      'activity',
-      'activity_contact',
-      'contact',
-      'document',
-      'draft',
-      'draft_code',
-      'electrification_project',
-      'electrification_project_category_code',
-      'electrification_project_type_code',
-      'email_log',
-      'enquiry',
-      'general_project',
-      'housing_project',
-      'identity_provider',
-      'initiative',
-      'note',
-      'note_history',
-      'permit',
-      'permit_note',
-      'permit_type',
-      'user',
-      'permit_type_initiative_xref'
-    ]
-  });
-
-  const schemas = new Set(Prisma.dmmf.datamodel.models.map((x) => x.schema));
-  const tables = new Set(Prisma.dmmf.datamodel.models.map((x) => x.dbName ?? x.name));
-  const matches = {
-    schemas: expected.schemas.every((t) => schemas.has(t)),
-    tables: expected.tables.every((t) => tables.has(t))
-  };
-
-  log.debug('Database schema introspection', { matches });
-  return matches.tables;
 }

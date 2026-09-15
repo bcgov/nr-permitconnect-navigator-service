@@ -16,9 +16,9 @@ const prismaInternalMock = mockDeep<DatabaseModule.ExtendedClient>();
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 (prismaInternalMock as any).$extends = vi.fn().mockReturnValue(prismaInternalMock);
 
-vi.mock('@prisma/client', async () => {
+vi.mock('../../../src/db/generated/client/client.ts', async () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const actual = await vi.importActual<any>('@prisma/client');
+  const actual = await vi.importActual<any>('../../../src/db/generated/client/client.ts');
   return {
     ...actual,
     // Must be a regular function (not an arrow) so `new PrismaClient(...)` works.
@@ -29,12 +29,10 @@ vi.mock('@prisma/client', async () => {
 });
 
 let checkDatabaseHealth: (typeof DatabaseModule)['checkDatabaseHealth'];
-let checkDatabaseSchema: (typeof DatabaseModule)['checkDatabaseSchema'];
 
 beforeEach(async () => {
   const actual = await vi.importActual<typeof DatabaseModule>('../../../src/db/database.ts');
   checkDatabaseHealth = actual.checkDatabaseHealth;
-  checkDatabaseSchema = actual.checkDatabaseSchema;
 });
 
 describe('checkDatabaseHealth', () => {
@@ -67,57 +65,5 @@ describe('checkDatabaseHealth', () => {
     const result = await checkDatabaseHealth();
 
     expect(result).toBe(false);
-  });
-});
-
-describe('checkDatabaseSchema', () => {
-  it('returns true when every expected table is present in the Prisma datamodel', () => {
-    const freezeSpy = vi.spyOn(Object, 'freeze');
-
-    const result = checkDatabaseSchema();
-
-    expect(result).toBe(true);
-    expect(freezeSpy).toHaveBeenCalledWith({
-      schemas: ['public', 'yars'],
-      tables: [
-        'access_request',
-        'activity',
-        'activity_contact',
-        'contact',
-        'document',
-        'draft',
-        'draft_code',
-        'electrification_project',
-        'electrification_project_category_code',
-        'electrification_project_type_code',
-        'email_log',
-        'enquiry',
-        'general_project',
-        'housing_project',
-        'identity_provider',
-        'initiative',
-        'note',
-        'note_history',
-        'permit',
-        'permit_note',
-        'permit_type',
-        'user',
-        'permit_type_initiative_xref'
-      ]
-    });
-
-    freezeSpy.mockRestore();
-  });
-});
-
-describe('datasourceUrl', () => {
-  it('encodes reserved characters in the database password when constructing datasourceUrl', async () => {
-    const { PrismaClient: FreshPrismaClient } = await import('@prisma/client');
-
-    expect(FreshPrismaClient).toHaveBeenCalledWith(
-      expect.objectContaining({
-        datasourceUrl: 'postgresql://test:p%40ss%3Aw%2Fo%3Fr%23d%25@test:test/test?&connection_limit=test'
-      })
-    );
   });
 });
