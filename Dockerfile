@@ -94,10 +94,6 @@ COPY --from=prod-deps /usr/lib/libgcc_s.so.* /usr/lib/
 COPY --from=prod-deps /usr/lib/libstdc++.so.* /usr/lib/
 COPY --from=prod-deps /usr/local/bin/node /usr/local/bin/node
 
-# Copy Prisma and OpenSSL required native libraries
-COPY --from=prod-deps /usr/lib/libcrypto.so.* /usr/lib/
-COPY --from=prod-deps /usr/lib/libssl.so.* /usr/lib/
-
 # Set working directory
 WORKDIR ${APP_ROOT}
 
@@ -121,4 +117,4 @@ EXPOSE ${APP_PORT}
 
 # Enter using the binary directly
 ENTRYPOINT ["/usr/local/bin/node"]
-CMD ["--max-old-space-size=50", "--conditions=sbin", "./sbin/server.js"]
+CMD ["--conditions=sbin", "./sbin/server.js"]
