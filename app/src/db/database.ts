@@ -19,9 +19,9 @@ const db = {
   poolMax: config.get<string>('server.db.poolMax')
 };
 
-const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}?&connection_limit=${db.poolMax}`;
+const datasourceUrl = `postgresql://${db.user}:${db.password}@${db.host}:${db.port}/${db.database}`;
 
-const adapter = new PrismaPg({ connectionString: datasourceUrl });
+const adapter = new PrismaPg({ connectionString: datasourceUrl, max: Number(db.poolMax) });
 
 // Note: These two types are a workaround for using Prisma's TransactionClient type while also extending the client.
 // The interface is necessary for function args to not show an expanded type

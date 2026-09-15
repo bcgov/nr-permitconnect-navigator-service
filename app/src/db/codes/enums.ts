@@ -1,6 +1,6 @@
 /**
  * AUTO-GENERATED FILE - DO NOT EDIT
- * @see app/src/db/codes/generate.ts
+ * @see app/src/db/generators/codeEnums.ts
  *
  * To update this file when updating or adding code tables to the db, run:
  * `npm run prisma:enums`
