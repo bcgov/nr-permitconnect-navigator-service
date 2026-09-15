@@ -1,6 +1,6 @@
 import { Prisma } from '#prismaClient';
 
-import { modelRelations, type RelationInfo } from '#src/db/generators/output/relations.generated';
+import { modelRelations, type RelationInfo } from '#src/db/generated/relations/relations.generated';
 
 const excludeOperations = new Set(['create', 'createMany', 'createManyAndReturn']);
 

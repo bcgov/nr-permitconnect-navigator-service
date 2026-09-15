@@ -50,19 +50,16 @@ ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
 ENV DATABASE_URL=${PRISMA_DUMMY_DATABASE_URL}
 
 WORKDIR ${APP_ROOT}
+COPY app/ ./
 
-# Copy package, Prisma config, and Prisma schema files
-COPY app/package.json app/package-lock.json app/prisma.config.ts ./
-COPY app/src/db/prisma/schema.prisma ./src/db/prisma/schema.prisma
-
-# Install production dependencies and generate the Prisma client directly via
-# `npx prisma generate` rather than `npm run prisma:generate`: the latter
-# triggers the postprisma:generate hook (regenerates relations.generated.ts),
-# which needs the full src/ tree and dev-only deps not present in this stage —
-# unnecessary here since that generated file is already committed to git and
-# gets picked up by the app-build stage's full source copy.
-RUN npm ci --ignore-scripts --omit=dev && \
-    npx prisma generate
+# `prisma generate` runs the zod and relations generators (prisma-zod-generator,
+# and the tsx-based relationsGenerator.ts under src/db/generators/), which need
+# dev-only deps (prisma-zod-generator, @prisma/generator-helper, prettier) and
+# the full src/ tree to run. Install everything, generate, then prune back to
+# production-only node_modules for the final image.
+RUN npm ci && \
+    npx prisma generate && \
+    npm prune --omit=dev
 
 # Create minimal user and group files for the final image
 RUN echo "appuser:x:${APP_UID}:${APP_UID}:appuser:/:/sbin/nologin" > /etc/passwd_min && \
