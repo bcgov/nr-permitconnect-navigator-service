@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import '../openapi.ts';
+import '#src/validators/openapi';
 
 export const permitTypeSchema = z
   .object({

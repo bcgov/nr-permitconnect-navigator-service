@@ -25,7 +25,11 @@ import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/applica
 import { draftSchema } from '#src/validators/schemas/draftSchema';
 import { housingProjectSchema } from '#src/validators/schemas/housingProjectSchema';
 import { housingProjectStatisticsSchema } from '#src/validators/schemas/housingProjectStatisticsSchema';
-import { problemResponse } from '#src/validators/schemas/problemResponse';
+import {
+  FORBIDDEN_RESPONSE,
+  UNAUTHORIZED_RESPONSE,
+  VALIDATION_ERROR_RESPONSE
+} from '#src/validators/schemas/problemResponse';
 import { schema } from '#src/validators/housingProject';
 
 const TAGS = ['Housing Project'];
@@ -41,8 +45,8 @@ openapiRoute(basePath, router, {
   tags: TAGS,
   responses: {
     200: { description: 'A list of housing projects', schema: z.array(housingProjectSchema) },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
   handler: listHousingProjectsController
@@ -55,8 +59,8 @@ openapiRoute(basePath, router, {
   tags: TAGS,
   responses: {
     200: { description: 'A list of activity IDs', schema: z.array(z.string()) },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
   handler: listHousingProjectActivityIdsController
@@ -70,9 +74,9 @@ openapiRoute(basePath, router, {
   schema: schema.searchHousingProjects,
   responses: {
     200: { description: 'Housing projects matching the search criteria', schema: z.array(housingProjectSchema) },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
   handler: searchHousingProjectsController
@@ -86,9 +90,9 @@ openapiRoute(basePath, router, {
   schema: schema.getStatistics,
   responses: {
     200: { description: 'Housing project statistics', schema: housingProjectStatisticsSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
   handler: getHousingProjectStatisticsController
@@ -102,9 +106,9 @@ openapiRoute(basePath, router, {
   schema: schema.getDraft,
   responses: {
     200: { description: 'A housing project draft', schema: draftSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), hasAccess('draftId')],
   handler: getHousingProjectDraftController
@@ -117,8 +121,8 @@ openapiRoute(basePath, router, {
   tags: TAGS,
   responses: {
     200: { description: 'A list of housing project drafts', schema: z.array(draftSchema) },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
   handler: getHousingProjectDraftsController
@@ -133,9 +137,9 @@ openapiRoute(basePath, router, {
   responses: {
     200: { description: 'The updated housing project draft', schema: draftSchema },
     201: { description: 'The created housing project draft', schema: draftSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
   handler: upsertHousingProjectDraftController
@@ -146,12 +150,12 @@ openapiRoute(basePath, router, {
   path: '/draft/submit',
   summary: 'Creates or updates an intake and set status to Submitted',
   tags: TAGS,
-  schema: schema.createHousingProject,
+  schema: schema.submitHousingProjectDraft,
   responses: {
     201: { description: 'The submitted housing project', schema: housingProjectSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
   handler: submitHousingProjectDraftController
@@ -165,9 +169,9 @@ openapiRoute(basePath, router, {
   schema: schema.createHousingProject,
   responses: {
     201: { description: 'The created housing project', schema: housingProjectSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasIdentity(IdentityProviderKind.AZUREIDIR), hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
   handler: createHousingProjectController
@@ -181,9 +185,9 @@ openapiRoute(basePath, router, {
   schema: schema.deleteDraft,
   responses: {
     204: { description: 'The draft was deleted' },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE), hasAccess('draftId')],
   handler: deleteHousingProjectDraftController
@@ -197,9 +201,9 @@ openapiRoute(basePath, router, {
   schema: schema.getHousingProject,
   responses: {
     200: { description: 'A housing project', schema: housingProjectSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), hasAccess('housingProjectId')],
   handler: getHousingProjectController
@@ -213,9 +217,9 @@ openapiRoute(basePath, router, {
   schema: schema.patchHousingProject,
   responses: {
     200: { description: 'The patched housing project', schema: housingProjectSchema },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE), hasAccess('housingProjectId')],
   handler: patchHousingProjectController
@@ -229,9 +233,9 @@ openapiRoute(basePath, router, {
   schema: schema.deleteHousingProject,
   responses: {
     204: { description: 'The housing project was deleted' },
-    401: { description: 'Unauthorized', schema: problemResponse, contentType: 'application/problem+json' },
-    403: { description: 'Forbidden', schema: problemResponse, contentType: 'application/problem+json' },
-    422: { description: 'Validation error', schema: problemResponse, contentType: 'application/problem+json' }
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE), hasAccess('housingProjectId')],
   handler: deleteHousingProjectController

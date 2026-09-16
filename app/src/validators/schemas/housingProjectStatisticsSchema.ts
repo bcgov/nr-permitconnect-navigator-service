@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-import '../openapi.ts';
+import '#src/validators/openapi';
 
 // Not Prisma-backed - the result of the get_housing_statistics() SQL function, see
 // src/services/housingProject.ts:79-99 and src/types/api/reports.ts:41
