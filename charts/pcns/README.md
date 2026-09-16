@@ -1,6 +1,6 @@
 # nr-permitconnect-navigator-service
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.10.0](https://img.shields.io/badge/AppVersion-0.10.0-informational?style=flat-square)
 
 PermitConnect Navigator Service
 
@@ -67,8 +67,10 @@ Kubernetes: `>= 1.13.0`
 | peachSync.concurrencyPolicy | string | `"Forbid"` |  |
 | peachSync.enabled | bool | `true` |  |
 | peachSync.failedJobsHistoryLimit | int | `3` |  |
+| peachSync.resources.limits.cpu | string | `"500m"` |  |
+| peachSync.resources.limits.memory | string | `"384Mi"` |  |
 | peachSync.resources.requests.cpu | string | `"10m"` |  |
-| peachSync.resources.requests.memory | string | `"128Mi"` |  |
+| peachSync.resources.requests.memory | string | `"256Mi"` |  |
 | peachSync.schedule | string | `"15 14 * * *"` | Cron schedule for PEACH sync |
 | peachSync.startingDeadlineSeconds | int | `600` | How long the controller can miss the schedule before it gives up starting the job |
 | peachSync.successfulJobsHistoryLimit | int | `5` |  |
@@ -77,9 +79,10 @@ Kubernetes: `>= 1.13.0`
 | podAnnotations | object | `{}` | Annotations for app pods |
 | podSecurityContext | object | `{}` | Privilege and access control settings |
 | replicaCount | int | `2` | Number of pod replicas running in the deployment |
-| resources.requests | object | `{"cpu":"10m","memory":"128Mi"}` | Limit Peak Memory (in gigabytes Gi or megabytes Mi ex. 2Gi) memory: 256Mi |
+| resources.limits.cpu | string | `"500m"` | Limit Peak CPU (in millicores ex. 1000m) |
+| resources.limits.memory | string | `"384Mi"` | Limit Peak Memory (in gigabytes Gi or megabytes Mi ex. 2Gi) |
 | resources.requests.cpu | string | `"10m"` | Requested CPU (in millicores ex. 500m) |
-| resources.requests.memory | string | `"128Mi"` | Requested Memory (in gigabytes Gi or megabytes Mi ex. 500Mi) |
+| resources.requests.memory | string | `"256Mi"` | Requested Memory (in gigabytes Gi or megabytes Mi ex. 500Mi) |
 | route.annotations | object | `{}` | Annotations to add to the route |
 | route.enabled | bool | `true` | Specifies whether a route should be created |
 | route.host | string | `"chart-example.local"` |  |

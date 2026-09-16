@@ -1,4 +1,4 @@
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { toPascalCase } from '#src/utils/index';
 
@@ -14,7 +14,7 @@ import { toPascalCase } from '#src/utils/index';
 const NOT_CODE_TABLES = new Set(['draft_code']);
 
 /**
- * Registry of code table models derived from Prisma schema metadata (DMMF).
+ * Registry of code table models derived from Prisma's generated model list.
  *
  * This is dynamically generated at runtime by inspecting Prisma models and
  * selecting those whose names end with `_code`, excluding any explicitly
@@ -27,6 +27,6 @@ const NOT_CODE_TABLES = new Set(['draft_code']);
  * This approach avoids manually maintaining a static list of code tables,
  * ensuring the registry stays in sync with the database schema.
  */
-export const CODE_TABLES = Prisma.dmmf.datamodel.models
-  .filter((m) => m.name.endsWith('_code') && !NOT_CODE_TABLES.has(m.name))
-  .map((m) => ({ name: toPascalCase(m.name), model: m.name }));
+export const CODE_TABLES = Object.values(Prisma.ModelName)
+  .filter((name) => name.endsWith('_code') && !NOT_CODE_TABLES.has(name))
+  .map((name) => ({ name: toPascalCase(name), model: name }));

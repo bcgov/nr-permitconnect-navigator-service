@@ -6,7 +6,7 @@ import { createServer } from 'node:http';
 
 import app from './app.ts';
 import { refreshCodeCaches } from './src/db/codes/cache.ts';
-import { checkDatabaseHealth, checkDatabaseSchema } from './src/db/database.ts';
+import { checkDatabaseHealth } from './src/db/database.ts';
 import getLogger from './src/utils/log.ts';
 import { state } from './state.ts';
 
@@ -116,7 +116,6 @@ function shutdown(signal: NodeJS.Signals): void {
 async function startup(): Promise<void> {
   try {
     if (!(await checkDatabaseHealth())) throw new Error('Health check failed');
-    if (!(await checkDatabaseSchema())) throw new Error('Schema check failed');
     if (!(await refreshCodeCaches())) throw new Error('Code cache refresh failed');
     state.ready = true;
   } catch (error) {

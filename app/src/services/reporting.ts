@@ -42,12 +42,14 @@ export const getElectrificationProjectPermitDataService = async () => {
        ssc.display as source_system_acronym
     from electrification_project as ep
     join activity as a on ep.activity_id = a.activity_id and a.deleted_at is null
-    join activity_contact as ac on ep.activity_id = ac.activity_id
-    join contact as c on ac.contact_id = c.contact_id
-    left join permit as p on ep.activity_id = p.activity_id
-    left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    left join source_system_code ssc on pt.source_system = ssc.code
-    left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
+    join activity_contact as ac on ep.activity_id = ac.activity_id and ac.deleted_at is null
+    join contact as c on ac.contact_id = c.contact_id and c.deleted_at is null
+    left join permit as p on ep.activity_id = p.activity_id and p.deleted_at is null
+    left join permit_type pt on p.permit_type_id = pt.permit_type_id and pt.deleted_at is null
+    left join source_system_code ssc on pt.source_system = ssc.code and ssc.deleted_at is null
+    left join permit_tracking ptr
+      on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true and ptr.deleted_at is null
+    where ep.deleted_at is null
     order by ep.activity_id asc`;
   });
 };
@@ -94,12 +96,14 @@ export const getGeneralProjectPermitDataService = async () => {
        ssc.display as source_system_acronym
     from general_project as ep
     join activity as a on ep.activity_id = a.activity_id and a.deleted_at is null
-    join activity_contact as ac on ep.activity_id = ac.activity_id
-    join contact as c on ac.contact_id = c.contact_id
-    left join permit as p on ep.activity_id = p.activity_id
-    left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    left join source_system_code ssc on pt.source_system = ssc.code
-    left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
+    join activity_contact as ac on ep.activity_id = ac.activity_id and ac.deleted_at is null
+    join contact as c on ac.contact_id = c.contact_id and c.deleted_at is null
+    left join permit as p on ep.activity_id = p.activity_id and p.deleted_at is null
+    left join permit_type pt on p.permit_type_id = pt.permit_type_id and pt.deleted_at is null
+    left join source_system_code ssc on pt.source_system = ssc.code and ssc.deleted_at is null
+    left join permit_tracking ptr
+      on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true and ptr.deleted_at is null
+    where ep.deleted_at is null
     order by ep.activity_id asc`;
   });
 };
@@ -155,12 +159,14 @@ export const getHousingProjectPermitDataService = async () => {
       ssc.display as source_system_acronym
     from housing_project as hp
     join activity as a on hp.activity_id = a.activity_id and a.deleted_at is null
-    join activity_contact as ac on hp.activity_id = ac.activity_id
-    join contact as c on ac.contact_id = c.contact_id
-    left join permit as p on hp.activity_id = p.activity_id
-    left join permit_type pt on p.permit_type_id = pt.permit_type_id
-    left join source_system_code ssc on pt.source_system = ssc.code
-    left join permit_tracking ptr on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true
+    join activity_contact as ac on hp.activity_id = ac.activity_id and ac.deleted_at is null
+    join contact as c on ac.contact_id = c.contact_id and c.deleted_at is null
+    left join permit as p on hp.activity_id = p.activity_id and p.deleted_at is null
+    left join permit_type pt on p.permit_type_id = pt.permit_type_id and pt.deleted_at is null
+    left join source_system_code ssc on pt.source_system = ssc.code and ssc.deleted_at is null
+    left join permit_tracking ptr
+      on p.permit_id = ptr.permit_id and ptr.shown_to_proponent = true and ptr.deleted_at is null
+    where hp.deleted_at is null
     order by hp.activity_id asc`;
   });
 };

@@ -83,6 +83,11 @@ jobs:
         run: npm ci
       - name: Generate Prisma Schema
         run: npm run prisma:generate
+        env:
+          # Placeholder: prisma generate never connects to the database, but
+          # prisma.config.ts's env('DATABASE_URL') resolves eagerly at
+          # config-load time and errors out if the var is unset.
+          DATABASE_URL: postgresql://user:password@localhost:5432/db
       - name: Test
         run: npm run test
         env:
