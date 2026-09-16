@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { activityBaseSchema } from './activity.ts';
-import '../openapi.ts';
+import '#src/validators/openapi';
 import {
   activity_contactModelSchema,
   contactModelSchema,

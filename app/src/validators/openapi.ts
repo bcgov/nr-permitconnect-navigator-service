@@ -1,7 +1,7 @@
 import { extendZodWithOpenApi, OpenAPIRegistry } from '@asteasolutions/zod-to-openapi';
 import { z } from 'zod';
 
-// Must run before any schema in validators/*.ts calls .openapi() - side effect import only.
+// Must run before any schema calls .openapi() - side effect import only.
 extendZodWithOpenApi(z);
 
 export const registry = new OpenAPIRegistry();
