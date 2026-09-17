@@ -6,7 +6,6 @@ import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
 import { createStamps } from './stamps.ts';
 import { requireValidCode } from '#src/db/codes/validator';
-import { validate } from '#src/middleware/validation';
 import { permitTypeSchema } from '#src/validators/schemas/permitTypeSchema';
 
 export const schema = {
@@ -85,13 +84,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  deletePermit: validate(schema.deletePermit),
-  getPermit: validate(schema.getPermit),
-  intakePermit: validate(schema.intakePermit),
-  listPermits: validate(schema.listPermits),
-  searchPermits: validate(schema.searchPermits),
-  upsertPermit: validate(schema.upsertPermit)
 };

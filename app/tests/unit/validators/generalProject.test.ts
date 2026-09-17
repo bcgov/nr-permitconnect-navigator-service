@@ -1,54 +1,20 @@
-import express from 'express';
-import request from 'supertest';
-
-import { generalProjectValidator } from '../../../src/validators/index.ts';
-
-import type { NextFunction, Request, Response } from 'express';
-import type Problem from '../../../src/utils/problem.ts';
-
-function buildApp() {
-  const app = express();
-  app.use(express.json());
-
-  app.post('/', generalProjectValidator.createGeneralProject, (req: Request, res: Response) =>
-    res.status(200).json(req.body)
-  );
-  app.post('/draft/submit', generalProjectValidator.submitGeneralProjectDraft, (req: Request, res: Response) =>
-    res.status(200).json(req.body)
-  );
-  app.patch('/:generalProjectId', generalProjectValidator.patchGeneralProject, (req: Request, res: Response) =>
-    res.status(200).json(req.body)
-  );
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  app.use((err: Problem, req: Request, res: Response, next: NextFunction) => {
-    res.status(err.status || 500).json({ detail: err.detail });
-  });
-
-  return app;
-}
-
-const validParams = '/5183f223-526a-44cf-8b6a-80f90c4e802b';
+import { schema } from '#src/validators/generalProject';
 
 describe('createGeneralProject validator', () => {
-  const app = buildApp();
-
-  it('accepts an empty body', async () => {
-    const res = await request(app).post('/').send({});
-    expect(res.status).toBe(200);
-    expect(res.body).toEqual({});
+  it('accepts an empty body', () => {
+    const result = schema.createGeneralProject.body.safeParse({});
+    expect(result.success).toBe(true);
+    expect(result.success && result.data).toEqual({});
   });
 
-  it('rejects unrecognized fields', async () => {
-    const res = await request(app).post('/').send({ notARealField: true });
-    expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key: "notARealField"/);
+  it('rejects unrecognized fields', () => {
+    const result = schema.createGeneralProject.body.safeParse({ notARealField: true });
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0].message).toMatch(/Unrecognized key: "notARealField"/);
   });
 });
 
 describe('submitGeneralProjectDraft validator', () => {
-  const app = buildApp();
-
   const validContact = {
     contactId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
     email: 'test@example.com',
@@ -74,118 +40,108 @@ describe('submitGeneralProjectDraft validator', () => {
     };
   }
 
-  it('requires registeredName when projectApplicantType is Business', async () => {
-    const res = await request(app)
-      .post('/draft/submit')
-      .send(validBody({ projectApplicantType: 'Business', projectName: 'Test Project', projectDescription: 'Desc' }));
-    expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/"registeredName" is required/);
+  it('requires registeredName when projectApplicantType is Business', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse(
+      validBody({ projectApplicantType: 'Business', projectName: 'Test Project', projectDescription: 'Desc' })
+    );
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues.some((i) => i.message.match(/"registeredName" is required/))).toBe(
+      true
+    );
   });
 
-  it('passes when projectApplicantType is Business and registeredName is provided', async () => {
-    const res = await request(app)
-      .post('/draft/submit')
-      .send(
-        validBody({
-          projectApplicantType: 'Business',
-          projectName: 'Test Project',
-          projectDescription: 'Desc',
-          registeredName: 'Acme'
-        })
-      );
-    expect(res.status).toBe(200);
+  it('passes when projectApplicantType is Business and registeredName is provided', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse(
+      validBody({
+        projectApplicantType: 'Business',
+        projectName: 'Test Project',
+        projectDescription: 'Desc',
+        registeredName: 'Acme'
+      })
+    );
+    expect(result.success).toBe(true);
   });
 
-  it('does not require registeredName when projectApplicantType is Individual', async () => {
-    const res = await request(app)
-      .post('/draft/submit')
-      .send(validBody({ projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' }));
-    expect(res.status).toBe(200);
+  it('does not require registeredName when projectApplicantType is Individual', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse(
+      validBody({ projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' })
+    );
+    expect(result.success).toBe(true);
   });
 
-  it('requires basic, contact, location, and permits', async () => {
-    const res = await request(app).post('/draft/submit').send({});
-    expect(res.status).toBe(422);
+  it('requires basic, contact, location, and permits', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse({});
+    expect(result.success).toBe(false);
   });
 
-  it('requires contactId on contact', async () => {
+  it('requires contactId on contact', () => {
     const contactWithoutId: Record<string, unknown> = { ...validContact };
     delete contactWithoutId.contactId;
-    const res = await request(app)
-      .post('/draft/submit')
-      .send({
-        contact: contactWithoutId,
-        basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
-        location: validLocation,
-        permits: validPermits
-      });
-    expect(res.status).toBe(422);
+    const result = schema.submitGeneralProjectDraft.body.safeParse({
+      contact: contactWithoutId,
+      basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
+      location: validLocation,
+      permits: validPermits
+    });
+    expect(result.success).toBe(false);
   });
 
-  it('requires contactPreference on contact', async () => {
+  it('requires contactPreference on contact', () => {
     const contactWithoutPreference: Record<string, unknown> = { ...validContact };
     delete contactWithoutPreference.contactPreference;
-    const res = await request(app)
-      .post('/draft/submit')
-      .send({
-        contact: contactWithoutPreference,
-        basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
-        location: validLocation,
-        permits: validPermits
-      });
-    expect(res.status).toBe(422);
+    const result = schema.submitGeneralProjectDraft.body.safeParse({
+      contact: contactWithoutPreference,
+      basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
+      location: validLocation,
+      permits: validPermits
+    });
+    expect(result.success).toBe(false);
   });
 
-  it('rejects unrecognized fields on contact', async () => {
-    const res = await request(app)
-      .post('/draft/submit')
-      .send({
-        contact: { ...validContact, notARealField: true },
-        basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
-        location: validLocation,
-        permits: validPermits
-      });
-    expect(res.status).toBe(422);
+  it('rejects unrecognized fields on contact', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse({
+      contact: { ...validContact, notARealField: true },
+      basic: { projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' },
+      location: validLocation,
+      permits: validPermits
+    });
+    expect(result.success).toBe(false);
   });
 
-  it('rejects a general field (dead, never sent by the frontend)', async () => {
-    const res = await request(app)
-      .post('/draft/submit')
-      .send({
-        ...validBody({ projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' }),
-        general: { projectName: 'Test Project', projectDescription: 'Desc' }
-      });
-    expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key: "general"/);
+  it('rejects a general field (dead, never sent by the frontend)', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse({
+      ...validBody({ projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: 'Desc' }),
+      general: { projectName: 'Test Project', projectDescription: 'Desc' }
+    });
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0].message).toMatch(/Unrecognized key: "general"/);
   });
 });
 
 describe('patchGeneralProject validator', () => {
-  const app = buildApp();
-
-  it('passes with an empty body', async () => {
-    const res = await request(app).patch(validParams).send({});
-    expect(res.status).toBe(200);
+  it('passes with an empty body', () => {
+    const result = schema.patchGeneralProject.body.safeParse({});
+    expect(result.success).toBe(true);
   });
 
-  it('passes with a single partial field', async () => {
-    const res = await request(app).patch(validParams).send({ projectName: 'Updated Name' });
-    expect(res.status).toBe(200);
+  it('passes with a single partial field', () => {
+    const result = schema.patchGeneralProject.body.safeParse({ projectName: 'Updated Name' });
+    expect(result.success).toBe(true);
   });
 
-  it('accepts naturalDisaster as a boolean', async () => {
-    const res = await request(app).patch(validParams).send({ naturalDisaster: true });
-    expect(res.status).toBe(200);
+  it('accepts naturalDisaster as a boolean', () => {
+    const result = schema.patchGeneralProject.body.safeParse({ naturalDisaster: true });
+    expect(result.success).toBe(true);
   });
 
-  it('rejects addedToAts, which does not exist on general_project', async () => {
-    const res = await request(app).patch(validParams).send({ addedToAts: true });
-    expect(res.status).toBe(422);
-    expect(res.body.detail).toMatch(/Unrecognized key: "addedToAts"/);
+  it('rejects addedToAts, which does not exist on general_project', () => {
+    const result = schema.patchGeneralProject.body.safeParse({ addedToAts: true });
+    expect(result.success).toBe(false);
+    expect(!result.success && result.error.issues[0].message).toMatch(/Unrecognized key: "addedToAts"/);
   });
 
-  it('passes with atsClientId and atsEnquiryId', async () => {
-    const res = await request(app).patch(validParams).send({ atsClientId: 1, atsEnquiryId: 2 });
-    expect(res.status).toBe(200);
+  it('passes with atsClientId and atsEnquiryId', () => {
+    const result = schema.patchGeneralProject.body.safeParse({ atsClientId: 1, atsEnquiryId: 2 });
+    expect(result.success).toBe(true);
   });
 });
