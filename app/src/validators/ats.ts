@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { validate } from '#src/middleware/validation';
 import { BasicResponse } from '#src/utils/enums/application';
 
 const addressBody = {
@@ -60,11 +59,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createATSClient: validate(schema.createATSClient),
-  atsEnquirySubmissionFields,
-  createATSEnquiry: validate(schema.createATSEnquiry),
-  searchATSUsers: validate(schema.searchATSUsers)
 };

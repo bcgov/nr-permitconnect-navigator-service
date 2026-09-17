@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { activityId, uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 
 export const schema = {
   createDocument: {
@@ -29,10 +28,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createDocument: validate(schema.createDocument),
-  deleteDocument: validate(schema.deleteDocument),
-  listDocuments: validate(schema.listDocuments)
 };

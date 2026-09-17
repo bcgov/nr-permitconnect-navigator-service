@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 
 export const schema = {
   searchUsers: {
@@ -22,8 +21,4 @@ export const schema = {
       .strict()
       .default({})
   }
-};
-
-export default {
-  searchUsers: validate(schema.searchUsers)
 };

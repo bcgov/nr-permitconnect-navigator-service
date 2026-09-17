@@ -1,6 +1,5 @@
 import { z } from 'zod';
 
-import { validate } from '#src/middleware/validation';
 import { GroupName, Initiative } from '#src/utils/enums/application';
 
 export const schema = {
@@ -27,10 +26,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  getGroups: validate(schema.getGroups),
-  listPermissions: validate(schema.listPermissions),
-  deleteSubjectGroup: validate(schema.deleteSubjectGroup)
 };

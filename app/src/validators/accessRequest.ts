@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 
 export const schema = {
   createUserAccessRequest: {
@@ -51,9 +50,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createUserAccessRequest: validate(schema.createUserAccessRequest),
-  processUserAccessRequest: validate(schema.processUserAccessRequest)
 };

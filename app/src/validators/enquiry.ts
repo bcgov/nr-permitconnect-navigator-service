@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
-import atsValidator from './ats.ts';
+import { atsEnquirySubmissionFields } from './ats.ts';
 import { uuidv4 } from './common.ts';
 import { submittedContactSchema } from './submittedContact.ts';
-import { validate } from '#src/middleware/validation';
 import {
   APPLICATION_STATUS_LIST,
   ENQUIRY_SUBMITTED_METHOD,
@@ -55,16 +54,8 @@ export const schema = {
         assignedUserId: uuidv4.nullish(),
         enquiryStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
         submittedMethod: z.enum(ENQUIRY_SUBMITTED_METHOD as [string, ...string[]]).optional(),
-        ...atsValidator.atsEnquirySubmissionFields
+        ...atsEnquirySubmissionFields
       })
       .strict()
   }
-};
-
-export default {
-  createEnquiry: validate(schema.createEnquiry),
-  deleteEnquiry: validate(schema.deleteEnquiry),
-  getEnquiry: validate(schema.getEnquiry),
-  searchEnquiries: validate(schema.searchEnquiries),
-  patchEnquiry: validate(schema.patchEnquiry)
 };

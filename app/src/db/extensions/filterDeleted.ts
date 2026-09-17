@@ -4,7 +4,7 @@ import { modelRelations, type RelationInfo } from '#src/db/generated/relations/r
 
 const excludeOperations = new Set(['create', 'createMany', 'createManyAndReturn']);
 
-// Naming convention: `{Model[0].toUpperCase()}{model.slice(1)}ScalarFieldEnum` (Prisma's generated export name).
+// Naming convention: `{Model[0].toUpperCase()}{model.slice(1)}ScalarFieldEnum` (Prisma's generated export name)
 const scalarFieldEnums = Prisma as unknown as Record<string, Record<string, string> | undefined>;
 
 const softDeleteModels = new Set<string>(

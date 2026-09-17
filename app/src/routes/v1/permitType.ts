@@ -12,7 +12,7 @@ import {
   FORBIDDEN_RESPONSE,
   UNAUTHORIZED_RESPONSE,
   VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponse';
+} from '#src/validators/schemas/problemResponseSchema';
 import { schema } from '#src/validators/permitType';
 
 const basePath = '/permit-type';

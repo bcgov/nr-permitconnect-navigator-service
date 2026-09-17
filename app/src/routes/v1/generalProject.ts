@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 
+import { openapiRoute } from './openapiRoute.ts';
 import {
   createGeneralProjectController,
   deleteGeneralProjectController,
@@ -19,107 +21,225 @@ import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { generalProjectValidator } from '#src/validators/index';
+import { draftSchema } from '#src/validators/schemas/draftSchema';
+import { generalProjectSchema } from '#src/validators/schemas/generalProjectSchema';
+import { generalProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
+import {
+  FORBIDDEN_RESPONSE,
+  UNAUTHORIZED_RESPONSE,
+  VALIDATION_ERROR_RESPONSE
+} from '#src/validators/schemas/problemResponseSchema';
+import { schema } from '#src/validators/generalProject';
 
+const basePath = '/general/project';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Gets a list of general projects */
-router.get('/', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), listGeneralProjectsController);
+const TAGS = ['General Project'];
 
-/** Get a list of all the activityIds */
-router.get(
-  '/activityIds',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  listGeneralProjectActivityIdsController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/',
+  summary: 'Gets a list of general projects',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of general projects', schema: z.array(generalProjectSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ)],
+  handler: listGeneralProjectsController
+});
 
-/** Search general projects */
-router.post(
-  '/search',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  generalProjectValidator.searchGeneralProjects,
-  searchGeneralProjectsController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/activityIds',
+  summary: 'Get a list of all the activityIds',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of activity IDs', schema: z.array(z.string()) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ)],
+  handler: listGeneralProjectActivityIdsController
+});
 
-/** Gets general project statistics*/
-router.get(
-  '/statistics',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  generalProjectValidator.getStatistics,
-  getGeneralProjectStatisticsController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/search',
+  summary: 'Search general projects',
+  tags: TAGS,
+  schema: schema.searchGeneralProjects,
+  responses: {
+    200: {
+      description: 'A list of general projects matching the search criteria',
+      schema: z.array(generalProjectSchema)
+    },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ)],
+  handler: searchGeneralProjectsController
+});
 
-/** Get a specific general project draft */
-router.get(
-  '/draft/:draftId',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  hasAccess('draftId'),
-  getGeneralProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/statistics',
+  summary: 'Gets general project statistics',
+  tags: TAGS,
+  schema: schema.getStatistics,
+  responses: {
+    200: { description: 'General project statistics', schema: generalProjectStatisticsSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ)],
+  handler: getGeneralProjectStatisticsController
+});
 
-/** Gets a list of general project drafts */
-router.get('/draft', hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), getGeneralProjectDraftsController);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/draft/:draftId',
+  summary: 'Get a specific general project draft',
+  tags: TAGS,
+  responses: {
+    200: { description: 'The requested draft', schema: draftSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), hasAccess('draftId')],
+  handler: getGeneralProjectDraftController
+});
 
-/** Creates or updates an intake and set status to Draft */
-router.post(
-  '/draft',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
-  generalProjectValidator.upsertDraft,
-  upsertGeneralProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/draft',
+  summary: 'Gets a list of general project drafts',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of general project drafts', schema: z.array(draftSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ)],
+  handler: getGeneralProjectDraftsController
+});
 
-/** Creates or updates an intake and set status to Submitted */
-router.post(
-  '/draft/submit',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
-  generalProjectValidator.submitGeneralProjectDraft,
-  submitGeneralProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/draft',
+  summary: 'Creates or updates an intake and set status to Draft',
+  tags: TAGS,
+  schema: schema.upsertDraft,
+  responses: {
+    200: { description: 'The updated general project draft', schema: draftSchema },
+    201: { description: 'The created general project draft', schema: draftSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE)],
+  handler: upsertGeneralProjectDraftController
+});
 
-/** Creates a blank general project */
-router.post(
-  '/',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE),
-  generalProjectValidator.createGeneralProject,
-  createGeneralProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/draft/submit',
+  summary: 'Creates or updates an intake and set status to Submitted',
+  tags: TAGS,
+  schema: schema.submitGeneralProjectDraft,
+  responses: {
+    201: { description: 'The submitted general project', schema: generalProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE)],
+  handler: submitGeneralProjectDraftController
+});
 
-/** Hard deletes a general project draft */
-router.delete(
-  '/draft/:draftId',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.DELETE),
-  hasAccess('draftId'),
-  generalProjectValidator.deleteDraft,
-  deleteGeneralProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/',
+  summary: 'Creates a blank general project',
+  tags: TAGS,
+  schema: schema.createGeneralProject,
+  responses: {
+    201: { description: 'The created general project', schema: generalProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.CREATE)],
+  handler: createGeneralProjectController
+});
 
-/** Gets a specific general project */
-router.get(
-  '/:generalProjectId',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.READ),
-  hasAccess('generalProjectId'),
-  generalProjectValidator.getGeneralProject,
-  getGeneralProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'delete',
+  path: '/draft/:draftId',
+  summary: 'Hard deletes a general project draft',
+  tags: TAGS,
+  schema: schema.deleteDraft,
+  responses: {
+    204: { description: 'The draft was deleted' },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.DELETE), hasAccess('draftId')],
+  handler: deleteGeneralProjectDraftController
+});
 
-/** Patches a general project*/
-router.patch(
-  '/:generalProjectId',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.UPDATE),
-  hasAccess('generalProjectId'),
-  generalProjectValidator.patchGeneralProject,
-  patchGeneralProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/:generalProjectId',
+  summary: 'Gets a specific general project',
+  tags: TAGS,
+  schema: schema.getGeneralProject,
+  responses: {
+    200: { description: 'The requested general project', schema: generalProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), hasAccess('generalProjectId')],
+  handler: getGeneralProjectController
+});
 
-/** Deletes a general project */
-router.delete(
-  '/:generalProjectId',
-  hasAuthorization(Resource.GENERAL_PROJECT, Action.DELETE),
-  hasAccess('generalProjectId'),
-  generalProjectValidator.deleteGeneralProject,
-  deleteGeneralProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'patch',
+  path: '/:generalProjectId',
+  summary: 'Patches a general project',
+  tags: TAGS,
+  schema: schema.patchGeneralProject,
+  responses: {
+    200: { description: 'The updated general project', schema: generalProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.UPDATE), hasAccess('generalProjectId')],
+  handler: patchGeneralProjectController
+});
+
+openapiRoute(basePath, router, {
+  method: 'delete',
+  path: '/:generalProjectId',
+  summary: 'Deletes a general project',
+  tags: TAGS,
+  schema: schema.deleteGeneralProject,
+  responses: {
+    204: { description: 'The general project was deleted' },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.DELETE), hasAccess('generalProjectId')],
+  handler: deleteGeneralProjectController
+});
 
 export default router;

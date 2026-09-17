@@ -2,7 +2,6 @@ import { z } from 'zod';
 
 import { activityId, uuidv4 } from './common.ts';
 import { requireValidCode } from '#src/db/codes/validator';
-import { validate } from '#src/middleware/validation';
 import { BRING_FORWARD_TYPE_LIST } from '#src/utils/constants/projectCommon';
 import { Resource } from '#src/utils/enums/application';
 
@@ -72,12 +71,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  deleteNoteHistory: validate(schema.deleteNoteHistory),
-  createNoteHistory: validate(schema.createNoteHistory),
-  listBringForwards: validate(schema.listBringForwards),
-  listNoteHistory: validate(schema.listNoteHistory),
-  patchNoteHistory: validate(schema.patchNoteHistory)
 };

@@ -1,10 +1,9 @@
 import { z } from 'zod';
 
-import atsValidator from './ats.ts';
+import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
-import { validate } from '#src/middleware/validation';
 import { YES_NO_LIST } from '#src/utils/constants/application';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
 import { ProjectType } from '#src/utils/enums/electrification';
@@ -121,7 +120,7 @@ export const schema = {
         queuePriority: z.number().int().min(0).max(3).optional(),
         submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
         applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
-        ...atsValidator.atsEnquirySubmissionFields,
+        ...atsEnquirySubmissionFields,
         aaiUpdated: z.boolean().optional()
       })
       .strict()
@@ -143,16 +142,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createElectrificationProject: validate(schema.createElectrificationProject),
-  submitElectrificationProjectDraft: validate(schema.submitElectrificationProjectDraft),
-  deleteElectrificationProject: validate(schema.deleteElectrificationProject),
-  deleteDraft: validate(schema.deleteDraft),
-  upsertDraft: validate(schema.upsertDraft),
-  getStatistics: validate(schema.getStatistics),
-  getElectrificationProject: validate(schema.getElectrificationProject),
-  searcElectrificationProjects: validate(schema.searchElectrificationProjects),
-  patchElectrificationProject: validate(schema.patchElectrificationProject)
 };

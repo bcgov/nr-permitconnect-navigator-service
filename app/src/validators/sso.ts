@@ -1,7 +1,5 @@
 import { z } from 'zod';
 
-import { validate } from '#src/middleware/validation';
-
 export const schema = {
   searchIdirUsers: {
     query: z
@@ -12,8 +10,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  searchIdirUsers: validate(schema.searchIdirUsers)
 };

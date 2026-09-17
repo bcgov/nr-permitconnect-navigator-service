@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { createStamps } from './stamps.ts';
-import { validate } from '#src/middleware/validation';
 
 export const schema = {
   getPeachSummary: {
@@ -34,8 +33,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  getPeachSummary: validate(schema.getPeachSummary)
 };

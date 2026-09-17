@@ -19,14 +19,10 @@ interface OpenApiRouteConfig<P, ResBody, ReqBody, ReqQuery, Locals extends Recor
   path: string;
   summary: string;
   tags: string[];
-  // Shape-compatible with a validators/*.ts file's `schema.<operation>` object, so it can be passed
-  // straight through (e.g. `schema: schema.searchHousingProjects`). bodyContentType only needs setting
-  // for a non-JSON body (e.g. 'application/pdf'); everything else defaults to JSON.
+  // Shape-compatible with a validators/*.ts file's `schema.<operation>` object
   schema?: { params?: ZodObject; query?: ZodObject; body?: ZodTypeAny; bodyContentType?: string };
   responses: OpenApiResponses;
-  // Middleware (auth checks etc.) is deliberately untyped to the route's own P/ResBody/ReqQuery/Locals -
-  // it's always written against bare Request/Response in this codebase, and unifying it with the
-  // narrowly-typed handler below made inference collapse to the widest common type for both.
+  // Untyped RequestHandler[]: unifying with the narrowly-typed handler below collapses inference for both.
   middleware?: RequestHandler[];
   handler: RequestHandler<P, ResBody, ReqBody, ReqQuery, Locals>;
 }
@@ -77,8 +73,5 @@ export function openapiRoute<
         handler
       ]
     : [...middleware, handler];
-  // Internal wiring only - the mismatched generics across middleware/validate()/handler don't unify
-  // cleanly here the way they do at a native router.get(...) call site; the public config above stays
-  // fully typed, so callers still get real inference on `handler`/`middleware`.
   router[method](path, ...(chain as RequestHandler[]));
 }

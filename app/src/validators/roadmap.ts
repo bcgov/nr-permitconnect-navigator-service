@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { activityId, email, uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 
 export const schema = {
   getRoadmapNote: {
@@ -33,9 +32,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  getRoadmapNote: validate(schema.getRoadmapNote),
-  send: validate(schema.send)
 };

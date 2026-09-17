@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { activityId, uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 const role = z.enum(Object.values(ActivityContactRole) as [string, ...string[]]);
@@ -43,11 +42,4 @@ export const schema = {
       .strict(),
     body: z.object({ role: role }).strict()
   }
-};
-
-export default {
-  createActivityContact: validate(schema.createActivityContact),
-  deleteActivityContact: validate(schema.deleteActivityContact),
-  listActivityContact: validate(schema.listActivityContact),
-  updateActivityContact: validate(schema.updateActivityContact)
 };
