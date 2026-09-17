@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
-import atsValidator from './ats.ts';
+import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { location } from './location.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
-import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
@@ -128,8 +127,8 @@ export const schema = {
         geoJson: z.unknown().optional(),
         naturalDisaster: z.boolean().optional(),
         projectLocationDescription: z.string().max(4000).nullish(),
-        atsClientId: atsValidator.atsEnquirySubmissionFields.atsClientId,
-        atsEnquiryId: atsValidator.atsEnquirySubmissionFields.atsEnquiryId,
+        atsClientId: atsEnquirySubmissionFields.atsClientId,
+        atsEnquiryId: atsEnquirySubmissionFields.atsEnquiryId,
         aaiUpdated: z.boolean().optional(),
         astNotes: z.string().max(4000).nullish(),
         assignedUserId: uuidv4.nullish(),
@@ -145,16 +144,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createGeneralProject: validate(schema.createGeneralProject),
-  submitGeneralProjectDraft: validate(schema.submitGeneralProjectDraft),
-  deleteGeneralProject: validate(schema.deleteGeneralProject),
-  deleteDraft: validate(schema.deleteDraft),
-  upsertDraft: validate(schema.upsertDraft),
-  getStatistics: validate(schema.getStatistics),
-  getGeneralProject: validate(schema.getGeneralProject),
-  searchGeneralProjects: validate(schema.searchGeneralProjects),
-  patchGeneralProject: validate(schema.patchGeneralProject)
 };

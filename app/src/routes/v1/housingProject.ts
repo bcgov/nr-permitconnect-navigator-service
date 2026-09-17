@@ -24,12 +24,12 @@ import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
 import { draftSchema } from '#src/validators/schemas/draftSchema';
 import { housingProjectSchema } from '#src/validators/schemas/housingProjectSchema';
-import { housingProjectStatisticsSchema } from '#src/validators/schemas/housingProjectStatisticsSchema';
+import { housingProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
 import {
   FORBIDDEN_RESPONSE,
   UNAUTHORIZED_RESPONSE,
   VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponse';
+} from '#src/validators/schemas/problemResponseSchema';
 import { schema } from '#src/validators/housingProject';
 
 const TAGS = ['Housing Project'];

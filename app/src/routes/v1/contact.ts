@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 
+import { openapiRoute } from './openapiRoute.ts';
 import {
   deleteContactController,
   getContactController,
@@ -13,54 +15,111 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { contactValidator } from '#src/validators/index';
+import { contactSchema } from '#src/validators/schemas/contactSchema';
+import {
+  FORBIDDEN_RESPONSE,
+  UNAUTHORIZED_RESPONSE,
+  VALIDATION_ERROR_RESPONSE
+} from '#src/validators/schemas/problemResponseSchema';
+import { schema } from '#src/validators/contact';
 
+const basePath = '/contact';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Get current user's contact information */
-router.get('/', hasAuthorization(Resource.CONTACT, Action.READ), getCurrentUserContactController);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/',
+  summary: "Get current user's contact information",
+  tags: ['Contact'],
+  responses: {
+    200: { description: "The current user's contact", schema: contactSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.CONTACT, Action.READ)],
+  handler: getCurrentUserContactController
+});
 
-/** Match contacts */
-router.post(
-  '/match',
-  hasAuthorization(Resource.CONTACT, Action.READ),
-  contactValidator.matchContacts,
-  matchContactsController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/match',
+  summary: 'Match contacts',
+  tags: ['Contact'],
+  schema: schema.matchContacts,
+  responses: {
+    200: { description: 'Contacts matching the given search criteria', schema: z.array(contactSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.CONTACT, Action.READ)],
+  handler: matchContactsController
+});
 
-/** Search contacts */
-router.post(
-  '/search',
-  hasIdentity(IdentityProviderKind.AZUREIDIR),
-  hasAuthorization(Resource.CONTACT, Action.READ),
-  contactValidator.searchContacts,
-  searchContactsController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/search',
+  summary: 'Search contacts',
+  tags: ['Contact'],
+  schema: schema.searchContacts,
+  responses: {
+    200: { description: 'Contacts matching the given search criteria', schema: z.array(contactSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasIdentity(IdentityProviderKind.AZUREIDIR), hasAuthorization(Resource.CONTACT, Action.READ)],
+  handler: searchContactsController
+});
 
-/** Get a specific contact */
-router.get(
-  '/:contactId',
-  hasAuthorization(Resource.CONTACT, Action.READ),
-  contactValidator.getContact,
-  getContactController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/:contactId',
+  summary: 'Get a specific contact',
+  tags: ['Contact'],
+  schema: schema.getContact,
+  responses: {
+    200: { description: 'The requested contact', schema: contactSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.CONTACT, Action.READ)],
+  handler: getContactController
+});
 
-/** Create or update a contact */
-router.post(
-  '/',
-  hasAuthorization(Resource.CONTACT, Action.UPDATE),
-  contactValidator.upsertContact,
-  upsertContactController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/',
+  summary: 'Create or update a contact',
+  tags: ['Contact'],
+  schema: schema.upsertContact,
+  responses: {
+    200: { description: 'The created or updated contact', schema: contactSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.CONTACT, Action.UPDATE)],
+  handler: upsertContactController
+});
 
-/** Delete a specific contact */
-router.delete(
-  '/:contactId',
-  hasAuthorization(Resource.CONTACT, Action.DELETE),
-  contactValidator.deleteContact,
-  deleteContactController
-);
+openapiRoute(basePath, router, {
+  method: 'delete',
+  path: '/:contactId',
+  summary: 'Delete a specific contact',
+  tags: ['Contact'],
+  schema: schema.deleteContact,
+  responses: {
+    204: { description: 'The contact was deleted' },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.CONTACT, Action.DELETE)],
+  handler: deleteContactController
+});
 
 export default router;

@@ -20,7 +20,9 @@ const TAGS = [
   { name: 'Contact', description: 'Operations for managing Contacts' },
   ...projectTags('Electrification'),
   ...projectTags('General'),
+  { name: 'General Map', description: 'Operations for General map PIDs' },
   ...projectTags('Housing'),
+  { name: 'Housing Map', description: 'Operations for Housing map PIDs' },
   { name: 'Permit Type', description: 'Operations for permit types' },
   { name: 'Reporting', description: 'Operations for performings actions related to reporting' },
   { name: 'Source System Kind', description: 'Operations for source system kinds' },
@@ -55,21 +57,28 @@ export function getDocHTML(version = 'v1'): string {
   </html>`;
 }
 
+let cachedSpec: OpenAPIObject | undefined;
+
 /**
- * Gets the OpenAPI specification, generated from the zod schemas registered via openapiRoute()
- * @returns The OpenAPI spec
+ * Gets the OpenAPI specification, generated from the zod schemas registered via openapiRoute().
+ * Memoized - registry.definitions is fixed once every route file has been imported at startup,
+ * so regenerating the document on every request would be wasted work.
+ * @returns The OpenAPI spec.
  */
 export function getSpec(): OpenAPIObject {
-  return new OpenApiGeneratorV3(registry.definitions).generateDocument({
-    openapi: '3.0.4',
-    info: {
-      version: '1.0.0',
-      title: 'NR PermitConnect Navigator Service (PCNS)',
-      description: 'A case management application meant to serve the needs of the NRM Permitting Solutions Branch.',
-      license: { name: 'Apache 2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0.html' }
-    },
-    servers: [{ url: '/api/v1', description: 'This server' }],
-    security: [{ BearerAuth: [], OpenID: [] }],
-    tags: TAGS
-  });
+  if (!cachedSpec) {
+    cachedSpec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
+      openapi: '3.0.4',
+      info: {
+        version: '1.0.0',
+        title: 'NR PermitConnect Navigator Service (PCNS)',
+        description: 'A case management application meant to serve the needs of the NRM Permitting Solutions Branch.',
+        license: { name: 'Apache 2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0.html' }
+      },
+      servers: [{ url: '/api/v1', description: 'This server' }],
+      security: [{ BearerAuth: [], OpenID: [] }],
+      tags: TAGS
+    });
+  }
+  return cachedSpec;
 }
