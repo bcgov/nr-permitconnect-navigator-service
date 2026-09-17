@@ -1,31 +1,24 @@
 import express from 'express';
 
-import accessRequest from './accessRequest.ts';
-import document from './document.ts';
+import createAccessRequestRouter from './accessRequest.ts';
+import createDocumentRouter from './document.ts';
 import electrificationProject from './electrificationProject.ts';
-import enquiry from './enquiry.ts';
-import noteHistory from './noteHistory.ts';
-import permit from './permit.ts';
-import roadmap from './roadmap.ts';
+import createEnquiryRouter from './enquiry.ts';
+import createNoteHistoryRouter from './noteHistory.ts';
+import createPermitRouter from './permit.ts';
+import createRoadmapRouter from './roadmap.ts';
 import { hasAuthentication } from '#src/middleware/authentication';
 import { Initiative } from '#src/utils/enums/application';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.ELECTRIFICATION));
 
-// Base v1 Responder
-router.get('/electrification', (_req, res) => {
-  res.status(200).json({
-    endpoints: ['/access-request', '/document', '/project', '/enquiry', '/note', '/permit', '/roadmap']
-  });
-});
-
-router.use('/access-request', accessRequest);
-router.use('/document', document);
+router.use('/access-request', createAccessRequestRouter('/electrification/access-request', 'Electrification'));
+router.use('/document', createDocumentRouter('/electrification/document', 'Electrification'));
 router.use('/project', electrificationProject);
-router.use('/enquiry', enquiry);
-router.use('/note', noteHistory);
-router.use('/permit', permit);
-router.use('/roadmap', roadmap);
+router.use('/enquiry', createEnquiryRouter('/electrification/enquiry', 'Electrification'));
+router.use('/note', createNoteHistoryRouter('/electrification/note', 'Electrification'));
+router.use('/permit', createPermitRouter('/electrification/permit', 'Electrification'));
+router.use('/roadmap', createRoadmapRouter('/electrification/roadmap', 'Electrification'));
 
 export default router;

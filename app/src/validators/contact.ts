@@ -1,7 +1,6 @@
 import { z } from 'zod';
 
 import { email, phoneNumber, queryBoolean, uuidv4 } from './common.ts';
-import { validate } from '#src/middleware/validation';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '#src/utils/constants/projectCommon';
 import { Initiative } from '#src/utils/enums/application';
 
@@ -69,7 +68,7 @@ export const schema = {
         includeActivities: z.boolean().default(false)
       })
       .strict()
-      .default({})
+      .default({ hasActivity: false, includeActivities: false })
   },
   upsertContact: {
     body: z
@@ -85,13 +84,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  deleteContact: validate(schema.deleteContact),
-  getContact: validate(schema.getContact),
-  getContactActivities: validate(schema.getContact),
-  matchContacts: validate(schema.matchContacts),
-  searchContacts: validate(schema.searchContacts),
-  upsertContact: validate(schema.upsertContact)
 };

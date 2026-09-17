@@ -9,21 +9,22 @@ import {
 import { hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { validate } from '#src/middleware/validation';
 import { Action, Resource } from '#src/utils/enums/application';
-import { yarsValidator } from '#src/validators/index';
+import { schema } from '#src/validators/yars';
 
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
 /** Lists groups */
-router.get('/groups', hasAuthorization(Resource.YARS, Action.READ), yarsValidator.getGroups, getGroupsController);
+router.get('/groups', hasAuthorization(Resource.YARS, Action.READ), validate(schema.getGroups), getGroupsController);
 
 /** List permissions */
 router.get(
   '/permissions',
   hasAuthorization(Resource.YARS, Action.READ),
-  yarsValidator.listPermissions,
+  validate(schema.listPermissions),
   listPermissionsController
 );
 
@@ -34,7 +35,7 @@ router.get('/subject/permissions', listSubjectPermissionsController);
 router.delete(
   '/subject/group',
   hasAuthorization(Resource.YARS, Action.DELETE),
-  yarsValidator.deleteSubjectGroup,
+  validate(schema.deleteSubjectGroup),
   deleteSubjectGroupController
 );
 

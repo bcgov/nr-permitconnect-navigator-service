@@ -1,12 +1,11 @@
 import { z } from 'zod';
 
 import { appliedPermit } from './appliedPermit.ts';
-import atsValidator from './ats.ts';
+import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { housing } from './housing';
 import { location } from './location.ts';
 import { submittedContactSchema } from './submittedContact.ts';
-import { validate } from '#src/middleware/validation';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
@@ -70,6 +69,13 @@ export const schema = {
       .strict()
   },
   deleteDraft: {
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
+  },
+  getDraft: {
     params: z
       .object({
         draftId: uuidv4
@@ -147,7 +153,7 @@ export const schema = {
         geoJson: z.unknown().optional(),
         naturalDisaster: z.boolean().optional(),
         projectLocationDescription: z.string().max(4000).nullish(),
-        ...atsValidator.atsEnquirySubmissionFields,
+        ...atsEnquirySubmissionFields,
         ltsaCompleted: z.boolean().optional(),
         bcOnlineCompleted: z.boolean().optional(),
         aaiUpdated: z.boolean().optional(),
@@ -192,16 +198,4 @@ export const schema = {
       })
       .strict()
   }
-};
-
-export default {
-  createHousingProject: validate(schema.createHousingProject),
-  submitHousingProjectDraft: validate(schema.submitHousingProjectDraft),
-  deleteHousingProject: validate(schema.deleteHousingProject),
-  deleteDraft: validate(schema.deleteDraft),
-  upsertDraft: validate(schema.upsertDraft),
-  getStatistics: validate(schema.getStatistics),
-  getHousingProject: validate(schema.getHousingProject),
-  patchHousingProject: validate(schema.patchHousingProject),
-  searchHousingProjects: validate(schema.searchHousingProjects)
 };

@@ -1,5 +1,7 @@
 import express from 'express';
+import { z } from 'zod';
 
+import { openapiRoute } from './openapiRoute.ts';
 import {
   createHousingProjectController,
   deleteHousingProjectController,
@@ -20,108 +22,223 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { housingProjectValidator } from '#src/validators/index';
+import { draftSchema } from '#src/validators/schemas/draftSchema';
+import { housingProjectSchema } from '#src/validators/schemas/housingProjectSchema';
+import { housingProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
+import {
+  FORBIDDEN_RESPONSE,
+  UNAUTHORIZED_RESPONSE,
+  VALIDATION_ERROR_RESPONSE
+} from '#src/validators/schemas/problemResponseSchema';
+import { schema } from '#src/validators/housingProject';
 
+const TAGS = ['Housing Project'];
+const basePath = '/housing/project';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Gets a list of housing projects */
-router.get('/', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), listHousingProjectsController);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/',
+  summary: 'Gets a list of housing projects',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of housing projects', schema: z.array(housingProjectSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
+  handler: listHousingProjectsController
+});
 
-/** Get a list of all the activityIds */
-router.get(
-  '/activityIds',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  listHousingProjectActivityIdsController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/activityIds',
+  summary: 'Get a list of all the activityIds',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of activity IDs', schema: z.array(z.string()) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
+  handler: listHousingProjectActivityIdsController
+});
 
-/** Search housing projects */
-router.post(
-  '/search',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  housingProjectValidator.searchHousingProjects,
-  searchHousingProjectsController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/search',
+  summary: 'Search housing projects',
+  tags: TAGS,
+  schema: schema.searchHousingProjects,
+  responses: {
+    200: { description: 'Housing projects matching the search criteria', schema: z.array(housingProjectSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
+  handler: searchHousingProjectsController
+});
 
-/** Gets housing project statistics*/
-router.get(
-  '/statistics',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  housingProjectValidator.getStatistics,
-  getHousingProjectStatisticsController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/statistics',
+  summary: 'Gets housing project statistics',
+  tags: TAGS,
+  schema: schema.getStatistics,
+  responses: {
+    200: { description: 'Housing project statistics', schema: housingProjectStatisticsSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
+  handler: getHousingProjectStatisticsController
+});
 
-/** Get a specific housing project draft */
-router.get(
-  '/draft/:draftId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  hasAccess('draftId'),
-  getHousingProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/draft/:draftId',
+  summary: 'Get a specific housing project draft',
+  tags: TAGS,
+  schema: schema.getDraft,
+  responses: {
+    200: { description: 'A housing project draft', schema: draftSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), hasAccess('draftId')],
+  handler: getHousingProjectDraftController
+});
 
-/** Gets a list of housing project drafts */
-router.get('/draft', hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), getHousingProjectDraftsController);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/draft',
+  summary: 'Gets a list of housing project drafts',
+  tags: TAGS,
+  responses: {
+    200: { description: 'A list of housing project drafts', schema: z.array(draftSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ)],
+  handler: getHousingProjectDraftsController
+});
 
-/** Creates or updates an intake and set status to Draft */
-router.post(
-  '/draft',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.upsertDraft,
-  upsertHousingProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/draft',
+  summary: 'Creates or updates an intake and set status to Draft',
+  tags: TAGS,
+  schema: schema.upsertDraft,
+  responses: {
+    200: { description: 'The updated housing project draft', schema: draftSchema },
+    201: { description: 'The created housing project draft', schema: draftSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
+  handler: upsertHousingProjectDraftController
+});
 
-/** Creates or updates an intake and set status to Submitted */
-router.post(
-  '/draft/submit',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.submitHousingProjectDraft,
-  submitHousingProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/draft/submit',
+  summary: 'Creates or updates an intake and set status to Submitted',
+  tags: TAGS,
+  schema: schema.submitHousingProjectDraft,
+  responses: {
+    201: { description: 'The submitted housing project', schema: housingProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
+  handler: submitHousingProjectDraftController
+});
 
-/** Creates a blank housing project */
-router.post(
-  '/',
-  hasIdentity(IdentityProviderKind.AZUREIDIR),
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE),
-  housingProjectValidator.createHousingProject,
-  createHousingProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'post',
+  path: '/',
+  summary: 'Creates a blank housing project',
+  tags: TAGS,
+  schema: schema.createHousingProject,
+  responses: {
+    201: { description: 'The created housing project', schema: housingProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasIdentity(IdentityProviderKind.AZUREIDIR), hasAuthorization(Resource.HOUSING_PROJECT, Action.CREATE)],
+  handler: createHousingProjectController
+});
 
-/** Hard deletes a housing project draft */
-router.delete(
-  '/draft/:draftId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),
-  hasAccess('draftId'),
-  housingProjectValidator.deleteDraft,
-  deleteHousingProjectDraftController
-);
+openapiRoute(basePath, router, {
+  method: 'delete',
+  path: '/draft/:draftId',
+  summary: 'Hard deletes a housing project draft',
+  tags: TAGS,
+  schema: schema.deleteDraft,
+  responses: {
+    204: { description: 'The draft was deleted' },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE), hasAccess('draftId')],
+  handler: deleteHousingProjectDraftController
+});
 
-/** Gets a specific housing project */
-router.get(
-  '/:housingProjectId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.READ),
-  hasAccess('housingProjectId'),
-  housingProjectValidator.getHousingProject,
-  getHousingProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/:housingProjectId',
+  summary: 'Gets a specific housing project',
+  tags: TAGS,
+  schema: schema.getHousingProject,
+  responses: {
+    200: { description: 'A housing project', schema: housingProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.READ), hasAccess('housingProjectId')],
+  handler: getHousingProjectController
+});
 
-/** Patches a housing project*/
-router.patch(
-  '/:housingProjectId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE),
-  hasAccess('housingProjectId'),
-  housingProjectValidator.patchHousingProject,
-  patchHousingProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'patch',
+  path: '/:housingProjectId',
+  summary: 'Patches a housing project',
+  tags: TAGS,
+  schema: schema.patchHousingProject,
+  responses: {
+    200: { description: 'The patched housing project', schema: housingProjectSchema },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.UPDATE), hasAccess('housingProjectId')],
+  handler: patchHousingProjectController
+});
 
-/** Deletes a housing project */
-router.delete(
-  '/:housingProjectId',
-  hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE),
-  hasAccess('housingProjectId'),
-  housingProjectValidator.deleteHousingProject,
-  deleteHousingProjectController
-);
+openapiRoute(basePath, router, {
+  method: 'delete',
+  path: '/:housingProjectId',
+  summary: 'Deletes a housing project',
+  tags: TAGS,
+  schema: schema.deleteHousingProject,
+  responses: {
+    204: { description: 'The housing project was deleted' },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.HOUSING_PROJECT, Action.DELETE), hasAccess('housingProjectId')],
+  handler: deleteHousingProjectController
+});
 
 export default router;

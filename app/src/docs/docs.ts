@@ -1,19 +1,33 @@
-import { load } from 'js-yaml';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
-/** A partial OpenAPI specification schema structure */
-interface OpenAPISpec {
-  security?: [];
-  servers: { url: string }[];
-  components: {
-    securitySchemes?: {
-      OpenID: {
-        openIdConnectUrl?: string;
-      };
-    };
-  };
-}
+import { registry } from '#src/validators/openapi';
+
+import type { OpenAPIObject } from 'openapi3-ts/oas30';
+
+// Electrification, General, and Housing each register the same 8 sub-resource tags under their own prefix.
+const projectTags = (prefix: string) => [
+  { name: `${prefix} Access Request`, description: `Operations for managing ${prefix} Access Requests` },
+  { name: `${prefix} Document`, description: `Operations for managing ${prefix} Documents` },
+  { name: `${prefix} Enquiry`, description: `Operations for managing ${prefix} Enquiries` },
+  { name: `${prefix} Note`, description: `Operations for managing ${prefix} Notes` },
+  { name: `${prefix} Permit`, description: `Operations for managing ${prefix} Permits` },
+  { name: `${prefix} Permit Note`, description: `Operations for ${prefix} Permit Notes` },
+  { name: `${prefix} Project`, description: `Operations for managing ${prefix} Projects, Drafts, and Statistics` },
+  { name: `${prefix} Roadmap`, description: `Operations for validating ${prefix} Roadmaps` }
+];
+
+const TAGS = [
+  { name: 'Contact', description: 'Operations for managing Contacts' },
+  ...projectTags('Electrification'),
+  ...projectTags('General'),
+  { name: 'General Map', description: 'Operations for General map PIDs' },
+  ...projectTags('Housing'),
+  { name: 'Housing Map', description: 'Operations for Housing map PIDs' },
+  { name: 'Permit Type', description: 'Operations for permit types' },
+  { name: 'Reporting', description: 'Operations for performings actions related to reporting' },
+  { name: 'Source System Kind', description: 'Operations for source system kinds' },
+  { name: 'User', description: 'Operations for managing users' }
+];
 
 /**
  * Generates a ReDocs HTML string for the documentation page of the NR
@@ -43,13 +57,28 @@ export function getDocHTML(version = 'v1'): string {
   </html>`;
 }
 
+let cachedSpec: OpenAPIObject | undefined;
+
 /**
- * Gets the OpenAPI specification
- * @returns The OpenAPI spec
+ * Gets the OpenAPI specification, generated from the zod schemas registered via openapiRoute().
+ * Memoized - registry.definitions is fixed once every route file has been imported at startup,
+ * so regenerating the document on every request would be wasted work.
+ * @returns The OpenAPI spec.
  */
-export function getSpec(): OpenAPISpec | undefined {
-  const rawSpec = readFileSync(join(__dirname, '../../docs/v1.api-spec.yaml'), 'utf8');
-  const spec = load(rawSpec) as OpenAPISpec;
-  spec.servers[0].url = '/api/v1';
-  return spec;
+export function getSpec(): OpenAPIObject {
+  if (!cachedSpec) {
+    cachedSpec = new OpenApiGeneratorV3(registry.definitions).generateDocument({
+      openapi: '3.0.4',
+      info: {
+        version: '1.0.0',
+        title: 'NR PermitConnect Navigator Service (PCNS)',
+        description: 'A case management application meant to serve the needs of the NRM Permitting Solutions Branch.',
+        license: { name: 'Apache 2.0', url: 'https://www.apache.org/licenses/LICENSE-2.0.html' }
+      },
+      servers: [{ url: '/api/v1', description: 'This server' }],
+      security: [{ BearerAuth: [], OpenID: [] }],
+      tags: TAGS
+    });
+  }
+  return cachedSpec;
 }
