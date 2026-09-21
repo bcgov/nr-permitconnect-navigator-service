@@ -40,7 +40,7 @@ const { errorMessage, handleBlur, value } = useField<string>(name);
       :type="type"
       :placeholder="placeholder"
       class="w-full"
-      :class="{ 'p-invalid': errorMessage }"
+      :invalid="!!errorMessage"
       :feedback="false"
       toggle-mask
       @blur="handleBlur"
