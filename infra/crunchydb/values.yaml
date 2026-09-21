@@ -87,7 +87,7 @@ crunchy-postgres:
   patroni:
     postgresql:
       # -- Host-based authentication rules for PostgreSQL.
-      pg_hba: "host all all 0.0.0.0/0 scram-sha-256"
+      pg_hba: "host all all all scram-sha-256"
       parameters:
         # -- Shared buffer memory for PostgreSQL engine.
         shared_buffers: 16MB
