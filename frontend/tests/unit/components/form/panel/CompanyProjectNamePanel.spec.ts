@@ -1,5 +1,5 @@
 import { flushPromises } from '@vue/test-utils';
-import { nextTick } from 'vue';
+import { nextTick, ref } from 'vue';
 
 import { AutoComplete, InputText, Select } from '@/components/form';
 import CompanyProjectNamePanel from '@/components/form/panel/CompanyProjectNamePanel.vue';
@@ -8,7 +8,7 @@ import { useFormStore } from '@/store';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 import { Initiative } from '@/utils/enums/application';
 import { FormState, FormType } from '@/utils/enums/projectCommon';
-import { updateLiveNameKey } from '@/utils/keys';
+import { formReadyKey, updateLiveNameKey } from '@/utils/keys';
 
 import { mountWithFormContext } from '../../../../mountWithFormContext';
 
@@ -44,6 +44,7 @@ function mountCompanyProjectNamePanel(
     formState?: FormState;
     companyNameRegistered?: string;
     updateLiveName?: (name: string) => void;
+    formReady?: boolean;
   } = {}
 ) {
   const {
@@ -52,7 +53,8 @@ function mountCompanyProjectNamePanel(
     formType = FormType.NEW,
     formState = FormState.UNLOCKED,
     companyNameRegistered,
-    updateLiveName = vi.fn()
+    updateLiveName = vi.fn(),
+    formReady = true
   } = options;
 
   const {
@@ -66,7 +68,8 @@ function mountCompanyProjectNamePanel(
       form: { formType, formState }
     },
     provide: {
-      [updateLiveNameKey as symbol]: updateLiveName
+      [updateLiveNameKey as symbol]: updateLiveName,
+      [formReadyKey as symbol]: ref(formReady)
     },
     formProps: { initialValues: { companyProjectName: { companyNameRegistered } } }
   });

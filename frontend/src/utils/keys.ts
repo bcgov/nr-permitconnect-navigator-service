@@ -9,6 +9,7 @@ export const atsEnquiryPartnerAgenciesKey: InjectionKey<Ref<string>> = Symbol();
 export const atsEnquiryTypeCodeKey: InjectionKey<Ref<string>> = Symbol();
 
 // Form
+export const formReadyKey: InjectionKey<Ref<boolean>> = Symbol();
 export const updateLiveNameKey: InjectionKey<(name: string) => void> = Symbol();
 
 // Permissions

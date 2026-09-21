@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { storeToRefs } from 'pinia';
 import { useFieldValue, useSetFieldValue } from 'vee-validate';
-import { inject, onMounted, ref } from 'vue';
+import { inject, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import { Company } from '@/components/common/icons';
@@ -12,7 +12,7 @@ import { externalApiService } from '@/services';
 import { useAppStore, useFormStore } from '@/store';
 import { BC_HYDRO_POWER_AUTHORITY } from '@/utils/constants/electrification';
 import { Initiative } from '@/utils/enums/application';
-import { updateLiveNameKey } from '@/utils/keys';
+import { formReadyKey, updateLiveNameKey } from '@/utils/keys';
 
 import type { AutoCompleteCompleteEvent } from 'primevue/autocomplete';
 import type { ComponentPublicInstance, Ref } from 'vue';
@@ -25,9 +25,13 @@ const { tab = 0 } = defineProps<{
 
 // Injections
 const updateLiveName = inject(updateLiveNameKey);
+const formReady = inject(formReadyKey);
 
 if (!updateLiveName) {
   throw new Error('updateLiveName not provided');
+}
+if (!formReady) {
+  throw new Error('formReady not provided');
 }
 
 // Emits
@@ -76,10 +80,19 @@ async function onRegisteredNameInput(e: AutoCompleteCompleteEvent) {
   }
 }
 
-onMounted(() => {
-  if (getCompanyNameRegistered.value)
-    onRegisteredNameInput({ originalEvent: {} as Event, query: String(getCompanyNameRegistered.value) });
-});
+// ProjectFormNavigator resets the form with real data asynchronously after this panel
+// mounts, so wait for that instead of checking the field value on mount (which is still
+// empty). Keyed off formReady rather than the field itself so typing in the (editable)
+// AutoComplete doesn't re-trigger this alongside its own @on-complete handler.
+watch(
+  formReady,
+  (ready) => {
+    if (ready && getCompanyNameRegistered.value) {
+      onRegisteredNameInput({ originalEvent: {} as Event, query: String(getCompanyNameRegistered.value) });
+    }
+  },
+  { immediate: true }
+);
 </script>
 
 <template>
