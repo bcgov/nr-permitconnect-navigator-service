@@ -7,13 +7,9 @@ import { hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { permitTypeSchema } from '#src/validators/schemas/permitTypeSchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/permitType';
+import { permitTypeSchema } from '#src/schemas/response/permitType';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/permitType';
 
 const basePath = '/permit-type';
 const router = express.Router();

@@ -21,15 +21,11 @@ import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { draftSchema } from '#src/validators/schemas/draftSchema';
-import { generalProjectSchema } from '#src/validators/schemas/generalProjectSchema';
-import { generalProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/generalProject';
+import { draftSchema } from '#src/schemas/response/draft';
+import { generalProjectSchema } from '#src/schemas/response/generalProject';
+import { generalProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/generalProject';
 
 const basePath = '/general/project';
 const router = express.Router();

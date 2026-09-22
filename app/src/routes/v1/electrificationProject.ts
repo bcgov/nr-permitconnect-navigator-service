@@ -21,15 +21,11 @@ import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { draftSchema } from '#src/validators/schemas/draftSchema';
-import { electrificationProjectSchema } from '#src/validators/schemas/electrificationProjectSchema';
-import { electrificationProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/electrificationProject';
+import { draftSchema } from '#src/schemas/response/draft';
+import { electrificationProjectSchema } from '#src/schemas/response/electrificationProject';
+import { electrificationProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/electrificationProject';
 
 const basePath = '/electrification/project';
 const router = express.Router();
