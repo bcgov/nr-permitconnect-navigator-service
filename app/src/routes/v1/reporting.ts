@@ -12,11 +12,8 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { UNAUTHORIZED_RESPONSE, FORBIDDEN_RESPONSE } from '#src/validators/schemas/problemResponseSchema';
-import {
-  housingReportingPermitDataSchema,
-  reportingPermitDataSchema
-} from '#src/validators/schemas/reportingPermitDataSchema';
+import { UNAUTHORIZED_RESPONSE, FORBIDDEN_RESPONSE } from '#src/schemas/response/problem';
+import { housingReportingPermitDataSchema, reportingPermitDataSchema } from '#src/schemas/response/reportingPermitData';
 
 const basePath = '/reporting';
 const router = express.Router();

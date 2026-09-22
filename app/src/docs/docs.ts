@@ -1,6 +1,6 @@
 import { OpenApiGeneratorV3 } from '@asteasolutions/zod-to-openapi';
 
-import { registry } from '#src/validators/openapi';
+import { registry } from '#src/schemas/openapi';
 
 import type { OpenAPIObject } from 'openapi3-ts/oas30';
 

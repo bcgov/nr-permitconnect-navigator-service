@@ -8,13 +8,9 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { noteHistorySchema } from '#src/validators/schemas/noteHistorySchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/roadmap';
+import { noteHistorySchema } from '#src/schemas/response/noteHistory';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/roadmap';
 
 import type { Router } from 'express';
 

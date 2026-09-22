@@ -15,13 +15,9 @@ import { hasAccess, hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { createEnquiryResponseSchema, enquirySchema } from '#src/validators/schemas/enquirySchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/enquiry';
+import { createEnquiryResponseSchema, enquirySchema } from '#src/schemas/response/enquiry';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/enquiry';
 
 import type { Router } from 'express';
 

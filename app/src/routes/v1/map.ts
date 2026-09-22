@@ -7,11 +7,8 @@ import { hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Initiative, Resource } from '#src/utils/enums/application';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/map';
 
 import type { NextFunction, Request, Response, Router } from 'express';
 
@@ -19,12 +16,6 @@ const INITIATIVE_RESOURCE_MAP = new Map<Initiative, Resource>([
   [Initiative.GENERAL, Resource.GENERAL_PROJECT],
   [Initiative.HOUSING, Resource.HOUSING_PROJECT]
 ]);
-
-const schema = {
-  getPids: {
-    params: z.object({ projectId: z.string() }).strict()
-  }
-};
 
 /**
  * Mounted separately per initiative (General, Housing - not Electrification), so basePath/

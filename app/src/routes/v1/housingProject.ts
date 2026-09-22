@@ -22,15 +22,11 @@ import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { draftSchema } from '#src/validators/schemas/draftSchema';
-import { housingProjectSchema } from '#src/validators/schemas/housingProjectSchema';
-import { housingProjectStatisticsSchema } from '#src/validators/schemas/projectStatisticsSchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/housingProject';
+import { draftSchema } from '#src/schemas/response/draft';
+import { housingProjectSchema } from '#src/schemas/response/housingProject';
+import { housingProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/housingProject';
 
 const TAGS = ['Housing Project'];
 const basePath = '/housing/project';

@@ -1,0 +1,160 @@
+import { BasicResponse } from '#src/utils/enums/application';
+import { NumResidentialUnits } from '#src/utils/enums/housing';
+import { housing } from '#src/schemas/request/housing';
+
+describe('housingSchema', () => {
+  it('should validate the housing schema with valid data', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      otherSelected: true,
+      otherUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherUnitsDescription: 'test description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(true);
+  });
+
+  it('should not validate the housing schema with invalid data', () => {
+    const data = {
+      financiallySupportedBc: 'Invalid',
+      financiallySupportedIndigenous: BasicResponse.YES,
+      financiallySupportedNonProfit: BasicResponse.NO,
+      financiallySupportedHousingCoop: BasicResponse.UNSURE,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: '',
+      indigenousDescription: 'Indigenous Description',
+      multiFamilySelected: true,
+      multiFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+      nonProfitDescription: '',
+      otherSelected: false,
+      otherUnits: '',
+      otherUnitsDescription: '',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE,
+      singleFamilySelected: false,
+      singleFamilyUnits: ''
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should not accept empty object', () => {
+    const data = {};
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should not exceed maximum length', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'a'.repeat(256),
+      otherSelected: true,
+      otherUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherUnitsDescription: 'a'.repeat(256),
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should accept when singleFamilySelected and otherSelected are true', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      singleFamilySelected: true,
+      singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherSelected: true,
+      otherUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherUnitsDescription: 'test description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(true);
+  });
+
+  it('should only accept otherUnitsDescription when otherSelected is true', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      otherSelected: false,
+      otherUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherUnitsDescription: 'test description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should not accept otherUnitsDescription when otherSelected is null', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      otherUnits: NumResidentialUnits.ONE_TO_NINE,
+      otherUnitsDescription: 'test description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should only accept a certain set of values for otherUnits', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      otherSelected: true,
+      otherUnits: 'not-a-valid-value',
+      otherUnitsDescription: 'test description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+
+  it('should not accept when none of singleFamilySelected, otherSelected, multiFamilySelected are selected', () => {
+    const data = {
+      financiallySupportedBc: BasicResponse.YES,
+      financiallySupportedIndigenous: BasicResponse.NO,
+      financiallySupportedNonProfit: BasicResponse.UNSURE,
+      financiallySupportedHousingCoop: BasicResponse.YES,
+      hasRentalUnits: BasicResponse.YES,
+      housingCoopDescription: 'Housing Coop Description',
+      rentalUnits: NumResidentialUnits.ONE_TO_NINE
+    };
+
+    const { success } = housing.safeParse(data);
+    expect(success).toBe(false);
+  });
+});

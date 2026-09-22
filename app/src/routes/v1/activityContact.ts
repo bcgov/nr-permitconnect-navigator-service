@@ -12,16 +12,9 @@ import { requireActivityAdmin } from '#src/middleware/requireActivityAdmin';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import {
-  activityContactSchema,
-  updateActivityContactResponseSchema
-} from '#src/validators/schemas/activityContactSchema';
-import {
-  FORBIDDEN_RESPONSE,
-  UNAUTHORIZED_RESPONSE,
-  VALIDATION_ERROR_RESPONSE
-} from '#src/validators/schemas/problemResponseSchema';
-import { schema } from '#src/validators/activityContact';
+import { activityContactSchema, updateActivityContactResponseSchema } from '#src/schemas/response/activityContact';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/activityContact';
 
 import type { RequestHandler } from 'express';
 

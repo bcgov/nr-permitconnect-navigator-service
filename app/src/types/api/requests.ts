@@ -1,21 +1,21 @@
 import type { z } from 'zod';
-import type { schema as accessRequestSchema } from '#src/validators/accessRequest';
-import type { schema as activityContactSchema } from '#src/validators/activityContact';
-import type { schema as atsSchema } from '#src/validators/ats';
-import type { schema as contactSchema } from '#src/validators/contact';
-import type { schema as documentSchema } from '#src/validators/document';
-import type { schema as electrificationProjectSchema } from '#src/validators/electrificationProject';
-import type { schema as enquirySchema } from '#src/validators/enquiry';
-import type { schema as generalProjectSchema } from '#src/validators/generalProject';
-import type { schema as housingProjectSchema } from '#src/validators/housingProject';
-import type { schema as noteHistorySchema } from '#src/validators/noteHistory';
-import type { schema as peachSchema } from '#src/validators/peach';
-import type { schema as permitSchema } from '#src/validators/permit';
-import type { schema as permitTypeSchema } from '#src/validators/permitType';
-import type { schema as roadmapSchema } from '#src/validators/roadmap';
-import type { schema as ssoSchema } from '#src/validators/sso';
-import type { schema as userSchema } from '#src/validators/user';
-import type { schema as yarsSchema } from '#src/validators/yars';
+import type { schema as accessRequestSchema } from '#src/schemas/request/accessRequest';
+import type { schema as activityContactSchema } from '#src/schemas/request/activityContact';
+import type { schema as atsSchema } from '#src/schemas/request/ats';
+import type { schema as contactSchema } from '#src/schemas/request/contact';
+import type { schema as documentSchema } from '#src/schemas/request/document';
+import type { schema as electrificationProjectSchema } from '#src/schemas/request/electrificationProject';
+import type { schema as enquirySchema } from '#src/schemas/request/enquiry';
+import type { schema as generalProjectSchema } from '#src/schemas/request/generalProject';
+import type { schema as housingProjectSchema } from '#src/schemas/request/housingProject';
+import type { schema as noteHistorySchema } from '#src/schemas/request/noteHistory';
+import type { schema as peachSchema } from '#src/schemas/request/peach';
+import type { schema as permitSchema } from '#src/schemas/request/permit';
+import type { schema as permitTypeSchema } from '#src/schemas/request/permitType';
+import type { schema as roadmapSchema } from '#src/schemas/request/roadmap';
+import type { schema as ssoSchema } from '#src/schemas/request/sso';
+import type { schema as userSchema } from '#src/schemas/request/user';
+import type { schema as yarsSchema } from '#src/schemas/request/yars';
 
 /**
  * Access Request
