@@ -87,8 +87,8 @@ async function onDownloadProjectPermitData() {
       }
 
       // handle csv format breaking characters
-      if (val.search(/("|,|\n)/g) >= 0) {
-        val = `"${val.replace(/"/g, '""')}"`;
+      if (val.search(/["\n,]/) >= 0) {
+        val = `"${val.replaceAll('"', '""')}"`;
       }
 
       return val;
