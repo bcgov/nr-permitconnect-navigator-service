@@ -30,7 +30,6 @@ crunchy-postgres:
       createS3Secret: false
       s3Secret: s3-pgbackrest
       s3Path: /padprd
-      s3UriStyle: path
       bucket: pcnspr
       endpoint: https://nrs.objectstore.gov.bc.ca
       region: ca-central-1

@@ -1,6 +1,6 @@
 # crunchydb
 
-![Version: 0.0.3](https://img.shields.io/badge/Version-0.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18](https://img.shields.io/badge/AppVersion-18-informational?style=flat-square)
+![Version: 0.0.4](https://img.shields.io/badge/Version-0.0.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 18](https://img.shields.io/badge/AppVersion-18-informational?style=flat-square)
 
 Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 
@@ -43,7 +43,7 @@ Standalone Crunchy PostgreSQL cluster for PCNS (wraps bcgov/crunchy-postgres)
 | crunchy-postgres.patroni.postgresql.parameters.min_wal_size | string | `"32MB"` | Minimum WAL size retention on disk. |
 | crunchy-postgres.patroni.postgresql.parameters.shared_buffers | string | `"16MB"` | Shared buffer memory for PostgreSQL engine. |
 | crunchy-postgres.patroni.postgresql.parameters.wal_buffers | string | `"64kB"` | Write-ahead log buffer size. |
-| crunchy-postgres.patroni.postgresql.pg_hba | string | `"host all all 0.0.0.0/0 scram-sha-256"` | Host-based authentication rules for PostgreSQL. |
+| crunchy-postgres.patroni.postgresql.pg_hba | string | `"host all all all scram-sha-256"` | Host-based authentication rules for PostgreSQL. |
 | crunchy-postgres.pgBackRest.repo1.enabled | bool | `true` | Enable local PVC backup repository (repo1). |
 | crunchy-postgres.pgBackRest.repoHost.requests.cpu | string | `"10m"` | CPU request for pgBackRest dedicated repo host pod. |
 | crunchy-postgres.pgBackRest.repoHost.requests.memory | string | `"64Mi"` | Memory request for pgBackRest dedicated repo host pod. |
