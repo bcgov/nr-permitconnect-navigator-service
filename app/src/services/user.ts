@@ -3,7 +3,7 @@ import { isTruthy } from '#src/utils/index';
 
 import type { Group, User, UserSearchParameters } from '#types';
 
-export type UserWithGroup = User & { groups?: Group[] };
+export type UserWithGroup = Omit<User, 'groups'> & { groups?: Group[] };
 
 /**
  * Search and filter for specific users

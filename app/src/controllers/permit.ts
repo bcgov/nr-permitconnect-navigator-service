@@ -25,7 +25,7 @@ export const deletePermitController = async (req: Request<{ permitId: string }>,
   res.status(204).end();
 };
 
-export const getPermitController = async (req: Request<{ permitId: string }>, res: Response) => {
+export const getPermitController = async (req: Request<{ permitId: string }>, res: Response<Permit>) => {
   const response = await getPermitService(req.params.permitId);
   res.status(200).json(response);
 };
@@ -64,7 +64,10 @@ export const searchPermitsController = async (
   res.status(200).json(response);
 };
 
-export const upsertPermitController = async (req: Request<never, never, UpsertPermitBodyRequest>, res: Response) => {
+export const upsertPermitController = async (
+  req: Request<never, never, UpsertPermitBodyRequest>,
+  res: Response<Permit>
+) => {
   const { permitTracking, permitType, permitNote, ...permit } = req.body;
   const response = await upsertPermitService(permit, permitNote, permitTracking, permitType);
   res.status(200).json(response);

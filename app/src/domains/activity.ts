@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Activity, CurrentContext } from '#types';
+import type { CurrentContext } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -15,7 +15,7 @@ import type { Initiative } from '#src/utils/enums/application';
 export const createActivity = async (
   repositories: Pick<Repositories, 'activity' | 'initiative'>,
   initiative: Initiative
-): Promise<Activity> => {
+) => {
   // Generate a new unique activity ID
   let id, queryResult;
 
