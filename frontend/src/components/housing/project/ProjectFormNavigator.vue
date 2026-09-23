@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ATSInfo from '@/components/ats/ATSInfo.vue';
@@ -27,6 +27,7 @@ import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
+import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
 import { createProjectFormNavigatorSchema } from '@/validators/housing/projectFormNavigatorSchema';
 
@@ -100,9 +101,19 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType>> = ref({
   consent: {}
 });
 const isFormReady: Ref<boolean> = ref(false);
+provide(formReadyKey, isFormReady);
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
+
+const projectFormNavigatorSchema = computed(() => {
+  return createProjectFormNavigatorSchema({
+    initiative: getInitiative.value,
+    t,
+    codeList,
+    orgBookOptions: orgBookOptions.value
+  });
+});
 
 // Actions
 async function createAtsClientEnquiry(): Promise<
@@ -332,7 +343,7 @@ const onSubmit = async (formValues: GenericObject) => {
   try {
     // vee-validate doesn't get transformed data from yup so
     // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
+    const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
 
     // Check for any ATS changes
     // Returns form values if no updates happen
@@ -424,13 +435,6 @@ const onSubmit = async (formValues: GenericObject) => {
     if (isAxiosError(e) || e instanceof Error) toast.error(t('i.common.projectForm.failedMessage'), e.message);
   }
 };
-
-const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
-  initiative: getInitiative.value,
-  t,
-  codeList,
-  orgBookOptions: orgBookOptions.value
-});
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {

@@ -57,7 +57,7 @@ const normalizedValue = computed({
     :mask="mask"
     :placeholder="placeholder"
     class="w-full"
-    :class="{ 'p-invalid': errorMessage }"
+    :invalid="!!errorMessage"
     :disabled="disabled"
     @blur="handleBlur"
   />

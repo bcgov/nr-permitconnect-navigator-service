@@ -2,7 +2,7 @@
 import { isAxiosError } from 'axios';
 import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
-import { nextTick, onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, provide, ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
 
 import ATSInfo from '@/components/ats/ATSInfo.vue';
@@ -23,6 +23,7 @@ import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/stor
 import { BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
+import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 
@@ -73,6 +74,7 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType>> = ref({
   projectAreasUpdated: {}
 });
 const isFormReady: Ref<boolean> = ref(false);
+provide(formReadyKey, isFormReady);
 const locationPidsAuto: Ref<string> = ref('');
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);

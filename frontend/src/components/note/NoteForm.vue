@@ -257,7 +257,7 @@ onBeforeMount(async () => {
   </Message>
   <Form
     ref="formRef"
-    v-slot="{ values }"
+    v-slot="{ meta, values }"
     :initial-values="initialFormValues"
     :validation-schema="formSchema"
     @invalid-submit="onInvalidSubmit"
@@ -291,7 +291,12 @@ onBeforeMount(async () => {
             <div class="flex items-center">
               <h6 class="font-bold app-label-color">
                 {{ t('note.noteForm.note') }}
-                <span class="text-[var(--p-support-required-text)]">*</span>
+                <span
+                  v-if="!noteHistory"
+                  class="text-[var(--p-support-required-text)]"
+                >
+                  *
+                </span>
               </h6>
               <Tooltip
                 v-if="
@@ -391,7 +396,7 @@ onBeforeMount(async () => {
           label="Save"
           type="submit"
           icon="pi pi-check"
-          :disabled="!editable"
+          :disabled="!editable || !meta.dirty"
         />
         <Button
           class="p-button-outlined mr-2"
