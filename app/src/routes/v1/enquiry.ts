@@ -38,10 +38,12 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
     path: '/list/:activityId',
     summary: 'Gets enquiries related to an activityId',
     tags: [`${tagPrefix} Enquiry`],
+    schema: schema.listRelatedEnquiries,
     responses: {
       200: { description: 'A list of enquiries related to the activity', schema: z.array(enquirySchema) },
       401: UNAUTHORIZED_RESPONSE,
-      403: FORBIDDEN_RESPONSE
+      403: FORBIDDEN_RESPONSE,
+      422: VALIDATION_ERROR_RESPONSE
     },
     middleware: [hasAuthorization(Resource.ENQUIRY, Action.READ), hasAccess('activityId')],
     handler: listRelatedEnquiriesController

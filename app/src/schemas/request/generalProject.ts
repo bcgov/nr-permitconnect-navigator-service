@@ -70,6 +70,13 @@ export const schema = {
       })
       .strict()
   },
+  getDraft: {
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
+  },
   upsertDraft: {
     body: z
       .object({
