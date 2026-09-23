@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 import { atsEnquirySubmissionFields } from './ats.ts';
-import { uuidv4 } from './common.ts';
+import { activityId, uuidv4 } from './common.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import {
   APPLICATION_STATUS_LIST,
@@ -31,6 +31,13 @@ export const schema = {
     params: z
       .object({
         enquiryId: uuidv4
+      })
+      .strict()
+  },
+  listRelatedEnquiries: {
+    params: z
+      .object({
+        activityId
       })
       .strict()
   },

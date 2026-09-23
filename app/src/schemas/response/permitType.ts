@@ -21,3 +21,9 @@ export const permitTypeSchema = permit_typeModelSchema
   .omit({ permit: true, sourceSystemCode: true, permitTypeInitiativeXref: true, permitTypeSourceSystemKindXref: true })
   .extend({ permitTypeInitiativeXref: z.array(permitTypeInitiativeXrefSchema).optional() })
   .openapi('PermitType');
+
+// listPermitTypesService always includes permitTypeInitiativeXref (with nested initiative) - see
+// src/services/permitType.ts - so this narrows the base schema's optional array to required.
+export const permitTypeWithInitiativesSchema = permitTypeSchema
+  .extend({ permitTypeInitiativeXref: z.array(permitTypeInitiativeXrefSchema) })
+  .openapi('PermitTypeWithInitiatives');

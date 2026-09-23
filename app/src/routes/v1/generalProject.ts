@@ -102,10 +102,12 @@ openapiRoute(basePath, router, {
   path: '/draft/:draftId',
   summary: 'Get a specific general project draft',
   tags: TAGS,
+  schema: schema.getDraft,
   responses: {
     200: { description: 'The requested draft', schema: draftSchema },
     401: UNAUTHORIZED_RESPONSE,
-    403: FORBIDDEN_RESPONSE
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
   },
   middleware: [hasAuthorization(Resource.GENERAL_PROJECT, Action.READ), hasAccess('draftId')],
   handler: getGeneralProjectDraftController

@@ -49,8 +49,8 @@ export const housingReportingPermitDataSchema = reportingPermitDataSchema
     consent_to_feedback: z.enum(['Yes', 'No']),
     street_address: z.string().nullable(),
     locality: z.string().nullable(),
-    latitude: z.number().nullable(),
-    longitude: z.number().nullable(),
+    latitude: z.string().nullable(),
+    longitude: z.string().nullable(),
     location_pids: z.string().nullable()
   })
   .openapi('HousingReportingPermitData');

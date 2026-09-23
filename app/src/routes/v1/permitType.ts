@@ -7,7 +7,7 @@ import { hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { permitTypeSchema } from '#src/schemas/response/permitType';
+import { permitTypeWithInitiativesSchema } from '#src/schemas/response/permitType';
 import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
 import { schema } from '#src/schemas/request/permitType';
 
@@ -23,7 +23,7 @@ openapiRoute(basePath, router, {
   tags: ['Permit Type'],
   schema: schema.listPermitTypes,
   responses: {
-    200: { description: 'A list of permit types', schema: z.array(permitTypeSchema) },
+    200: { description: 'A list of permit types', schema: z.array(permitTypeWithInitiativesSchema) },
     401: UNAUTHORIZED_RESPONSE,
     403: FORBIDDEN_RESPONSE,
     422: VALIDATION_ERROR_RESPONSE
