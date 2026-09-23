@@ -29,7 +29,7 @@ import {
 import type { Prisma } from '#prismaClient';
 import type {
   AccessRequest,
-  Activity,
+  ActivityBase,
   ActivityContact,
   CodingEvent,
   Contact,
@@ -47,11 +47,11 @@ import type {
   Group,
   HousingProject,
   HousingProjectBase,
-  Initiative as InitiativeModel,
+  InitiativeBase,
   Note,
   NoteHistory,
   PiesRecord,
-  PeachSummary,
+  PeachSummaryResponse,
   Permit,
   PermitNote,
   PermitTracking,
@@ -91,7 +91,19 @@ export const TEST_ACCESS_REQUEST_1: AccessRequest = {
   updatedAt: null,
   updatedBy: null,
   deletedBy: null,
-  deletedAt: null
+  deletedAt: null,
+  group: {
+    groupId: 1,
+    initiativeId: 'aaaa-bbbb-cccc-eeee',
+    name: 'NAVIGATOR',
+    label: 'Navigator',
+    createdAt: null,
+    createdBy: null,
+    updatedAt: null,
+    updatedBy: null,
+    deletedBy: null,
+    deletedAt: null
+  }
 };
 
 export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
@@ -106,7 +118,7 @@ export const TEST_ACTIVITY_CONTACT_1: ActivityContact = {
   deletedAt: null
 };
 
-export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
+export const TEST_ACTIVITY_ELECTRIFICATION: ActivityBase = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.ELECTRIFICATION,
   createdAt: null,
@@ -117,7 +129,7 @@ export const TEST_ACTIVITY_ELECTRIFICATION: Activity = {
   deletedAt: null
 };
 
-export const TEST_ACTIVITY_GENERAL: Activity = {
+export const TEST_ACTIVITY_GENERAL: ActivityBase = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.GENERAL,
   createdAt: null,
@@ -128,7 +140,7 @@ export const TEST_ACTIVITY_GENERAL: Activity = {
   deletedAt: null
 };
 
-export const TEST_ACTIVITY_HOUSING: Activity = {
+export const TEST_ACTIVITY_HOUSING: ActivityBase = {
   activityId: 'ACTI1234',
   initiativeId: Initiative.HOUSING,
   createdAt: null,
@@ -267,6 +279,7 @@ export const TEST_ELECTRIFICATION_PROJECT_1: ElectrificationProjectBase = {
 
 export const TEST_ELECTRIFICATION_PROJECT_CREATE: ElectrificationProject = {
   electrificationProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   submittedAt: new Date(),
   projectName: null,
@@ -433,6 +446,7 @@ export const TEST_GENERAL_PROJECT_1: GeneralProjectBase = {
 
 export const TEST_GENERAL_PROJECT_CREATE: GeneralProject = {
   generalProjectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
+  projectId: '5183f223-526a-44cf-8b6a-80f90c4e802b',
   activityId: 'ACTI1234',
   assignedUserId: null,
   submittedAt: new Date(),
@@ -734,7 +748,7 @@ export const TEST_HOUSING_PROJECT_UPDATE: Partial<Omit<HousingProjectBase, 'hous
   projectName: 'NEW NAME'
 };
 
-export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {
+export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeBase = {
   initiativeId: 'initiative123',
   code: Initiative.ELECTRIFICATION,
   label: '',
@@ -746,7 +760,7 @@ export const TEST_INITIATIVE_ELECTRIFICATION: InitiativeModel = {
   deletedAt: null
 };
 
-export const TEST_INITIATIVE_HOUSING: InitiativeModel = {
+export const TEST_INITIATIVE_HOUSING: InitiativeBase = {
   initiativeId: 'initiative123',
   code: Initiative.HOUSING,
   label: '',
@@ -937,7 +951,7 @@ export const TEST_PEACH_RECORD_UNMAPPED: PiesRecord = {
   on_hold_event_set: []
 };
 
-export const TEST_PEACH_SUMMARY: PeachSummary = {
+export const TEST_PEACH_SUMMARY: PeachSummaryResponse = {
   stage: PermitStage.APPLICATION_SUBMISSION,
   state: PermitState.IN_PROGRESS,
   submittedDate: '2024-01-10',

@@ -9,7 +9,7 @@ import type {
   DateTimeStrings,
   Event as PiesEvent,
   NullableDateTimeStrings,
-  PeachSummary,
+  PeachSummaryResponse,
   ProcessEvent,
   PiesRecord
 } from '#types';
@@ -413,11 +413,11 @@ export function compareProcessEvents(a: ProcessEvent, b: ProcessEvent, desc = fa
 }
 
 /**
- * Produces a normalized {@link PeachSummary} for a single PEACH record
+ * Produces a normalized {@link PeachSummaryResponse} for a single PEACH record
  * @param record Full PEACH record to summarize
  * @returns A peach summary containing the derived stage, state, and key dates, if no stage or state return null
  */
-export function summarizePiesRecord(record: PiesRecord): PeachSummary | null {
+export function summarizePiesRecord(record: PiesRecord): PeachSummaryResponse | null {
   // Sort the record's events - latest to earliest
   sortRecordEvents(record);
 
@@ -483,8 +483,8 @@ export function summarizePiesRecord(record: PiesRecord): PeachSummary | null {
  * @param records Readonly list of PEACH records to parse.
  * @returns A map of peach summaries keyed by the system id and record id
  */
-export function parsePiesRecords(records: readonly PiesRecord[]): Record<string, PeachSummary> {
-  const parsedRecords: Record<string, PeachSummary> = {};
+export function parsePiesRecords(records: readonly PiesRecord[]): Record<string, PeachSummaryResponse> {
+  const parsedRecords: Record<string, PeachSummaryResponse> = {};
   for (const record of records) {
     const summary = summarizePiesRecord(record);
     if (!summary) continue;

@@ -1,0 +1,36 @@
+{
+  "$schema": "../../../node_modules/prisma-zod-generator/lib/config/schema.json",
+  "mode": "custom",
+  "pureModels": true,
+  "emit": {
+    "enums": true,
+    "objects": false,
+    "crud": false,
+    "results": false,
+    "pureModels": false,
+    "variants": true
+  },
+  "variants": {
+    "pure": { "enabled": true },
+    "input": { "enabled": false },
+    "result": { "enabled": false }
+  },
+  "models": {
+    "knex_migrations": { "enabled": false },
+    "knex_migrations_lock": { "enabled": false },
+    "action": { "enabled": false },
+    "attribute": { "enabled": false },
+    "attribute_group": { "enabled": false },
+    "group": { "enabled": false },
+    "group_role": { "enabled": false },
+    "policy": { "enabled": false },
+    "policy_attribute": { "enabled": false },
+    "resource": { "enabled": false },
+    "role": { "enabled": false },
+    "role_policy": { "enabled": false },
+    "group_role_policy_vw": { "enabled": false },
+    "subject_group": { "enabled": false },
+    "draft_code": { "enabled": false },
+    "permit_type_source_system_kind_xref": { "enabled": false }
+  }
+}

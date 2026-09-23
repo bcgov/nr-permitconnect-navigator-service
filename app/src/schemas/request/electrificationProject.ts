@@ -1,0 +1,152 @@
+import { z } from 'zod';
+
+import { atsEnquirySubmissionFields } from './ats.ts';
+import { activityId, uuidv4 } from './common.ts';
+import { submittedContactSchema } from './submittedContact.ts';
+import { requireValidCode } from '#src/db/codes/validator';
+import { YES_NO_LIST } from '#src/utils/constants/application';
+import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
+import { ProjectType } from '#src/utils/enums/electrification';
+
+export const schema = {
+  // POST / always sends an empty body (frontend creates a blank project, then fills it in via patch).
+  createElectrificationProject: {
+    body: z.object({}).strict().default({})
+  },
+  // POST /draft/submit carries the full intake payload from ProjectIntakeForm.vue.
+  submitElectrificationProjectDraft: {
+    body: z
+      .object({
+        activityId: activityId.nullish(),
+        basic: z
+          .object({
+            projectDescription: z.string().max(4000).nullish(),
+            projectName: z.string().max(255).trim(),
+            registeredId: z.string().max(255).trim().nullish(),
+            registeredName: z.string().max(255).trim()
+          })
+          .strict(),
+        contact: submittedContactSchema,
+        draftId: uuidv4.nullish(),
+        project: z
+          .object({
+            bcHydroNumber: z.string().max(255).trim().nullish(),
+            projectType: requireValidCode.ElectrificationProjectType(z.string())
+          })
+          .strict()
+      })
+      .strict()
+      .superRefine((data, ctx) => {
+        const isOther = data.project.projectType === ProjectType.OTHER;
+        const value = data.basic.projectDescription;
+        const isEmpty = value === undefined || value === null || value === '';
+        if (isOther && isEmpty) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['basic', 'projectDescription'],
+            message: '"projectDescription" is required'
+          });
+        }
+      })
+  },
+  deleteElectrificationProject: {
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
+  },
+  deleteDraft: {
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
+  },
+  getDraft: {
+    params: z
+      .object({
+        draftId: uuidv4
+      })
+      .strict()
+  },
+  upsertDraft: {
+    body: z
+      .object({
+        draftId: uuidv4.nullish(),
+        data: z.unknown().refine((value) => value !== undefined, { message: '"data" is required' })
+      })
+      .strict()
+  },
+  getStatistics: {
+    query: z
+      .object({
+        dateFrom: z.coerce.date().nullish(),
+        dateTo: z.coerce.date().nullish(),
+        monthYear: z.coerce.date().nullish(),
+        userId: uuidv4.nullish()
+      })
+      .strict()
+  },
+  getElectrificationProject: {
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
+  },
+  searchElectrificationProjects: {
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional(),
+        electrificationProjectId: z.array(uuidv4).optional(),
+        projectType: z.array(requireValidCode.ElectrificationProjectType(z.string())).optional(),
+        projectCategory: z.array(requireValidCode.ElectrificationProjectCategory(z.string())).optional()
+      })
+      .strict()
+      .default({})
+  },
+  patchElectrificationProject: {
+    body: z
+      .object({
+        projectName: z.string().max(255).trim().optional(),
+        companyNameRegistered: z.string().max(255).trim().nullish(),
+        companyIdRegistered: z.string().max(255).trim().nullish(),
+        projectType: requireValidCode.ElectrificationProjectType(z.string()).optional(),
+        bcHydroNumber: z.string().max(255).trim().nullish(),
+        projectDescription: z.string().max(4000).nullish(),
+        projectCategory: requireValidCode.ElectrificationProjectCategory(z.string()).nullish(),
+        assignedUserId: uuidv4.nullish(),
+        hasEpa: z.enum(YES_NO_LIST as [string, ...string[]]).nullish(),
+        megawatts: z.number().positive().nullish(),
+        bcEnvironmentAssessNeeded: z.enum(YES_NO_LIST as [string, ...string[]]).nullish(),
+        locationDescription: z.string().max(4000).nullish(),
+        astNotes: z.string().max(4000).nullish(),
+        queuePriority: z.number().int().min(0).max(3).optional(),
+        submissionType: z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]]).optional(),
+        applicationStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+        ...atsEnquirySubmissionFields,
+        aaiUpdated: z.boolean().optional()
+      })
+      .strict()
+      .superRefine((data, ctx) => {
+        const isOther = data.projectType === ProjectType.OTHER;
+        const value = data.projectDescription;
+        const isEmpty = value === undefined || value === null || value === '';
+        if (isOther && isEmpty) {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['projectDescription'],
+            message: '"projectDescription" is required'
+          });
+        }
+      }),
+    params: z
+      .object({
+        electrificationProjectId: uuidv4
+      })
+      .strict()
+  }
+};

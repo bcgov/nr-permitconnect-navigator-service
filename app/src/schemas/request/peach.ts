@@ -1,0 +1,36 @@
+import { z } from 'zod';
+
+import { createStamps } from './stamps.ts';
+
+export const schema = {
+  getPeachSummary: {
+    body: z
+      .object({
+        permitTrackings: z
+          .array(
+            z
+              .object({
+                trackingId: z.string().nullish(),
+                permitTrackingId: z.number().nullish(),
+                permitId: z.string().nullish(),
+                shownToProponent: z.boolean().nullish(),
+                sourceSystemKindId: z.number().nullish(),
+                sourceSystemKind: z
+                  .object({
+                    sourceSystemKindId: z.number(),
+                    description: z.string().min(1),
+                    integrated: z.boolean().optional(),
+                    kind: z.string().nullish(),
+                    sourceSystem: z.string().min(1),
+                    ...createStamps
+                  })
+                  .strict(),
+                ...createStamps
+              })
+              .strict()
+          )
+          .min(1)
+      })
+      .strict()
+  }
+};
