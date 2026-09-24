@@ -85,12 +85,12 @@ onBeforeMount(async () => {
   contact.value = contactData;
 
   if (activityIds?.length && projectService?.value) {
-    const [projects, enquiries] = await Promise.all([
+    const [searchProjectsResponse, enquiries] = await Promise.all([
       projectService.value.searchProjects({ activityId: activityIds }),
       enquiryService.searchEnquiries({ activityId: activityIds })
     ]);
 
-    projectsEnquiries.value = projectsEnquiries.value.concat(projects).concat(enquiries);
+    projectsEnquiries.value = projectsEnquiries.value.concat(searchProjectsResponse.projects).concat(enquiries);
   }
   // Map users ids to full names for history data table
   let userIds: string[] = [];

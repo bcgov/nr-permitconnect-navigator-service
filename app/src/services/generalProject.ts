@@ -16,6 +16,7 @@ import type {
   Maybe,
   PatchGeneralProjectInput,
   SearchGeneralProjectInput,
+  SearchProjectResponse,
   SubmitGeneralProjectDraftInput
 } from '#types';
 
@@ -140,16 +141,21 @@ export const searchGeneralProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
   params: SearchGeneralProjectInput
-): Promise<GeneralProject[]> => {
+): Promise<SearchProjectResponse> => {
   return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
     const result = await generalProject.search(params);
 
-    return await filterActivityResponseByScope(
+    const projects = await filterActivityResponseByScope(
       { activityContact, contact },
       currentAuthorization,
       currentContext,
-      result
+      result.projects
     );
+
+    return {
+      projects,
+      totalRecords: result.totalRecords
+    };
   });
 };
 
