@@ -6,7 +6,7 @@ import { Button, DatePicker, Select, useToast } from '@/lib/primevue';
 import { reportingService, userService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { MIN_SEARCH_INPUT_LENGTH } from '@/utils/constants/application';
-import { Action, Initiative, Regex, Resource } from '@/utils/enums/application';
+import { Action, GroupName, Initiative, Regex, Resource } from '@/utils/enums/application';
 import { formatDate, formatDateFilename } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
@@ -23,6 +23,15 @@ import type {
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
 
+// Constants
+const NAV_GROUPS = [
+  GroupName.ADMIN,
+  GroupName.DEVELOPER,
+  GroupName.NAVIGATOR,
+  GroupName.NAVIGATOR_READ_ONLY,
+  GroupName.SUPERVISOR
+];
+
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<ProjectStatistics | undefined>('statistics');
@@ -37,16 +46,16 @@ const getPercentage = (input: number) =>
     ? Math.round((input / statistics.value.total_submissions) * 100)
     : 0;
 
-const isEmpty = (value: unknown) =>
+const assigneeIsEmpty = (value: unknown) =>
   value === null || value === undefined || (typeof value === 'string' && value.trim().length === 0);
 
 async function onAssigneeInput(e: InputEvent) {
   const input = e.target.value;
 
-  if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
-    assigneeOptions.value = await userService.searchUsers({ email: input, fullName: input });
-  } else if (input.match(Regex.EMAIL)) {
-    assigneeOptions.value = await userService.searchUsers({ email: input });
+  if (input.match(Regex.EMAIL)) {
+    assigneeOptions.value = await userService.searchUsers({ email: input, group: NAV_GROUPS });
+  } else if (input.length >= MIN_SEARCH_INPUT_LENGTH) {
+    assigneeOptions.value = await userService.searchUsers({ email: input, fullName: input, group: NAV_GROUPS });
   } else {
     assigneeOptions.value = [];
   }
@@ -116,16 +125,21 @@ async function onDownloadProjectPermitData() {
 watch(
   statisticFilters,
   async () => {
-    // Only submit if the user filter is empty or valid uuid
+    // Only search if the user filter is empty or valid uuid
     // It's possible for the value to contain a garbage string due to how PrimeVue editable dropdown works
-    let validUser =
-      isEmpty(statisticFilters.value.userId) ||
-      (!isEmpty(statisticFilters.value.userId) &&
-        uuidValidate(statisticFilters.value.userId as string) &&
-        uuidVersion(statisticFilters.value.userId as string) === 4);
+    const userId = statisticFilters.value.userId;
+    const isEmpty = assigneeIsEmpty(userId);
+    const isValidUuid = isEmpty || (!isEmpty && uuidValidate(userId as string) && uuidVersion(userId as string) === 4);
 
-    if (validUser) {
-      if (projectService) statistics.value = await projectService.value.getProjectStatistics(statisticFilters.value);
+    // Ignore invalid or garbage user filter
+    if (!isEmpty && !isValidUuid) return;
+
+    if (projectService) {
+      const searchPayload = {
+        ...statisticFilters.value,
+        userId: isEmpty ? undefined : userId
+      };
+      statistics.value = await projectService.value.getProjectStatistics(searchPayload);
     }
   },
   { deep: true }
