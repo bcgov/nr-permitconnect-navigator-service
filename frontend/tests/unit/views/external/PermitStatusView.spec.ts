@@ -88,8 +88,8 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 beforeEach(() => {
   vi.mocked(contactService.searchContacts).mockResolvedValue([]);
   vi.mocked(permitService.getPermit).mockResolvedValue({ permitId: '123' } as Permit);
-  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue([]);
-  vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
+  vi.mocked(electrificationProjectService.searchProjects).mockResolvedValue({ projects: [], totalRecords: 0 });
+  vi.mocked(housingProjectService.searchProjects).mockResolvedValue({ projects: [], totalRecords: 0 });
 });
 
 afterEach(() => {

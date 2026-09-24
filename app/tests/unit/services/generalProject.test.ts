@@ -178,7 +178,10 @@ describe('generalProject service', () => {
     it('searches projects and applies filtering', async () => {
       const mockProjects = [TEST_GENERAL_PROJECT_1];
       const searchParams = { activityId: ['id-1'] };
-      mockRepos.generalProject.search.mockResolvedValueOnce(mockProjects as never);
+      mockRepos.generalProject.search.mockResolvedValueOnce({
+        projects: mockProjects,
+        totalRecords: mockProjects.length
+      } as never);
       filterSpy.mockResolvedValueOnce(mockProjects as never);
 
       const response = await generalProjectService.searchGeneralProjects(
@@ -199,7 +202,7 @@ describe('generalProject service', () => {
         TEST_CURRENT_CONTEXT,
         mockProjects
       );
-      expect(response).toStrictEqual(mockProjects);
+      expect(response).toStrictEqual({ projects: mockProjects, totalRecords: mockProjects.length });
     });
   });
 

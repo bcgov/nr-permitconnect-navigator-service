@@ -35,13 +35,19 @@ describe('ElectrificationProjectRepository', () => {
 
       expect(findManyMock).toHaveBeenCalledTimes(1);
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: ['act-1', 'act-2'] } },
             { createdBy: { in: ['user-1'] } },
             { electrificationProjectId: { in: ['elec-1'] } },
             { projectType: { in: ['RESIDENTIAL'] } },
-            { projectCategory: { in: ['UPGRADE'] } }
+            { projectCategory: { in: ['UPGRADE'] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {
@@ -132,6 +138,7 @@ describe('ElectrificationProjectRepository', () => {
 
     it('passes all params including optional user filter and returns the result', async () => {
       findManyMock.mockResolvedValueOnce([TEST_ELECTRIFICATION_PROJECT_1]);
+      vi.spyOn(repo, 'count').mockResolvedValueOnce(1);
 
       const params = {
         activityId: ['act-1'],
@@ -146,13 +153,19 @@ describe('ElectrificationProjectRepository', () => {
 
       expect(findManyMock).toHaveBeenCalledTimes(1);
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: ['act-1'] } },
             { createdBy: { in: ['user-1'] } },
             { electrificationProjectId: { in: ['elec-1'] } },
             { projectType: { in: ['RESIDENTIAL'] } },
-            { projectCategory: { in: ['UPGRADE'] } }
+            { projectCategory: { in: ['UPGRADE'] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {
@@ -168,7 +181,7 @@ describe('ElectrificationProjectRepository', () => {
           user: true
         }
       });
-      expect(result).toStrictEqual([TEST_ELECTRIFICATION_PROJECT_1]);
+      expect(result).toStrictEqual({ projects: [TEST_ELECTRIFICATION_PROJECT_1], totalRecords: 1 });
     });
   });
 });
