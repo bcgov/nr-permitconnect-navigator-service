@@ -24,6 +24,7 @@ import type {
   LocalContext,
   PatchElectrificationProjectRequest,
   SearchElectrificationProjectRequest,
+  SearchProjectResponse,
   SubmitElectrificationProjectDraftRequest,
   UpsertElectrificationProjectDraftRequest
 } from '#types';
@@ -76,7 +77,7 @@ export const listElectrificationProjectsController = async (
 
 export const searchElectrificationProjectsController = async (
   req: Request<never, never, SearchElectrificationProjectRequest>,
-  res: Response<ElectrificationProject[], LocalContext>
+  res: Response<SearchProjectResponse, LocalContext>
 ) => {
   const response = await searchElectrificationProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,

@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
+import { paginationOptions } from './paginationOptions.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
@@ -94,11 +95,15 @@ export const schema = {
       .object({
         activityId: z.array(z.string()).optional(),
         createdBy: z.array(z.string()).optional(),
+        dateRange: z.array(z.string()).length(2).nullish().optional(),
         includeUser: z.boolean().optional(),
         electrificationProjectId: z.array(uuidv4).optional(),
+        applicationStatus: z.array(z.string()).optional(),
+        searchTag: z.string().optional(),
         projectType: z.array(requireValidCode.ElectrificationProjectType(z.string())).optional(),
         projectCategory: z.array(requireValidCode.ElectrificationProjectCategory(z.string())).optional()
       })
+      .merge(paginationOptions)
       .strict()
       .default({})
   },
