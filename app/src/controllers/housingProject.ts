@@ -24,6 +24,7 @@ import type {
   SearchHousingProjectRequest,
   LocalContext,
   PatchHousingProjectRequest,
+  SearchProjectResponse,
   SubmitHousingProjectDraftRequest,
   UpsertHousingProjectDraftRequest
 } from '#types';
@@ -67,7 +68,7 @@ export const listHousingProjectsController = async (_req: Request, res: Response
 
 export const searchHousingProjectsController = async (
   req: Request<never, never, SearchHousingProjectRequest>,
-  res: Response<HousingProject[], LocalContext>
+  res: Response<SearchProjectResponse, LocalContext>
 ) => {
   const response = await searchHousingProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,
