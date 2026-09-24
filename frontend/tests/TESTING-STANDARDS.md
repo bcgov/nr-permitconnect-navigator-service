@@ -10,7 +10,7 @@ Two shared entry points live in `tests/`. Pick based on what the
 component under test actually needs:
 
 | Utility | Use when the component... |
-|---|---|
+| --- | --- |
 | `mountComponent` | Establishes its own `<Form>` context internally, or needs no vee-validate form context at all -- just Pinia / provide / stubs. This is the default. |
 | `mountWithFormContext` | **Assumes an ancestor** already provides vee-validate's form context (a field/section component that doesn't render its own `<Form>`). |
 
