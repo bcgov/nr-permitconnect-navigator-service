@@ -34,12 +34,18 @@ describe('GeneralProjectRepository', () => {
 
       expect(findManyMock).toHaveBeenCalledTimes(1);
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: ['act-1', 'act-2'] } },
             { createdBy: { in: ['user-1'] } },
             { generalProjectId: { in: ['gen-1'] } },
-            { submissionType: { in: ['NEW'] } }
+            { submissionType: { in: ['NEW'] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {
@@ -127,6 +133,7 @@ describe('GeneralProjectRepository', () => {
 
     it('passes all params including optional user filter and returns the result', async () => {
       findManyMock.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1 as never]);
+      vi.spyOn(repo, 'count').mockResolvedValueOnce(1);
 
       const params = {
         activityId: ['act-1'],
@@ -140,12 +147,18 @@ describe('GeneralProjectRepository', () => {
 
       expect(findManyMock).toHaveBeenCalledTimes(1);
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: ['act-1'] } },
             { createdBy: { in: ['user-1'] } },
             { generalProjectId: { in: ['gen-1'] } },
-            { submissionType: { in: ['NEW'] } }
+            { submissionType: { in: ['NEW'] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {
@@ -161,7 +174,7 @@ describe('GeneralProjectRepository', () => {
           user: true
         }
       });
-      expect(result).toStrictEqual([TEST_GENERAL_PROJECT_1]);
+      expect(result).toStrictEqual({ projects: [TEST_GENERAL_PROJECT_1], totalRecords: 1 });
     });
   });
 });

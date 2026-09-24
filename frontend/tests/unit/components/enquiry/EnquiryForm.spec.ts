@@ -114,7 +114,7 @@ beforeEach(() => {
   } as Enquiry);
   vi.mocked(housingProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
   vi.mocked(electrificationProjectService.listActivityIds).mockResolvedValue(activityIdMockData);
-  vi.mocked(housingProjectService.searchProjects).mockResolvedValue([]);
+  vi.mocked(housingProjectService.searchProjects).mockResolvedValue({ projects: [], totalRecords: 0 });
 });
 
 // Tests
@@ -524,26 +524,29 @@ describe('EnquiryForm.vue', () => {
     });
 
     it('searches projects and updates related ATS info on EditableSelect change', async () => {
-      vi.mocked(housingProjectService.searchProjects).mockResolvedValueOnce([
-        {
-          atsClientId: 345,
-          activity: {
-            activityContact: [
-              {
-                contact: {
-                  contactId: 'contact123',
-                  firstName: 'John',
-                  lastName: 'Doe',
-                  phoneNumber: '555-1234',
-                  email: 'john@example.com',
-                  contactApplicantRelationship: ProjectRelationship.CONSULTANT,
-                  contactPreference: ContactPreference.EITHER
+      vi.mocked(housingProjectService.searchProjects).mockResolvedValueOnce({
+        projects: [
+          {
+            atsClientId: 345,
+            activity: {
+              activityContact: [
+                {
+                  contact: {
+                    contactId: 'contact123',
+                    firstName: 'John',
+                    lastName: 'Doe',
+                    phoneNumber: '555-1234',
+                    email: 'john@example.com',
+                    contactApplicantRelationship: ProjectRelationship.CONSULTANT,
+                    contactPreference: ContactPreference.EITHER
+                  }
                 }
-              }
-            ]
-          }
-        } as HousingProject
-      ]);
+              ]
+            }
+          } as HousingProject
+        ],
+        totalRecords: 1
+      });
 
       const { wrapper: component } = mountEnquiryForm({ editable: true });
       await flushPromises();

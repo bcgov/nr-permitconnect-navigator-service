@@ -103,9 +103,11 @@ function mountSubmissionsNavigator(
   return { wrapper, getProjectStatistics };
 }
 
-/** `props('projects')` is typed as possibly-undefined via VTU's overloads -- narrow it once here. */
-function getMutatedProjects(wrapper: ReturnType<typeof mountSubmissionsNavigator>['wrapper']): Project[] {
-  return (wrapper.findComponent(ProjectListNavigator).props('projects') ?? []) as Project[];
+/** ProjectListNavigator fetches its own data and no longer receives `projects` as a prop, so
+ * the `update:projects` model event is the only way to observe the navigator's final value. */
+function getLastEmittedProjects(wrapper: ReturnType<typeof mountSubmissionsNavigator>['wrapper']): Project[] {
+  const emitted = wrapper.emitted('update:projects');
+  return (emitted?.at(-1)?.[0] ?? []) as Project[];
 }
 
 beforeEach(() => {
@@ -147,17 +149,18 @@ describe('SubmissionsNavigator', () => {
       const project = makeProject({ activityId: 'activity-1' });
       const enquiry = { relatedActivityId: 'activity-1' } as Enquiry;
 
-      const { wrapper } = mountSubmissionsNavigator({ projects: [project], enquiries: [enquiry] });
+      mountSubmissionsNavigator({ projects: [project], enquiries: [enquiry] });
 
-      expect(getMutatedProjects(wrapper)[0]!.hasRelatedEnquiry).toBe(true);
+      // Vue passes props by reference, so the enrichment mutates this same object
+      expect(project.hasRelatedEnquiry).toBe(true);
     });
 
     it('does not flag projects with no matching enquiry', () => {
       const project = makeProject({ activityId: 'activity-1' });
 
-      const { wrapper } = mountSubmissionsNavigator({ projects: [project], enquiries: [] });
+      mountSubmissionsNavigator({ projects: [project], enquiries: [] });
 
-      expect(getMutatedProjects(wrapper)[0]!.hasRelatedEnquiry).toBe(false);
+      expect(project.hasRelatedEnquiry).toBe(false);
     });
 
     it.each([
@@ -168,9 +171,9 @@ describe('SubmissionsNavigator', () => {
     ])('formats the assigned user full name %s -> %s', (nameParts, expected) => {
       const project = makeProject({ user: { ...nameParts, fullName: '' } as never });
 
-      const { wrapper } = mountSubmissionsNavigator({ projects: [project] });
+      mountSubmissionsNavigator({ projects: [project] });
 
-      expect(getMutatedProjects(wrapper)[0]!.user!.fullName).toBe(expected);
+      expect(project.user!.fullName).toBe(expected);
     });
 
     it('counts YES-needed permits per activity to build the multiPermitsNeeded label', () => {
@@ -182,18 +185,18 @@ describe('SubmissionsNavigator', () => {
         { activityId: 'other-activity', needed: 'Yes' }
       ] as Permit[];
 
-      const { wrapper } = mountSubmissionsNavigator({ projects: [project], permits });
+      mountSubmissionsNavigator({ projects: [project], permits });
 
-      expect(getMutatedProjects(wrapper)[0]!.multiPermitsNeeded).toBe(`${BasicResponse.YES} (2)`);
+      expect(project.multiPermitsNeeded).toBe(`${BasicResponse.YES} (2)`);
     });
 
     it('labels the project as not multi-permit when 1 or fewer permits are needed', () => {
       const project = makeProject({ activityId: 'activity-1' });
       const permits = [{ activityId: 'activity-1', needed: 'Yes' }] as Permit[];
 
-      const { wrapper } = mountSubmissionsNavigator({ projects: [project], permits });
+      mountSubmissionsNavigator({ projects: [project], permits });
 
-      expect(getMutatedProjects(wrapper)[0]!.multiPermitsNeeded).toBe(`${BasicResponse.NO} (1)`);
+      expect(project.multiPermitsNeeded).toBe(`${BasicResponse.NO} (1)`);
     });
 
     it('restores the accordion index from session storage', () => {
@@ -218,7 +221,7 @@ describe('SubmissionsNavigator', () => {
       await wrapper.findComponent(ProjectListNavigator).vm.$emit('submission:delete', 'project-1', 'activity-1');
       await flushPromises();
 
-      expect(wrapper.findComponent(ProjectListNavigator).props('projects')).toEqual([]);
+      expect(getLastEmittedProjects(wrapper)).toEqual([]);
       expect(getProjectStatistics).toHaveBeenCalledWith({});
     });
 

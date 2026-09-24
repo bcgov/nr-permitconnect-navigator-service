@@ -1,5 +1,5 @@
 import { addDays } from 'date-fns';
-import { Prisma } from '@prisma/client';
+import { Prisma } from '#prismaClient';
 
 import { WritableRepository } from './writable.ts';
 
