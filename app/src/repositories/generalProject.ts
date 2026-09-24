@@ -25,12 +25,14 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
 
   public async search(params: SearchGeneralProjectRequest): Promise<SearchProjectResponse> {
     const validSortFields = [
-      'projectName',
       'activityId',
+      'applicationStatus',
+      'assignedTo',
       'companyNameRegistered',
-      'submittedAt',
+      'location',
+      'projectName',
       'queuePriority',
-      'applicationStatus'
+      'submittedAt'
     ];
 
     let orderBy:
