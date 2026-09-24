@@ -87,6 +87,7 @@ const projectRoute = inject(projectRouteNameKey);
   <Column
     field="location"
     header="Location"
+    :sortable="true"
     style="min-width: 250px"
   />
   <Column

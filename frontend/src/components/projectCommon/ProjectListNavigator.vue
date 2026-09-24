@@ -8,7 +8,6 @@ import { useRoute, useRouter } from 'vue-router';
 import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue';
 import ProjectListNavigatorGeneral from '@/components/general/project/ProjectListNavigatorGeneral.vue';
 import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
-import { Spinner } from '@/components/layout';
 import {
   Button,
   DataTable,
@@ -193,46 +192,46 @@ async function searchProjects() {
     await searchMutex.runExclusive(async () => {
       try {
         loading.value = true;
-        projectService?.value
-          .searchProjects({
-            applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
-            dateRange: dateRange.value,
-            searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
-            skip: (pagination.value.page && pagination.value.rows
-              ? pagination.value.page * pagination.value.rows
-              : 0
-            ).toString(),
-            take: pagination.value.rows?.toString(),
-            sortField: pagination.value.field,
-            sortOrder: pagination.value.order?.toString()
-          })
-          .then((res) => {
-            searchResponse.value = res;
-          })
-          .finally(() => {
-            loading.value = false;
-          });
+        const res = await projectService?.value.searchProjects({
+          applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
+          dateRange: dateRange.value,
+          searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
+          skip: (pagination.value.page && pagination.value.rows
+            ? pagination.value.page * pagination.value.rows
+            : 0
+          ).toString(),
+          take: pagination.value.rows?.toString(),
+          sortField: pagination.value.field,
+          sortOrder: pagination.value.order?.toString()
+        });
+        if (res) searchResponse.value = res;
       } catch (e) {
-        generalErrorHandler(e);
+        generalErrorHandler(e, undefined, undefined, toast);
+      } finally {
+        loading.value = false;
       }
     });
   }, 500);
+}
+
+function onDateRangeChange(value: Date | Date[] | (Date | null)[] | null | undefined) {
+  // range selection emits after the first date too; only search once both dates (or a clear) are set
+  if (!value || (Array.isArray(value) && value[0] && value[1])) searchProjects();
 }
 
 onBeforeMount(() => {
   searchProjects();
 });
 </script>
-<!-- :value="filteredProjects" -->
 <template>
-  <!-- {{ searchResponse }} -->
-  <!-- {{ filteredProjects }} -->
   <DataTable
     v-model:filters="filters"
     v-model:selection="selection"
     lazy
     data-key="projectId"
     :value="filteredProjects"
+    :loading="loading"
+    loading-icon="pi pi-spinner pi-spin"
     removable-sort
     scrollable
     responsive-layout="scroll"
@@ -276,28 +275,9 @@ onBeforeMount(() => {
         <h3>No items found.</h3>
       </div>
     </template>
-    <template #loading>
-      <Spinner />
-    </template>
     <template #header>
       <div class="flex justify-between mb-3">
         <div class="grid grid-cols-3 gap-3">
-          <!-- <Select
-            v-model="selectedFilter"
-            class="col-span-1"
-            :options="FILTER_OPTIONS as FilterOption[]"
-            option-label="label"
-          /> -->
-          <!-- <Select
-            v-model="selectedFilter"
-            name="authorizationType"
-            :label="t('authorization.common.authorization')"
-            :placeholder="t('authorization.common.authorizationType')"
-            :options="getInitiativePermitTypes"
-            :option-label="(e) => `${e.businessDomain}: ${e.name}`"
-            show-clear
-            @change="searchPermits"
-          /> -->
           <Select
             v-model="applicationStatus"
             class="col-span-1"
@@ -310,11 +290,6 @@ onBeforeMount(() => {
             icon-position="left"
           >
             <InputIcon class="pi pi-search" />
-            <!-- <InputText
-              v-model="filters['global'].value"
-              class="h-full"
-              placeholder="Search"
-            /> -->
             <InputText
               id="searchTag"
               v-model="searchTag"
@@ -330,7 +305,7 @@ onBeforeMount(() => {
             :max-date="new Date()"
             hide-on-range-selection
             show-clear
-            @value-change="searchProjects()"
+            @value-change="onDateRangeChange"
           />
         </div>
         <Button

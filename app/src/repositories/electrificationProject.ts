@@ -72,6 +72,7 @@ export class ElectrificationProjectRepository extends WritableRepository<
                 { projectName: { contains: params.searchTag, mode: 'insensitive' as const } },
                 { activityId: { contains: params.searchTag, mode: 'insensitive' as const } },
                 { companyNameRegistered: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { projectType: { contains: params.searchTag, mode: 'insensitive' as const } },
                 {
                   activity: {
                     activityContact: {

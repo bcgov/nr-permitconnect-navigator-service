@@ -25,15 +25,17 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
 
   public async search(params: SearchHousingProjectRequest): Promise<SearchProjectResponse> {
     const validSortFields = [
-      'projectName',
       'activityId',
+      'applicationStatus',
+      'assignedTo',
       'companyNameRegistered',
-      'submittedAt',
-      'queuePriority',
-      'hasRentalUnits',
       'financiallySupported',
+      'hasRentalUnits',
+      'location',
       'naturalDisaster',
-      'applicationStatus'
+      'projectName',
+      'queuePriority',
+      'submittedAt'
     ];
 
     let orderBy:
