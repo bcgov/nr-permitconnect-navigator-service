@@ -5,6 +5,7 @@ import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { housing } from './housing';
 import { location } from './location.ts';
+import { paginationOptions } from './paginationOptions.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST, PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
@@ -112,10 +113,14 @@ export const schema = {
       .object({
         activityId: z.array(z.string()).optional(),
         createdBy: z.array(z.string()).optional(),
+        dateRange: z.array(z.string()).length(2).nullish().optional(),
         includeUser: z.boolean().optional(),
         housingProjectId: z.array(uuidv4).optional(),
+        applicationStatus: z.array(z.string()).optional(),
+        searchTag: z.string().optional(),
         submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
       })
+      .merge(paginationOptions)
       .strict()
       .default({})
   },

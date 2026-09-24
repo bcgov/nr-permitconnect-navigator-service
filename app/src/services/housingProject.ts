@@ -16,6 +16,7 @@ import type {
   Maybe,
   PatchHousingProjectInput,
   SearchHousingProjectInput,
+  SearchProjectResponse,
   SubmitHousingProjectDraftInput
 } from '#types';
 
@@ -155,20 +156,22 @@ export const listHousingProjectsService = async (
  * @param params.includeUser - Optional boolean representing whether the linked user should be included
  * @returns A Promise that resolves to an array of housing projects from search params
  */
+
 export const searchHousingProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
   params: SearchHousingProjectInput
-): Promise<HousingProject[]> => {
+): Promise<SearchProjectResponse> => {
   return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
     const result = await housingProject.search(params);
 
-    return await filterActivityResponseByScope(
+    const projects = await filterActivityResponseByScope(
       { activityContact, contact },
       currentAuthorization,
       currentContext,
-      result
+      result.projects
     );
+    return { projects, totalRecords: result.totalRecords };
   });
 };
 

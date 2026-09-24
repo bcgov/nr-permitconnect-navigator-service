@@ -233,8 +233,10 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
   query: {
     activityId: string[];
     createdBy: string[];
+    dateRange: [Date, Date];
     includeUser: boolean;
     housingProjectId: string[];
+    projectStatus: string[];
     submissionType: string[];
   };
 }

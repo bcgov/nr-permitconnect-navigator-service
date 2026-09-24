@@ -70,13 +70,11 @@ const projectRoute = inject(projectRouteNameKey);
   <Column
     field="activity.activityContact.0.contact.firstName"
     header="First name"
-    :sortable="true"
     style="min-width: 150px"
   />
   <Column
     field="activity.activityContact.0.contact.lastName"
     header="Last name"
-    :sortable="true"
     style="min-width: 150px"
   />
   <Column
@@ -89,7 +87,6 @@ const projectRoute = inject(projectRouteNameKey);
   <Column
     field="location"
     header="Location"
-    :sortable="true"
     style="min-width: 250px"
   />
   <Column
@@ -111,7 +108,6 @@ const projectRoute = inject(projectRouteNameKey);
   <Column
     field="multiPermitsNeeded"
     header="Multi-authorization project"
-    :sortable="true"
     style="min-width: 125px"
   />
   <Column
