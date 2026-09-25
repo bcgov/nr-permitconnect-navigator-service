@@ -35,12 +35,18 @@ describe('HousingProjectRepository', () => {
 
       expect(findManyMock).toHaveBeenCalledTimes(1);
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: ['ACTI1234', 'ACTI5678'] } },
             { createdBy: { in: ['user-1', 'user-2'] } },
             { housingProjectId: { in: ['project-1'] } },
-            { submissionType: { in: [SubmissionType.GUIDANCE] } }
+            { submissionType: { in: [SubmissionType.GUIDANCE] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {
@@ -107,6 +113,7 @@ describe('HousingProjectRepository', () => {
 
     it('handles empty filter arrays', async () => {
       findManyMock.mockResolvedValueOnce([]);
+      vi.spyOn(repo, 'count').mockResolvedValueOnce(0);
 
       const params = {
         activityId: [],
@@ -117,14 +124,20 @@ describe('HousingProjectRepository', () => {
 
       const result = await repo.search(params);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual({ projects: [], totalRecords: 0 });
       expect(findManyMock).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
+        orderBy: undefined,
         where: {
           AND: [
             { activityId: { in: [] } },
             { createdBy: { in: [] } },
             { housingProjectId: { in: [] } },
-            { submissionType: { in: [] } }
+            { submissionType: { in: [] } },
+            {},
+            {},
+            {}
           ]
         },
         include: {

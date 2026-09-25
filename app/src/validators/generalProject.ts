@@ -4,6 +4,7 @@ import { appliedPermit } from './appliedPermit.ts';
 import atsValidator from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { location } from './location.ts';
+import { paginationOptions } from './paginationOptions.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { validate } from '#src/middleware/validation';
@@ -101,10 +102,14 @@ export const schema = {
       .object({
         activityId: z.array(z.string()).optional(),
         createdBy: z.array(z.string()).optional(),
+        dateRange: z.array(z.string()).length(2).nullish().optional(),
         includeUser: z.boolean().optional(),
         generalProjectId: z.array(uuidv4).optional(),
+        applicationStatus: z.array(z.string()).optional(),
+        searchTag: z.string().optional(),
         submissionType: z.array(z.enum(SUBMISSION_TYPE_LIST as [string, ...string[]])).optional()
       })
+      .merge(paginationOptions)
       .strict()
       .default({})
   },

@@ -1,15 +1,17 @@
 <script setup lang="ts">
+import { Mutex } from 'async-mutex';
 import { isAxiosError } from 'axios';
 import { computed, inject, onBeforeMount, ref } from 'vue';
+import { useI18n } from 'vue-i18n';
 import { useRoute, useRouter } from 'vue-router';
 
 import ProjectListNavigatorElectrification from '@/components/electrification/project/ProjectListNavigatorElectrification.vue';
 import ProjectListNavigatorGeneral from '@/components/general/project/ProjectListNavigatorGeneral.vue';
 import ProjectListNavigatorHousing from '@/components/housing/project/ProjectListNavigatorHousing.vue';
-import { Spinner } from '@/components/layout';
 import {
   Button,
   DataTable,
+  DatePicker,
   FilterMatchMode,
   IconField,
   InputIcon,
@@ -23,21 +25,16 @@ import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
-import { toNumber } from '@/utils/utils';
+import { generalErrorHandler, toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Pagination, Project, ProjectService } from '@/types';
+import type { ActivityContact, Pagination, Project, ProjectService, SearchProjectsResponse } from '@/types';
 
 // Types
 interface FilterOption {
   label: string;
   statuses: string[];
 }
-
-// Props
-const { projects } = defineProps<{
-  projects: Project[] | undefined;
-}>();
 
 // Injections
 const projectResource = inject(resourceKey);
@@ -49,6 +46,7 @@ const confirmDialog = useConfirm();
 const route = useRoute();
 const router = useRouter();
 const toast = useToast();
+const { t } = useI18n();
 
 // Constants
 const FILTER_OPTIONS: readonly FilterOption[] = [
@@ -67,6 +65,7 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
+const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -75,40 +74,39 @@ const pagination: Ref<Pagination> = ref({
 });
 const rowsPerPageOptions: Ref<number[]> = ref([10, 20, 50]);
 const selection: Ref<Project | undefined> = ref(undefined);
-const selectedFilter: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
+const applicationStatus: Ref<FilterOption> = ref(FILTER_OPTIONS[0]!);
+const loading: Ref<boolean> = ref(true);
+const searchResponse: Ref<SearchProjectsResponse> = ref({ projects: [], totalRecords: 0 });
+const searchTag: Ref<string | undefined> = ref(undefined);
 
 /**
  * Filter projects based on status and reduce contacts to primary contact only
  * Inject a joined location field for housing for proper sorting and searching
  */
 const filteredProjects = computed(() => {
-  return projects
-    ?.filter((element) => {
-      return selectedFilter.value.statuses.includes(element.applicationStatus);
-    })
-    .map((x) => {
-      const primaryContact = x.activity?.activityContact?.find(
-        (contact: ActivityContact) => contact.role === ActivityContactRole.PRIMARY
-      );
+  return searchResponse?.value?.projects?.map((x) => {
+    const primaryContact = x.activity?.activityContact?.find(
+      (contact: ActivityContact) => contact.role === ActivityContactRole.PRIMARY
+    );
 
-      if ('housingProjectId' in x || 'generalProjectId' in x) {
-        return {
-          ...x,
-          location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),
-          activity: {
-            ...x.activity,
-            activityContact: primaryContact ? [primaryContact] : []
-          }
-        };
-      } else
-        return {
-          ...x,
-          activity: {
-            ...x.activity,
-            activityContact: primaryContact ? [primaryContact] : []
-          }
-        };
-    });
+    if ('housingProjectId' in x || 'generalProjectId' in x) {
+      return {
+        ...x,
+        location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),
+        activity: {
+          ...x.activity,
+          activityContact: primaryContact ? [primaryContact] : []
+        }
+      };
+    } else
+      return {
+        ...x,
+        activity: {
+          ...x.activity,
+          activityContact: primaryContact ? [primaryContact] : []
+        }
+      };
+  });
 });
 
 // read from query params if tab is set to enquiry otherwise use default values
@@ -184,25 +182,62 @@ function updateQueryParams() {
   });
 }
 
+const searchMutex = new Mutex();
+let timeoutId: ReturnType<typeof setTimeout>;
+
+async function searchProjects() {
+  searchTag.value = searchTag?.value?.trim();
+  clearTimeout(timeoutId);
+  timeoutId = setTimeout(async () => {
+    await searchMutex.runExclusive(async () => {
+      try {
+        loading.value = true;
+        const res = await projectService?.value.searchProjects({
+          applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
+          dateRange: dateRange.value,
+          searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
+          skip: (pagination.value.page && pagination.value.rows
+            ? pagination.value.page * pagination.value.rows
+            : 0
+          ).toString(),
+          take: pagination.value.rows?.toString(),
+          sortField: pagination.value.field,
+          sortOrder: pagination.value.order?.toString()
+        });
+        if (res) searchResponse.value = res;
+      } catch (e) {
+        generalErrorHandler(e, undefined, undefined, toast);
+      } finally {
+        loading.value = false;
+      }
+    });
+  }, 500);
+}
+
+function onDateRangeChange(value: Date | Date[] | (Date | null)[] | null | undefined) {
+  // range selection emits after the first date too; only search once both dates (or a clear) are set
+  if (!value || (Array.isArray(value) && value[0] && value[1])) searchProjects();
+}
+
 onBeforeMount(() => {
-  const lastRowsPerPage = rowsPerPageOptions.value[rowsPerPageOptions.value.length - 1];
-  if (projects && lastRowsPerPage && projects.length > lastRowsPerPage) {
-    rowsPerPageOptions.value.push(projects.length);
-  }
+  searchProjects();
 });
 </script>
-
 <template>
   <DataTable
     v-model:filters="filters"
     v-model:selection="selection"
-    :value="filteredProjects"
+    lazy
     data-key="projectId"
+    :value="filteredProjects"
+    :loading="loading"
+    loading-icon="pi pi-spinner pi-spin"
     removable-sort
     scrollable
     responsive-layout="scroll"
     :paginator="true"
     :rows="pagination.rows"
+    :total-records="searchResponse.totalRecords"
     :sort-field="pagination.field"
     :sort-order="pagination.order"
     paginator-template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink "
@@ -215,6 +250,7 @@ onBeforeMount(() => {
         pagination.field = e;
         pagination.page = 0;
         updateQueryParams();
+        searchProjects();
       }
     "
     @update:sort-order="
@@ -222,6 +258,7 @@ onBeforeMount(() => {
         pagination.order = e ?? -1;
         pagination.page = 0;
         updateQueryParams();
+        searchProjects();
       }
     "
     @page="
@@ -229,6 +266,7 @@ onBeforeMount(() => {
         pagination.page = e.page;
         pagination.rows = e.rows;
         updateQueryParams();
+        searchProjects();
       }
     "
   >
@@ -237,17 +275,15 @@ onBeforeMount(() => {
         <h3>No items found.</h3>
       </div>
     </template>
-    <template #loading>
-      <Spinner />
-    </template>
     <template #header>
       <div class="flex justify-between mb-3">
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-3 gap-3">
           <Select
-            v-model="selectedFilter"
+            v-model="applicationStatus"
             class="col-span-1"
             :options="FILTER_OPTIONS as FilterOption[]"
             option-label="label"
+            @change="searchProjects"
           />
           <IconField
             class="col-span-1"
@@ -255,11 +291,22 @@ onBeforeMount(() => {
           >
             <InputIcon class="pi pi-search" />
             <InputText
-              v-model="filters['global'].value"
+              id="searchTag"
+              v-model="searchTag"
               class="h-full"
-              placeholder="Search"
+              :placeholder="t('authorization.common.search')"
+              @update:model-value="searchProjects"
             />
           </IconField>
+          <DatePicker
+            v-model="dateRange"
+            :placeholder="t('authorization.authorizationListNavigator.dateRange')"
+            selection-mode="range"
+            :max-date="new Date()"
+            hide-on-range-selection
+            show-clear
+            @value-change="onDateRangeChange"
+          />
         </div>
         <Button
           v-if="authzStore.can(useAppStore().getInitiative, projectResource, Action.CREATE)"

@@ -2,6 +2,8 @@ import { Contact, Enquiry } from './resources.ts';
 
 import type { PermitStage, PermitState, PiesOnHold } from '#src/db/codes/enums';
 
+import type { Project } from '#types';
+
 /** Create bolts a top-level `contact` onto the response; not a real Enquiry relation, kept off `Enquiry` itself. */
 export type CreateEnquiryResponse = Enquiry & { contact: Contact };
 
@@ -40,5 +42,10 @@ export interface SearchPermitsResponse {
       province?: string | null;
     } | null;
   }[];
+  totalRecords: number;
+}
+
+export interface SearchProjectResponse {
+  projects: Project[];
   totalRecords: number;
 }

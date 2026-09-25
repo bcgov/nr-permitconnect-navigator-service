@@ -166,7 +166,10 @@ describe('electrificationProject service', () => {
     it('searches projects and applies filtering', async () => {
       const mockProjects = [TEST_ELECTRIFICATION_PROJECT_1];
       const searchParams = { activityId: ['id-1'] };
-      mockRepos.electrificationProject.search.mockResolvedValueOnce(mockProjects as never);
+      mockRepos.electrificationProject.search.mockResolvedValueOnce({
+        projects: mockProjects,
+        totalRecords: mockProjects.length
+      } as never);
       filterSpy.mockResolvedValueOnce(mockProjects as never);
 
       const response = await electrificationProjectService.searchElectrificationProjects(
@@ -187,7 +190,7 @@ describe('electrificationProject service', () => {
         TEST_CURRENT_CONTEXT,
         mockProjects
       );
-      expect(response).toStrictEqual(mockProjects);
+      expect(response).toStrictEqual({ projects: mockProjects, totalRecords: mockProjects.length });
     });
   });
 

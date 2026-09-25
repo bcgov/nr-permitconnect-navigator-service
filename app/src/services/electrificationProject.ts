@@ -17,6 +17,7 @@ import type {
   GetElectrificationProjectStatisticsInput,
   Maybe,
   PatchElectrificationProjectInput,
+  SearchProjectResponse,
   SearchElectrificationProjectInput,
   SubmitElectrificationProjectDraftInput
 } from '#types';
@@ -159,16 +160,17 @@ export const searchElectrificationProjects = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
   params: SearchElectrificationProjectInput
-): Promise<ElectrificationProject[]> => {
+): Promise<SearchProjectResponse> => {
   return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
     const result = await electrificationProject.search(params);
 
-    return await filterActivityResponseByScope(
+    const projects = await filterActivityResponseByScope(
       { activityContact, contact },
       currentAuthorization,
       currentContext,
-      result
+      result.projects
     );
+    return { projects, totalRecords: result.totalRecords };
   });
 };
 

@@ -281,10 +281,7 @@ watchEffect(() => {
             </AccordionContent>
           </AccordionPanel>
         </Accordion>
-        <ProjectListNavigator
-          :projects="projects"
-          @submission:delete="onSubmissionDelete"
-        />
+        <ProjectListNavigator @submission:delete="onSubmissionDelete" />
       </TabPanel>
       <TabPanel :value="1">
         <AuthorizationListNavigator />

@@ -1,10 +1,11 @@
+import { addDays } from 'date-fns';
 import { Prisma } from '#prismaClient';
 
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
-import type { HousingProject, PatchHousingProjectRequest, SearchHousingProjectRequest } from '#types';
+import type { PatchHousingProjectRequest, SearchHousingProjectRequest, SearchProjectResponse } from '#types';
 
 export class HousingProjectRepository extends WritableRepository<PrismaTransactionClient['housing_project']> {
   constructor(tx: PrismaTransactionClient, principal: string) {
@@ -22,24 +23,96 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: SearchHousingProjectRequest): Promise<HousingProject[]> {
-    return await this.findMany({
-      where: {
-        AND: [
-          {
-            activityId: { in: params.activityId }
-          },
-          {
-            createdBy: { in: params.createdBy }
-          },
-          {
-            housingProjectId: { in: params.housingProjectId }
-          },
-          {
-            submissionType: { in: params.submissionType }
-          }
-        ]
-      },
+  public async search(params: SearchHousingProjectRequest): Promise<SearchProjectResponse> {
+    const validSortFields = [
+      'activityId',
+      'applicationStatus',
+      'assignedTo',
+      'companyNameRegistered',
+      'financiallySupported',
+      'hasRentalUnits',
+      'location',
+      'naturalDisaster',
+      'projectName',
+      'queuePriority',
+      'submittedAt'
+    ];
+
+    let orderBy:
+      Prisma.housing_projectOrderByWithRelationInput | Prisma.housing_projectOrderByWithRelationInput[] | undefined;
+
+    if (params?.sortOrder !== '0' && params?.sortField) {
+      const sortDirection = params.sortOrder === '1' ? 'asc' : 'desc';
+
+      if (params.sortField === 'assignedTo') {
+        // display sorts as "Lastname, Firstname"; user.fullName is a separate, not reliably synced column
+        orderBy = [{ user: { lastName: sortDirection } }, { user: { firstName: sortDirection } }];
+      } else if (params.sortField === 'location') {
+        // location is streetAddress/locality/province joined client-side; approximate with the same field priority
+        orderBy = [{ streetAddress: sortDirection }, { locality: sortDirection }, { province: sortDirection }];
+      } else if (validSortFields.includes(params.sortField)) {
+        orderBy = { [params.sortField]: sortDirection };
+      }
+    }
+
+    const whereClause = {
+      AND: [
+        {
+          activityId: { in: params.activityId }
+        },
+        {
+          createdBy: { in: params.createdBy }
+        },
+        {
+          housingProjectId: { in: params.housingProjectId }
+        },
+        {
+          submissionType: { in: params.submissionType }
+        },
+        params.dateRange
+          ? {
+              OR: [{ submittedAt: { gte: params.dateRange[0], lt: addDays(params.dateRange[1], 1) } }]
+            }
+          : {},
+        params.applicationStatus
+          ? {
+              applicationStatus: { in: params.applicationStatus }
+            }
+          : {},
+        params?.searchTag
+          ? {
+              OR: [
+                { projectName: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { activityId: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { companyNameRegistered: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { streetAddress: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { locality: { contains: params.searchTag, mode: 'insensitive' as const } },
+                { province: { contains: params.searchTag, mode: 'insensitive' as const } },
+                {
+                  activity: {
+                    activityContact: {
+                      some: {
+                        contact: {
+                          OR: [
+                            { firstName: { contains: params.searchTag, mode: 'insensitive' as const } },
+                            { lastName: { contains: params.searchTag, mode: 'insensitive' as const } }
+                          ]
+                        }
+                      }
+                    }
+                  }
+                }
+              ]
+            }
+          : {}
+      ]
+    };
+
+    const projects = await this.findMany({
+      skip: params?.skip ? Number.parseInt(params.skip) : 0,
+      take: params?.take ? Number.parseInt(params.take) : 10,
+      orderBy: orderBy,
+      where: whereClause,
       include: {
         activity: {
           include: {
@@ -53,5 +126,11 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
         user: params.includeUser
       }
     });
+
+    const totalRecords = await this.count({
+      where: whereClause
+    });
+
+    return { projects, totalRecords };
   }
 }
