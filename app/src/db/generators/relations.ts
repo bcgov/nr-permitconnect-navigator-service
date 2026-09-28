@@ -1,13 +1,3 @@
-import { readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
-
-import { getDMMF } from '@prisma/internals';
-import prettier from 'prettier';
-
-import { getLogger } from '#src/utils/log';
-
-const log = getLogger(module.filename);
-
 export interface RelationInfo {
   targetModel: string;
   isList: boolean;
@@ -48,48 +38,4 @@ export function buildRelationsMap(models: readonly DmmfModel[]): Record<string, 
   }
 
   return relations;
-}
-
-async function main() {
-  const schemaPath = join(process.cwd(), 'src/db/prisma/schema.prisma');
-  const dmmf = await getDMMF({ datamodel: readFileSync(schemaPath, 'utf-8') });
-
-  const relations = buildRelationsMap(dmmf.datamodel.models);
-
-  const output =
-    [
-      '/**',
-      ' * AUTO-GENERATED FILE - DO NOT EDIT',
-      ' * @see app/src/db/generators/relations.ts',
-      ' *',
-      ' * Regenerated automatically by `npm run prisma:generate`',
-      ' * (via the postprisma:generate hook). Do not run `prisma:relations` directly.',
-      ' */',
-      '',
-      'export interface RelationInfo {',
-      '  targetModel: string;',
-      '  isList: boolean;',
-      '}',
-      '',
-      'export const modelRelations: Record<string, Record<string, RelationInfo>> =',
-      `  ${JSON.stringify(relations)};`
-    ].join('\n') + '\n';
-
-  const outputPath = join(process.cwd(), 'src/db/generators/output/relations.generated.ts');
-  const prettierConfig = await prettier.resolveConfig(outputPath);
-  const formatted = await prettier.format(output, { ...prettierConfig, parser: 'typescript' });
-
-  log.info(`Writing generated relation map to ${outputPath} ...`);
-
-  writeFileSync(outputPath, formatted);
-
-  log.info(`Generated relations for ${Object.keys(relations).length} models`);
-}
-
-// Guard against running as a side effect of importing this module in tests.
-if (process.env.VITEST !== 'true') {
-  main().catch((e) => {
-    log.error(e);
-    process.exit(1);
-  });
 }

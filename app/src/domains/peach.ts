@@ -11,7 +11,7 @@ import { getLogger } from '#src/utils/log';
 
 import type { PermitStage, PermitState } from '#src/db/codes/enums';
 import type { Repositories } from '#src/db/unitOfWork';
-import type { PeachSummary, PermitTracking, PiesRecord, UpdatedPermitWithNote } from '#types';
+import type { PeachSummaryResponse, PermitTracking, PiesRecord, UpdatedPermitWithNote } from '#types';
 
 const log = getLogger(module.filename);
 const limit = pLimit(5);
@@ -101,7 +101,7 @@ export const syncPeachRecords = async (
     }
   }
 
-  const parsedRecords: Record<string, PeachSummary> = parsePiesRecords(records);
+  const parsedRecords: Record<string, PeachSummaryResponse> = parsePiesRecords(records);
 
   const updatedPermits: UpdatedPermitWithNote[] = [];
 

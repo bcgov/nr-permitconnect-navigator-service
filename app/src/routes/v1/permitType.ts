@@ -1,22 +1,35 @@
 import express from 'express';
+import { z } from 'zod';
 
+import { openapiRoute } from './openapiRoute.ts';
 import { listPermitTypesController } from '#src/controllers/permitType';
 import { hasAuthorization } from '#src/middleware/authorization';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
-import { permitTypeValidator } from '#src/validators/index';
+import { permitTypeWithInitiativesSchema } from '#src/schemas/response/permitType';
+import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
+import { schema } from '#src/schemas/request/permitType';
 
+const basePath = '/permit-type';
 const router = express.Router();
 router.use(requireSomeAuth);
 router.use(requireSomeGroup);
 
-/** Get a list of permit types */
-router.get(
-  '/',
-  hasAuthorization(Resource.PERMIT_TYPE, Action.READ),
-  permitTypeValidator.listPermitTypes,
-  listPermitTypesController
-);
+openapiRoute(basePath, router, {
+  method: 'get',
+  path: '/',
+  summary: 'Get a list of permit types',
+  tags: ['Permit Type'],
+  schema: schema.listPermitTypes,
+  responses: {
+    200: { description: 'A list of permit types', schema: z.array(permitTypeWithInitiativesSchema) },
+    401: UNAUTHORIZED_RESPONSE,
+    403: FORBIDDEN_RESPONSE,
+    422: VALIDATION_ERROR_RESPONSE
+  },
+  middleware: [hasAuthorization(Resource.PERMIT_TYPE, Action.READ)],
+  handler: listPermitTypesController
+});
 
 export default router;

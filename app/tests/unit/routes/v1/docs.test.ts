@@ -68,7 +68,7 @@ describe('Docs Router', () => {
 
   describe('GET /api-spec.yaml', () => {
     it('should return YAML specification', async () => {
-      const mockSpec = { openapi: '3.0.0', servers: [], components: {} };
+      const mockSpec = { openapi: '3.0.0', info: { title: 'Mock', version: '1.0.0' }, paths: {} };
       const mockYaml = 'openapi: 3.0.0';
       vi.mocked(getSpec).mockReturnValue(mockSpec);
       vi.mocked(dump).mockReturnValue(mockYaml);
@@ -85,7 +85,7 @@ describe('Docs Router', () => {
 
   describe('GET /api-spec.json', () => {
     it('should return JSON specification', async () => {
-      const mockSpec = { openapi: '3.0.0', servers: [], components: {} };
+      const mockSpec = { openapi: '3.0.0', info: { title: 'Mock', version: '1.0.0' }, paths: {} };
       vi.mocked(getSpec).mockReturnValue(mockSpec);
 
       const response = await request(app).get('/api-spec.json');

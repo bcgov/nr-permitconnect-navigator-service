@@ -5,8 +5,9 @@ import { hasAuthorization } from '#src/middleware/authorization';
 import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { validate } from '#src/middleware/validation';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { atsValidator } from '#src/validators/index';
+import { schema } from '#src/schemas/request/ats';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -17,7 +18,7 @@ router.use(requireSomeGroup);
 router.get(
   '/clients',
   hasAuthorization(Resource.ATS, Action.READ),
-  atsValidator.searchATSUsers,
+  validate(schema.searchATSUsers),
   searchAtsUsersController
 );
 
@@ -25,7 +26,7 @@ router.get(
 router.post(
   '/client',
   hasAuthorization(Resource.ATS, Action.CREATE),
-  atsValidator.createATSClient,
+  validate(schema.createATSClient),
   createAtsClientController
 );
 
@@ -33,7 +34,7 @@ router.post(
 router.post(
   '/enquiry',
   hasAuthorization(Resource.ATS, Action.CREATE),
-  atsValidator.createATSEnquiry,
+  validate(schema.createATSEnquiry),
   createAtsEnquiryController
 );
 

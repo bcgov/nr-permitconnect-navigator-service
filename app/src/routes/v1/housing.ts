@@ -1,33 +1,26 @@
 import express from 'express';
 
-import accessRequest from './accessRequest.ts';
-import document from './document.ts';
-import enquiry from './enquiry.ts';
+import createAccessRequestRouter from './accessRequest.ts';
+import createDocumentRouter from './document.ts';
+import createEnquiryRouter from './enquiry.ts';
 import housingProject from './housingProject.ts';
-import map from './map.ts';
-import noteHistory from './noteHistory.ts';
-import permit from './permit.ts';
-import roadmap from './roadmap.ts';
+import createMapRouter from './map.ts';
+import createNoteHistoryRouter from './noteHistory.ts';
+import createPermitRouter from './permit.ts';
+import createRoadmapRouter from './roadmap.ts';
 import { hasAuthentication } from '#src/middleware/authentication';
 import { Initiative } from '#src/utils/enums/application';
 
 const router = express.Router();
 router.use(hasAuthentication(Initiative.HOUSING));
 
-// Base v1 Responder
-router.get('/housing', (_req, res) => {
-  res.status(200).json({
-    endpoints: ['/access-request', '/document', '/enquiry', '/project', '/map', '/note', '/permit', '/roadmap']
-  });
-});
-
-router.use('/access-request', accessRequest);
-router.use('/document', document);
-router.use('/enquiry', enquiry);
+router.use('/access-request', createAccessRequestRouter('/housing/access-request', 'Housing'));
+router.use('/document', createDocumentRouter('/housing/document', 'Housing'));
+router.use('/enquiry', createEnquiryRouter('/housing/enquiry', 'Housing'));
 router.use('/project', housingProject);
-router.use('/map', map);
-router.use('/note', noteHistory);
-router.use('/permit', permit);
-router.use('/roadmap', roadmap);
+router.use('/map', createMapRouter('/housing/map', 'Housing'));
+router.use('/note', createNoteHistoryRouter('/housing/note', 'Housing'));
+router.use('/permit', createPermitRouter('/housing/permit', 'Housing'));
+router.use('/roadmap', createRoadmapRouter('/housing/roadmap', 'Housing'));
 
 export default router;

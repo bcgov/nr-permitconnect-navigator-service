@@ -17,6 +17,11 @@ export const createUserAccessRequestController = async (
     req.body.accessRequest,
     req.body.user
   );
+  // Admin revoke (isAdmin && !grant) removes groups but produces no record to return.
+  if (response.data === undefined) {
+    res.status(204).end();
+    return;
+  }
   res.status(response.isAdmin ? 200 : 201).json(response.data);
 };
 

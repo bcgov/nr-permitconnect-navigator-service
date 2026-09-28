@@ -5,8 +5,9 @@ import { hasAuthorization } from '#src/middleware/authorization';
 import { hasIdentity } from '#src/middleware/identity';
 import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
+import { validate } from '#src/middleware/validation';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
-import { ssoValidator } from '#src/validators/index';
+import { schema } from '#src/schemas/request/sso';
 
 const router = express.Router();
 router.use(requireSomeAuth);
@@ -17,7 +18,7 @@ router.use(requireSomeGroup);
 router.get(
   '/idir/users',
   hasAuthorization(Resource.SSO, Action.READ),
-  ssoValidator.searchIdirUsers,
+  validate(schema.searchIdirUsers),
   searchIdirUsersController
 );
 

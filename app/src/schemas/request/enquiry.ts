@@ -1,0 +1,68 @@
+import { z } from 'zod';
+
+import { atsEnquirySubmissionFields } from './ats.ts';
+import { activityId, uuidv4 } from './common.ts';
+import { submittedContactSchema } from './submittedContact.ts';
+import {
+  APPLICATION_STATUS_LIST,
+  ENQUIRY_SUBMITTED_METHOD,
+  ENQUIRY_TYPE_LIST
+} from '#src/utils/constants/projectCommon';
+
+export const schema = {
+  createEnquiry: {
+    body: z
+      .object({
+        contact: submittedContactSchema,
+        enquiryDescription: z.string().nullish(), // allow null for creating an enquiry from the nav side
+        relatedActivityId: z.string().max(255).nullish(),
+        submissionType: z.enum(ENQUIRY_TYPE_LIST as [string, ...string[]]).nullish()
+      })
+      .strict()
+  },
+  deleteEnquiry: {
+    params: z
+      .object({
+        enquiryId: uuidv4
+      })
+      .strict()
+  },
+  getEnquiry: {
+    params: z
+      .object({
+        enquiryId: uuidv4
+      })
+      .strict()
+  },
+  listRelatedEnquiries: {
+    params: z
+      .object({
+        activityId
+      })
+      .strict()
+  },
+  searchEnquiries: {
+    body: z
+      .object({
+        activityId: z.array(z.string()).optional(),
+        createdBy: z.array(z.string()).optional(),
+        enquiryId: z.array(z.string()).optional(),
+        includeUser: z.boolean().optional()
+      })
+      .strict()
+      .default({})
+  },
+  patchEnquiry: {
+    body: z
+      .object({
+        submissionType: z.string().nullish(),
+        relatedActivityId: z.string().max(255).nullish(),
+        enquiryDescription: z.string().nullish(),
+        assignedUserId: uuidv4.nullish(),
+        enquiryStatus: z.enum(APPLICATION_STATUS_LIST as [string, ...string[]]).optional(),
+        submittedMethod: z.enum(ENQUIRY_SUBMITTED_METHOD as [string, ...string[]]).optional(),
+        ...atsEnquirySubmissionFields
+      })
+      .strict()
+  }
+};

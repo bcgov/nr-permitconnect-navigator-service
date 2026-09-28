@@ -32,7 +32,6 @@ export function formatEnumBlock(name: string, rows: CodeRow[]): string {
     })
     .join(',\n');
 
-  // Check if the type definition line would exceed 120 characters
   const typeLine = `export type ${name} = (typeof ${name})[keyof typeof ${name}];`;
   const typeDefinition =
     typeLine.length > 120 ? `export type ${name} =\n  (typeof ${name})[keyof typeof ${name}];` : typeLine;
