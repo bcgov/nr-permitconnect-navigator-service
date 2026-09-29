@@ -12,7 +12,7 @@ import type { NextFunction, Request, Response } from 'express';
 import type { JwtPayload } from 'jsonwebtoken';
 import type { Initiative } from '#src/utils/enums/application';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 export const jwtPayloadCache = new LRUCache<string, jwt.JwtPayload>({
   allowStale: false,

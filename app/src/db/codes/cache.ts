@@ -4,7 +4,7 @@ import { getLogger } from '#src/utils/log';
 
 import type { CachedCodeTable, CodeCache, CodeTableName, CodeTablesResult } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 const toCachedCodeTable = (
   rows: { code: string; display: string; definition: string | null }[] = []

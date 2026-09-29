@@ -9,7 +9,7 @@ import type { Contact, Project, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 import type { EmailTemplate } from '#src/utils/templates';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 /**
  * Helper object for prisma include

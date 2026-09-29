@@ -75,16 +75,14 @@ COPY --from=prod-deps /usr/local/bin/node /usr/local/bin/node
 # Set working directory
 WORKDIR ${APP_ROOT}
 
-# Copy production dependencies and Prisma client
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/node_modules ./node_modules
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/prisma ./src/db/prisma
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/generated ./sbin/src/db/generated
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/package.json ./package.json
-
-# Copy backend source (run directly, no build step needed for TS-native Node)
-COPY --chown=0:0 app/src ./src
-COPY --chown=0:0 app/server.ts ./server.ts
+# Copy app code, run directly by Node's native type stripping
+COPY --chown=0:0 app/package.json app/server.ts app/app.ts app/state.ts app/knexfile.ts app/peachSync.ts ./
 COPY --chown=0:0 app/config ./config
+COPY --chown=0:0 app/src ./src
+
+# Copy production dependencies and generated Prisma code (gitignored, so absent from app/src)
+COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/node_modules ./node_modules
+COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/generated ./src/db/generated
 
 # Copy compiled frontend
 COPY --from=frontend-build --chown=0:0 ${APP_ROOT}/dist ./dist
@@ -95,4 +93,4 @@ EXPOSE ${APP_PORT}
 
 # Enter using the binary directly
 ENTRYPOINT ["/usr/local/bin/node"]
-CMD ["--max-old-space-size=50", "./server.ts"]
+CMD ["./server.ts"]

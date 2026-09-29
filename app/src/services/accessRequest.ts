@@ -12,7 +12,7 @@ import Problem from '#src/utils/problem';
 import type { AccessRequest, CreateUserAccessRequestInput, CurrentAuthorization, CurrentContext, Group } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 /**
  * Retrieve all access requests

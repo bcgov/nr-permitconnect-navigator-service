@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { appliedPermit } from './appliedPermit.ts';
 import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
-import { housing } from './housing';
+import { housing } from './housing.ts';
 import { location } from './location.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';

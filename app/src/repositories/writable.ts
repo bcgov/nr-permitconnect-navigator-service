@@ -1,8 +1,8 @@
-import { ReadableRepository } from './readable';
+import { ReadableRepository } from './readable.ts';
 import { mapPrismaError } from '#src/db/errors';
 
 import type { Prisma } from '#prismaClient';
-import type { ReadableModelDelegate } from './readable';
+import type { ReadableModelDelegate } from './readable.ts';
 
 export interface AuditFields {
   createdAt?: Date;

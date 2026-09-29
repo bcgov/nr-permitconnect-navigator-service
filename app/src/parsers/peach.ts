@@ -14,7 +14,7 @@ import type {
   PiesRecord
 } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 interface Status {
   phase: PermitPhase;

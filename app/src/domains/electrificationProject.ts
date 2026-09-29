@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 
-import { ensureActivityWithPrimaryContact } from './activity';
+import { ensureActivityWithPrimaryContact } from './activity.ts';
 import { Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
