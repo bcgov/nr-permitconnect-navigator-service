@@ -9,26 +9,7 @@ ARG GIT_COMMIT
 ARG PRISMA_DUMMY_DATABASE_URL="postgresql://user:password@localhost:5432/db"
 
 #
-# Stage 1: Build the backend app
-#
-FROM docker.io/node:24.20.0-alpine AS app-build
-
-ARG APP_ROOT
-ARG PRISMA_DUMMY_DATABASE_URL
-ENV NPM_CONFIG_FUND=false NPM_CONFIG_UPDATE_NOTIFIER=false
-ENV DATABASE_URL=${PRISMA_DUMMY_DATABASE_URL}
-
-WORKDIR ${APP_ROOT}
-COPY app/ ./
-# Generate the Prisma client before compiling: tsc needs the #prismaClient
-# subpath import to resolve, and src/db/generated is gitignored so a clean
-# checkout never has it on disk.
-RUN npm ci && \
-    npx prisma generate && \
-    npm run build
-
-#
-# Stage 2: Build the frontend
+# Stage 1: Build the frontend
 #
 FROM docker.io/node:24.20.0-alpine AS frontend-build
 
@@ -40,7 +21,7 @@ COPY frontend/ ./
 RUN npm ci && npm run build
 
 #
-# Stage 3: Production Dependencies & Minimal Identity
+# Stage 2: Production Dependencies & Minimal Identity
 #
 FROM docker.io/node:24.20.0-alpine AS prod-deps
 
@@ -70,7 +51,7 @@ RUN echo "appuser:x:${APP_UID}:${APP_UID}:appuser:/:/sbin/nologin" > /etc/passwd
 # RUN ldd node_modules/@prisma/engines/*.node
 
 #
-# Stage 4: Final Distroless Image
+# Stage 3: Final Distroless Image
 #
 FROM scratch
 
@@ -94,16 +75,14 @@ COPY --from=prod-deps /usr/local/bin/node /usr/local/bin/node
 # Set working directory
 WORKDIR ${APP_ROOT}
 
-# Copy production dependencies and Prisma client
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/node_modules ./node_modules
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/prisma ./src/db/prisma
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/generated ./sbin/src/db/generated
-COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/package.json ./package.json
+# Copy app code, run directly by Node's native type stripping
+COPY --chown=0:0 app/package.json app/server.ts app/app.ts app/state.ts app/knexfile.ts app/peachSync.ts ./
+COPY --chown=0:0 app/config ./config
+COPY --chown=0:0 app/src ./src
 
-# Copy compiled backend and configurations
-COPY --from=app-build --chown=0:0 ${APP_ROOT}/sbin ./sbin
-COPY --from=app-build --chown=0:0 ${APP_ROOT}/config ./config
-COPY --from=app-build --chown=0:0 ${APP_ROOT}/config ./sbin/config
+# Copy production dependencies and generated Prisma code (gitignored, so absent from app/src)
+COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/node_modules ./node_modules
+COPY --from=prod-deps --chown=0:0 ${APP_ROOT}/src/db/generated ./src/db/generated
 
 # Copy compiled frontend
 COPY --from=frontend-build --chown=0:0 ${APP_ROOT}/dist ./dist
@@ -114,4 +93,4 @@ EXPOSE ${APP_PORT}
 
 # Enter using the binary directly
 ENTRYPOINT ["/usr/local/bin/node"]
-CMD ["--conditions=sbin", "./sbin/server.js"]
+CMD ["./server.ts"]

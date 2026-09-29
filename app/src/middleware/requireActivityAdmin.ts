@@ -49,7 +49,7 @@ export const requireActivityAdmin = async (
 
         isActivityAdmin =
           !!activityContactRes &&
-          [ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN].includes(
+          ([ActivityContactRole.PRIMARY, ActivityContactRole.ADMIN] as ActivityContactRole[]).includes(
             activityContactRes.role as ActivityContactRole
           );
       }

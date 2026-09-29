@@ -199,7 +199,7 @@ export const listPermitsService = async (
 export const searchPermitsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext,
-  initiative: Exclude<Initiative, Initiative.PCNS>,
+  initiative: Exclude<Initiative, 'PCNS'>,
   options: SearchPermitsInput
 ): Promise<SearchPermitsResponse> => {
   return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {

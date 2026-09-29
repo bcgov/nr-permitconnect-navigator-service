@@ -1,8 +1,8 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
-import { ensureActivityWithPrimaryContact } from './activity';
-import { getProjectByActivityId } from './project';
+import { ensureActivityWithPrimaryContact } from './activity.ts';
+import { getProjectByActivityId } from './project.ts';
 import { email } from '#src/external/ches';
 import { getCurrentUsername, toTitleCase } from '#src/utils/index';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';

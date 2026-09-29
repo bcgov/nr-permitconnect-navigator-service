@@ -3,8 +3,8 @@ import { format, parseJSON } from 'date-fns';
 
 import { type Knex } from 'knex';
 
-import { getLogger } from './src/utils/log';
-const log = getLogger(module.filename);
+import { getLogger } from './src/utils/log.ts';
+const log = getLogger(import.meta.filename);
 
 /**
  * Knex configuration

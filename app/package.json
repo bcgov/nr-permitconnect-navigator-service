@@ -6,30 +6,18 @@
   "description": "Permit Connect Navigator Service",
   "author": "NRM Permitting and Data Solutions <NRM.PermittingAndData@gov.bc.ca>",
   "main": "server.ts",
+  "type": "module",
   "imports": {
-    "#types": {
-      "sbin": "./sbin/src/types/index.js",
-      "default": "./src/types/index.ts"
-    },
-    "#prismaClient": {
-      "sbin": "./sbin/src/db/generated/client/client.js",
-      "default": "./src/db/generated/client/client.ts"
-    },
-    "#prismaZod": {
-      "sbin": "./sbin/src/db/generated/zod/schemas/index.js",
-      "default": "./src/db/generated/zod/schemas/index.ts"
-    },
-    "#src/*": {
-      "sbin": "./sbin/src/*.js",
-      "default": "./src/*.ts"
-    },
+    "#types": "./src/types/index.ts",
+    "#prismaClient": "./src/db/generated/client/client.ts",
+    "#prismaZod": "./src/db/generated/zod/schemas/index.ts",
+    "#src/*": "./src/*.ts",
     "#tests/*": "./tests/*.ts"
   },
   "scripts": {
     "build:all": "tsx ./deploy-utils.ts",
-    "build": "tsc --project tsconfig.build.json",
     "clean:all": "tsx ./deploy-utils.ts clean",
-    "clean": "rimraf coverage dist sbin",
+    "clean": "rimraf coverage dist",
     "format": "prettier ./src --write",
     "prisma:enums": "tsx ./src/db/generators/codeEnums.ts",
     "knex:local": "tsx ./node_modules/knex/bin/cli.js",
@@ -41,11 +29,9 @@
     "migrate:rollback:all": "knex migrate:rollback --all",
     "migrate:rollback": "knex migrate:rollback",
     "migrate:up": "knex migrate:up",
-    "migrate": "node --conditions=sbin ./node_modules/knex/bin/cli.js migrate:latest --knexfile ./sbin/knexfile.js",
-    "peach:sync": "node sbin/peachSync.js",
+    "migrate": "knex migrate:latest --knexfile ./knexfile.ts",
+    "peach:sync": "node peachSync.ts",
     "peach:sync:local": "tsx ./peachSync.ts",
-    "postbuild:all": "npm run build",
-    "postbuild": "tsx ./deploy-utils.ts docs && tsx ./deploy-utils.ts prisma-client",
     "postclean:all": "npm run clean",
     "postprisma:case": "npm run prisma:sync",
     "postprisma:migrate:rollback": "npm run prisma:sync",
@@ -54,7 +40,6 @@
     "postprisma:migrate:dev": "npm run seed:dev",
     "postprisma:migrate": "npm run prisma:case",
     "postprisma:sync": "npm run prisma:generate",
-    "postrebuild": "npm run build",
     "postreinstall": "npm install",
     "postseed:dev": "npm run prisma:sync",
     "posttest": "tsx ./lcov-fix.ts",
@@ -70,14 +55,13 @@
     "prisma:migrate": "cross-env NODE_ENV=dev npm run knex:local migrate:latest",
     "prisma:sync": "prisma db pull",
     "purge": "rimraf node_modules",
-    "rebuild": "npm run clean",
     "reinstall": "npm run purge",
     "seed:make": "knex seed:make",
     "seed:dev": "tsx ./node_modules/knex/bin/cli.js seed:run --specific=dev_groups.ts",
     "seed:housing": "tsx ./node_modules/knex/bin/cli.js seed:run --specific=housing_projects.ts",
     "seed": "knex seed:run",
     "dev": "cross-env NODE_ENV=dev tsx watch --include \"./config/*\" --include \"./src/**/*\" ./server.ts --clear-screen=false",
-    "start": "tsx ./server.ts",
+    "start": "cross-env NODE_ENV=dev tsx ./server.ts",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
     "typecheck": "tsc --noEmit"
@@ -105,7 +89,6 @@
     "p-limit": "7.3.1",
     "pg": "8.23.0",
     "proj4": "2.21.0",
-    "tsx": "4.23.12",
     "winston-transport": "4.9.0",
     "zod": "4.6.5"
   },
@@ -126,7 +109,7 @@
     "@types/supertest": "7.2.1",
     "@vitest/coverage-v8": "4.1.11",
     "cross-env": "10.1.0",
-    "eslint": "10.9.1",
+    "eslint": "10.11.0",
     "eslint-config-prettier": "10.1.8",
     "eslint-plugin-jsdoc": "64.2.1",
     "eslint-plugin-prettier": "5.5.6",
@@ -136,7 +119,7 @@
     "prisma-zod-generator": "3.3.1",
     "rimraf": "6.1.3",
     "supertest": "7.2.2",
-    "ts-node": "10.9.2",
+    "tsx": "4.23.12",
     "typescript": "5.9.3",
     "typescript-eslint": "8.68.0",
     "vitest": "4.1.11",

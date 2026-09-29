@@ -13,7 +13,7 @@ import type { PermitStage, PermitState } from '#src/db/codes/enums';
 import type { Repositories } from '#src/db/unitOfWork';
 import type { PeachSummaryResponse, PermitTracking, PiesRecord, UpdatedPermitWithNote } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 const limit = pLimit(5);
 
 /**

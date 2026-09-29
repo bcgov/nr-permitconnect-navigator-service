@@ -10,7 +10,7 @@ import { checkDatabaseHealth } from './src/db/database.ts';
 import getLogger from './src/utils/log.ts';
 import { state } from './state.ts';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 const port = normalizePort(config.get('server.port') ?? '3000');
 
 // Prevent unhandled rejections from crashing application

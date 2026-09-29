@@ -9,7 +9,7 @@ import { getLogger } from '#src/utils/log';
 import type { IdentityProviderKind } from './enums/application.ts';
 import type { CurrentContext, DateTimeStrings, IdpAttributes } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 /**
  * Yields a lowercase uuid `str` that has dashes inserted, or `str` if not a string.
@@ -319,10 +319,16 @@ export function readFeatureList(): Record<string, boolean> {
 
   let features: Record<string, boolean> = {};
 
-  if (existsSync(join(__dirname, configDir, overrideFile))) {
-    features = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8')) as Record<string, boolean>;
-  } else if (existsSync(join(__dirname, configDir, defaultFile))) {
-    features = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8')) as Record<string, boolean>;
+  if (existsSync(join(import.meta.dirname, configDir, overrideFile))) {
+    features = JSON.parse(readFileSync(join(import.meta.dirname, configDir, overrideFile), 'utf8')) as Record<
+      string,
+      boolean
+    >;
+  } else if (existsSync(join(import.meta.dirname, configDir, defaultFile))) {
+    features = JSON.parse(readFileSync(join(import.meta.dirname, configDir, defaultFile), 'utf8')) as Record<
+      string,
+      boolean
+    >;
   }
 
   return features;
@@ -339,10 +345,10 @@ export function readIdpList(): IdpAttributes[] {
 
   let idpList: IdpAttributes[] = [];
 
-  if (existsSync(join(__dirname, configDir, overrideFile))) {
-    idpList = JSON.parse(readFileSync(join(__dirname, configDir, overrideFile), 'utf8')) as IdpAttributes[];
-  } else if (existsSync(join(__dirname, configDir, defaultFile))) {
-    idpList = JSON.parse(readFileSync(join(__dirname, configDir, defaultFile), 'utf8')) as IdpAttributes[];
+  if (existsSync(join(import.meta.dirname, configDir, overrideFile))) {
+    idpList = JSON.parse(readFileSync(join(import.meta.dirname, configDir, overrideFile), 'utf8')) as IdpAttributes[];
+  } else if (existsSync(join(import.meta.dirname, configDir, defaultFile))) {
+    idpList = JSON.parse(readFileSync(join(import.meta.dirname, configDir, defaultFile), 'utf8')) as IdpAttributes[];
   }
 
   return idpList;

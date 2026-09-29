@@ -7,7 +7,7 @@ import { getLogger } from '#src/utils/log';
 import type { Request, Response } from 'express';
 import type { JwksClient } from 'jwks-rsa';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 let jwksClientPromise: Promise<JwksClient> | null = null;
 let jwksUriPromise: Promise<string> | null = null;
