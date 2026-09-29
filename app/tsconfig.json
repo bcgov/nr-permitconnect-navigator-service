@@ -4,15 +4,13 @@
     "erasableSyntaxOnly": true,
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
-    "noEmit": false,
-    "outDir": "./sbin",
-    "rootDir": ".",
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
     "resolveJsonModule": true,
-    "rewriteRelativeImportExtensions": true,
     "types": [
       "vitest/globals"
     ],
-    "verbatimModuleSyntax": false
+    "verbatimModuleSyntax": true
   },
   "exclude": [
     "node_modules"

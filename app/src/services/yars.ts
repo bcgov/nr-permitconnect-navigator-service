@@ -8,7 +8,7 @@ import Problem from '#src/utils/problem';
 import type { CurrentContext } from '#types';
 import type { GroupName } from '#src/utils/enums/application';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 /**
  * Gets a list of groups for the given initiativeId

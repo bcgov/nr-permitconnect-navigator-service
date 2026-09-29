@@ -1,7 +1,9 @@
 generator client {
-  provider        = "prisma-client"
-  output          = "../generated/client"
-  previewFeatures = ["views"]
+  provider            = "prisma-client"
+  previewFeatures     = ["views"]
+  output              = "../generated/client"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
 }
 
 generator zod {

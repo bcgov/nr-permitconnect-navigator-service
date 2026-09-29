@@ -1,5 +1,6 @@
 // This script attempts to gracefully rebuild and update nr-permitting-navigator-service-frontend if necessary
 /* eslint-disable no-console */
+import { spawnSync } from 'child_process';
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 
@@ -88,15 +89,8 @@ function deployComponents() {
  * @param cwd Working directory of the command to run
  */
 export function runSync(cmd: string, cwd: string | undefined) {
-  const { spawnSync } = require('child_process'); // eslint-disable-line @typescript-eslint/no-require-imports
   const parts = cmd.split(/\s+/g);
-  const opts = {
-    cwd: cwd || undefined,
-    stdio: 'inherit',
-    shell: true
-  };
-
-  const p = spawnSync(parts[0], parts.slice(1), opts);
+  const p = spawnSync(parts[0], parts.slice(1), { cwd: cwd || undefined, stdio: 'inherit', shell: true });
   if (p.status) {
     throw new Error(`Command "${cmd}" exited with status code "${p.status}"`);
   }

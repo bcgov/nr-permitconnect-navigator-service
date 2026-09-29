@@ -7,7 +7,7 @@ import { getLogger } from '#src/utils/log';
 
 import type { CodeTableDelegate } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 interface CodeRow {
   code: string;

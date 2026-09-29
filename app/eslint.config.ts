@@ -23,7 +23,7 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: __dirname //TODO when type:module => import.meta.dirname
+        tsconfigRootDir: import.meta.dirname
       }
     },
     rules: {

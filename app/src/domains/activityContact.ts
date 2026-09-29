@@ -1,6 +1,6 @@
 import config from 'config';
 
-import { getProjectByActivityId } from './project';
+import { getProjectByActivityId } from './project.ts';
 import { Problem } from '#src/utils/index';
 import { GroupName } from '#src/utils/enums/application';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
