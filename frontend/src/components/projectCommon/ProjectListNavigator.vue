@@ -22,7 +22,7 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthZStore } from '@/store';
 import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
-import { Action, Initiative } from '@/utils/enums/application';
+import { Action, BasicResponse, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 import { generalErrorHandler, toNumber } from '@/utils/utils';
@@ -89,23 +89,19 @@ const filteredProjects = computed(() => {
       (contact: ActivityContact) => contact.role === ActivityContactRole.PRIMARY
     );
 
-    if ('housingProjectId' in x || 'generalProjectId' in x) {
-      return {
-        ...x,
-        location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', '),
-        activity: {
-          ...x.activity,
-          activityContact: primaryContact ? [primaryContact] : []
-        }
-      };
-    } else
-      return {
-        ...x,
-        activity: {
-          ...x.activity,
-          activityContact: primaryContact ? [primaryContact] : []
-        }
-      };
+    const neededCount = x.activity?._count?.permit ?? 0;
+
+    return {
+      ...x,
+      ...(('housingProjectId' in x || 'generalProjectId' in x) && {
+        location: [x.streetAddress, x.locality, x.province].filter((str) => str?.trim()).join(', ')
+      }),
+      multiPermitsNeeded: `${neededCount > 1 ? BasicResponse.YES : BasicResponse.NO} (${neededCount})`,
+      activity: {
+        ...x.activity,
+        activityContact: primaryContact ? [primaryContact] : []
+      }
+    };
   });
 });
 

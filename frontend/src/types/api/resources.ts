@@ -91,6 +91,8 @@ export interface Activity extends AuditFields {
   activityId: string;
   initiativeId: UUID;
 
+  _count?: { permit: number };
+
   // Joined
   activityContact?: ActivityContact[];
 }

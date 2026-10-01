@@ -58,7 +58,8 @@ describe('HousingProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
@@ -90,7 +91,8 @@ describe('HousingProjectRepository', () => {
                   include: {
                     contact: true
                   }
-                }
+                },
+                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
               }
             },
             user: true
@@ -155,7 +157,8 @@ describe('HousingProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined

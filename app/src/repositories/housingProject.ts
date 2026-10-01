@@ -120,7 +120,8 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
               include: {
                 contact: true
               }
-            }
+            },
+            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
           }
         },
         user: params.includeUser

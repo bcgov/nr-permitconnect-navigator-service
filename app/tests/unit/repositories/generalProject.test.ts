@@ -57,7 +57,8 @@ describe('GeneralProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
@@ -131,7 +132,8 @@ describe('GeneralProjectRepository', () => {
                   include: {
                     contact: true
                   }
-                }
+                },
+                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
               }
             }
           }
@@ -178,7 +180,8 @@ describe('GeneralProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: true

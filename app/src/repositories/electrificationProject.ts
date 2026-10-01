@@ -105,7 +105,8 @@ export class ElectrificationProjectRepository extends WritableRepository<
               include: {
                 contact: true
               }
-            }
+            },
+            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
           }
         },
         user: params.includeUser

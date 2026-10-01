@@ -59,7 +59,8 @@ describe('ElectrificationProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
@@ -136,7 +137,8 @@ describe('ElectrificationProjectRepository', () => {
                   include: {
                     contact: true
                   }
-                }
+                },
+                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
               }
             }
           }
@@ -185,7 +187,8 @@ describe('ElectrificationProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: true
