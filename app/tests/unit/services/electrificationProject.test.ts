@@ -163,14 +163,11 @@ describe('electrificationProject service', () => {
   });
 
   describe('searchElectrificationProjects', () => {
-    it('searches projects and applies filtering', async () => {
-      const mockProjects = [TEST_ELECTRIFICATION_PROJECT_1];
-      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
-      mockRepos.electrificationProject.search.mockResolvedValueOnce({
-        projects: mockProjects,
-        totalRecords: mockProjects.length
-      } as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
+    const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
+    const searchResult = { projects: [TEST_ELECTRIFICATION_PROJECT_1], totalRecords: 1 };
+
+    it('searches unscoped without post-filtering when not scope:self', async () => {
+      mockRepos.electrificationProject.search.mockResolvedValueOnce(searchResult as never);
 
       const response = await electrificationProjectService.searchElectrificationProjects(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -178,19 +175,21 @@ describe('electrificationProject service', () => {
         searchParams
       );
 
-      expect(mockRepos.electrificationProject.search).toHaveBeenCalledTimes(1);
-      expect(mockRepos.electrificationProject.search).toHaveBeenCalledWith(searchParams);
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      expect(mockRepos.electrificationProject.search).toHaveBeenCalledWith(searchParams, undefined);
+      expect(filterSpy).not.toHaveBeenCalled();
+      expect(response).toStrictEqual(searchResult);
+    });
+
+    it('scopes the search to the current user when scope:self', async () => {
+      mockRepos.electrificationProject.search.mockResolvedValueOnce(searchResult as never);
+
+      await electrificationProjectService.searchElectrificationProjects(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
         TEST_CURRENT_CONTEXT,
-        mockProjects
+        searchParams
       );
-      expect(response).toStrictEqual({ projects: mockProjects, totalRecords: mockProjects.length });
+
+      expect(mockRepos.electrificationProject.search).toHaveBeenCalledWith(searchParams, TEST_CURRENT_CONTEXT.userId);
     });
   });
 

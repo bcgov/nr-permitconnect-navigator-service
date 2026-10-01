@@ -3,7 +3,7 @@ import { unitOfWork } from '#src/db/unitOfWork';
 import { createGeneralProjectData, generateGeneralProjectData } from '#src/domains/generalProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
 
@@ -142,21 +142,9 @@ export const searchGeneralProjects = async (
   currentContext: CurrentContext,
   params: SearchGeneralProjectInput
 ): Promise<SearchProjectResponse> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
-    const result = await generalProject.search(params);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    const projects = await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result.projects
-    );
-
-    return {
-      projects,
-      totalRecords: result.totalRecords
-    };
-  });
+  return await unitOfWork.execute(async ({ generalProject }) => generalProject.search(params, scopeUserId));
 };
 
 export const submitGeneralProjectDraftService = async (

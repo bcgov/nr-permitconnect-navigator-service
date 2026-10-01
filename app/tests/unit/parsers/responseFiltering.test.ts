@@ -1,6 +1,6 @@
 import { TEST_ACTIVITY_CONTACT_1, TEST_CONTACT_1 } from '#tests/unit/data/index';
 import { prismaTxMock } from '#tests/__mocks__/prismaMock';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
 import { ActivityContactRepository } from '#src/repositories/activityContact';
 import { ContactRepository } from '#src/repositories/contact';
 import { Problem } from '#src/utils/index';
@@ -274,5 +274,23 @@ describe('filterActivityResponseByScope', () => {
 
       expect(result).toEqual([data[0], data[2]]);
     });
+  });
+});
+
+describe('getScopeUserId', () => {
+  const selfAuth = { attributes: ['scope:self'] } as LocalContext['currentAuthorization'];
+  const allAuth = { attributes: ['scope:all'] } as LocalContext['currentAuthorization'];
+  const context = { userId: 'user-1' } as LocalContext['currentContext'];
+
+  it('returns undefined when not scope:self', () => {
+    expect(getScopeUserId(allAuth, context)).toBeUndefined();
+  });
+
+  it('returns the user ID when scope:self', () => {
+    expect(getScopeUserId(selfAuth, context)).toBe('user-1');
+  });
+
+  it('throws rather than returning an unscoped result when scope:self has no user ID', () => {
+    expect(() => getScopeUserId(selfAuth, {} as LocalContext['currentContext'])).toThrow(Problem);
   });
 });

@@ -1,4 +1,4 @@
-import { jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { activityContactScope, jsonToPrismaInputJson } from '#src/db/utils/utils';
 
 describe('jsonToPrismaInputJson', () => {
   it('maps null to a Prisma JSON null', () => {
@@ -26,5 +26,19 @@ describe('jsonToPrismaInputJson', () => {
 
   it('throws for values containing BigInt', () => {
     expect(() => jsonToPrismaInputJson({ value: 1n })).toThrow('Value is not valid JSON');
+  });
+});
+
+describe('activityContactScope', () => {
+  it('returns no restriction without a user ID', () => {
+    expect(activityContactScope()).toEqual({});
+  });
+
+  it('restricts to active activity contacts of the user', () => {
+    expect(activityContactScope('user-1')).toEqual({
+      activity: {
+        activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+      }
+    });
   });
 });

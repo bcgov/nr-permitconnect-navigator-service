@@ -5,7 +5,7 @@ import {
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
@@ -161,17 +161,11 @@ export const searchElectrificationProjects = async (
   currentContext: CurrentContext,
   params: SearchElectrificationProjectInput
 ): Promise<SearchProjectResponse> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
-    const result = await electrificationProject.search(params);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    const projects = await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result.projects
-    );
-    return { projects, totalRecords: result.totalRecords };
-  });
+  return await unitOfWork.execute(async ({ electrificationProject }) =>
+    electrificationProject.search(params, scopeUserId)
+  );
 };
 
 export const submitElectrificationProjectDraftService = async (

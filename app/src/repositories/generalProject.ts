@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { Prisma } from '#prismaClient';
 
-import { jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { activityContactScope, jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -23,7 +23,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: SearchGeneralProjectRequest): Promise<SearchProjectResponse> {
+  public async search(params: SearchGeneralProjectRequest, scopeUserId?: string): Promise<SearchProjectResponse> {
     const validSortFields = [
       'activityId',
       'applicationStatus',
@@ -101,7 +101,8 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
                 }
               ]
             }
-          : {}
+          : {},
+        activityContactScope(scopeUserId)
       ]
     };
     const projects = await this.findMany({
@@ -116,7 +117,8 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
               include: {
                 contact: true
               }
-            }
+            },
+            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
           }
         },
         user: params.includeUser

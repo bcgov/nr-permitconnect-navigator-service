@@ -48,6 +48,7 @@ describe('HousingProjectRepository', () => {
             { submissionType: { in: [SubmissionType.GUIDANCE] } },
             {},
             {},
+            {},
             {}
           ]
         },
@@ -58,7 +59,8 @@ describe('HousingProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
@@ -90,7 +92,8 @@ describe('HousingProjectRepository', () => {
                   include: {
                     contact: true
                   }
-                }
+                },
+                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
               }
             },
             user: true
@@ -145,6 +148,7 @@ describe('HousingProjectRepository', () => {
             { submissionType: { in: [] } },
             {},
             {},
+            {},
             {}
           ]
         },
@@ -155,12 +159,28 @@ describe('HousingProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
         }
       });
+    });
+
+    it('scopes both the page and the count to the given user', async () => {
+      findManyMock.mockResolvedValueOnce([]);
+      const countMock = vi.spyOn(repo, 'count').mockResolvedValueOnce(0);
+
+      await repo.search({ skip: 0, take: 10 }, 'user-1');
+
+      const where = findManyMock.mock.calls[0][0].where;
+      expect(where.AND).toContainEqual({
+        activity: {
+          activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+        }
+      });
+      expect(countMock).toHaveBeenCalledWith({ where });
     });
   });
 });

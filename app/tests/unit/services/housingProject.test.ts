@@ -175,14 +175,11 @@ describe('housingProject service', () => {
   });
 
   describe('searchHousingProjects', () => {
-    it('searches projects and applies filtering', async () => {
-      const mockProjects = [TEST_HOUSING_PROJECT_1];
-      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
-      mockRepos.housingProject.search.mockResolvedValueOnce({
-        projects: mockProjects,
-        totalRecords: mockProjects.length
-      } as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
+    const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
+    const searchResult = { projects: [TEST_HOUSING_PROJECT_1], totalRecords: 1 };
+
+    it('searches unscoped without post-filtering when not scope:self', async () => {
+      mockRepos.housingProject.search.mockResolvedValueOnce(searchResult as never);
 
       const response = await housingProjectService.searchHousingProjects(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -190,19 +187,21 @@ describe('housingProject service', () => {
         searchParams
       );
 
-      expect(mockRepos.housingProject.search).toHaveBeenCalledTimes(1);
-      expect(mockRepos.housingProject.search).toHaveBeenCalledWith(searchParams);
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      expect(mockRepos.housingProject.search).toHaveBeenCalledWith(searchParams, undefined);
+      expect(filterSpy).not.toHaveBeenCalled();
+      expect(response).toStrictEqual(searchResult);
+    });
+
+    it('scopes the search to the current user when scope:self', async () => {
+      mockRepos.housingProject.search.mockResolvedValueOnce(searchResult as never);
+
+      await housingProjectService.searchHousingProjects(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
         TEST_CURRENT_CONTEXT,
-        mockProjects
+        searchParams
       );
-      expect(response).toStrictEqual({ projects: mockProjects, totalRecords: mockProjects.length });
+
+      expect(mockRepos.housingProject.search).toHaveBeenCalledWith(searchParams, TEST_CURRENT_CONTEXT.userId);
     });
   });
 

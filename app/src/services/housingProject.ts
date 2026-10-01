@@ -3,7 +3,7 @@ import { unitOfWork } from '#src/db/unitOfWork';
 import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
@@ -162,17 +162,9 @@ export const searchHousingProjects = async (
   currentContext: CurrentContext,
   params: SearchHousingProjectInput
 ): Promise<SearchProjectResponse> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
-    const result = await housingProject.search(params);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    const projects = await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result.projects
-    );
-    return { projects, totalRecords: result.totalRecords };
-  });
+  return await unitOfWork.execute(async ({ housingProject }) => housingProject.search(params, scopeUserId));
 };
 
 export const submitHousingProjectDraftService = async (

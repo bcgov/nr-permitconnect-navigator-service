@@ -7,7 +7,7 @@ import { buildNewPermitRecord, sendPermitUpdateNotifications } from '#src/domain
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import Problem from '#src/utils/problem';
 import { differential, isEmptyObject } from '#src/utils/utils';
@@ -202,22 +202,9 @@ export const searchPermitsService = async (
   initiative: Exclude<Initiative, Initiative.PCNS>,
   options: SearchPermitsInput
 ): Promise<SearchPermitsResponse> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
-    const result = await permit.search(initiative, options);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    const filtered = await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result.permits
-    );
-
-    // TODO: totalRecords will be incorrect as its based on all permits
-    // TBH we probably need filtering at the prisma level somehow
-    // Not an immediate priority as pagination is currently internal only and Navs always see full results
-    // Will need to be addressed when pagination goes to the proponent side
-    return { permits: filtered, totalRecords: result.totalRecords };
-  });
+  return await unitOfWork.execute(async ({ permit }) => permit.search(initiative, options, scopeUserId));
 };
 
 /**

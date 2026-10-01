@@ -23,18 +23,17 @@ import {
 } from '@/lib/primevue';
 import { useAppStore, useAuthNStore, useAuthZStore } from '@/store';
 import { BRING_FORWARD_ROUTE_MAP } from '@/utils/constants/application';
-import { Action, BasicResponse, GroupName, Initiative, Resource, StorageKey } from '@/utils/enums/application';
+import { Action, GroupName, Initiative, Resource, StorageKey } from '@/utils/enums/application';
 import { NoteType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
-import type { BringForward, Enquiry, Permit, Project, ProjectService, ProjectStatistics } from '@/types';
+import type { BringForward, Enquiry, Project, ProjectService, ProjectStatistics } from '@/types';
 
 // Props
 const bringForward = defineModel<BringForward[]>('bringForward', { required: true });
 const enquiries = defineModel<Enquiry[]>('enquiries', { required: true });
-const permits = defineModel<Permit[]>('permits', { required: true });
 const projects = defineModel<Project[]>('projects', { required: true });
 const statistics = defineModel<ProjectStatistics>('statistics');
 
@@ -77,19 +76,6 @@ function assignEnquiriesAndFullName() {
           ? `${sub.user.lastName}, ${sub.user.firstName}`
           : sub.user.firstName || sub.user.lastName || '';
     }
-  });
-}
-
-// Set multiPermitsNeeded property of each submission to Yes/No (count)
-// if the submission have more than one permit with needed Yes
-function assignMultiPermitsNeeded() {
-  projects.value.forEach((sub) => {
-    const multiPermitsNeededCount = permits.value.filter(
-      (x) => x.activityId === sub.activityId && x.needed?.toUpperCase() === BasicResponse.YES.toUpperCase()
-    ).length;
-
-    if (multiPermitsNeededCount > 1) sub.multiPermitsNeeded = `${BasicResponse.YES} (${multiPermitsNeededCount})`;
-    else sub.multiPermitsNeeded = `${BasicResponse.NO} (${multiPermitsNeededCount})`;
   });
 }
 
@@ -194,7 +180,6 @@ function sortRelevantBringForwards(filteredBringForwards: BringForward[]) {
 
 onBeforeMount(async () => {
   assignEnquiriesAndFullName();
-  assignMultiPermitsNeeded();
 
   const profile = getProfile.value;
 
