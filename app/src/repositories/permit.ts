@@ -100,8 +100,8 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
 
     // Get paginated data
     const permits = await this.findMany({
-      skip: options?.skip ? Number.parseInt(options.skip) : 0,
-      take: options?.take ? Number.parseInt(options.take) : 10,
+      skip: options?.skip,
+      take: options?.take,
       where: whereClause,
       orderBy: orderBy,
       select: {

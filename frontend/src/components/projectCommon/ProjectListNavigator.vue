@@ -195,6 +195,7 @@ async function searchProjects() {
         const res = await projectService?.value.searchProjects({
           applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
           dateRange: dateRange.value,
+          includeUser: true,
           searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
           skip: (pagination.value.page && pagination.value.rows
             ? pagination.value.page * pagination.value.rows
@@ -283,7 +284,11 @@ onBeforeMount(() => {
             class="col-span-1"
             :options="FILTER_OPTIONS as FilterOption[]"
             option-label="label"
-            @change="searchProjects"
+            @change="
+              pagination.page = 0;
+              updateQueryParams();
+              searchProjects();
+            "
           />
           <IconField
             class="col-span-1"
@@ -295,7 +300,11 @@ onBeforeMount(() => {
               v-model="searchTag"
               class="h-full"
               :placeholder="t('authorization.common.search')"
-              @update:model-value="searchProjects"
+              @update:model-value="
+                pagination.page = 0;
+                updateQueryParams();
+                searchProjects();
+              "
             />
           </IconField>
           <DatePicker
@@ -305,7 +314,13 @@ onBeforeMount(() => {
             :max-date="new Date()"
             hide-on-range-selection
             show-clear
-            @value-change="onDateRangeChange"
+            @value-change="
+              (value) => {
+                pagination.page = 0;
+                updateQueryParams();
+                onDateRangeChange(value);
+              }
+            "
           />
         </div>
         <Button

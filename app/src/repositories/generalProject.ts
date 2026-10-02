@@ -41,7 +41,7 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
     if (params?.sortOrder !== '0' && params?.sortField) {
       const sortDirection = params.sortOrder === '1' ? 'asc' : 'desc';
 
-      if (params.sortField === 'assignedTo') {
+      if (params.sortField === 'user.fullName') {
         // display sorts as "Lastname, Firstname"; user.fullName is a separate, not reliably synced column
         orderBy = [{ user: { lastName: sortDirection } }, { user: { firstName: sortDirection } }];
       } else if (params.sortField === 'location') {
@@ -105,8 +105,8 @@ export class GeneralProjectRepository extends WritableRepository<PrismaTransacti
       ]
     };
     const projects = await this.findMany({
-      skip: params?.skip ? Number.parseInt(params.skip) : 0,
-      take: params?.take ? Number.parseInt(params.take) : 10,
+      skip: params?.skip,
+      take: params?.take,
       orderBy: orderBy,
       where: whereClause,
       include: {

@@ -74,11 +74,10 @@ describe('permit searchPermits query schema', () => {
       dateRange: null,
       permitTypeId: null,
       searchTag: null,
-      skip: null,
+      // skip/take are coerced numbers with min constraints, so null is not an accepted value for them
       sortField: null,
       sortOrder: null,
-      sourceSystemKindId: null,
-      take: null
+      sourceSystemKindId: null
     };
 
     const result = schema.searchPermits.query.safeParse(query);

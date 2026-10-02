@@ -25,6 +25,8 @@ describe('HousingProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['ACTI1234', 'ACTI5678'],
         createdBy: ['user-1', 'user-2'],
         housingProjectId: ['project-1'],
@@ -68,6 +70,8 @@ describe('HousingProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['ACTI1234'],
         createdBy: [],
         housingProjectId: [],
@@ -99,6 +103,8 @@ describe('HousingProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_HOUSING_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         housingProjectId: [],
@@ -116,6 +122,8 @@ describe('HousingProjectRepository', () => {
       vi.spyOn(repo, 'count').mockResolvedValueOnce(0);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         housingProjectId: [],

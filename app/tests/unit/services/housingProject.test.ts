@@ -177,7 +177,7 @@ describe('housingProject service', () => {
   describe('searchHousingProjects', () => {
     it('searches projects and applies filtering', async () => {
       const mockProjects = [TEST_HOUSING_PROJECT_1];
-      const searchParams = { activityId: ['id-1'] };
+      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
       mockRepos.housingProject.search.mockResolvedValueOnce({
         projects: mockProjects,
         totalRecords: mockProjects.length

@@ -86,7 +86,7 @@ onBeforeMount(async () => {
 
   if (activityIds?.length && projectService?.value) {
     const [searchProjectsResponse, enquiries] = await Promise.all([
-      projectService.value.searchProjects({ activityId: activityIds }),
+      projectService.value.searchProjects({ activityId: activityIds, take: activityIds.length }),
       enquiryService.searchEnquiries({ activityId: activityIds })
     ]);
 

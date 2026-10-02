@@ -24,6 +24,8 @@ describe('ElectrificationProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_ELECTRIFICATION_PROJECT_1]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['act-1', 'act-2'],
         createdBy: ['user-1'],
         electrificationProjectId: ['elec-1'],
@@ -69,6 +71,8 @@ describe('ElectrificationProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_ELECTRIFICATION_PROJECT_1]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         electrificationProjectId: [],
@@ -90,6 +94,8 @@ describe('ElectrificationProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_ELECTRIFICATION_PROJECT_1]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         electrificationProjectId: [],
@@ -110,6 +116,8 @@ describe('ElectrificationProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_ELECTRIFICATION_PROJECT_1]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         electrificationProjectId: [],
@@ -141,6 +149,8 @@ describe('ElectrificationProjectRepository', () => {
       vi.spyOn(repo, 'count').mockResolvedValueOnce(1);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['act-1'],
         createdBy: ['user-1'],
         electrificationProjectId: ['elec-1'],
