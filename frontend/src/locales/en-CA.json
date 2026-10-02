@@ -586,6 +586,12 @@
       "noUpdates": "No updates at the moment.",
       "submittedOn": "Submitted on"
     },
+    "authorizationFirstNationConsultation": {
+      "firstNationConsultation": "First Nation consultation",
+      "consultationStartDate": "Consultation start date",
+      "consultationEndDate": "Consultation end date",
+      "toolTip": "Consultation Start Date: When formal engagement with the First Nation was initiated. Consultation End Date: When the consultation process was completed or formally closed."
+    },
     "authorizationForm": {
       "addAuthorization": "Add authorization",
       "agency": "Agency",
