@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import { array, boolean, date, number, object, string, type InferType } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
+import AuthorizationFirstNationConsultationCard from '@/components/authorization/AuthorizationFirstNationConsultationCard.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { FormNavigationGuard } from '@/components/form';
@@ -70,6 +71,8 @@ const formSchema = object({
       then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
     }),
   authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
+  consultationStartDate: date().nullable(),
+  consultationEndDate: date().nullable(),
   needed: string()
     .required()
     .oneOf(PERMIT_NEEDED_LIST)
@@ -245,6 +248,12 @@ function initializeFormValues() {
   if (authorization) {
     initialFormValues.value = {
       authorizationType: authorization.permitType,
+      consultationStartDate: authorization?.consultationStartDate
+        ? new Date(authorization?.consultationStartDate)
+        : undefined,
+      consultationEndDate: authorization?.consultationEndDate
+        ? new Date(authorization?.consultationEndDate)
+        : undefined,
       decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
       submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
       permitTracking: authorization.permitTracking?.map((pt) => {
@@ -327,6 +336,8 @@ async function onSubmit(data: GenericObject) {
       permitTypeId: authorizationType.permitTypeId,
       submittedDate: submitted.date,
       submittedTime: submitted.time,
+      consultationStartDate: data.consultationStartDate ? data.consultationStartDate.toISOString() : null,
+      consultationEndDate: data.consultationEndDate ? data.consultationEndDate.toISOString() : null,
       decisionDate: decision.date,
       decisionTime: decision.time,
       statusLastVerified: statusLastVerified.date,
@@ -449,6 +460,18 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       "
     />
     <AuthorizationStatusUpdatesCard
+      :editable="editable"
+      :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
+      :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"
+      :on-hold-code="authorization?.onHoldCode"
+      :show-target-date-description="!!values?.targetDate"
+      :valid-stage-options="getValidStageOptions(values?.state)"
+      class="mt-7"
+      @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
+      @update:state-changed="setFieldValue('stage', undefined)"
+      @update:target-date-changed="if (!!values?.targetDate) setFieldValue('targetDateDescription', undefined);"
+    />
+    <AuthorizationFirstNationConsultationCard
       :editable="editable"
       :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
       :peach-integrated-tracking-id="isPeachIntegratedTrackingId && isPeachEnabled"

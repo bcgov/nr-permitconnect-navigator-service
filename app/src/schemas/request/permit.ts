@@ -88,6 +88,8 @@ export const schema = {
         onHoldCode: requireValidCode.PiesOnHold(z.string().max(255)).nullish(),
         submittedDate: dateOnlyString.nullish(),
         submittedTime: timeTzString.nullish(),
+        consultationStartDate: z.coerce.date().nullish(),
+        consultationEndDate: z.coerce.date().nullish(),
         decisionDate: dateOnlyString.nullish(),
         decisionTime: timeTzString.nullish(),
         statusLastChanged: dateOnlyString.nullish(),
