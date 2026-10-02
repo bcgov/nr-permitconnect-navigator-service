@@ -237,10 +237,10 @@ describe('permit service', () => {
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
         TEST_CURRENT_CONTEXT,
         Initiative.HOUSING,
-        {}
+        { skip: 0, take: 10 }
       );
 
-      expect(mockRepos.permit.search).toHaveBeenCalledWith(Initiative.HOUSING, {});
+      expect(mockRepos.permit.search).toHaveBeenCalledWith(Initiative.HOUSING, { skip: 0, take: 10 });
       expect(response).toStrictEqual({ permits: [TEST_PERMIT_1], totalRecords: 1 });
     });
   });

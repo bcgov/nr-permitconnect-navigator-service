@@ -115,6 +115,7 @@ const projectRoute = inject(projectRouteNameKey);
     field="user.fullName"
     header="Assigned to"
     :sortable="true"
+    sort-field="assignedTo"
     style="min-width: 200px"
   />
 

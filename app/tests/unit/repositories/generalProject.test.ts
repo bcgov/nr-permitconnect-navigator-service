@@ -24,6 +24,8 @@ describe('GeneralProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['act-1', 'act-2'],
         createdBy: ['user-1'],
         generalProjectId: ['gen-1'],
@@ -67,6 +69,8 @@ describe('GeneralProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         generalProjectId: [],
@@ -87,6 +91,8 @@ describe('GeneralProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         generalProjectId: [],
@@ -106,6 +112,8 @@ describe('GeneralProjectRepository', () => {
       findManyMock.mockResolvedValueOnce([TEST_GENERAL_PROJECT_1 as never]);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: [],
         createdBy: [],
         generalProjectId: [],
@@ -136,6 +144,8 @@ describe('GeneralProjectRepository', () => {
       vi.spyOn(repo, 'count').mockResolvedValueOnce(1);
 
       const params = {
+        skip: 0,
+        take: 10,
         activityId: ['act-1'],
         createdBy: ['user-1'],
         generalProjectId: ['gen-1'],

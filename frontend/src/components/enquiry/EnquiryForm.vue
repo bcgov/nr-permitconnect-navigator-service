@@ -242,10 +242,10 @@ async function onRelatedActivityChange(e: SelectChangeEvent) {
   if (e.value) {
     if (projectService?.value) {
       const response = await projectService.value.searchProjects({ activityId: [e.value] });
-      if (response?.projects.length > 0) {
+      if (response.projects.length > 0) {
         // Set ATS client ID from the related project
-        formRef.value?.setFieldValue('atsInfo.atsClientId', response?.projects[0].atsClientId);
-        if (response?.projects[0].activity?.activityContact?.[0]?.contact)
+        formRef.value?.setFieldValue('atsInfo.atsClientId', response.projects[0].atsClientId);
+        if (response.projects[0].activity?.activityContact?.[0]?.contact)
           setBasicInfo(response.projects[0].activity?.activityContact?.[0]?.contact);
       }
     } else {

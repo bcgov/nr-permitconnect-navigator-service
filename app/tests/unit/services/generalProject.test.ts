@@ -177,7 +177,7 @@ describe('generalProject service', () => {
   describe('searchGeneralProjects', () => {
     it('searches projects and applies filtering', async () => {
       const mockProjects = [TEST_GENERAL_PROJECT_1];
-      const searchParams = { activityId: ['id-1'] };
+      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
       mockRepos.generalProject.search.mockResolvedValueOnce({
         projects: mockProjects,
         totalRecords: mockProjects.length

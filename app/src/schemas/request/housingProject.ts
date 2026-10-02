@@ -122,7 +122,6 @@ export const schema = {
       })
       .merge(paginationOptions)
       .strict()
-      .default({})
   },
   patchHousingProject: {
     body: z

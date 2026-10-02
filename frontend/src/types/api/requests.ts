@@ -236,7 +236,7 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
     dateRange: [Date, Date];
     includeUser: boolean;
     housingProjectId: string[];
-    projectStatus: string[];
+    applicationStatus: string[];
     submissionType: string[];
   };
 }

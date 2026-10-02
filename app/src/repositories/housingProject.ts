@@ -109,8 +109,8 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
     };
 
     const projects = await this.findMany({
-      skip: params?.skip ? Number.parseInt(params.skip) : 0,
-      take: params?.take ? Number.parseInt(params.take) : 10,
+      skip: params?.skip,
+      take: params?.take,
       orderBy: orderBy,
       where: whereClause,
       include: {

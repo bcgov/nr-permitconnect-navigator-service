@@ -117,7 +117,6 @@ export const schema = {
       })
       .merge(paginationOptions)
       .strict()
-      .default({})
   },
   patchGeneralProject: {
     body: z

@@ -165,7 +165,7 @@ describe('electrificationProject service', () => {
   describe('searchElectrificationProjects', () => {
     it('searches projects and applies filtering', async () => {
       const mockProjects = [TEST_ELECTRIFICATION_PROJECT_1];
-      const searchParams = { activityId: ['id-1'] };
+      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
       mockRepos.electrificationProject.search.mockResolvedValueOnce({
         projects: mockProjects,
         totalRecords: mockProjects.length

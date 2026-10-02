@@ -28,7 +28,7 @@ export class ElectrificationProjectRepository extends WritableRepository<
       | Prisma.electrification_projectOrderByWithRelationInput[]
       | undefined;
 
-    if (params?.sortOrder !== '0' && params?.sortField) {
+    if (params.sortOrder !== '0' && params.sortField) {
       const sortDirection = params.sortOrder === '1' ? 'asc' : 'desc';
 
       if (params.sortField === 'assignedTo') {
@@ -94,8 +94,8 @@ export class ElectrificationProjectRepository extends WritableRepository<
     };
 
     const projects = await this.findMany({
-      skip: params?.skip ? Number.parseInt(params.skip) : 0,
-      take: params?.take ? Number.parseInt(params.take) : 10,
+      skip: params?.skip,
+      take: params?.take,
       orderBy: orderBy,
       where: whereClause,
       include: {
