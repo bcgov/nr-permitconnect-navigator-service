@@ -37,6 +37,7 @@ import type {
   LocalContext,
   PatchElectrificationProjectRequest,
   GetElectrificationProjectStatisticsRequest,
+  SearchProjectResponse,
   SubmitElectrificationProjectDraftRequest,
   UpsertElectrificationProjectDraftRequest
 } from '#types';
@@ -194,12 +195,12 @@ describe('searchElectrificationProjectsController', () => {
       body: { projectName: 'test' }
     } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
-    searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
+    searchSpy.mockResolvedValue({
+      projects: [TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject],
+      totalRecords: 1
+    });
 
-    await searchElectrificationProjectsController(
-      req,
-      res as unknown as Response<ElectrificationProject[], LocalContext>
-    );
+    await searchElectrificationProjectsController(req, res as unknown as Response<SearchProjectResponse, LocalContext>);
 
     expect(searchSpy).toHaveBeenCalledTimes(1);
     expect(searchSpy).toHaveBeenCalledWith(
@@ -211,7 +212,7 @@ describe('searchElectrificationProjectsController', () => {
       })
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_ELECTRIFICATION_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith({ projects: [TEST_ELECTRIFICATION_PROJECT_1], totalRecords: 1 });
   });
 
   it('coerces includeUser query parameter to boolean', async () => {
@@ -219,12 +220,12 @@ describe('searchElectrificationProjectsController', () => {
       body: { includeUser: 'true' }
     } as unknown as Request<never, never, SearchElectrificationProjectRequest, never>;
 
-    searchSpy.mockResolvedValue([TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject]);
+    searchSpy.mockResolvedValue({
+      projects: [TEST_ELECTRIFICATION_PROJECT_1 as ElectrificationProject],
+      totalRecords: 1
+    });
 
-    await searchElectrificationProjectsController(
-      req,
-      res as unknown as Response<ElectrificationProject[], LocalContext>
-    );
+    await searchElectrificationProjectsController(req, res as unknown as Response<SearchProjectResponse, LocalContext>);
 
     expect(searchSpy).toHaveBeenCalledWith(
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,

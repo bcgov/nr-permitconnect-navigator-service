@@ -38,7 +38,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10' };
+      const options = { skip: 0, take: 10 };
       await makeRepo().search(Initiative.ELECTRIFICATION, options);
 
       expect(prismaTxMock.permit.findMany).toHaveBeenCalledTimes(1);
@@ -57,7 +57,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10' };
+      const options = { skip: 0, take: 10 };
       await makeRepo().search(Initiative.HOUSING, options);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -75,7 +75,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10' };
+      const options = { skip: 0, take: 10 };
       await makeRepo().search(Initiative.GENERAL, options);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,7 +95,7 @@ describe('PermitRepository', () => {
 
       const startDate = new Date('2024-01-01');
       const endDate = new Date('2024-12-31');
-      const options = { skip: '0', take: '10', dateRange: [startDate, endDate] } as never;
+      const options = { skip: 0, take: 10, dateRange: [startDate, endDate] } as never;
 
       await makeRepo().search(Initiative.HOUSING, options);
 
@@ -118,7 +118,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', permitTypeId: '42' };
+      const options = { skip: 0, take: 10, permitTypeId: '42' };
       await makeRepo().search(Initiative.HOUSING, options);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,7 +134,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sourceSystemKindId: '99' };
+      const options = { skip: 0, take: 10, sourceSystemKindId: '99' };
       await makeRepo().search(Initiative.HOUSING, options);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -156,7 +156,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', searchTag: 'test' };
+      const options = { skip: 0, take: 10, searchTag: 'test' };
       await makeRepo().search(Initiative.HOUSING, options);
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -182,7 +182,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '1' } as const;
+      const options = { skip: 0, take: 10, sortField: 'stage', sortOrder: '1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -193,7 +193,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '-1' } as const;
+      const options = { skip: 0, take: 10, sortField: 'stage', sortOrder: '-1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -204,7 +204,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'stage', sortOrder: '0' } as const;
+      const options = { skip: 0, take: 10, sortField: 'stage', sortOrder: '0' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -215,7 +215,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(1);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10', sortField: 'invalidField', sortOrder: '1' } as const;
+      const options = { skip: 0, take: 10, sortField: 'invalidField', sortOrder: '1' } as const;
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -226,7 +226,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(10);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '20', take: '5' };
+      const options = { skip: 20, take: 5 };
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -238,7 +238,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(10);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = {};
+      const options = { skip: 0, take: 10 };
       await makeRepo().search(Initiative.HOUSING, options);
 
       const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0];
@@ -250,7 +250,7 @@ describe('PermitRepository', () => {
       prismaTxMock.permit.count.mockResolvedValueOnce(5);
       prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-      const options = { skip: '0', take: '10' };
+      const options = { skip: 0, take: 10 };
       const result = await makeRepo().search(Initiative.HOUSING, options);
 
       expect(result.totalRecords).toBe(5);
@@ -268,7 +268,7 @@ describe('PermitRepository', () => {
     prismaTxMock.permit.count.mockResolvedValueOnce(1);
     prismaTxMock.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_SELECT_1]);
 
-    const options = { skip: '0', take: '10', searchTag: 'test' };
+    const options = { skip: 0, take: 10, searchTag: 'test' };
     await makeRepo().search(Initiative.ELECTRIFICATION, options);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const callArgs = prismaTxMock.permit.findMany.mock.calls[0][0] as any;
