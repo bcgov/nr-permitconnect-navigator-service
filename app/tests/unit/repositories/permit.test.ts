@@ -296,7 +296,7 @@ describe('PermitRepository', () => {
     const where = (prismaTxMock.permit.findMany.mock.calls[0][0] as any).where;
     expect(where.AND).toContainEqual({
       activity: {
-        activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+        activityContact: { some: { contact: { userId: 'user-1' } } }
       }
     });
     expect(prismaTxMock.permit.count.mock.calls[0][0]?.where).toEqual(where);

@@ -2,6 +2,7 @@ import { addDays } from 'date-fns';
 import { Prisma } from '#prismaClient';
 
 import { activityContactScope, jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { PermitNeeded } from '#src/utils/enums/permit';
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -122,7 +123,7 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
                 contact: true
               }
             },
-            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
+            _count: { select: { permit: { where: { needed: PermitNeeded.YES } } } }
           }
         },
         user: params.includeUser
