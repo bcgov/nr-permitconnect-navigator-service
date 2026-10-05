@@ -1,6 +1,7 @@
 import { Prisma } from '#prismaClient';
 
 import { WritableRepository } from './writable.ts';
+import { activityContactScope } from '#src/db/utils/utils';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -15,7 +16,7 @@ export class EnquiryRepository extends WritableRepository<PrismaTransactionClien
     return this.update(where, data as Prisma.enquiryUncheckedUpdateInput);
   }
 
-  public async search(params: SearchEnquiriesRequest, initiativeCode?: Initiative) {
+  public async search(params: SearchEnquiriesRequest, initiativeCode?: Initiative, scopeUserId?: string) {
     return await this.findMany({
       where: {
         AND: [
@@ -34,7 +35,8 @@ export class EnquiryRepository extends WritableRepository<PrismaTransactionClien
           },
           {
             enquiryId: { in: params.enquiryId }
-          }
+          },
+          activityContactScope(scopeUserId)
         ]
       },
       include: {

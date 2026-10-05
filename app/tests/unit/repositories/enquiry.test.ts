@@ -1,5 +1,6 @@
 import { TEST_ENQUIRY_1 } from '#tests/unit/data/index';
 import { prismaTxMock } from '#tests/__mocks__/prismaMock';
+import { activityContactScope } from '#src/db/utils/utils';
 import { EnquiryRepository } from '#src/repositories/enquiry';
 import { Initiative } from '#src/utils/enums/application';
 
@@ -45,7 +46,8 @@ describe('EnquiryRepository', () => {
             },
             {
               enquiryId: { in: undefined }
-            }
+            },
+            {}
           ]
         },
         include: {
@@ -154,7 +156,8 @@ describe('EnquiryRepository', () => {
             },
             {
               enquiryId: { in: params.enquiryId }
-            }
+            },
+            {}
           ]
         },
         include: {
@@ -172,6 +175,14 @@ describe('EnquiryRepository', () => {
         }
       });
       expect(result).toStrictEqual([TEST_ENQUIRY_1]);
+    });
+
+    it('scopes the search to the given user', async () => {
+      findManyMock.mockResolvedValueOnce([]);
+
+      await repo.search({}, Initiative.HOUSING, 'user-1');
+
+      expect(findManyMock.mock.calls[0][0].where.AND).toContainEqual(activityContactScope('user-1'));
     });
   });
 });

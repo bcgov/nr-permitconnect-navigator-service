@@ -9,9 +9,9 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import prisma from '#src/db/database';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as electrificationProjectDomain from '#src/domains/electrificationProject';
 import * as projectDomain from '#src/domains/project';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import * as electrificationProjectService from '#src/services/electrificationProject';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
@@ -26,7 +26,6 @@ vi.mock('../../../src/db/database.ts', () => ({
 const createDataSpy = vi.spyOn(electrificationProjectDomain, 'createElectrificationProjectData');
 const generateDataSpy = vi.spyOn(electrificationProjectDomain, 'generateElectrificationProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
 describe('electrificationProject service', () => {
   beforeEach(() => {
@@ -120,10 +119,9 @@ describe('electrificationProject service', () => {
   });
 
   describe('listElectrificationProjectsService', () => {
-    it('fetches projects with includes and applies filtering', async () => {
+    it('fetches projects with includes, unscoped when not scope:self', async () => {
       const mockProjects = [TEST_ELECTRIFICATION_PROJECT_1];
       mockRepos.electrificationProject.findMany.mockResolvedValueOnce(mockProjects as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
 
       const response = await electrificationProjectService.listElectrificationProjectsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -132,6 +130,7 @@ describe('electrificationProject service', () => {
 
       expect(mockRepos.electrificationProject.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.findMany).toHaveBeenCalledWith({
+        where: {},
         include: {
           activity: {
             include: {
@@ -148,17 +147,20 @@ describe('electrificationProject service', () => {
           createdAt: 'desc'
         }
       });
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        mockProjects
-      );
       expect(response).toStrictEqual(mockProjects);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.electrificationProject.findMany.mockResolvedValueOnce([] as never);
+
+      await electrificationProjectService.listElectrificationProjectsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(mockRepos.electrificationProject.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: activityContactScope(TEST_CURRENT_CONTEXT.userId) })
+      );
     });
   });
 
@@ -166,7 +168,7 @@ describe('electrificationProject service', () => {
     const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
     const searchResult = { projects: [TEST_ELECTRIFICATION_PROJECT_1], totalRecords: 1 };
 
-    it('searches unscoped without post-filtering when not scope:self', async () => {
+    it('searches unscoped when not scope:self', async () => {
       mockRepos.electrificationProject.search.mockResolvedValueOnce(searchResult as never);
 
       const response = await electrificationProjectService.searchElectrificationProjects(
@@ -176,7 +178,6 @@ describe('electrificationProject service', () => {
       );
 
       expect(mockRepos.electrificationProject.search).toHaveBeenCalledWith(searchParams, undefined);
-      expect(filterSpy).not.toHaveBeenCalled();
       expect(response).toStrictEqual(searchResult);
     });
 

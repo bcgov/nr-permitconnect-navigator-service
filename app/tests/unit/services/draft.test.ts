@@ -8,8 +8,8 @@ import {
   TEST_HOUSING_DRAFT
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as activityDomain from '#src/domains/activity';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import {
   createDraftService,
   deleteDraftService,
@@ -26,7 +26,6 @@ import type { DraftCreateInput } from '#types';
 vi.mock('config');
 
 const createActivitySpy = vi.spyOn(activityDomain, 'createActivity');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
 describe('draft service', () => {
   beforeEach(() => {
@@ -93,10 +92,9 @@ describe('draft service', () => {
   });
 
   describe('listDraftsService', () => {
-    it('calls draft.findMany and returns filtered result', async () => {
+    it('calls draft.findMany unscoped when not scope:self', async () => {
       const drafts = [TEST_HOUSING_DRAFT];
       mockRepos.draft.findMany.mockResolvedValue(drafts as never);
-      filterSpy.mockResolvedValue(drafts as never);
 
       const result = await listDraftsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -109,17 +107,23 @@ describe('draft service', () => {
         where: { draftCode: DraftCode.HOUSING_PROJECT },
         include: { activity: { include: { activityContact: true } } }
       });
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        drafts
-      );
       expect(result).toEqual(drafts);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.draft.findMany.mockResolvedValue([] as never);
+
+      await listDraftsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT,
+        DraftCode.HOUSING_PROJECT
+      );
+
+      expect(mockRepos.draft.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { draftCode: DraftCode.HOUSING_PROJECT, ...activityContactScope(TEST_CURRENT_CONTEXT.userId) }
+        })
+      );
     });
   });
 

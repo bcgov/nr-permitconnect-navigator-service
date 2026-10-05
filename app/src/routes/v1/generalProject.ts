@@ -22,7 +22,7 @@ import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
 import { draftSchema } from '#src/schemas/response/draft';
-import { generalProjectSchema } from '#src/schemas/response/generalProject';
+import { generalProjectSchema, searchGeneralProjectsResponseSchema } from '#src/schemas/response/generalProject';
 import { generalProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
 import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
 import { schema } from '#src/schemas/request/generalProject';
@@ -71,7 +71,7 @@ openapiRoute(basePath, router, {
   responses: {
     200: {
       description: 'A list of general projects matching the search criteria',
-      schema: z.array(generalProjectSchema)
+      schema: searchGeneralProjectsResponseSchema
     },
     401: UNAUTHORIZED_RESPONSE,
     403: FORBIDDEN_RESPONSE,

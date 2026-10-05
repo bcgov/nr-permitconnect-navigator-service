@@ -8,8 +8,8 @@ import {
   TEST_ENQUIRY_INTAKE
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as enquiryDomain from '#src/domains/enquiry';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import {
   createEnquiryService,
   getEnquiryService,
@@ -27,7 +27,7 @@ vi.mock('config');
 
 const generateEnquiryDataSpy = vi.spyOn(enquiryDomain, 'generateEnquiryData');
 const emailEnquiryConfirmationSpy = vi.spyOn(enquiryDomain, 'emailEnquiryConfirmation');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
+const SCOPE_SELF = { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] };
 
 const ENQUIRY_INCLUDE = {
   activity: {
@@ -165,33 +165,35 @@ describe('enquiry service', () => {
   });
 
   describe('listEnquiriesService', () => {
-    it('lists enquiries and filters the response by scope', async () => {
+    it('lists enquiries unscoped when not scope:self', async () => {
       const enquiries = [TEST_ENQUIRY_1];
       mockRepos.enquiry.findMany.mockResolvedValue(enquiries as never);
-      filterSpy.mockResolvedValue(enquiries as never);
 
       const result = await listEnquiriesService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT);
 
       expect(mockRepos.enquiry.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.enquiry.findMany).toHaveBeenCalledWith({
+        where: {},
         include: { ...ENQUIRY_INCLUDE, user: true }
       });
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ activityContact: mockRepos.activityContact, contact: mockRepos.contact }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        enquiries
-      );
       expect(result).toEqual(enquiries);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.enquiry.findMany.mockResolvedValue([] as never);
+
+      await listEnquiriesService(SCOPE_SELF, TEST_CURRENT_CONTEXT);
+
+      expect(mockRepos.enquiry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: activityContactScope(TEST_CURRENT_CONTEXT.userId) })
+      );
     });
   });
 
   describe('listRelatedEnquiriesService', () => {
-    it('lists related enquiries for an activity and filters by scope', async () => {
+    it('lists related enquiries for an activity, unscoped when not scope:self', async () => {
       const enquiries = [TEST_ENQUIRY_1];
       mockRepos.enquiry.findMany.mockResolvedValue(enquiries as never);
-      filterSpy.mockResolvedValue(enquiries as never);
 
       const result = await listRelatedEnquiriesService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -205,22 +207,28 @@ describe('enquiry service', () => {
         include: ENQUIRY_INCLUDE,
         orderBy: { createdAt: 'asc' }
       });
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ activityContact: mockRepos.activityContact, contact: mockRepos.contact }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        enquiries
-      );
       expect(result).toEqual(enquiries);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.enquiry.findMany.mockResolvedValue([] as never);
+
+      await listRelatedEnquiriesService(SCOPE_SELF, TEST_CURRENT_CONTEXT, 'ACTI1234');
+
+      expect(mockRepos.enquiry.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { relatedActivityId: 'ACTI1234', ...activityContactScope(TEST_CURRENT_CONTEXT.userId) }
+        })
+      );
     });
   });
 
   describe('searchEnquiriesService', () => {
-    it('searches enquiries via the repository and filters by scope', async () => {
-      const params: SearchEnquiriesRequest = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
+    const params: SearchEnquiriesRequest = { enquiryId: [TEST_ENQUIRY_1.enquiryId], includeUser: true };
+
+    it('searches enquiries via the repository, unscoped when not scope:self', async () => {
       const enquiries = [TEST_ENQUIRY_1];
       mockRepos.enquiry.search.mockResolvedValue(enquiries as never);
-      filterSpy.mockResolvedValue(enquiries as never);
 
       const result = await searchEnquiriesService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -230,14 +238,20 @@ describe('enquiry service', () => {
       );
 
       expect(mockRepos.enquiry.search).toHaveBeenCalledTimes(1);
-      expect(mockRepos.enquiry.search).toHaveBeenCalledWith(params, Initiative.ELECTRIFICATION);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ activityContact: mockRepos.activityContact, contact: mockRepos.contact }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        enquiries
-      );
+      expect(mockRepos.enquiry.search).toHaveBeenCalledWith(params, Initiative.ELECTRIFICATION, undefined);
       expect(result).toEqual(enquiries);
+    });
+
+    it('scopes the search to the current user when scope:self', async () => {
+      mockRepos.enquiry.search.mockResolvedValue([] as never);
+
+      await searchEnquiriesService(SCOPE_SELF, TEST_CURRENT_CONTEXT, params, Initiative.ELECTRIFICATION);
+
+      expect(mockRepos.enquiry.search).toHaveBeenCalledWith(
+        params,
+        Initiative.ELECTRIFICATION,
+        TEST_CURRENT_CONTEXT.userId
+      );
     });
   });
 

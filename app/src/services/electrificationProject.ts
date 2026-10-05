@@ -1,11 +1,12 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
+import { activityContactScope } from '#src/db/utils/utils';
 import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateElectrificationSubmission } from '#src/utils/templates';
 
@@ -116,8 +117,11 @@ export const listElectrificationProjectsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<ElectrificationProject[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, electrificationProject }) => {
-    const result = await electrificationProject.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ electrificationProject }) =>
+    electrificationProject.findMany({
+      where: activityContactScope(scopeUserId),
       include: {
         activity: {
           include: {
@@ -133,15 +137,8 @@ export const listElectrificationProjectsService = async (
       orderBy: {
         createdAt: 'desc'
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 /**

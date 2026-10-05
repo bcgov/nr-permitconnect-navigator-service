@@ -1,9 +1,10 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
+import { activityContactScope } from '#src/db/utils/utils';
 import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
 
@@ -116,8 +117,11 @@ export const listHousingProjectsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<HousingProject[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, housingProject }) => {
-    const result = await housingProject.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ housingProject }) =>
+    housingProject.findMany({
+      where: activityContactScope(scopeUserId),
       include: {
         activity: {
           include: {
@@ -133,15 +137,8 @@ export const listHousingProjectsService = async (
       orderBy: {
         createdAt: 'desc'
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 /**

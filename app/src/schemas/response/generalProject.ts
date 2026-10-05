@@ -20,3 +20,10 @@ export const generalProjectSchema = general_projectModelSchema
     longitude: z.string().nullable()
   })
   .openapi('GeneralProject');
+
+export const searchGeneralProjectsResponseSchema = z
+  .object({
+    projects: z.array(generalProjectSchema),
+    totalRecords: z.number()
+  })
+  .openapi('SearchGeneralProjectsResponse');

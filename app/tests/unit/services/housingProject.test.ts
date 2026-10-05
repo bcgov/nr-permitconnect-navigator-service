@@ -10,10 +10,10 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import prisma from '#src/db/database';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as housingProjectDomain from '#src/domains/housingProject';
 import * as permitTrackingDomain from '#src/domains/permitTracking';
 import * as projectDomain from '#src/domains/project';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import * as housingProjectService from '#src/services/housingProject';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateHousingSubmission } from '#src/utils/templates';
@@ -29,7 +29,6 @@ const createDataSpy = vi.spyOn(housingProjectDomain, 'createHousingProjectData')
 const generateDataSpy = vi.spyOn(housingProjectDomain, 'generateHousingProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
 describe('housingProject service', () => {
   beforeEach(() => {
@@ -132,10 +131,9 @@ describe('housingProject service', () => {
   });
 
   describe('listHousingProjectsService', () => {
-    it('fetches projects with includes and applies filtering', async () => {
+    it('fetches projects with includes, unscoped when not scope:self', async () => {
       const mockProjects = [TEST_HOUSING_PROJECT_1];
       mockRepos.housingProject.findMany.mockResolvedValueOnce(mockProjects as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
 
       const response = await housingProjectService.listHousingProjectsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -144,6 +142,7 @@ describe('housingProject service', () => {
 
       expect(mockRepos.housingProject.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.housingProject.findMany).toHaveBeenCalledWith({
+        where: {},
         include: {
           activity: {
             include: {
@@ -160,17 +159,20 @@ describe('housingProject service', () => {
           createdAt: 'desc'
         }
       });
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        mockProjects
-      );
       expect(response).toStrictEqual(mockProjects);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.housingProject.findMany.mockResolvedValueOnce([] as never);
+
+      await housingProjectService.listHousingProjectsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(mockRepos.housingProject.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: activityContactScope(TEST_CURRENT_CONTEXT.userId) })
+      );
     });
   });
 
@@ -178,7 +180,7 @@ describe('housingProject service', () => {
     const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
     const searchResult = { projects: [TEST_HOUSING_PROJECT_1], totalRecords: 1 };
 
-    it('searches unscoped without post-filtering when not scope:self', async () => {
+    it('searches unscoped when not scope:self', async () => {
       mockRepos.housingProject.search.mockResolvedValueOnce(searchResult as never);
 
       const response = await housingProjectService.searchHousingProjects(
@@ -188,7 +190,6 @@ describe('housingProject service', () => {
       );
 
       expect(mockRepos.housingProject.search).toHaveBeenCalledWith(searchParams, undefined);
-      expect(filterSpy).not.toHaveBeenCalled();
       expect(response).toStrictEqual(searchResult);
     });
 

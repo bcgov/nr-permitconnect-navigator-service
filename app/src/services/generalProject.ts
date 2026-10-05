@@ -1,9 +1,10 @@
 import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
+import { activityContactScope } from '#src/db/utils/utils';
 import { createGeneralProjectData, generateGeneralProjectData } from '#src/domains/generalProject';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
-import { filterActivityResponseByScope, getScopeUserId } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
 
@@ -75,8 +76,11 @@ export const listGeneralProjectsService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<GeneralProject[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, generalProject }) => {
-    const result = await generalProject.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ generalProject }) =>
+    generalProject.findMany({
+      where: activityContactScope(scopeUserId),
       include: {
         activity: {
           include: {
@@ -92,15 +96,8 @@ export const listGeneralProjectsService = async (
       orderBy: {
         createdAt: 'desc'
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 export const getGeneralProjectStatisticsService = async (

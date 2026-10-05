@@ -19,3 +19,10 @@ export const electrificationProjectSchema = electrification_projectModelSchema
     megawatts: z.string().nullable()
   })
   .openapi('ElectrificationProject');
+
+export const searchElectrificationProjectsResponseSchema = z
+  .object({
+    projects: z.array(electrificationProjectSchema),
+    totalRecords: z.number()
+  })
+  .openapi('SearchElectrificationProjectsResponse');
