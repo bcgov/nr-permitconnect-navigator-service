@@ -23,6 +23,7 @@ import type {
   LocalContext,
   PatchGeneralProjectRequest,
   SearchGeneralProjectRequest,
+  SearchProjectResponse,
   SubmitGeneralProjectDraftRequest,
   UpsertGeneralProjectDraftRequest
 } from '#types';
@@ -63,7 +64,7 @@ export const listGeneralProjectsController = async (_req: Request, res: Response
 
 export const searchGeneralProjectsController = async (
   req: Request<never, never, SearchGeneralProjectRequest>,
-  res: Response<GeneralProject[], LocalContext>
+  res: Response<SearchProjectResponse, LocalContext>
 ) => {
   const response = await searchGeneralProjects(res.locals.currentAuthorization, res.locals.currentContext, {
     ...req.body,

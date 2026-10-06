@@ -15,6 +15,7 @@ import type {
   PatchHousingProjectRequest,
   ProjectStatistics,
   SearchHousingProjectRequest,
+  SearchProjectsResponse,
   SubmitDraftHousingProjectRequest,
   UpsertDraftRequest
 } from '@/types';
@@ -148,8 +149,8 @@ export function patchProject(req: PatchHousingProjectRequest): Promise<HousingPr
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export function searchProjects(req: SearchHousingProjectRequest): Promise<HousingProject[]> {
-  return api.post<HousingProject[]>(housingProjectRoutes.search(), req);
+export function searchProjects(req: SearchHousingProjectRequest): Promise<SearchProjectsResponse> {
+  return api.post<SearchProjectsResponse>(housingProjectRoutes.search(), req);
 }
 
 /**
@@ -187,7 +188,7 @@ export interface HousingProjectService extends DraftableProjectService<HousingPr
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<HousingProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchHousingProjectRequest): Promise<HousingProject[]>;
+  searchProjects(req: SearchHousingProjectRequest): Promise<SearchProjectsResponse>;
   submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }

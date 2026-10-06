@@ -15,6 +15,7 @@ import type {
   PatchElectrificationProjectRequest,
   ProjectStatistics,
   SearchElectrificationProjectRequest,
+  SearchProjectsResponse,
   UpsertDraftRequest,
   SubmitDraftElectrificationProjectRequest
 } from '@/types';
@@ -148,8 +149,8 @@ export async function patchProject(req: PatchElectrificationProjectRequest): Pro
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `ElectrificationProject` resources.
  */
-export async function searchProjects(req: SearchElectrificationProjectRequest): Promise<ElectrificationProject[]> {
-  return api.post<ElectrificationProject[]>(electrificationProjectRoutes.search(), req);
+export async function searchProjects(req: SearchElectrificationProjectRequest): Promise<SearchProjectsResponse> {
+  return api.post<SearchProjectsResponse>(electrificationProjectRoutes.search(), req);
 }
 
 /**
@@ -187,7 +188,7 @@ export interface ElectrificationProjectService extends DraftableProjectService<E
   getProject(req: GetProjectRequest): Promise<ElectrificationProject>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchElectrificationProjectRequest): Promise<ElectrificationProject[]>;
+  searchProjects(req: SearchElectrificationProjectRequest): Promise<SearchProjectsResponse>;
   submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }

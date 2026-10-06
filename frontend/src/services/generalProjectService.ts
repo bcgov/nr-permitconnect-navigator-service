@@ -15,6 +15,7 @@ import type {
   PatchGeneralProjectRequest,
   ProjectStatistics,
   SearchGeneralProjectRequest,
+  SearchProjectsResponse,
   UpsertDraftRequest,
   SubmitDraftGeneralProjectRequest
 } from '@/types';
@@ -148,8 +149,8 @@ export async function patchProject(req: PatchGeneralProjectRequest): Promise<Gen
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function searchProjects(req: SearchGeneralProjectRequest): Promise<GeneralProject[]> {
-  return api.post<GeneralProject[]>(generalProjectRoutes.search(), req);
+export async function searchProjects(req: SearchGeneralProjectRequest): Promise<SearchProjectsResponse> {
+  return api.post<SearchProjectsResponse>(generalProjectRoutes.search(), req);
 }
 
 /**
@@ -187,7 +188,7 @@ export interface GeneralProjectService extends DraftableProjectService<GeneralPr
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<GeneralProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchGeneralProjectRequest): Promise<GeneralProject[]>;
+  searchProjects(req: SearchGeneralProjectRequest): Promise<SearchProjectsResponse>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
   upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
 }

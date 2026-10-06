@@ -37,6 +37,7 @@ import type {
   LocalContext,
   PatchGeneralProjectRequest,
   GetGeneralProjectStatisticsRequest,
+  SearchProjectResponse,
   SubmitGeneralProjectDraftRequest,
   UpsertGeneralProjectDraftRequest
 } from '#types';
@@ -188,9 +189,12 @@ describe('searchGeneralProjectsController', () => {
       body: { projectName: 'test' }
     } as unknown as Request<never, never, SearchGeneralProjectRequest, never>;
 
-    searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
+    searchSpy.mockResolvedValue({
+      projects: [TEST_GENERAL_PROJECT_1 as GeneralProject],
+      totalRecords: 1
+    });
 
-    await searchGeneralProjectsController(req, res as unknown as Response<GeneralProject[], LocalContext>);
+    await searchGeneralProjectsController(req, res as unknown as Response<SearchProjectResponse, LocalContext>);
 
     expect(searchSpy).toHaveBeenCalledTimes(1);
     expect(searchSpy).toHaveBeenCalledWith(
@@ -202,7 +206,7 @@ describe('searchGeneralProjectsController', () => {
       })
     );
     expect(res.status).toHaveBeenCalledWith(200);
-    expect(res.json).toHaveBeenCalledWith([TEST_GENERAL_PROJECT_1]);
+    expect(res.json).toHaveBeenCalledWith({ projects: [TEST_GENERAL_PROJECT_1], totalRecords: 1 });
   });
 
   it('coerces includeUser query parameter to boolean', async () => {
@@ -210,9 +214,12 @@ describe('searchGeneralProjectsController', () => {
       body: { includeUser: 'true' }
     } as unknown as Request<never, never, SearchGeneralProjectRequest, never>;
 
-    searchSpy.mockResolvedValue([TEST_GENERAL_PROJECT_1 as GeneralProject]);
+    searchSpy.mockResolvedValue({
+      projects: [TEST_GENERAL_PROJECT_1 as GeneralProject],
+      totalRecords: 1
+    });
 
-    await searchGeneralProjectsController(req, res as unknown as Response<GeneralProject[], LocalContext>);
+    await searchGeneralProjectsController(req, res as unknown as Response<SearchProjectResponse, LocalContext>);
 
     expect(searchSpy).toHaveBeenCalledWith(
       TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,

@@ -120,7 +120,7 @@ async function updateRelatedEnquiry() {
     const response = await initiativeState.value.projectService.searchProjects({
       activityId: [getEnquiry?.value?.relatedActivityId]
     });
-    relatedProject.value = response[0];
+    relatedProject.value = response.projects[0];
   } else relatedProject.value = undefined;
 }
 
