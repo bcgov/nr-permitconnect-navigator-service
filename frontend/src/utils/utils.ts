@@ -82,6 +82,17 @@ export function generalErrorHandler(
 }
 
 /**
+ * Splits an array into consecutive batches of at most `size` items.
+ *
+ * @param arr - The array to split.
+ * @param size - The maximum number of items per batch.
+ * @returns The batches in order, the last of which may be shorter.
+ */
+export function getBatches<T>(arr: T[], size: number): T[][] {
+  return Array.from({ length: Math.ceil(arr.length / size) }, (_, i) => arr.slice(i * size, (i + 1) * size));
+}
+
+/**
  * @function getFileCategory
  * Compares mimeType to a list and returns a string category for that mimetype
  * @param {string} mimeType mimeType to be categorized

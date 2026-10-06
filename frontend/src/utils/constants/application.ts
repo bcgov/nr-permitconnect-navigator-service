@@ -64,6 +64,9 @@ export const MANAGED_GROUP_NAME_LIST = [
   { id: GroupName.SUPERVISOR, text: 'groupName.supervisor' }
 ];
 
+// Matches the API paginationOptions take max
+export const MAX_SEARCH_TAKE = 100;
+
 export const MIN_SEARCH_INPUT_LENGTH = 2;
 
 export const SPATIAL_FILE_FORMATS = [
