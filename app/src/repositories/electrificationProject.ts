@@ -1,6 +1,7 @@
 import { addDays } from 'date-fns';
 import { Prisma } from '#prismaClient';
 
+import { activityContactScope } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -13,7 +14,10 @@ export class ElectrificationProjectRepository extends WritableRepository<
     super(tx.electrification_project, principal, true);
   }
 
-  public async search(params: SearchElectrificationProjectRequest): Promise<SearchProjectResponse> {
+  public async search(
+    params: SearchElectrificationProjectRequest,
+    scopeUserId?: string
+  ): Promise<SearchProjectResponse> {
     const validSortFields = [
       'projectName',
       'activityId',
@@ -89,7 +93,8 @@ export class ElectrificationProjectRepository extends WritableRepository<
                 }
               ]
             }
-          : {}
+          : {},
+        activityContactScope(scopeUserId)
       ]
     };
 
@@ -105,7 +110,8 @@ export class ElectrificationProjectRepository extends WritableRepository<
               include: {
                 contact: true
               }
-            }
+            },
+            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
           }
         },
         user: params.includeUser

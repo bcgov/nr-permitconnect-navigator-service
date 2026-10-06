@@ -7,13 +7,13 @@ import SubmissionBringForwardCalendar from '@/components/submission/SubmissionBr
 import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.vue';
 import SubmissionStatistics from '@/components/submission/SubmissionStatistics.vue';
 import { Tab } from '@/lib/primevue';
-import { Action, BasicResponse, GroupName, Initiative, Resource, StorageKey } from '@/utils/enums/application';
+import { Action, GroupName, Initiative, Resource, StorageKey } from '@/utils/enums/application';
 import { projectServiceKey } from '@/utils/keys';
 
 import { mockAuthNStore, resetMockAuthNStore } from '../../../mockAuthNStore';
 import { mountComponent } from '../../../mountComponent';
 
-import type { BringForward, Enquiry, Group, Permission, Permit, Project, ProjectStatistics } from '@/types';
+import type { BringForward, Enquiry, Group, Permission, Project, ProjectStatistics } from '@/types';
 
 // Mocks
 
@@ -56,7 +56,6 @@ function mountSubmissionsNavigator(
   options: {
     projects?: Project[];
     enquiries?: Enquiry[];
-    permits?: Permit[];
     bringForward?: BringForward[];
     statistics?: ProjectStatistics;
     permissions?: Permission[];
@@ -67,7 +66,6 @@ function mountSubmissionsNavigator(
   const {
     projects = [],
     enquiries = [],
-    permits = [],
     bringForward = [],
     statistics = undefined,
     permissions = [],
@@ -78,7 +76,7 @@ function mountSubmissionsNavigator(
   const projectService = { getProjectStatistics };
 
   const { wrapper } = mountComponent(SubmissionsNavigator, {
-    props: { projects, enquiries, permits, bringForward, statistics },
+    props: { projects, enquiries, bringForward, statistics },
     piniaState: {
       app: { initiative: Initiative.HOUSING },
       authz: { permissions, groups }
@@ -174,29 +172,6 @@ describe('SubmissionsNavigator', () => {
       mountSubmissionsNavigator({ projects: [project] });
 
       expect(project.user!.fullName).toBe(expected);
-    });
-
-    it('counts YES-needed permits per activity to build the multiPermitsNeeded label', () => {
-      const project = makeProject({ activityId: 'activity-1' });
-      const permits = [
-        { activityId: 'activity-1', needed: 'yes' },
-        { activityId: 'activity-1', needed: 'YES' },
-        { activityId: 'activity-1', needed: 'No' },
-        { activityId: 'other-activity', needed: 'Yes' }
-      ] as Permit[];
-
-      mountSubmissionsNavigator({ projects: [project], permits });
-
-      expect(project.multiPermitsNeeded).toBe(`${BasicResponse.YES} (2)`);
-    });
-
-    it('labels the project as not multi-permit when 1 or fewer permits are needed', () => {
-      const project = makeProject({ activityId: 'activity-1' });
-      const permits = [{ activityId: 'activity-1', needed: 'Yes' }] as Permit[];
-
-      mountSubmissionsNavigator({ projects: [project], permits });
-
-      expect(project.multiPermitsNeeded).toBe(`${BasicResponse.NO} (1)`);
     });
 
     it('restores the accordion index from session storage', () => {

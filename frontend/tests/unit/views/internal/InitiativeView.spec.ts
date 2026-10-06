@@ -6,13 +6,7 @@ import { flushPromises, shallowMount } from '@vue/test-utils';
 import { default as i18n } from '@/i18n';
 import ViewHeader from '@/components/common/ViewHeader.vue';
 import SubmissionsNavigator from '@/components/submission/SubmissionsNavigator.vue';
-import {
-  electrificationProjectService,
-  enquiryService,
-  housingProjectService,
-  noteHistoryService,
-  permitService
-} from '@/services';
+import { electrificationProjectService, enquiryService, housingProjectService, noteHistoryService } from '@/services';
 import { useAuthZStore } from '@/store';
 import { GroupName, Initiative } from '@/utils/enums/application';
 import InitiativeView from '@/views/internal/InitiativeView.vue';
@@ -48,12 +42,6 @@ vi.mock('vue-router', () => ({
 vi.mock('@/services/enquiryService', () => ({
   enquiryService: {
     searchEnquiries: vi.fn()
-  }
-}));
-
-vi.mock('@/services/permitService', () => ({
-  permitService: {
-    listPermits: vi.fn()
   }
 }));
 
@@ -105,7 +93,6 @@ const wrapperSettings = (initiative = Initiative.HOUSING) => ({
 // Tests
 beforeEach(() => {
   vi.mocked(enquiryService.searchEnquiries).mockResolvedValue([]);
-  vi.mocked(permitService.listPermits).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.listProjects).mockResolvedValue([]);
   vi.mocked(electrificationProjectService.getProjectStatistics).mockResolvedValue({} as ProjectStatistics);
   vi.mocked(housingProjectService.listProjects).mockResolvedValue([]);
@@ -165,7 +152,6 @@ describe('InitiativeView.vue', () => {
     const childComponent = wrapper.findComponent(SubmissionsNavigator);
     expect(childComponent.props('bringForward')).toStrictEqual([]);
     expect(childComponent.props('enquiries')).toStrictEqual([]);
-    expect(childComponent.props('permits')).toStrictEqual([]);
     expect(childComponent.props('projects')).toStrictEqual([]);
     expect(childComponent.props('statistics')).toStrictEqual({});
   });

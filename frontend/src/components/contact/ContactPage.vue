@@ -8,9 +8,10 @@ import UpdateContactModal from '@/components/contact/UpdateContactModal.vue';
 import ContactHistoryList from '@/components/contact/ContactHistoryList.vue';
 import { Button, Card, Message, Tab, Tabs, TabList, TabPanel, TabPanels, useConfirm, useToast } from '@/lib/primevue';
 import { contactService, enquiryService, userService } from '@/services';
+import { MAX_SEARCH_TAKE } from '@/utils/constants/application';
 import { IdentityProviderKind } from '@/utils/enums/application';
 import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
-import { findIdpConfig } from '@/utils/utils';
+import { findIdpConfig, getBatches } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Contact, Enquiry, Project, ProjectService, User } from '@/types';
@@ -85,13 +86,19 @@ onBeforeMount(async () => {
   contact.value = contactData;
 
   if (activityIds?.length && projectService?.value) {
-    const [searchProjectsResponse, enquiries] = await Promise.all([
-      projectService.value.searchProjects({ activityId: activityIds, take: activityIds.length }),
-      enquiryService.searchEnquiries({ activityId: activityIds })
+    // Each activity has at most one project, so a batch's take never truncates its results
+    const [enquiries, ...searchProjectsResponses] = await Promise.all([
+      enquiryService.searchEnquiries({ activityId: activityIds }),
+      ...getBatches(activityIds, MAX_SEARCH_TAKE).map((batch) =>
+        projectService.value.searchProjects({ activityId: batch, take: batch.length })
+      )
     ]);
 
-    projectsEnquiries.value = projectsEnquiries.value.concat(searchProjectsResponse.projects).concat(enquiries);
+    projectsEnquiries.value = projectsEnquiries.value
+      .concat(searchProjectsResponses.flatMap((r) => r.projects))
+      .concat(enquiries);
   }
+
   // Map users ids to full names for history data table
   let userIds: string[] = [];
   projectsEnquiries.value.forEach((pe) => {

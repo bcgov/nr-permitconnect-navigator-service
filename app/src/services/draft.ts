@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 
 import { unitOfWork } from '#src/db/unitOfWork';
-import { jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { activityContactScope, jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { createActivity } from '#src/domains/activity';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 
 import type { CurrentAuthorization, CurrentContext, Draft, DraftCreateInput, Maybe } from '#types';
@@ -60,19 +60,14 @@ export const listDraftsService = async (
   currentContext: CurrentContext,
   draftCode?: DraftCode
 ): Promise<Draft[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, draft }) => {
-    const result = await draft.findMany({
-      where: { draftCode },
-      include: { activity: { include: { activityContact: true } } }
-    });
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+  return await unitOfWork.execute(async ({ draft }) =>
+    draft.findMany({
+      where: { draftCode, ...activityContactScope(scopeUserId) },
+      include: { activity: { include: { activityContact: true } } }
+    })
+  );
 };
 
 /**

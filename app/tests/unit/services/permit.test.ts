@@ -8,12 +8,12 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as peachDomain from '#src/domains/peach';
 import * as permitDomain from '#src/domains/permit';
 import * as permitTrackingDomain from '#src/domains/permitTracking';
 import * as externalPeach from '#src/external/peach';
 import * as peachParser from '#src/parsers/peach';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import * as permitService from '#src/services/permit';
 import { Initiative } from '#src/utils/enums/application';
 import { PermitNeeded } from '#src/utils/enums/permit';
@@ -25,7 +25,6 @@ vi.mock('config');
 
 const sendNotificationsSpy = vi.spyOn(permitDomain, 'sendPermitUpdateNotifications');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
 const getPiesRecordSpy = vi.spyOn(externalPeach, 'getPiesRecord');
 const summarizePiesRecordSpy = vi.spyOn(peachParser, 'summarizePiesRecord');
@@ -184,10 +183,9 @@ describe('permit service', () => {
   });
 
   describe('listPermitsService', () => {
-    it('fetches permits and applies scope filtering', async () => {
+    it('fetches permits, unscoped when not scope:self', async () => {
       const mockPermits = [TEST_PERMIT_1];
       mockRepos.permit.findMany.mockResolvedValueOnce(mockPermits as never);
-      filterSpy.mockResolvedValueOnce(mockPermits as never);
 
       const response = await permitService.listPermitsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -208,9 +206,24 @@ describe('permit service', () => {
       expect(response).toStrictEqual(mockPermits);
     });
 
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
+
+      await permitService.listPermitsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT,
+        { activityId: TEST_PERMIT_1.activityId }
+      );
+
+      expect(mockRepos.permit.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { activityId: TEST_PERMIT_1.activityId, ...activityContactScope(TEST_CURRENT_CONTEXT.userId) }
+        })
+      );
+    });
+
     it('fetches permits with notes included when includeNotes is true', async () => {
       mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
-      filterSpy.mockResolvedValueOnce([TEST_PERMIT_1] as never);
 
       await permitService.listPermitsService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, {
         activityId: TEST_PERMIT_1.activityId,
@@ -228,10 +241,10 @@ describe('permit service', () => {
   });
 
   describe('searchPermitsService', () => {
-    it('calls permit.search and applies scope filtering', async () => {
-      const mockSearchResult = { permits: [TEST_PERMIT_1], totalRecords: 1 };
+    const mockSearchResult = { permits: [TEST_PERMIT_1], totalRecords: 1 };
+
+    it('searches unscoped when not scope:self', async () => {
       mockRepos.permit.search.mockResolvedValueOnce(mockSearchResult as never);
-      filterSpy.mockResolvedValueOnce([TEST_PERMIT_1] as never);
 
       const response = await permitService.searchPermitsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -240,8 +253,25 @@ describe('permit service', () => {
         { skip: 0, take: 10 }
       );
 
-      expect(mockRepos.permit.search).toHaveBeenCalledWith(Initiative.HOUSING, { skip: 0, take: 10 });
-      expect(response).toStrictEqual({ permits: [TEST_PERMIT_1], totalRecords: 1 });
+      expect(mockRepos.permit.search).toHaveBeenCalledWith(Initiative.HOUSING, { skip: 0, take: 10 }, undefined);
+      expect(response).toStrictEqual(mockSearchResult);
+    });
+
+    it('scopes the search to the current user when scope:self', async () => {
+      mockRepos.permit.search.mockResolvedValueOnce(mockSearchResult as never);
+
+      await permitService.searchPermitsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT,
+        Initiative.HOUSING,
+        { skip: 0, take: 10 }
+      );
+
+      expect(mockRepos.permit.search).toHaveBeenCalledWith(
+        Initiative.HOUSING,
+        { skip: 0, take: 10 },
+        TEST_CURRENT_CONTEXT.userId
+      );
     });
   });
 

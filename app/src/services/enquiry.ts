@@ -1,6 +1,7 @@
 import { unitOfWork } from '#src/db/unitOfWork';
+import { activityContactScope } from '#src/db/utils/utils';
 import { emailEnquiryConfirmation, generateEnquiryData } from '#src/domains/enquiry';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { ActivityContactRole, EnquirySubmittedMethod } from '#src/utils/enums/projectCommon';
 
 import type {
@@ -134,8 +135,11 @@ export const listEnquiriesService = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<Enquiry[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
-    const result = await enquiry.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ enquiry }) =>
+    enquiry.findMany({
+      where: activityContactScope(scopeUserId),
       include: {
         activity: {
           include: {
@@ -148,15 +152,8 @@ export const listEnquiriesService = async (
         },
         user: true
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 /**
@@ -171,10 +168,13 @@ export const listRelatedEnquiriesService = async (
   currentContext: CurrentContext,
   activityId: string
 ): Promise<Enquiry[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
-    const result = await enquiry.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ enquiry }) =>
+    enquiry.findMany({
       where: {
-        relatedActivityId: activityId
+        relatedActivityId: activityId,
+        ...activityContactScope(scopeUserId)
       },
       include: {
         activity: {
@@ -190,15 +190,8 @@ export const listRelatedEnquiriesService = async (
       orderBy: {
         createdAt: 'asc'
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 /**
@@ -215,16 +208,9 @@ export const searchEnquiriesService = async (
   params: SearchEnquiriesInput,
   initiative: Initiative
 ): Promise<Enquiry[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, enquiry }) => {
-    const result = await enquiry.search(params, initiative);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+  return await unitOfWork.execute(async ({ enquiry }) => enquiry.search(params, initiative, scopeUserId));
 };
 
 /**

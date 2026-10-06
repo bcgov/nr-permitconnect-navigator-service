@@ -2,12 +2,13 @@ import { randomUUID } from 'node:crypto';
 
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
+import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
 import { buildNewPermitRecord, sendPermitUpdateNotifications } from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { getPiesRecord } from '#src/external/peach';
 import { summarizePiesRecord } from '#src/parsers/peach';
-import { filterActivityResponseByScope } from '#src/parsers/responseFiltering';
+import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import Problem from '#src/utils/problem';
 import { differential, isEmptyObject } from '#src/utils/utils';
@@ -153,10 +154,13 @@ export const listPermitsService = async (
   currentContext: CurrentContext,
   options?: ListPermitsInput
 ): Promise<Permit[]> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
-    const result = await permit.findMany({
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
+
+  return await unitOfWork.execute(async ({ permit }) =>
+    permit.findMany({
       where: {
-        activityId: options?.activityId ?? undefined
+        activityId: options?.activityId ?? undefined,
+        ...activityContactScope(scopeUserId)
       },
       orderBy: {
         permitType: {
@@ -177,15 +181,8 @@ export const listPermitsService = async (
           }
         }
       }
-    });
-
-    return await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result
-    );
-  });
+    })
+  );
 };
 
 /**
@@ -202,22 +199,9 @@ export const searchPermitsService = async (
   initiative: Exclude<Initiative, Initiative.PCNS>,
   options: SearchPermitsInput
 ): Promise<SearchPermitsResponse> => {
-  return await unitOfWork.execute(async ({ activityContact, contact, permit }) => {
-    const result = await permit.search(initiative, options);
+  const scopeUserId = getScopeUserId(currentAuthorization, currentContext);
 
-    const filtered = await filterActivityResponseByScope(
-      { activityContact, contact },
-      currentAuthorization,
-      currentContext,
-      result.permits
-    );
-
-    // TODO: totalRecords will be incorrect as its based on all permits
-    // TBH we probably need filtering at the prisma level somehow
-    // Not an immediate priority as pagination is currently internal only and Navs always see full results
-    // Will need to be addressed when pagination goes to the proponent side
-    return { permits: filtered, totalRecords: result.totalRecords };
-  });
+  return await unitOfWork.execute(async ({ permit }) => permit.search(initiative, options, scopeUserId));
 };
 
 /**

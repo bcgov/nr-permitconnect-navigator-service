@@ -10,10 +10,10 @@ import {
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import prisma from '#src/db/database';
+import { activityContactScope } from '#src/db/utils/utils';
 import * as generalProjectDomain from '#src/domains/generalProject';
 import * as permitTrackingDomain from '#src/domains/permitTracking';
 import * as projectDomain from '#src/domains/project';
-import * as responseFiltering from '#src/parsers/responseFiltering';
 import * as generalProjectService from '#src/services/generalProject';
 import { Initiative } from '#src/utils/enums/application';
 import { confirmationTemplateGeneralSubmission } from '#src/utils/templates';
@@ -29,7 +29,6 @@ const createDataSpy = vi.spyOn(generalProjectDomain, 'createGeneralProjectData')
 const generateDataSpy = vi.spyOn(generalProjectDomain, 'generateGeneralProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
-const filterSpy = vi.spyOn(responseFiltering, 'filterActivityResponseByScope');
 
 describe('generalProject service', () => {
   beforeEach(() => {
@@ -132,10 +131,9 @@ describe('generalProject service', () => {
   });
 
   describe('listGeneralProjectsService', () => {
-    it('fetches projects with includes and applies filtering', async () => {
+    it('fetches projects with includes, unscoped when not scope:self', async () => {
       const mockProjects = [TEST_GENERAL_PROJECT_1];
       mockRepos.generalProject.findMany.mockResolvedValueOnce(mockProjects as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
 
       const response = await generalProjectService.listGeneralProjectsService(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -144,6 +142,7 @@ describe('generalProject service', () => {
 
       expect(mockRepos.generalProject.findMany).toHaveBeenCalledTimes(1);
       expect(mockRepos.generalProject.findMany).toHaveBeenCalledWith({
+        where: {},
         include: {
           activity: {
             include: {
@@ -160,29 +159,29 @@ describe('generalProject service', () => {
           createdAt: 'desc'
         }
       });
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        mockProjects
-      );
       expect(response).toStrictEqual(mockProjects);
+    });
+
+    it('scopes the query to the current user when scope:self', async () => {
+      mockRepos.generalProject.findMany.mockResolvedValueOnce([] as never);
+
+      await generalProjectService.listGeneralProjectsService(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
+        TEST_CURRENT_CONTEXT
+      );
+
+      expect(mockRepos.generalProject.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({ where: activityContactScope(TEST_CURRENT_CONTEXT.userId) })
+      );
     });
   });
 
   describe('searchGeneralProjects', () => {
-    it('searches projects and applies filtering', async () => {
-      const mockProjects = [TEST_GENERAL_PROJECT_1];
-      const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
-      mockRepos.generalProject.search.mockResolvedValueOnce({
-        projects: mockProjects,
-        totalRecords: mockProjects.length
-      } as never);
-      filterSpy.mockResolvedValueOnce(mockProjects as never);
+    const searchParams = { skip: 0, take: 10, activityId: ['id-1'] };
+    const searchResult = { projects: [TEST_GENERAL_PROJECT_1], totalRecords: 1 };
+
+    it('searches unscoped when not scope:self', async () => {
+      mockRepos.generalProject.search.mockResolvedValueOnce(searchResult as never);
 
       const response = await generalProjectService.searchGeneralProjects(
         TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
@@ -190,19 +189,20 @@ describe('generalProject service', () => {
         searchParams
       );
 
-      expect(mockRepos.generalProject.search).toHaveBeenCalledTimes(1);
-      expect(mockRepos.generalProject.search).toHaveBeenCalledWith(searchParams);
-      expect(filterSpy).toHaveBeenCalledTimes(1);
-      expect(filterSpy).toHaveBeenCalledWith(
-        expect.objectContaining({
-          activityContact: mockRepos.activityContact,
-          contact: mockRepos.contact
-        }),
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
+      expect(mockRepos.generalProject.search).toHaveBeenCalledWith(searchParams, undefined);
+      expect(response).toStrictEqual(searchResult);
+    });
+
+    it('scopes the search to the current user when scope:self', async () => {
+      mockRepos.generalProject.search.mockResolvedValueOnce(searchResult as never);
+
+      await generalProjectService.searchGeneralProjects(
+        { ...TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, attributes: ['scope:self'] },
         TEST_CURRENT_CONTEXT,
-        mockProjects
+        searchParams
       );
-      expect(response).toStrictEqual({ projects: mockProjects, totalRecords: mockProjects.length });
+
+      expect(mockRepos.generalProject.search).toHaveBeenCalledWith(searchParams, TEST_CURRENT_CONTEXT.userId);
     });
   });
 

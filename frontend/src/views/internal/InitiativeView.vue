@@ -25,7 +25,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { BringForward, DraftableProjectService, Enquiry, Permit, Project, ProjectStatistics } from '@/types';
+import type { BringForward, DraftableProjectService, Enquiry, Project, ProjectStatistics } from '@/types';
 
 // Interfaces
 interface InitiativeState {
@@ -78,7 +78,6 @@ const bringForward: Ref<BringForward[]> = ref([]);
 const enquiries: Ref<Enquiry[]> = ref([]);
 const initiativeState: Ref<InitiativeState> = ref(HOUSING_INITIATIVE_STATE);
 const loading: Ref<boolean> = ref(true);
-const permits: Ref<Permit[]> = ref([]);
 const projects: Ref<Project[]> = ref([]);
 const statistics: Ref<ProjectStatistics | undefined> = ref(undefined);
 
@@ -131,7 +130,6 @@ onBeforeMount(async () => {
       v-if="authzStore.canNavigate(initiativeState?.navigationPermission)"
       v-model:bring-forward="bringForward"
       v-model:enquiries="enquiries"
-      v-model:permits="permits"
       v-model:projects="projects"
       v-model:statistics="statistics"
     />

@@ -1,4 +1,11 @@
-import { combineDateTime, isPlainObject, setEmptyStringsToNull, splitDateTime, toKebabCase } from '@/utils/utils';
+import {
+  combineDateTime,
+  getBatches,
+  isPlainObject,
+  setEmptyStringsToNull,
+  splitDateTime,
+  toKebabCase
+} from '@/utils/utils';
 
 describe('utils.ts', () => {
   describe('combineDateTime', () => {
@@ -37,6 +44,20 @@ describe('utils.ts', () => {
 
       expect(result).not.toBeNull();
       expect(result!.toISOString()).toBe('2024-01-10T07:00:00.000Z');
+    });
+  });
+
+  describe('getBatches', () => {
+    it('returns an empty array for an empty input', () => {
+      expect(getBatches([], 2)).toStrictEqual([]);
+    });
+
+    it('returns a single batch when the input fits within size', () => {
+      expect(getBatches([1, 2], 2)).toStrictEqual([[1, 2]]);
+    });
+
+    it('splits into full batches with a shorter last batch', () => {
+      expect(getBatches([1, 2, 3, 4, 5], 2)).toStrictEqual([[1, 2], [3, 4], [5]]);
     });
   });
 

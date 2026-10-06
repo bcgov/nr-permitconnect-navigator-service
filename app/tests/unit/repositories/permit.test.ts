@@ -285,4 +285,20 @@ describe('PermitRepository', () => {
       { companyNameRegistered: { contains: 'test', mode: 'insensitive' } }
     ]);
   });
+
+  it('scopes both the page and the count to the given user', async () => {
+    prismaTxMock.permit.count.mockResolvedValueOnce(0);
+    prismaTxMock.permit.findMany.mockResolvedValueOnce([]);
+
+    await makeRepo().search(Initiative.HOUSING, { skip: 0, take: 10 }, 'user-1');
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const where = (prismaTxMock.permit.findMany.mock.calls[0][0] as any).where;
+    expect(where.AND).toContainEqual({
+      activity: {
+        activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+      }
+    });
+    expect(prismaTxMock.permit.count.mock.calls[0][0]?.where).toEqual(where);
+  });
 });

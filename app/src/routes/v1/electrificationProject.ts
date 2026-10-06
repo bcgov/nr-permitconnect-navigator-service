@@ -22,7 +22,10 @@ import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, Resource } from '#src/utils/enums/application';
 import { draftSchema } from '#src/schemas/response/draft';
-import { electrificationProjectSchema } from '#src/schemas/response/electrificationProject';
+import {
+  electrificationProjectSchema,
+  searchElectrificationProjectsResponseSchema
+} from '#src/schemas/response/electrificationProject';
 import { electrificationProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
 import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
 import { schema } from '#src/schemas/request/electrificationProject';
@@ -71,7 +74,7 @@ openapiRoute(basePath, router, {
   responses: {
     200: {
       description: 'A list of electrification projects matching the search criteria',
-      schema: z.array(electrificationProjectSchema)
+      schema: searchElectrificationProjectsResponseSchema
     },
     401: UNAUTHORIZED_RESPONSE,
     403: FORBIDDEN_RESPONSE,

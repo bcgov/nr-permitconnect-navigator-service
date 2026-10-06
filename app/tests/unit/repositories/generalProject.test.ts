@@ -47,6 +47,7 @@ describe('GeneralProjectRepository', () => {
             { submissionType: { in: ['NEW'] } },
             {},
             {},
+            {},
             {}
           ]
         },
@@ -57,7 +58,8 @@ describe('GeneralProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: undefined
@@ -131,7 +133,8 @@ describe('GeneralProjectRepository', () => {
                   include: {
                     contact: true
                   }
-                }
+                },
+                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
               }
             }
           }
@@ -168,6 +171,7 @@ describe('GeneralProjectRepository', () => {
             { submissionType: { in: ['NEW'] } },
             {},
             {},
+            {},
             {}
           ]
         },
@@ -178,13 +182,29 @@ describe('GeneralProjectRepository', () => {
                 include: {
                   contact: true
                 }
-              }
+              },
+              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
             }
           },
           user: true
         }
       });
       expect(result).toStrictEqual({ projects: [TEST_GENERAL_PROJECT_1], totalRecords: 1 });
+    });
+
+    it('scopes both the page and the count to the given user', async () => {
+      findManyMock.mockResolvedValueOnce([]);
+      const countMock = vi.spyOn(repo, 'count').mockResolvedValueOnce(0);
+
+      await repo.search({ skip: 0, take: 10 }, 'user-1');
+
+      const where = findManyMock.mock.calls[0][0].where;
+      expect(where.AND).toContainEqual({
+        activity: {
+          activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+        }
+      });
+      expect(countMock).toHaveBeenCalledWith({ where });
     });
   });
 });

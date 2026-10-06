@@ -23,7 +23,7 @@ import { requireSomeAuth } from '#src/middleware/requireSomeAuth';
 import { requireSomeGroup } from '#src/middleware/requireSomeGroup';
 import { Action, IdentityProviderKind, Resource } from '#src/utils/enums/application';
 import { draftSchema } from '#src/schemas/response/draft';
-import { housingProjectSchema } from '#src/schemas/response/housingProject';
+import { housingProjectSchema, searchHousingProjectsResponseSchema } from '#src/schemas/response/housingProject';
 import { housingProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
 import { FORBIDDEN_RESPONSE, UNAUTHORIZED_RESPONSE, VALIDATION_ERROR_RESPONSE } from '#src/schemas/response/problem';
 import { schema } from '#src/schemas/request/housingProject';
@@ -69,7 +69,7 @@ openapiRoute(basePath, router, {
   tags: TAGS,
   schema: schema.searchHousingProjects,
   responses: {
-    200: { description: 'Housing projects matching the search criteria', schema: z.array(housingProjectSchema) },
+    200: { description: 'Housing projects matching the search criteria', schema: searchHousingProjectsResponseSchema },
     401: UNAUTHORIZED_RESPONSE,
     403: FORBIDDEN_RESPONSE,
     422: VALIDATION_ERROR_RESPONSE

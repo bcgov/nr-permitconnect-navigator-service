@@ -1,4 +1,5 @@
 import { WritableRepository } from './writable.ts';
+import { activityContactScope } from '#src/db/utils/utils';
 import { Initiative } from '#src/utils/enums/application';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -9,7 +10,11 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
     super(tx.permit, principal, true);
   }
 
-  public async search(initiativeCode: Exclude<Initiative, Initiative.PCNS>, options: SearchPermitsRequest) {
+  public async search(
+    initiativeCode: Exclude<Initiative, Initiative.PCNS>,
+    options: SearchPermitsRequest,
+    scopeUserId?: string
+  ) {
     // Determine project table based on initiative, exclude PCNS
     const projectTableMap = {
       [Initiative.ELECTRIFICATION]: 'electrificationProject',
@@ -89,7 +94,8 @@ export class PermitRepository extends WritableRepository<PrismaTransactionClient
                 }
               ]
             }
-          : {}
+          : {},
+        activityContactScope(scopeUserId)
       ]
     };
 

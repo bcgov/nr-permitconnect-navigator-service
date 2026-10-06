@@ -23,3 +23,10 @@ export const housingProjectSchema = housing_projectModelSchema
     longitude: z.string().nullable()
   })
   .openapi('HousingProject');
+
+export const searchHousingProjectsResponseSchema = z
+  .object({
+    projects: z.array(housingProjectSchema),
+    totalRecords: z.number()
+  })
+  .openapi('SearchHousingProjectsResponse');

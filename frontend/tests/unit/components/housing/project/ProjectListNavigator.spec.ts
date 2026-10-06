@@ -1,3 +1,4 @@
+import { flushPromises } from '@vue/test-utils';
 import { ref } from 'vue';
 
 import ProjectListNavigator from '@/components/projectCommon/ProjectListNavigator.vue';
@@ -98,9 +99,10 @@ function mountProjectListNavigator(
     props?: Partial<{ projects: HousingProject[]; loading: boolean }>;
     initiative?: Initiative;
     permissions?: { initiative: Initiative; resource: unknown; action: Action; group?: unknown }[];
+    searchProjects?: () => Promise<unknown>;
   } = {}
 ) {
-  const { props = {}, initiative, permissions } = options;
+  const { props = {}, initiative, permissions, searchProjects = vi.fn() } = options;
 
   const { wrapper, pinia } = mountComponent(ProjectListNavigator, {
     props: {
@@ -115,7 +117,7 @@ function mountProjectListNavigator(
     },
     provide: {
       [projectRouteNameKey as symbol]: ref('route-name'),
-      [projectServiceKey as symbol]: ref({ foo: vi.fn() }),
+      [projectServiceKey as symbol]: ref({ searchProjects }),
       [resourceKey as symbol]: ref(PROVIDED_RESOURCE)
     },
     stubs: {
@@ -225,6 +227,30 @@ describe('ProjectListNavigator', () => {
       expect(dataTable.props('rows')).toBe(10);
       expect(dataTable.props('sortField')).toBe('submittedAt');
       expect(dataTable.props('sortOrder')).toBe(-1);
+    });
+  });
+
+  describe('multi-permit label', () => {
+    afterEach(() => {
+      vi.useRealTimers();
+    });
+
+    it.each([
+      { count: 3, expected: `${BasicResponse.YES} (3)` },
+      { count: 1, expected: `${BasicResponse.NO} (1)` },
+      { count: undefined, expected: `${BasicResponse.NO} (0)` }
+    ])('labels a project with $count needed permits as $expected', async ({ count, expected }) => {
+      vi.useFakeTimers();
+      const searchProjects = vi.fn().mockResolvedValue({
+        projects: [{ ...testProject, activity: { _count: count === undefined ? undefined : { permit: count } } }],
+        totalRecords: 1
+      });
+
+      const { wrapper } = mountProjectListNavigator({ searchProjects });
+      await vi.advanceTimersByTimeAsync(500);
+      await flushPromises();
+
+      expect(wrapper.findComponent(DataTable).props('value')?.[0]?.multiPermitsNeeded).toBe(expected);
     });
   });
 });

@@ -43,5 +43,7 @@ const initiativeBaseSchema = initiativeModelSchema.omit({
 
 export const activityWithContactsSchema = activityBaseSchema.extend({
   activityContact: z.array(activityContactWithContactSchema),
-  initiative: initiativeBaseSchema.optional()
+  initiative: initiativeBaseSchema.optional(),
+  // Only project search includes it - count of permits with needed 'Yes'
+  _count: z.object({ permit: z.number() }).optional()
 });

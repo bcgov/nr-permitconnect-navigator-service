@@ -4,18 +4,6 @@ import type { Prisma } from '#prismaClient';
 import type { CurrentContext } from '#types';
 
 /**
- * Generates DB create stamps
- * @param currentContext The current context of the Express request
- * @returns An object with filled create stamps
- */
-export function generateCreateStamps(currentContext: CurrentContext | undefined) {
-  return {
-    createdBy: currentContext?.userId ?? SYSTEM_ID,
-    createdAt: new Date()
-  };
-}
-
-/**
  * Generates DB update stamps
  * @param currentContext The current context of the Express request
  * @returns An object with filled update stamps
@@ -28,27 +16,18 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
 }
 
 /**
- * Generates null DB update stamps
- * @returns An object with null update stamps
+ * Builds a where fragment restricting results to activities the given user is an active contact on.
+ * Soft-delete filters are explicit as the filterDeleted extension doesn't reach relation filters in `where`.
+ * @param userId The user to scope to, or undefined for no restriction
+ * @returns A where fragment for any model with an `activity` relation, or an empty object
  */
-export function generateNullUpdateStamps() {
-  return {
-    updatedBy: null,
-    updatedAt: null
-  };
-}
+export function activityContactScope(userId?: string) {
+  if (!userId) return {};
 
-export function generateDeleteStamps(currentContext: CurrentContext | undefined) {
   return {
-    deletedBy: currentContext?.userId ?? SYSTEM_ID,
-    deletedAt: new Date()
-  };
-}
-
-export function generateNullDeleteStamps() {
-  return {
-    deletedBy: null,
-    deletedAt: null
+    activity: {
+      activityContact: { some: { deletedAt: null, contact: { userId, deletedAt: null } } }
+    }
   };
 }
 

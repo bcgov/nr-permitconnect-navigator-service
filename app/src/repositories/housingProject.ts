@@ -1,7 +1,7 @@
 import { addDays } from 'date-fns';
 import { Prisma } from '#prismaClient';
 
-import { jsonToPrismaInputJson } from '#src/db/utils/utils';
+import { activityContactScope, jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { WritableRepository } from './writable.ts';
 
 import type { PrismaTransactionClient } from '#src/db/database';
@@ -23,7 +23,7 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
     return this.update(where, updateData);
   }
 
-  public async search(params: SearchHousingProjectRequest): Promise<SearchProjectResponse> {
+  public async search(params: SearchHousingProjectRequest, scopeUserId?: string): Promise<SearchProjectResponse> {
     const validSortFields = [
       'activityId',
       'applicationStatus',
@@ -104,7 +104,8 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
                 }
               ]
             }
-          : {}
+          : {},
+        activityContactScope(scopeUserId)
       ]
     };
 
@@ -120,7 +121,8 @@ export class HousingProjectRepository extends WritableRepository<PrismaTransacti
               include: {
                 contact: true
               }
-            }
+            },
+            _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
           }
         },
         user: params.includeUser
