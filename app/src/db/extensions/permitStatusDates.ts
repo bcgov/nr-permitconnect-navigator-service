@@ -3,9 +3,23 @@ import { Prisma } from '#prismaClient';
 import { Regex } from '#src/utils/enums/application';
 
 const DATE_ONLY_REGEX = new RegExp(Regex.DATE_ONLY);
-const DATE_FIELDS = ['submittedDate', 'decisionDate', 'statusLastVerified', 'statusLastChanged'];
+const DATE_FIELDS = [
+  'submittedDate',
+  'consultationStartDate',
+  'consultationEndDate',
+  'decisionDate',
+  'statusLastVerified',
+  'statusLastChanged'
+];
 const TIMETZ_REGEX = new RegExp(Regex.TIMETZ);
-const TIME_FIELDS = ['submittedTime', 'decisionTime', 'statusLastVerifiedTime', 'statusLastChangedTime'];
+const TIME_FIELDS = [
+  'submittedTime',
+  'consultationStartTime',
+  'consultationEndTime',
+  'decisionTime',
+  'statusLastVerifiedTime',
+  'statusLastChangedTime'
+];
 
 // Date string "HH:MM:SS(.SSS)Z" into Date object w/ dummy time, gets dropped once inserted into db
 function dateFromDateString(date: string | null | undefined): Date | null {
@@ -85,6 +99,18 @@ const permitStatusDatesTransform = Prisma.defineExtension({
           return dateToDateString(permit.submittedDate);
         }
       },
+      consultationStartDate: {
+        needs: { consultationStartDate: true },
+        compute(permit) {
+          return dateToDateString(permit.consultationStartDate);
+        }
+      },
+      consultationEndDate: {
+        needs: { consultationEndDate: true },
+        compute(permit) {
+          return dateToDateString(permit.consultationEndDate);
+        }
+      },
       decisionDate: {
         needs: { decisionDate: true },
         compute(permit) {
@@ -107,6 +133,18 @@ const permitStatusDatesTransform = Prisma.defineExtension({
         needs: { submittedTime: true },
         compute(permit) {
           return dateToTimeString(permit.submittedTime);
+        }
+      },
+      consultationStartTime: {
+        needs: { consultationStartTime: true },
+        compute(permit) {
+          return dateToTimeString(permit.consultationStartTime);
+        }
+      },
+      consultationEndTime: {
+        needs: { consultationEndTime: true },
+        compute(permit) {
+          return dateToTimeString(permit.consultationEndTime);
         }
       },
       decisionTime: {
