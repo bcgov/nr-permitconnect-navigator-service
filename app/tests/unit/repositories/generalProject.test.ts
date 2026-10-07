@@ -59,7 +59,7 @@ describe('GeneralProjectRepository', () => {
                   contact: true
                 }
               },
-              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
+              _count: { select: { permit: { where: { needed: 'Yes' } } } }
             }
           },
           user: undefined
@@ -134,7 +134,7 @@ describe('GeneralProjectRepository', () => {
                     contact: true
                   }
                 },
-                _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
+                _count: { select: { permit: { where: { needed: 'Yes' } } } }
               }
             }
           }
@@ -183,7 +183,7 @@ describe('GeneralProjectRepository', () => {
                   contact: true
                 }
               },
-              _count: { select: { permit: { where: { needed: 'Yes', deletedAt: null } } } }
+              _count: { select: { permit: { where: { needed: 'Yes' } } } }
             }
           },
           user: true
@@ -201,7 +201,7 @@ describe('GeneralProjectRepository', () => {
       const where = findManyMock.mock.calls[0][0].where;
       expect(where.AND).toContainEqual({
         activity: {
-          activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+          activityContact: { some: { contact: { userId: 'user-1' } } }
         }
       });
       expect(countMock).toHaveBeenCalledWith({ where });

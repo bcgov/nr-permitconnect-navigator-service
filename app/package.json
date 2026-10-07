@@ -80,6 +80,7 @@
     "start": "tsx ./server.ts",
     "test": "vitest run --coverage",
     "test:watch": "vitest",
+    "verify:softdelete": "cross-env NODE_ENV=dev tsx ./tests/scripts/verifySoftDelete.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

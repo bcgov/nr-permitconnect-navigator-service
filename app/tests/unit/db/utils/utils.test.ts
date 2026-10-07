@@ -34,10 +34,10 @@ describe('activityContactScope', () => {
     expect(activityContactScope()).toEqual({});
   });
 
-  it('restricts to active activity contacts of the user', () => {
+  it('restricts to activity contacts of the user', () => {
     expect(activityContactScope('user-1')).toEqual({
       activity: {
-        activityContact: { some: { deletedAt: null, contact: { userId: 'user-1', deletedAt: null } } }
+        activityContact: { some: { contact: { userId: 'user-1' } } }
       }
     });
   });

@@ -119,13 +119,33 @@ describe('ReadableRepository', () => {
       expect(prismaTxMock.enquiry.findMany).toHaveBeenCalledWith({ where: { deletedAt: null } });
     });
 
-    it('does not add deletedAt:null when includeDeleted is true', async () => {
+    it.each(['count', 'findMany', 'findFirst', 'findFirstOrThrow', 'findUnique'] as const)(
+      'passes includeDeleted through to the filterDeleted extension for %s',
+      async (method) => {
+        const repo = new TestReadableRepository(true);
+        const read = repo[method] as (args: unknown, options: { includeDeleted: boolean }) => Promise<unknown>;
+
+        await read.call(repo, { where: { enquiryId: 'e1' } }, { includeDeleted: true });
+
+        expect(prismaTxMock.enquiry[method]).toHaveBeenCalledWith({ where: { enquiryId: 'e1' }, includeDeleted: true });
+      }
+    );
+
+    it('passes includeDeleted through when no args are given', async () => {
       const repo = new TestReadableRepository(true);
-      prismaTxMock.enquiry.findMany.mockResolvedValueOnce([]);
+
+      await repo.findMany(undefined, { includeDeleted: true });
+
+      expect(prismaTxMock.enquiry.findMany).toHaveBeenCalledWith({ includeDeleted: true });
+    });
+
+    it('passes includeDeleted through when soft delete is disabled', async () => {
+      // The extension filters every model with deletedAt, regardless of this repository setting
+      const repo = new TestReadableRepository(false);
 
       await repo.findMany({ where: { enquiryId: 'e1' } }, { includeDeleted: true });
 
-      expect(prismaTxMock.enquiry.findMany).toHaveBeenCalledWith({ where: { enquiryId: 'e1' } });
+      expect(prismaTxMock.enquiry.findMany).toHaveBeenCalledWith({ where: { enquiryId: 'e1' }, includeDeleted: true });
     });
 
     it('does not add deletedAt:null when soft delete is disabled', async () => {

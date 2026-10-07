@@ -16,8 +16,7 @@ export function generateUpdateStamps(currentContext: CurrentContext | undefined)
 }
 
 /**
- * Builds a where fragment restricting results to activities the given user is an active contact on.
- * Soft-delete filters are explicit as the filterDeleted extension doesn't reach relation filters in `where`.
+ * Builds a where fragment restricting results to activities the given user is a contact on.
  * @param userId The user to scope to, or undefined for no restriction
  * @returns A where fragment for any model with an `activity` relation, or an empty object
  */
@@ -26,7 +25,7 @@ export function activityContactScope(userId?: string) {
 
   return {
     activity: {
-      activityContact: { some: { deletedAt: null, contact: { userId, deletedAt: null } } }
+      activityContact: { some: { contact: { userId } } }
     }
   };
 }
