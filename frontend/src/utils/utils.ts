@@ -9,7 +9,7 @@ import type { ToastMessageOptions } from 'primevue/toast';
 
 /**
  * @function combineDateTime
- * Combines separate date and time strings into a single UTC Date object
+ * Combines separate date and time strings into a single Date object
  * @param date date string
  * @param time time string
  * @returns A constructed date object

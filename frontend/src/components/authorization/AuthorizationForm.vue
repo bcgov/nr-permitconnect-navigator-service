@@ -8,6 +8,7 @@ import { useRouter } from 'vue-router';
 import { array, boolean, date, number, object, string, type InferType } from 'yup';
 
 import AuthorizationCardIntake from '@/components/authorization/AuthorizationCardIntake.vue';
+import AuthorizationFirstNationConsultationCard from '@/components/authorization/AuthorizationFirstNationConsultationCard.vue';
 import AuthorizationStatusUpdatesCard from '@/components/authorization/AuthorizationStatusUpdatesCard.vue';
 import AuthorizationUpdateHistory from '@/components/authorization/AuthorizationUpdateHistory.vue';
 import { FormNavigationGuard } from '@/components/form';
@@ -70,6 +71,18 @@ const formSchema = object({
       then: (schema) => schema.required(t('authorization.authorizationForm.noteRequired'))
     }),
   authorizationType: object().required().label(t('authorization.authorizationForm.authorizationType')),
+  consultationStartDate: date().nullable(),
+  consultationEndDate: date()
+    .nullable()
+    .test(
+      'consultationEndDate > consultationStartDate',
+      t('authorization.authorizationFirstNationConsultation.consultationEndDateInvalid'),
+      function (value) {
+        const { consultationStartDate } = this.parent;
+        if (!value || !consultationStartDate) return true;
+        return value >= consultationStartDate;
+      }
+    ),
   needed: string()
     .required()
     .oneOf(PERMIT_NEEDED_LIST)
@@ -245,6 +258,9 @@ function initializeFormValues() {
   if (authorization) {
     initialFormValues.value = {
       authorizationType: authorization.permitType,
+      consultationStartDate: combineDateTime(authorization.consultationStartDate, authorization.consultationStartTime),
+      consultationEndDate: combineDateTime(authorization.consultationEndDate, authorization.consultationEndTime),
+      // Combine date and time fields into a single Date object as the timezones may differ
       decisionDate: combineDateTime(authorization.decisionDate, authorization.decisionTime),
       submittedDate: combineDateTime(authorization.submittedDate, authorization.submittedTime),
       permitTracking: authorization.permitTracking?.map((pt) => {
@@ -319,6 +335,8 @@ async function onSubmit(data: GenericObject) {
     const submitted = splitDateTime(data.submittedDate);
     const statusLastChanged = splitDateTime(data.statusLastChanged);
     const statusLastVerified = splitDateTime(data.statusLastVerified);
+    const consultationStart = splitDateTime(data.consultationStartDate);
+    const consultationEnd = splitDateTime(data.consultationEndDate);
 
     const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
     const permitData: UpsertPermitRequest = {
@@ -327,6 +345,10 @@ async function onSubmit(data: GenericObject) {
       permitTypeId: authorizationType.permitTypeId,
       submittedDate: submitted.date,
       submittedTime: submitted.time,
+      consultationStartDate: consultationStart.date,
+      consultationStartTime: consultationStart.time,
+      consultationEndDate: consultationEnd.date,
+      consultationEndTime: consultationEnd.time,
       decisionDate: decision.date,
       decisionTime: decision.time,
       statusLastVerified: statusLastVerified.date,
@@ -459,6 +481,11 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
       @update:set-verified-date="setFieldValue('statusLastVerified', new Date())"
       @update:state-changed="setFieldValue('stage', undefined)"
       @update:target-date-changed="if (!!values?.targetDate) setFieldValue('targetDateDescription', undefined);"
+    />
+    <AuthorizationFirstNationConsultationCard
+      :editable="editable"
+      :peach-integrated-auth-type="isPeachIntegratedAuthType && isPeachEnabled"
+      class="mt-7"
     />
     <div class="mt-8 flex justify-between">
       <div>

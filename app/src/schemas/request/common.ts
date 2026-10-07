@@ -6,13 +6,25 @@ import { Regex } from '#src/utils/enums/application';
 export const activityId = z.string().min(8).max(8);
 
 /** Date-only string (YYYY-MM-DD), canonical and not in the future. */
-export const dateOnlyString = z
+export const notInFutureDateOnlyString = z
   .string()
   .regex(new RegExp(Regex.DATE_ONLY), '"Must be a valid date in the format YYYY-MM-DD"')
   .superRefine((value, ctx) => {
     const d = new Date(value);
     const canonical = Number.isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
     if (canonical !== value || d.getTime() > Date.now()) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: '"Must be a valid date in the format YYYY-MM-DD"' });
+    }
+  });
+
+/** Date-only string (YYYY-MM-DD), canonical */
+export const dateOnlyString = z
+  .string()
+  .regex(new RegExp(Regex.DATE_ONLY), '"Must be a valid date in the format YYYY-MM-DD"')
+  .superRefine((value, ctx) => {
+    const d = new Date(value);
+    const canonical = Number.isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
+    if (canonical !== value) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: '"Must be a valid date in the format YYYY-MM-DD"' });
     }
   });
