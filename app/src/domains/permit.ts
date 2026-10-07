@@ -215,7 +215,7 @@ export const sendPermitUpdateNotifications = async (
   }
 
   // Send out permit update emails
-  for (const emailJob of permitUpdateEmails) {
-    await sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob);
-  }
+  await Promise.all(
+    permitUpdateEmails.map((emailJob) => sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
+  );
 };

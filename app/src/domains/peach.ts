@@ -103,7 +103,14 @@ export const syncPeachRecords = async (
 
   const parsedRecords: Record<string, PeachSummaryResponse> = parsePiesRecords(records);
 
-  const updatedPermits: UpdatedPermitWithNote[] = [];
+  const pendingUpdates: {
+    cleanedPermit: Omit<
+      (typeof systemRecordPermits)[number]['permit'],
+      'activity' | 'permitNote' | 'permitTracking' | 'permitType'
+    >;
+    note?: string;
+    notify: boolean;
+  }[] = [];
 
   for (const systemRecordPermit of systemRecordPermits) {
     const { recordId, systemId, permit: pcnsPermit } = systemRecordPermit;
@@ -163,13 +170,6 @@ export const syncPeachRecords = async (
     pcnsPermit.updatedBy = updatedBy;
 
     const cleanedPermit = omit(pcnsPermit, ['activity', 'permitNote', 'permitTracking', 'permitType']);
-    const updatedPermit = await repositories.permit.upsert(
-      {
-        permitId: cleanedPermit.permitId
-      },
-      cleanedPermit,
-      cleanedPermit
-    );
     const applicantRequestedHold = !onHoldCodesEqual && peachSummary.onHoldCode === PiesOnHold.APPLICANT_REQUEST;
     let note: string | undefined = undefined;
 
@@ -178,8 +178,14 @@ export const syncPeachRecords = async (
     }
 
     // For notifications, only return permits that have had a status change or is now on hold by applicant's request.
-    if (stageOrStateHasDiff || applicantRequestedHold) updatedPermits.push({ permit: updatedPermit, note });
+    pendingUpdates.push({ cleanedPermit, note, notify: stageOrStateHasDiff || applicantRequestedHold });
   }
 
-  return updatedPermits;
+  const upsertedPermits = await Promise.all(
+    pendingUpdates.map(({ cleanedPermit }) =>
+      repositories.permit.upsert({ permitId: cleanedPermit.permitId }, cleanedPermit, cleanedPermit)
+    )
+  );
+
+  return pendingUpdates.flatMap(({ note, notify }, i) => (notify ? [{ permit: upsertedPermits[i], note }] : []));
 };
