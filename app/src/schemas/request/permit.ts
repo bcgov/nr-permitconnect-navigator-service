@@ -1,6 +1,14 @@
 import { z } from 'zod';
 
-import { activityId, dateOnlyString, notInFutureDate, queryBoolean, timeTzString, uuidv4 } from './common.ts';
+import {
+  activityId,
+  dateOnlyString,
+  notInFutureDate,
+  notInFutureDateOnlyString,
+  queryBoolean,
+  timeTzString,
+  uuidv4
+} from './common.ts';
 import { paginationOptions } from './paginationOptions.ts';
 import { sharedPermitNoteSchema } from './permitNote.ts';
 import { permitTrackingSchema } from './permitTracking.ts';
@@ -86,13 +94,17 @@ export const schema = {
         state: requireValidCode.PermitState(z.string().max(255)),
         stage: requireValidCode.PermitStage(z.string().max(255)),
         onHoldCode: requireValidCode.PiesOnHold(z.string().max(255)).nullish(),
-        submittedDate: dateOnlyString.nullish(),
+        submittedDate: notInFutureDateOnlyString.nullish(),
         submittedTime: timeTzString.nullish(),
-        decisionDate: dateOnlyString.nullish(),
+        consultationStartDate: dateOnlyString.nullish(),
+        consultationStartTime: timeTzString.nullish(),
+        consultationEndDate: dateOnlyString.nullish(),
+        consultationEndTime: timeTzString.nullish(),
+        decisionDate: notInFutureDateOnlyString.nullish(),
         decisionTime: timeTzString.nullish(),
-        statusLastChanged: dateOnlyString.nullish(),
+        statusLastChanged: notInFutureDateOnlyString.nullish(),
         statusLastChangedTime: timeTzString.nullish(),
-        statusLastVerified: dateOnlyString.nullish(),
+        statusLastVerified: notInFutureDateOnlyString.nullish(),
         statusLastVerifiedTime: timeTzString.nullish(),
         targetDate: z.coerce.date().nullish(),
         targetDateDescription: z.string().max(255).nullish(),
@@ -100,5 +112,15 @@ export const schema = {
         ...createStamps
       })
       .strict()
+      .refine(
+        (data) =>
+          !data.consultationStartDate ||
+          !data.consultationEndDate ||
+          data.consultationEndDate >= data.consultationStartDate,
+        {
+          message: '"consultationEndDate" must be on or after "consultationStartDate"',
+          path: ['consultationEndDate']
+        }
+      )
   }
 };
