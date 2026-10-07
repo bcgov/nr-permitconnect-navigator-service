@@ -5,9 +5,9 @@ import { unitOfWork } from './src/db/unitOfWork.ts';
 import { getLogger } from './src/utils/log.ts';
 import { state } from './state.ts';
 
-import type { UpdatedPermitWithNote } from './src/types';
+import type { UpdatedPermitWithNote } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 async function syncPeachToPcns() {
   if (!state.features.peach) return;

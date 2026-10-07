@@ -8,7 +8,7 @@ import permitStatusDatesTransform from './extensions/permitStatusDates.ts';
 import projectIdTransform from './extensions/projectId.ts';
 import { getLogger } from '#src/utils/log';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 const db = {
   host: config.get<string>('server.db.host'),

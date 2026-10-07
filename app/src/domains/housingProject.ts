@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-import { ensureActivityWithPrimaryContact } from './activity';
-import { buildNewPermitRecord } from './permit';
+import { ensureActivityWithPrimaryContact } from './activity.ts';
+import { buildNewPermitRecord } from './permit.ts';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { jsonToPrismaInputJson } from '#src/db/utils/utils';
 import { getCurrentUsername } from '#src/utils/index';

@@ -7,7 +7,7 @@ import { getLogger } from '#src/utils/log';
 
 import type { CodeTableDelegate } from '#types';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 interface CodeRow {
   code: string;
@@ -64,16 +64,17 @@ export function buildEnumsOutput(entries: CodeTableEntry[]): string {
 }
 
 async function main() {
-  const entries: CodeTableEntry[] = [];
-  for (const { name, model } of CODE_TABLES) {
-    const delegate = (prisma as unknown as Record<string, CodeTableDelegate>)[model];
-    const rows = await delegate.findMany({
-      where: { active: true },
-      select: { code: true },
-      orderBy: { code: 'asc' }
-    });
-    entries.push({ name, rows });
-  }
+  const entries: CodeTableEntry[] = await Promise.all(
+    CODE_TABLES.map(async ({ name, model }) => {
+      const delegate = (prisma as unknown as Record<string, CodeTableDelegate>)[model];
+      const rows = await delegate.findMany({
+        where: { active: true },
+        select: { code: true },
+        orderBy: { code: 'asc' }
+      });
+      return { name, rows };
+    })
+  );
 
   const output = buildEnumsOutput(entries);
 
@@ -91,12 +92,12 @@ async function main() {
 
 // Guard against running as a side effect of importing this module in tests.
 if (process.env.VITEST !== 'true') {
-  main()
-    .catch((e) => {
-      log.error(e);
-      process.exit(1);
-    })
-    .finally(async () => {
-      await prisma.$disconnect();
-    });
+  try {
+    await main();
+  } catch (e) {
+    log.error(e);
+    process.exitCode = 1;
+  } finally {
+    await prisma.$disconnect();
+  }
 }

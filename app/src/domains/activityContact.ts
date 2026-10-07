@@ -1,6 +1,6 @@
 import config from 'config';
 
-import { getProjectByActivityId } from './project';
+import { getProjectByActivityId } from './project.ts';
 import { Problem } from '#src/utils/index';
 import { GroupName } from '#src/utils/enums/application';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
@@ -73,7 +73,7 @@ export const verifyPrimaryChange = async (
   currentAuthorization: CurrentAuthorization,
   currentContext: CurrentContext
 ): Promise<ActivityContact | undefined> => {
-  const NAVIGATOR_GROUPS = new Set([GroupName.ADMIN, GroupName.NAVIGATOR, GroupName.SUPERVISOR]);
+  const NAVIGATOR_GROUPS = new Set<GroupName>([GroupName.ADMIN, GroupName.NAVIGATOR, GroupName.SUPERVISOR]);
 
   const activityContacts = await repositories.activityContact.findMany({ where: { activityId } });
 

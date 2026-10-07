@@ -1,7 +1,7 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
-import { getProjectByActivityId } from './project';
+import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { email } from '#src/external/ches';
@@ -13,7 +13,7 @@ import {
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
 } from '#src/utils/templates';
-import { state } from '../../state';
+import { state } from '../../state.ts';
 
 import type { Repositories } from '#src/db/unitOfWork';
 import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
@@ -215,7 +215,7 @@ export const sendPermitUpdateNotifications = async (
   }
 
   // Send out permit update emails
-  for (const emailJob of permitUpdateEmails) {
-    await sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob);
-  }
+  await Promise.all(
+    permitUpdateEmails.map((emailJob) => sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
+  );
 };

@@ -78,11 +78,10 @@ jobs:
         run: |
           kubectl exec $(oc get pods --selector='app.kubernetes.io/instance=pr-${{ github.event.number }},app.kubernetes.io/name=nr-permitconnect-navigator-service' -o custom-columns=POD:.metadata.name --no-headers | head -1) -- \
             /usr/local/bin/node \
-            --conditions=sbin \
             ./node_modules/knex/bin/cli.js \
             seed:run \
-            --specific=dev_groups.js \
-            --knexfile=./sbin/knexfile.js
+            --specific=dev_groups.ts \
+            --knexfile=./knexfile.ts
 
   comment-pr:
     name: Comment on PR

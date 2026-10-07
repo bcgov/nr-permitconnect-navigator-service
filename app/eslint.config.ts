@@ -7,7 +7,7 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig([
   {
-    ignores: ['coverage/**', 'dist/**', 'vitest.config.ts', 'node_modules/**', 'sbin/**', 'src/db/generated/**']
+    ignores: ['coverage/**', 'dist/**', 'vitest.config.ts', 'node_modules/**', 'src/db/generated/**']
   },
   {
     files: ['**/*.{js,ts}'],
@@ -23,7 +23,7 @@ export default defineConfig([
     languageOptions: {
       parserOptions: {
         projectService: true,
-        tsconfigRootDir: __dirname //TODO when type:module => import.meta.dirname
+        tsconfigRootDir: import.meta.dirname
       }
     },
     rules: {

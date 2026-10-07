@@ -1,6 +1,6 @@
 import config from 'config';
 
-import { getProjectByActivityId } from './project';
+import { getProjectByActivityId } from './project.ts';
 import { email } from '#src/external/ches';
 import { Problem } from '#src/utils/index';
 import { GroupName, Resource } from '#src/utils/enums/application';
@@ -47,7 +47,7 @@ export async function emailBringForwardNotification(
       activityId: noteHistory.activityId
     });
   } else if (
-    [Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, resource === Resource.HOUSING_PROJECT].includes(
+    ([Resource.ELECTRIFICATION_PROJECT, Resource.GENERAL_PROJECT, Resource.HOUSING_PROJECT] as Resource[]).includes(
       resource
     )
   ) {

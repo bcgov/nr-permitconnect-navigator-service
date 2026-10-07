@@ -18,7 +18,7 @@ import { state } from './state.ts';
 
 import type { NextFunction, Request, Response } from 'express';
 
-const log = getLogger(module.filename);
+const log = getLogger(import.meta.filename);
 
 const appRouter = express.Router();
 const app = express();
@@ -105,8 +105,7 @@ appRouter.get('/config', (_req: Request, res: Response, next: NextFunction): voi
 appRouter.use('/api', router);
 
 // Host the static frontend assets
-// This route assumes being executed from '/sbin'
-appRouter.use('/', express.static(join(__dirname, '../dist')));
+appRouter.use('/', express.static(join(import.meta.dirname, './dist')));
 
 // Root level Router
 app.use('/', appRouter);

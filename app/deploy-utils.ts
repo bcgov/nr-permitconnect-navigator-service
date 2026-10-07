@@ -1,13 +1,12 @@
 // This script attempts to gracefully rebuild and update nr-permitting-navigator-service-frontend if necessary
 /* eslint-disable no-console */
+import { spawnSync } from 'child_process';
 import { existsSync, lstatSync, mkdirSync, readdirSync, readFileSync, rmSync, statSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
 
 const FRONTEND_DIR = '../frontend';
 const DIST_DIR = 'dist';
-const SBIN_DIR = 'sbin';
 const TITLE = 'nr-permitting-navigator-service-frontend';
-const V1_DOCS = 'v1.api-spec.yaml';
 
 try {
   const args = process.argv.slice(2);
@@ -20,12 +19,6 @@ try {
       break;
     case 'deploy':
       deployComponents();
-      break;
-    case 'docs':
-      copyDocs();
-      break;
-    case 'prisma-client':
-      copyPrismaClient();
       break;
     case 'purge':
       console.log(`Purging "${DIST_DIR}"...`);
@@ -76,22 +69,6 @@ function cleanComponents() {
   console.log(`${TITLE} has been cleaned`);
 }
 
-function copyDocs() {
-  console.log('Copying OpenAPI docs...');
-  if (existsSync(SBIN_DIR)) {
-    copyFileSync(`./src/docs/${V1_DOCS}`, `./sbin/src/docs/${V1_DOCS}`);
-  }
-  console.log('OpenAPI docs have been copied.');
-}
-
-function copyPrismaClient() {
-  console.log('Copying generated Prisma client...');
-  if (existsSync(SBIN_DIR) && existsSync('./src/db/generated')) {
-    copyDirRecursiveSync('./src/db/generated', './sbin/src/db');
-  }
-  console.log('Generated Prisma client has been copied.');
-}
-
 /**
  * Redeploy `nr-permitting-navigator-service-frontend` library
  */
@@ -112,15 +89,8 @@ function deployComponents() {
  * @param cwd Working directory of the command to run
  */
 export function runSync(cmd: string, cwd: string | undefined) {
-  const { spawnSync } = require('child_process'); // eslint-disable-line @typescript-eslint/no-require-imports
   const parts = cmd.split(/\s+/g);
-  const opts = {
-    cwd: cwd || undefined,
-    stdio: 'inherit',
-    shell: true
-  };
-
-  const p = spawnSync(parts[0], parts.slice(1), opts);
+  const p = spawnSync(parts[0], parts.slice(1), { cwd: cwd || undefined, stdio: 'inherit', shell: true });
   if (p.status) {
     throw new Error(`Command "${cmd}" exited with status code "${p.status}"`);
   }

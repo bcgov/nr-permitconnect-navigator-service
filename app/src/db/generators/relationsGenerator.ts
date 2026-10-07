@@ -1,7 +1,7 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { generatorHandler } from '@prisma/generator-helper';
+import generatorHelper from '@prisma/generator-helper';
 import prettier from 'prettier';
 
 import { buildRelationsMap } from './relations.ts';
@@ -9,7 +9,9 @@ import { getLogger } from '#src/utils/log';
 
 import type { GeneratorOptions } from '@prisma/generator-helper';
 
-const log = getLogger(module.filename);
+// CJS package: Node can't detect its named exports from ESM
+const { generatorHandler } = generatorHelper;
+const log = getLogger(import.meta.filename);
 
 generatorHandler({
   onManifest: () => ({
