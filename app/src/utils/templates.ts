@@ -501,3 +501,38 @@ export const bringForwardEnquiryNotificationTemplate: EmailTemplate = (replaceCo
     </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
 };
+
+export const intakePermitNotificationTemplate: EmailTemplate = (replaceConfig) => {
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ dearName }},<br><br>
+
+    <b>Project name: {{ projectName }}</b><br><br>
+    <b>Project ID: {{ activityId }}</b><br><br>
+
+    {{ proponentName }} ({{ relationshipToProject }}) has submitted ({{ newPermitsCount }})
+    new authorization to the project. Please review the<br>
+    submission:<br><br>
+
+    <b>Submitted authorization(s):</b>
+    {{ submittedPermits }}
+    <br><br>
+
+    <b>Submitted date: {{ submittedDate }}</b>
+    </div><br><br>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
+  return replacePlaceholders(baseTemplate, replaceConfig);
+};
