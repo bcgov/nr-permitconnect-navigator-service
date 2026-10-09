@@ -6,12 +6,14 @@ import {
   TEST_IDIR_USER_1,
   TEST_PERMIT_1,
   TEST_PERMIT_2,
-  TEST_PERMIT_NOTE_1
+  TEST_PERMIT_NOTE_1,
+  TEST_PERMIT_TYPE_1
 } from '#tests/unit/data/index';
 import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
   listPeachIntegratedTrackings,
+  sendIntakePermitNotification,
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
 } from '#src/domains/permit';
@@ -348,6 +350,53 @@ describe('permit domain', () => {
       await sendPermitUpdateNotifications(mockRepos, permit as never, false);
 
       expect(mockRepos.permitNote.create).toHaveBeenCalled();
+    });
+  });
+
+  describe('sendIntakePermitNotification', () => {
+    it('should include a comma-separated link for each submitted permit', async () => {
+      const emailSpy = vi.spyOn(chesExternal, 'email').mockResolvedValue(TEST_EMAIL_RESPONSE as never);
+      const secondPermitType = { ...TEST_PERMIT_TYPE_1, permitTypeId: 2, name: 'PERMIT2' };
+      vi.mocked(config.get).mockImplementation((key: string) => {
+        if (key === 'server.pcns.appUrl') return 'www.example.com';
+        if (key === 'server.pcns.navEmail') return 'nav@example.com';
+        return undefined;
+      });
+
+      vi.spyOn(projectDomain, 'getProjectByActivityId').mockResolvedValue({
+        projectId: 'proj-123',
+        projectName: 'Project',
+        activity: {
+          activityId: 'ACTI1234',
+          initiative: { code: Initiative.HOUSING },
+          activityContact: [
+            {
+              role: ActivityContactRole.PRIMARY,
+              contact: {
+                firstName: 'John',
+                contactApplicantRelationship: 'Applicant'
+              }
+            }
+          ]
+        },
+        assignedUserId: null
+      } as never);
+
+      mockRepos.permitType.findUnique
+        .mockResolvedValueOnce(TEST_PERMIT_TYPE_1 as never)
+        .mockResolvedValueOnce(secondPermitType as never);
+
+      await sendIntakePermitNotification(mockRepos, [
+        { ...TEST_PERMIT_1, createdAt: new Date('2024-01-04T00:00:00.000Z') },
+        { ...TEST_PERMIT_2, permitTypeId: 2, createdAt: new Date('2024-01-05T00:00:00.000Z') }
+      ]);
+
+      const emailBody = emailSpy.mock.calls[0]?.[0].body;
+      const authorizationPath = 'www.example.com/i/HOUSING/project/proj-123/authorization';
+      const firstLink = `<a href="${authorizationPath}/${TEST_PERMIT_1.permitId}">DOMAIN: PERMIT1</a>`;
+      const secondLink = `<a href="${authorizationPath}/${TEST_PERMIT_2.permitId}">DOMAIN: PERMIT2</a>`;
+      expect(emailBody).toContain(`${firstLink}, ${secondLink}`);
+      expect(mockRepos.permitType.findUnique).toHaveBeenCalledTimes(2);
     });
   });
 });
