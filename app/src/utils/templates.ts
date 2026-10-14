@@ -6,12 +6,27 @@ const BC_EMAIL_BANNER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/446ee8ee-e
 const BC_EMAIL_FOOTER_IMG = 'https://coms.api.gov.bc.ca/api/v1/object/853de44a-e62f-41f5-81fd-6eff6cb66d52';
 
 export type EmailTemplate = (
-  replaceConfig: Record<string, string | (string | undefined)[] | undefined | null>
+  replaceConfig: Record<string, string | (string | HrefLinks | undefined)[] | undefined | null>
 ) => string;
+
+export interface HrefLinks {
+  href: string;
+  label: string;
+}
+
+const escapeHtml = (value: string): string =>
+  value
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
 
 export const replacePlaceholders = (
   baseText: string,
-  replacementConfig: Record<string, string | (string | undefined)[] | undefined | null>
+  replacementConfig: Record<string, string | (string | HrefLinks | undefined)[] | undefined | null>,
+  isHtmlTemplate = true,
+  template?: string
 ) => {
   if (!baseText || Object.keys(replacementConfig).length === 0) return baseText;
 
@@ -19,11 +34,19 @@ export const replacePlaceholders = (
 
   for (const [key, value] of Object.entries(replacementConfig)) {
     const pattern = `{{ ${key} }}`;
-    if (typeof value === 'string') {
-      newText = newText.replaceAll(pattern, value);
+    const stringValue = typeof value === 'string' ? (isHtmlTemplate ? escapeHtml(value) : value) : undefined;
+    if (stringValue) {
+      newText = newText.replaceAll(pattern, stringValue);
     } else if (Array.isArray(value)) {
-      const listString = value.join('\n');
-      newText = newText.replaceAll(pattern, listString);
+      if (template === 'intakePermitNotificationTemplate') {
+        const permitLinks = value.map((link) => {
+          return `<a href="${(link as HrefLinks).href}">${(link as HrefLinks).label}</a>`;
+        });
+        newText = newText.replaceAll(pattern, permitLinks.join(', '));
+      } else {
+        const listString = isHtmlTemplate ? escapeHtml(value.join('\n')) : value.join('\n');
+        newText = newText.replaceAll(pattern, listString);
+      }
     }
   }
   return newText;
@@ -248,7 +271,7 @@ export const roadmapTemplate: EmailTemplate = (replaceConfig) => {
     'Regards,\n\n' +
     '{{ navigatorName }}';
 
-  return replacePlaceholders(baseTemplate, replaceConfig);
+  return replacePlaceholders(baseTemplate, replaceConfig, false);
 };
 
 // Optional template sections - don't show if corresponding replaceConfig key is blank
@@ -500,4 +523,39 @@ export const bringForwardEnquiryNotificationTemplate: EmailTemplate = (replaceCo
     /><br><br>
     </div>`;
   return replacePlaceholders(baseTemplate, replaceConfig);
+};
+
+export const intakePermitNotificationTemplate: EmailTemplate = (replaceConfig) => {
+  const baseTemplate = `
+    <div style="width: 880px">
+    <img
+    src="${BC_EMAIL_BANNER_IMG}"
+    height="120rem" width="880px"
+    alt="B.C. Government Logo"
+    /><br><br>
+
+    <div style="margin-left: 3rem; margin-right: 3rem;">
+    Dear {{ dearName }},<br><br>
+
+    <b>Project name: {{ projectName }}</b><br><br>
+    <b>Project ID: {{ activityId }}</b><br><br>
+
+    {{ proponentName }} ({{ relationshipToProject }}) has submitted ({{ newPermitsCount }})
+    new authorization(s) to the project. Please review the<br>
+    submission:<br><br>
+
+    <b>Submitted authorization(s):</b>
+    {{ submittedPermits }}
+    <br><br>
+
+    <b>Submitted date: {{ submittedDate }}</b>
+    </div><br><br>
+
+    <img
+    src="${BC_EMAIL_FOOTER_IMG}"
+    width="100%"
+    alt="B.C. Government Footer"
+    /><br><br>
+    </div>`;
+  return replacePlaceholders(baseTemplate, replaceConfig, true, 'intakePermitNotificationTemplate');
 };
