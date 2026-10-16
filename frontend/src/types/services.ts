@@ -1,30 +1,21 @@
+import type { ApiInitiative, QueryParams, RequestBody } from './api/openapi';
 import type { ProjectStatistics } from './api/reports';
-import type {
-  CreateProjectRequest,
-  DeleteDraftRequest,
-  DeleteProjectRequest,
-  GetDraftRequest,
-  GetProjectRequest,
-  GetProjectStatisticsRequest,
-  UpsertDraftRequest
-} from './api/requests';
 import type { SearchProjectsResponse } from './api/responses';
 import type { Draft } from './api/resources';
 
 export interface ProjectService<T> {
-  createProject(req: CreateProjectRequest): Promise<T>;
-  deleteProject(req: DeleteProjectRequest): Promise<void>;
-  getProject(req: GetProjectRequest): Promise<T>;
-  getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics>;
+  createProject(req: RequestBody<`create${ApiInitiative}Project`>): Promise<T>;
+  deleteProject(req: { projectId: string }): Promise<void>;
+  getProject(req: { projectId: string }): Promise<T>;
+  getProjectStatistics(req: QueryParams<`get${ApiInitiative}ProjectStatistics`>): Promise<ProjectStatistics>;
   listActivityIds(): Promise<string[]>;
   listProjects(): Promise<T[]>;
-  searchProjects(filters?: unknown): Promise<SearchProjectsResponse>;
-  submitDraft(req: unknown): Promise<T>;
+  searchProjects(req: RequestBody<`search${ApiInitiative}Projects`>): Promise<SearchProjectsResponse>;
 }
 
 export interface DraftableProjectService<T, U> extends ProjectService<T> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getDraft(req: GetDraftRequest): Promise<Draft<U>>;
+  deleteDraft(req: { draftId: string }): Promise<void>;
+  getDraft(req: { draftId: string }): Promise<Draft<U>>;
   listDrafts(): Promise<Draft<U>[]>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<U>>;
+  upsertDraft(req: RequestBody<`upsert${ApiInitiative}ProjectDraft`>): Promise<Draft<U>>;
 }

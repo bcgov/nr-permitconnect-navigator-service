@@ -19,7 +19,8 @@ import {
   optionalTextSchema,
   permitsFormSchema,
   refineBusinessRegistration,
-  requireUnits
+  requireUnits,
+  unitsSchema
 } from '@/validators/common';
 import { contactFormSchema } from '@/validators/contact';
 
@@ -46,17 +47,17 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       financiallySupportedIndigenous: requiredOneOf('Indigenous Housing Provider', YES_NO_UNSURE_LIST),
       financiallySupportedNonProfit: requiredOneOf('Non-profit housing society', YES_NO_UNSURE_LIST),
       financiallySupportedHousingCoop: requiredOneOf('Housing co-operative', YES_NO_UNSURE_LIST),
-      rentalUnits: z.string().nullish(),
+      rentalUnits: unitsSchema('Expected rental units'),
       indigenousDescription: z.string().nullish(),
       nonProfitDescription: z.string().nullish(),
       housingCoopDescription: z.string().nullish(),
       singleFamilySelected: z.boolean().optional(),
       multiFamilySelected: z.boolean().optional(),
       otherSelected: z.boolean().optional(),
-      singleFamilyUnits: z.string().nullish(),
-      multiFamilyUnits: z.string().nullish(),
+      singleFamilyUnits: unitsSchema('Expected number of single-family units'),
+      multiFamilyUnits: unitsSchema('Expected number of multi-family units'),
       otherUnitsDescription: optionalTextSchema('Description of units'),
-      otherUnits: z.string().nullish()
+      otherUnits: unitsSchema('Expected number of other units')
     })
     .superRefine((value, ctx) => {
       if (value.hasRentalUnits === BasicResponse.YES) {

@@ -838,7 +838,8 @@
     "confirm": "Confirm",
     "confirmCreateHeader": "Confirm create submission",
     "confirmCreateMsg": "Please confirm that you want to create a new submission.",
-    "failedSubmission": "Failed to create new submission"
+    "failedSubmission": "Failed to create new submission",
+    "incompleteContact": "Add your phone number, relationship to project and preferred contact method to your contact details first."
   },
   "enquiryListProponent": {
     "createdByFailed": "Failed to load created by users",

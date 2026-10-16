@@ -5,6 +5,7 @@ import { z } from 'zod';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, Regex } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
 import {
@@ -186,7 +187,7 @@ export const atsClientIdSchema = (label: string) =>
 export const locationFormSchema = z
   .looseObject({
     naturalDisaster: requiredOneOf('Natural disaster', YES_NO_LIST),
-    projectLocation: requiredString('Location'),
+    projectLocation: requiredOneOf('Location', PROJECT_LOCATION_LIST),
     streetAddress: z.string().nullish(),
     locality: z.string().nullish(),
     province: z.string().nullish(),
@@ -265,6 +266,10 @@ export const refineBusinessRegistration =
       }
     }
   };
+
+// Optional housing unit count, one of the residential unit ranges when set
+export const unitsSchema = (label: string) =>
+  z.enum(NUM_RESIDENTIAL_UNITS_LIST, oneOfMessage(label, NUM_RESIDENTIAL_UNITS_LIST)).nullish();
 
 // Housing unit counts: required, and one of the residential unit ranges
 export function requireUnits(ctx: z.RefinementCtx, key: string, label: string, value: unknown) {

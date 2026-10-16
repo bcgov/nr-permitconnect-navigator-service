@@ -12,7 +12,7 @@ import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
 import { contactFormSchema } from '@/validators/contact';
 
 import type { Ref } from 'vue';
-import type { CreateEnquiryRequest } from '@/types';
+import type { ApiInitiative, RequestBody } from '@/types';
 
 // Composables
 const formValues = useFormValues();
@@ -45,7 +45,7 @@ const confirmSubmit = () => {
 
 async function onAssistanceRequest() {
   try {
-    const enquiryData: CreateEnquiryRequest = {
+    const enquiryData: RequestBody<`create${ApiInitiative}Enquiry`> = {
       enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
       submissionType: SubmissionType.ASSISTANCE,
       contact: setEmptyStringsToNull({

@@ -6,7 +6,13 @@ import { mount } from '@vue/test-utils';
 
 import EnquiryListNavigator from '@/components/enquiry/EnquiryListNavigator.vue';
 import { enquiryService } from '@/services';
-import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/utils/enums/projectCommon';
+import {
+  ApplicationStatus,
+  ContactPreference,
+  EnquirySubmittedMethod,
+  ProjectRelationship,
+  SubmissionType
+} from '@/utils/enums/projectCommon';
 
 import type { Enquiry } from '@/types';
 import { enquiryRouteNameKey } from '@/utils/keys';
@@ -17,6 +23,15 @@ vi.mock('vue-i18n', () => ({
     t: vi.fn()
   })
 }));
+const mockConfirmRequire = vi.fn();
+const mockToastError = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire }),
+  useToast: () => ({ error: mockToastError, success: vi.fn() })
+}));
+
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({
     query: {}
@@ -28,6 +43,7 @@ vi.mock('vue-router', () => ({
 
 const deleteEnquirySpy = vi.spyOn(enquiryService, 'deleteEnquiry');
 deleteEnquirySpy.mockResolvedValue(undefined);
+const createEnquirySpy = vi.spyOn(enquiryService, 'createEnquiry');
 const currentDate = new Date().toISOString();
 
 // Example Enquiry object
@@ -49,7 +65,17 @@ const testEnquiry: Enquiry = {
 };
 
 const testEnquiries = [testEnquiry];
-const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => ({
+
+const staffContact = {
+  contactId: 'a7a6b0d4-3c4f-4b89-9d24-1f3a2e5d6c7b',
+  firstName: 'Staff',
+  lastName: 'Member',
+  email: 'staff@example.com',
+  phoneNumber: '2505551234',
+  contactApplicantRelationship: ProjectRelationship.OTHER,
+  contactPreference: ContactPreference.EMAIL
+};
+const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false, contact: object = staffContact) => ({
   props: {
     enquiries: testEnquiriesProp,
     loading: loading
@@ -61,7 +87,8 @@ const wrapperSettings = (testEnquiriesProp = testEnquiries, loading = false) => 
           initialState: {
             auth: {
               user: {}
-            }
+            },
+            contact: { contact }
           }
         }),
       PrimeVue,
@@ -79,5 +106,37 @@ describe('EnquiryListNavigator.vue', () => {
   it('renders the component with the provided props', () => {
     const wrapper = mount(EnquiryListNavigator, wrapperSettings());
     expect(wrapper).toBeTruthy();
+  });
+
+  describe('creating a new enquiry', () => {
+    async function createNew(contact: object) {
+      createEnquirySpy.mockResolvedValue({} as never);
+      const wrapper = mount(EnquiryListNavigator, wrapperSettings(testEnquiries, false, contact));
+
+      (wrapper.vm as unknown as { handleCreateNewActivity: () => void }).handleCreateNewActivity();
+      await mockConfirmRequire.mock.calls[0][0].accept();
+    }
+
+    beforeEach(() => {
+      vi.clearAllMocks();
+    });
+
+    it('creates the enquiry with the staff contact', async () => {
+      await createNew(staffContact);
+
+      expect(createEnquirySpy).toHaveBeenCalledWith({ contact: staffContact });
+      expect(mockToastError).not.toHaveBeenCalled();
+    });
+
+    // The API requires these, but a stored contact can lack them
+    it.each(['phoneNumber', 'contactApplicantRelationship', 'contactPreference'])(
+      'explains instead of calling the API when the contact has no %s',
+      async (field) => {
+        await createNew({ ...staffContact, [field]: null });
+
+        expect(createEnquirySpy).not.toHaveBeenCalled();
+        expect(mockToastError).toHaveBeenCalled();
+      }
+    );
   });
 });

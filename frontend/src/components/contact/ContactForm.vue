@@ -12,7 +12,7 @@ import { toTypedSchema } from '@/utils/zodSchema';
 import { contactFormSchema } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
-import type { Contact, UpsertContactRequest } from '@/types';
+import type { Contact, RequestBody } from '@/types';
 
 // Props
 const { contact, editable } = defineProps<{
@@ -45,7 +45,7 @@ const initialFormValues = ref({
 // Actions
 const onSubmit = async (values: GenericObject) => {
   try {
-    const req: UpsertContactRequest = setEmptyStringsToNull(values);
+    const req: RequestBody<'upsertContact'> = setEmptyStringsToNull(values);
     const result = await contactService.upsertContact(req);
 
     formRef.value?.resetForm({

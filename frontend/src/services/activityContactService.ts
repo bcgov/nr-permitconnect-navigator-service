@@ -1,14 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type {
-  ActivityContact,
-  CreateActivityContactRequest,
-  DeleteActivityContactRequest,
-  ListActivityContactsRequest,
-  PutActivityContactRequest,
-  PutActivityContactResponse
-} from '@/types';
+import type { ActivityContact, PutActivityContactResponse, RequestBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -29,7 +22,9 @@ const activityRoutes = {
  * @param req - The request payload containing path parameters and the contact role.
  * @returns A promise resolving to the created `ActivityContact` resource.
  */
-export async function createActivityContact(req: CreateActivityContactRequest): Promise<ActivityContact> {
+export async function createActivityContact(
+  req: { activityId: string; contactId: string } & RequestBody<'createActivityContact'>
+): Promise<ActivityContact> {
   const { activityId, contactId, ...body } = req;
 
   return api.post<ActivityContact>(activityRoutes.contacts.byId(activityId, contactId), body);
@@ -40,7 +35,7 @@ export async function createActivityContact(req: CreateActivityContactRequest): 
  * @param req - The request payload containing the compound key for deletion.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteActivityContact(req: DeleteActivityContactRequest): Promise<void> {
+export async function deleteActivityContact(req: { activityId: string; contactId: string }): Promise<void> {
   const { activityId, contactId } = req;
 
   return api.delete(activityRoutes.contacts.byId(activityId, contactId));
@@ -51,7 +46,7 @@ export async function deleteActivityContact(req: DeleteActivityContactRequest): 
  * @param activityId - The ID of the activity to list contacts for.
  * @returns A promise resolving to an array of `ActivityContact` resources.
  */
-export async function listActivityContacts(req: ListActivityContactsRequest): Promise<ActivityContact[]> {
+export async function listActivityContacts(req: { activityId: string }): Promise<ActivityContact[]> {
   const { activityId } = req;
 
   return api.get<ActivityContact[]>(activityRoutes.contacts.list(activityId));
@@ -62,7 +57,9 @@ export async function listActivityContacts(req: ListActivityContactsRequest): Pr
  * @param req - The request payload containing path parameters and updatable fields.
  * @returns A promise resolving to the updated `ActivityContact` and any optionally demoted contact.
  */
-export async function putActivityContact(req: PutActivityContactRequest): Promise<PutActivityContactResponse> {
+export async function putActivityContact(
+  req: { activityId: string; contactId: string } & RequestBody<'updateActivityContact'>
+): Promise<PutActivityContactResponse> {
   const { activityId, contactId, ...body } = req;
 
   return api.put<PutActivityContactResponse>(activityRoutes.contacts.byId(activityId, contactId), body);

@@ -26,12 +26,13 @@ import { notInFutureValidator } from '@/validators/common';
 
 import type { Ref } from 'vue';
 import type {
+  ApiInitiative,
   AuditFields,
   Permit,
   PermitTracking,
   PermitType,
+  RequestBody,
   SourceSystemKind,
-  UpsertPermitRequest,
   User
 } from '@/types';
 
@@ -339,7 +340,7 @@ async function onSubmit(data: GenericObject) {
     const consultationEnd = splitDateTime(data.consultationEndDate);
 
     const { authorizationType, permitNote, ...rest } = data as FormSchemaType;
-    const permitData: UpsertPermitRequest = {
+    const permitData: RequestBody<`upsert${ApiInitiative}Permit`> = {
       ...rest,
       activityId: getProject.value!.activityId,
       permitTypeId: authorizationType.permitTypeId,
@@ -365,7 +366,8 @@ async function onSubmit(data: GenericObject) {
       checkIfPeachIntegratedAuthType(authorizationType.sourceSystem) &&
       checkIfPeachIntegratedTrackingId(data.permitTracking)
     ) {
-      const response = await getPeachSummary(permitData?.permitTracking ?? []);
+      // PEACH only reads the tracking ids and source systems, which match between the request and resource shapes
+      const response = await getPeachSummary((permitData?.permitTracking ?? []) as PermitTracking[]);
       if (response) {
         permitData.decisionDate = response.decisionDate;
         permitData.state = response.state;

@@ -190,16 +190,14 @@ async function searchProjects() {
         loading.value = true;
         const res = await projectService?.value.searchProjects({
           applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
-          dateRange: dateRange.value,
+          dateRange: dateRange.value?.map((date) => date.toISOString()),
           includeUser: true,
           searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
-          skip: (pagination.value.page && pagination.value.rows
-            ? pagination.value.page * pagination.value.rows
-            : 0
-          ).toString(),
-          take: pagination.value.rows?.toString(),
+          skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,
+          take: pagination.value.rows,
           sortField: pagination.value.field,
-          sortOrder: pagination.value.order?.toString()
+          // DataTable sort orders are -1, 0 or 1
+          sortOrder: pagination.value.order?.toString() as '-1' | '0' | '1' | undefined
         });
         if (res) searchResponse.value = res;
       } catch (e) {

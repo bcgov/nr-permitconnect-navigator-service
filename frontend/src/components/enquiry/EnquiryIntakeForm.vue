@@ -23,7 +23,7 @@ import { enquiryIntakeFormSchema } from '@/validators/enquiryIntakeFormSchema';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { CreateEnquiryRequest, Enquiry, Permit, Project } from '@/types';
+import type { ApiInitiative, Enquiry, Permit, Project, RequestBody } from '@/types';
 import type { FormSchemaType } from '@/validators/enquiryIntakeFormSchema';
 
 // Props
@@ -109,7 +109,7 @@ async function onSubmit(values: FormSchemaType) {
   formStore.setFormState(FormState.LOCKED);
 
   try {
-    let payload: CreateEnquiryRequest = {
+    let payload: RequestBody<`create${ApiInitiative}Enquiry`> = {
       enquiryDescription: values.basic.enquiryDescription,
       relatedActivityId: project?.activityId ?? undefined,
       contact: values.contacts

@@ -1,16 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type {
-  CreateEnquiryRequest,
-  CreateEnquiryResponse,
-  DeleteEnquiryRequest,
-  Enquiry,
-  GetEnquiryRequest,
-  ListRelatedEnquiriesRequest,
-  PatchEnquiryRequest,
-  SearchEnquiriesRequest
-} from '@/types';
+import type { ApiInitiative, CreateEnquiryResponse, Enquiry, RequestBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -32,7 +23,7 @@ const enquiryRoutes = {
  * @param req - The request payload containing the enquiry data to create.
  * @returns A promise resolving to the created `Enquiry` resource.
  */
-export function createEnquiry(req: CreateEnquiryRequest): Promise<CreateEnquiryResponse> {
+export function createEnquiry(req: RequestBody<`create${ApiInitiative}Enquiry`>): Promise<CreateEnquiryResponse> {
   const { ...body } = req;
 
   return api.post<CreateEnquiryResponse>(enquiryRoutes.root(), body);
@@ -43,7 +34,7 @@ export function createEnquiry(req: CreateEnquiryRequest): Promise<CreateEnquiryR
  * @param req - The request payload containing the enquiry ID.
  * @returns A promise resolving when the operation completes.
  */
-export function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
+export function deleteEnquiry(req: { enquiryId: string }): Promise<void> {
   const { enquiryId } = req;
 
   return api.delete(enquiryRoutes.byId(enquiryId));
@@ -54,7 +45,7 @@ export function deleteEnquiry(req: DeleteEnquiryRequest): Promise<void> {
  * @param req - The request payload containing the enquiry ID.
  * @returns A promise resolving to the requested `Enquiry` resource.
  */
-export function getEnquiry(req: GetEnquiryRequest): Promise<Enquiry> {
+export function getEnquiry(req: { enquiryId: string }): Promise<Enquiry> {
   const { enquiryId } = req;
 
   return api.get<Enquiry>(enquiryRoutes.byId(enquiryId));
@@ -73,7 +64,7 @@ export function listEnquiries(): Promise<Enquiry[]> {
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to an array of `Enquiry` resources.
  */
-export function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Promise<Enquiry[]> {
+export function listRelatedEnquiries(req: { activityId: string }): Promise<Enquiry[]> {
   const { activityId } = req;
 
   return api.get<Enquiry[]>(enquiryRoutes.listRelated(activityId));
@@ -84,7 +75,7 @@ export function listRelatedEnquiries(req: ListRelatedEnquiriesRequest): Promise<
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `Enquiry` resources.
  */
-export function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enquiry[]> {
+export function searchEnquiries(req: RequestBody<`search${ApiInitiative}Enquiries`>): Promise<Enquiry[]> {
   return api.post<Enquiry[]>(enquiryRoutes.search(), req);
 }
 
@@ -93,7 +84,9 @@ export function searchEnquiries(req: SearchEnquiriesRequest): Promise<Enquiry[]>
  * @param req - The request payload containing the enquiry ID and updated fields.
  * @returns A promise resolving to the updated `Enquiry` resource.
  */
-export function patchEnquiry(req: PatchEnquiryRequest): Promise<Enquiry> {
+export function patchEnquiry(
+  req: { enquiryId: string } & RequestBody<`patch${ApiInitiative}Enquiry`>
+): Promise<Enquiry> {
   const { enquiryId, ...body } = req;
 
   return api.patch<Enquiry>(enquiryRoutes.byId(enquiryId), body);

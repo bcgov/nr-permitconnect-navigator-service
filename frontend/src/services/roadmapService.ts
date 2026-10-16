@@ -2,7 +2,7 @@ import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 import { delimitEmails } from '@/utils/utils';
 
-import type { GetRoadmapNoteRequest, NoteHistory, SendRoadmapRequest } from '@/types';
+import type { ApiInitiative, Email, NoteHistory, QueryParams, RequestBody } from '@/types';
 /**
  * Base route builder and endpoint definitions for this resource.
  * Routes should be referenced through this object rather than
@@ -20,7 +20,7 @@ const roadmapRoutes = {
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to the roadmap note.
  */
-export function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
+export function getRoadmapNote(req: QueryParams<`get${ApiInitiative}RoadmapNote`>): Promise<string> {
   const { activityId } = req;
 
   return api.get<string>(roadmapRoutes.note(), {
@@ -33,7 +33,11 @@ export function getRoadmapNote(req: GetRoadmapNoteRequest): Promise<string> {
  * @param req - The request payload containing the activity ID, selected files, and email data.
  * @returns A promise resolving to the send result.
  */
-export function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory> {
+export function sendRoadmap(req: {
+  activityId: string;
+  selectedFileIds: string[];
+  emailData: Email;
+}): Promise<NoteHistory> {
   const { activityId, selectedFileIds, emailData } = req;
 
   const normalizedEmailData = { ...emailData };
@@ -54,11 +58,13 @@ export function sendRoadmap(req: SendRoadmapRequest): Promise<NoteHistory> {
     normalizedEmailData.bcc = delimitEmails(normalizedEmailData.bcc);
   }
 
-  return api.post<NoteHistory>(roadmapRoutes.root(), {
+  const body: RequestBody<`send${ApiInitiative}Roadmap`> = {
     activityId,
     selectedFileIds,
     emailData: normalizedEmailData
-  });
+  };
+
+  return api.post<NoteHistory>(roadmapRoutes.root(), body);
 }
 
 /**
