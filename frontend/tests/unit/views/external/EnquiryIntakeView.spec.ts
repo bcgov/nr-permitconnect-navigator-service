@@ -61,7 +61,7 @@ interface Props {
   permitId?: string;
 }
 
-const wrapperSettings = (initiative = Initiative.HOUSING, props?: Props) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING, props?: Props) => ({
   props: {
     ...props
   },

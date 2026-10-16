@@ -55,7 +55,7 @@ vi.mock('@/services/permitService', () => ({
 }));
 
 // Default component mounting wrapper settings
-const wrapperSettings = (initiative = Initiative.HOUSING) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING) => ({
   props: {
     projectId: '1',
     permitId: '3'

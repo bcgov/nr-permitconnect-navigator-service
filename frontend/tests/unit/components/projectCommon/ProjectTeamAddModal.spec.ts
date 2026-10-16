@@ -53,7 +53,7 @@ const mockActivityContact: ActivityContact = {
   contact: mockContact
 };
 
-const wrapperSettings = (zone = Zone.INTERNAL, activityContacts: ActivityContact[] = []) => ({
+const wrapperSettings = (zone: Zone = Zone.INTERNAL, activityContacts: ActivityContact[] = []) => ({
   props: {
     activityContacts,
     visible: true,
