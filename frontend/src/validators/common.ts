@@ -5,13 +5,10 @@ import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
+import { coerceDate, coerceNumber, isBlank, isOneOf } from '@/utils/utils';
 import {
   addIssue,
-  coerceDate,
-  coerceNumber,
   evenWithIssues,
-  isBlank,
-  isOneOf,
   maxMessage,
   numberRangeSchema,
   oneOfMessage,

@@ -39,8 +39,8 @@ import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
-import { toOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { toContactFormValues } from '@/validators/contact';
 
 import type { GeoJSON } from 'geojson';

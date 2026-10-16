@@ -33,8 +33,8 @@ import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
-import { isOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { toContactFormValues } from '@/validators/contact';
 
 import type { GeoJSON } from 'geojson';
@@ -127,9 +127,7 @@ function loadProjectValues() {
     initialFormValues.value = {
       basic: {
         // Unknown stored values are dropped, so the form asks for them again
-        projectApplicantType: isOneOf(PROJECT_APPLICANT_LIST, project.projectApplicantType)
-          ? project.projectApplicantType
-          : undefined,
+        projectApplicantType: toOneOf(PROJECT_APPLICANT_LIST, project.projectApplicantType),
         isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
         registeredName: project.companyNameRegistered ?? undefined,
         registeredId: project.companyIdRegistered ?? undefined,
@@ -160,9 +158,7 @@ function loadProjectValues() {
             ...x,
             submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
           })),
-        hasAppliedProvincialPermits: isOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits)
-          ? project.hasAppliedProvincialPermits
-          : undefined,
+        hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
         investigatePermits: useProjectStore().getPermits.filter(
           (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
         )

@@ -11,12 +11,10 @@ import {
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/projectCommon';
 import { BasicResponse, Initiative, Regex } from '@/utils/enums/application';
+import { coerceNumber, isBlank, isOneOf } from '@/utils/utils';
 import {
-  coerceNumber,
   evenWithIssues,
   formSection,
-  isBlank,
-  isOneOf,
   maxMessage,
   oneOfMessage,
   blankOrOneOfSchema,
