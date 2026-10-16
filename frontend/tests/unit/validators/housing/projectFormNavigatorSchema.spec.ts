@@ -49,7 +49,7 @@ const schema = createProjectFormNavigatorSchema({ initiative: Initiative.HOUSING
 // Tests
 
 describe('housing createProjectFormNavigatorSchema', () => {
-  // Omitted optional panels are accepted (yup outputs them as {})
+  // Omitted optional panels are accepted
   it('accepts a well-formed form with optional panels omitted', async () => {
     const { value, errors } = await runSchema(schema, testForm);
 

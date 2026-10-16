@@ -21,6 +21,13 @@ import type { AtsClientResource, AtsEnquiryResource, ElectrificationProject } fr
 
 // Mocks
 
+const mockConfirmRequire = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire })
+}));
+
 const createAtsClientSpy = vi.spyOn(atsService, 'createAtsClient');
 const createAtsEnquirySpy = vi.spyOn(atsService, 'createAtsEnquiry');
 const patchProjectSpy = vi.spyOn(electrificationProjectService, 'patchProject');
@@ -92,7 +99,7 @@ function mountProjectFormNavigator(options: { project?: ElectrificationProject; 
   const { wrapper } = mountComponent(ProjectFormNavigator, {
     props: { project, editable },
     piniaState: {
-      project: { activityContacts: [primaryActivityContact] },
+      project: { project, activityContacts: [primaryActivityContact] },
       code: {
         codes: {
           ElectrificationProjectType: [{ code: ElectrificationProjectType.IPP_SOLAR, display: 'Solar', active: true }]
@@ -266,6 +273,43 @@ describe('ProjectFormNavigator', () => {
       expect(createAtsClientSpy).not.toHaveBeenCalled();
       expect(createAtsEnquirySpy).not.toHaveBeenCalled();
       expect(patchProjectSpy).toHaveBeenCalled();
+    });
+  });
+
+  describe('reopen', () => {
+    const completedProject = { ...testProject, applicationStatus: ApplicationStatus.COMPLETED };
+
+    async function reopen(project: ElectrificationProject) {
+      const { wrapper } = mountProjectFormNavigator({ project });
+      await flushPromises();
+      await wrapper
+        .findComponent({ name: 'CompanyProjectNamePanel' })
+        .vm.$emit('org-book-options', [
+          { registeredId: testProject.companyIdRegistered, registeredName: testProject.companyNameRegistered }
+        ]);
+
+      await wrapper
+        .findAll('button')
+        .find((b) => b.text() === 'Re-open submission')
+        ?.trigger('click');
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
+    }
+
+    it('validates and saves the project as in progress', async () => {
+      patchProjectSpy.mockResolvedValue(testProject);
+
+      await reopen(completedProject);
+
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: testProject.projectId, applicationStatus: ApplicationStatus.IN_PROGRESS })
+      );
+    });
+
+    it('does not save when the form is invalid', async () => {
+      await reopen({ ...completedProject, projectName: '' });
+
+      expect(patchProjectSpy).not.toHaveBeenCalled();
     });
   });
 

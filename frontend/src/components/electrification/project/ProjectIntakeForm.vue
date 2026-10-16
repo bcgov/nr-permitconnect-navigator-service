@@ -23,6 +23,7 @@ import { useCodeStore, useContactStore, useFormStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -53,7 +54,7 @@ const formRef: Ref<InstanceType<typeof Form> | null> = ref(null);
 const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(undefined);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(codeList, orgBookOptions.value);
+  return toTypedSchema(createProjectIntakeSchema(codeList, orgBookOptions.value));
 });
 
 // Actions
@@ -101,12 +102,11 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    // The schema requires the asserted fields but its inferred types leave them optional
     const payload: Parameters<typeof electrificationProjectService.submitDraft>[0] = {
       activityId: draft.value?.activityId,
       basic: {
         registeredId: data.basic.registeredId,
-        registeredName: data.basic.registeredName!,
+        registeredName: data.basic.registeredName,
         projectName: data.basic.projectName,
         projectDescription: data.basic.projectDescription
       },
@@ -115,9 +115,9 @@ async function onSubmit(data: FormSchemaType) {
         firstName: data.contacts.firstName,
         lastName: data.contacts.lastName,
         email: data.contacts.email,
-        phoneNumber: data.contacts.phoneNumber!,
-        contactApplicantRelationship: data.contacts.contactApplicantRelationship!,
-        contactPreference: data.contacts.contactPreference!
+        phoneNumber: data.contacts.phoneNumber,
+        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
+        contactPreference: data.contacts.contactPreference
       },
       draftId: draft.value?.draftId,
       project: {
@@ -166,7 +166,7 @@ onBeforeMount(async () => {
 
       initialFormValues.value = {
         basic: {
-          registeredName: project.companyNameRegistered,
+          registeredName: project.companyNameRegistered ?? undefined,
           registeredId: project.companyIdRegistered,
           projectName: project.projectName,
           projectDescription: project.projectDescription

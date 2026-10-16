@@ -167,7 +167,7 @@ describe('PermitAddView', () => {
       await flushPromises();
 
       expect(permitService.intakePermits).toHaveBeenCalledWith([
-        expect.objectContaining({ activityId: testProject.activityId, permitTypeId: '5' })
+        expect.objectContaining({ activityId: testProject.activityId, permitTypeId: 5 })
       ]);
       expect(mockToastSuccess).toHaveBeenCalled();
       expect(mockRouter.push).toHaveBeenCalledWith({

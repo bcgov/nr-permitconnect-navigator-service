@@ -4,7 +4,6 @@ import { storeToRefs } from 'pinia';
 import { Form, type GenericObject } from 'vee-validate';
 import { ref, watch } from 'vue';
 import { useI18n } from 'vue-i18n';
-import { array, object, string, type InferType } from 'yup';
 
 import FileSelectModal from '@/components/file/FileSelectModal.vue';
 import { InputText, TextArea } from '@/components/form';
@@ -12,9 +11,12 @@ import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { roadmapService, userService } from '@/services';
 import { useAppStore, useConfigStore, useProjectStore } from '@/store';
 import { delimitEmails, setEmptyStringsToNull } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { roadmapFormSchema } from '@/validators/roadmapFormSchema';
 
 import type { Ref } from 'vue';
 import type { Document } from '@/types';
+import type { FormSchemaType } from '@/validators/roadmapFormSchema';
 
 // Props
 const { editable = true } = defineProps<{
@@ -25,33 +27,7 @@ const { editable = true } = defineProps<{
 const { t } = useI18n();
 
 // Form schema
-const emailValidator = (min: number, message: string) => {
-  return array()
-    .transform(function (value, originalValue) {
-      if (this.isType(value) && value !== null) {
-        return value;
-      }
-      return originalValue ? delimitEmails(originalValue) : [];
-    })
-    .min(min, message)
-    .of(
-      string()
-        .trim()
-        .email(({ value }) => `${value} is not a valid email`)
-    );
-};
-
-const formSchema = object({
-  from: string(),
-  to: emailValidator(1, 'To is required'),
-  cc: emailValidator(0, 'CC is not required'),
-  bcc: emailValidator(1, 'BCC is required'),
-  subject: string().required(),
-  body: string().required(),
-  bodyType: string()
-});
-
-export type FormSchemaType = InferType<typeof formSchema>;
+const formSchema = toTypedSchema(roadmapFormSchema);
 
 // Store
 const { getConfig } = storeToRefs(useConfigStore());
@@ -133,7 +109,7 @@ watch(
     // Initial form values
     initialFormValues.value = {
       from: navigator.email,
-      to: [contact?.email],
+      to: contact?.email ? [contact.email] : [],
       cc: undefined,
       bcc: bcc ? delimitEmails(bcc) : undefined,
       subject: `Here is your ${initiative} project's Permit Roadmap`,

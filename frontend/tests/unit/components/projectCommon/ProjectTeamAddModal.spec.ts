@@ -168,7 +168,7 @@ describe('ProjectTeamAddModal.vue', () => {
   });
 
   describe('Adding & Removing Users', () => {
-    // Runs the real schema through useForm, guarding the yup -> zod swap
+    // Runs the real schema through useForm
     it('does not add a manual entry that fails validation', async () => {
       veeValidateMode.real = true;
       vi.mocked(contactService.matchContacts).mockResolvedValue([]);

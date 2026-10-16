@@ -46,7 +46,7 @@ const schema = createProjectFormNavigatorSchema({
 // Tests
 
 describe('electrification createProjectFormNavigatorSchema', () => {
-  // Omitted optional panels are accepted (yup outputs them as {})
+  // Omitted optional panels are accepted
   it('accepts a well-formed form with optional panels omitted', async () => {
     const { value, errors } = await runSchema(schema, testForm);
 
@@ -66,7 +66,7 @@ describe('electrification createProjectFormNavigatorSchema', () => {
       'submissionState.queuePriority': 'Priority is a required field',
       'submissionState.submissionType': 'Submission type is a required field',
       'projectAreasUpdated.aaiUpdated': AAI_REQUIRED,
-      'projectAreasUpdated.addedToAts': AAI_REQUIRED
+      'projectAreasUpdated.addedToAts': 'Authorized Tracking System (ATS) updated is a required field'
     });
   });
 

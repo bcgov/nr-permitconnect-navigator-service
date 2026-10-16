@@ -1,4 +1,4 @@
-import { object } from 'yup';
+import { z } from 'zod';
 
 import {
   createAstNotesPanelSchema,
@@ -12,8 +12,8 @@ import {
   createSubmissionStatePanelSchema
 } from '@/validators/navigator';
 
-import type { InferType } from 'yup';
 import type { CreateSchemaOptions } from '@/types';
+import type { FormValues } from '@/utils/zodSchema';
 
 export function createProjectFormNavigatorSchema({
   initiative,
@@ -21,7 +21,7 @@ export function createProjectFormNavigatorSchema({
   codeList,
   orgBookOptions
 }: Required<CreateSchemaOptions>) {
-  return object({
+  return z.looseObject({
     ...createContactCardNavFormSchema({ t }),
     ...createElectrificationPanelSchema({ codeList, t }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
@@ -34,4 +34,4 @@ export function createProjectFormNavigatorSchema({
   });
 }
 
-export type FormSchemaType = InferType<ReturnType<typeof createProjectFormNavigatorSchema>>;
+export type FormSchemaType = FormValues<z.infer<ReturnType<typeof createProjectFormNavigatorSchema>>>;

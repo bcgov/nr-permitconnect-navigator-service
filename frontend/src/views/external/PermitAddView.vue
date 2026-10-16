@@ -4,7 +4,6 @@ import { Form } from 'vee-validate';
 import { onMounted, ref, type Ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object, type InferType } from 'yup';
 
 import { FormNavigationGuard } from '@/components/form';
 import CancelButton from '@/components/form/CancelButton.vue';
@@ -15,10 +14,12 @@ import { useAppStore, useFormStore, useProjectStore } from '@/store';
 import { generalErrorHandler } from '@/utils/utils';
 import { Initiative, RouteName } from '@/utils/enums/application';
 import { FormState } from '@/utils/enums/projectCommon';
-import { appliedPermitsValidator } from '@/validators/common';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { permitAddFormSchema } from '@/validators/permitAddFormSchema';
 
 import type { GenericObject } from 'vee-validate';
 import type { ApiInitiative, Project, ProjectService, RequestBody } from '@/types';
+import type { FormSchemaType } from '@/validators/permitAddFormSchema';
 
 // Props
 const { projectId } = defineProps<{
@@ -30,9 +31,6 @@ interface InitiativeState {
   projectRouteName: RouteName;
   projectService: ProjectService<Project>;
 }
-
-// Types
-type FormSchemaType = InferType<typeof FORM_SCHEMA>;
 
 // Constants
 const ELECTRIFICATION_INITIATIVE_STATE: InitiativeState = {
@@ -50,11 +48,7 @@ const HOUSING_INITIATIVE_STATE: InitiativeState = {
   projectService: housingProjectService
 };
 
-const FORM_SCHEMA = object({
-  permits: object({
-    appliedPermits: appliedPermitsValidator.min(1).required()
-  })
-});
+const FORM_SCHEMA = toTypedSchema(permitAddFormSchema);
 
 // Composables
 const confirm = useConfirm();
