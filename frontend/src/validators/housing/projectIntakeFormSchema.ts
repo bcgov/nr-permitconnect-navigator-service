@@ -9,6 +9,7 @@ import {
   evenWithIssues,
   formSection,
   maxMessage,
+  optionalTextSchema,
   requiredMessage,
   requiredOneOf,
   requiredString,
@@ -16,7 +17,6 @@ import {
 } from '@/utils/zodSchema';
 import {
   locationFormSchema,
-  optionalTextSchema,
   permitsFormSchema,
   refineBusinessRegistration,
   requireUnits,

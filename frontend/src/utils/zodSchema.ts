@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+import { Regex } from '@/utils/enums/application';
+import { delimitEmails } from '@/utils/utils';
+
 import type { TypedSchema, TypedSchemaError } from 'vee-validate';
 
 /**
@@ -11,14 +14,14 @@ export const evenWithIssues = {
 };
 
 /**
- * Builds the required message yup generated from a field label.
+ * Builds the standard required message from a field label.
  * @param label - The field label.
  * @returns The required message.
  */
 export const requiredMessage = (label: string) => `${label} is a required field`;
 
 /**
- * Builds the allowed-values message yup generated from a field label.
+ * Builds the standard allowed-values message from a field label.
  * @param label - The field label.
  * @param values - The allowed values.
  * @returns The allowed-values message.
@@ -27,7 +30,7 @@ export const oneOfMessage = (label: string, values: readonly unknown[]) =>
   `${label} must be one of the following values: ${values.join(', ')}`;
 
 /**
- * Builds the max-length message yup generated from a field label.
+ * Builds the standard max-length message from a field label.
  * @param label - The field label.
  * @param max - The maximum length.
  * @returns The max-length message.
@@ -50,7 +53,7 @@ export const isBlank = (value: unknown) => value === undefined || value === null
 export const isOneOf = <T>(values: readonly T[], value: unknown): value is T => values.includes(value as T);
 
 /**
- * Builds a required enum with yup's required message for missing values and its allowed-values message otherwise.
+ * Builds a required enum with the required message for missing values and the allowed-values message otherwise.
  * @param label - The field label.
  * @param values - The allowed values.
  * @returns The enum schema.
@@ -61,11 +64,118 @@ export const requiredOneOf = <T extends string>(label: string, values: readonly 
   });
 
 /**
- * Builds a required string that rejects empty strings but, like yup's `string().required()`, does not trim.
+ * Builds a required string that rejects empty strings but does not trim.
  * @param label - The field label.
  * @returns The string schema.
  */
 export const requiredString = (label: string) => z.string(requiredMessage(label)).min(1, requiredMessage(label));
+
+// Trims text and treats blank text as unset
+const blankToNull = (value: unknown) => (typeof value === 'string' ? value.trim() || null : value);
+
+/**
+ * Builds optional text that is trimmed, with blank text output as null.
+ * @param label - The field label.
+ * @param max - The optional maximum length.
+ * @returns The text schema.
+ */
+export const optionalTextSchema = (label: string, max?: number) =>
+  z.preprocess(blankToNull, (max ? z.string().max(max, maxMessage(label, max)) : z.string()).nullish());
+
+/**
+ * Builds required text that is trimmed, so blank text counts as missing.
+ * @param label - The field label.
+ * @param max - The optional maximum length.
+ * @returns The text schema.
+ */
+export const requiredTextSchema = (label: string, max?: number) =>
+  z.preprocess(blankToNull, max ? requiredString(label).max(max, maxMessage(label, max)) : requiredString(label));
+
+/**
+ * Builds an optional enum where blank text, null or a missing value all mean unset and output null.
+ * @param label - The field label.
+ * @param values - The allowed values.
+ * @returns The enum schema.
+ */
+export const blankOrOneOfSchema = <T extends string>(label: string, values: readonly T[]) =>
+  z.preprocess(blankToNull, z.enum(values as [T, ...T[]], oneOfMessage(label, values)).nullish());
+
+/**
+ * Builds an optional enum where only a missing value means unset; unlike blankOrOneOfSchema, it rejects blanks.
+ * @param label - The field label.
+ * @param values - The allowed values.
+ * @returns The enum schema.
+ */
+export const missingOrOneOfSchema = <T extends string>(label: string, values: readonly T[]) =>
+  z.enum(values as [T, ...T[]], oneOfMessage(label, values)).optional();
+
+/**
+ * Preprocessor that turns numeric text from an input into a number, leaving anything else for the schema to judge.
+ * @param value - The raw input.
+ * @returns The number, or the raw input.
+ */
+export const coerceNumber = (value: unknown) =>
+  typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+
+/**
+ * Builds an optional number within inclusive bounds that also accepts numeric text.
+ * @param label - The field label.
+ * @param min - The minimum value.
+ * @param max - The maximum value.
+ * @returns The number schema.
+ */
+export const numberRangeSchema = (label: string, min: number, max: number) =>
+  z.preprocess(
+    coerceNumber,
+    z
+      .number(`${label} must be a number`)
+      .min(min, `${label} must be greater than or equal to ${min}`)
+      .max(max, `${label} must be less than or equal to ${max}`)
+      .nullish()
+  );
+
+/**
+ * Preprocessor that turns date text into a Date, with date-only strings parsed as local midnight.
+ * @param value - The raw input.
+ * @returns The date, or the raw input.
+ */
+export const coerceDate = (value: unknown) =>
+  typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00` : value) : value;
+
+/**
+ * Builds an optional date that also accepts date text.
+ * @param label - The field label.
+ * @returns The date schema.
+ */
+export const dateSchema = (label: string) =>
+  z.preprocess(coerceDate, z.date(`${label} must be a valid date`).nullish());
+
+/**
+ * Builds an optional date that also accepts date text and rejects dates after now.
+ * @param label - The field label.
+ * @returns The date schema.
+ */
+export const notInFutureSchema = (label: string) =>
+  dateSchema(label).refine((date) => !date || date.getTime() <= Date.now(), 'Date cannot be in the future');
+
+/**
+ * Builds a list of email addresses that accepts an array or a space, comma or semicolon separated string.
+ * @param min - The minimum number of addresses.
+ * @param message - The message when there are too few addresses.
+ * @returns The email list schema.
+ */
+export const emailListSchema = (min: number, message: string) =>
+  z.preprocess(
+    (value) => (Array.isArray(value) ? value : typeof value === 'string' ? delimitEmails(value) : []),
+    z
+      .array(
+        z
+          .string()
+          .trim()
+          .regex(new RegExp(Regex.EMAIL), { error: (issue) => `${issue.input} is not a valid email` })
+      )
+      .min(min, message)
+  );
 
 /**
  * Adds a custom issue to a refinement, at a field of the refined object or at the object itself.

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
-import { formSection, maxMessage, requiredOneOf, requiredString } from '@/utils/zodSchema';
-import { optionalTextSchema } from '@/validators/common';
+import { formSection, maxMessage, optionalTextSchema, requiredOneOf, requiredString } from '@/utils/zodSchema';
 import { contactFormSchema } from '@/validators/contact';
 
 import type { CodeTableName, OrgBookOption } from '@/types';
@@ -12,7 +11,7 @@ export function createProjectIntakeSchema(codeList: Record<CodeTableName, string
   return z.looseObject({
     [IntakeFormCategory.BASIC]: formSection(
       z.looseObject({
-        // Known bug: never required, even for the OTHER project type, as under yup
+        // Known bug: never required, even for the OTHER project type
         projectDescription: z.string().nullish(),
         projectName: requiredString('Project name').max(255, maxMessage('Project name', 255)),
         registeredId: optionalTextSchema('Business ID'),

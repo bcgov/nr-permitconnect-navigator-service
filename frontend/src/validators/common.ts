@@ -1,174 +1,38 @@
-import '@/utils/yupMethods';
-
-import { array, date, mixed, number, object, string } from 'yup';
 import { z } from 'zod';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
-import { BasicResponse, Regex } from '@/utils/enums/application';
+import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
 import {
   addIssue,
+  coerceDate,
+  coerceNumber,
   evenWithIssues,
   isBlank,
   isOneOf,
   maxMessage,
+  numberRangeSchema,
   oneOfMessage,
   requiredMessage,
   requiredOneOf,
-  requiredString,
   requireText
 } from '@/utils/zodSchema';
 
 import type { OrgBookOption } from '@/types';
 
-export const assignedToValidator = (message: string, label: string) =>
-  mixed()
-    .test('expect-user-or-empty', message, (obj) => {
-      if (typeof obj === 'object') return true;
-      if (typeof obj === 'string') {
-        return obj === null || obj === undefined || obj.length === 0;
-      }
-    })
-    .nullable()
-    .label(label);
-
-export const atsClientIdValidator = (label: string) => number().nullable().min(0).integer().label(label);
-
-export const emailValidator = (message: string) => string().matches(new RegExp(Regex.EMAIL), message);
-
-export const latitudeValidator = (label: string) => number().notRequired().min(48).max(60).label(label);
-
-export const locationValidator = object({
-  naturalDisaster: string().oneOf(YES_NO_LIST).required().label('Natural disaster'),
-  projectLocation: string().required().label('Location'),
-  streetAddress: string()
-    .nullable()
-    .when('projectLocation', {
-      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-      then: () => string().required().max(255).label('Street address'),
-      otherwise: () => string().nullable()
-    }),
-  locality: string()
-    .nullable()
-    .when('projectLocation', {
-      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-      then: () => string().required().max(255).label('Locality'),
-      otherwise: () => string().nullable()
-    }),
-  province: string()
-    .nullable()
-    .when('projectLocation', {
-      is: (value: string) => value === ProjectLocation.STREET_ADDRESS,
-      then: () => string().required().max(255).label('Province'),
-      otherwise: () => string().nullable()
-    }),
-  latitude: number()
-    .nullable()
-    .when('projectLocation', {
-      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
-      then: () => number().required().min(48).max(60).label('Latitude'),
-      otherwise: () => number().nullable().min(48).max(60).label('Latitude')
-    }),
-  longitude: number()
-    .nullable()
-    .when('projectLocation', {
-      is: (value: string) => value === ProjectLocation.LOCATION_COORDINATES,
-      then: () => number().required().min(-139).max(-114).label('Longitude'),
-      otherwise: () => number().nullable().min(-139).max(-114).label('Longitude')
-    }),
-  ltsaPidLookup: string().max(255).nullable().label('Parcel ID'),
-  geomarkUrl: string().max(255).nullable().label('Geomark web service url'),
-  geoJson: mixed().nullable().label('geoJson'),
-  projectLocationDescription: string().nullable()
-});
-
-export const longitudeValidator = (label: string) => number().notRequired().min(-139).max(-114).label(label);
-
-export const notInFutureValidator = date().test('not-in-future', 'Date cannot be in the future', (value) => {
-  if (!value) return true;
-  return value.getTime() <= Date.now();
-});
-
-export const appliedPermitsValidator = array().of(
-  object({
-    permitTypeId: number().required().label('Permit type'),
-    submittedDate: date()
-      .test(
-        'submitted-date',
-        'Submitted date must be valid or empty',
-        (val) => val instanceof Date || val === undefined
-      )
-      .label('Submitted date'),
-    permitTracking: array().of(object({ trackingId: string().max(255).nullable().label('Tracking ID') }))
-  })
-);
-
-export const permitsValidator = object({
-  appliedPermits: appliedPermitsValidator,
-  hasAppliedProvincialPermits: string().oneOf(YES_NO_UNSURE_LIST).required().label('Applied permits'),
-  investigatePermits: array().of(
-    object({
-      permitTypeId: number().required().label('Permit type')
-    })
-  )
-});
-
-export const optionalText = (max?: number) => {
-  let schema = string().trim().emptyToNull().nullable();
-
-  if (max) {
-    schema = schema.max(max);
-  }
-
-  return schema;
-};
-
-export const requiredText = (max?: number) => {
-  return optionalText(max).required();
-};
-
-// zod copies of the shared validators above; each yup version is removed once its last consumer migrates
-
-const blankToNull = (value: unknown) => (typeof value === 'string' ? value.trim() || null : value);
-
-export const toNumber = (value: unknown) => (typeof value === 'string' && value.trim() !== '' ? Number(value) : value);
-
-// Date-only strings parse as local midnight, matching yup
-export const toDate = (value: unknown) =>
-  typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00` : value) : value;
-
-const coordinateSchema = (label: string, min: number, max: number) =>
-  z.preprocess(
-    toNumber,
-    z
-      .number(`${label} must be a number`)
-      .min(min, `${label} must be greater than or equal to ${min}`)
-      .max(max, `${label} must be less than or equal to ${max}`)
-      .nullish()
-  );
-
 const permitTypeIdSchema = z.preprocess(
-  toNumber,
+  coerceNumber,
   z.number({
     error: (issue) => (isBlank(issue.input) ? requiredMessage('Permit type') : 'Permit type must be a number')
   })
 );
 
-export const optionalTextSchema = (label: string, max?: number) =>
-  z.preprocess(blankToNull, (max ? z.string().max(max, maxMessage(label, max)) : z.string()).nullish());
+// BC bounds
+export const latitudeSchema = (label: string) => numberRangeSchema(label, 48, 60);
 
-export const requiredTextSchema = (label: string, max?: number) =>
-  z.preprocess(blankToNull, max ? requiredString(label).max(max, maxMessage(label, max)) : requiredString(label));
-
-// Optional select: blank means unset, anything else must be an allowed value
-export const optionalOneOfSchema = <T extends string>(label: string, values: readonly T[]) =>
-  z.preprocess(blankToNull, z.enum(values as [T, ...T[]], oneOfMessage(label, values)).nullish());
-
-export const latitudeSchema = (label: string) => coordinateSchema(label, 48, 60);
-
-export const longitudeSchema = (label: string) => coordinateSchema(label, -139, -114);
+export const longitudeSchema = (label: string) => numberRangeSchema(label, -139, -114);
 
 // A selected user is an object; blank means unassigned; free text left in the autocomplete is invalid
 export const assignedToSchema = (message: string) =>
@@ -176,7 +40,7 @@ export const assignedToSchema = (message: string) =>
 
 export const atsClientIdSchema = (label: string) =>
   z.preprocess(
-    toNumber,
+    coerceNumber,
     z
       .number(`${label} must be a number`)
       .int(`${label} must be an integer`)
@@ -191,8 +55,8 @@ export const locationFormSchema = z
     streetAddress: z.string().nullish(),
     locality: z.string().nullish(),
     province: z.string().nullish(),
-    latitude: coordinateSchema('Latitude', 48, 60),
-    longitude: coordinateSchema('Longitude', -139, -114),
+    latitude: latitudeSchema('Latitude'),
+    longitude: longitudeSchema('Longitude'),
     ltsaPidLookup: z.string().max(255, maxMessage('Parcel ID', 255)).nullish(),
     geomarkUrl: z.string().max(255, maxMessage('Geomark web service url', 255)).nullish(),
     geoJson: z.unknown().optional(),
@@ -214,7 +78,7 @@ export const locationFormSchema = z
 export const appliedPermitSchema = z.looseObject({
   permitTypeId: permitTypeIdSchema,
   submittedDate: z.preprocess(
-    toDate,
+    coerceDate,
     z
       .date({
         error: (issue) =>
