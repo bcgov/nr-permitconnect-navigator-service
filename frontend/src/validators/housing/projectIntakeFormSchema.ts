@@ -72,10 +72,10 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
         requireText(ctx, 'housingCoopDescription', 'Housing co-operative', value.housingCoopDescription);
       }
 
-      // The section-level issue is the message ResidentialUnitsCard displays; the blank checkbox issues let
-      // useFormErrorWatcher match the card's inputs so invalid submits jump to its tab
+      // unitTypes is a field ResidentialUnitsCard registers to show this message only once validated;
+      // the blank checkbox issues let useFormErrorWatcher jump invalid submits to the card's tab
       if (!value.singleFamilySelected && !value.multiFamilySelected && !value.otherSelected) {
-        addIssue(ctx, [], 'At least one residential unit type must be selected');
+        addIssue(ctx, 'unitTypes', 'At least one residential unit type must be selected');
         for (const key of ['singleFamilySelected', 'multiFamilySelected', 'otherSelected']) addIssue(ctx, key, '\n');
       }
       if (value.singleFamilySelected) {
