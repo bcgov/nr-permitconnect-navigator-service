@@ -29,6 +29,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listActivityContacts',
   summary: 'List activity_contact linkages for an activity',
   tags: ['Contact'],
   schema: schema.listActivityContact,
@@ -45,6 +46,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/:contactId',
+  operationId: 'createActivityContact',
   summary: 'Create an activity_contact linkage for an activity',
   tags: ['Contact'],
   schema: schema.createActivityContact,
@@ -61,6 +63,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'put',
   path: '/:contactId',
+  operationId: 'updateActivityContact',
   summary: 'Update an activity_contact linkage for an activity',
   tags: ['Contact'],
   schema: schema.updateActivityContact,
@@ -80,6 +83,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/:contactId',
+  operationId: 'deleteActivityContact',
   summary: 'Delete an activity_contact linkage for an activity',
   tags: ['Contact'],
   schema: schema.deleteActivityContact,

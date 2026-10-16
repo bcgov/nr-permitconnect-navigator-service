@@ -21,6 +21,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/search',
+  operationId: 'searchUsers',
   summary: 'Search users',
   tags: ['User'],
   schema: schema.searchUsers,

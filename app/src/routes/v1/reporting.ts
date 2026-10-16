@@ -24,6 +24,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/electrification-project/permit',
+  operationId: 'getElectrificationProjectPermitReport',
   summary: 'Get all electrification project and permit data for csv download',
   tags: ['Reporting'],
   responses: {
@@ -38,6 +39,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/general-project/permit',
+  operationId: 'getGeneralProjectPermitReport',
   summary: 'Get all general project and permit data for csv download',
   tags: ['Reporting'],
   responses: {
@@ -52,6 +54,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/housing-project/permit',
+  operationId: 'getHousingProjectPermitReport',
   summary: 'Get all housing project and permit data for csv download',
   tags: ['Reporting'],
   responses: {

@@ -3,6 +3,8 @@ import { getSpec } from '#src/docs/docs';
 import { electrificationProjectStatisticsSchema } from '#src/schemas/response/projectStatistics';
 import { schema as permitSchema } from '#src/schemas/request/permit';
 
+import type { OperationObject } from 'openapi3-ts/oas30';
+
 vi.mock('config', () => {
   const mock = { has: vi.fn(), get: vi.fn() };
   return { default: mock, ...mock };
@@ -30,6 +32,16 @@ describe('getSpec', () => {
     expect(Object.keys(spec.components?.schemas ?? {})).toEqual(
       expect.arrayContaining(['Permit', 'Contact', 'Problem'])
     );
+  });
+
+  // Generated frontend types key operations by id, so a collision would silently merge two endpoints
+  it('gives every operation a unique operationId', () => {
+    const operationIds = Object.values(getSpec().paths ?? {}).flatMap((pathItem) =>
+      Object.values(pathItem as Record<string, OperationObject>).map((operation) => operation.operationId)
+    );
+
+    expect(operationIds.every(Boolean)).toBe(true);
+    expect(new Set(operationIds).size).toBe(operationIds.length);
   });
 });
 

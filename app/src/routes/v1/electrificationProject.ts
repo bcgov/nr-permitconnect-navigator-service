@@ -40,6 +40,7 @@ const TAGS = ['Electrification Project'];
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listElectrificationProjects',
   summary: 'Gets a list of electrification projects',
   tags: TAGS,
   responses: {
@@ -54,6 +55,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/activityIds',
+  operationId: 'listElectrificationProjectActivityIds',
   summary: 'Get a list of all the activityIds',
   tags: TAGS,
   responses: {
@@ -68,6 +70,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/search',
+  operationId: 'searchElectrificationProjects',
   summary: 'Search electrification projects',
   tags: TAGS,
   schema: schema.searchElectrificationProjects,
@@ -87,6 +90,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/statistics',
+  operationId: 'getElectrificationProjectStatistics',
   summary: 'Gets electrification project statistics',
   tags: TAGS,
   schema: schema.getStatistics,
@@ -103,6 +107,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft/:draftId',
+  operationId: 'getElectrificationProjectDraft',
   summary: 'Gets a electrification project draft',
   tags: TAGS,
   schema: schema.getDraft,
@@ -119,6 +124,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/draft',
+  operationId: 'listElectrificationProjectDrafts',
   summary: 'Gets a list of electrification project drafts',
   tags: TAGS,
   responses: {
@@ -133,6 +139,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft',
+  operationId: 'upsertElectrificationProjectDraft',
   summary: 'Creates or updates an intake and set status to Draft',
   tags: TAGS,
   schema: schema.upsertDraft,
@@ -150,6 +157,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/draft/submit',
+  operationId: 'submitElectrificationProjectDraft',
   summary: 'Creates or updates an intake and set status to Submitted',
   tags: TAGS,
   schema: schema.submitElectrificationProjectDraft,
@@ -166,6 +174,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/',
+  operationId: 'createElectrificationProject',
   summary: 'Creates a blank electrification project',
   tags: TAGS,
   schema: schema.createElectrificationProject,
@@ -182,6 +191,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/draft/:draftId',
+  operationId: 'deleteElectrificationProjectDraft',
   summary: 'Hard deletes a electrification project draft',
   tags: TAGS,
   schema: schema.deleteDraft,
@@ -198,6 +208,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/:electrificationProjectId',
+  operationId: 'getElectrificationProject',
   summary: 'Gets a specific electrification project',
   tags: TAGS,
   schema: schema.getElectrificationProject,
@@ -214,6 +225,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'patch',
   path: '/:electrificationProjectId',
+  operationId: 'patchElectrificationProject',
   summary: 'Patches a electrification project',
   tags: TAGS,
   schema: schema.patchElectrificationProject,
@@ -233,6 +245,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/:electrificationProjectId',
+  operationId: 'deleteElectrificationProject',
   summary: 'Deletes an electrification project',
   tags: TAGS,
   schema: schema.deleteElectrificationProject,

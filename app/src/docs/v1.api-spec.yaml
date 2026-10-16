@@ -3527,6 +3527,7 @@ components:
 paths:
   /activity/{activityId}/contact:
     get:
+      operationId: listActivityContacts
       summary: List activity_contact linkages for an activity
       tags:
         - Contact
@@ -3567,6 +3568,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /activity/{activityId}/contact/{contactId}:
     post:
+      operationId: createActivityContact
       summary: Create an activity_contact linkage for an activity
       tags:
         - Contact
@@ -3625,6 +3627,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     put:
+      operationId: updateActivityContact
       summary: Update an activity_contact linkage for an activity
       tags:
         - Contact
@@ -3683,6 +3686,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteActivityContact
       summary: Delete an activity_contact linkage for an activity
       tags:
         - Contact
@@ -3723,6 +3727,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /contact:
     get:
+      operationId: getCurrentContact
       summary: Get current user's contact information
       tags:
         - Contact
@@ -3746,6 +3751,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertContact
       summary: Create or update a contact
       tags:
         - Contact
@@ -3823,6 +3829,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /contact/match:
     post:
+      operationId: matchContacts
       summary: Match contacts
       tags:
         - Contact
@@ -3890,6 +3897,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /contact/search:
     post:
+      operationId: searchContacts
       summary: Search contacts
       tags:
         - Contact
@@ -3991,6 +3999,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /contact/{contactId}:
     get:
+      operationId: getContact
       summary: Get a specific contact
       tags:
         - Contact
@@ -4032,6 +4041,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteContact
       summary: Delete a specific contact
       tags:
         - Contact
@@ -4065,6 +4075,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project:
     get:
+      operationId: listElectrificationProjects
       summary: Gets a list of electrification projects
       tags: &ref_0
         - Electrification Project
@@ -4090,6 +4101,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createElectrificationProject
       summary: Creates a blank electrification project
       tags: *ref_0
       requestBody:
@@ -4127,6 +4139,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/activityIds:
     get:
+      operationId: listElectrificationProjectActivityIds
       summary: Get a list of all the activityIds
       tags: *ref_0
       responses:
@@ -4152,6 +4165,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/search:
     post:
+      operationId: searchElectrificationProjects
       summary: Search electrification projects
       tags: *ref_0
       requestBody:
@@ -4243,6 +4257,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/statistics:
     get:
+      operationId: getElectrificationProjectStatistics
       summary: Gets electrification project statistics
       tags: *ref_0
       parameters:
@@ -4301,6 +4316,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/draft/{draftId}:
     get:
+      operationId: getElectrificationProjectDraft
       summary: Gets a electrification project draft
       tags: *ref_0
       parameters:
@@ -4336,6 +4352,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteElectrificationProjectDraft
       summary: Hard deletes a electrification project draft
       tags: *ref_0
       parameters:
@@ -4368,6 +4385,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/draft:
     get:
+      operationId: listElectrificationProjectDrafts
       summary: Gets a list of electrification project drafts
       tags: *ref_0
       responses:
@@ -4392,6 +4410,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertElectrificationProjectDraft
       summary: Creates or updates an intake and set status to Draft
       tags: *ref_0
       requestBody:
@@ -4442,6 +4461,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/draft/submit:
     post:
+      operationId: submitElectrificationProjectDraft
       summary: Creates or updates an intake and set status to Submitted
       tags: *ref_0
       requestBody:
@@ -4564,6 +4584,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/project/{electrificationProjectId}:
     get:
+      operationId: getElectrificationProject
       summary: Gets a specific electrification project
       tags: *ref_0
       parameters:
@@ -4599,6 +4620,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchElectrificationProject
       summary: Patches a electrification project
       tags: *ref_0
       parameters:
@@ -4724,6 +4746,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteElectrificationProject
       summary: Deletes an electrification project
       tags: *ref_0
       parameters:
@@ -4756,6 +4779,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/access-request:
     post:
+      operationId: createElectrificationAccessRequest
       summary: Request to create/revoke a user and access request
       tags:
         - Electrification Access Request
@@ -4896,6 +4920,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: listElectrificationAccessRequests
       summary: Get access requests
       tags:
         - Electrification Access Request
@@ -4922,6 +4947,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/access-request/{accessRequestId}:
     post:
+      operationId: processElectrificationAccessRequest
       summary: Process an access request
       tags:
         - Electrification Access Request
@@ -4966,6 +4992,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/document:
     post:
+      operationId: createElectrificationDocument
       summary: Create a document
       tags:
         - Electrification Document
@@ -5024,6 +5051,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/document/{documentId}:
     delete:
+      operationId: deleteElectrificationDocument
       summary: Delete a document
       tags:
         - Electrification Document
@@ -5057,6 +5085,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/document/list/{activityId}:
     get:
+      operationId: listElectrificationDocuments
       summary: Get a list of documents
       tags:
         - Electrification Document
@@ -5097,6 +5126,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/enquiry/list/{activityId}:
     get:
+      operationId: listRelatedElectrificationEnquiries
       summary: Gets enquiries related to an activityId
       tags:
         - Electrification Enquiry
@@ -5137,6 +5167,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/enquiry/search:
     post:
+      operationId: searchElectrificationEnquiries
       summary: Search all enquiries
       tags:
         - Electrification Enquiry
@@ -5191,6 +5222,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/enquiry/{enquiryId}:
     get:
+      operationId: getElectrificationEnquiry
       summary: Gets a specific enquiry
       tags:
         - Electrification Enquiry
@@ -5227,6 +5259,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchElectrificationEnquiry
       summary: Patches an enquiry
       tags:
         - Electrification Enquiry
@@ -5300,6 +5333,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteElectrificationEnquiry
       summary: Deletes an enquiry
       tags:
         - Electrification Enquiry
@@ -5333,6 +5367,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/enquiry:
     get:
+      operationId: listElectrificationEnquiries
       summary: Gets a list of enquiries
       tags:
         - Electrification Enquiry
@@ -5358,6 +5393,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createElectrificationEnquiry
       summary: Creates an enquiry and set status to Submitted
       tags:
         - Electrification Enquiry
@@ -5454,6 +5490,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/note:
     post:
+      operationId: createElectrificationNoteHistory
       summary: Create a note history
       tags:
         - Electrification Note
@@ -5531,6 +5568,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/note/{noteHistoryId}:
     patch:
+      operationId: patchElectrificationNoteHistory
       summary: Patch a note history
       tags:
         - Electrification Note
@@ -5612,6 +5650,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteElectrificationNoteHistory
       summary: Delete a note history
       tags:
         - Electrification Note
@@ -5645,6 +5684,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/note/bring-forward:
     get:
+      operationId: listElectrificationBringForwards
       summary: Get a list of bring forward note histories
       tags:
         - Electrification Note
@@ -5686,6 +5726,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/note/list/{activityId}:
     get:
+      operationId: listElectrificationNoteHistories
       summary: Get a list of note histories
       tags:
         - Electrification Note
@@ -5726,6 +5767,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/permit:
     get:
+      operationId: listElectrificationPermits
       summary: Get a list of permits
       tags:
         - Electrification Permit
@@ -5772,6 +5814,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertElectrificationPermit
       summary: Create or update a permit
       tags:
         - Electrification Permit
@@ -6157,6 +6200,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/permit/{permitId}:
     delete:
+      operationId: deleteElectrificationPermit
       summary: Delete a permit
       tags:
         - Electrification Permit
@@ -6189,6 +6233,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: getElectrificationPermit
       summary: Get a permit
       tags:
         - Electrification Permit
@@ -6226,6 +6271,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/permit/intake:
     post:
+      operationId: createElectrificationIntakePermits
       summary: Create multiple permit records
       tags:
         - Electrification Permit
@@ -6288,6 +6334,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/permit/search:
     get:
+      operationId: searchElectrificationPermits
       summary: Get a list of permits based on search criteria
       tags:
         - Electrification Permit
@@ -6378,6 +6425,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/roadmap:
     post:
+      operationId: sendElectrificationRoadmap
       summary: Send an email with the roadmap data
       tags:
         - Electrification Roadmap
@@ -6470,6 +6518,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /electrification/roadmap/note:
     get:
+      operationId: getElectrificationRoadmapNote
       summary: Get the roadmap note for a project
       tags:
         - Electrification Roadmap
@@ -6508,6 +6557,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project:
     get:
+      operationId: listGeneralProjects
       summary: Gets a list of general projects
       tags: &ref_1
         - General Project
@@ -6533,6 +6583,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createGeneralProject
       summary: Creates a blank general project
       tags: *ref_1
       requestBody:
@@ -6570,6 +6621,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/activityIds:
     get:
+      operationId: listGeneralProjectActivityIds
       summary: Get a list of all the activityIds
       tags: *ref_1
       responses:
@@ -6595,6 +6647,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/search:
     post:
+      operationId: searchGeneralProjects
       summary: Search general projects
       tags: *ref_1
       requestBody:
@@ -6685,6 +6738,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/statistics:
     get:
+      operationId: getGeneralProjectStatistics
       summary: Gets general project statistics
       tags: *ref_1
       parameters:
@@ -6743,6 +6797,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/draft/{draftId}:
     get:
+      operationId: getGeneralProjectDraft
       summary: Get a specific general project draft
       tags: *ref_1
       parameters:
@@ -6778,6 +6833,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteGeneralProjectDraft
       summary: Hard deletes a general project draft
       tags: *ref_1
       parameters:
@@ -6810,6 +6866,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/draft:
     get:
+      operationId: listGeneralProjectDrafts
       summary: Gets a list of general project drafts
       tags: *ref_1
       responses:
@@ -6834,6 +6891,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertGeneralProjectDraft
       summary: Creates or updates an intake and set status to Draft
       tags: *ref_1
       requestBody:
@@ -6884,6 +6942,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/draft/submit:
     post:
+      operationId: submitGeneralProjectDraft
       summary: Creates or updates an intake and set status to Submitted
       tags: *ref_1
       requestBody:
@@ -7212,6 +7271,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/project/{generalProjectId}:
     get:
+      operationId: getGeneralProject
       summary: Gets a specific general project
       tags: *ref_1
       parameters:
@@ -7247,6 +7307,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchGeneralProject
       summary: Patches a general project
       tags: *ref_1
       parameters:
@@ -7381,6 +7442,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteGeneralProject
       summary: Deletes a general project
       tags: *ref_1
       parameters:
@@ -7413,6 +7475,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/access-request:
     post:
+      operationId: createGeneralAccessRequest
       summary: Request to create/revoke a user and access request
       tags:
         - General Access Request
@@ -7553,6 +7616,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: listGeneralAccessRequests
       summary: Get access requests
       tags:
         - General Access Request
@@ -7579,6 +7643,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/access-request/{accessRequestId}:
     post:
+      operationId: processGeneralAccessRequest
       summary: Process an access request
       tags:
         - General Access Request
@@ -7623,6 +7688,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/document:
     post:
+      operationId: createGeneralDocument
       summary: Create a document
       tags:
         - General Document
@@ -7681,6 +7747,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/document/{documentId}:
     delete:
+      operationId: deleteGeneralDocument
       summary: Delete a document
       tags:
         - General Document
@@ -7714,6 +7781,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/document/list/{activityId}:
     get:
+      operationId: listGeneralDocuments
       summary: Get a list of documents
       tags:
         - General Document
@@ -7754,6 +7822,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/enquiry/list/{activityId}:
     get:
+      operationId: listRelatedGeneralEnquiries
       summary: Gets enquiries related to an activityId
       tags:
         - General Enquiry
@@ -7794,6 +7863,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/enquiry/search:
     post:
+      operationId: searchGeneralEnquiries
       summary: Search all enquiries
       tags:
         - General Enquiry
@@ -7848,6 +7918,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/enquiry/{enquiryId}:
     get:
+      operationId: getGeneralEnquiry
       summary: Gets a specific enquiry
       tags:
         - General Enquiry
@@ -7884,6 +7955,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchGeneralEnquiry
       summary: Patches an enquiry
       tags:
         - General Enquiry
@@ -7957,6 +8029,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteGeneralEnquiry
       summary: Deletes an enquiry
       tags:
         - General Enquiry
@@ -7990,6 +8063,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/enquiry:
     get:
+      operationId: listGeneralEnquiries
       summary: Gets a list of enquiries
       tags:
         - General Enquiry
@@ -8015,6 +8089,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createGeneralEnquiry
       summary: Creates an enquiry and set status to Submitted
       tags:
         - General Enquiry
@@ -8111,6 +8186,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/map/pids/{projectId}:
     get:
+      operationId: getGeneralProjectPids
       summary: Get PIDs for a project
       tags:
         - General Map
@@ -8149,6 +8225,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/note:
     post:
+      operationId: createGeneralNoteHistory
       summary: Create a note history
       tags:
         - General Note
@@ -8226,6 +8303,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/note/{noteHistoryId}:
     patch:
+      operationId: patchGeneralNoteHistory
       summary: Patch a note history
       tags:
         - General Note
@@ -8307,6 +8385,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteGeneralNoteHistory
       summary: Delete a note history
       tags:
         - General Note
@@ -8340,6 +8419,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/note/bring-forward:
     get:
+      operationId: listGeneralBringForwards
       summary: Get a list of bring forward note histories
       tags:
         - General Note
@@ -8381,6 +8461,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/note/list/{activityId}:
     get:
+      operationId: listGeneralNoteHistories
       summary: Get a list of note histories
       tags:
         - General Note
@@ -8421,6 +8502,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/permit:
     get:
+      operationId: listGeneralPermits
       summary: Get a list of permits
       tags:
         - General Permit
@@ -8467,6 +8549,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertGeneralPermit
       summary: Create or update a permit
       tags:
         - General Permit
@@ -8852,6 +8935,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/permit/{permitId}:
     delete:
+      operationId: deleteGeneralPermit
       summary: Delete a permit
       tags:
         - General Permit
@@ -8884,6 +8968,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: getGeneralPermit
       summary: Get a permit
       tags:
         - General Permit
@@ -8921,6 +9006,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/permit/intake:
     post:
+      operationId: createGeneralIntakePermits
       summary: Create multiple permit records
       tags:
         - General Permit
@@ -8983,6 +9069,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/permit/search:
     get:
+      operationId: searchGeneralPermits
       summary: Get a list of permits based on search criteria
       tags:
         - General Permit
@@ -9073,6 +9160,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/roadmap:
     post:
+      operationId: sendGeneralRoadmap
       summary: Send an email with the roadmap data
       tags:
         - General Roadmap
@@ -9165,6 +9253,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /general/roadmap/note:
     get:
+      operationId: getGeneralRoadmapNote
       summary: Get the roadmap note for a project
       tags:
         - General Roadmap
@@ -9203,6 +9292,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project:
     get:
+      operationId: listHousingProjects
       summary: Gets a list of housing projects
       tags: &ref_2
         - Housing Project
@@ -9228,6 +9318,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createHousingProject
       summary: Creates a blank housing project
       tags: *ref_2
       requestBody:
@@ -9265,6 +9356,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/activityIds:
     get:
+      operationId: listHousingProjectActivityIds
       summary: Get a list of all the activityIds
       tags: *ref_2
       responses:
@@ -9290,6 +9382,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/search:
     post:
+      operationId: searchHousingProjects
       summary: Search housing projects
       tags: *ref_2
       requestBody:
@@ -9380,6 +9473,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/statistics:
     get:
+      operationId: getHousingProjectStatistics
       summary: Gets housing project statistics
       tags: *ref_2
       parameters:
@@ -9438,6 +9532,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/draft/{draftId}:
     get:
+      operationId: getHousingProjectDraft
       summary: Get a specific housing project draft
       tags: *ref_2
       parameters:
@@ -9473,6 +9568,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteHousingProjectDraft
       summary: Hard deletes a housing project draft
       tags: *ref_2
       parameters:
@@ -9505,6 +9601,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/draft:
     get:
+      operationId: listHousingProjectDrafts
       summary: Gets a list of housing project drafts
       tags: *ref_2
       responses:
@@ -9529,6 +9626,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertHousingProjectDraft
       summary: Creates or updates an intake and set status to Draft
       tags: *ref_2
       requestBody:
@@ -9579,6 +9677,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/draft/submit:
     post:
+      operationId: submitHousingProjectDraft
       summary: Creates or updates an intake and set status to Submitted
       tags: *ref_2
       requestBody:
@@ -10001,6 +10100,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/project/{housingProjectId}:
     get:
+      operationId: getHousingProject
       summary: Gets a specific housing project
       tags: *ref_2
       parameters:
@@ -10036,6 +10136,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchHousingProject
       summary: Patches a housing project
       tags: *ref_2
       parameters:
@@ -10243,6 +10344,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteHousingProject
       summary: Deletes a housing project
       tags: *ref_2
       parameters:
@@ -10275,6 +10377,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/access-request:
     post:
+      operationId: createHousingAccessRequest
       summary: Request to create/revoke a user and access request
       tags:
         - Housing Access Request
@@ -10415,6 +10518,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: listHousingAccessRequests
       summary: Get access requests
       tags:
         - Housing Access Request
@@ -10441,6 +10545,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/access-request/{accessRequestId}:
     post:
+      operationId: processHousingAccessRequest
       summary: Process an access request
       tags:
         - Housing Access Request
@@ -10485,6 +10590,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/document:
     post:
+      operationId: createHousingDocument
       summary: Create a document
       tags:
         - Housing Document
@@ -10543,6 +10649,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/document/{documentId}:
     delete:
+      operationId: deleteHousingDocument
       summary: Delete a document
       tags:
         - Housing Document
@@ -10576,6 +10683,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/document/list/{activityId}:
     get:
+      operationId: listHousingDocuments
       summary: Get a list of documents
       tags:
         - Housing Document
@@ -10616,6 +10724,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/enquiry/list/{activityId}:
     get:
+      operationId: listRelatedHousingEnquiries
       summary: Gets enquiries related to an activityId
       tags:
         - Housing Enquiry
@@ -10656,6 +10765,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/enquiry/search:
     post:
+      operationId: searchHousingEnquiries
       summary: Search all enquiries
       tags:
         - Housing Enquiry
@@ -10710,6 +10820,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/enquiry/{enquiryId}:
     get:
+      operationId: getHousingEnquiry
       summary: Gets a specific enquiry
       tags:
         - Housing Enquiry
@@ -10746,6 +10857,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     patch:
+      operationId: patchHousingEnquiry
       summary: Patches an enquiry
       tags:
         - Housing Enquiry
@@ -10819,6 +10931,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteHousingEnquiry
       summary: Deletes an enquiry
       tags:
         - Housing Enquiry
@@ -10852,6 +10965,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/enquiry:
     get:
+      operationId: listHousingEnquiries
       summary: Gets a list of enquiries
       tags:
         - Housing Enquiry
@@ -10877,6 +10991,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: createHousingEnquiry
       summary: Creates an enquiry and set status to Submitted
       tags:
         - Housing Enquiry
@@ -10973,6 +11088,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/map/pids/{projectId}:
     get:
+      operationId: getHousingProjectPids
       summary: Get PIDs for a project
       tags:
         - Housing Map
@@ -11011,6 +11127,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/note:
     post:
+      operationId: createHousingNoteHistory
       summary: Create a note history
       tags:
         - Housing Note
@@ -11088,6 +11205,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/note/{noteHistoryId}:
     patch:
+      operationId: patchHousingNoteHistory
       summary: Patch a note history
       tags:
         - Housing Note
@@ -11169,6 +11287,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     delete:
+      operationId: deleteHousingNoteHistory
       summary: Delete a note history
       tags:
         - Housing Note
@@ -11202,6 +11321,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/note/bring-forward:
     get:
+      operationId: listHousingBringForwards
       summary: Get a list of bring forward note histories
       tags:
         - Housing Note
@@ -11243,6 +11363,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/note/list/{activityId}:
     get:
+      operationId: listHousingNoteHistories
       summary: Get a list of note histories
       tags:
         - Housing Note
@@ -11283,6 +11404,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/permit:
     get:
+      operationId: listHousingPermits
       summary: Get a list of permits
       tags:
         - Housing Permit
@@ -11329,6 +11451,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     post:
+      operationId: upsertHousingPermit
       summary: Create or update a permit
       tags:
         - Housing Permit
@@ -11714,6 +11837,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/permit/{permitId}:
     delete:
+      operationId: deleteHousingPermit
       summary: Delete a permit
       tags:
         - Housing Permit
@@ -11746,6 +11870,7 @@ paths:
               schema:
                 $ref: '#/components/schemas/Problem'
     get:
+      operationId: getHousingPermit
       summary: Get a permit
       tags:
         - Housing Permit
@@ -11783,6 +11908,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/permit/intake:
     post:
+      operationId: createHousingIntakePermits
       summary: Create multiple permit records
       tags:
         - Housing Permit
@@ -11845,6 +11971,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/permit/search:
     get:
+      operationId: searchHousingPermits
       summary: Get a list of permits based on search criteria
       tags:
         - Housing Permit
@@ -11935,6 +12062,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/roadmap:
     post:
+      operationId: sendHousingRoadmap
       summary: Send an email with the roadmap data
       tags:
         - Housing Roadmap
@@ -12027,6 +12155,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /housing/roadmap/note:
     get:
+      operationId: getHousingRoadmapNote
       summary: Get the roadmap note for a project
       tags:
         - Housing Roadmap
@@ -12065,6 +12194,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /permit-type:
     get:
+      operationId: listPermitTypes
       summary: Get a list of permit types
       tags:
         - Permit Type
@@ -12110,6 +12240,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /reporting/electrification-project/permit:
     get:
+      operationId: getElectrificationProjectPermitReport
       summary: Get all electrification project and permit data for csv download
       tags:
         - Reporting
@@ -12136,6 +12267,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /reporting/general-project/permit:
     get:
+      operationId: getGeneralProjectPermitReport
       summary: Get all general project and permit data for csv download
       tags:
         - Reporting
@@ -12162,6 +12294,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /reporting/housing-project/permit:
     get:
+      operationId: getHousingProjectPermitReport
       summary: Get all housing project and permit data for csv download
       tags:
         - Reporting
@@ -12188,6 +12321,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /source-system-kind:
     get:
+      operationId: listSourceSystemKinds
       summary: Get all source system kind table data
       tags:
         - Source System Kind
@@ -12208,6 +12342,7 @@ paths:
                 $ref: '#/components/schemas/Problem'
   /user/search:
     post:
+      operationId: searchUsers
       summary: Search users
       tags:
         - User

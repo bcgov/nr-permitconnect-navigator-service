@@ -12,6 +12,7 @@ const router = express.Router();
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'listSourceSystemKinds',
   summary: 'Get all source system kind table data',
   tags: ['Source System Kind'],
   responses: {
