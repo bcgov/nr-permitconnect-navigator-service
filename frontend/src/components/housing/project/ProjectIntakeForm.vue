@@ -299,7 +299,7 @@ onBeforeMount(() => {
               ...x,
               submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
             })),
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ? BasicResponse.YES : BasicResponse.NO,
+          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ?? undefined,
           investigatePermits: useProjectStore().getPermits.filter(
             (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
           )

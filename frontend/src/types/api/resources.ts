@@ -241,7 +241,7 @@ export interface GeneralProjectBase extends ProjectBase {
   streetAddress?: Nullable<string>;
   geomarkUrl?: Nullable<string>;
   naturalDisaster: boolean;
-  hasAppliedProvincialPermits: boolean;
+  hasAppliedProvincialPermits: Nullable<BasicResponse>;
   activityType: string;
   region?: Nullable<Region>;
   area?: Nullable<Area>;
@@ -296,7 +296,7 @@ export interface HousingProjectBase extends ProjectBase {
   naturalDisaster: boolean;
   ltsaCompleted: boolean;
   bcOnlineCompleted: boolean;
-  hasAppliedProvincialPermits: boolean;
+  hasAppliedProvincialPermits: Nullable<BasicResponse>;
 }
 
 export type HousingProject = HousingProjectBase & Partial<ProjectRelations>;

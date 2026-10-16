@@ -98,7 +98,7 @@ const testProject: HousingProject = {
   applicationStatus: ApplicationStatus.COMPLETED,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: '',
-  hasAppliedProvincialPermits: false,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

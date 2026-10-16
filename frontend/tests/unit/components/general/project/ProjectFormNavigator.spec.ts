@@ -3,7 +3,7 @@ import { flushPromises } from '@vue/test-utils';
 import ProjectFormNavigator from '@/components/general/project/ProjectFormNavigator.vue';
 import { generalProjectService, mapService, userService } from '@/services';
 import { useProjectStore } from '@/store';
-import { Initiative } from '@/utils/enums/application';
+import { BasicResponse, Initiative } from '@/utils/enums/application';
 import {
   ActivityContactRole,
   Area,
@@ -72,7 +72,7 @@ const testProject: GeneralProject = {
   region: Region.CARIBOO,
   area: Area.COAST,
   naturalDisaster: false,
-  hasAppliedProvincialPermits: false,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
