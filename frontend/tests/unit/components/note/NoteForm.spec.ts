@@ -153,7 +153,7 @@ describe('NoteForm', () => {
     });
   });
 
-  // Runs the real schema through vee-validate's <Form>, guarding the yup -> zod swap
+  // Runs the real schema through vee-validate's <Form>
   describe('validation', () => {
     it('blocks submit and shows field errors when required fields are empty', async () => {
       const { wrapper } = mountNoteForm({ noteHistory: undefined });

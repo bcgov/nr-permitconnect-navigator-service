@@ -12,15 +12,19 @@ import {
 } from '@/utils/constants/projectCommon';
 import { BasicResponse, Initiative, Regex } from '@/utils/enums/application';
 import {
+  coerceNumber,
   evenWithIssues,
   formSection,
   isBlank,
   isOneOf,
   maxMessage,
   oneOfMessage,
+  blankOrOneOfSchema,
+  optionalTextSchema,
   requiredMessage,
   requiredOneOf,
   requiredString,
+  requiredTextSchema,
   requireText
 } from '@/utils/zodSchema';
 import {
@@ -28,12 +32,8 @@ import {
   atsClientIdSchema,
   latitudeSchema,
   longitudeSchema,
-  optionalOneOfSchema,
-  optionalTextSchema,
-  requiredTextSchema,
   requireUnits,
-  unitsSchema,
-  toNumber
+  unitsSchema
 } from '@/validators/common';
 
 import type { CreateSchemaOptions } from '@/types';
@@ -50,11 +50,11 @@ export function createContactCardNavFormSchema({ t }: CreateSchemaOptions) {
         firstName: requiredTextSchema(t('validators.contactCardNavForm.contactFirstName'), 255),
         lastName: optionalTextSchema(t('validators.contactCardNavForm.contactLastName'), 255),
         phoneNumber: optionalTextSchema(t('validators.contactCardNavForm.contactPhoneNumber')),
-        contactApplicantRelationship: optionalOneOfSchema(
+        contactApplicantRelationship: blankOrOneOfSchema(
           t('validators.contactCardNavForm.contactApplicantRelationship'),
           PROJECT_RELATIONSHIP_LIST
         ),
-        contactPreference: optionalOneOfSchema(
+        contactPreference: blankOrOneOfSchema(
           t('validators.contactCardNavForm.contactPreference'),
           CONTACT_PREFERENCE_LIST
         ),
@@ -103,15 +103,15 @@ export function createElectrificationPanelSchema({
   return {
     electrification: formSection(
       z.looseObject({
-        bcEnvironmentAssessNeeded: optionalOneOfSchema('BC Environmental Assessment needed?', YES_NO_LIST),
+        bcEnvironmentAssessNeeded: blankOrOneOfSchema('BC Environmental Assessment needed?', YES_NO_LIST),
         bcHydroNumber: optionalTextSchema('BC Hydro Call for Power project number', 255),
-        hasEpa: optionalOneOfSchema('Do they have an EPA?', YES_NO_LIST),
+        hasEpa: blankOrOneOfSchema('Do they have an EPA?', YES_NO_LIST),
         megawatts: z.preprocess(
-          (value) => (value === '' ? null : toNumber(value)),
+          (value) => (value === '' ? null : coerceNumber(value)),
           z.number(t('i.common.form.numberError')).positive('Must be greater than zero').nullish()
         ),
         projectType: requiredOneOf('Project type', codeList.ElectrificationProjectType),
-        projectCategory: optionalOneOfSchema('Project category', codeList.ElectrificationProjectCategory)
+        projectCategory: blankOrOneOfSchema('Project category', codeList.ElectrificationProjectCategory)
       })
     )
   };
@@ -183,7 +183,7 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
         area: isGeneral ? z.enum(AREA_LIST, 'Area is a required field').optional() : z.string().nullish(),
         assignedUser: assignedToSchema(t('validators.submissionState.assignedToMsg')),
         queuePriority: z.preprocess(
-          toNumber,
+          coerceNumber,
           z
             .number({
               error: (issue) =>

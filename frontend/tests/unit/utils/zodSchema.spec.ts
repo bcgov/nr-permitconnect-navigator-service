@@ -3,7 +3,9 @@ import { useForm } from 'vee-validate';
 import { defineComponent } from 'vue';
 import { z } from 'zod';
 
-import { toTypedSchema } from '@/utils/zodSchema';
+import { optionalTextSchema, requiredTextSchema, toTypedSchema } from '@/utils/zodSchema';
+
+import { runSchema } from '../../helpers';
 
 // Mocks
 
@@ -105,5 +107,40 @@ describe('toTypedSchema', () => {
 
       expect(onSubmit).toHaveBeenCalledWith({ ...validValues, basic: { projectName: 'Project' } }, expect.anything());
     });
+  });
+});
+
+describe('optionalTextSchema', () => {
+  it.each([
+    ['', null],
+    ['   ', null],
+    [null, null],
+    [undefined, undefined],
+    ['  x  ', 'x']
+  ])('accepts %j and outputs %j', async (input, output) => {
+    expect(await runSchema(optionalTextSchema('Text', 5), input)).toEqual({ value: output, errors: {} });
+  });
+
+  it('rejects text over the max length after trimming', async () => {
+    expect(Object.keys((await runSchema(optionalTextSchema('Text', 5), ' abcdef ')).errors)).toEqual(['']);
+    expect((await runSchema(optionalTextSchema('Text', 5), '  abc  ')).value).toBe('abc');
+  });
+
+  it('has no max length when none is given', async () => {
+    expect((await runSchema(optionalTextSchema('Text'), 'a'.repeat(5000))).errors).toEqual({});
+  });
+});
+
+describe('requiredTextSchema', () => {
+  it.each(['', '   ', null, undefined])('rejects %j', async (input) => {
+    expect(Object.keys((await runSchema(requiredTextSchema('Text', 5), input)).errors)).toEqual(['']);
+  });
+
+  it('trims the output', async () => {
+    expect(await runSchema(requiredTextSchema('Text', 5), '  x  ')).toEqual({ value: 'x', errors: {} });
+  });
+
+  it('rejects text over the max length', async () => {
+    expect(Object.keys((await runSchema(requiredTextSchema('Text', 5), 'abcdef')).errors)).toEqual(['']);
   });
 });
