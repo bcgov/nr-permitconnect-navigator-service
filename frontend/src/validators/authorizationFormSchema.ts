@@ -3,12 +3,11 @@ import { z } from 'zod';
 import { PERMIT_NEEDED_LIST, VALID_STATE_STAGES } from '@/utils/constants/permit';
 import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
+import { coerceNumber, isOneOf } from '@/utils/utils';
 import {
   addIssue,
-  coerceNumber,
   dateSchema,
   evenWithIssues,
-  isOneOf,
   maxMessage,
   notInFutureSchema,
   requiredMessage,

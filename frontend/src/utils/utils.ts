@@ -8,11 +8,28 @@ import type { DateTimeStrings, IdentityProvider } from '@/types';
 import type { ToastMessageOptions } from 'primevue/toast';
 
 /**
- * @function combineDateTime
- * Combines separate date and time strings into a single UTC Date object
- * @param date date string
- * @param time time string
- * @returns A constructed date object
+ * Turns date text into a Date, with date-only strings parsed as local midnight, leaving anything else unchanged.
+ * @param value - The raw input.
+ * @returns The date, or the raw input.
+ */
+export function coerceDate(value: unknown) {
+  return typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00` : value) : value;
+}
+
+/**
+ * Turns numeric text into a number, leaving anything else unchanged.
+ * @param value - The raw input.
+ * @returns The number, or the raw input.
+ */
+export function coerceNumber(value: unknown) {
+  return typeof value === 'string' && value.trim() !== '' ? Number(value) : value;
+}
+
+/**
+ * Combines separate date and time strings into one Date, with a date-only string read as local midnight.
+ * @param date - The date string.
+ * @param time - The time string.
+ * @returns The combined date, or null when there is no date.
  */
 export function combineDateTime(date?: string | null, time?: string | null): Date | null {
   if (!date) return null;
@@ -27,10 +44,9 @@ export function combineDateTime(date?: string | null, time?: string | null): Dat
 }
 
 /**
- * @function delimitEmails
- * Converts a space, semi-colon, or comma-separated value string into an array of string values
- * @param {string} value The string to parse
- * @returns {string[]} An array of string values
+ * Splits a space, semicolon or comma separated string into its values.
+ * @param value - The string to split.
+ * @returns The non-empty values.
  */
 export function delimitEmails(value: string): string[] {
   return value
@@ -40,11 +56,10 @@ export function delimitEmails(value: string): string[] {
 }
 
 /**
- * @function differential
- * Create a key/value differential from source against comparer
- * @param source Source object
- * @param comparer The object to be compared against
- * @returns Object containing the non-matching key/value pairs in the source object
+ * Builds a key/value differential of a source object against a comparer.
+ * @param source - The source object.
+ * @param comparer - The object to compare against.
+ * @returns The key/value pairs of the source that differ from the comparer.
  */
 export function differential<T extends Record<PropertyKey, unknown>>(source: T, comparer: Partial<T>): Partial<T> {
   return Object.fromEntries(
@@ -53,21 +68,20 @@ export function differential<T extends Record<PropertyKey, unknown>>(source: T, 
 }
 
 /**
- * @function findIdpConfig
- * Get the identity provider configuration for the given kind
- * @param {IdentityProviderKind} kind The kind of identity provider
- * @returns {IdentityProvider | undefined} IDP config for the given kind or undefined if not found
+ * Gets the identity provider configuration for a kind.
+ * @param kind - The kind of identity provider.
+ * @returns The configuration, or undefined when there is none.
  */
 export function findIdpConfig(kind: IdentityProviderKind): IdentityProvider | undefined {
   return useConfigStore().getConfig?.idpList?.find((x: IdentityProvider) => x.kind === kind);
 }
 
 /**
- * Basic error handler to display a toast message
- * @param error The error object
- * @param title Optional title. If not given the error message will be used
- * @param options Optional toast message options
- * @param toast Optional toast instance. Required if called outside of setup()
+ * Shows an error as a toast message.
+ * @param error - The error.
+ * @param title - The toast title; the error message is used when omitted.
+ * @param options - The toast message options.
+ * @param toast - The toast instance, required when called outside of setup().
  */
 export function generalErrorHandler(
   error: unknown,
@@ -83,7 +97,6 @@ export function generalErrorHandler(
 
 /**
  * Splits an array into consecutive batches of at most `size` items.
- *
  * @param arr - The array to split.
  * @param size - The maximum number of items per batch.
  * @returns The batches in order, the last of which may be shorter.
@@ -93,10 +106,9 @@ export function getBatches<T>(arr: T[], size: number): T[][] {
 }
 
 /**
- * @function getFileCategory
- * Compares mimeType to a list and returns a string category for that mimetype
- * @param {string} mimeType mimeType to be categorized
- * @returns {string} Category of file the mimeType falls under
+ * Categorizes a MIME type.
+ * @param mimeType - The MIME type to categorize.
+ * @returns The file category the MIME type falls under.
  */
 export function getFileCategory(mimeType: string): string {
   // Checks for commonly used and likely used mimetypes
@@ -138,9 +150,9 @@ export function getFileCategory(mimeType: string): string {
 }
 
 /**
- * @function getFilenameAndExtension
- * Separates a full filename into name and extension parts
- * @returns {filename: string, extension: string} An object containing filename and extension
+ * Separates a filename into its name and extension.
+ * @param filename - The full filename.
+ * @returns The name, and the extension when there is one.
  */
 export function getFilenameAndExtension(filename: string): { filename: string; extension: string | undefined } {
   const extensionIdx = filename.lastIndexOf('.');
@@ -154,12 +166,11 @@ export function getFilenameAndExtension(filename: string): { filename: string; e
 }
 
 /**
- * @function getHTMLElement
- * Return element that is inside a given element/container
- * @param {HTMLElement} container contains element to be found
- * @param {string} query query used to find said element
- * @param {number} index index of element that is desired, if undefined get only/last element
- * @returns {HTMLElement | null} HTMLElement or null if no element/not an html element
+ * Finds an element inside a container.
+ * @param container - The container to search.
+ * @param query - The selector for the element.
+ * @param index - The index of the match to return; the last match is returned when omitted.
+ * @returns The element, or null when there is no match or it is not an HTML element.
  */
 export function getHTMLElement(container: HTMLElement, query: string, index?: number): HTMLElement | null {
   const elements = container.querySelectorAll(query);
@@ -173,44 +184,54 @@ export function getHTMLElement(container: HTMLElement, query: string, index?: nu
 }
 
 /**
- * @function isDebugMode
- * Checks if the app is currently running in debug mode
- * @returns {boolean} True if in debug, false otherwise
+ * Whether a raw input counts as not filled in: never set, cleared to null, or left empty.
+ * @param value - The raw input.
+ * @returns Whether the input is blank.
+ */
+export function isBlank(value: unknown) {
+  return value === undefined || value === null || value === '';
+}
+
+/**
+ * Whether the app is running in debug mode.
+ * @returns Whether the app is in debug mode.
  */
 export function isDebugMode(): boolean {
   return import.meta.env.MODE.toUpperCase() === 'DEBUG';
 }
 
 /**
- * Checks whether a value is neither `null` nor `undefined`.
- *
- * This function acts as a type guard, allowing TypeScript to
- * narrow the type of the value to `T` when it returns `true`.
- *
- * @template T
- * @param value - The value to test, which may be `null` or `undefined`
- * @returns `true` if the value is defined; otherwise `false`
- *
+ * Narrows a value to one that is neither null nor undefined.
+ * @param value - The value to check.
+ * @returns Whether the value is defined.
  */
 export function isDefined<T>(value: T | null | undefined): value is T {
   return value !== null && value !== undefined;
 }
 
 /**
- * Checks whether the given object is empty, no properties
- *
- * @param {object} obj - The object to check.
- * @returns {boolean} True if the object is empty, false otherwise.
+ * Whether an object has no properties.
+ * @param obj - The object to check.
+ * @returns Whether the object is empty.
  */
 export function isEmptyObject(obj: object): boolean {
   return Object.keys(obj).length === 0;
 }
 
 /**
- * @function isPlainObject
- * Checks if the given value is a plain object and not another type or other built in object type
- * @param {unknown} value The value to check
- * @returns {boolean} True if the value is a plain object, false otherwise
+ * Narrows an unknown value to one of a list of allowed values.
+ * @param values - The allowed values.
+ * @param value - The value to check.
+ * @returns Whether the value is one of the allowed values.
+ */
+export function isOneOf<T>(values: readonly T[], value: unknown): value is T {
+  return values.includes(value as T);
+}
+
+/**
+ * Narrows a value to a plain object, rather than another type or a built-in object.
+ * @param value - The value to check.
+ * @returns Whether the value is a plain object.
  */
 export function isPlainObject(value: unknown): value is Record<string, unknown> {
   if (typeof value !== 'object' || value === null) {
@@ -227,10 +248,9 @@ export function isPlainObject(value: unknown): value is Record<string, unknown> 
 }
 
 /**
- * @function isTruthy
- * Returns true if the element name in the object contains a truthy value
- * @param {object} value The object to evaluate
- * @returns {boolean} True if truthy, false if not, and undefined if undefined
+ * Whether a value means true: `true`, `1`, or a string such as "true", "yes" or "1".
+ * @param value - The value to check.
+ * @returns Whether the value means true, or undefined when the value is undefined.
  */
 export function isTruthy(value: unknown) {
   if (value === undefined) return value;
@@ -241,10 +261,9 @@ export function isTruthy(value: unknown) {
 }
 
 /**
- * @function joinPath
- * Joins a set of string arguments to yield a string path
- * @param  {...string} items The strings to join on
- * @returns {string} A path string with the specified delimiter
+ * Joins path segments with the path delimiter, dropping empty segments.
+ * @param items - The segments to join.
+ * @returns The joined path.
  */
 export function joinPath(...items: string[]): string {
   if (items && items.length) {
@@ -260,11 +279,10 @@ export function joinPath(...items: string[]): string {
 }
 
 /**
- * @function omit
- * Omits the given set of keys from the given object
- * @param {object} data The object to copy and manipulate
- * @param {string[]} keys Array of keys to remove
- * @returns {object} A new object with the given keys removed
+ * Copies an object without the given keys.
+ * @param data - The object to copy.
+ * @param keys - The keys to leave out.
+ * @returns A new object without the given keys.
  */
 export function omit<Data extends object, Keys extends keyof Data>(data: Data, keys: Keys[]): Omit<Data, Keys> {
   const result = { ...data };
@@ -277,23 +295,21 @@ export function omit<Data extends object, Keys extends keyof Data>(data: Data, k
 }
 
 /**
- * @function parseCSV
- * Converts a comma separated value string into an array of string values
- * @param {string} value The CSV string to parse
- * @param {string} delimiter The optional string delimiter
- * @returns {string[]} An array of string values, or `value` if it is not a string
+ * Splits a delimited string into its trimmed values.
+ * @param value - The string to split.
+ * @param delimiter - The delimiter, a comma by default.
+ * @returns The trimmed values.
  */
 export function parseCSV(value: string, delimiter = ','): string[] {
   return value.split(`${delimiter}`).map((s) => s.trim());
 }
 
 /**
- * @function partition
- * Partitions an array into two array sets depending on conditional
+ * Splits an array into the items that pass a predicate and the items that fail it.
  * @see {@link https://stackoverflow.com/a/71247432}
- * @param {T[]} arr The array to partition
- * @param {Function} predicate The predicate function
- * @returns
+ * @param arr - The array to split.
+ * @param predicate - The predicate to test each item with.
+ * @returns The passing items, then the failing items.
  */
 export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => boolean): [T[], T[]] {
   return arr.reduce(
@@ -306,9 +322,8 @@ export function partition<T>(arr: T[], predicate: (v: T, i: number, ar: T[]) => 
 }
 
 /**
- * @function scrollToFirstError
- * Scrolls to the first invalid field in a form
- * @param {object} errors An object with keys as field names and values as error messages
+ * Scrolls to the topmost invalid field in a form.
+ * @param errors - The error messages, keyed by field name.
  */
 export function scrollToFirstError(errors: Record<string, string>) {
   let first: Element | null = null;
@@ -327,11 +342,9 @@ export function scrollToFirstError(errors: Record<string, string>) {
 }
 
 /**
- * @function setDispositionHeader
- * Constructs a valid RFC 6266 'Content-Disposition' header
- * and optionally handles RFC 8187 UTF-8 encoding when necessary
- * @param  {string} filename The file name to check if encoding is needed
- * @returns {string} The value for the key 'Content-Disposition'
+ * Builds an RFC 6266 Content-Disposition header, adding RFC 8187 UTF-8 encoding when the filename needs it.
+ * @param filename - The file name.
+ * @returns The Content-Disposition header value.
  */
 export function setDispositionHeader(filename: string) {
   const dispositionHeader = `attachment; filename="${filename}"`;
@@ -348,10 +361,9 @@ export function setDispositionHeader(filename: string) {
 }
 
 /**
- * @function setEmptyStringsToNull
- * Converts empty string values to null values, recursively
- * @param data The object to change
- * @returns The object with the remapped values
+ * Converts empty strings to null, recursively.
+ * @param data - The value to convert.
+ * @returns The value with empty strings converted.
  */
 // Too much gets broken by trying to make this type safe
 // Honestly we need to find a way to remove this function
@@ -371,10 +383,9 @@ export function setEmptyStringsToNull(data: any): any {
 }
 
 /**
- * @function splitDateTime
- * Splits a single Date object into separate UTC date and time strings
- * @param value The Date instance to split
- * @returns An object containing `date` and `time` strings
+ * Splits a Date into separate UTC date and time strings, with no time for a date at UTC midnight.
+ * @param value - The date to split.
+ * @returns The date and time strings, both null when the date is missing or invalid.
  */
 export function splitDateTime(value?: Date | null): DateTimeStrings {
   if (!value || Number.isNaN(value.getTime())) {
@@ -397,10 +408,9 @@ export function splitDateTime(value?: Date | null): DateTimeStrings {
 }
 
 /**
- * @function toKebabCase
- * Converts string values to kebab case
- * @param  {string} input The object to change
- * @returns {string} The object with the remapped values
+ * Converts a string to kebab case.
+ * @param input - The string to convert.
+ * @returns The kebab case string.
  */
 export function toKebabCase(input: string | undefined) {
   if (!input) return input;
@@ -412,10 +422,9 @@ export function toKebabCase(input: string | undefined) {
 }
 
 /**
- * @function toTitleCase
- * Converts a string to title case
- * @param {string} str The string to convert
- * @returns {object} An arbitrary object with specified secret fields marked as redacted
+ * Capitalizes the first letter of a string and lowercases the rest.
+ * @param str - The string to convert.
+ * @returns The converted string.
  */
 export function toTitleCase(str: string): string {
   if (!str) return str;
@@ -424,12 +433,21 @@ export function toTitleCase(str: string): string {
 }
 
 /**
- * @function toNumber
- * Converts a string to number if possible
- * @param  {string} input The string to convert
- * @returns {number | undefined} The number if possible
+ * Parses the leading integer from a string.
+ * @param input - The string to parse.
+ * @returns The integer, or undefined when the string does not start with one.
  */
 export function toNumber(input: string): number | undefined {
   const i = Number.parseInt(input);
   return Number.isNaN(i) ? undefined : i;
+}
+
+/**
+ * Keeps a value only when it is one of a list of allowed values, so a form asks again for anything else.
+ * @param values - The allowed values.
+ * @param value - The value to check.
+ * @returns The value, or undefined when it is not allowed.
+ */
+export function toOneOf<T>(values: readonly T[], value: unknown): T | undefined {
+  return isOneOf(values, value) ? value : undefined;
 }

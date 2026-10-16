@@ -25,8 +25,8 @@ import { BasicResponse } from '@/utils/enums/application';
 import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
-import { scrollToFirstError } from '@/utils/utils';
-import { isOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { scrollToFirstError, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 import { toContactFormValues } from '@/validators/contact';
 
@@ -131,11 +131,9 @@ async function initializeFormValues(project: GeneralProject): Promise<DeepPartia
       submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
       // Unknown stored values are dropped, so the form asks for them again
-      applicationStatus: isOneOf(APPLICATION_STATUS_LIST, project.applicationStatus)
-        ? project.applicationStatus
-        : undefined,
-      region: isOneOf(REGION_LIST, project.region) ? project.region : undefined,
-      area: isOneOf(AREA_LIST, project.area) ? project.area : undefined
+      applicationStatus: toOneOf(APPLICATION_STATUS_LIST, project.applicationStatus),
+      region: toOneOf(REGION_LIST, project.region),
+      area: toOneOf(AREA_LIST, project.area)
     },
 
     // ATS link

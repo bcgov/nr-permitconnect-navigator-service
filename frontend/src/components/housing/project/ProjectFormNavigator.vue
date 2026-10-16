@@ -34,8 +34,8 @@ import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/en
 import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
-import { toOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf, toTitleCase } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/housing/projectFormNavigatorSchema';
 import { toContactFormValues } from '@/validators/contact';
 

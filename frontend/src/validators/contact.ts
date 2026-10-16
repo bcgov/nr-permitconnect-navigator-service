@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { Regex } from '@/utils/enums/application';
-import { isBlank, isOneOf, maxMessage, requiredMessage, requiredOneOf, requiredString } from '@/utils/zodSchema';
+import { isBlank, toOneOf } from '@/utils/utils';
+import { maxMessage, requiredMessage, requiredOneOf, requiredString } from '@/utils/zodSchema';
 
 import type { Contact } from '@/types';
 
@@ -46,11 +47,7 @@ export function toContactFormValues(contact?: StoredContact | null) {
     lastName: contact?.lastName ?? undefined,
     phoneNumber: contact?.phoneNumber ?? undefined,
     email: contact?.email ?? undefined,
-    contactApplicantRelationship: isOneOf(PROJECT_RELATIONSHIP_LIST, contact?.contactApplicantRelationship)
-      ? contact.contactApplicantRelationship
-      : undefined,
-    contactPreference: isOneOf(CONTACT_PREFERENCE_LIST, contact?.contactPreference)
-      ? contact.contactPreference
-      : undefined
+    contactApplicantRelationship: toOneOf(PROJECT_RELATIONSHIP_LIST, contact?.contactApplicantRelationship),
+    contactPreference: toOneOf(CONTACT_PREFERENCE_LIST, contact?.contactPreference)
   };
 }

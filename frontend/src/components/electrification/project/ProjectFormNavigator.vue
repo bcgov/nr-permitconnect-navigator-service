@@ -27,8 +27,8 @@ import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/en
 import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
-import { isOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf, toTitleCase } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/electrification/projectFormNavigatorSchema';
 import { toContactFormValues } from '@/validators/contact';
 
@@ -153,9 +153,7 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
       submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
       // Unknown stored values are dropped, so the form asks for them again
-      applicationStatus: isOneOf(APPLICATION_STATUS_LIST, project.applicationStatus)
-        ? project.applicationStatus
-        : undefined
+      applicationStatus: toOneOf(APPLICATION_STATUS_LIST, project.applicationStatus)
     },
 
     // ATS link

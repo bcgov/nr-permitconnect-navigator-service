@@ -2,7 +2,8 @@ import { z } from 'zod';
 
 import { BRING_FORWARD_TYPE_LIST, NOTE_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { NoteType } from '@/utils/enums/projectCommon';
-import { addIssue, evenWithIssues, isOneOf, oneOfMessage, requiredString } from '@/utils/zodSchema';
+import { isOneOf } from '@/utils/utils';
+import { addIssue, evenWithIssues, oneOfMessage, requiredString } from '@/utils/zodSchema';
 
 import type { CreateSchemaOptions } from '@/types';
 import type { FormValues } from '@/utils/zodSchema';

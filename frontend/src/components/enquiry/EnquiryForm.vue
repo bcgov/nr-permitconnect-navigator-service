@@ -16,8 +16,8 @@ import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/en
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
-import { isOneOf, toTypedSchema } from '@/utils/zodSchema';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createEnquiryFormSchema } from '@/validators/enquiryFormSchema';
 import { toContactFormValues } from '@/validators/contact';
 
@@ -165,9 +165,9 @@ async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
     submissionState: {
       assignedUser: assigneeOptions[0] ?? null,
       // Unknown stored values are dropped, so the form asks for them again
-      enquiryStatus: isOneOf(APPLICATION_STATUS_LIST, enquiry?.enquiryStatus) ? enquiry.enquiryStatus : undefined,
+      enquiryStatus: toOneOf(APPLICATION_STATUS_LIST, enquiry?.enquiryStatus),
       submittedMethod: enquiry?.submittedMethod,
-      submissionType: isOneOf(ENQUIRY_TYPE_LIST, enquiry?.submissionType) ? enquiry.submissionType : undefined
+      submissionType: toOneOf(ENQUIRY_TYPE_LIST, enquiry?.submissionType)
     },
 
     atsInfo: {

@@ -1,14 +1,8 @@
 import { z } from 'zod';
 
 import { APPLICATION_STATUS_LIST, ENQUIRY_SUBMITTED_METHOD, ENQUIRY_TYPE_LIST } from '@/utils/constants/projectCommon';
-import {
-  coerceNumber,
-  formSection,
-  maxMessage,
-  missingOrOneOfSchema,
-  requiredMessage,
-  requiredString
-} from '@/utils/zodSchema';
+import { coerceNumber } from '@/utils/utils';
+import { formSection, maxMessage, missingOrOneOfSchema, requiredMessage, requiredString } from '@/utils/zodSchema';
 import { assignedToSchema, atsClientIdSchema } from '@/validators/common';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
 
