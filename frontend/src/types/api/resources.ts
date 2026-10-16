@@ -1,28 +1,7 @@
-import type { GeoJSON } from 'geojson';
-
+import type { Schema } from './openapi';
 import type { UUID } from '../common';
-import type { MaybeUndefined, Nullable } from '../util';
-import type {
-  AccessRequestStatus,
-  BasicResponse,
-  GroupName,
-  IdentityProviderKind,
-  Initiative as EInitiative
-} from '@/utils/enums/application';
-import type { BusinessArea, PermitStage, PermitState, PiesOnHold } from '@/utils/enums/codeEnums';
-import type { NumResidentialUnits } from '@/utils/enums/housing';
-import type {
-  ActivityContactRole,
-  ApplicationStatus,
-  Area,
-  ContactPreference,
-  EnquirySubmittedMethod,
-  NoteType,
-  ProjectApplicant,
-  ProjectRelationship,
-  Region,
-  SubmissionType
-} from '@/utils/enums/projectCommon';
+import type { Nullable } from '../util';
+import type { IdentityProviderKind } from '@/utils/enums/application';
 
 /**
  * Shared interfaces
@@ -36,52 +15,17 @@ export interface AuditFields {
   deletedAt?: Nullable<string>;
 }
 
-export interface ProjectBase extends AuditFields {
-  projectId: string;
-  activityId: string;
-  submittedAt: string;
-  assignedUserId?: string | null;
-  applicationStatus: ApplicationStatus;
-
-  companyIdRegistered?: string | null;
-  companyNameRegistered?: string | null;
-  hasRelatedEnquiry: boolean;
-  queuePriority: number;
-  submissionType: SubmissionType;
-  projectName: string;
-  projectDescription: string;
-  multiPermitsNeeded: string;
+// Filled in by the frontend after fetching
+export interface ProjectAnnotations {
+  hasRelatedEnquiry?: boolean;
   relatedEnquiries?: string;
-  astNotes?: string | null;
-  atsClientId: number | null;
-  atsEnquiryId: number | null;
-  addedToAts: boolean;
-  aaiUpdated: boolean;
-}
-
-interface ProjectRelations {
-  activity: Activity;
-  contacts: Contact[];
-  user: User;
 }
 
 /**
  * Access Request
  */
 
-export interface AccessRequestBase extends AuditFields {
-  accessRequestId: UUID;
-  userId: UUID;
-  grant: boolean;
-  groupId: number;
-  status: AccessRequestStatus;
-}
-
-interface AccessRequestRelations {
-  group: Group;
-}
-
-export type AccessRequest = AccessRequestBase & Partial<AccessRequestRelations>;
+export type AccessRequest = Schema<'AccessRequest'>;
 
 /**
  * Activity
@@ -101,205 +45,64 @@ export interface Activity extends AuditFields {
  * Activity Contact
  */
 
-export interface ActivityContactBase extends AuditFields {
-  activityId: string;
-  contactId: UUID;
-  role: ActivityContactRole;
-}
-
-interface ActivityContactRelations {
-  contact: Contact;
-}
-
-export type ActivityContact = ActivityContactBase & Partial<ActivityContactRelations>;
+export type ActivityContact = Schema<'ActivityContact'>;
 
 /**
  * Bring Forward
  */
 
-export interface BringForward {
-  activityId: string;
-  enquiryId?: string;
-  noteHistoryId: string;
-  projectId?: string;
-  initiative?: EInitiative;
-  title: string;
-  projectName?: string;
-  bringForwardDate: string;
-  createdByFullName?: string;
-  escalateToSupervisor: boolean;
-  escalateToDirector: boolean;
-}
+export type BringForward = Schema<'BringForward'>;
 
 /**
  * Contact
  */
 
-export interface ContactBase extends AuditFields {
-  contactId: UUID;
-  userId?: UUID;
-  bceidBusinessName?: string;
-  contactApplicantRelationship?: ProjectRelationship;
-  contactPreference?: ContactPreference;
-  email: string;
-  firstName: string;
-  lastName?: string;
-  phoneNumber?: string;
-}
-
-interface ContactRelations {
-  activityContact?: ActivityContact[];
-}
-
-export type Contact = ContactBase & Partial<ContactRelations>;
+export type Contact = Schema<'Contact'>;
 
 /**
  * Document
  */
 
-export interface Document extends AuditFields {
-  documentId: UUID;
-  activityId: string;
-  filename: string;
-  extension?: MaybeUndefined<string>;
-  mimeType: string;
-  filesize: number;
-  createdByFullName: string;
-}
+// extension is derived from the filename after fetching
+export type Document = Schema<'Document'> & { extension?: string };
 
 /**
  * Draft
  */
 
-export interface Draft<T> extends AuditFields {
-  draftId: UUID;
-  activityId: string;
-  draftCode: string;
-  data: T;
-}
+// data holds the drafting form's own values, which the API stores as opaque JSON
+export type Draft<T> = Omit<Schema<'Draft'>, 'data'> & { data: T };
 
 /**
  * Electrification Project
  */
 
-export interface ElectrificationProjectBase extends ProjectBase {
-  electrificationProjectId: UUID;
-  projectType?: string;
-  projectCategory?: Nullable<string>;
-  bcHydroNumber?: Nullable<string>;
-  locationDescription?: Nullable<string>;
-  hasEpa?: Nullable<string>;
-  megawatts?: Nullable<number>;
-  bcEnvironmentAssessNeeded?: Nullable<string>;
-}
-
-export type ElectrificationProject = ElectrificationProjectBase & Partial<ProjectRelations>;
+export type ElectrificationProject = Schema<'ElectrificationProject'> & ProjectAnnotations;
 
 /**
  * Enquiry
  */
 
-export interface EnquiryBase extends AuditFields {
-  enquiryId: UUID;
-  activityId: string;
-  addedToAts: boolean;
-  assignedUserId?: Nullable<string>;
-  atsClientId: Nullable<number>;
-  atsEnquiryId: Nullable<number>;
-  submissionType: SubmissionType;
-  submittedAt: string;
-  submittedBy: string;
-  relatedActivityId?: Nullable<string>;
-  enquiryDescription?: string;
-  enquiryStatus: ApplicationStatus;
-  submittedMethod: EnquirySubmittedMethod;
-}
-
-interface EnquiryRelations {
-  activity: Activity;
-  user: User;
-}
-
-export type Enquiry = EnquiryBase & Partial<EnquiryRelations>;
+export type Enquiry = Schema<'Enquiry'>;
 
 /**
  * General Project
  */
 
-export interface GeneralProjectBase extends ProjectBase {
-  generalProjectId: UUID;
-  projectNumber?: string;
-  projectApplicantType: ProjectApplicant;
-  geoJson?: GeoJSON;
-  projectLocation: string;
-  projectLocationDescription?: Nullable<string>;
-  locality?: Nullable<string>;
-  province?: Nullable<string>;
-  locationPids?: Nullable<string>;
-  latitude?: Nullable<number>;
-  longitude?: Nullable<number>;
-  streetAddress?: Nullable<string>;
-  geomarkUrl?: Nullable<string>;
-  naturalDisaster: boolean;
-  hasAppliedProvincialPermits: Nullable<BasicResponse>;
-  activityType: string;
-  region?: Nullable<Region>;
-  area?: Nullable<Area>;
-  businessArea?: Nullable<BusinessArea>;
-}
-
-export type GeneralProject = GeneralProjectBase & Partial<ProjectRelations>;
+export type GeneralProject = Schema<'GeneralProject'> & ProjectAnnotations;
 
 /**
  * Group
  */
 
-export interface Group {
-  groupId: number;
-  initiativeCode?: string;
-  initiativeId: string;
-  name: GroupName;
-  label?: string;
-}
+// The yars group list returns the same shape as a user's groups
+export type Group = NonNullable<User['groups']>[number];
 
 /**
  * Housing Project
  */
 
-export interface HousingProjectBase extends ProjectBase {
-  housingProjectId: UUID;
-  projectApplicantType: ProjectApplicant;
-  consentToFeedback?: boolean;
-  geoJson?: GeoJSON;
-  projectLocation: string;
-  projectLocationDescription?: Nullable<string>;
-  singleFamilyUnits?: Nullable<NumResidentialUnits>;
-  multiFamilyUnits?: Nullable<NumResidentialUnits>;
-  otherUnitsDescription?: Nullable<string>;
-  otherUnits?: Nullable<NumResidentialUnits>;
-  hasRentalUnits: BasicResponse;
-  rentalUnits: string;
-  financiallySupportedBc: BasicResponse;
-  financiallySupportedIndigenous: BasicResponse;
-  indigenousDescription: string;
-  financiallySupportedNonProfit: BasicResponse;
-  nonProfitDescription: string;
-  financiallySupportedHousingCoop: BasicResponse;
-  housingCoopDescription: string;
-  locality?: Nullable<string>;
-  province?: Nullable<string>;
-  locationPids?: Nullable<string>;
-  latitude?: Nullable<number>;
-  longitude?: Nullable<number>;
-  streetAddress?: Nullable<string>;
-  geomarkUrl?: Nullable<string>;
-  naturalDisaster: boolean;
-  ltsaCompleted: boolean;
-  bcOnlineCompleted: boolean;
-  hasAppliedProvincialPermits: Nullable<BasicResponse>;
-}
-
-export type HousingProject = HousingProjectBase & Partial<ProjectRelations>;
+export type HousingProject = Schema<'HousingProject'> & ProjectAnnotations;
 
 /**
  * Identity Provider
@@ -325,157 +128,32 @@ export interface Initiative extends AuditFields {
  * Note
  */
 
-export interface Note extends AuditFields {
-  noteId?: UUID;
-  noteHistoryId?: UUID;
-  note: string;
-}
+export type Note = NonNullable<NoteHistory['note']>[number];
 
 /**
  * Note History
  */
 
-export interface NoteHistoryBase extends AuditFields {
-  noteHistoryId: UUID;
-  activityId: string;
-  bringForwardDate: Nullable<string>;
-  bringForwardState: Nullable<string>;
-  escalateToDirector: boolean;
-  escalateToSupervisor: boolean;
-  escalationType: Nullable<string>;
-  shownToProponent: boolean;
-  title: string;
-  type: NoteType;
-}
-
-interface NoteHistoryRelations {
-  note: Note[];
-}
-
-export type NoteHistory = NoteHistoryBase & Partial<NoteHistoryRelations>;
+export type NoteHistory = Schema<'NoteHistory'>;
 
 /**
  * Permit
  */
 
-interface PermitBase extends AuditFields {
-  permitId: UUID;
-  activityId: string;
-  issuedPermitId?: Nullable<string>;
-  needed: string;
-  permitTypeId: number;
-  stage: PermitStage;
-  state: PermitState;
-  submittedDate?: Nullable<string>;
-  submittedTime?: Nullable<string>;
-  statusLastChanged?: Nullable<string>;
-  statusLastChangedTime?: Nullable<string>;
-  statusLastVerified?: Nullable<string>;
-  statusLastVerifiedTime?: Nullable<string>;
-  targetDate?: Nullable<string>;
-  targetDateDescription?: Nullable<string>;
-  technicalReviewer?: Nullable<string>;
-  consultationStartDate?: Nullable<string>;
-  consultationStartTime?: Nullable<string>;
-  consultationEndDate?: Nullable<string>;
-  consultationEndTime?: Nullable<string>;
-  decisionDate?: Nullable<string>;
-  decisionTime?: Nullable<string>;
-  onHoldCode?: Nullable<PiesOnHold>;
-}
+export type Permit = Schema<'Permit'>;
 
-interface PermitRelations {
-  activity: Activity;
-  permitNote: PermitNote[];
-  permitTracking: PermitTracking[];
-  permitType: PermitType;
-}
+export type PermitNote = NonNullable<Permit['permitNote']>[number];
 
-export type Permit = PermitBase & Partial<PermitRelations>;
+export type PermitTracking = Schema<'PermitTracking'>;
 
-/**
- * Permit Note
- */
+export type PermitType = Schema<'PermitType'>;
 
-export interface PermitNote extends AuditFields {
-  permitNoteId: UUID;
-  permitId: UUID;
-  note: string;
-}
-
-/**
- * Permit Tracking
- */
-
-export interface PermitTracking extends AuditFields {
-  permitTrackingId?: number;
-  permitId?: UUID;
-  shownToProponent: boolean;
-  sourceSystemKind?: SourceSystemKind;
-  sourceSystemKindId?: number;
-  trackingId?: string;
-}
-
-/**
- * Permit Type
- */
-
-export interface PermitTypeBase extends AuditFields {
-  permitTypeId: number;
-  agency: string;
-  branch: string;
-  businessDomain: string;
-  division: string;
-  family?: string;
-  infoUrl?: string;
-  name: string;
-  nameSubtype?: string;
-  acronym?: string;
-  trackedInAts?: boolean;
-  sourceSystem: string;
-  sourceSystemAcronym: string;
-  trackedInATS?: boolean;
-  type: string;
-}
-
-interface PermitTypeRelations {
-  permitTypeInitiativeXref: {
-    permitTypeId: number;
-    initiativeId: UUID;
-    initiative: Initiative;
-  }[];
-}
-
-export type PermitType = PermitTypeBase & Partial<PermitTypeRelations>;
-
-/**
- * Source System Kind
- */
-
-export interface SourceSystemKind extends AuditFields {
-  sourceSystemKindId: number;
-  description: string;
-  integrated: boolean;
-  kind?: string;
-  permitTypeIds: number[];
-  sourceSystem: string;
-}
+// The spec marks the schema itself nullable, as OpenAPI 3.0 cannot mark a single reference to it nullable
+export type SourceSystemKind = NonNullable<Schema<'SourceSystemKind'>>;
 
 /**
  * User
  */
 
-export interface User extends AuditFields {
-  active: boolean;
-  email: string;
-  firstName: string;
-  fullName: string;
-  idp: string;
-  lastName: string;
-  groups: Group[];
-  status?: string;
-  userId: UUID;
-  sub: string;
-  elevatedRights: boolean;
-  bceidBusinessName: string;
-}
+// The spec marks the schema itself nullable, as OpenAPI 3.0 cannot mark a single reference to it nullable
+export type User = NonNullable<Schema<'User'>>;

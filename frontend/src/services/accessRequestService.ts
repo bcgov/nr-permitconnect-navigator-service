@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type { AccessRequest, ApiInitiative, RequestBody } from '@/types';
+import type { AccessRequest, ApiInitiative, RequestBody, ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -18,12 +18,13 @@ const accessRequestRoutes = {
 /**
  * Creates a new access request.
  * @param req - The request payload.
- * @returns A promise resolving to the created AccessRequest resource.
+ * @returns A promise resolving to the pending AccessRequest, or the grant result when an admin's grant applies
+ * immediately. An admin's revoke applies immediately with no body.
  */
 export async function createAccessRequest(
   req: RequestBody<`create${ApiInitiative}AccessRequest`>
-): Promise<AccessRequest> {
-  return api.post<AccessRequest>(accessRequestRoutes.root(), req);
+): Promise<ResponseBody<`create${ApiInitiative}AccessRequest`>> {
+  return api.post(accessRequestRoutes.root(), req);
 }
 
 /**
@@ -39,14 +40,14 @@ export async function listAccessRequests(): Promise<AccessRequest[]> {
  * This may represent approval, denial, revocation, role change, etc.
  *
  * @param req - The request payload containing the access request ID and action details.
- * @returns A promise resolving to the updated AccessRequest resource.
+ * @returns A promise that resolves once the access request has been processed.
  */
 export async function processAccessRequest(
   req: { accessRequestId: string } & RequestBody<`process${ApiInitiative}AccessRequest`>
-): Promise<AccessRequest> {
+): Promise<void> {
   const { accessRequestId, ...body } = req;
 
-  return api.post<AccessRequest>(accessRequestRoutes.byId(accessRequestId), body);
+  await api.post(accessRequestRoutes.byId(accessRequestId), body);
 }
 
 /**

@@ -612,9 +612,20 @@ components:
         projectType:
           type: string
           nullable: true
+          enum:
+            - IPP_HYDRO
+            - IPP_SOLAR
+            - IPP_WIND
+            - OTHER
         projectCategory:
           type: string
           nullable: true
+          enum:
+            - CONNECTIVITY
+            - INTERCONNECTIVITY
+            - IPP
+            - REMOTE_RENEWABLE
+            - SUSTAINMENT
         createdBy:
           type: string
           nullable: true
@@ -1816,11 +1827,29 @@ components:
           nullable: true
         state:
           type: string
+          enum:
+            - ACCEPTED
+            - APPROVED
+            - CANCELLED
+            - DENIED
+            - IN_PROGRESS
+            - INITIAL_REVIEW
+            - ISSUED
+            - NONE
+            - PENDING_APPLICANT_ACTION
+            - REJECTED
+            - WITHDRAWN
         needed:
           type: string
           nullable: true
         stage:
           type: string
+          enum:
+            - APPLICATION_SUBMISSION
+            - PENDING_DECISION
+            - POST_DECISION
+            - PRE_SUBMISSION
+            - TECHNICAL_REVIEW
         submittedDate:
           type: string
           nullable: true
@@ -1876,6 +1905,11 @@ components:
         onHoldCode:
           type: string
           nullable: true
+          enum:
+            - APPLICANT_REQUEST
+            - LEGAL_ACTION
+            - MISSING_INFORMATION
+            - PENDING_EXTERNAL_DECISION
         technicalReviewer:
           type: string
           nullable: true
@@ -2111,6 +2145,23 @@ components:
         sourceSystem:
           type: string
           nullable: true
+          enum:
+            - ITSM-5285
+            - ITSM-5314
+            - ITSM-5364
+            - ITSM-5527
+            - ITSM-5528
+            - ITSM-5644
+            - ITSM-5816
+            - ITSM-5939
+            - ITSM-5963
+            - ITSM-6004
+            - ITSM-60081
+            - ITSM-6030
+            - ITSM-6072
+            - ITSM-6117
+            - ITSM-6136
+            - ITSM-6197
         infoUrl:
           type: string
           nullable: true
@@ -2282,6 +2333,23 @@ components:
           nullable: true
         sourceSystem:
           type: string
+          enum:
+            - ITSM-5285
+            - ITSM-5314
+            - ITSM-5364
+            - ITSM-5527
+            - ITSM-5528
+            - ITSM-5644
+            - ITSM-5816
+            - ITSM-5939
+            - ITSM-5963
+            - ITSM-6004
+            - ITSM-60081
+            - ITSM-6030
+            - ITSM-6072
+            - ITSM-6117
+            - ITSM-6136
+            - ITSM-6197
         createdBy:
           type: string
           nullable: true
@@ -2341,8 +2409,26 @@ components:
                 nullable: true
               stage:
                 type: string
+                enum:
+                  - APPLICATION_SUBMISSION
+                  - PENDING_DECISION
+                  - POST_DECISION
+                  - PRE_SUBMISSION
+                  - TECHNICAL_REVIEW
               state:
                 type: string
+                enum:
+                  - ACCEPTED
+                  - APPROVED
+                  - CANCELLED
+                  - DENIED
+                  - IN_PROGRESS
+                  - INITIAL_REVIEW
+                  - ISSUED
+                  - NONE
+                  - PENDING_APPLICANT_ACTION
+                  - REJECTED
+                  - WITHDRAWN
               statusLastChanged:
                 type: string
                 nullable: true
@@ -2498,6 +2584,57 @@ components:
         businessArea:
           type: string
           nullable: true
+          enum:
+            - ABORIGINAL_RELATIONS
+            - ADVANCED_EDUCATION
+            - AGRICULTURAL_LAND_COMMISSION
+            - AGRICULTURE
+            - ARCHAEOLOGY
+            - BC_ASSESSMENT_AUTHORITY
+            - BC_ENERGY_REGULATOR
+            - COMMUNITY_DEVELOPMENT
+            - COMMUNITY_SPORT_AND_CULTURE
+            - DEPARTMENT_OF_FISHERIES_AND_OCEANS_CANADA
+            - ECONOMIC_DEVELOPMENT
+            - EDUCATION
+            - ELECTRIFICATION
+            - ENERGY
+            - ENVIRONMENT
+            - ENVIRONMENTAL_PROTECTION
+            - FEDERAL_GOVERNMENT
+            - FINANCE
+            - FISH_AND_WILDLIFE
+            - FORESTS
+            - FRASER_HEALTH_AUTHORITY
+            - HEALTH_SERVICES
+            - INTERIOR_HEALTH_AUTHORITY
+            - LABOUR_AND_CITIZENS_SERVICES
+            - LAND_TITLE_AUTHORITY
+            - LANDS
+            - LOCAL_GOVERNMENT_MUNICIPALITIES_AND_CITIES
+            - MINES
+            - MINISTRY_OF_ATTORNEY_GENERAL
+            - MINISTRY_OF_SMALL_BUSINESS_AND_REVENUE
+            - MOUNTAIN_RESORTS_BRANCH
+            - NON_LISTED_PARTNER_AGENCY_OR_OTHER
+            - NORTHERN_HEALTH_AUTHORITY
+            - OFFICE_OF_THE_PREMIER
+            - PARKS
+            - PROVINCIAL_EMERGENCY_PROGRAM
+            - PUBLIC_SERVICE_AGENCY
+            - RANGE
+            - RECREATION_SITES_AND_TRAILS
+            - REGIONAL_DISTRICTS
+            - RIPARIAN
+            - RURAL_DEVELOPMENT
+            - SMALL_BUSINESS_BC
+            - SOLICITOR_GENERAL
+            - SURVEYOR_GENERAL_LAND_TITLE_AND_SURVEY_AUTHORITIES
+            - SYSTEMS
+            - TRANSPORTATION
+            - VANCOUVER_COAST_HEALTH_AUTHORITY
+            - VANCOUVER_ISLAND_HEALTH_AUTHORITY
+            - WATER
         createdBy:
           type: string
           nullable: true

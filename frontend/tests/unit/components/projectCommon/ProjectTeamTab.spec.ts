@@ -9,6 +9,7 @@ import { activityContactService, contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { mockAxiosError, mockAxiosErrorNoResponse } from '../../../helpers';
+import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
 import type { ActivityContact, Contact } from '@/types';
 
@@ -37,6 +38,7 @@ vi.mock('@/services', () => ({
 }));
 
 const mockContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact1',
   firstName: 'John',
   lastName: 'Doe',
@@ -45,6 +47,7 @@ const mockContact: Contact = {
 };
 
 const mockActivityContact: ActivityContact = {
+  ...testAuditFields,
   contactId: 'contact1',
   activityId: 'activity1',
   role: ActivityContactRole.MEMBER,

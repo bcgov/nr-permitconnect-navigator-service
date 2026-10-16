@@ -47,7 +47,7 @@ const sourceSystemKinds: Ref<SourceSystemKind[]> = ref([]);
 const getPermitTrackingOptions = computed(() =>
   authorizationType.value
     ? sourceSystemKinds.value.filter(
-        (ssk) => authorizationType.value && ssk.permitTypeIds.includes(authorizationType.value.permitTypeId)
+        (ssk) => authorizationType.value && ssk.permitTypeIds?.includes(authorizationType.value.permitTypeId)
       )
     : undefined
 );

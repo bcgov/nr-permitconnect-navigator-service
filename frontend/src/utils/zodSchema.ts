@@ -53,6 +53,15 @@ export const isBlank = (value: unknown) => value === undefined || value === null
 export const isOneOf = <T>(values: readonly T[], value: unknown): value is T => values.includes(value as T);
 
 /**
+ * Keeps a stored value only when it is one of a list of allowed values, so a form asks again for anything else.
+ * @param values - The allowed values.
+ * @param value - The stored value.
+ * @returns The value, or undefined when it is not allowed.
+ */
+export const toOneOf = <T>(values: readonly T[], value: unknown): T | undefined =>
+  isOneOf(values, value) ? value : undefined;
+
+/**
  * Builds a required enum with the required message for missing values and the allowed-values message otherwise.
  * @param label - The field label.
  * @param values - The allowed values.

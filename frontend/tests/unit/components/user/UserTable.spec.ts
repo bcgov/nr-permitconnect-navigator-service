@@ -5,7 +5,9 @@ import { mount } from '@vue/test-utils';
 import { AccessRequestStatus, GroupName } from '@/utils/enums/application';
 import UserTable from '@/components/user/UserTable.vue';
 
-import type { User, UserAccessRequest, Group } from '@/types';
+import { testAuditFields } from '../../../fixtures';
+
+import type { UserAccessRequest, Group } from '@/types';
 
 const currentDate = new Date().toISOString();
 
@@ -22,7 +24,8 @@ const exampleAccessRequest = {
 };
 
 // Example User object
-const exampleUser: User = {
+const exampleUser: UserAccessRequest['user'] = {
+  ...testAuditFields,
   active: true,
   email: 'john.doe@example.com',
   firstName: 'John',
@@ -33,7 +36,6 @@ const exampleUser: User = {
   status: 'active',
   userId: 'user123',
   sub: 'sub-123',
-  elevatedRights: true,
   bceidBusinessName: '',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,

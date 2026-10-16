@@ -7,10 +7,12 @@ import i18n from '@/i18n';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
+import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
 import type { ActivityContact, Contact } from '@/types';
 
 const mockContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact1',
   firstName: 'John',
   lastName: 'Doe',
@@ -19,6 +21,7 @@ const mockContact: Contact = {
 };
 
 const mockActivityContact: ActivityContact = {
+  ...testAuditFields,
   activityId: 'activity1',
   contactId: 'contact1',
   role: ActivityContactRole.MEMBER,

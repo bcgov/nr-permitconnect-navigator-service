@@ -6,6 +6,7 @@ import { i18n } from '@/i18n';
 
 import { mountWithFormContext } from '../../../mountWithFormContext';
 import { mockRouter, resetMockRouter } from '../../../mockRouter';
+import { testAuditFields } from '../../../fixtures';
 
 import type { SourceSystemKind } from '@/types';
 
@@ -18,8 +19,9 @@ vi.mock('vue-router', () => ({
 // Fixtures
 
 const sampleSourceSystemKind: SourceSystemKind = {
+  ...testAuditFields,
   description: 'ATS Project Number',
-  kind: undefined,
+  kind: null,
   sourceSystem: 'ITSM-5314',
   sourceSystemKindId: 2,
   integrated: false,

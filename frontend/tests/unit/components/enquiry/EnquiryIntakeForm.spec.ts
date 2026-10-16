@@ -14,6 +14,7 @@ import {
   enquiryRouteNameKey
 } from '@/utils/keys';
 import { ref } from 'vue';
+import { testContactDefaults } from '../../../fixtures';
 
 // Mocks
 
@@ -42,6 +43,7 @@ vi.mock('vue-router', () => ({
 // Fixtures
 
 const sampleContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'John',

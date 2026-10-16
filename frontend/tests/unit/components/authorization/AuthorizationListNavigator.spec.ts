@@ -7,6 +7,7 @@ import { Initiative, RouteName } from '@/utils/enums/application';
 import { projectAuthorizationRouteNameKey } from '@/utils/keys';
 
 import { mountComponent } from '../../../mountComponent';
+import { testAuditFields } from '../../../fixtures';
 
 import type { SearchPermitsResponse, SourceSystemKind } from '@/types';
 
@@ -35,8 +36,9 @@ const testPermit: SearchPermitsResponse['permits'][number] = {
 const testSearchResponse: SearchPermitsResponse = { permits: [testPermit], totalRecords: 1 };
 
 const sampleSourceSystemKind: SourceSystemKind = {
+  ...testAuditFields,
   description: 'ATS Project Number',
-  kind: undefined,
+  kind: null,
   sourceSystem: 'ITSM-5314',
   sourceSystemKindId: 2,
   integrated: false,

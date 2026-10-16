@@ -9,6 +9,7 @@ import ContactForm from '@/components/contact/ContactForm.vue';
 import { contactService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
+import { testContactDefaults } from '../../../fixtures';
 
 import type { Contact } from '@/types';
 
@@ -24,6 +25,7 @@ vi.mock('@/lib/primevue/useToast', () => ({
 const upsertContactSpy = vi.spyOn(contactService, 'upsertContact');
 
 const testContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'Jane',

@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { activityWithContactsSchema } from './activity.ts';
 import '#src/schemas/openapi';
 import { electrification_projectModelSchema } from '#prismaZod';
+import { ElectrificationProjectCategory, ElectrificationProjectType } from '#src/db/codes/enums';
 import { userSchema } from '#src/schemas/response/user';
 
 // Relation stubs narrowed to match src/services/electrificationProject.ts include - see housingProjectSchema.ts.
@@ -16,7 +17,16 @@ export const electrificationProjectSchema = electrification_projectModelSchema
     activity: activityWithContactsSchema.optional(),
     user: userSchema.nullable().optional(),
     projectId: z.string(),
-    megawatts: z.string().nullable()
+    megawatts: z.string().nullable(),
+    // Foreign keys to code tables, so the spec lists their codes; the database guarantees them
+    projectType: z
+      .string()
+      .nullable()
+      .openapi({ enum: Object.values(ElectrificationProjectType) }),
+    projectCategory: z
+      .string()
+      .nullable()
+      .openapi({ enum: Object.values(ElectrificationProjectCategory) })
   })
   .openapi('ElectrificationProject');
 

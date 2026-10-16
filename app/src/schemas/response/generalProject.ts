@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { activityWithContactsSchema } from './activity.ts';
 import '#src/schemas/openapi';
 import { general_projectModelSchema } from '#prismaZod';
+import { BusinessArea } from '#src/db/codes/enums';
 import { userSchema } from '#src/schemas/response/user';
 
 // Relation stubs narrowed to match src/services/generalProject.ts include - see housingProjectSchema.ts.
@@ -17,7 +18,12 @@ export const generalProjectSchema = general_projectModelSchema
     user: userSchema.nullable().optional(),
     projectId: z.string(),
     latitude: z.string().nullable(),
-    longitude: z.string().nullable()
+    longitude: z.string().nullable(),
+    // Foreign key to a code table, so the spec lists its codes; the database guarantees them
+    businessArea: z
+      .string()
+      .nullable()
+      .openapi({ enum: Object.values(BusinessArea) })
   })
   .openapi('GeneralProject');
 

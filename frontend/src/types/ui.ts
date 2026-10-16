@@ -1,4 +1,4 @@
-import type { AccessRequest, IdentityProvider, Nullable, PartialFields, User } from '@/types';
+import type { AccessRequest, IdentityProvider, Nullable, User } from '@/types';
 import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 
 export interface Code {
@@ -68,6 +68,8 @@ export interface Permission {
 }
 
 export interface UserAccessRequest {
-  accessRequest?: PartialFields<AccessRequest, 'accessRequestId'>;
-  user: User;
+  // Requests created in the table only have these fields until the list is reloaded
+  accessRequest?: Pick<AccessRequest, 'userId' | 'grant' | 'groupId' | 'status'> & Partial<AccessRequest>;
+  // Table status derived from the user's access requests
+  user: User & { status?: string };
 }

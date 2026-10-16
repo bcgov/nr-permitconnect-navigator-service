@@ -66,21 +66,15 @@ describe('accessRequestService', () => {
   });
 
   describe('processAccessRequest', () => {
-    it('processes an access request and returns the updated resource', async () => {
+    // The API responds 204 with no body
+    it('processes an access request', async () => {
       const request = {
         accessRequestId: 'access-request-1',
         status: 'Approved',
         comments: 'Approved by admin'
       };
 
-      const updatedAccessRequest = {
-        accessRequestId: 'access-request-1',
-        status: 'Approved'
-      };
-
-      mockPost.mockResolvedValue({
-        data: updatedAccessRequest
-      });
+      mockPost.mockResolvedValue({ data: '' });
 
       const result = await processAccessRequest(request as never);
 
@@ -93,7 +87,7 @@ describe('accessRequestService', () => {
         undefined
       );
 
-      expect(result).toEqual(updatedAccessRequest);
+      expect(result).toBeUndefined();
     });
 
     it('sends only the request body excluding accessRequestId', async () => {

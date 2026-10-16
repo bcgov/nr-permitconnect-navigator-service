@@ -110,7 +110,7 @@ onBeforeMount(async () => {
     if (idpCfg) {
       const users = await userService.searchUsers({ userId: userIds, idp: [idpCfg.idp] });
       users.forEach((u: User) => {
-        assignedUsers.value[u.userId] = u.fullName;
+        assignedUsers.value[u.userId] = u.fullName ?? '';
       });
     }
   }

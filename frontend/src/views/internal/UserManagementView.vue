@@ -27,10 +27,10 @@ import { accessRequestService, userService, yarsService } from '@/services';
 import { useAppStore, useAuthZStore } from '@/store';
 import { MANAGED_GROUP_NAME_LIST } from '@/utils/constants/application';
 import { IdentityProviderKind, AccessRequestStatus, GroupName } from '@/utils/enums/application';
-import { findIdpConfig, omit } from '@/utils/utils';
+import { findIdpConfig } from '@/utils/utils';
 
 import type { Ref } from 'vue';
-import type { AccessRequest, Group, User, UserAccessRequest } from '@/types';
+import type { AccessRequest, ApiInitiative, Group, RequestBody, User, UserAccessRequest } from '@/types';
 
 // Constants
 const PENDING_STATUSES = {
@@ -79,6 +79,13 @@ const getApprovedUsers = computed(() =>
 const confirm = useConfirm();
 const toast = useToast();
 
+// The API requires a user's identity details, which a stored IDIR user always has
+function toAccessRequestUser(user: User): RequestBody<`create${ApiInitiative}AccessRequest`>['user'] {
+  const { userId, idp, sub, email, firstName, fullName, lastName, active } = user;
+  if (!idp || !email || !firstName || !fullName || !lastName) throw new Error('User is missing identity details');
+  return { userId, idp, sub, email, firstName, fullName, lastName, active };
+}
+
 function assignUserStatus(request: UserAccessRequest) {
   request.user.status =
     request.accessRequest?.status === AccessRequestStatus.PENDING
@@ -107,31 +114,29 @@ async function onProcessUserAccessRequest() {
     const deniedRevocation =
       userProcessModalAction.value === REQUEST_ACTION.DENY && !selectedUserAccessRequest.value?.accessRequest?.grant;
 
-    const response = await accessRequestService.processAccessRequest({
+    await accessRequestService.processAccessRequest({
       accessRequestId: selectedUserAccessRequest.value?.accessRequest?.accessRequestId as string,
       approve: userProcessModalAction.value === REQUEST_ACTION.APPROVE
     });
 
-    if (response) {
-      const idx = usersAndAccessRequests.value.findIndex(
-        (x) => x.accessRequest?.accessRequestId === selectedUserAccessRequest.value?.accessRequest?.accessRequestId
-      );
+    const idx = usersAndAccessRequests.value.findIndex(
+      (x) => x.accessRequest?.accessRequestId === selectedUserAccessRequest.value?.accessRequest?.accessRequestId
+    );
 
-      // Change status back to approved
-      if (usersAndAccessRequests.value[idx] && (approvedAccess || deniedRevocation)) {
-        if (usersAndAccessRequests.value[idx].accessRequest) {
-          usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
-            ? AccessRequestStatus.APPROVED
-            : AccessRequestStatus.REJECTED;
-        }
-
-        usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
+    // Change status back to approved
+    if (usersAndAccessRequests.value[idx] && (approvedAccess || deniedRevocation)) {
+      if (usersAndAccessRequests.value[idx].accessRequest) {
+        usersAndAccessRequests.value[idx].accessRequest.status = approvedAccess
+          ? AccessRequestStatus.APPROVED
+          : AccessRequestStatus.REJECTED;
       }
 
-      // Drop from table
-      if (deniedAccess || approvedRevocation) {
-        usersAndAccessRequests.value.splice(idx, 1);
-      }
+      usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
+    }
+
+    // Drop from table
+    if (deniedAccess || approvedRevocation) {
+      usersAndAccessRequests.value.splice(idx, 1);
     }
 
     // TODO: i18n parameterized magic for this string
@@ -162,24 +167,16 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        const omittedUser = omit(userAccessRequest.user, [
-          'bceidBusinessName',
-          'groups',
-          'status',
-          'createdAt',
-          'createdBy',
-          'updatedAt',
-          'updatedBy',
-          'deletedAt',
-          'deletedBy'
-        ]);
+        const omittedUser = toAccessRequestUser(userAccessRequest.user);
+        const groupId = userAccessRequest.user.groups?.[0]?.groupId;
+        if (!groupId) throw new Error('User has no group');
         let response;
 
         if (admin) {
           // Delete subject group
           response = await yarsService.deleteSubjectGroup({
             sub: userAccessRequest.user.sub,
-            groupId: userAccessRequest.user.groups[0]!.groupId
+            groupId
           });
         } else {
           // Create user access request
@@ -187,7 +184,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
             user: omittedUser,
             accessRequest: {
               grant: false,
-              groupId: userAccessRequest.user.groups[0]!.groupId
+              groupId
             }
           });
         }
@@ -199,7 +196,8 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
         if (admin) {
           usersAndAccessRequests.value.splice(idx, 1);
         } else if (response) {
-          usersAndAccessRequests.value[idx].accessRequest = response;
+          // A non-admin revoke is always created pending
+          usersAndAccessRequests.value[idx].accessRequest = response as AccessRequest;
           usersAndAccessRequests.value[idx].user.status = PENDING_STATUSES.PENDING_REVOCATION;
         }
 
@@ -215,17 +213,7 @@ async function onUserGroupChange(group: Group) {
   try {
     const user = selectedUserAccessRequest.value?.user;
     if (user) {
-      const omittedUser = omit(user, [
-        'bceidBusinessName',
-        'groups',
-        'status',
-        'createdAt',
-        'createdBy',
-        'updatedAt',
-        'updatedBy',
-        'deletedAt',
-        'deletedBy'
-      ]);
+      const omittedUser = toAccessRequestUser(user);
       const response = await accessRequestService.createAccessRequest({
         user: omittedUser,
         accessRequest: {
@@ -261,17 +249,7 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
 
     user.idp = idpCfg.idp;
 
-    const omittedUser = omit(user, [
-      'bceidBusinessName',
-      'groups',
-      'status',
-      'createdAt',
-      'createdBy',
-      'updatedAt',
-      'updatedBy',
-      'deletedAt',
-      'deletedBy'
-    ]);
+    const omittedUser = toAccessRequestUser(user);
 
     const accessRequest = {
       userId: user.userId,
@@ -285,8 +263,8 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       accessRequest: { ...accessRequest },
       user: omittedUser
     });
-    // Update main data table
-    if (response.status !== AccessRequestStatus.APPROVED) {
+    // Update main data table; a pending request returns the created access request, an immediate grant only its result
+    if ('accessRequestId' in response) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;
       if (!userAccessRequest.user.groups) userAccessRequest.user.groups = [];
       userAccessRequest.user.groups.push(group);
@@ -352,7 +330,7 @@ onBeforeMount(async () => {
         currentAccessRequests.delete(user.userId);
         return assignUserStatus({ accessRequest, user });
       })
-      .filter((x) => x.user.groups.length > 0 || x.accessRequest);
+      .filter((x) => x.user.groups?.length || x.accessRequest);
 
     // Get requesting users and add their access requests
     const newRequestingUsers: User[] = await userService.searchUsers({

@@ -10,6 +10,7 @@ import { StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import ContactProfileView from '@/views/contact/ContactView.vue';
 import { PRIMEVUE_STUBS, t } from '../../../helpers';
+import { testContactDefaults } from '../../../fixtures';
 
 import type { MockInstance } from 'vitest';
 import type { Contact } from '@/types';
@@ -25,6 +26,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const testContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'John',
@@ -87,9 +89,9 @@ describe('ContactProfileView.vue', () => {
   it('enters edit mode on mount if contact details are missing', () => {
     const incompleteContact = {
       ...testContact,
-      phoneNumber: undefined,
-      contactApplicantRelationship: undefined,
-      contactPreference: undefined
+      phoneNumber: null,
+      contactApplicantRelationship: null,
+      contactPreference: null
     };
 
     const wrapper = createWrapper(incompleteContact);

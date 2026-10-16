@@ -15,6 +15,7 @@ import { BasicResponse } from '@/utils/enums/application';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { enquiryRouteNameKey, projectRouteNameKey } from '@/utils/keys';
 import { ref } from 'vue';
+import { testEnquiryDefaults, testHousingProjectDefaults } from '../../../fixtures';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -28,6 +29,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   addedToAts: false,
@@ -39,13 +41,14 @@ const testEnquiry: Enquiry = {
   submittedAt: '2023-01-01T12:00:00Z',
   submittedBy: 'user123',
   enquiryStatus: ApplicationStatus.NEW,
-  createdAt: undefined,
-  createdBy: undefined,
-  updatedAt: undefined,
-  updatedBy: undefined
+  createdAt: null,
+  createdBy: null,
+  updatedAt: null,
+  updatedBy: null
 };
 
 const testSubmission: HousingProject = {
+  ...testHousingProjectDefaults,
   activityId: 'activity789',
   housingProjectId: 'submission123',
   projectId: 'submission123',
@@ -61,7 +64,6 @@ const testSubmission: HousingProject = {
   projectLocationDescription: 'Location Description',
   singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
   multiFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
-  multiPermitsNeeded: 'No',
   otherUnitsDescription: 'None',
   otherUnits: NumResidentialUnits.UNSURE,
   hasRentalUnits: BasicResponse.NO,
@@ -77,8 +79,8 @@ const testSubmission: HousingProject = {
   locality: 'Test City',
   province: 'Test Province',
   locationPids: 'PID123',
-  latitude: 0,
-  longitude: 0,
+  latitude: '0',
+  longitude: '0',
   geomarkUrl: 'http://test.com',
   naturalDisaster: false,
   addedToAts: false,
@@ -92,8 +94,7 @@ const testSubmission: HousingProject = {
   applicationStatus: ApplicationStatus.NEW,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: '',
-  hasAppliedProvincialPermits: BasicResponse.NO,
-  contacts: []
+  hasAppliedProvincialPermits: BasicResponse.NO
 };
 
 const testHistory = [testEnquiry, testSubmission];
