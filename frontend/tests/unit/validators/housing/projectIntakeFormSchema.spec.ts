@@ -85,6 +85,7 @@ describe('housing createProjectIntakeSchema', () => {
       'housing.financiallySupportedIndigenous': 'Indigenous Housing Provider is a required field',
       'housing.financiallySupportedNonProfit': 'Non-profit housing society is a required field',
       'housing.financiallySupportedHousingCoop': 'Housing co-operative is a required field',
+      housing: 'At least one residential unit type must be selected',
       'housing.singleFamilySelected': '\n',
       'housing.multiFamilySelected': '\n',
       'housing.otherSelected': '\n',
@@ -134,8 +135,10 @@ describe('housing createProjectIntakeSchema', () => {
   });
 
   describe('housing', () => {
+    // The section message is what ResidentialUnitsCard displays; the blank checkbox errors drive its tab navigation
     it('requires at least one unit type to be selected', async () => {
       expect(await sectionErrors('housing', { singleFamilySelected: false, singleFamilyUnits: null })).toEqual({
+        housing: 'At least one residential unit type must be selected',
         'housing.singleFamilySelected': '\n',
         'housing.multiFamilySelected': '\n',
         'housing.otherSelected': '\n'

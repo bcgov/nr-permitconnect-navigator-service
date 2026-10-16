@@ -187,6 +187,7 @@ export interface GeneralProjectService extends DraftableProjectService<GeneralPr
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<GeneralProject>;
+  patchProject(req: PatchGeneralProjectRequest): Promise<GeneralProject>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: SearchGeneralProjectRequest): Promise<SearchProjectsResponse>;
   submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;

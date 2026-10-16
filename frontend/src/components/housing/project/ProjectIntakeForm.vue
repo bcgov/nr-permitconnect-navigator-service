@@ -36,6 +36,7 @@ import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
@@ -76,7 +77,7 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(unde
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(orgBookOptions.value);
+  return toTypedSchema(createProjectIntakeSchema(orgBookOptions.value));
 });
 
 // Actions
@@ -160,10 +161,11 @@ async function onSubmit(data: FormSchemaType) {
         financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
         financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
         financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-        rentalUnits: data.housing.rentalUnits,
-        indigenousDescription: data.housing.indigenousDescription,
-        nonProfitDescription: data.housing.nonProfitDescription,
-        housingCoopDescription: data.housing.housingCoopDescription
+        // Hidden fields can keep a null initial value, which the API rejects
+        rentalUnits: data.housing.rentalUnits ?? undefined,
+        indigenousDescription: data.housing.indigenousDescription ?? undefined,
+        nonProfitDescription: data.housing.nonProfitDescription ?? undefined,
+        housingCoopDescription: data.housing.housingCoopDescription ?? undefined
       },
       location: {
         naturalDisaster: data.location.naturalDisaster,

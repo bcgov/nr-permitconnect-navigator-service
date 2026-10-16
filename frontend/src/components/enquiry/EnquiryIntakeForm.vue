@@ -18,12 +18,13 @@ import {
   enquiryRouteNameKey
 } from '@/utils/keys';
 import { generalErrorHandler } from '@/utils/utils';
-import { enquirySchema } from '@/validators/enquiry';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { enquiryIntakeFormSchema } from '@/validators/enquiryIntakeFormSchema';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
 import type { CreateEnquiryRequest, Enquiry, Permit, Project } from '@/types';
-import type { FormSchemaType } from '@/validators/enquiry';
+import type { FormSchemaType } from '@/validators/enquiryIntakeFormSchema';
 
 // Props
 const {
@@ -55,6 +56,7 @@ const formStore = useFormStore();
 const { getEditable } = storeToRefs(formStore);
 
 // State
+const validationSchema = toTypedSchema(enquiryIntakeFormSchema);
 const initialFormValues: Ref<undefined | GenericObject> = ref(undefined);
 const isOnlyProjectRelated: Ref<boolean> = computed(() => Boolean(project && !permit));
 const isPermitRelated: Ref<boolean> = computed(() => Boolean(permit));
@@ -225,7 +227,7 @@ onBeforeMount(async () => {
       v-if="initialFormValues"
       keep-values
       :initial-values="initialFormValues"
-      :validation-schema="enquirySchema"
+      :validation-schema="validationSchema"
       @invalid-submit="onInvalidSubmit"
       @submit="confirmSubmit"
     >

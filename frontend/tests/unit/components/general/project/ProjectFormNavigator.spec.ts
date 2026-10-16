@@ -16,11 +16,19 @@ import {
 } from '@/utils/enums/projectCommon';
 import { updateLiveNameKey } from '@/utils/keys';
 
+import { t } from '../../../../helpers';
 import { mountComponent } from '../../../../mountComponent';
 
 import type { GeneralProject, User } from '@/types';
 
 // Mocks
+
+const mockConfirmRequire = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire })
+}));
 
 const getPidsSpy = vi.spyOn(mapService, 'getPids');
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
@@ -95,7 +103,7 @@ function mountProjectFormNavigator(options: { project?: GeneralProject; editable
     props: { project, editable },
     piniaState: {
       app: { initiative: Initiative.GENERAL },
-      project: { activityContacts: [primaryActivityContact] }
+      project: { project, activityContacts: [primaryActivityContact] }
     },
     provide: { [updateLiveNameKey]: () => {} },
     stubs: {
@@ -184,6 +192,38 @@ describe('ProjectFormNavigator', () => {
       await submitForm(wrapper);
 
       expect(patchProjectSpy).toHaveBeenCalledWith(expect.objectContaining({ projectId: testProject.projectId }));
+    });
+  });
+
+  describe('reopen', () => {
+    const completedProject = { ...testProject, applicationStatus: ApplicationStatus.COMPLETED };
+
+    async function reopen(project: GeneralProject) {
+      const { wrapper } = mountProjectFormNavigator({ project });
+      await flushPromises();
+
+      const reopenButton = wrapper
+        .findAll('button')
+        .find((b) => b.text() === t('i.housing.project.projectForm.reopenSubmission'));
+      await reopenButton?.trigger('click');
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
+    }
+
+    it('validates and saves the project as in progress', async () => {
+      patchProjectSpy.mockResolvedValue(testProject);
+
+      await reopen(completedProject);
+
+      expect(patchProjectSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ projectId: testProject.projectId, applicationStatus: ApplicationStatus.IN_PROGRESS })
+      );
+    });
+
+    it('does not save when the form is invalid', async () => {
+      await reopen({ ...completedProject, projectName: '' });
+
+      expect(patchProjectSpy).not.toHaveBeenCalled();
     });
   });
 

@@ -1,16 +1,25 @@
 import { runSchema } from '../../helpers';
 import {
+  appliedPermitsFormSchema,
   appliedPermitsValidator,
+  assignedToSchema,
   assignedToValidator,
+  atsClientIdSchema,
   atsClientIdValidator,
   emailValidator,
+  latitudeSchema,
   latitudeValidator,
+  locationFormSchema,
   locationValidator,
+  longitudeSchema,
   longitudeValidator,
   notInFutureValidator,
   optionalText,
+  optionalTextSchema,
+  permitsFormSchema,
   permitsValidator,
-  requiredText
+  requiredText,
+  requiredTextSchema
 } from '@/validators/common';
 import { BasicResponse } from '@/utils/enums/application';
 import { ProjectLocation } from '@/utils/enums/projectCommon';
@@ -58,7 +67,11 @@ afterEach(() => {
 // Leaf helpers get their label from the caller, so only error presence and output values are pinned here;
 // labelled messages are pinned by the composed schema specs
 describe('common validators', () => {
-  describe('optionalText', () => {
+  // Shared validators run against the yup original and its zod copy until the yup version is removed
+  describe.each([
+    ['yup', optionalText],
+    ['zod', (max?: number) => optionalTextSchema('Text', max)]
+  ])('optionalText (%s)', (_, optionalText) => {
     it.each([
       ['', null],
       ['   ', null],
@@ -79,7 +92,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('requiredText', () => {
+  describe.each([
+    ['yup', requiredText],
+    ['zod', (max?: number) => requiredTextSchema('Text', max)]
+  ])('requiredText (%s)', (_, requiredText) => {
     it.each(['', '   ', null, undefined])('rejects %j', async (input) => {
       expect(Object.keys((await runSchema(requiredText(5), input)).errors)).toEqual(['']);
     });
@@ -93,7 +109,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('assignedToValidator', () => {
+  describe.each([
+    ['yup', assignedToValidator],
+    ['zod', (message: string) => assignedToSchema(message)]
+  ])('assignedToValidator (%s)', (_, assignedToValidator) => {
     it.each([[{ userId: 'u1' }], [''], [null]])('accepts %j', async (input) => {
       expect(await runSchema(assignedToValidator('Pick a user', 'Assigned'), input)).toEqual({
         value: input,
@@ -109,7 +128,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('atsClientIdValidator', () => {
+  describe.each([
+    ['yup', atsClientIdValidator],
+    ['zod', atsClientIdSchema]
+  ])('atsClientIdValidator (%s)', (_, atsClientIdValidator) => {
     it.each([
       [1, 1],
       [0, 0],
@@ -142,7 +164,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('latitudeValidator / longitudeValidator', () => {
+  describe.each([
+    ['yup', latitudeValidator, longitudeValidator],
+    ['zod', latitudeSchema, longitudeSchema]
+  ])('latitudeValidator / longitudeValidator (%s)', (_, latitudeValidator, longitudeValidator) => {
     it.each([
       [48, 48],
       [60, 60],
@@ -199,7 +224,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('locationValidator', () => {
+  describe.each([
+    ['yup', locationValidator],
+    ['zod', locationFormSchema]
+  ])('locationValidator (%s)', (_, locationValidator) => {
     it('requires natural disaster and location', async () => {
       expect((await runSchema(locationValidator, {})).errors).toEqual({
         naturalDisaster: 'Natural disaster is a required field',
@@ -287,7 +315,10 @@ describe('common validators', () => {
     });
   });
 
-  describe('permitsValidator', () => {
+  describe.each([
+    ['yup', permitsValidator, appliedPermitsValidator],
+    ['zod', permitsFormSchema, appliedPermitsFormSchema]
+  ])('permitsValidator (%s)', (_, permitsValidator, appliedPermitsValidator) => {
     it('requires hasAppliedProvincialPermits', async () => {
       expect((await runSchema(permitsValidator, {})).errors).toEqual({
         hasAppliedProvincialPermits: 'Applied permits is a required field'

@@ -1,5 +1,5 @@
 import { runSchema } from '../../helpers';
-import { contactSchema, createContactSchema } from '@/validators/contact';
+import { contactFormSchema, contactSchema, createContactSchema } from '@/validators/contact';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 // Mocks
@@ -21,7 +21,11 @@ const testContact = { ...testCreateContact, contactId: 'a7a6b0d4-3c4f-4b89-9d24-
 // Tests
 
 describe('contact validators', () => {
-  describe('createContactSchema', () => {
+  // Run against the yup original and its zod copy until the yup version is removed; the zod copy fixes the 'v4' message
+  describe.each([
+    ['yup', createContactSchema, 'v4'],
+    ['zod', contactFormSchema.omit({ contactId: true }), 'User ID must be a valid UUID']
+  ])('createContactSchema (%s)', (_, createContactSchema, invalidUserIdMessage) => {
     it('accepts a well-formed contact', async () => {
       expect(await runSchema(createContactSchema, testCreateContact)).toEqual({
         value: testCreateContact,
@@ -53,8 +57,7 @@ describe('contact validators', () => {
           })
         ).errors
       ).toEqual({
-        // uuid('v4') treats 'v4' as the message, not the version
-        userId: 'v4',
+        userId: invalidUserIdMessage,
         contactApplicantRelationship:
           'Relationship to project must be one of the following values: Property owner, Project consultant, Other',
         contactPreference: 'Preferred contact method must be one of the following values: Phone call, Email, Either',
@@ -65,7 +68,10 @@ describe('contact validators', () => {
     });
   });
 
-  describe('contactSchema', () => {
+  describe.each([
+    ['yup', contactSchema, 'v4'],
+    ['zod', contactFormSchema, 'Contact ID must be a valid UUID']
+  ])('contactSchema (%s)', (_, contactSchema, invalidContactIdMessage) => {
     it('accepts a well-formed contact', async () => {
       expect(await runSchema(contactSchema, testContact)).toEqual({ value: testContact, errors: {} });
     });
@@ -75,7 +81,7 @@ describe('contact validators', () => {
         contactId: 'Contact ID is a required field'
       });
       expect((await runSchema(contactSchema, { ...testContact, contactId: 'x' })).errors).toEqual({
-        contactId: 'v4'
+        contactId: invalidContactIdMessage
       });
     });
   });
