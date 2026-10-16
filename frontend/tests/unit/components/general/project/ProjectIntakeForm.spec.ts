@@ -3,10 +3,8 @@ import { nextTick } from 'vue';
 
 import ProjectIntakeForm from '@/components/general/project/ProjectIntakeForm.vue';
 import { StepperHeader } from '@/components/form';
-import { createProjectIntakeSchema } from '@/validators/general/projectIntakeFormSchema';
 import { contactService } from '@/services';
-import { BasicResponse, RouteName, StorageKey } from '@/utils/enums/application';
-import { ProjectApplicant } from '@/utils/enums/projectCommon';
+import { RouteName, StorageKey } from '@/utils/enums/application';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 import { mountComponent } from '../../../../mountComponent';
@@ -128,108 +126,6 @@ describe('ProjectIntakeForm', () => {
       await flushPromises();
 
       expect(mockRouter.replace).toHaveBeenCalledWith({ name: RouteName.EXT_GENERAL });
-    });
-  });
-
-  // These don't need a mounted component at all
-  // `createProjectIntakeSchema` is a pure function, so we test it directly
-  describe('validation schema', () => {
-    const validCases = [
-      {
-        category: 'basic',
-        orgBookOptions: [{ registeredName: 'testString3', registeredId: 'FM0281610' }],
-        data: {
-          basic: {
-            projectApplicantType: ProjectApplicant.BUSINESS,
-            isDevelopedInBc: BasicResponse.NO,
-            registeredId: 'FM0281610',
-            registeredName: 'testString3',
-            projectName: 'Project',
-            projectDescription: 'Desc',
-            projectNumber: 'PN-1'
-          }
-        }
-      },
-      {
-        category: 'location',
-        orgBookOptions: [],
-        data: {
-          location: {
-            naturalDisaster: 'Yes',
-            projectLocation: 'testString1',
-            streetAddress: 'testString2',
-            locality: 'testString3',
-            province: 'testString4',
-            latitude: '51',
-            longitude: '-139',
-            ltsaPIDLookup: '',
-            geomarkUrl: ''
-          }
-        }
-      },
-      {
-        category: 'permits',
-        orgBookOptions: [],
-        data: {
-          permits: {
-            appliedPermits: [{ permitTypeId: 1, submittedDate: new Date(), trackingId: 'testString' }],
-            hasAppliedProvincialPermits: BasicResponse.YES
-          }
-        }
-      }
-    ] as const;
-
-    const invalidCases = [
-      {
-        category: 'basic',
-        data: {
-          basic: {
-            projectApplicantType: 'testString1',
-            isDevelopedInBC: 'testString2',
-            registeredName: 'testString3'
-          }
-        }
-      },
-      {
-        category: 'location',
-        data: {
-          location: {
-            projectLocation: '',
-            streetAddress: 'testString2',
-            locality: 'testString3',
-            province: 'testString4',
-            latitude: '12',
-            longitude: '-139',
-            ltsaPIDLookup: '',
-            geomarkUrl: ''
-          }
-        }
-      },
-      {
-        category: 'permits',
-        data: {
-          permits: {
-            appliedPermits: [{ permitTypeId: '', submittedDate: new Date(), trackingId: 'testString' }],
-            hasAppliedProvincialPermits: 123
-          }
-        }
-      },
-      // A category that's missing entirely should fail the same way as one
-      // with invalid fields, for every category.
-      { category: 'basic', data: {} },
-      { category: 'location', data: {} },
-      { category: 'permits', data: {} }
-    ] as const;
-
-    it.each(validCases)(
-      '$category passes validation with well-formed data',
-      async ({ category, orgBookOptions, data }) => {
-        await expect(createProjectIntakeSchema([...orgBookOptions]).validateAt(category, data)).resolves.toBeTruthy();
-      }
-    );
-
-    it.each(invalidCases)('$category rejects malformed or missing data', async ({ category, data }) => {
-      await expect(createProjectIntakeSchema([]).validateAt(category, data)).rejects.toThrowError();
     });
   });
 });

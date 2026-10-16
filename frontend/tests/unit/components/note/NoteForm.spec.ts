@@ -1,8 +1,9 @@
+import { flushPromises } from '@vue/test-utils';
 import { nextTick, ref } from 'vue';
 
 import { DatePicker, InputText, Select, TextArea } from '@/components/form';
 import NoteForm from '@/components/note/NoteForm.vue';
-import { userService } from '@/services';
+import { noteHistoryService, userService } from '@/services';
 
 import { NoteType } from '@/utils/enums/projectCommon';
 
@@ -33,6 +34,7 @@ vi.mock('vue-router', () => ({
 // Fixtures
 
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
+const createNoteHistorySpy = vi.spyOn(noteHistoryService, 'createNoteHistory');
 
 const TEST_NOTE: Note = {
   noteId: '123',
@@ -73,7 +75,8 @@ function mountNoteForm(options: { noteHistory?: NoteHistory; editable?: boolean 
     props: { noteHistory, editable },
     piniaState: {
       auth: { user: {} },
-      code: { options: { EscalationType: [] } }
+      code: { options: { EscalationType: [] } },
+      project: { project: { activityId: 'ACT1' } }
     },
     provide: {
       [projectRouteNameKey]: ref('project-route-name'),
@@ -90,6 +93,7 @@ beforeEach(() => {
   resetMockRouter();
   vi.clearAllMocks();
   searchUsersSpy.mockResolvedValue([{ fullName: 'dummyName' }] as User[]);
+  createNoteHistorySpy.mockResolvedValue({} as never);
 });
 
 // Tests
@@ -146,6 +150,37 @@ describe('NoteForm', () => {
 
         expect(datePicker.props('name')).toBe('bringForwardDate');
       });
+    });
+  });
+
+  // Runs the real schema through vee-validate's <Form>, guarding the yup -> zod swap
+  describe('validation', () => {
+    it('blocks submit and shows field errors when required fields are empty', async () => {
+      const { wrapper } = mountNoteForm({ noteHistory: undefined });
+
+      await flushPromises();
+      await wrapper.find('form').trigger('submit');
+      await flushPromises();
+
+      await vi.waitFor(() => expect(wrapper.text()).toContain('Title is a required field'));
+      expect(wrapper.text()).toContain('note.noteForm.noteReqd');
+      expect(createNoteHistorySpy).not.toHaveBeenCalled();
+    });
+
+    it('submits the validated values', async () => {
+      const { wrapper } = mountNoteForm({ noteHistory: undefined });
+
+      await flushPromises();
+      await wrapper.find('input[name="title"]').setValue('A title');
+      await wrapper.find('textarea[name="note"]').setValue('A note');
+      await wrapper.find('form').trigger('submit');
+      await flushPromises();
+
+      await vi.waitFor(() =>
+        expect(createNoteHistorySpy).toHaveBeenCalledWith(
+          expect.objectContaining({ activityId: 'ACT1', note: 'A note', title: 'A title', type: NoteType.GENERAL })
+        )
+      );
     });
   });
 });
