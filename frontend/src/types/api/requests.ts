@@ -242,7 +242,6 @@ interface HousingProjectBaseSchema extends ResourceSchemaConfig<HousingProjectBa
 }
 export type CreateHousingProjectRequest = CreateRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
 export type SearchHousingProjectRequest = ListRequestDTO<Partial<HousingProjectBase>, HousingProjectBaseSchema>;
-export type PatchHousingProjectRequest = PatchRequestDTO<HousingProjectBase, HousingProjectBaseSchema>;
 export type SubmitDraftHousingProjectRequest = HousingProjectIntake;
 
 /**
@@ -321,7 +320,6 @@ export interface GetProjectStatisticsRequest {
   monthYear?: Date;
   userId?: string;
 }
-export type PatchProjectRequest = PatchRequestDTO<ProjectBase, ProjectSchema>;
 export type DeleteProjectRequest = DeleteRequestDTO<ProjectBase, ProjectSchema>;
 
 /**

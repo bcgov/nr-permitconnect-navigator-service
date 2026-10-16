@@ -178,7 +178,7 @@ export function createResidentialUnitsSchema({ t }: CreateSchemaOptions) {
         .oneOf(NUM_RESIDENTIAL_UNITS_LIST)
         .notRequired()
         .when('otherUnitsDescription', {
-          is: (val: string) => val === BasicResponse.YES,
+          is: (val?: string | null) => !!val,
           then: (schema) => schema.required().label(t('i.housing.project.projectFormNavigatorSchema.unitsOtherUnits')),
           otherwise: () => string().notRequired()
         }),

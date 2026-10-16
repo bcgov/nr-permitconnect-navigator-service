@@ -6,7 +6,6 @@ import type {
   GetDraftRequest,
   GetProjectRequest,
   GetProjectStatisticsRequest,
-  PatchProjectRequest,
   UpsertDraftRequest
 } from './api/requests';
 import type { SearchProjectsResponse } from './api/responses';
@@ -19,7 +18,6 @@ export interface ProjectService<T> {
   getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics>;
   listActivityIds(): Promise<string[]>;
   listProjects(): Promise<T[]>;
-  patchProject(req: PatchProjectRequest): Promise<T>;
   searchProjects(filters?: unknown): Promise<SearchProjectsResponse>;
   submitDraft(req: unknown): Promise<T>;
 }

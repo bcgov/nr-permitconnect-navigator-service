@@ -5,7 +5,6 @@ import { Form, type GenericObject } from 'vee-validate';
 import { inject, onBeforeMount, ref } from 'vue';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { object, string, mixed, type InferType, boolean } from 'yup';
 
 import Divider from '@/components/common/Divider.vue';
 import Tooltip from '@/components/common/Tooltip.vue';
@@ -19,10 +18,13 @@ import { BringForwardType, NoteType } from '@/utils/enums/projectCommon';
 import { formatDate, formatTime } from '@/utils/formatters';
 import { enquiryRouteNameKey, projectEnquiryRouteNameKey, projectRouteNameKey, resourceKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { createNoteFormSchema } from '@/validators/noteFormSchema';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
 import type { NoteHistory, User } from '@/types';
+import type { FormSchemaType } from '@/validators/noteFormSchema';
 
 // Props
 const { editable, noteHistory = undefined } = defineProps<{
@@ -53,44 +55,7 @@ const toast = useToast();
 const { options } = useCodeStore();
 
 // Form Schema
-const formSchema = object({
-  bringForwardDate: mixed()
-    .nullable()
-    .when('type', {
-      is: (type: string) => type === NoteType.BRING_FORWARD,
-      then: (schema) => schema.required(t('note.noteForm.bfDateReqd')),
-      otherwise: (schema) => schema.nullable()
-    })
-    .label('Bring forward date'),
-  bringForwardState: mixed()
-    .when('type', {
-      is: (type: string) => type === NoteType.BRING_FORWARD,
-      then: () => string().oneOf(BRING_FORWARD_TYPE_LIST),
-      otherwise: () => mixed().nullable()
-    })
-    .label('Bring forward state'),
-  noteHistoryId: string(),
-  note: string()
-    .when('noteHistoryId', {
-      is: (noteHistoryId: string) => noteHistoryId === undefined,
-      then: (schema) => schema.required(t('note.noteForm.noteReqd')),
-      otherwise: (schema) => schema.notRequired()
-    })
-    .label('Note'),
-  type: string().oneOf(NOTE_TYPE_LIST).label('Note type'),
-  title: string().required().max(255, t('note.noteForm.titleLong')).label('Title'),
-  escalateToDirector: boolean(),
-  escalateToSupervisor: boolean(),
-  escalationType: mixed()
-    .when(['escalateToSupervisor', 'escalateToDirector'], {
-      is: (escalateToSupervisor: boolean, escalateToDirector: boolean) => escalateToSupervisor || escalateToDirector,
-      then: (schema) => schema.required(t('note.noteForm.escalationTypeReqd')),
-      otherwise: (schema) => schema.nullable()
-    })
-    .label('Escalation type')
-});
-
-export type FormSchemaType = InferType<typeof formSchema>;
+const formSchema = toTypedSchema(createNoteFormSchema({ t }));
 
 // Store
 const { getProject } = storeToRefs(projectStore);

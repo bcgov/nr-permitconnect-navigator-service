@@ -18,17 +18,23 @@ vi.mock('@/services', () => ({
   contactService: { matchContacts: vi.fn() }
 }));
 
+// Set per test to run the real useForm and validation schema instead of the canned submit
+const veeValidateMode = vi.hoisted(() => ({ real: false }));
+
 vi.mock('vee-validate', async (importOriginal) => {
   const actual = await importOriginal<typeof VeeValidate>();
   return {
     ...actual,
-    useForm: () => ({
-      handleSubmit: (fn: (values: VeeValidate.GenericObject) => void) => (e?: Event) => {
-        if (e?.preventDefault) e.preventDefault();
-        fn({ firstName: 'Manual', lastName: 'User' });
-      },
-      resetForm: vi.fn()
-    })
+    useForm: (...args: Parameters<typeof actual.useForm>) =>
+      veeValidateMode.real
+        ? actual.useForm(...args)
+        : {
+            handleSubmit: (fn: (values: VeeValidate.GenericObject) => void) => (e?: Event) => {
+              if (e?.preventDefault) e.preventDefault();
+              fn({ firstName: 'Manual', lastName: 'User' });
+            },
+            resetForm: vi.fn()
+          }
   };
 });
 
@@ -80,6 +86,7 @@ const wrapperSettings = (zone = Zone.INTERNAL, activityContacts: ActivityContact
 describe('ProjectTeamAddModal.vue', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    veeValidateMode.real = false;
   });
 
   describe('Search Logic & UI Bindings', () => {
@@ -161,6 +168,31 @@ describe('ProjectTeamAddModal.vue', () => {
   });
 
   describe('Adding & Removing Users', () => {
+    // Runs the real schema through useForm, guarding the yup -> zod swap
+    it('does not add a manual entry that fails validation', async () => {
+      veeValidateMode.real = true;
+      vi.mocked(contactService.matchContacts).mockResolvedValue([]);
+      const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));
+
+      const searchInput = wrapper.find('input');
+      await searchInput.setValue('John Doe');
+      await searchInput.trigger('keydown.enter');
+      await flushPromises();
+
+      const toggleBtn = wrapper.findAll('button').find((b) => b.text().includes(t('projectTeamAddModal.manualEntry')));
+      await toggleBtn?.trigger('click');
+      await flushPromises();
+
+      await wrapper.find('form').trigger('submit');
+      await flushPromises();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      await flushPromises();
+
+      const selectedTable = wrapper.findAllComponents({ name: 'DataTable' })[1];
+      expect(selectedTable?.props('value') ?? []).toEqual([]);
+      expect(wrapper.text()).toContain('First name is a required field');
+    });
+
     it('checks manualEntry addition via Form submit', async () => {
       vi.mocked(contactService.matchContacts).mockResolvedValue([]);
       const wrapper = mount(ProjectTeamAddModal, wrapperSettings(Zone.INTERNAL));

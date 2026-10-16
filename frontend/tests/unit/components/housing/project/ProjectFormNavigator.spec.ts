@@ -86,7 +86,7 @@ const testProject: HousingProject = {
   astNotes: 'AST notes.',
   applicationStatus: ApplicationStatus.COMPLETED,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
-  hasAppliedProvincialPermits: false,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   projectLocation: '',
   contacts: [exampleContact],
   user: {

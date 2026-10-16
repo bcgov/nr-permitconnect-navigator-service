@@ -9,9 +9,10 @@ import { enquiryService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
-import { contactSchema } from '@/validators';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { Ref } from 'vue';
+import type { CreateEnquiryRequest } from '@/types';
 
 // Composables
 const formValues = useFormValues();
@@ -26,7 +27,7 @@ const confirm = useConfirm();
 
 // Check if applicant section is filled
 const checkApplicantValuesValid = (): boolean => {
-  return contactSchema.isValidSync(formValues.value.contacts);
+  return contactFormSchema.safeParse(formValues.value.contacts).success;
 };
 
 const confirmSubmit = () => {
@@ -44,11 +45,9 @@ const confirmSubmit = () => {
 
 async function onAssistanceRequest() {
   try {
-    const enquiryData = {
-      basic: {
-        enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
-        submissionType: SubmissionType.ASSISTANCE
-      },
+    const enquiryData: CreateEnquiryRequest = {
+      enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
+      submissionType: SubmissionType.ASSISTANCE,
       contact: setEmptyStringsToNull({
         contactId: formValues.value.contacts.contactId,
         firstName: formValues.value.contacts.firstName,
