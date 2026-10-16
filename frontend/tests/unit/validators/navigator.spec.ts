@@ -367,11 +367,9 @@ describe('navigator validators', () => {
       });
     });
 
-    // otherUnits keys off otherUnitsDescription being literally 'Yes'
-    it('requires rental and other units when their triggers are Yes', async () => {
+    it('requires rental units when rentals are Yes and other units when an other type is described', async () => {
       expect(
-        (await runSchema(schema, { hasRentalUnits: BasicResponse.YES, otherUnitsDescription: BasicResponse.YES }))
-          .errors
+        (await runSchema(schema, { hasRentalUnits: BasicResponse.YES, otherUnitsDescription: 'Townhouses' })).errors
       ).toEqual({
         otherUnits: 'Other type units is a required field',
         rentalUnits: 'Rental units is a required field'
@@ -392,6 +390,7 @@ describe('navigator validators', () => {
         ).errors
       ).toEqual({
         multiFamilyUnits: `Multi-family units ${UNITS_ONE_OF}`,
+        otherUnits: `Other type units ${UNITS_ONE_OF}`,
         otherUnitsDescription: 'Other type must be at most 255 characters',
         rentalUnits: `Rental units ${UNITS_ONE_OF}`,
         singleFamilyUnits: `Single family units ${UNITS_ONE_OF}`
@@ -399,17 +398,14 @@ describe('navigator validators', () => {
     });
 
     // The otherwise branches replace the schema, dropping the oneOf check
-    it('accepts any rental and other units when their triggers are not Yes', async () => {
+    it('accepts any rental and other units when their triggers are off', async () => {
       expect(
-        (
-          await runSchema(schema, {
-            hasRentalUnits: BasicResponse.NO,
-            otherUnits: 'x',
-            otherUnitsDescription: 'desc',
-            rentalUnits: 'x'
-          })
-        ).errors
+        (await runSchema(schema, { hasRentalUnits: BasicResponse.NO, otherUnits: 'x', rentalUnits: 'x' })).errors
       ).toEqual({});
+    });
+
+    it.each([null, ''])('does not require other units when the other type is %j', async (otherUnitsDescription) => {
+      expect((await runSchema(schema, { hasRentalUnits: BasicResponse.NO, otherUnitsDescription })).errors).toEqual({});
     });
 
     it('accepts well-formed units', async () => {
@@ -417,7 +413,7 @@ describe('navigator validators', () => {
         hasRentalUnits: BasicResponse.YES,
         multiFamilyUnits: null,
         otherUnits: UNITS,
-        otherUnitsDescription: BasicResponse.YES,
+        otherUnitsDescription: 'Townhouses',
         rentalUnits: UNITS,
         singleFamilyUnits: UNITS
       };
