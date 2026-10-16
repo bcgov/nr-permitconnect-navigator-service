@@ -24,7 +24,7 @@ import { toTypedSchema } from '@/utils/zodSchema';
 import { createAuthorizationFormSchema } from '@/validators/authorizationFormSchema';
 
 import type { Ref } from 'vue';
-import type { ApiInitiative, AuditFields, Permit, PermitTracking, RequestBody, SourceSystemKind, User } from '@/types';
+import type { ApiInitiative, Permit, PermitTracking, RequestBody, SourceSystemKind, User } from '@/types';
 import type { FormSchemaType as AuthorizationFormSchemaType } from '@/validators/authorizationFormSchema';
 
 // Props
@@ -52,7 +52,8 @@ const { isPeachEnabled } = storeToRefs(featureStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Types
-type FormSchemaType = AuthorizationFormSchemaType & AuditFields;
+type FormSchemaType = AuthorizationFormSchemaType &
+  Partial<Pick<Permit, 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'>>;
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);

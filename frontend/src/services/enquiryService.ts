@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type { ApiInitiative, CreateEnquiryResponse, Enquiry, RequestBody } from '@/types';
+import type { ApiInitiative, Enquiry, RequestBody, ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -23,10 +23,12 @@ const enquiryRoutes = {
  * @param req - The request payload containing the enquiry data to create.
  * @returns A promise resolving to the created `Enquiry` resource.
  */
-export function createEnquiry(req: RequestBody<`create${ApiInitiative}Enquiry`>): Promise<CreateEnquiryResponse> {
+export function createEnquiry(
+  req: RequestBody<`create${ApiInitiative}Enquiry`>
+): Promise<ResponseBody<`create${ApiInitiative}Enquiry`>> {
   const { ...body } = req;
 
-  return api.post<CreateEnquiryResponse>(enquiryRoutes.root(), body);
+  return api.post<ResponseBody<`create${ApiInitiative}Enquiry`>>(enquiryRoutes.root(), body);
 }
 
 /**

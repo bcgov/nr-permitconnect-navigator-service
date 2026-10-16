@@ -1,5 +1,5 @@
-import type { AccessRequest, IdentityProvider, Nullable, User } from '@/types';
-import type { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
+import type { AccessRequest, Nullable, User } from '@/types';
+import type { Action, GroupName, IdentityProviderKind, Initiative, Resource } from '@/utils/enums/application';
 
 export interface Code {
   code: string;
@@ -42,6 +42,13 @@ export interface Config {
   orgbook: {
     apiPath?: string;
   };
+}
+
+// Entries of the IdP config list served by /config, not rows of the identity_provider table
+export interface IdentityProvider {
+  idp: string;
+  kind: IdentityProviderKind;
+  username: string;
 }
 
 export interface InputEvent extends Event {

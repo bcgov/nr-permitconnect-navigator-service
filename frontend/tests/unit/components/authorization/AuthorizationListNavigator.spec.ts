@@ -18,7 +18,7 @@ const testPermit: SearchPermitsResponse['permits'][number] = {
   activityId: 'activity-1',
   permitTypeId: 26,
   decisionDate: '2024-01-15',
-  stage: 'SUBMISSION',
+  stage: 'APPLICATION_SUBMISSION',
   state: 'IN_PROGRESS',
   statusLastChanged: '2024-01-10',
   submittedDate: '2024-01-01',
@@ -61,7 +61,7 @@ function mountAuthorizationListNavigator(options: { initiative?: Initiative } = 
       code: {
         codes: {
           PermitState: [{ code: 'IN_PROGRESS', display: 'In Progress', active: true }],
-          PermitStage: [{ code: 'SUBMISSION', display: 'Submission', active: true }],
+          PermitStage: [{ code: 'APPLICATION_SUBMISSION', display: 'Application submission', active: true }],
           SourceSystem: [{ code: 'ITSM-5314', display: 'ATS', active: true }]
         }
       }
