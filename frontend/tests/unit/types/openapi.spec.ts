@@ -18,8 +18,12 @@ describe('ResponseBody', () => {
     expectTypeOf<ResponseBody<'submitHousingProjectDraft'>>().toEqualTypeOf<Schema<'HousingProject'>>();
   });
 
-  it('ignores error responses, so an operation with no success body gives never', () => {
-    expectTypeOf<ResponseBody<'deleteHousingProject'>>().toBeNever();
+  it('gives undefined for an operation that only returns 204', () => {
+    expectTypeOf<ResponseBody<'deleteHousingProject'>>().toBeUndefined();
+  });
+
+  it('adds undefined to the body when a 204 is also declared', () => {
+    expectTypeOf<ResponseBody<'getHousingProjectPids'>>().toEqualTypeOf<string | undefined>();
   });
 
   it('gives the union of bodies for a union of ids', () => {

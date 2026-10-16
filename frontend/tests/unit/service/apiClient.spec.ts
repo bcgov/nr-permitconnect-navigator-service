@@ -31,6 +31,12 @@ describe('api wrapper', () => {
       expect(res).toBe('result');
     });
 
+    it('returns undefined for a 204 instead of the empty string axios reports', async () => {
+      mockAxios.post.mockResolvedValue({ status: 204, data: '' });
+
+      expect(await api.post('/test')).toBeUndefined();
+    });
+
     it('get forwards config', async () => {
       mockAxios.get.mockResolvedValue({ data: 'ok' });
 

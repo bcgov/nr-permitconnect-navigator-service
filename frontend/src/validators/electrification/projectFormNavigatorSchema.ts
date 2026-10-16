@@ -26,7 +26,7 @@ export function createProjectFormNavigatorSchema({
     ...createElectrificationPanelSchema({ codeList, t }),
     ...createCompanyProjectNamePanelSchema({ initiative, t, orgBookOptions }),
     ...createLocationDescriptionPanelSchema({ t }),
-    ...createProjectDescriptionPanelSchema({ initiative, t }),
+    ...createProjectDescriptionPanelSchema({ t }),
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createAtsInfoPanelSchema({ initiative, t, codeList }),

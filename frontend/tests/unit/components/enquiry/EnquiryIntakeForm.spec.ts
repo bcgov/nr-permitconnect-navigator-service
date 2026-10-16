@@ -1,20 +1,22 @@
 import { flushPromises } from '@vue/test-utils';
+import { ref } from 'vue';
 
 import EnquiryIntakeForm from '@/components/enquiry/EnquiryIntakeForm.vue';
-import { contactService, housingProjectService } from '@/services';
+import { contactService, enquiryService, housingProjectService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
-
-import type { Contact, HousingProject } from '@/types';
-import { mountComponent } from '../../../mountComponent';
-import { mockRouter, resetMockRouter } from '../../../mockRouter';
 import {
   enquiryConfirmRouteNameKey,
   enquiryPermitConfirmRouteNameKey,
   enquiryProjectConfirmRouteNameKey,
   enquiryRouteNameKey
 } from '@/utils/keys';
-import { ref } from 'vue';
+
 import { testContactDefaults } from '../../../fixtures';
+import { mockRouter, resetMockRouter } from '../../../mockRouter';
+import { mountComponent } from '../../../mountComponent';
+
+import type { Contact, HousingProject } from '@/types';
+import type { FormSchemaType } from '@/validators/enquiryIntakeFormSchema';
 
 // Mocks
 
@@ -63,6 +65,7 @@ const sampleContact: Contact = {
 const listActivityIds = vi.spyOn(housingProjectService, 'listActivityIds');
 const listProjects = vi.spyOn(housingProjectService, 'listProjects');
 const searchContactsSpy = vi.spyOn(contactService, 'searchContacts');
+const createEnquirySpy = vi.spyOn(enquiryService, 'createEnquiry');
 
 listActivityIds.mockResolvedValue(['someActivityid']);
 listProjects.mockResolvedValue([{ activityId: 'someActivityid' }] as HousingProject[]);
@@ -116,6 +119,37 @@ describe('EnquiryIntakeForm', () => {
           expect(textAreaCard.props('required')).toBe(true);
         });
       });
+    });
+  });
+
+  describe('onSubmit', () => {
+    // The create enquiry contact is strict, so a user-linked contact's userId must not be sent
+    it('sends only the submitted contact fields', async () => {
+      createEnquirySpy.mockResolvedValue({ enquiryId: 'enquiry123' } as Awaited<
+        ReturnType<typeof enquiryService.createEnquiry>
+      >);
+      const { wrapper } = mountEnquiryIntakeForm();
+      await flushPromises();
+
+      const { userId, contactId, firstName, lastName, email, phoneNumber } = sampleContact;
+      const { contactApplicantRelationship, contactPreference } = sampleContact;
+      const contact = {
+        contactId,
+        firstName,
+        lastName,
+        email,
+        phoneNumber,
+        contactApplicantRelationship,
+        contactPreference
+      };
+      const values = { basic: { enquiryDescription: 'Description' }, contacts: { ...contact, userId } };
+
+      await (wrapper.vm as unknown as { onSubmit: (v: FormSchemaType) => Promise<void> }).onSubmit(
+        values as FormSchemaType
+      );
+
+      expect(createEnquirySpy).toHaveBeenCalledWith(expect.objectContaining({ contact }));
+      expect(createEnquirySpy.mock.calls[0]![0].contact).not.toHaveProperty('userId');
     });
   });
 });

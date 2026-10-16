@@ -113,7 +113,15 @@ async function onSubmit(values: FormSchemaType) {
     let payload: RequestBody<`create${ApiInitiative}Enquiry`> = {
       enquiryDescription: values.basic.enquiryDescription,
       relatedActivityId: project?.activityId ?? undefined,
-      contact: values.contacts
+      contact: {
+        contactId: values.contacts.contactId,
+        firstName: values.contacts.firstName,
+        lastName: values.contacts.lastName,
+        email: values.contacts.email,
+        phoneNumber: values.contacts.phoneNumber,
+        contactApplicantRelationship: values.contacts.contactApplicantRelationship,
+        contactPreference: values.contacts.contactPreference
+      }
     };
 
     if (permit) {

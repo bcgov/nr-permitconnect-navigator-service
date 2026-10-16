@@ -322,7 +322,6 @@
         "failedSaveIntake": "Failed to save intake",
         "formSaved": "Form saved",
         "projectDescriptionCard": "Help us learn more about your project",
-        "projectDescriptionCardOptional": "Help us learn more about your project (optional)",
         "projectNameCard": "What is the name of your project?",
         "projectTypeCard": "What is your project type?",
         "provideDetails": "Provide us with additional information - short description about the project and/or project website link",
@@ -366,10 +365,10 @@
       },
       "atsUserLinkModal": {
         "atsClientLink": "ATS Client Link",
-        "clientNo": "ATS client # (optional)",
-        "email": "Email (optional)",
+        "clientNo": "ATS client #",
+        "email": "Email",
         "linkToPCNS": "Link to PCNS",
-        "phone": "Phone (optional)",
+        "phone": "Phone",
         "search": "Search"
       },
       "common": {
@@ -887,7 +886,7 @@
         "parcel": "Parcel ID (PID Number)"
       }
     },
-    "header": "Provide additional location details (optional)",
+    "header": "Provide additional location details",
     "help": "List the parcel IDs - if multiple PIDS, separate them with commas, e.g., 006-209-521, 007-209-522",
     "labels": {
       "geomark": "Open Geomark Web Service",
@@ -898,7 +897,7 @@
     }
   },
   "locationDescriptionCard": {
-    "header": "Is there anything else you would like to tell us about this project's location? (optional)"
+    "header": "Is there anything else you would like to tell us about this project's location?"
   },
   "loginButton": {
     "login": "Log in",
@@ -1034,8 +1033,7 @@
   },
   "projectDescriptionCard": {
     "headers": {
-      "required": "Help us learn more about your project",
-      "optional": "Help us learn more about your project (optional)"
+      "required": "Help us learn more about your project"
     },
     "labels": {
       "projectDescription": "Provide additional information"
@@ -1066,7 +1064,7 @@
     "header": "What is your project type?"
   },
   "bcHydroNumberCard": {
-    "header": "What is your BC Hydro Call for Power project number? (optional)"
+    "header": "What is your BC Hydro Call for Power project number?"
   },
   "appliedPermitsCard": {
     "header": "Have you applied for any provincial permits for this project?",
@@ -1079,7 +1077,7 @@
     }
   },
   "investigatePermitsCard": {
-    "header": "Select all provincially issued permits you plan to submit (optional)",
+    "header": "Select all provincially issued permits you plan to submit",
     "headerTooltip": "Early information on your permitting needs will help us coordinate and expedite the authorization process.",
     "placeholders": {
       "permitTypeId": "Select Permit type"

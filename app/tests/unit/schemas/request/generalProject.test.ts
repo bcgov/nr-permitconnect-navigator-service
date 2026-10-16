@@ -69,6 +69,13 @@ describe('submitGeneralProjectDraft validator', () => {
     expect(result.success).toBe(true);
   });
 
+  it('rejects a blank projectDescription', () => {
+    const result = schema.submitGeneralProjectDraft.body.safeParse(
+      validBody({ projectApplicantType: 'Individual', projectName: 'Test Project', projectDescription: '  ' })
+    );
+    expect(!result.success && result.error.issues[0].path).toEqual(['basic', 'projectDescription']);
+  });
+
   it('requires basic, contact, location, and permits', () => {
     const result = schema.submitGeneralProjectDraft.body.safeParse({});
     expect(result.success).toBe(false);

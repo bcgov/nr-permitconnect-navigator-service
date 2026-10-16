@@ -187,6 +187,12 @@ describe('housing createProjectIntakeSchema', () => {
     });
   });
 
+  it('requires a project description that is not blank', async () => {
+    expect(await sectionErrors('basic', { projectDescription: '  ' })).toEqual({
+      'basic.projectDescription': 'Project description is a required field'
+    });
+  });
+
   it('rejects malformed location and permit values', async () => {
     expect(
       (

@@ -80,6 +80,19 @@ describe('submitHousingProjectDraft validator', () => {
     expect(result.success).toBe(true);
   });
 
+  it('rejects a blank projectDescription', () => {
+    const body = validBody({
+      consentToFeedback: true,
+      projectApplicantType: 'Individual',
+      projectName: 'Test Project',
+      projectDescription: '  '
+    });
+
+    const result = schema.submitHousingProjectDraft.body.safeParse(body);
+
+    expect(!result.success && result.error.issues[0].path).toEqual(['basic', 'projectDescription']);
+  });
+
   it('does not require registeredName when projectApplicantType is Individual', () => {
     const body = validBody({
       consentToFeedback: true,

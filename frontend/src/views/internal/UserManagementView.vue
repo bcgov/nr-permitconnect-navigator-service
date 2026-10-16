@@ -134,8 +134,8 @@ async function onProcessUserAccessRequest() {
       usersAndAccessRequests.value[idx].user.status = AccessRequestStatus.APPROVED;
     }
 
-    // Drop from table
-    if (deniedAccess || approvedRevocation) {
+    // Drop from table, unless a stale selection is no longer in it
+    if (idx >= 0 && (deniedAccess || approvedRevocation)) {
       usersAndAccessRequests.value.splice(idx, 1);
     }
 
@@ -167,7 +167,6 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
     rejectProps: { outlined: true },
     accept: async () => {
       try {
-        const omittedUser = toAccessRequestUser(userAccessRequest.user);
         const groupId = userAccessRequest.user.groups?.[0]?.groupId;
         if (!groupId) throw new Error('User has no group');
         let response;
@@ -181,7 +180,7 @@ function onRevoke(userAccessRequest: UserAccessRequest) {
         } else {
           // Create user access request
           response = await accessRequestService.createAccessRequest({
-            user: omittedUser,
+            user: toAccessRequestUser(userAccessRequest.user),
             accessRequest: {
               grant: false,
               groupId
@@ -263,6 +262,9 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       accessRequest: { ...accessRequest },
       user: omittedUser
     });
+    // Only an admin revoke returns no body, and this is a grant
+    if (!response) throw new Error('No access request returned');
+
     // Update main data table; a pending request returns the created access request, an immediate grant only its result
     if ('accessRequestId' in response) {
       (userAccessRequest.accessRequest as AccessRequest).accessRequestId = response.accessRequestId;

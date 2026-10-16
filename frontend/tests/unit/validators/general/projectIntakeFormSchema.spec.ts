@@ -105,6 +105,12 @@ describe('general createProjectIntakeSchema', () => {
     });
   });
 
+  it('requires a project description that is not blank', async () => {
+    expect(await basicErrors({ projectDescription: '  ' })).toEqual({
+      'basic.projectDescription': 'Project description is a required field'
+    });
+  });
+
   it('rejects malformed basic, location and permit values', async () => {
     expect(
       (

@@ -54,7 +54,7 @@ export const generateElectrificationProjectData = async (
     companyIdRegistered: data.basic.registeredId ?? null,
     companyNameRegistered: data.basic.registeredName,
     projectName: data.basic.projectName,
-    projectDescription: data.basic.projectDescription ?? null,
+    projectDescription: data.basic.projectDescription,
     bcHydroNumber: data.project.bcHydroNumber ?? null,
     projectType: data.project.projectType,
     electrificationProjectId: randomUUID(),

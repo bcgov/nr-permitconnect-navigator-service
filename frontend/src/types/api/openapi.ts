@@ -33,13 +33,15 @@ export type Schema<Name extends keyof components['schemas']> = components['schem
 
 /**
  * JSON body of an API operation's success (200 or 201) response, by its operationId in the generated OpenAPI types.
- * A union of ids gives the union of their bodies; an operation with no success body (e.g. 204) gives never.
+ * A union of ids gives the union of their bodies; a declared 204 adds undefined, so an operation that only returns 204
+ * gives undefined.
  * @example ResponseBody<'getHousingProject'>
  */
 export type ResponseBody<Id extends keyof operations> = Id extends unknown
   ? operations[Id]['responses'] extends infer R
-    ? {
-        [S in keyof R & (200 | 201)]: R[S] extends { content: { 'application/json': infer B } } ? B : never;
-      }[keyof R & (200 | 201)]
+    ? | {
+          [S in keyof R & (200 | 201)]: R[S] extends { content: { 'application/json': infer B } } ? B : never;
+        }[keyof R & (200 | 201)]
+      | (204 extends keyof R ? undefined : never)
     : never
   : never;

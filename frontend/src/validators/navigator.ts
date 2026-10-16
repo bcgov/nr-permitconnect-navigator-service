@@ -22,14 +22,14 @@ import {
   requiredMessage,
   requiredOneOf,
   requiredString,
-  requiredTextSchema,
-  requireText
+  requiredTextSchema
 } from '@/utils/zodSchema';
 import {
   assignedToSchema,
-  atsClientIdSchema,
+  atsIdSchema,
   latitudeSchema,
   longitudeSchema,
+  requireFinanceDescriptions,
   requireUnits,
   unitsSchema
 } from '@/validators/common';
@@ -147,19 +147,10 @@ export function createLocationDescriptionPanelSchema({ t }: CreateSchemaOptions)
   };
 }
 
-export function createProjectDescriptionPanelSchema({
-  initiative,
-  t
-}: Required<Pick<CreateSchemaOptions, 'initiative' | 't'>>) {
+export function createProjectDescriptionPanelSchema({ t }: CreateSchemaOptions) {
   return {
     projectDescription: formSection(
-      z.looseObject({
-        // Known bug: never required for electrification, even for the OTHER project type
-        description:
-          initiative === Initiative.ELECTRIFICATION
-            ? z.string().nullish()
-            : requiredTextSchema(t('validators.projectDescription.description'))
-      })
+      z.looseObject({ description: requiredTextSchema(t('validators.projectDescription.description')) })
     )
   };
 }
@@ -215,8 +206,8 @@ export function createAtsInfoPanelSchema({
   return {
     atsInfo: formSection(
       z.looseObject({
-        atsClientId: atsClientIdSchema(t('validators.atsClientId.label')),
-        atsEnquiryId: atsClientIdSchema('ATS enquiry #'),
+        atsClientId: atsIdSchema(t('validators.atsClientId.label')),
+        atsEnquiryId: atsIdSchema('ATS enquiry #'),
         businessArea:
           initiative === Initiative.GENERAL
             ? z
@@ -297,27 +288,15 @@ export function createFinanciallySupportedPanelSchema({ t }: CreateSchemaOptions
           financiallySupportedHousingCoop: supported('financeFinanciallySupportedHousingCoop'),
           housingCoopDescription: z.string().nullish()
         })
-        .superRefine((value, ctx) => {
-          if (value.financiallySupportedIndigenous === BasicResponse.YES) {
-            requireText(
-              ctx,
-              'indigenousDescription',
-              label('financeIndigenousDescription'),
-              value.indigenousDescription
-            );
-          }
-          if (value.financiallySupportedNonProfit === BasicResponse.YES) {
-            requireText(ctx, 'nonProfitDescription', label('financeNonProfitDescription'), value.nonProfitDescription);
-          }
-          if (value.financiallySupportedHousingCoop === BasicResponse.YES) {
-            requireText(
-              ctx,
-              'housingCoopDescription',
-              label('financeHousingCoopDescription'),
-              value.housingCoopDescription
-            );
-          }
-        }, evenWithIssues)
+        .superRefine(
+          (value, ctx) =>
+            requireFinanceDescriptions(ctx, value, {
+              indigenous: label('financeIndigenousDescription'),
+              nonProfit: label('financeNonProfitDescription'),
+              housingCoop: label('financeHousingCoopDescription')
+            }),
+          evenWithIssues
+        )
     )
   };
 }
