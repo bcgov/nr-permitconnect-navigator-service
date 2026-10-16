@@ -20,6 +20,7 @@ import {
 import { generalErrorHandler } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 import { enquiryIntakeFormSchema } from '@/validators/enquiryIntakeFormSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -156,15 +157,7 @@ onBeforeMount(async () => {
     initialFormValues.value = {
       activityId: response?.activityId,
       enquiryId: response?.enquiryId,
-      contacts: {
-        firstName: primaryContact?.firstName,
-        lastName: primaryContact?.lastName,
-        phoneNumber: primaryContact?.phoneNumber,
-        email: primaryContact?.email,
-        contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-        contactPreference: primaryContact?.contactPreference,
-        contactId: primaryContact?.contactId
-      },
+      contacts: toContactFormValues(primaryContact),
       basic: {
         relatedActivityId: response?.relatedActivityId,
         enquiryDescription: response?.enquiryDescription

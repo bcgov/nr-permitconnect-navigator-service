@@ -194,11 +194,11 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
     const updatedWithContact = { ...updated, contact: contact.contact };
     projectStore.updateActivityContact(updatedWithContact);
 
-    if (demoted) {
-      const originalDemoted = getActivityContacts.value.find((ac) => ac.contactId === demoted.contactId);
-      const demotedWithContact = { ...demoted, contact: originalDemoted?.contact };
-      projectStore.updateActivityContact(demotedWithContact);
-    }
+    // The API returns bare rows, so the demoted contact's details come from the store
+    const demotedContact = demoted
+      ? getActivityContacts.value.find((ac) => ac.contactId === demoted.contactId)?.contact
+      : undefined;
+    if (demoted) projectStore.updateActivityContact({ ...demoted, contact: demotedContact });
 
     // Close modal on success
     manageUserModalVisible.value = false;
@@ -217,8 +217,8 @@ async function onManageUser(contact: ActivityContact, role: ActivityContactRole)
           toast.success(
             t('projectTeamTab.primaryUpdatedAndDemoted', {
               ...firstLastNames,
-              firstDemoted: demoted.contact?.firstName,
-              lastDemoted: demoted.contact?.lastName
+              firstDemoted: demotedContact?.firstName,
+              lastDemoted: demotedContact?.lastName
             })
           );
         } else {

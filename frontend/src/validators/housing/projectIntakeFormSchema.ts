@@ -13,12 +13,13 @@ import {
   requiredMessage,
   requiredOneOf,
   requiredString,
-  requireText
+  requiredTextSchema
 } from '@/utils/zodSchema';
 import {
   locationFormSchema,
   permitsFormSchema,
   refineBusinessRegistration,
+  requireFinanceDescriptions,
   requireUnits,
   unitsSchema
 } from '@/validators/common';
@@ -36,7 +37,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       registeredId: optionalTextSchema('Business ID'),
       registeredName: optionalTextSchema('Business name'),
       projectName: requiredString('Project name').max(255, maxMessage('Project name', 255)),
-      projectDescription: requiredString('Project description')
+      projectDescription: requiredTextSchema('Project description')
     })
     .superRefine(refineBusinessRegistration(orgBookOptions), evenWithIssues);
 
@@ -63,15 +64,11 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       if (value.hasRentalUnits === BasicResponse.YES) {
         requireUnits(ctx, 'rentalUnits', 'Expected rental units', value.rentalUnits);
       }
-      if (value.financiallySupportedIndigenous === BasicResponse.YES) {
-        requireText(ctx, 'indigenousDescription', 'Indigenous housing provider', value.indigenousDescription);
-      }
-      if (value.financiallySupportedNonProfit === BasicResponse.YES) {
-        requireText(ctx, 'nonProfitDescription', 'Non-profit housing society', value.nonProfitDescription);
-      }
-      if (value.financiallySupportedHousingCoop === BasicResponse.YES) {
-        requireText(ctx, 'housingCoopDescription', 'Housing co-operative', value.housingCoopDescription);
-      }
+      requireFinanceDescriptions(ctx, value, {
+        indigenous: 'Indigenous housing provider',
+        nonProfit: 'Non-profit housing society',
+        housingCoop: 'Housing co-operative'
+      });
 
       // unitTypes is a field ResidentialUnitsCard registers to show this message only once validated;
       // the blank checkbox issues let useFormErrorWatcher jump invalid submits to the card's tab

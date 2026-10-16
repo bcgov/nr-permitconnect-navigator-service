@@ -11,8 +11,9 @@ import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { projectRouteNameKey, projectServiceKey } from '@/utils/keys';
 
-import type { GetPeachSummaryResponse, Permit, PermitTracking, PermitType, User } from '@/types';
+import type { GetPeachSummaryResponse, Permit, PermitTracking, PermitType, SourceSystemKind, User } from '@/types';
 import { ref } from 'vue';
+import { testAuditFields } from '../../../fixtures';
 
 // Mock Services
 vi.mock('@/services', () => ({
@@ -52,17 +53,21 @@ vi.mock('vue-i18n', () => ({
   })
 }));
 
-const testSourceSystemKinds = [
+const testSourceSystemKinds: SourceSystemKind[] = [
   {
+    ...testAuditFields,
+    kind: null,
     sourceSystemKindId: 10,
-    sourceSystem: 'ITSM-9999',
+    sourceSystem: 'ITSM-5314',
     description: 'Integrated System',
     integrated: true,
     permitTypeIds: [123]
   },
   {
+    ...testAuditFields,
+    kind: null,
     sourceSystemKindId: 2,
-    sourceSystem: 'OTHER',
+    sourceSystem: 'ITSM-5285',
     description: 'Standard System',
     integrated: false,
     permitTypeIds: [123]
@@ -201,7 +206,7 @@ describe('AuthorizationForm.vue', () => {
     it('interacts with PEACH service when saving an integrated authorization', async () => {
       const peachAuth: Permit = {
         ...defaultAuthorization,
-        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-9999' } as PermitType,
+        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-5314' } as PermitType,
         permitTracking: [{ sourceSystemKindId: 10, trackingId: 'ABC-123' } as PermitTracking]
       };
 
@@ -230,7 +235,7 @@ describe('AuthorizationForm.vue', () => {
     it('opens no data modal when PEACH service returns a 404', async () => {
       const peachAuth: Permit = {
         ...defaultAuthorization,
-        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-9999' } as PermitType,
+        permitType: { ...defaultAuthorization.permitType, sourceSystem: 'ITSM-5314' } as PermitType,
         permitTracking: [{ sourceSystemKindId: 10, trackingId: 'ABC-123' } as PermitTracking]
       };
 

@@ -62,7 +62,11 @@ const filteredDocuments = computed(() => {
       break;
     case SORT_TYPES.CREATED_BY:
       tempDocuments = tempDocuments.sort((a, b) =>
-        sortComparator(sortOrder.value, a.createdByFullName.toLowerCase(), b.createdByFullName.toLowerCase())
+        sortComparator(
+          sortOrder.value,
+          (a.createdByFullName ?? '').toLowerCase(),
+          (b.createdByFullName ?? '').toLowerCase()
+        )
       );
       break;
   }

@@ -23,7 +23,7 @@ const testForm = {
   contact: { email: 'a@b.co', firstName: 'First' },
   electrification: { projectType: 'IPP_SOLAR' },
   companyProjectName: { companyNameRegistered: 'Test Co', projectName: 'Project' },
-  projectDescription: { description: '' },
+  projectDescription: { description: 'Desc' },
   submissionState: {
     applicationStatus: ApplicationStatus.NEW,
     assignedUser: null,
@@ -56,6 +56,7 @@ describe('electrification createProjectFormNavigatorSchema', () => {
 
   it('reports every required field on an empty form', async () => {
     expect((await runSchema(schema, {})).errors).toEqual({
+      'projectDescription.description': 'Additional information about project is a required field',
       'contact.email': 'Contact email is a required field',
       'contact.firstName': 'Contact first name is a required field',
       'electrification.projectType': 'Project type is a required field',
@@ -83,8 +84,9 @@ describe('electrification createProjectFormNavigatorSchema', () => {
     });
   });
 
-  // Known bug: the OTHER project type should require a description, see navigator.spec.ts
-  it('does not require a description for the OTHER project type', async () => {
-    expect((await runSchema(schema, { ...testForm, electrification: { projectType: 'OTHER' } })).errors).toEqual({});
+  it('requires a description for any project type', async () => {
+    expect((await runSchema(schema, { ...testForm, projectDescription: { description: '  ' } })).errors).toEqual({
+      'projectDescription.description': 'Additional information about project is a required field'
+    });
   });
 });

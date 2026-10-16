@@ -13,6 +13,7 @@ import { ApplicationStatus, ProjectApplicant, SubmissionType } from '@/utils/enu
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
 
 import { mountComponent } from '../../../../mountComponent';
+import { testHousingProjectDefaults } from '../../../../fixtures';
 
 import type { Pinia } from 'pinia';
 import type { HousingProject } from '@/types';
@@ -40,6 +41,7 @@ vi.mock('vue-router', () => ({
 const PROVIDED_RESOURCE = 'resource';
 
 const testProject: HousingProject = {
+  ...testHousingProjectDefaults,
   activityId: 'activity456',
   housingProjectId: 'project789',
   projectId: 'project789',
@@ -47,7 +49,6 @@ const testProject: HousingProject = {
   submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
-  hasRelatedEnquiry: true,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
@@ -56,7 +57,6 @@ const testProject: HousingProject = {
   projectLocationDescription: 'Test location description.',
   singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
   multiFamilyUnits: NumResidentialUnits.UNSURE,
-  multiPermitsNeeded: 'Yes',
   otherUnitsDescription: 'Other units description.',
   otherUnits: NumResidentialUnits.UNSURE,
   hasRentalUnits: BasicResponse.YES,
@@ -72,8 +72,8 @@ const testProject: HousingProject = {
   locality: 'Anytown',
   province: 'BC',
   locationPids: '123456789',
-  latitude: 49.2827,
-  longitude: -123.1207,
+  latitude: '49.2827',
+  longitude: '-123.1207',
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: false,
   addedToAts: true,
@@ -86,8 +86,7 @@ const testProject: HousingProject = {
   applicationStatus: ApplicationStatus.COMPLETED,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   hasAppliedProvincialPermits: BasicResponse.NO,
-  projectLocation: '',
-  contacts: []
+  projectLocation: ''
 };
 
 const testProjects = [testProject];

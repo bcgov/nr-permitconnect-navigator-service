@@ -25,7 +25,7 @@ import { APPLICATION_STATUS_LIST } from '@/utils/constants/projectCommon';
 import { Action, BasicResponse, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { projectRouteNameKey, projectServiceKey, resourceKey } from '@/utils/keys';
-import { generalErrorHandler, toNumber } from '@/utils/utils';
+import { generalErrorHandler, toIsoRange, toNumber } from '@/utils/utils';
 
 import type { Ref } from 'vue';
 import type { ActivityContact, Pagination, Project, ProjectService, SearchProjectsResponse } from '@/types';
@@ -65,7 +65,7 @@ const emit = defineEmits(['submission:delete']);
 const authzStore = useAuthZStore();
 
 // State
-const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
+const dateRange: Ref<(Date | null)[] | null | undefined> = ref(undefined);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
   order: -1,
@@ -190,7 +190,7 @@ async function searchProjects() {
         loading.value = true;
         const res = await projectService?.value.searchProjects({
           applicationStatus: applicationStatus.value ? applicationStatus.value.statuses : undefined,
-          dateRange: dateRange.value?.map((date) => date.toISOString()),
+          dateRange: toIsoRange(dateRange.value),
           includeUser: true,
           searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
           skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,

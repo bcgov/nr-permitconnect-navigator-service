@@ -2,7 +2,7 @@ import { runSchema } from '../../helpers';
 import {
   appliedPermitsFormSchema,
   assignedToSchema,
-  atsClientIdSchema,
+  atsIdSchema,
   latitudeSchema,
   locationFormSchema,
   longitudeSchema,
@@ -59,25 +59,25 @@ describe('common validators', () => {
     });
   });
 
-  describe('atsClientIdSchema', () => {
+  describe('atsIdSchema', () => {
     it.each([
       [1, 1],
       [0, 0],
       ['3', 3],
       [null, null]
     ])('accepts %j and outputs %j', async (input, output) => {
-      expect(await runSchema(atsClientIdSchema('ATS'), input)).toEqual({ value: output, errors: {} });
+      expect(await runSchema(atsIdSchema('ATS'), input)).toEqual({ value: output, errors: {} });
     });
 
     it.each([
       [-1, 'ATS must be greater than or equal to 0'],
       [1.5, 'ATS must be an integer']
     ])('rejects %j', async (input, message) => {
-      expect((await runSchema(atsClientIdSchema('ATS'), input)).errors).toEqual({ '': message });
+      expect((await runSchema(atsIdSchema('ATS'), input)).errors).toEqual({ '': message });
     });
 
     it('rejects non-numeric strings', async () => {
-      expect(Object.keys((await runSchema(atsClientIdSchema('ATS'), 'x')).errors)).toEqual(['']);
+      expect(Object.keys((await runSchema(atsIdSchema('ATS'), 'x')).errors)).toEqual(['']);
     });
   });
 
@@ -152,6 +152,13 @@ describe('common validators', () => {
         streetAddress: 'Street address must be at most 255 characters'
       });
       expect((await runSchema(locationFormSchema, { ...coordinateLocation, streetAddress: long })).errors).toEqual({});
+    });
+
+    it('caps the location description at the API limit', async () => {
+      expect(
+        (await runSchema(locationFormSchema, { ...coordinateLocation, projectLocationDescription: 'a'.repeat(4001) }))
+          .errors
+      ).toEqual({ projectLocationDescription: 'Location description must be at most 4000 characters' });
     });
 
     it('casts numeric strings for coordinates', async () => {

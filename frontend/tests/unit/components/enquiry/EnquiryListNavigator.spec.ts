@@ -17,6 +17,7 @@ import {
 import type { Enquiry } from '@/types';
 import { enquiryRouteNameKey } from '@/utils/keys';
 import { ref } from 'vue';
+import { testEnquiryDefaults } from '../../../fixtures';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -48,6 +49,7 @@ const currentDate = new Date().toISOString();
 
 // Example Enquiry object
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: SubmissionType.GUIDANCE,

@@ -70,7 +70,7 @@ vi.mock('@/services/permitService', () => ({
   }
 }));
 
-const wrapperSettings = (initiative = Initiative.HOUSING) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING) => ({
   props: {
     draftId: undefined,
     projectId: '123'

@@ -31,7 +31,7 @@ export const BRING_FORWARD_ROUTE_MAP = {
     enquiry: RouteName.INT_HOUSING_ENQUIRY_NOTE
   }
 } satisfies Record<
-  Exclude<Initiative, Initiative.PCNS>,
+  Exclude<Initiative, typeof Initiative.PCNS>,
   {
     project: RouteName;
     enquiry: RouteName;

@@ -5,13 +5,10 @@ import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { PROJECT_LOCATION_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse } from '@/utils/enums/application';
 import { ProjectApplicant, ProjectLocation } from '@/utils/enums/projectCommon';
+import { coerceDate, coerceNumber, isBlank, isOneOf } from '@/utils/utils';
 import {
   addIssue,
-  coerceDate,
-  coerceNumber,
   evenWithIssues,
-  isBlank,
-  isOneOf,
   maxMessage,
   numberRangeSchema,
   oneOfMessage,
@@ -38,7 +35,8 @@ export const longitudeSchema = (label: string) => numberRangeSchema(label, -139,
 export const assignedToSchema = (message: string) =>
   z.unknown().refine((value) => typeof value === 'object' || value === '', message);
 
-export const atsClientIdSchema = (label: string) =>
+// An ATS client or enquiry number, held to the same rule as the API
+export const atsIdSchema = (label: string) =>
   z.preprocess(
     coerceNumber,
     z
@@ -60,7 +58,7 @@ export const locationFormSchema = z
     ltsaPidLookup: z.string().max(255, maxMessage('Parcel ID', 255)).nullish(),
     geomarkUrl: z.string().max(255, maxMessage('Geomark web service url', 255)).nullish(),
     geoJson: z.unknown().optional(),
-    projectLocationDescription: z.string().nullish()
+    projectLocationDescription: z.string().max(4000, maxMessage('Location description', 4000)).nullish()
   })
   .superRefine((location, ctx) => {
     if (location.projectLocation === ProjectLocation.STREET_ADDRESS) {
@@ -138,5 +136,22 @@ export function requireUnits(ctx: z.RefinementCtx, key: string, label: string, v
   if (!value) addIssue(ctx, key, requiredMessage(label));
   else if (!isOneOf(NUM_RESIDENTIAL_UNITS_LIST, value)) {
     addIssue(ctx, key, oneOfMessage(label, NUM_RESIDENTIAL_UNITS_LIST));
+  }
+}
+
+// Housing intake and navigator: a financial supporter answered Yes needs its description
+export function requireFinanceDescriptions(
+  ctx: z.RefinementCtx,
+  value: Record<string, unknown>,
+  labels: { indigenous: string; nonProfit: string; housingCoop: string }
+) {
+  if (value.financiallySupportedIndigenous === BasicResponse.YES) {
+    requireText(ctx, 'indigenousDescription', labels.indigenous, value.indigenousDescription);
+  }
+  if (value.financiallySupportedNonProfit === BasicResponse.YES) {
+    requireText(ctx, 'nonProfitDescription', labels.nonProfit, value.nonProfitDescription);
+  }
+  if (value.financiallySupportedHousingCoop === BasicResponse.YES) {
+    requireText(ctx, 'housingCoopDescription', labels.housingCoop, value.housingCoopDescription);
   }
 }

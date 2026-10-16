@@ -11,14 +11,15 @@ import ATSInfo from '@/components/ats/ATSInfo.vue';
 import { Button, Message, Panel, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, enquiryService, userService } from '@/services';
 import { useEnquiryStore } from '@/store';
-import { ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
+import { APPLICATION_STATUS_LIST, ATS_MANAGING_REGION, ENQUIRY_TYPE_LIST } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ActivityContactRole, ApplicationStatus } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey } from '@/utils/keys';
-import { scrollToFirstError, setEmptyStringsToNull } from '@/utils/utils';
+import { scrollToFirstError, setEmptyStringsToNull, toOneOf } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 import { createEnquiryFormSchema } from '@/validators/enquiryFormSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { GenericObject } from 'vee-validate';
@@ -158,23 +159,15 @@ async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
 
   return {
     relatedActivityId: enquiry?.relatedActivityId,
-    enquiryDescription: enquiry?.enquiryDescription,
-    contact: {
-      contactId: primaryContact.value?.contactId,
-      firstName: primaryContact.value?.firstName,
-      lastName: primaryContact.value?.lastName,
-      phoneNumber: primaryContact.value?.phoneNumber,
-      email: primaryContact.value?.email,
-      contactApplicantRelationship: primaryContact.value?.contactApplicantRelationship,
-      contactPreference: primaryContact.value?.contactPreference,
-      userId: primaryContact.value?.userId
-    },
+    enquiryDescription: enquiry?.enquiryDescription ?? undefined,
+    contact: toContactFormValues(primaryContact.value),
 
     submissionState: {
       assignedUser: assigneeOptions[0] ?? null,
-      enquiryStatus: enquiry?.enquiryStatus,
+      // Unknown stored values are dropped, so the form asks for them again
+      enquiryStatus: toOneOf(APPLICATION_STATUS_LIST, enquiry?.enquiryStatus),
       submittedMethod: enquiry?.submittedMethod,
-      submissionType: enquiry?.submissionType
+      submissionType: toOneOf(ENQUIRY_TYPE_LIST, enquiry?.submissionType)
     },
 
     atsInfo: {

@@ -12,29 +12,24 @@ import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import {
   ApplicationStatus,
-  ContactPreference,
   EnquirySubmittedMethod,
   ProjectApplicant,
-  ProjectRelationship,
   SubmissionType
 } from '@/utils/enums/projectCommon';
+import {
+  testAuditFields,
+  testEnquiryDefaults,
+  testHousingProjectDefaults,
+  testPermitDefaults
+} from '../../../fixtures';
 
-import type { Contact, Enquiry, HousingProject, Permit, PermitType } from '@/types';
+import type { Enquiry, HousingProject, Permit, PermitType } from '@/types';
 
 let mockRoute = {};
 const currentDate = new Date().toISOString();
 
-const exampleContact: Contact = {
-  contactId: 'contact123',
-  firstName: 'John',
-  lastName: 'Doe',
-  email: 'john.doe@example.com',
-  phoneNumber: '123-456-7890',
-  contactApplicantRelationship: ProjectRelationship.OWNER,
-  contactPreference: ContactPreference.EITHER
-};
-
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: '789',
   activityId: '789',
   submissionType: SubmissionType.ASSISTANCE,
@@ -52,6 +47,7 @@ const testEnquiry: Enquiry = {
 };
 
 const testProject: HousingProject = {
+  ...testHousingProjectDefaults,
   activityId: 'activity456',
   housingProjectId: '456',
   projectId: '456',
@@ -59,7 +55,6 @@ const testProject: HousingProject = {
   submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
-  hasRelatedEnquiry: true,
   companyNameRegistered: 'Example Company',
   companyIdRegistered: 'FM0281610',
   consentToFeedback: true,
@@ -68,7 +63,6 @@ const testProject: HousingProject = {
   projectLocationDescription: 'Test location description.',
   singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
   multiFamilyUnits: NumResidentialUnits.UNSURE,
-  multiPermitsNeeded: 'Yes',
   otherUnitsDescription: 'Other units description.',
   otherUnits: NumResidentialUnits.UNSURE,
   hasRentalUnits: BasicResponse.YES,
@@ -84,8 +78,8 @@ const testProject: HousingProject = {
   locality: 'Anytown',
   province: 'BC',
   locationPids: '123456789',
-  latitude: 49.2827,
-  longitude: -123.1207,
+  latitude: '49.2827',
+  longitude: '-123.1207',
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: false,
   addedToAts: true,
@@ -99,7 +93,6 @@ const testProject: HousingProject = {
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: '',
   hasAppliedProvincialPermits: BasicResponse.NO,
-  contacts: [exampleContact],
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
@@ -107,22 +100,24 @@ const testProject: HousingProject = {
 } as HousingProject;
 
 const testPermitType: PermitType = {
+  ...testAuditFields,
   permitTypeId: 1,
   agency: 'Water, Land and Resource Stewardship',
   division: 'Forest Resiliency and Archaeology',
   branch: 'Archaeology',
   businessDomain: 'Archaeology',
   type: 'Alteration',
-  family: undefined,
+  family: null,
   name: 'Archaeology Alteration Permit',
-  nameSubtype: undefined,
+  nameSubtype: null,
   acronym: 'SAP',
-  trackedInATS: false,
-  sourceSystem: 'Archaeology Permit Tracking System',
-  sourceSystemAcronym: 'APTS'
+  trackedInAts: false,
+  sourceSystem: 'ITSM-5285',
+  infoUrl: null
 };
 
 const testPermit: Permit = {
+  ...testPermitDefaults,
   permitId: '123',
   activityId: 'activityUUID',
   needed: 'yes',
@@ -238,7 +233,7 @@ describe('Breadcrumb.vue', () => {
 
     expect(links.length).toBe(1);
     expect(currentSpans.length).toBeGreaterThanOrEqual(1);
-    expect(links[0]!.text()).toBe(testProject.projectName.substring(0, 10) + '...');
+    expect(links[0]!.text()).toBe(testProject.projectName!.substring(0, 10) + '...');
     const tooltipEl = links[0]!.find('[title]');
     expect(tooltipEl.exists()).toBe(true);
     expect(tooltipEl.attributes('title')).toBe(testProject.projectName);

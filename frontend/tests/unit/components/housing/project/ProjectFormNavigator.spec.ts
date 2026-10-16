@@ -17,8 +17,10 @@ import { updateLiveNameKey } from '@/utils/keys';
 
 import { mockAxiosResponse } from '../../../../helpers';
 import { mountComponent } from '../../../../mountComponent';
+import { testAuditFields, testContactDefaults, testHousingProjectDefaults } from '../../../../fixtures';
 
-import type { AtsClientResource, AtsEnquiryResource, Group, HousingProject, User } from '@/types';
+import type { AtsClientResource, AtsEnquiryResource, DeepPartial, Group, HousingProject, User } from '@/types';
+import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
 
 // Mocks
 
@@ -33,6 +35,7 @@ const patchProjectSpy = vi.spyOn(housingProjectService, 'patchProject');
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   firstName: 'John',
   lastName: 'Doe',
@@ -41,6 +44,7 @@ const exampleContact = {
 };
 
 const testProject: HousingProject = {
+  ...testHousingProjectDefaults,
   activityId: 'activity456',
   housingProjectId: 'project789',
   projectId: 'project789',
@@ -48,7 +52,6 @@ const testProject: HousingProject = {
   submissionType: SubmissionType.GUIDANCE,
   submittedAt: '2023-01-01T12:00:00Z',
   relatedEnquiries: 'enquiry123',
-  hasRelatedEnquiry: true,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Example Company',
   consentToFeedback: true,
@@ -57,7 +60,6 @@ const testProject: HousingProject = {
   projectLocationDescription: 'Test location description.',
   singleFamilyUnits: NumResidentialUnits.ONE_TO_NINE,
   multiFamilyUnits: NumResidentialUnits.UNSURE,
-  multiPermitsNeeded: 'Yes',
   otherUnitsDescription: 'Other units description.',
   otherUnits: NumResidentialUnits.UNSURE,
   hasRentalUnits: BasicResponse.YES,
@@ -73,8 +75,8 @@ const testProject: HousingProject = {
   locality: 'Anytown',
   province: 'BC',
   locationPids: '123456789',
-  latitude: 49.2827,
-  longitude: -123.1207,
+  latitude: '49.2827',
+  longitude: '-123.1207',
   geomarkUrl: 'http://example.com/geomark',
   naturalDisaster: false,
   addedToAts: true,
@@ -88,7 +90,6 @@ const testProject: HousingProject = {
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   hasAppliedProvincialPermits: BasicResponse.NO,
   projectLocation: '',
-  contacts: [exampleContact],
   user: {
     active: true,
     email: 'john.doe@example.com',
@@ -97,10 +98,8 @@ const testProject: HousingProject = {
     idp: 'idir',
     lastName: 'Doe',
     groups: [{ groupId: 1, name: GroupName.DEVELOPER } as Group],
-    status: 'active',
     userId: 'user123',
     sub: 'sub-123',
-    elevatedRights: true,
     bceidBusinessName: '',
     createdBy: 'testCreatedBy',
     createdAt: currentDate,
@@ -210,6 +209,19 @@ describe('ProjectFormNavigator', () => {
       expect(wrapper.isVisible()).toBe(true);
       expect(getPidsSpy).toHaveBeenCalledExactlyOnceWith({ projectId: testProject.housingProjectId });
     });
+
+    it('seeds decimals as numbers and drops unknown options', async () => {
+      const { wrapper } = mountProjectFormNavigator({
+        project: { ...testProject, latitude: '49.5', longitude: null, singleFamilyUnits: '7', hasRentalUnits: null }
+      });
+      await flushPromises();
+
+      const values = (
+        wrapper.vm as unknown as { formRef: { getValues: () => DeepPartial<FormSchemaType> } }
+      ).formRef.getValues();
+      expect(values.location).toMatchObject({ latitude: 49.5, longitude: null });
+      expect(values.units).toMatchObject({ singleFamilyUnits: undefined, hasRentalUnits: undefined });
+    });
   });
 
   describe('form submission', () => {
@@ -314,6 +326,7 @@ describe('ProjectFormNavigator', () => {
       const store = useProjectStore();
       store.activityContacts = [
         {
+          ...testAuditFields,
           contactId: 'new-contact-999',
           activityId: 'activity456',
           role: ActivityContactRole.PRIMARY,

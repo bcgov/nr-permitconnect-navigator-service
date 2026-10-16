@@ -24,7 +24,7 @@ import { toTypedSchema } from '@/utils/zodSchema';
 import { createAuthorizationFormSchema } from '@/validators/authorizationFormSchema';
 
 import type { Ref } from 'vue';
-import type { ApiInitiative, AuditFields, Permit, PermitTracking, RequestBody, SourceSystemKind, User } from '@/types';
+import type { ApiInitiative, Permit, PermitTracking, RequestBody, SourceSystemKind, User } from '@/types';
 import type { FormSchemaType as AuthorizationFormSchemaType } from '@/validators/authorizationFormSchema';
 
 // Props
@@ -52,7 +52,8 @@ const { isPeachEnabled } = storeToRefs(featureStore);
 const { getProject } = storeToRefs(projectStore);
 
 // Types
-type FormSchemaType = AuthorizationFormSchemaType & AuditFields;
+type FormSchemaType = AuthorizationFormSchemaType &
+  Partial<Pick<Permit, 'createdAt' | 'createdBy' | 'updatedAt' | 'updatedBy'>>;
 
 // State
 const disableFormNavigationGuard: Ref<boolean> = ref(false);
@@ -88,10 +89,10 @@ const sortForDisplayOrder = (a: SourceSystemKind, b: SourceSystemKind) => {
     const srcSysCompare = sourceA.localeCompare(sourceB, locale.value, { sensitivity: 'base' });
     if (srcSysCompare !== 0) return srcSysCompare;
   }
-  return a.description.localeCompare(b.description, locale.value, { sensitivity: 'base' });
+  return (a.description ?? '').localeCompare(b.description ?? '', locale.value, { sensitivity: 'base' });
 };
 
-function checkIfPeachIntegratedAuthType(sourceSystem: string): boolean {
+function checkIfPeachIntegratedAuthType(sourceSystem: string | null): boolean {
   const sourceSystemKind = sourceSystemKinds.value.find((ssk) => ssk.integrated && ssk.sourceSystem === sourceSystem);
   return !!sourceSystemKind;
 }
@@ -378,7 +379,7 @@ watch(() => isPeachIntegrated.value, handlePeachIntegrationChange, { immediate: 
     <AuthorizationCardIntake
       :editable="editable"
       :source-system-kinds="
-        sourceSystemKinds.filter((ssk) => ssk.permitTypeIds.includes(values?.authorizationType?.permitTypeId))
+        sourceSystemKinds.filter((ssk) => ssk.permitTypeIds?.includes(values?.authorizationType?.permitTypeId))
       "
       class="mt-6"
       @update:uncheck-shown-to-proponent="

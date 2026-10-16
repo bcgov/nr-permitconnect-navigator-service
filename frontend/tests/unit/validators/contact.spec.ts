@@ -1,5 +1,5 @@
 import { runSchema } from '../../helpers';
-import { contactFormSchema } from '@/validators/contact';
+import { contactFormSchema, toContactFormValues } from '@/validators/contact';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 // Mocks
@@ -59,5 +59,47 @@ describe('contactFormSchema', () => {
       firstName: 'First name must be at most 255 characters',
       lastName: 'Last name must be at most 255 characters'
     });
+  });
+});
+
+describe('toContactFormValues', () => {
+  it('unsets null fields and drops unknown options', () => {
+    expect(
+      toContactFormValues({
+        contactId: 'c1',
+        userId: null,
+        firstName: 'First',
+        lastName: null,
+        phoneNumber: null,
+        email: 'a@b.co',
+        contactApplicantRelationship: 'Landlord',
+        contactPreference: ContactPreference.EMAIL
+      })
+    ).toEqual({
+      contactId: 'c1',
+      userId: undefined,
+      firstName: 'First',
+      lastName: undefined,
+      phoneNumber: undefined,
+      email: 'a@b.co',
+      contactApplicantRelationship: undefined,
+      contactPreference: ContactPreference.EMAIL
+    });
+  });
+
+  it('keeps a known relationship and handles no contact', () => {
+    expect(
+      toContactFormValues({
+        contactId: 'c1',
+        userId: 'u1',
+        firstName: null,
+        lastName: null,
+        phoneNumber: null,
+        email: null,
+        contactApplicantRelationship: ProjectRelationship.OWNER,
+        contactPreference: null
+      }).contactApplicantRelationship
+    ).toBe(ProjectRelationship.OWNER);
+    expect(toContactFormValues(undefined).contactId).toBeUndefined();
   });
 });

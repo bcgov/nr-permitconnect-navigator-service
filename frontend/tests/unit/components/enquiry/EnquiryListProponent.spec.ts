@@ -11,6 +11,7 @@ import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/uti
 import type { Enquiry } from '@/types';
 import { enquiryRouteNameKey, navigationPermissionKey } from '@/utils/keys';
 import { ref } from 'vue';
+import { testEnquiryDefaults } from '../../../fixtures';
 
 // Mock dependencies
 vi.mock('vue-i18n', () => ({
@@ -34,6 +35,7 @@ const currentDate = new Date().toISOString();
 
 // Example Enquiry object
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: SubmissionType.GUIDANCE,

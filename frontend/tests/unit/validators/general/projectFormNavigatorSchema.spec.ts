@@ -58,8 +58,10 @@ describe('general createProjectFormNavigatorSchema', () => {
       'location.naturalDisaster': 'Affected by natural disaster is a required field',
       'projectDescription.description': 'Additional information about project is a required field',
       'submissionState.applicationStatus': 'Project state is a required field',
+      'submissionState.area': 'Area is a required field',
       'submissionState.assignedUser': 'Assigned to must be empty or a selected user',
       'submissionState.queuePriority': 'Priority is a required field',
+      'submissionState.region': 'Region is a required field',
       'submissionState.submissionType': 'Submission type is a required field',
       'projectAreasUpdated.aaiUpdated': 'Authorization and Approvals Insight (AAI) updated is a required field'
     });

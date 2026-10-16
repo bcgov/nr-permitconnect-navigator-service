@@ -122,7 +122,7 @@ vi.mock('@/services/roadmapService', () => ({
 }));
 
 // Default component mounting wrapper settings
-const wrapperSettings = (initiative = Initiative.HOUSING) => ({
+const wrapperSettings = (initiative: Initiative = Initiative.HOUSING) => ({
   props: {
     projectId: '123'
   },

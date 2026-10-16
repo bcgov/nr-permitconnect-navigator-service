@@ -6,10 +6,11 @@ import { Button, DatePicker, Select } from '@/lib/primevue';
 import { reportingService, userService } from '@/services';
 import { Action, GroupName, Initiative, Resource } from '@/utils/enums/application';
 import { projectServiceKey } from '@/utils/keys';
+import { omit } from '@/utils/utils';
 
 import { mountComponent } from '../../../mountComponent';
 
-import type { GetProjectPermitDataResponse, ProjectStatistics, User } from '@/types';
+import type { ProjectStatistics, Schema, User } from '@/types';
 
 // Mocks
 
@@ -47,9 +48,6 @@ const mockStatistics: ProjectStatistics = {
   total_submissions_between: 30,
   total_submissions_monthyear: 40,
   total_submissions_assignedto: 15,
-  intake_assigned: 3,
-  intake_completed: 1,
-  intake_submitted: 2,
   state_new: 10,
   state_inprogress: 25,
   state_delayed: 5,
@@ -68,7 +66,7 @@ const mockStatistics: ProjectStatistics = {
   inapplicable: 15
 };
 
-const mockPermitDataRow: GetProjectPermitDataResponse = {
+const mockPermitDataRow: Schema<'HousingReportingPermitData'> = {
   submitted_date: '2026-01-15T12:00:00Z',
   decision_date: '2026-02-01T12:00:00Z',
   status_last_verified: '2026-02-10T12:00:00Z',
@@ -76,7 +74,7 @@ const mockPermitDataRow: GetProjectPermitDataResponse = {
   notes: null as unknown as string,
   unassigned: undefined as unknown as string,
   permit_count: 5 as unknown as string
-} as unknown as GetProjectPermitDataResponse;
+} as unknown as Schema<'HousingReportingPermitData'>;
 
 const testUser: User = {
   userId: 'a0000000-0000-4000-8000-000000000000',
@@ -161,10 +159,8 @@ describe('SubmissionStatistics.vue', () => {
       expect(wrapper.text()).toContain('0%');
     });
 
-    it('renders housing-specific rows when initiative is HOUSING', () => {
-      const { wrapper } = mountSubmissionStatistics({
-        piniaState: { app: { initiative: Initiative.HOUSING } }
-      });
+    it('renders the financially supported rows for housing statistics', () => {
+      const { wrapper } = mountSubmissionStatistics();
 
       expect(wrapper.text()).toContain('BC Housing');
       expect(wrapper.text()).toContain('Indigenous');
@@ -172,8 +168,15 @@ describe('SubmissionStatistics.vue', () => {
       expect(wrapper.text()).toContain('Co-operative');
     });
 
-    it('omits housing-specific rows when initiative is not HOUSING', () => {
+    it('omits the financially supported rows for statistics without them', () => {
+      const generalStatistics = omit(mockStatistics, [
+        'supported_bc',
+        'supported_indigenous',
+        'supported_non_profit',
+        'supported_housing_coop'
+      ]);
       const { wrapper } = mountSubmissionStatistics({
+        props: { statistics: generalStatistics },
         piniaState: { app: { initiative: Initiative.GENERAL } }
       });
 

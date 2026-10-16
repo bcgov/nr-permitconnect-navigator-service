@@ -10,6 +10,7 @@ import { contactService, housingProjectService, enquiryService, userService } fr
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { contactRouteNameKey, projectServiceKey } from '@/utils/keys';
 import { ref } from 'vue';
+import { testContactDefaults } from '../../../fixtures';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({
@@ -25,6 +26,7 @@ vi.mock('vue-router', () => ({
 }));
 
 const testContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'John',

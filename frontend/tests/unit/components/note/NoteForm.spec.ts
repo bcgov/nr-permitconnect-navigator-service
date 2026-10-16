@@ -43,7 +43,9 @@ const TEST_NOTE: Note = {
   createdBy: 'user',
   createdAt: new Date().toISOString(),
   updatedBy: 'user',
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
+  deletedBy: null,
+  deletedAt: null
 };
 
 const TEST_NOTE_HISTORY: NoteHistory = {
@@ -61,7 +63,9 @@ const TEST_NOTE_HISTORY: NoteHistory = {
   createdBy: 'user',
   createdAt: new Date().toISOString(),
   updatedBy: 'user',
-  updatedAt: new Date().toISOString()
+  updatedAt: new Date().toISOString(),
+  deletedBy: null,
+  deletedAt: null
 };
 
 // Mount

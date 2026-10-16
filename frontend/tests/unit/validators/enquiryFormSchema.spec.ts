@@ -75,6 +75,16 @@ describe('createEnquiryFormSchema', () => {
     });
   });
 
+  // Matches the navigator panel and the API, which both reject these
+  it.each([
+    [-1, 'ATS enquiry # must be greater than or equal to 0'],
+    [1.5, 'ATS enquiry # must be an integer']
+  ])('rejects an ATS enquiry # of %j', async (atsEnquiryId, message) => {
+    expect((await runSchema(schema, { ...testForm, atsInfo: { atsClientId: null, atsEnquiryId } })).errors).toEqual({
+      'atsInfo.atsEnquiryId': message
+    });
+  });
+
   it('casts numeric ATS ids', async () => {
     expect(
       (await runSchema(schema, { ...testForm, atsInfo: { atsClientId: '12', atsEnquiryId: '34' } })).value

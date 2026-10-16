@@ -4,12 +4,14 @@ import PrimeVue from 'primevue/config';
 
 import UpdateContactModal from '@/components/contact/UpdateContactModal.vue';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
+import { testContactDefaults } from '../../../fixtures';
 
 vi.mock('vue-i18n', () => ({
   useI18n: () => ({ t: vi.fn() })
 }));
 
 const testContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'Jane',

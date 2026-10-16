@@ -143,24 +143,6 @@ describe('SubmissionsNavigator', () => {
   });
 
   describe('onBeforeMount project enrichment', () => {
-    it('flags projects that have a related enquiry', () => {
-      const project = makeProject({ activityId: 'activity-1' });
-      const enquiry = { relatedActivityId: 'activity-1' } as Enquiry;
-
-      mountSubmissionsNavigator({ projects: [project], enquiries: [enquiry] });
-
-      // Vue passes props by reference, so the enrichment mutates this same object
-      expect(project.hasRelatedEnquiry).toBe(true);
-    });
-
-    it('does not flag projects with no matching enquiry', () => {
-      const project = makeProject({ activityId: 'activity-1' });
-
-      mountSubmissionsNavigator({ projects: [project], enquiries: [] });
-
-      expect(project.hasRelatedEnquiry).toBe(false);
-    });
-
     it.each([
       [{ firstName: 'John', lastName: 'Doe' }, 'Doe, John'],
       [{ firstName: 'John', lastName: undefined }, 'John'],

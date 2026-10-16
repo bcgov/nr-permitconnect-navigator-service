@@ -1,6 +1,8 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
+import type { ResponseBody } from '@/types';
+
 /**
  * Base route builder and endpoint definitions for this resource.
  * Routes should be referenced through this object rather than
@@ -15,12 +17,14 @@ const mapRoutes = {
 /**
  * Get the PIDs for a project.
  * @param req - The request payload containing the project ID.
- * @returns A promise resolving to the project PIDs in CSV format.
+ * @returns A promise resolving to the project PIDs in CSV format, or undefined when there are none.
  */
-export function getPids(req: { projectId: string }): Promise<string> {
+export function getPids(req: {
+  projectId: string;
+}): Promise<ResponseBody<'getGeneralProjectPids' | 'getHousingProjectPids'>> {
   const { projectId } = req;
 
-  return api.get<string>(mapRoutes.pids(projectId));
+  return api.get<ResponseBody<'getGeneralProjectPids' | 'getHousingProjectPids'>>(mapRoutes.pids(projectId));
 }
 
 /**

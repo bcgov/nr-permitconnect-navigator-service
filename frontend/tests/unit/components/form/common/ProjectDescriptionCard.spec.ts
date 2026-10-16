@@ -69,12 +69,13 @@ describe('ProjectDescriptionCard', () => {
         expect(asterisk).toBeTruthy();
       });
 
-      it('displays an asterisk for ELECTRIFICATION projects with type OTHER', () => {
+      it('is required for any ELECTRIFICATION project type', () => {
         const { wrapper } = mountProjectDescriptionCard({
           initiative: Initiative.ELECTRIFICATION,
-          initialProjectType: ElectrificationProjectType.OTHER
+          initialProjectType: ElectrificationProjectType.IPP_SOLAR
         });
 
+        expect(wrapper.find('h6').text()).toBe('Help us learn more about your project');
         expect(wrapper.findComponent(TextArea).props('required')).toBe(true);
         expect(wrapper.find('label[for="basic.projectDescription"]').text()).toContain('*');
       });

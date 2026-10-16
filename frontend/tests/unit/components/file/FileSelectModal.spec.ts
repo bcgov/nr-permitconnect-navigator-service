@@ -30,6 +30,8 @@ const testDocument: Document[] = [
     createdAt: currentDate,
     updatedBy: 'testUpdatedAt',
     updatedAt: currentDate,
+    deletedBy: null,
+    deletedAt: null,
     documentId: 'documentUUID', // Primary Key
     activityId: 'activityUUID',
     filename: 'test file name',

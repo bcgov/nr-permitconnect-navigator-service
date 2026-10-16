@@ -27,17 +27,20 @@ import { createProjectIntakeSchema } from '@/validators/general/projectIntakeFor
 import { Button, Step, StepList, Stepper, StepPanel, StepPanels, useConfirm, useToast } from '@/lib/primevue';
 import { generalProjectService } from '@/services';
 import { useContactStore, useFormStore, useProjectStore } from '@/store';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, GeneralProject, RequestBody, OrgBookOption, Permit, PermitTracking } from '@/types';
+import type { DeepPartial, Draft, GeneralProject, RequestBody, OrgBookOption, Permit } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 // Props
@@ -83,15 +86,7 @@ function confirmSubmit(data: GenericObject) {
 function loadDefaultValues() {
   const userContact = useContactStore().getContact;
   initialFormValues.value = {
-    contacts: {
-      contactId: userContact?.contactId,
-      firstName: userContact?.firstName,
-      lastName: userContact?.lastName,
-      email: userContact?.email,
-      phoneNumber: userContact?.phoneNumber,
-      contactApplicantRelationship: userContact?.contactApplicantRelationship,
-      contactPreference: userContact?.contactPreference
-    }
+    contacts: toContactFormValues(userContact)
   };
 }
 
@@ -131,23 +126,16 @@ function loadProjectValues() {
 
     initialFormValues.value = {
       basic: {
-        projectApplicantType: project.projectApplicantType,
+        // Unknown stored values are dropped, so the form asks for them again
+        projectApplicantType: toOneOf(PROJECT_APPLICANT_LIST, project.projectApplicantType),
         isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-        registeredName: project.companyNameRegistered,
-        registeredId: project.companyIdRegistered,
-        projectName: project.projectName,
-        projectNumber: project.projectNumber,
-        projectDescription: project.projectDescription
+        registeredName: project.companyNameRegistered ?? undefined,
+        registeredId: project.companyIdRegistered ?? undefined,
+        projectName: project.projectName ?? undefined,
+        projectNumber: project.projectNumber ?? undefined,
+        projectDescription: project.projectDescription ?? undefined
       },
-      contacts: {
-        firstName: primaryContact?.firstName,
-        lastName: primaryContact?.lastName,
-        phoneNumber: primaryContact?.phoneNumber,
-        email: primaryContact?.email,
-        contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-        contactPreference: primaryContact?.contactPreference,
-        contactId: primaryContact?.contactId
-      },
+      contacts: toContactFormValues(primaryContact),
       location: {
         naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
         // Stored values come from this form, so they are one of the location types
@@ -155,8 +143,9 @@ function loadProjectValues() {
         streetAddress: project.streetAddress,
         locality: project.locality,
         province: project.province,
-        latitude: project.latitude,
-        longitude: project.longitude,
+        // The API sends decimals as strings
+        latitude: project.latitude === null ? null : Number(project.latitude),
+        longitude: project.longitude === null ? null : Number(project.longitude),
         ltsaPidLookup: project.locationPids,
         geomarkUrl: project.geomarkUrl,
         projectLocationDescription: project.projectLocationDescription,
@@ -169,7 +158,7 @@ function loadProjectValues() {
             ...x,
             submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
           })),
-        hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ?? undefined,
+        hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
         investigatePermits: useProjectStore().getPermits.filter(
           (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
         )
@@ -249,7 +238,7 @@ async function onSubmit(data: FormSchemaType) {
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({
           submittedDate: x.submittedDate?.toISOString(),
-          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId }],
           permitTypeId: x.permitTypeId
         })),
         hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,

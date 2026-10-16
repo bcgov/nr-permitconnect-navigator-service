@@ -348,17 +348,14 @@ describe('navigator validators', () => {
     const schemaFor = (initiative: Initiative) =>
       createProjectDescriptionPanelSchema(options(initiative)).projectDescription;
 
-    it.each([Initiative.GENERAL, Initiative.HOUSING])('%s requires a description', async (initiative) => {
-      expect((await runSchema(schemaFor(initiative), { description: '  ' })).errors).toEqual({
-        description: 'Additional information about project is a required field'
-      });
-    });
-
-    // Known bug: when('project.projectType') resolves inside projectDescription, not the form root,
-    // so the OTHER branch can never trigger
-    it('ELECTRIFICATION never requires a description', async () => {
-      expect((await runSchema(schemaFor(Initiative.ELECTRIFICATION), { description: '' })).errors).toEqual({});
-    });
+    it.each([Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING])(
+      '%s requires a description',
+      async (initiative) => {
+        expect((await runSchema(schemaFor(initiative), { description: '  ' })).errors).toEqual({
+          description: 'Additional information about project is a required field'
+        });
+      }
+    );
   });
 
   describe('createResidentialUnitsSchema', () => {
@@ -488,17 +485,24 @@ describe('navigator validators', () => {
   describe('createSubmissionStatePanelSchema', () => {
     const schemaFor = (initiative: Initiative) => createSubmissionStatePanelSchema(options(initiative)).submissionState;
 
-    it.each([Initiative.GENERAL, Initiative.ELECTRIFICATION, Initiative.HOUSING])(
-      '%s requires the common fields',
-      async (initiative) => {
-        expect((await runSchema(schemaFor(initiative), {})).errors).toEqual({
-          applicationStatus: 'Project state is a required field',
-          assignedUser: 'Assigned to must be empty or a selected user',
-          queuePriority: 'Priority is a required field',
-          submissionType: 'Submission type is a required field'
-        });
-      }
-    );
+    const commonErrors = {
+      applicationStatus: 'Project state is a required field',
+      assignedUser: 'Assigned to must be empty or a selected user',
+      queuePriority: 'Priority is a required field',
+      submissionType: 'Submission type is a required field'
+    };
+
+    it.each([Initiative.ELECTRIFICATION, Initiative.HOUSING])('%s requires the common fields', async (initiative) => {
+      expect((await runSchema(schemaFor(initiative), {})).errors).toEqual(commonErrors);
+    });
+
+    it('GENERAL also requires area and region', async () => {
+      expect((await runSchema(schemaFor(Initiative.GENERAL), {})).errors).toEqual({
+        ...commonErrors,
+        area: 'Area is a required field',
+        region: 'Region is a required field'
+      });
+    });
 
     it('GENERAL rejects malformed values including area and region', async () => {
       expect(

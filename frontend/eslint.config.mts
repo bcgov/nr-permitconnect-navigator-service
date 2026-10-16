@@ -56,6 +56,7 @@ export default defineConfig([
     },
     rules: {
       ...vitest.configs.recommended.rules,
+      'vitest/expect-expect': ['error', { assertFunctionNames: ['expect', 'assert', 'expectTypeOf'] }],
       'vitest/no-focused-tests': ['warn']
     }
   },

@@ -11,12 +11,10 @@ import {
   SUBMISSION_TYPE_LIST
 } from '@/utils/constants/projectCommon';
 import { BasicResponse, Initiative, Regex } from '@/utils/enums/application';
+import { coerceNumber, isBlank, isOneOf } from '@/utils/utils';
 import {
-  coerceNumber,
   evenWithIssues,
   formSection,
-  isBlank,
-  isOneOf,
   maxMessage,
   oneOfMessage,
   blankOrOneOfSchema,
@@ -24,14 +22,14 @@ import {
   requiredMessage,
   requiredOneOf,
   requiredString,
-  requiredTextSchema,
-  requireText
+  requiredTextSchema
 } from '@/utils/zodSchema';
 import {
   assignedToSchema,
-  atsClientIdSchema,
+  atsIdSchema,
   latitudeSchema,
   longitudeSchema,
+  requireFinanceDescriptions,
   requireUnits,
   unitsSchema
 } from '@/validators/common';
@@ -149,19 +147,10 @@ export function createLocationDescriptionPanelSchema({ t }: CreateSchemaOptions)
   };
 }
 
-export function createProjectDescriptionPanelSchema({
-  initiative,
-  t
-}: Required<Pick<CreateSchemaOptions, 'initiative' | 't'>>) {
+export function createProjectDescriptionPanelSchema({ t }: CreateSchemaOptions) {
   return {
     projectDescription: formSection(
-      z.looseObject({
-        // Known bug: never required for electrification, even for the OTHER project type
-        description:
-          initiative === Initiative.ELECTRIFICATION
-            ? z.string().nullish()
-            : requiredTextSchema(t('validators.projectDescription.description'))
-      })
+      z.looseObject({ description: requiredTextSchema(t('validators.projectDescription.description')) })
     )
   };
 }
@@ -180,7 +169,7 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
     submissionState: formSection(
       z.looseObject({
         applicationStatus: requiredOneOf(t('validators.submissionState.applicationStatus'), APPLICATION_STATUS_LIST),
-        area: isGeneral ? z.enum(AREA_LIST, 'Area is a required field').optional() : z.string().nullish(),
+        area: isGeneral ? z.enum(AREA_LIST, 'Area is a required field') : z.string().nullish(),
         assignedUser: assignedToSchema(t('validators.submissionState.assignedToMsg')),
         queuePriority: z.preprocess(
           coerceNumber,
@@ -194,7 +183,7 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
             .int(`${queuePriorityLabel} must be an integer`)
             .refine((value) => isOneOf(QUEUE_PRIORITY, value), oneOfMessage(queuePriorityLabel, QUEUE_PRIORITY))
         ),
-        region: isGeneral ? z.enum(REGION_LIST, 'Region is a required field').optional() : z.string().nullish(),
+        region: isGeneral ? z.enum(REGION_LIST, 'Region is a required field') : z.string().nullish(),
         submissionType: requiredOneOf(t('validators.submissionState.submissionType'), SUBMISSION_TYPE_LIST)
       })
     )
@@ -217,8 +206,8 @@ export function createAtsInfoPanelSchema({
   return {
     atsInfo: formSection(
       z.looseObject({
-        atsClientId: atsClientIdSchema(t('validators.atsClientId.label')),
-        atsEnquiryId: atsClientIdSchema('ATS enquiry #'),
+        atsClientId: atsIdSchema(t('validators.atsClientId.label')),
+        atsEnquiryId: atsIdSchema('ATS enquiry #'),
         businessArea:
           initiative === Initiative.GENERAL
             ? z
@@ -299,27 +288,15 @@ export function createFinanciallySupportedPanelSchema({ t }: CreateSchemaOptions
           financiallySupportedHousingCoop: supported('financeFinanciallySupportedHousingCoop'),
           housingCoopDescription: z.string().nullish()
         })
-        .superRefine((value, ctx) => {
-          if (value.financiallySupportedIndigenous === BasicResponse.YES) {
-            requireText(
-              ctx,
-              'indigenousDescription',
-              label('financeIndigenousDescription'),
-              value.indigenousDescription
-            );
-          }
-          if (value.financiallySupportedNonProfit === BasicResponse.YES) {
-            requireText(ctx, 'nonProfitDescription', label('financeNonProfitDescription'), value.nonProfitDescription);
-          }
-          if (value.financiallySupportedHousingCoop === BasicResponse.YES) {
-            requireText(
-              ctx,
-              'housingCoopDescription',
-              label('financeHousingCoopDescription'),
-              value.housingCoopDescription
-            );
-          }
-        }, evenWithIssues)
+        .superRefine(
+          (value, ctx) =>
+            requireFinanceDescriptions(ctx, value, {
+              indigenous: label('financeIndigenousDescription'),
+              nonProfit: label('financeNonProfitDescription'),
+              housingCoop: label('financeHousingCoopDescription')
+            }),
+          evenWithIssues
+        )
     )
   };
 }

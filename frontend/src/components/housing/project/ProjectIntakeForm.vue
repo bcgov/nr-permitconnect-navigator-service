@@ -31,13 +31,17 @@ import { createProjectIntakeSchema } from '@/validators/housing/projectIntakeFor
 import { Button, Step, StepList, Stepper, StepPanel, StepPanels, useConfirm, useToast } from '@/lib/primevue';
 import { housingProjectService } from '@/services';
 import { useContactStore, useFormStore, useProjectStore } from '@/store';
+import { YES_NO_UNSURE_LIST } from '@/utils/constants/application';
+import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
+import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { NumResidentialUnits } from '@/utils/enums/housing';
 import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
-import { generalErrorHandler } from '@/utils/utils';
+import { generalErrorHandler, toOneOf } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
@@ -235,42 +239,35 @@ onBeforeMount(() => {
         ? project.activity?.activityContact?.find((x) => x.role === ActivityContactRole.PRIMARY)?.contact
         : useContactStore().getContact;
 
+      // Unknown stored values are dropped, so the form asks for them again
       initialFormValues.value = {
         basic: {
           consentToFeedback: project.consentToFeedback,
-          projectApplicantType: project.projectApplicantType,
+          projectApplicantType: toOneOf(PROJECT_APPLICANT_LIST, project.projectApplicantType),
           isDevelopedInBc: project.companyIdRegistered ? BasicResponse.YES : BasicResponse.NO,
-          registeredName: project.companyNameRegistered,
-          registeredId: project.companyIdRegistered,
-          projectName: project.projectName,
-          projectDescription: project.projectDescription
+          registeredName: project.companyNameRegistered ?? undefined,
+          registeredId: project.companyIdRegistered ?? undefined,
+          projectName: project.projectName ?? undefined,
+          projectDescription: project.projectDescription ?? undefined
         },
-        contacts: {
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          contactId: primaryContact?.contactId
-        },
+        contacts: toContactFormValues(primaryContact),
         housing: {
           singleFamilySelected: !!project.singleFamilyUnits,
           multiFamilySelected: !!project.multiFamilyUnits,
-          singleFamilyUnits: project.singleFamilyUnits,
-          multiFamilyUnits: project.multiFamilyUnits,
+          singleFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.singleFamilyUnits),
+          multiFamilyUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.multiFamilyUnits),
           otherSelected: !!project.otherUnits,
           otherUnitsDescription: project.otherUnitsDescription,
-          otherUnits: project.otherUnits,
-          hasRentalUnits: project.hasRentalUnits,
+          otherUnits: toOneOf(NUM_RESIDENTIAL_UNITS_LIST, project.otherUnits),
+          hasRentalUnits: toOneOf(YES_NO_UNSURE_LIST, project.hasRentalUnits),
           // Stored values come from this form, so they are one of the unit ranges / location types
           rentalUnits: project.rentalUnits as NumResidentialUnits,
-          financiallySupportedBc: project.financiallySupportedBc,
-          financiallySupportedIndigenous: project.financiallySupportedIndigenous,
+          financiallySupportedBc: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedBc),
+          financiallySupportedIndigenous: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedIndigenous),
           indigenousDescription: project.indigenousDescription,
-          financiallySupportedNonProfit: project.financiallySupportedNonProfit,
+          financiallySupportedNonProfit: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedNonProfit),
           nonProfitDescription: project.nonProfitDescription,
-          financiallySupportedHousingCoop: project.financiallySupportedHousingCoop,
+          financiallySupportedHousingCoop: toOneOf(YES_NO_UNSURE_LIST, project.financiallySupportedHousingCoop),
           housingCoopDescription: project.housingCoopDescription
         },
         location: {
@@ -279,8 +276,9 @@ onBeforeMount(() => {
           streetAddress: project.streetAddress,
           locality: project.locality,
           province: project.province,
-          latitude: project.latitude,
-          longitude: project.longitude,
+          // The API sends decimals as strings
+          latitude: project.latitude === null ? null : Number(project.latitude),
+          longitude: project.longitude === null ? null : Number(project.longitude),
           ltsaPidLookup: project.locationPids,
           geomarkUrl: project.geomarkUrl,
           projectLocationDescription: project?.projectLocationDescription,
@@ -293,7 +291,7 @@ onBeforeMount(() => {
               ...x,
               submittedDate: x.submittedDate ? new Date(x.submittedDate) : undefined
             })),
-          hasAppliedProvincialPermits: project.hasAppliedProvincialPermits ?? undefined,
+          hasAppliedProvincialPermits: toOneOf(YES_NO_UNSURE_LIST, project.hasAppliedProvincialPermits),
           investigatePermits: useProjectStore().getPermits.filter(
             (x: Permit) => x.needed === PermitNeeded.UNDER_INVESTIGATION
           )
@@ -305,15 +303,7 @@ onBeforeMount(() => {
         basic: {
           consentToFeedback: false
         },
-        contacts: {
-          contactId: userContact?.contactId,
-          firstName: userContact?.firstName,
-          lastName: userContact?.lastName,
-          email: userContact?.email,
-          phoneNumber: userContact?.phoneNumber,
-          contactApplicantRelationship: userContact?.contactApplicantRelationship,
-          contactPreference: userContact?.contactPreference
-        },
+        contacts: toContactFormValues(userContact),
         housing: {
           singleFamilySelected: false,
           multiFamilySelected: false,

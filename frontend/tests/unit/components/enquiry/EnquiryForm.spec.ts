@@ -15,6 +15,7 @@ import { atsEnquiryPartnerAgenciesKey, atsEnquiryTypeCodeKey, projectServiceKey 
 import { PRIMEVUE_STUBS, VEE_FORM_STUB } from '../../../helpers';
 import { mountComponent } from '../../../mountComponent';
 import { mockRouter, resetMockRouter } from '../../../mockRouter';
+import { testEnquiryDefaults } from '../../../fixtures';
 
 import type { Ref } from 'vue';
 import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/types';
@@ -37,6 +38,7 @@ vi.mock('vue-router', () => ({
 const currentDate = new Date().toISOString();
 
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: SubmissionType.ASSISTANCE,
