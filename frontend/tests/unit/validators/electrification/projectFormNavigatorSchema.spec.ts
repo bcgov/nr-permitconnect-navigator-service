@@ -66,7 +66,7 @@ describe('electrification createProjectFormNavigatorSchema', () => {
       'submissionState.queuePriority': 'Priority is a required field',
       'submissionState.submissionType': 'Submission type is a required field',
       'projectAreasUpdated.aaiUpdated': AAI_REQUIRED,
-      'projectAreasUpdated.addedToAts': AAI_REQUIRED
+      'projectAreasUpdated.addedToAts': 'Authorized Tracking System (ATS) updated is a required field'
     });
   });
 

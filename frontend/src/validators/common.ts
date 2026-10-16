@@ -136,7 +136,7 @@ const blankToNull = (value: unknown) => (typeof value === 'string' ? value.trim(
 export const toNumber = (value: unknown) => (typeof value === 'string' && value.trim() !== '' ? Number(value) : value);
 
 // Date-only strings parse as local midnight, matching yup
-const toDate = (value: unknown) =>
+export const toDate = (value: unknown) =>
   typeof value === 'string' ? new Date(/^\d{4}-\d{2}-\d{2}$/.test(value) ? `${value}T00:00` : value) : value;
 
 const coordinateSchema = (label: string, min: number, max: number) =>
@@ -211,25 +211,23 @@ export const locationFormSchema = z
     }
   }, evenWithIssues);
 
-export const appliedPermitsFormSchema = z
-  .array(
-    z.looseObject({
-      permitTypeId: permitTypeIdSchema,
-      submittedDate: z.preprocess(
-        toDate,
-        z
-          .date({
-            error: (issue) =>
-              issue.input === null ? 'Submitted date cannot be null' : 'Submitted date must be a valid date'
-          })
-          .optional()
-      ),
-      permitTracking: z
-        .array(z.looseObject({ trackingId: z.string().max(255, maxMessage('Tracking ID', 255)).nullish() }))
-        .optional()
-    })
-  )
-  .optional();
+export const appliedPermitSchema = z.looseObject({
+  permitTypeId: permitTypeIdSchema,
+  submittedDate: z.preprocess(
+    toDate,
+    z
+      .date({
+        error: (issue) =>
+          issue.input === null ? 'Submitted date cannot be null' : 'Submitted date must be a valid date'
+      })
+      .optional()
+  ),
+  permitTracking: z
+    .array(z.looseObject({ trackingId: z.string().max(255, maxMessage('Tracking ID', 255)).nullish() }))
+    .optional()
+});
+
+export const appliedPermitsFormSchema = z.array(appliedPermitSchema).optional();
 
 export const permitsFormSchema = z.looseObject({
   appliedPermits: appliedPermitsFormSchema,

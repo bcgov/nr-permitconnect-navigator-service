@@ -16,7 +16,6 @@ import {
   createResidentialUnitsSchema,
   createSubmissionStatePanelSchema
 } from '@/validators/navigator';
-import * as zodPanels from '@/validators/navigatorPanels';
 import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import { BasicResponse, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus, Area, Region, SubmissionType } from '@/utils/enums/projectCommon';
@@ -56,10 +55,7 @@ const validSubmissionState = {
 // Tests
 
 describe('navigator validators', () => {
-  describe.each([
-    ['yup', createContactCardNavFormSchema],
-    ['zod', zodPanels.createContactCardNavFormSchema]
-  ])('createContactCardNavFormSchema (%s)', (_, createContactCardNavFormSchema) => {
+  describe('createContactCardNavFormSchema', () => {
     const schema = createContactCardNavFormSchema({ t }).contact;
 
     it('requires email and first name', async () => {
@@ -115,10 +111,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createCompanyProjectNamePanelSchema],
-    ['zod', zodPanels.createCompanyProjectNamePanelSchema]
-  ])('createCompanyProjectNamePanelSchema (%s)', (_, createCompanyProjectNamePanelSchema) => {
+  describe('createCompanyProjectNamePanelSchema', () => {
     const schemaFor = (initiative: Initiative) =>
       createCompanyProjectNamePanelSchema(options(initiative)).companyProjectName;
 
@@ -254,10 +247,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createLocationPanelSchema],
-    ['zod', zodPanels.createLocationPanelSchema]
-  ])('createLocationPanelSchema (%s)', (_, createLocationPanelSchema) => {
+  describe('createLocationPanelSchema', () => {
     const schema = createLocationPanelSchema({ t }).location;
 
     it('requires natural disaster', async () => {
@@ -307,68 +297,41 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    [
-      'yup',
-      createLocationPidsPanelSchema,
-      createLocationDescriptionPanelSchema,
-      createAstNotesPanelSchema,
-      createRelatedEnquiriesPanelSchema
-    ],
-    [
-      'zod',
-      zodPanels.createLocationPidsPanelSchema,
-      zodPanels.createLocationDescriptionPanelSchema,
-      zodPanels.createAstNotesPanelSchema,
-      zodPanels.createRelatedEnquiriesPanelSchema
-    ]
-  ])(
-    'simple text panels (%s)',
-    (
-      _,
-      createLocationPidsPanelSchema,
-      createLocationDescriptionPanelSchema,
-      createAstNotesPanelSchema,
-      createRelatedEnquiriesPanelSchema
-    ) => {
-      it('createLocationPidsPanelSchema converts empty to null', async () => {
-        expect((await runSchema(createLocationPidsPanelSchema().locationPids, { auto: '' })).value).toEqual({
-          auto: null
-        });
+  describe('simple text panels', () => {
+    it('createLocationPidsPanelSchema converts empty to null', async () => {
+      expect((await runSchema(createLocationPidsPanelSchema().locationPids, { auto: '' })).value).toEqual({
+        auto: null
       });
+    });
 
-      it('createLocationDescriptionPanelSchema caps the description at 4000', async () => {
-        expect(
-          (
-            await runSchema(createLocationDescriptionPanelSchema({ t }).locationDescription, {
-              description: 'a'.repeat(4001)
-            })
-          ).errors
-        ).toEqual({ description: 'Additional information about location must be at most 4000 characters' });
+    it('createLocationDescriptionPanelSchema caps the description at 4000', async () => {
+      expect(
+        (
+          await runSchema(createLocationDescriptionPanelSchema({ t }).locationDescription, {
+            description: 'a'.repeat(4001)
+          })
+        ).errors
+      ).toEqual({ description: 'Additional information about location must be at most 4000 characters' });
+    });
+
+    it('createAstNotesPanelSchema caps notes at 4000 and converts empty to null', async () => {
+      const schema = createAstNotesPanelSchema({ t }).astNotes;
+
+      expect((await runSchema(schema, { notes: 'a'.repeat(4001) })).errors).toEqual({
+        notes: 'Automated Status Tool (AST) notes must be at most 4000 characters'
       });
+      expect((await runSchema(schema, { notes: '' })).value).toEqual({ notes: null });
+    });
 
-      it('createAstNotesPanelSchema caps notes at 4000 and converts empty to null', async () => {
-        const schema = createAstNotesPanelSchema({ t }).astNotes;
-
-        expect((await runSchema(schema, { notes: 'a'.repeat(4001) })).errors).toEqual({
-          notes: 'Automated Status Tool (AST) notes must be at most 4000 characters'
-        });
-        expect((await runSchema(schema, { notes: '' })).value).toEqual({ notes: null });
+    it('createRelatedEnquiriesPanelSchema accepts null', async () => {
+      expect(await runSchema(createRelatedEnquiriesPanelSchema().relatedEnquiries, { csv: null })).toEqual({
+        value: { csv: null },
+        errors: {}
       });
+    });
+  });
 
-      it('createRelatedEnquiriesPanelSchema accepts null', async () => {
-        expect(await runSchema(createRelatedEnquiriesPanelSchema({ t }).relatedEnquiries, { csv: null })).toEqual({
-          value: { csv: null },
-          errors: {}
-        });
-      });
-    }
-  );
-
-  describe.each([
-    ['yup', createConsentPanelSchema],
-    ['zod', zodPanels.createConsentPanelSchema]
-  ])('createConsentPanelSchema (%s)', (_, createConsentPanelSchema) => {
+  describe('createConsentPanelSchema', () => {
     it('createConsentPanelSchema requires Yes or No', async () => {
       const schema = createConsentPanelSchema({ t }).consent;
 
@@ -381,10 +344,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createProjectDescriptionPanelSchema],
-    ['zod', zodPanels.createProjectDescriptionPanelSchema]
-  ])('createProjectDescriptionPanelSchema (%s)', (_, createProjectDescriptionPanelSchema) => {
+  describe('createProjectDescriptionPanelSchema', () => {
     const schemaFor = (initiative: Initiative) =>
       createProjectDescriptionPanelSchema(options(initiative)).projectDescription;
 
@@ -401,10 +361,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createResidentialUnitsSchema],
-    ['zod', zodPanels.createResidentialUnitsSchema]
-  ])('createResidentialUnitsSchema (%s)', (_, createResidentialUnitsSchema) => {
+  describe('createResidentialUnitsSchema', () => {
     const schema = createResidentialUnitsSchema({ t }).units;
 
     it('requires hasRentalUnits', async () => {
@@ -468,10 +425,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createFinanciallySupportedPanelSchema],
-    ['zod', zodPanels.createFinanciallySupportedPanelSchema]
-  ])('createFinanciallySupportedPanelSchema (%s)', (_, createFinanciallySupportedPanelSchema) => {
+  describe('createFinanciallySupportedPanelSchema', () => {
     const schema = createFinanciallySupportedPanelSchema({ t }).finance;
     const allYes = {
       financiallySupportedBc: BasicResponse.YES,
@@ -531,10 +485,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createSubmissionStatePanelSchema],
-    ['zod', zodPanels.createSubmissionStatePanelSchema]
-  ])('createSubmissionStatePanelSchema (%s)', (_, createSubmissionStatePanelSchema) => {
+  describe('createSubmissionStatePanelSchema', () => {
     const schemaFor = (initiative: Initiative) => createSubmissionStatePanelSchema(options(initiative)).submissionState;
 
     it.each([Initiative.GENERAL, Initiative.ELECTRIFICATION, Initiative.HOUSING])(
@@ -591,10 +542,7 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createAtsInfoPanelSchema],
-    ['zod', zodPanels.createAtsInfoPanelSchema]
-  ])('createAtsInfoPanelSchema (%s)', (_, createAtsInfoPanelSchema) => {
+  describe('createAtsInfoPanelSchema', () => {
     const schemaFor = (initiative: Initiative) => createAtsInfoPanelSchema(options(initiative)).atsInfo;
 
     it.each([Initiative.GENERAL, Initiative.ELECTRIFICATION, Initiative.HOUSING])(
@@ -625,41 +573,33 @@ describe('navigator validators', () => {
     });
   });
 
-  describe.each([
-    ['yup', createProjectAreasUpdatedSchema, AAI_REQUIRED, AAI_REQUIRED],
-    [
-      'zod',
-      zodPanels.createProjectAreasUpdatedSchema,
-      'Authorized Tracking System (ATS) updated is a required field',
-      'Land Title Survey Authority (LTSA) completed is a required field'
-    ]
-  ])(
-    'createProjectAreasUpdatedSchema (%s)',
-    (_, createProjectAreasUpdatedSchema, ADDED_TO_ATS_REQUIRED, LTSA_REQUIRED) => {
-      const schemaFor = (initiative: Initiative) =>
-        createProjectAreasUpdatedSchema(options(initiative)).projectAreasUpdated;
-      // yup reuses the aaiUpdated label for addedToAts and ltsaCompleted; the zod copy fixes it
-      it.each([
-        [Initiative.GENERAL, { aaiUpdated: AAI_REQUIRED }],
-        [Initiative.ELECTRIFICATION, { aaiUpdated: AAI_REQUIRED, addedToAts: ADDED_TO_ATS_REQUIRED }],
-        [
-          Initiative.HOUSING,
-          {
-            aaiUpdated: AAI_REQUIRED,
-            addedToAts: ADDED_TO_ATS_REQUIRED,
-            ltsaCompleted: LTSA_REQUIRED,
-            bcOnlineCompleted: 'BC Online completed is a required field'
-          }
-        ]
-      ])('%s requires its initiative specific flags', async (initiative, errors) => {
-        expect((await runSchema(schemaFor(initiative), {})).errors).toEqual(errors);
-      });
+  describe('createProjectAreasUpdatedSchema', () => {
+    const ADDED_TO_ATS_REQUIRED = 'Authorized Tracking System (ATS) updated is a required field';
+    const LTSA_REQUIRED = 'Land Title Survey Authority (LTSA) completed is a required field';
 
-      it('accepts false flags', async () => {
-        const flags = { aaiUpdated: false, addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false };
+    const schemaFor = (initiative: Initiative) =>
+      createProjectAreasUpdatedSchema(options(initiative)).projectAreasUpdated;
 
-        expect(await runSchema(schemaFor(Initiative.HOUSING), flags)).toEqual({ value: flags, errors: {} });
-      });
-    }
-  );
+    it.each([
+      [Initiative.GENERAL, { aaiUpdated: AAI_REQUIRED }],
+      [Initiative.ELECTRIFICATION, { aaiUpdated: AAI_REQUIRED, addedToAts: ADDED_TO_ATS_REQUIRED }],
+      [
+        Initiative.HOUSING,
+        {
+          aaiUpdated: AAI_REQUIRED,
+          addedToAts: ADDED_TO_ATS_REQUIRED,
+          ltsaCompleted: LTSA_REQUIRED,
+          bcOnlineCompleted: 'BC Online completed is a required field'
+        }
+      ]
+    ])('%s requires its initiative specific flags', async (initiative, errors) => {
+      expect((await runSchema(schemaFor(initiative), {})).errors).toEqual(errors);
+    });
+
+    it('accepts false flags', async () => {
+      const flags = { aaiUpdated: false, addedToAts: false, ltsaCompleted: false, bcOnlineCompleted: false };
+
+      expect(await runSchema(schemaFor(Initiative.HOUSING), flags)).toEqual({ value: flags, errors: {} });
+    });
+  });
 });
