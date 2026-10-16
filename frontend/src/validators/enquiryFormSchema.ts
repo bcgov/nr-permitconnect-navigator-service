@@ -1,9 +1,8 @@
 import { z } from 'zod';
 
 import { APPLICATION_STATUS_LIST, ENQUIRY_SUBMITTED_METHOD, ENQUIRY_TYPE_LIST } from '@/utils/constants/projectCommon';
-import { coerceNumber } from '@/utils/utils';
 import { formSection, maxMessage, missingOrOneOfSchema, requiredMessage, requiredString } from '@/utils/zodSchema';
-import { assignedToSchema, atsClientIdSchema } from '@/validators/common';
+import { assignedToSchema, atsIdSchema } from '@/validators/common';
 import { createContactCardNavFormSchema } from '@/validators/navigator';
 
 import type { CreateSchemaOptions } from '@/types';
@@ -17,8 +16,8 @@ export function createEnquiryFormSchema({ t }: Pick<CreateSchemaOptions, 't'>) {
     addedToAts: z.boolean(requiredMessage('Authorized Tracking System (ATS) updated')),
     atsInfo: formSection(
       z.looseObject({
-        atsClientId: atsClientIdSchema(t('validators.atsClientId.label')),
-        atsEnquiryId: z.preprocess(coerceNumber, z.number('ATS enquiry # must be a number').nullish())
+        atsClientId: atsIdSchema(t('validators.atsClientId.label')),
+        atsEnquiryId: atsIdSchema('ATS enquiry #')
       })
     ),
     submissionState: formSection(

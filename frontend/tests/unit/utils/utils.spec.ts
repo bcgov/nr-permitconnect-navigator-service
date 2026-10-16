@@ -4,6 +4,7 @@ import {
   isPlainObject,
   setEmptyStringsToNull,
   splitDateTime,
+  toIsoRange,
   toKebabCase
 } from '@/utils/utils';
 
@@ -197,6 +198,19 @@ describe('utils.ts', () => {
         date: '2025-01-02',
         time: '15:30:45.123Z'
       });
+    });
+  });
+
+  describe('toIsoRange', () => {
+    it('converts a complete range', () => {
+      expect(toIsoRange([new Date('2025-01-01T00:00:00Z'), new Date('2025-01-31T00:00:00Z')])).toEqual([
+        '2025-01-01T00:00:00.000Z',
+        '2025-01-31T00:00:00.000Z'
+      ]);
+    });
+
+    it.each([undefined, null, [new Date()], [new Date(), null]])('returns undefined for %j', (range) => {
+      expect(toIsoRange(range)).toBeUndefined();
     });
   });
 

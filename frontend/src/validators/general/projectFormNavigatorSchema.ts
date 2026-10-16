@@ -29,7 +29,7 @@ export function createProjectFormNavigatorSchema({
     ...createLocationPanelSchema({ t }),
     ...createLocationPidsPanelSchema(),
     ...createLocationDescriptionPanelSchema({ t }),
-    ...createProjectDescriptionPanelSchema({ initiative, t }),
+    ...createProjectDescriptionPanelSchema({ t }),
     ...createAstNotesPanelSchema({ t }),
     ...createSubmissionStatePanelSchema({ initiative, t }),
     ...createRelatedEnquiriesPanelSchema(),

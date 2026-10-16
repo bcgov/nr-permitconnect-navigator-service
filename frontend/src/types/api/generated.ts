@@ -3866,7 +3866,7 @@ export interface operations {
         'application/json': {
           activityId?: string | null;
           basic: {
-            projectDescription?: string | null;
+            projectDescription: string;
             projectName: string;
             registeredId?: string | null;
             registeredName: string;
@@ -4042,7 +4042,7 @@ export interface operations {
           companyIdRegistered?: string | null;
           projectType?: string;
           bcHydroNumber?: string | null;
-          projectDescription?: string | null;
+          projectDescription?: string;
           projectCategory?: string | null;
           assignedUserId?: string | null;
           /** @enum {string|null} */

@@ -4601,7 +4601,7 @@ paths:
                   properties:
                     projectDescription:
                       type: string
-                      nullable: true
+                      minLength: 1
                       maxLength: 4000
                     projectName:
                       type: string
@@ -4614,6 +4614,7 @@ paths:
                       type: string
                       maxLength: 255
                   required:
+                    - projectDescription
                     - projectName
                     - registeredName
                   additionalProperties: false
@@ -4776,7 +4777,7 @@ paths:
                   maxLength: 255
                 projectDescription:
                   type: string
-                  nullable: true
+                  minLength: 1
                   maxLength: 4000
                 projectCategory:
                   type: string

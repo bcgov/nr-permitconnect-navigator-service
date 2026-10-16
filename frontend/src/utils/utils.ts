@@ -408,6 +408,17 @@ export function splitDateTime(value?: Date | null): DateTimeStrings {
 }
 
 /**
+ * Converts a date range to ISO strings, but only once both ends are picked.
+ * @param range - The range, whose end is null while a range picker is half picked.
+ * @returns The ISO strings, or undefined when the range is missing or incomplete.
+ */
+export function toIsoRange(range: (Date | null)[] | null | undefined) {
+  return range?.length === 2 && range.every((date) => date instanceof Date)
+    ? range.map((date) => date.toISOString())
+    : undefined;
+}
+
+/**
  * Converts a string to kebab case.
  * @param input - The string to convert.
  * @returns The kebab case string.

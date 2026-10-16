@@ -258,7 +258,7 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
     },
 
     // Additional Info
-    projectDescription: { description: project.projectDescription },
+    projectDescription: { description: project.projectDescription ?? undefined },
 
     // Location
     locationDescription: { description: project.projectLocationDescription },
@@ -396,7 +396,7 @@ const onSubmit = async (formValues: GenericObject) => {
       projectLocationDescription: values.locationDescription.description,
 
       // Additional Project Information
-      projectDescription: values.projectDescription.description ?? undefined,
+      projectDescription: values.projectDescription.description,
 
       // AST Notes
       astNotes: values.astNotes.notes,
@@ -468,7 +468,7 @@ onMounted(async () => {
   useFormStore().setFormType(FormType.NAVIGATOR);
   useFormStore().setFormState(FormState.UNLOCKED);
 
-  locationPidsAuto.value = await mapService.getPids({ projectId: project.housingProjectId });
+  locationPidsAuto.value = (await mapService.getPids({ projectId: project.housingProjectId })) ?? '';
 
   // `formRef` is a template ref, only guaranteed
   // populated once the component has mounted

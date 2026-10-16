@@ -348,17 +348,14 @@ describe('navigator validators', () => {
     const schemaFor = (initiative: Initiative) =>
       createProjectDescriptionPanelSchema(options(initiative)).projectDescription;
 
-    it.each([Initiative.GENERAL, Initiative.HOUSING])('%s requires a description', async (initiative) => {
-      expect((await runSchema(schemaFor(initiative), { description: '  ' })).errors).toEqual({
-        description: 'Additional information about project is a required field'
-      });
-    });
-
-    // Known bug: when('project.projectType') resolves inside projectDescription, not the form root,
-    // so the OTHER branch can never trigger
-    it('ELECTRIFICATION never requires a description', async () => {
-      expect((await runSchema(schemaFor(Initiative.ELECTRIFICATION), { description: '' })).errors).toEqual({});
-    });
+    it.each([Initiative.ELECTRIFICATION, Initiative.GENERAL, Initiative.HOUSING])(
+      '%s requires a description',
+      async (initiative) => {
+        expect((await runSchema(schemaFor(initiative), { description: '  ' })).errors).toEqual({
+          description: 'Additional information about project is a required field'
+        });
+      }
+    );
   });
 
   describe('createResidentialUnitsSchema', () => {

@@ -16,7 +16,7 @@ const codeList = {
 const orgBookOptions = [{ registeredName: 'Test Co', registeredId: 'BC123' }];
 
 const testForm = {
-  basic: { registeredId: 'BC123', registeredName: 'Test Co', projectName: 'Project' },
+  basic: { registeredId: 'BC123', registeredName: 'Test Co', projectName: 'Project', projectDescription: 'Desc' },
   contacts: {
     contactApplicantRelationship: ProjectRelationship.OWNER,
     contactPreference: ContactPreference.EMAIL,
@@ -44,6 +44,7 @@ describe('electrification createProjectIntakeSchema', () => {
 
   it('reports every required field on an empty intake', async () => {
     expect((await runSchema(schema, {})).errors).toEqual({
+      'basic.projectDescription': 'Project description is a required field',
       'basic.projectName': 'Project name is a required field',
       'basic.registeredName': 'Business name is a required field',
       'contacts.contactId': 'Contact ID is a required field',
@@ -61,7 +62,7 @@ describe('electrification createProjectIntakeSchema', () => {
       (
         await runSchema(schema, {
           ...testForm,
-          basic: { registeredName: 'Not a suggestion', projectName: 'a'.repeat(256) },
+          basic: { registeredName: 'Not a suggestion', projectName: 'a'.repeat(256), projectDescription: 'Desc' },
           project: { projectType: 'NOT_A_TYPE', bcHydroNumber: 'a'.repeat(256) }
         })
       ).errors
@@ -73,10 +74,9 @@ describe('electrification createProjectIntakeSchema', () => {
     });
   });
 
-  // Known bug: the OTHER project type should require a description
-  it('does not require a project description for the OTHER project type', async () => {
+  it.each([undefined, '', '  '])('requires a project description for any project type (%j)', async (description) => {
     expect(
-      (await runSchema(schema, { ...testForm, project: { projectType: ElectrificationProjectType.OTHER } })).errors
-    ).toEqual({});
+      (await runSchema(schema, { ...testForm, basic: { ...testForm.basic, projectDescription: description } })).errors
+    ).toEqual({ 'basic.projectDescription': 'Project description is a required field' });
   });
 });

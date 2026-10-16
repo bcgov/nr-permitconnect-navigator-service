@@ -138,7 +138,7 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
     },
 
     // Additional Info
-    projectDescription: { description: project.projectDescription },
+    projectDescription: { description: project.projectDescription ?? undefined },
 
     // Location
     locationDescription: { description: project.locationDescription },

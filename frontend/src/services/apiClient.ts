@@ -1,6 +1,9 @@
 import { appAxios } from './interceptors';
 
-import type { AxiosRequestConfig } from 'axios';
+import type { AxiosRequestConfig, AxiosResponse } from 'axios';
+
+// A 204 has no body, which axios reports as an empty string
+const dataOf = <T>(res: AxiosResponse<T>) => (res.status === 204 ? undefined : res.data) as T;
 
 /**
  * High-level API client that returns only response data.
@@ -12,7 +15,7 @@ import type { AxiosRequestConfig } from 'axios';
  * payload is needed.
  *
  * - Strips AxiosResponse wrapper
- * - Returns `T` directly
+ * - Returns `T` directly, or undefined for a 204
  * - Does not expose status codes or headers
  *
  * For cases where HTTP metadata (status, headers, config) is required,
@@ -20,23 +23,23 @@ import type { AxiosRequestConfig } from 'axios';
  */
 export const api = {
   async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return (await appAxios().get<T>(url, config)).data;
+    return dataOf(await appAxios().get<T>(url, config));
   },
 
   async post<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    return (await appAxios().post<T>(url, body, config)).data;
+    return dataOf(await appAxios().post<T>(url, body, config));
   },
 
   async put<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    return (await appAxios().put<T>(url, body, config)).data;
+    return dataOf(await appAxios().put<T>(url, body, config));
   },
 
   async patch<T>(url: string, body?: unknown, config?: AxiosRequestConfig): Promise<T> {
-    return (await appAxios().patch<T>(url, body, config)).data;
+    return dataOf(await appAxios().patch<T>(url, body, config));
   },
 
   async delete<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    return (await appAxios().delete<T>(url, config)).data;
+    return dataOf(await appAxios().delete<T>(url, config));
   }
 };
 

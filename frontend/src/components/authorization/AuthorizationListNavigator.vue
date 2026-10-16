@@ -10,7 +10,7 @@ import { useAppStore, useCodeStore, usePermitStore } from '@/store';
 import { Initiative } from '@/utils/enums/application';
 import { formatDateOnly } from '@/utils/formatters';
 import { projectAuthorizationRouteNameKey } from '@/utils/keys';
-import { generalErrorHandler } from '@/utils/utils';
+import { generalErrorHandler, toIsoRange } from '@/utils/utils';
 
 import type { DataTableSortEvent } from 'primevue/datatable';
 import type { Ref } from 'vue';
@@ -31,7 +31,7 @@ const { getInitiativePermitTypes } = storeToRefs(usePermitStore());
 // State
 const authorizationTracking: Ref<PermitTracking | undefined> = ref(undefined);
 const authorizationType: Ref<PermitType | undefined> = ref(undefined);
-const dateRange: Ref<[Date, Date] | undefined> = ref(undefined);
+const dateRange: Ref<(Date | null)[] | null | undefined> = ref(undefined);
 const loading: Ref<boolean> = ref(true);
 const pagination: Ref<Pagination> = ref({
   rows: 10,
@@ -77,7 +77,7 @@ async function searchPermits() {
         loading.value = true;
         permitService
           .searchPermits({
-            dateRange: dateRange.value?.map((date) => date.toISOString()),
+            dateRange: toIsoRange(dateRange.value),
             permitTypeId: authorizationType.value?.permitTypeId?.toString(),
             sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId?.toString(),
             searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
@@ -180,7 +180,7 @@ onBeforeMount(async () => {
               :max-date="new Date()"
               hide-on-range-selection
               show-clear
-              @value-change="searchPermits()"
+              @value-change="(value) => (!value || toIsoRange(value as (Date | null)[])) && searchPermits()"
             />
           </div>
           <div>

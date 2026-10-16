@@ -2,7 +2,14 @@ import { z } from 'zod';
 
 import { PROJECT_APPLICANT_LIST } from '@/utils/constants/projectCommon';
 import { IntakeFormCategory } from '@/utils/enums/projectCommon';
-import { evenWithIssues, formSection, maxMessage, requiredOneOf, requiredString } from '@/utils/zodSchema';
+import {
+  evenWithIssues,
+  formSection,
+  maxMessage,
+  requiredOneOf,
+  requiredString,
+  requiredTextSchema
+} from '@/utils/zodSchema';
 import { locationFormSchema, permitsFormSchema, refineBusinessRegistration } from '@/validators/common';
 import { contactFormSchema } from '@/validators/contact';
 
@@ -18,7 +25,7 @@ export function createProjectIntakeSchema(orgBookOptions: OrgBookOption[]) {
       registeredId: z.string().nullish(),
       registeredName: z.string().nullish(),
       projectName: requiredString('Project name').max(255, maxMessage('Project name', 255)),
-      projectDescription: requiredString('Project description'),
+      projectDescription: requiredTextSchema('Project description'),
       projectNumber: z.string().max(255, maxMessage('Project number', 255)).optional()
     })
     .superRefine(refineBusinessRegistration(orgBookOptions), evenWithIssues);

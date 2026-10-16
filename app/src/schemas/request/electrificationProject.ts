@@ -7,7 +7,6 @@ import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
 import { YES_NO_LIST } from '#src/utils/constants/application';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
-import { ProjectType } from '#src/utils/enums/electrification';
 
 export const schema = {
   // POST / always sends an empty body (frontend creates a blank project, then fills it in via patch).
@@ -21,7 +20,7 @@ export const schema = {
         activityId: activityId.nullish(),
         basic: z
           .object({
-            projectDescription: z.string().max(4000).nullish(),
+            projectDescription: z.string().trim().min(1).max(4000),
             projectName: z.string().max(255).trim(),
             registeredId: z.string().max(255).trim().nullish(),
             registeredName: z.string().max(255).trim()
@@ -37,18 +36,6 @@ export const schema = {
           .strict()
       })
       .strict()
-      .superRefine((data, ctx) => {
-        const isOther = data.project.projectType === ProjectType.OTHER;
-        const value = data.basic.projectDescription;
-        const isEmpty = value === undefined || value === null || value === '';
-        if (isOther && isEmpty) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['basic', 'projectDescription'],
-            message: '"projectDescription" is required'
-          });
-        }
-      })
   },
   deleteElectrificationProject: {
     params: z
@@ -120,7 +107,7 @@ export const schema = {
         companyIdRegistered: z.string().max(255).trim().nullish(),
         projectType: requireValidCode.ElectrificationProjectType(z.string()).optional(),
         bcHydroNumber: z.string().max(255).trim().nullish(),
-        projectDescription: z.string().max(4000).nullish(),
+        projectDescription: z.string().trim().min(1).max(4000).optional(),
         projectCategory: requireValidCode.ElectrificationProjectCategory(z.string()).nullish(),
         assignedUserId: uuidv4.nullish(),
         hasEpa: z.enum(YES_NO_LIST as [string, ...string[]]).nullish(),
@@ -134,19 +121,7 @@ export const schema = {
         ...atsEnquirySubmissionFields,
         aaiUpdated: z.boolean().optional()
       })
-      .strict()
-      .superRefine((data, ctx) => {
-        const isOther = data.projectType === ProjectType.OTHER;
-        const value = data.projectDescription;
-        const isEmpty = value === undefined || value === null || value === '';
-        if (isOther && isEmpty) {
-          ctx.addIssue({
-            code: z.ZodIssueCode.custom,
-            path: ['projectDescription'],
-            message: '"projectDescription" is required'
-          });
-        }
-      }),
+      .strict(),
     params: z
       .object({
         electrificationProjectId: uuidv4

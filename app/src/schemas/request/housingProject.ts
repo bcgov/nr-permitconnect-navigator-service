@@ -33,7 +33,7 @@ export const schema = {
             consentToFeedback: z.boolean(),
             projectApplicantType: z.enum(PROJECT_APPLICANT_LIST as [string, ...string[]]),
             projectName: z.string().min(1).max(255).trim(),
-            projectDescription: z.string().min(1).max(4000),
+            projectDescription: z.string().trim().min(1).max(4000),
             registeredId: z.string().nullish(),
             registeredName: z.string().nullish()
           })

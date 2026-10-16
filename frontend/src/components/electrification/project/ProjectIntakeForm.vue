@@ -170,7 +170,7 @@ onBeforeMount(async () => {
           registeredName: project.companyNameRegistered ?? undefined,
           registeredId: project.companyIdRegistered,
           projectName: project.projectName ?? undefined,
-          projectDescription: project.projectDescription
+          projectDescription: project.projectDescription ?? undefined
         },
         contacts: toContactFormValues(primaryContact),
         project: {
