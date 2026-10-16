@@ -304,9 +304,7 @@ describe('ProjectIntakeForm', () => {
       expect(mockRouter.push).not.toHaveBeenCalled();
     });
 
-    // A raw yup schema hands @submit the raw form values; a Standard Schema (zod) hands it the parsed output,
-    // which would trim this value - update deliberately when migrating
-    it('submits raw form values rather than the schema-transformed output', async () => {
+    it('submits the schema-parsed output rather than raw form values', async () => {
       submitDraftSpy.mockResolvedValue({ activityId: 'activity-1', electrificationProjectId: 'project-1' } as never);
 
       const { wrapper } = mountProjectIntakeForm({
@@ -323,7 +321,7 @@ describe('ProjectIntakeForm', () => {
       await flushPromises();
 
       expect(submitDraftSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ basic: expect.objectContaining({ registeredId: '  BC123  ' }) })
+        expect.objectContaining({ basic: expect.objectContaining({ registeredId: 'BC123' }) })
       );
     });
 

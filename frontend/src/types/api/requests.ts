@@ -1,13 +1,7 @@
-import type { AuditFields, ContactBase, PermitTracking } from './resources';
+import type { PermitTracking } from './resources';
 import type { KeyValuePair } from '../common';
 import type { GroupName, Initiative } from '@/utils/enums/application';
 import type { AxiosRequestConfig } from 'axios';
-
-/**
- * Contact
- */
-
-export type CreateContactRequest = Omit<ContactBase, 'contactId' | keyof AuditFields>;
 
 /**
  * Other
@@ -33,20 +27,6 @@ export interface GetObjectRequest {
 
 export interface DownloadObjectRequest extends GetObjectRequest {
   filename: string;
-}
-
-export interface Email {
-  bcc?: string[];
-  bodyType: string;
-  body: string;
-  cc?: string[];
-  delayTS?: number;
-  encoding?: string;
-  from: string;
-  priority?: string;
-  subject: string;
-  to: string[];
-  tag?: string;
 }
 
 export interface DeleteSubjectGroupRequest {

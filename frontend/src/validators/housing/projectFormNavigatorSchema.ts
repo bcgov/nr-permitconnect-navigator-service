@@ -15,7 +15,7 @@ import {
   createRelatedEnquiriesPanelSchema,
   createResidentialUnitsSchema,
   createSubmissionStatePanelSchema
-} from '@/validators/navigatorPanels';
+} from '@/validators/navigator';
 
 import type { CreateSchemaOptions } from '@/types';
 import type { FormValues } from '@/utils/zodSchema';

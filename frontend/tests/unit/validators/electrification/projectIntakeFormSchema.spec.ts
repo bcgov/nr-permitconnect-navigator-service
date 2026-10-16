@@ -73,8 +73,7 @@ describe('electrification createProjectIntakeSchema', () => {
     });
   });
 
-  // Known bug: when('$project.projectType') reads yup context, which ProjectIntakeForm never passes,
-  // so the description is never required even for the OTHER project type
+  // Known bug: the OTHER project type should require a description
   it('does not require a project description for the OTHER project type', async () => {
     expect(
       (await runSchema(schema, { ...testForm, project: { projectType: ElectrificationProjectType.OTHER } })).errors

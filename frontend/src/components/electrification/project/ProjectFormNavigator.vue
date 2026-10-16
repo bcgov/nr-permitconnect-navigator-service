@@ -24,6 +24,7 @@ import { ApplicationStatus, FormState, FormType, SubmissionType } from '@/utils/
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/electrification/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
@@ -95,12 +96,14 @@ const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 const projectFormNavigatorSchema = computed(() => {
-  return createProjectFormNavigatorSchema({
-    initiative: getInitiative.value,
-    t,
-    codeList,
-    orgBookOptions: orgBookOptions.value
-  });
+  return toTypedSchema(
+    createProjectFormNavigatorSchema({
+      initiative: getInitiative.value,
+      t,
+      codeList,
+      orgBookOptions: orgBookOptions.value
+    })
+  );
 });
 
 // Actions
@@ -291,18 +294,18 @@ function onReOpen() {
     acceptLabel: t('i.common.projectForm.reopenAccept'),
     rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
+    const values = formValues as FormSchemaType;
 
     // Check for any ATS changes
     // Returns form values if no updates happen

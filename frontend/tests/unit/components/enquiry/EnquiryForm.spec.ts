@@ -21,6 +21,13 @@ import type { Enquiry, HousingProject, Project, ProjectService, User } from '@/t
 
 // Mocks
 
+const mockConfirmRequire = vi.fn();
+
+vi.mock('@/lib/primevue', async (importOriginal) => ({
+  ...(await importOriginal<object>()),
+  useConfirm: () => ({ require: mockConfirmRequire })
+}));
+
 vi.mock('vue-router', () => ({
   useRouter: () => mockRouter
 }));
@@ -66,6 +73,7 @@ function mountEnquiryForm(
     projectService?: Ref<ProjectService<Project>>;
     atsEnquiryPartnerAgencies?: string;
     atsEnquiryTypeCode?: string;
+    stubForm?: boolean;
   } = {}
 ) {
   const {
@@ -73,7 +81,8 @@ function mountEnquiryForm(
     editable,
     projectService = ref(housingProjectService),
     atsEnquiryPartnerAgencies = testAtsEnquiryPartnerAgencies,
-    atsEnquiryTypeCode = testAtsEnquiryTypeCode
+    atsEnquiryTypeCode = testAtsEnquiryTypeCode,
+    stubForm = true
   } = options;
 
   const { wrapper } = mountComponent(EnquiryForm, {
@@ -94,7 +103,7 @@ function mountEnquiryForm(
       'ats-user-details-modal': true,
       'ats-user-create-modal': true,
       'ats-user-link-modal': true,
-      Form: VEE_FORM_STUB,
+      ...(stubForm && { Form: VEE_FORM_STUB }),
       CancelButton: true,
       SubmissionStateSection: true,
       ...PRIMEVUE_STUBS
@@ -667,6 +676,47 @@ describe('EnquiryForm.vue', () => {
       expect(atsInfo.props('lastName')).toBe('Doe');
       expect(atsInfo.props('email')).toBe('john@example.com');
       expect(atsInfo.props('phoneNumber')).toBe('555-1234');
+    });
+  });
+
+  describe('reopen', () => {
+    const completedEnquiry = {
+      ...testEnquiry,
+      enquiryStatus: ApplicationStatus.COMPLETED,
+      enquiryDescription: 'Description',
+      activity: {
+        activityId: testEnquiry.activityId,
+        activityContact: [
+          {
+            role: ActivityContactRole.PRIMARY,
+            contact: { contactId: 'contact123', firstName: 'John', email: 'john@example.com' }
+          }
+        ]
+      }
+    } as unknown as Enquiry;
+
+    // The real Form validates on reopen; the shared stub does not
+    async function reopen(enquiry: Enquiry) {
+      const { wrapper } = mountEnquiryForm({ enquiry, stubForm: false });
+      await flushPromises();
+
+      (wrapper.vm as unknown as { $: { setupState: { onReOpen: () => void } } }).$.setupState.onReOpen();
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
+    }
+
+    it('validates and saves the enquiry as in progress', async () => {
+      await reopen(completedEnquiry);
+
+      expect(patchEnquirySpy).toHaveBeenCalledWith(
+        expect.objectContaining({ enquiryId: testEnquiry.enquiryId, enquiryStatus: ApplicationStatus.IN_PROGRESS })
+      );
+    });
+
+    it('does not save when the form is invalid', async () => {
+      await reopen({ ...completedEnquiry, enquiryDescription: '' });
+
+      expect(patchEnquirySpy).not.toHaveBeenCalled();
     });
   });
 });
