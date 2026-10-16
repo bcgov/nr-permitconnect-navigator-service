@@ -5,7 +5,6 @@ export * from './ui';
 export * from './util';
 export * from './validation';
 export * from './api/openapi';
-export * from './api/reports';
 export * from './api/requests';
 export * from './api/resources';
 export * from './api/responses';

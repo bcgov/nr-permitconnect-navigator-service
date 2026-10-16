@@ -56,7 +56,6 @@ const testSubmission: HousingProject = {
   submissionType: SubmissionType.ASSISTANCE,
   submittedAt: '2023-02-01T12:00:00Z',
   relatedEnquiries: 'none',
-  hasRelatedEnquiry: false,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Company Inc.',
   projectName: 'Test Project',

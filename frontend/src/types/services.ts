@@ -1,6 +1,5 @@
 import type { ApiInitiative, QueryParams, RequestBody } from './api/openapi';
-import type { ProjectStatistics } from './api/reports';
-import type { SearchProjectsResponse } from './api/responses';
+import type { ProjectStatistics, SearchProjectsResponse } from './api/responses';
 import type { Draft } from './api/resources';
 
 export interface ProjectService<T> {

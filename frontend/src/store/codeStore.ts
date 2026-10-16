@@ -5,18 +5,17 @@ import { codeService } from '@/services';
 import * as codeEnums from '@/utils/enums/codeEnums';
 
 import type { Ref } from 'vue';
-import type { Code, CodeTableName } from '@/types';
+import type { Code, CodeTableName, GetCodeTablesResponse } from '@/types';
 
 const codeNames = Object.keys(codeEnums) as CodeTableName[];
-type CodeMap = Record<CodeTableName, Code[]>;
 
-const initialCodeMap = codeNames.reduce<CodeMap>((acc, name) => {
+const initialCodeMap = codeNames.reduce<GetCodeTablesResponse>((acc, name) => {
   acc[name] = [];
   return acc;
-}, {} as CodeMap);
+}, {} as GetCodeTablesResponse);
 
 export interface CodeStoreState {
-  codes: Ref<CodeMap>;
+  codes: Ref<GetCodeTablesResponse>;
 }
 
 export const useCodeStore = defineStore('code', () => {
@@ -91,7 +90,7 @@ export const useCodeStore = defineStore('code', () => {
     state.codes.value[name] = rows;
   }
 
-  function setCodes(data: CodeMap) {
+  function setCodes(data: GetCodeTablesResponse) {
     Object.entries(data).forEach(([k, v]) => setCode(k as CodeTableName, v as Code[])); // nosonar
   }
 

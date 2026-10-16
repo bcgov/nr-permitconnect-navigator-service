@@ -56,7 +56,6 @@ const testProject: GeneralProject = {
   applicationStatus: ApplicationStatus.IN_PROGRESS,
   companyIdRegistered: 'FM0281610',
   companyNameRegistered: 'Test Co',
-  hasRelatedEnquiry: false,
   queuePriority: 1,
   // The navigator form's schema (unlike intake's) only allows a submission
   // type of GUIDANCE/INAPPLICABLE -- ASSISTANCE et al. are intake-only.

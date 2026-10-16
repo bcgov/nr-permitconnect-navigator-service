@@ -58,19 +58,7 @@ const relevantBringForwards: Ref<DatedBringForward[]> = ref([]);
 const myAssignedTo: Ref<Set<string>> = ref(new Set<string>());
 
 // Actions
-function assignEnquiriesAndFullName() {
-  const relatedActivityIds = new Set();
-
-  enquiries.value.forEach((enquiry) => relatedActivityIds.add(enquiry.relatedActivityId));
-
-  projects.value.forEach((sub) => {
-    if (relatedActivityIds.has(sub.activityId)) {
-      sub.hasRelatedEnquiry = true;
-    } else {
-      sub.hasRelatedEnquiry = false;
-    }
-  });
-
+function assignFullNames() {
   projects.value.forEach((sub) => {
     if (sub.user) {
       sub.user.fullName =
@@ -181,7 +169,7 @@ function sortRelevantBringForwards(filteredBringForwards: DatedBringForward[]) {
 }
 
 onBeforeMount(async () => {
-  assignEnquiriesAndFullName();
+  assignFullNames();
 
   const profile = getProfile.value;
 

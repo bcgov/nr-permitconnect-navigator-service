@@ -95,7 +95,7 @@ onBeforeMount(async () => {
     ]);
 
     projectsEnquiries.value = projectsEnquiries.value
-      .concat(searchProjectsResponses.flatMap((r) => r.projects))
+      .concat(searchProjectsResponses.flatMap((r): Project[] => r.projects))
       .concat(enquiries);
   }
 

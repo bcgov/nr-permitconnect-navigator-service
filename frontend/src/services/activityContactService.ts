@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { ActivityContact, PutActivityContactResponse, RequestBody } from '@/types';
+import type { ActivityContact, RequestBody, ResponseBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -59,10 +59,10 @@ export async function listActivityContacts(req: { activityId: string }): Promise
  */
 export async function putActivityContact(
   req: { activityId: string; contactId: string } & RequestBody<'updateActivityContact'>
-): Promise<PutActivityContactResponse> {
+): Promise<ResponseBody<'updateActivityContact'>> {
   const { activityId, contactId, ...body } = req;
 
-  return api.put<PutActivityContactResponse>(activityRoutes.contacts.byId(activityId, contactId), body);
+  return api.put<ResponseBody<'updateActivityContact'>>(activityRoutes.contacts.byId(activityId, contactId), body);
 }
 
 /**
