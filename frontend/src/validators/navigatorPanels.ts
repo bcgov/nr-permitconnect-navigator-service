@@ -2,7 +2,6 @@
 import { z } from 'zod';
 
 import { YES_NO_LIST, YES_NO_UNSURE_LIST } from '@/utils/constants/application';
-import { NUM_RESIDENTIAL_UNITS_LIST } from '@/utils/constants/housing';
 import {
   APPLICATION_STATUS_LIST,
   AREA_LIST,
@@ -34,6 +33,7 @@ import {
   optionalTextSchema,
   requiredTextSchema,
   requireUnits,
+  unitsSchema,
   toNumber
 } from '@/validators/common';
 
@@ -237,15 +237,13 @@ export function createProjectAreasUpdatedSchema({ initiative, t }: CreateSchemaO
 
 export function createResidentialUnitsSchema({ t }: CreateSchemaOptions) {
   const label = (key: string) => t(`i.housing.project.projectFormNavigatorSchema.${key}`);
-  const unitsSchema = (key: string) =>
-    z.enum(NUM_RESIDENTIAL_UNITS_LIST, oneOfMessage(label(key), NUM_RESIDENTIAL_UNITS_LIST)).nullish();
 
   return {
     units: formSection(
       z
         .looseObject({
-          singleFamilyUnits: unitsSchema('unitsSingleFamilyUnits'),
-          multiFamilyUnits: unitsSchema('unitsMultiFamilyUnits'),
+          singleFamilyUnits: unitsSchema(label('unitsSingleFamilyUnits')),
+          multiFamilyUnits: unitsSchema(label('unitsMultiFamilyUnits')),
           otherUnitsDescription: z
             .string()
             .max(255, maxMessage(label('unitsOtherUnitsDescription'), 255))

@@ -23,7 +23,7 @@ import { createNoteFormSchema } from '@/validators/noteFormSchema';
 
 import type { SelectChangeEvent } from 'primevue/select';
 import type { Ref } from 'vue';
-import type { NoteHistory, User } from '@/types';
+import type { ApiInitiative, NoteHistory, RequestBody, User } from '@/types';
 import type { FormSchemaType } from '@/validators/noteFormSchema';
 
 // Props
@@ -117,7 +117,7 @@ function onDelete() {
 
 async function onSubmit(data: GenericObject) {
   try {
-    const body = { ...data } as NoteHistory;
+    const body = { ...data } as Omit<RequestBody<`create${ApiInitiative}NoteHistory`>, 'activityId' | 'note'>;
 
     // Force some data based on the type of note
     if (body.type === NoteType.BRING_FORWARD) {
@@ -145,8 +145,10 @@ async function onSubmit(data: GenericObject) {
       if (!resource?.value) throw new Error(t('note.noteForm.resourceNotDef'));
       await noteHistoryService.patchNoteHistory({
         ...body,
+        noteHistoryId: noteHistory.noteHistoryId,
         note: data.note,
-        resource: resource.value
+        // Notes only appear on project and enquiry pages, which provide one of the resources the API accepts
+        resource: resource.value as RequestBody<`patch${ApiInitiative}NoteHistory`>['resource']
       });
     }
     toast.success(t('note.noteForm.noteSaved'));

@@ -109,7 +109,7 @@ describe('AuthorizationListNavigator', () => {
         skip: 0,
         take: 10,
         sortField: 'submittedDate',
-        sortOrder: -1
+        sortOrder: '-1'
       });
     });
 
@@ -171,7 +171,7 @@ describe('AuthorizationListNavigator', () => {
       await vi.advanceTimersByTimeAsync(500);
 
       expect(searchPermitsSpy).toHaveBeenCalledWith(
-        expect.objectContaining({ sortField: 'submittedDate', sortOrder: 1, skip: 0 })
+        expect.objectContaining({ sortField: 'submittedDate', sortOrder: '1', skip: 0 })
       );
     });
 

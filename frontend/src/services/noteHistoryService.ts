@@ -1,15 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type {
-  BringForward,
-  CreateNoteHistoryRequest,
-  DeleteNoteHistoryRequest,
-  ListBringForwardsRequest,
-  ListNoteHistoriesRequest,
-  NoteHistory,
-  PatchNoteHistoryRequest
-} from '@/types';
+import type { ApiInitiative, BringForward, NoteHistory, QueryParams, RequestBody } from '@/types';
 /**
  * Base route builder and endpoint definitions for this resource.
  * Routes should be referenced through this object rather than
@@ -30,7 +22,7 @@ const noteRoutes = {
  * @param req - The request payload containing the note history data and note content.
  * @returns A promise resolving to the created `NoteHistory` resource.
  */
-export function createNoteHistory(req: CreateNoteHistoryRequest): Promise<NoteHistory> {
+export function createNoteHistory(req: RequestBody<`create${ApiInitiative}NoteHistory`>): Promise<NoteHistory> {
   return api.post<NoteHistory>(noteRoutes.root(), req);
 }
 
@@ -39,7 +31,7 @@ export function createNoteHistory(req: CreateNoteHistoryRequest): Promise<NoteHi
  * @param req - The request payload containing the note history ID.
  * @returns A promise resolving to the deleted `NoteHistory` resource.
  */
-export function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> {
+export function deleteNoteHistory(req: { noteHistoryId: string }): Promise<void> {
   const { noteHistoryId } = req;
 
   return api.delete(noteRoutes.byId(noteHistoryId));
@@ -50,7 +42,7 @@ export function deleteNoteHistory(req: DeleteNoteHistoryRequest): Promise<void> 
  * @param req - The request payload containing optional bring-forward filter criteria.
  * @returns A promise resolving to an array of `BringForward` resources.
  */
-export function listBringForwards(req: ListBringForwardsRequest): Promise<BringForward[]> {
+export function listBringForwards(req: QueryParams<`list${ApiInitiative}BringForwards`>): Promise<BringForward[]> {
   const { bringForwardState } = req;
 
   return api.get<BringForward[]>(noteRoutes.bringForwards(), {
@@ -63,7 +55,7 @@ export function listBringForwards(req: ListBringForwardsRequest): Promise<BringF
  * @param req - The request payload containing the activity ID.
  * @returns A promise resolving to an array of `NoteHistory` resources.
  */
-export function listNoteHistories(req: ListNoteHistoriesRequest): Promise<NoteHistory[]> {
+export function listNoteHistories(req: { activityId: string }): Promise<NoteHistory[]> {
   const { activityId } = req;
 
   return api.get<NoteHistory[]>(noteRoutes.list(activityId));
@@ -74,7 +66,9 @@ export function listNoteHistories(req: ListNoteHistoriesRequest): Promise<NoteHi
  * @param req - The request payload containing the note history ID and fields to update.
  * @returns A promise resolving to the updated `NoteHistory` resource.
  */
-export function patchNoteHistory(req: PatchNoteHistoryRequest): Promise<NoteHistory> {
+export function patchNoteHistory(
+  req: { noteHistoryId: string } & RequestBody<`patch${ApiInitiative}NoteHistory`>
+): Promise<NoteHistory> {
   const { noteHistoryId, ...body } = req;
 
   return api.patch<NoteHistory>(noteRoutes.byId(noteHistoryId), body);

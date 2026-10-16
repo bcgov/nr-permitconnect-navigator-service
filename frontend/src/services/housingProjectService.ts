@@ -3,21 +3,13 @@ import { createRouteBuilder } from './routeBuilder';
 import { Initiative } from '@/utils/enums/application';
 
 import type {
-  CreateHousingProjectRequest,
-  DeleteDraftRequest,
-  DeleteProjectRequest,
   Draft,
   DraftableProjectService,
-  GetDraftRequest,
-  GetProjectRequest,
-  GetProjectStatisticsRequest,
   HousingProject,
-  RequestBody,
   ProjectStatistics,
-  SearchHousingProjectRequest,
-  SearchProjectsResponse,
-  SubmitDraftHousingProjectRequest,
-  UpsertDraftRequest
+  QueryParams,
+  RequestBody,
+  SearchProjectsResponse
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
@@ -46,7 +38,7 @@ const housingProjectRoutes = {
  * @param req - The request payload containing the project data to create.
  * @returns A promise resolving to the created `HousingProject` resource.
  */
-export function createProject(req: CreateHousingProjectRequest): Promise<HousingProject> {
+export function createProject(req: RequestBody<'createHousingProject'>): Promise<HousingProject> {
   const { ...body } = req;
 
   return api.post<HousingProject>(housingProjectRoutes.root(), body);
@@ -57,7 +49,7 @@ export function createProject(req: CreateHousingProjectRequest): Promise<Housing
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving when the operation completes.
  */
-export function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+export function deleteDraft(req: { draftId: string }): Promise<void> {
   const { draftId } = req;
 
   return api.delete(housingProjectRoutes.draftById(draftId));
@@ -68,7 +60,7 @@ export function deleteDraft(req: DeleteDraftRequest): Promise<void> {
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
  */
-export function deleteProject(req: DeleteProjectRequest): Promise<void> {
+export function deleteProject(req: { projectId: string }): Promise<void> {
   const { projectId } = req;
 
   return api.delete(housingProjectRoutes.byId(projectId));
@@ -79,7 +71,7 @@ export function deleteProject(req: DeleteProjectRequest): Promise<void> {
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving to the requested draft resource.
  */
-export function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+export function getDraft(req: { draftId: string }): Promise<Draft<FormSchemaType>> {
   const { draftId } = req;
 
   return api.get<Draft<FormSchemaType>>(housingProjectRoutes.draftById(draftId));
@@ -90,7 +82,7 @@ export function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving to the requested `HousingProject` resource.
  */
-export function getProject(req: GetProjectRequest): Promise<HousingProject> {
+export function getProject(req: { projectId: string }): Promise<HousingProject> {
   const { projectId } = req;
 
   return api.get<HousingProject>(housingProjectRoutes.byId(projectId));
@@ -101,7 +93,7 @@ export function getProject(req: GetProjectRequest): Promise<HousingProject> {
  * @param req - The request payload containing optional statistic filters.
  * @returns A promise resolving to project statistics.
  */
-export function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
+export function getProjectStatistics(req: QueryParams<'getHousingProjectStatistics'>): Promise<ProjectStatistics> {
   const { ...filters } = req;
 
   return api.get<ProjectStatistics>(housingProjectRoutes.statistics(), {
@@ -138,9 +130,7 @@ export function listProjects(): Promise<HousingProject[]> {
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `HousingProject` resource.
  */
-export function patchProject(
-  req: { projectId: string } & RequestBody<'/housing/project/{housingProjectId}', 'patch'>
-): Promise<HousingProject> {
+export function patchProject(req: { projectId: string } & RequestBody<'patchHousingProject'>): Promise<HousingProject> {
   const { projectId, ...body } = req;
 
   return api.patch<HousingProject>(housingProjectRoutes.byId(projectId), body);
@@ -151,7 +141,7 @@ export function patchProject(
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `HousingProject` resources.
  */
-export function searchProjects(req: SearchHousingProjectRequest): Promise<SearchProjectsResponse> {
+export function searchProjects(req: RequestBody<'searchHousingProjects'>): Promise<SearchProjectsResponse> {
   return api.post<SearchProjectsResponse>(housingProjectRoutes.search(), req);
 }
 
@@ -160,7 +150,7 @@ export function searchProjects(req: SearchHousingProjectRequest): Promise<Search
  * @param req - The request payload containing the project data to submit.
  * @returns A promise resolving to the submitted `HousingProject` resource.
  */
-export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject> {
+export function submitDraft(req: RequestBody<'submitHousingProjectDraft'>): Promise<HousingProject> {
   const { ...body } = req;
 
   return api.post<HousingProject>(housingProjectRoutes.submitDraft(), body);
@@ -171,31 +161,16 @@ export function submitDraft(req: SubmitDraftHousingProjectRequest): Promise<Hous
  * @param req - The request payload containing the draft data.
  * @returns A promise resolving to the saved draft resource.
  */
-export function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
+export function upsertDraft(req: RequestBody<'upsertHousingProjectDraft'>): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
   return api.post<Draft<FormSchemaType>>(housingProjectRoutes.draft(), body);
 }
 
-/**
- * Backward compatibility layer for legacy default-export service usage.
- *
- * This object preserves the previous pattern:
- *   export default { ...serviceMethods }
- *
- * It may be removed once all consumers are migrated to named imports.
- */
 export interface HousingProjectService extends DraftableProjectService<HousingProject, FormSchemaType> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  getProject(req: GetProjectRequest): Promise<HousingProject>;
   patchProject: typeof patchProject;
-  listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchHousingProjectRequest): Promise<SearchProjectsResponse>;
-  submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+  submitDraft: typeof submitDraft;
 }
-
 export const housingProjectService: HousingProjectService = {
   createProject,
   deleteDraft,

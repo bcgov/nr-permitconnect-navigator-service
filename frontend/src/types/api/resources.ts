@@ -404,7 +404,7 @@ export interface PermitNote extends AuditFields {
  */
 
 export interface PermitTracking extends AuditFields {
-  permitTrackingId?: UUID;
+  permitTrackingId?: number;
   permitId?: UUID;
   shownToProponent: boolean;
   sourceSystemKind?: SourceSystemKind;

@@ -30,22 +30,14 @@ import { useContactStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
-import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
+import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type {
-  DeepPartial,
-  Draft,
-  GeneralProject,
-  GeneralProjectIntake,
-  OrgBookOption,
-  Permit,
-  PermitTracking
-} from '@/types';
+import type { DeepPartial, Draft, GeneralProject, RequestBody, OrgBookOption, Permit, PermitTracking } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
 // Props
@@ -158,7 +150,8 @@ function loadProjectValues() {
       },
       location: {
         naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
-        projectLocation: project.projectLocation,
+        // Stored values come from this form, so they are one of the location types
+        projectLocation: project.projectLocation as ProjectLocation,
         streetAddress: project.streetAddress,
         locality: project.locality,
         province: project.province,
@@ -220,7 +213,7 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const payload: GeneralProjectIntake = {
+    const payload: RequestBody<'submitGeneralProjectDraft'> = {
       activityId: draft.value?.activityId,
       basic: {
         projectApplicantType: data.basic.projectApplicantType,

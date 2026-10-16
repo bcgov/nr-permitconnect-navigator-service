@@ -27,7 +27,7 @@ const {
   placeholder?: string;
   disabled?: boolean;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  options: any[]; // Matches Prisma type
+  options: readonly any[]; // Matches Prisma type
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   optionLabel?: string | ((data: any) => string) | undefined; // Matches Prisma type
   optionValue?: string;

@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type { AccessRequest, CreateAccessRequestRequest, ProcessAccessRequestRequest } from '@/types';
+import type { AccessRequest, ApiInitiative, RequestBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -20,7 +20,9 @@ const accessRequestRoutes = {
  * @param req - The request payload.
  * @returns A promise resolving to the created AccessRequest resource.
  */
-export async function createAccessRequest(req: CreateAccessRequestRequest): Promise<AccessRequest> {
+export async function createAccessRequest(
+  req: RequestBody<`create${ApiInitiative}AccessRequest`>
+): Promise<AccessRequest> {
   return api.post<AccessRequest>(accessRequestRoutes.root(), req);
 }
 
@@ -39,7 +41,9 @@ export async function listAccessRequests(): Promise<AccessRequest[]> {
  * @param req - The request payload containing the access request ID and action details.
  * @returns A promise resolving to the updated AccessRequest resource.
  */
-export async function processAccessRequest(req: ProcessAccessRequestRequest): Promise<AccessRequest> {
+export async function processAccessRequest(
+  req: { accessRequestId: string } & RequestBody<`process${ApiInitiative}AccessRequest`>
+): Promise<AccessRequest> {
   const { accessRequestId, ...body } = req;
 
   return api.post<AccessRequest>(accessRequestRoutes.byId(accessRequestId), body);

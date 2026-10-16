@@ -21,7 +21,7 @@ import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { generalProjectService, mapService, userService } from '@/services';
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse } from '@/utils/enums/application';
-import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, Area, FormState, FormType, Region, SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
@@ -29,7 +29,7 @@ import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
-import type { Contact, DeepPartial, GeneralProject, OrgBookOption, PatchGeneralProjectRequest, User } from '@/types';
+import type { Contact, DeepPartial, GeneralProject, OrgBookOption, User } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 import type { BusinessArea } from '@/utils/enums/codeEnums';
 
@@ -198,7 +198,7 @@ const onSubmit = async (formValues: GenericObject) => {
     const values = formValues as FormSchemaType;
 
     // Generate final payload
-    const payload: PatchGeneralProjectRequest = {
+    const payload: Parameters<typeof generalProjectService.patchProject>[0] = {
       projectId: project.projectId,
 
       // Company and Project Information
@@ -231,7 +231,8 @@ const onSubmit = async (formValues: GenericObject) => {
       region: values.submissionState.region as Region,
       area: values.submissionState.area as Area,
       applicationStatus: values.submissionState.applicationStatus,
-      submissionType: values.submissionState.submissionType,
+      // The schema only accepts the navigator submission types the API allows here
+      submissionType: values.submissionState.submissionType as SubmissionType.GUIDANCE | SubmissionType.INAPPLICABLE,
       queuePriority: values.submissionState.queuePriority,
 
       // ATS

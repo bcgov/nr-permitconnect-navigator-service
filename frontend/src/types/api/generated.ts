@@ -18,55 +18,7 @@ export interface paths {
       cookie?: never;
     };
     /** List activity_contact linkages for an activity */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of activity contact linkages */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ActivityContact'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listActivityContacts'];
     put?: never;
     post?: never;
     delete?: never;
@@ -84,170 +36,11 @@ export interface paths {
     };
     get?: never;
     /** Update an activity_contact linkage for an activity */
-    put: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-          contactId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            /** @enum {string} */
-            role: 'ADMIN' | 'MEMBER' | 'PRIMARY';
-          };
-        };
-      };
-      responses: {
-        /** @description The updated (and possibly demoted) activity contact linkages */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['UpdateActivityContactResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    put: operations['updateActivityContact'];
     /** Create an activity_contact linkage for an activity */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-          contactId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            /** @enum {string} */
-            role: 'ADMIN' | 'MEMBER' | 'PRIMARY';
-          };
-        };
-      };
-      responses: {
-        /** @description The created activity contact linkage */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ActivityContact'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createActivityContact'];
     /** Delete an activity_contact linkage for an activity */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-          contactId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The activity contact linkage was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteActivityContact'];
     options?: never;
     head?: never;
     patch?: never;
@@ -261,108 +54,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get current user's contact information */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The current user's contact */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Contact'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getCurrentContact'];
     put?: never;
     /** Create or update a contact */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            userId?: string | null;
-            contactId?: string | null;
-            email: string;
-            firstName: string;
-            lastName?: string | null;
-            phoneNumber: string;
-            /** @enum {string} */
-            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-            /** @enum {string} */
-            contactPreference: 'Phone call' | 'Email' | 'Either';
-          };
-        };
-      };
-      responses: {
-        /** @description The created or updated contact */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Contact'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertContact'];
     delete?: never;
     options?: never;
     head?: never;
@@ -379,64 +74,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Match contacts */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            contactId?: string[] | null;
-            userId?: string[] | null;
-            email?: string | null;
-            firstName?: string | null;
-            lastName?: string | null;
-            phoneNumber?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description Contacts matching the given search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Contact'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['matchContacts'];
     delete?: never;
     options?: never;
     head?: never;
@@ -453,74 +91,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search contacts */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            userId?: string[] | null;
-            contactId?: string[] | null;
-            email?: string | null;
-            firstName?: string | null;
-            lastName?: string | null;
-            phoneNumber?: string | null;
-            /** @enum {string|null} */
-            contactApplicantRelationship?: 'Property owner' | 'Project consultant' | 'Other' | null;
-            /** @enum {string|null} */
-            contactPreference?: 'Phone call' | 'Email' | 'Either' | null;
-            /** @default false */
-            hasActivity?: boolean;
-            /** @enum {string|null} */
-            initiative?: 'PCNS' | 'ELECTRIFICATION' | 'GENERAL' | 'HOUSING' | null;
-            /** @default false */
-            includeActivities?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description Contacts matching the given search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Contact'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchContacts'];
     delete?: never;
     options?: never;
     head?: never;
@@ -535,107 +106,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a specific contact */
-    get: {
-      parameters: {
-        query?: {
-          includeActivities?: boolean;
-        };
-        header?: never;
-        path: {
-          contactId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested contact */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Contact'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getContact'];
     put?: never;
     post?: never;
     /** Delete a specific contact */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          contactId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The contact was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteContact'];
     options?: never;
     head?: never;
     patch?: never;
@@ -649,97 +124,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of electrification projects */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of electrification projects */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProject'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationProjects'];
     put?: never;
     /** Creates a blank electrification project */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': Record<string, never>;
-        };
-      };
-      responses: {
-        /** @description The created electrification project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationProject'];
     delete?: never;
     options?: never;
     head?: never;
@@ -754,44 +142,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of all the activityIds */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of activity IDs */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string[];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationProjectActivityIds'];
     put?: never;
     post?: never;
     delete?: never;
@@ -810,74 +161,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search electrification projects */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            dateRange?: string[] | null;
-            includeUser?: boolean;
-            electrificationProjectId?: string[];
-            applicationStatus?: string[];
-            searchTag?: string;
-            projectType?: string[];
-            projectCategory?: string[];
-            /** @default 0 */
-            skip?: number | null;
-            sortField?: string | null;
-            /** @enum {string|null} */
-            sortOrder?: '0' | '1' | '-1' | null;
-            /** @default 10 */
-            take?: number;
-          };
-        };
-      };
-      responses: {
-        /** @description A list of electrification projects matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchElectrificationProjectsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchElectrificationProjects'];
     delete?: never;
     options?: never;
     head?: never;
@@ -892,58 +176,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets electrification project statistics */
-    get: {
-      parameters: {
-        query?: {
-          dateFrom?: string | null;
-          dateTo?: string | null;
-          monthYear?: string | null;
-          userId?: string | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Electrification project statistics */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProjectStatistics'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationProjectStatistics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -960,105 +193,11 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a electrification project draft */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationProjectDraft'];
     put?: never;
     post?: never;
     /** Hard deletes a electrification project draft */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The draft was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationProjectDraft'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1072,109 +211,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of electrification project drafts */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of electrification project drafts */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationProjectDrafts'];
     put?: never;
     /** Creates or updates an intake and set status to Draft */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            draftId?: string | null;
-            data: unknown;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated electrification project draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description The created electrification project draft */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertElectrificationProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1191,81 +231,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Creates or updates an intake and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string | null;
-            basic: {
-              projectDescription?: string | null;
-              projectName: string;
-              registeredId?: string | null;
-              registeredName: string;
-            };
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            draftId?: string | null;
-            project: {
-              bcHydroNumber?: string | null;
-              projectType: string;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The submitted electrification project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['submitElectrificationProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1280,186 +246,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific electrification project */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          electrificationProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested electrification project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationProject'];
     put?: never;
     post?: never;
     /** Deletes an electrification project */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          electrificationProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The electrification project was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationProject'];
     options?: never;
     head?: never;
     /** Patches a electrification project */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          electrificationProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            projectName?: string;
-            companyNameRegistered?: string | null;
-            companyIdRegistered?: string | null;
-            projectType?: string;
-            bcHydroNumber?: string | null;
-            projectDescription?: string | null;
-            projectCategory?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string|null} */
-            hasEpa?: 'Yes' | 'No' | null;
-            megawatts?: number | null;
-            /** @enum {string|null} */
-            bcEnvironmentAssessNeeded?: 'Yes' | 'No' | null;
-            locationDescription?: string | null;
-            astNotes?: string | null;
-            queuePriority?: number;
-            /** @enum {string} */
-            submissionType?: 'Guidance' | 'Inapplicable';
-            /** @enum {string} */
-            applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-            addedToAts?: boolean;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-            aaiUpdated?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated electrification project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ElectrificationProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchElectrificationProject'];
     trace?: never;
   };
   '/electrification/access-request': {
@@ -1470,139 +265,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get access requests */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of access requests */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationAccessRequests'];
     put?: never;
     /** Request to create/revoke a user and access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            user: {
-              userId?: string | null;
-              idp: string;
-              sub: string;
-              email: string;
-              firstName: string;
-              fullName: string;
-              lastName: string;
-              bceidBusinessName?: string | null;
-              active?: boolean;
-            };
-            accessRequest: {
-              accessRequestId?: string | null;
-              userId?: string | null;
-              grant: boolean;
-              groupId?: number | null;
-              status?: string | null;
-              update?: boolean | null;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was actioned immediately (caller is an admin, grant) */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              userId: string;
-              grant: boolean;
-              groupId?: number | null;
-              /** @enum {string} */
-              status: 'Approved' | 'Pending' | 'Rejected';
-            };
-          };
-        };
-        /** @description The created access request, pending approval */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'];
-          };
-        };
-        /** @description The access request was revoked immediately (caller is an admin, revoke) */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1619,59 +285,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Process an access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          accessRequestId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            approve: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was processed */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['processElectrificationAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1688,63 +302,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a document */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            documentId: string;
-            filename: string;
-            mimeType?: string;
-            filesize: number;
-          };
-        };
-      };
-      responses: {
-        /** @description The created document */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationDocument'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1762,53 +320,7 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a document */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          documentId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The document was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationDocument'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1822,55 +334,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of documents */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of documents for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationDocuments'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1887,55 +351,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets enquiries related to an activityId */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries related to the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listRelatedElectrificationEnquiries'];
     put?: never;
     post?: never;
     delete?: never;
@@ -1954,62 +370,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search all enquiries */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            enquiryId?: string[];
-            includeUser?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description A list of enquiries matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchElectrificationEnquiries'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2024,171 +385,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific enquiry */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationEnquiry'];
     put?: never;
     post?: never;
     /** Deletes an enquiry */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The enquiry was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationEnquiry'];
     options?: never;
     head?: never;
     /** Patches an enquiry */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            submissionType?: string | null;
-            relatedActivityId?: string | null;
-            enquiryDescription?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string} */
-            enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-            /** @enum {string} */
-            submittedMethod?: 'Email' | 'PCNS' | 'Phone';
-            addedToAts?: boolean;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchElectrificationEnquiry'];
     trace?: never;
   };
   '/electrification/enquiry': {
@@ -2199,113 +404,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of enquiries */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationEnquiries'];
     put?: never;
     /** Creates an enquiry and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            enquiryDescription?: string | null;
-            relatedActivityId?: string | null;
-            /** @enum {string|null} */
-            submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created enquiry */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['CreateEnquiryResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationEnquiry'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2322,70 +424,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a note history */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note: string;
-            shownToProponent?: boolean;
-            title: string;
-            type: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The created note history */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationNoteHistory'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2403,123 +442,11 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a note history */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The note history was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationNoteHistory'];
     options?: never;
     head?: never;
     /** Patch a note history */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note?: string | null;
-            /** @enum {string} */
-            resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
-            shownToProponent?: boolean;
-            title?: string;
-            type?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated note history */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchElectrificationNoteHistory'];
     trace?: never;
   };
   '/electrification/note/bring-forward': {
@@ -2530,55 +457,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of bring forward note histories */
-    get: {
-      parameters: {
-        query?: {
-          bringForwardState?: 'Unresolved' | 'Resolved';
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of bring forward note histories */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['BringForward'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationBringForwards'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2595,55 +474,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of note histories */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of note histories for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationNoteHistories'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2660,192 +491,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits */
-    get: {
-      parameters: {
-        query?: {
-          activityId?: string | null;
-          includeNotes?: boolean | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of permits */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listElectrificationPermits'];
     put?: never;
     /** Create or update a permit */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitType?: {
-              permitTypeId: number;
-              agency: string;
-              division?: string | null;
-              branch?: string | null;
-              businessDomain?: string | null;
-              type: string;
-              family?: string | null;
-              name: string;
-              nameSubtype?: string | null;
-              acronym?: string | null;
-              infoUrl?: string | null;
-              trackedInAts: boolean;
-              sourceSystem?: string | null;
-            };
-            permitId?: string | null;
-            permitTypeId: number;
-            activityId?: string;
-            issuedPermitId?: string | null;
-            permitNote?:
-              | ({
-                  permitId?: string | null;
-                  permitNoteId?: string | null;
-                  note: string;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                } | null)[]
-              | null;
-            permitTracking?:
-              | {
-                  trackingId?: string | null;
-                  permitTrackingId?: number | null;
-                  shownToProponent?: boolean | null;
-                  sourceSystemKindId?: number | null;
-                  sourceSystemKind?: {
-                    sourceSystemKindId: number;
-                    description: string;
-                    integrated?: boolean;
-                    kind?: string | null;
-                    sourceSystem: string;
-                    createdAt?: string | number | unknown;
-                    createdBy?: string | null;
-                    updatedAt?: string | number | unknown;
-                    updatedBy?: string | null;
-                    deletedAt?: string | number | unknown;
-                    deletedBy?: string | null;
-                  } | null;
-                  permitId?: string | null;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                }[]
-              | null;
-            needed: string;
-            state: string;
-            stage: string;
-            onHoldCode?: string | null;
-            submittedDate?: string | null;
-            submittedTime?: string | null;
-            decisionDate?: string | null;
-            decisionTime?: string | null;
-            statusLastChanged?: string | null;
-            statusLastChangedTime?: string | null;
-            statusLastVerified?: string | null;
-            statusLastVerifiedTime?: string | null;
-            /** Format: date-time */
-            targetDate?: string | null;
-            targetDateDescription?: string | null;
-            technicalReviewer?: string | null;
-            createdAt?: string | number | unknown;
-            createdBy?: string | null;
-            updatedAt?: string | number | unknown;
-            updatedBy?: string | null;
-            deletedAt?: string | number | unknown;
-            deletedBy?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created or updated permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertElectrificationPermit'];
     delete?: never;
     options?: never;
     head?: never;
@@ -2860,105 +509,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a permit */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationPermit'];
     put?: never;
     post?: never;
     /** Delete a permit */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The permit was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteElectrificationPermit'];
     options?: never;
     head?: never;
     patch?: never;
@@ -2974,62 +529,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create multiple permit records */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitTypeId: number;
-            activityId: string;
-            trackingId?: string | null;
-            submittedDate?: string | number | unknown;
-          }[];
-        };
-      };
-      responses: {
-        /** @description The created permits */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createElectrificationIntakePermits'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3044,62 +544,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits based on search criteria */
-    get: {
-      parameters: {
-        query?: {
-          dateRange?: string[] | null;
-          permitTypeId?: string | null;
-          searchTag?: string | null;
-          sourceSystemKindId?: string | null;
-          skip?: number | null;
-          sortField?: string | null;
-          sortOrder?: '0' | '1' | '-1' | null;
-          take?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Paginated permits matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchPermitsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['searchElectrificationPermits'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3118,72 +563,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Send an email with the roadmap data */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            selectedFileIds?: string[];
-            emailData: {
-              bcc?: string[];
-              bodyType: string;
-              body: string;
-              cc?: string[];
-              delayTS?: number;
-              from: string;
-              priority?: string;
-              subject: string;
-              tag?: string;
-              to: string[];
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The note history created for the sent roadmap */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['sendElectrificationRoadmap'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3198,55 +578,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get the roadmap note for a project */
-    get: {
-      parameters: {
-        query: {
-          activityId: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The generated roadmap note text */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string;
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationRoadmapNote'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3263,97 +595,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of general projects */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of general projects */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProject'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralProjects'];
     put?: never;
     /** Creates a blank general project */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': Record<string, never>;
-        };
-      };
-      responses: {
-        /** @description The created general project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralProject'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3368,44 +613,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of all the activityIds */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of activity IDs */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string[];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralProjectActivityIds'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3424,73 +632,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search general projects */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            dateRange?: string[] | null;
-            includeUser?: boolean;
-            generalProjectId?: string[];
-            applicationStatus?: string[];
-            searchTag?: string;
-            submissionType?: ('Guidance' | 'Inapplicable')[];
-            /** @default 0 */
-            skip?: number | null;
-            sortField?: string | null;
-            /** @enum {string|null} */
-            sortOrder?: '0' | '1' | '-1' | null;
-            /** @default 10 */
-            take?: number;
-          };
-        };
-      };
-      responses: {
-        /** @description A list of general projects matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchGeneralProjectsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchGeneralProjects'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3505,58 +647,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets general project statistics */
-    get: {
-      parameters: {
-        query?: {
-          dateFrom?: string | null;
-          dateTo?: string | null;
-          monthYear?: string | null;
-          userId?: string | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description General project statistics */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProjectStatistics'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralProjectStatistics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3573,105 +664,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a specific general project draft */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralProjectDraft'];
     put?: never;
     post?: never;
     /** Hard deletes a general project draft */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The draft was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralProjectDraft'];
     options?: never;
     head?: never;
     patch?: never;
@@ -3685,109 +682,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of general project drafts */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of general project drafts */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralProjectDrafts'];
     put?: never;
     /** Creates or updates an intake and set status to Draft */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            draftId?: string | null;
-            data: unknown;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated general project draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description The created general project draft */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertGeneralProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3804,139 +702,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Creates or updates an intake and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            draftId?: string | null;
-            activityId?: string | null;
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            basic: {
-              /** @enum {string} */
-              projectApplicantType: 'Business' | 'Individual';
-              projectName: string;
-              projectNumber?: string;
-              projectDescription: string;
-              registeredId?: string | null;
-              registeredName?: string | null;
-            };
-            location: {
-              /** @enum {string} */
-              naturalDisaster: 'Yes' | 'No';
-              /** @enum {string} */
-              projectLocation: 'Location coordinates' | 'Street address' | 'Pin or draw your location';
-              streetAddress?: string | null;
-              locality?: string | null;
-              province?: string | null;
-              latitude?: number | null;
-              longitude?: number | null;
-              ltsaPidLookup?: string | null;
-              geomarkUrl?: string | null;
-              geoJson?: unknown;
-              projectLocationDescription?: string | null;
-            };
-            permits: {
-              appliedPermits?:
-                | {
-                    permitTypeId: number;
-                    stage?: string | null;
-                    submittedDate?: string | number | unknown;
-                    permitTracking?:
-                      | {
-                          trackingId?: string | null;
-                          permitTrackingId?: number | null;
-                          shownToProponent?: boolean | null;
-                          sourceSystemKindId?: number | null;
-                          sourceSystemKind?: {
-                            sourceSystemKindId: number;
-                            description: string;
-                            integrated?: boolean;
-                            kind?: string | null;
-                            sourceSystem: string;
-                            createdAt?: string | number | unknown;
-                            createdBy?: string | null;
-                            updatedAt?: string | number | unknown;
-                            updatedBy?: string | null;
-                            deletedAt?: string | number | unknown;
-                            deletedBy?: string | null;
-                          } | null;
-                          permitId?: string | null;
-                          createdAt?: string | number | unknown;
-                          createdBy?: string | null;
-                          updatedAt?: string | number | unknown;
-                          updatedBy?: string | null;
-                          deletedAt?: string | number | unknown;
-                          deletedBy?: string | null;
-                        }[]
-                      | null;
-                  }[]
-                | null;
-              /** @enum {string} */
-              hasAppliedProvincialPermits: 'Yes' | 'No' | 'Unsure';
-              investigatePermits?:
-                | {
-                    permitTypeId: number;
-                  }[]
-                | null;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The submitted general project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['submitGeneralProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -3951,190 +717,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific general project */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          generalProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested general project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralProject'];
     put?: never;
     post?: never;
     /** Deletes a general project */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          generalProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The general project was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralProject'];
     options?: never;
     head?: never;
     /** Patches a general project */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          generalProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            queuePriority?: number;
-            /** @enum {string} */
-            submissionType?: 'Guidance' | 'Inapplicable';
-            companyNameRegistered?: string | null;
-            companyIdRegistered?: string | null;
-            projectName?: string;
-            activityType?: string;
-            projectDescription?: string | null;
-            streetAddress?: string | null;
-            locality?: string | null;
-            province?: string | null;
-            locationPids?: string | null;
-            latitude?: number | null;
-            longitude?: number | null;
-            geomarkUrl?: string | null;
-            geoJson?: unknown;
-            naturalDisaster?: boolean;
-            projectLocationDescription?: string | null;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-            aaiUpdated?: boolean;
-            astNotes?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string} */
-            applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-            region?: string | null;
-            area?: string | null;
-            businessArea?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated general project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['GeneralProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchGeneralProject'];
     trace?: never;
   };
   '/general/access-request': {
@@ -4145,139 +736,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get access requests */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of access requests */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralAccessRequests'];
     put?: never;
     /** Request to create/revoke a user and access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            user: {
-              userId?: string | null;
-              idp: string;
-              sub: string;
-              email: string;
-              firstName: string;
-              fullName: string;
-              lastName: string;
-              bceidBusinessName?: string | null;
-              active?: boolean;
-            };
-            accessRequest: {
-              accessRequestId?: string | null;
-              userId?: string | null;
-              grant: boolean;
-              groupId?: number | null;
-              status?: string | null;
-              update?: boolean | null;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was actioned immediately (caller is an admin, grant) */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              userId: string;
-              grant: boolean;
-              groupId?: number | null;
-              /** @enum {string} */
-              status: 'Approved' | 'Pending' | 'Rejected';
-            };
-          };
-        };
-        /** @description The created access request, pending approval */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'];
-          };
-        };
-        /** @description The access request was revoked immediately (caller is an admin, revoke) */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4294,59 +756,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Process an access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          accessRequestId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            approve: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was processed */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['processGeneralAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4363,63 +773,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a document */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            documentId: string;
-            filename: string;
-            mimeType?: string;
-            filesize: number;
-          };
-        };
-      };
-      responses: {
-        /** @description The created document */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralDocument'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4437,53 +791,7 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a document */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          documentId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The document was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralDocument'];
     options?: never;
     head?: never;
     patch?: never;
@@ -4497,55 +805,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of documents */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of documents for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralDocuments'];
     put?: never;
     post?: never;
     delete?: never;
@@ -4562,55 +822,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets enquiries related to an activityId */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries related to the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listRelatedGeneralEnquiries'];
     put?: never;
     post?: never;
     delete?: never;
@@ -4629,62 +841,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search all enquiries */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            enquiryId?: string[];
-            includeUser?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description A list of enquiries matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchGeneralEnquiries'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4699,171 +856,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific enquiry */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralEnquiry'];
     put?: never;
     post?: never;
     /** Deletes an enquiry */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The enquiry was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralEnquiry'];
     options?: never;
     head?: never;
     /** Patches an enquiry */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            submissionType?: string | null;
-            relatedActivityId?: string | null;
-            enquiryDescription?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string} */
-            enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-            /** @enum {string} */
-            submittedMethod?: 'Email' | 'PCNS' | 'Phone';
-            addedToAts?: boolean;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchGeneralEnquiry'];
     trace?: never;
   };
   '/general/enquiry': {
@@ -4874,113 +875,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of enquiries */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralEnquiries'];
     put?: never;
     /** Creates an enquiry and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            enquiryDescription?: string | null;
-            relatedActivityId?: string | null;
-            /** @enum {string|null} */
-            submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created enquiry */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['CreateEnquiryResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralEnquiry'];
     delete?: never;
     options?: never;
     head?: never;
@@ -4995,62 +893,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get PIDs for a project */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          projectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The PIDs for the project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string;
-          };
-        };
-        /** @description No PIDs found for the project */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralProjectPids'];
     put?: never;
     post?: never;
     delete?: never;
@@ -5069,70 +912,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a note history */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note: string;
-            shownToProponent?: boolean;
-            title: string;
-            type: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The created note history */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralNoteHistory'];
     delete?: never;
     options?: never;
     head?: never;
@@ -5150,123 +930,11 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a note history */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The note history was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralNoteHistory'];
     options?: never;
     head?: never;
     /** Patch a note history */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note?: string | null;
-            /** @enum {string} */
-            resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
-            shownToProponent?: boolean;
-            title?: string;
-            type?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated note history */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchGeneralNoteHistory'];
     trace?: never;
   };
   '/general/note/bring-forward': {
@@ -5277,55 +945,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of bring forward note histories */
-    get: {
-      parameters: {
-        query?: {
-          bringForwardState?: 'Unresolved' | 'Resolved';
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of bring forward note histories */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['BringForward'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralBringForwards'];
     put?: never;
     post?: never;
     delete?: never;
@@ -5342,55 +962,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of note histories */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of note histories for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralNoteHistories'];
     put?: never;
     post?: never;
     delete?: never;
@@ -5407,192 +979,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits */
-    get: {
-      parameters: {
-        query?: {
-          activityId?: string | null;
-          includeNotes?: boolean | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of permits */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listGeneralPermits'];
     put?: never;
     /** Create or update a permit */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitType?: {
-              permitTypeId: number;
-              agency: string;
-              division?: string | null;
-              branch?: string | null;
-              businessDomain?: string | null;
-              type: string;
-              family?: string | null;
-              name: string;
-              nameSubtype?: string | null;
-              acronym?: string | null;
-              infoUrl?: string | null;
-              trackedInAts: boolean;
-              sourceSystem?: string | null;
-            };
-            permitId?: string | null;
-            permitTypeId: number;
-            activityId?: string;
-            issuedPermitId?: string | null;
-            permitNote?:
-              | ({
-                  permitId?: string | null;
-                  permitNoteId?: string | null;
-                  note: string;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                } | null)[]
-              | null;
-            permitTracking?:
-              | {
-                  trackingId?: string | null;
-                  permitTrackingId?: number | null;
-                  shownToProponent?: boolean | null;
-                  sourceSystemKindId?: number | null;
-                  sourceSystemKind?: {
-                    sourceSystemKindId: number;
-                    description: string;
-                    integrated?: boolean;
-                    kind?: string | null;
-                    sourceSystem: string;
-                    createdAt?: string | number | unknown;
-                    createdBy?: string | null;
-                    updatedAt?: string | number | unknown;
-                    updatedBy?: string | null;
-                    deletedAt?: string | number | unknown;
-                    deletedBy?: string | null;
-                  } | null;
-                  permitId?: string | null;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                }[]
-              | null;
-            needed: string;
-            state: string;
-            stage: string;
-            onHoldCode?: string | null;
-            submittedDate?: string | null;
-            submittedTime?: string | null;
-            decisionDate?: string | null;
-            decisionTime?: string | null;
-            statusLastChanged?: string | null;
-            statusLastChangedTime?: string | null;
-            statusLastVerified?: string | null;
-            statusLastVerifiedTime?: string | null;
-            /** Format: date-time */
-            targetDate?: string | null;
-            targetDateDescription?: string | null;
-            technicalReviewer?: string | null;
-            createdAt?: string | number | unknown;
-            createdBy?: string | null;
-            updatedAt?: string | number | unknown;
-            updatedBy?: string | null;
-            deletedAt?: string | number | unknown;
-            deletedBy?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created or updated permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertGeneralPermit'];
     delete?: never;
     options?: never;
     head?: never;
@@ -5607,105 +997,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a permit */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralPermit'];
     put?: never;
     post?: never;
     /** Delete a permit */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The permit was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteGeneralPermit'];
     options?: never;
     head?: never;
     patch?: never;
@@ -5721,62 +1017,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create multiple permit records */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitTypeId: number;
-            activityId: string;
-            trackingId?: string | null;
-            submittedDate?: string | number | unknown;
-          }[];
-        };
-      };
-      responses: {
-        /** @description The created permits */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createGeneralIntakePermits'];
     delete?: never;
     options?: never;
     head?: never;
@@ -5791,62 +1032,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits based on search criteria */
-    get: {
-      parameters: {
-        query?: {
-          dateRange?: string[] | null;
-          permitTypeId?: string | null;
-          searchTag?: string | null;
-          sourceSystemKindId?: string | null;
-          skip?: number | null;
-          sortField?: string | null;
-          sortOrder?: '0' | '1' | '-1' | null;
-          take?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Paginated permits matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchPermitsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['searchGeneralPermits'];
     put?: never;
     post?: never;
     delete?: never;
@@ -5865,72 +1051,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Send an email with the roadmap data */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            selectedFileIds?: string[];
-            emailData: {
-              bcc?: string[];
-              bodyType: string;
-              body: string;
-              cc?: string[];
-              delayTS?: number;
-              from: string;
-              priority?: string;
-              subject: string;
-              tag?: string;
-              to: string[];
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The note history created for the sent roadmap */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['sendGeneralRoadmap'];
     delete?: never;
     options?: never;
     head?: never;
@@ -5945,55 +1066,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get the roadmap note for a project */
-    get: {
-      parameters: {
-        query: {
-          activityId: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The generated roadmap note text */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string;
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralRoadmapNote'];
     put?: never;
     post?: never;
     delete?: never;
@@ -6010,97 +1083,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of housing projects */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of housing projects */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProject'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingProjects'];
     put?: never;
     /** Creates a blank housing project */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': Record<string, never>;
-        };
-      };
-      responses: {
-        /** @description The created housing project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingProject'];
     delete?: never;
     options?: never;
     head?: never;
@@ -6115,44 +1101,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of all the activityIds */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of activity IDs */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string[];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingProjectActivityIds'];
     put?: never;
     post?: never;
     delete?: never;
@@ -6171,73 +1120,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search housing projects */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            dateRange?: string[] | null;
-            includeUser?: boolean;
-            housingProjectId?: string[];
-            applicationStatus?: string[];
-            searchTag?: string;
-            submissionType?: ('Guidance' | 'Inapplicable')[];
-            /** @default 0 */
-            skip?: number | null;
-            sortField?: string | null;
-            /** @enum {string|null} */
-            sortOrder?: '0' | '1' | '-1' | null;
-            /** @default 10 */
-            take?: number;
-          };
-        };
-      };
-      responses: {
-        /** @description Housing projects matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchHousingProjectsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchHousingProjects'];
     delete?: never;
     options?: never;
     head?: never;
@@ -6252,58 +1135,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets housing project statistics */
-    get: {
-      parameters: {
-        query?: {
-          dateFrom?: string | null;
-          dateTo?: string | null;
-          monthYear?: string | null;
-          userId?: string | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Housing project statistics */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProjectStatistics'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingProjectStatistics'];
     put?: never;
     post?: never;
     delete?: never;
@@ -6320,105 +1152,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a specific housing project draft */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A housing project draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingProjectDraft'];
     put?: never;
     post?: never;
     /** Hard deletes a housing project draft */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          draftId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The draft was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingProjectDraft'];
     options?: never;
     head?: never;
     patch?: never;
@@ -6432,109 +1170,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of housing project drafts */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of housing project drafts */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingProjectDrafts'];
     put?: never;
     /** Creates or updates an intake and set status to Draft */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            draftId?: string | null;
-            data: unknown;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated housing project draft */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description The created housing project draft */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Draft'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertHousingProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -6551,166 +1190,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Creates or updates an intake and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            draftId?: string | null;
-            activityId?: string | null;
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            basic: {
-              consentToFeedback: boolean;
-              /** @enum {string} */
-              projectApplicantType: 'Business' | 'Individual';
-              projectName: string;
-              projectDescription: string;
-              registeredId?: string | null;
-              registeredName?: string | null;
-            };
-            housing: {
-              /** @enum {string} */
-              financiallySupportedBc: 'Yes' | 'No' | 'Unsure';
-              /** @enum {string} */
-              financiallySupportedIndigenous: 'Yes' | 'No' | 'Unsure';
-              /** @enum {string} */
-              financiallySupportedNonProfit: 'Yes' | 'No' | 'Unsure';
-              /** @enum {string} */
-              financiallySupportedHousingCoop: 'Yes' | 'No' | 'Unsure';
-              /** @enum {string} */
-              hasRentalUnits: 'Yes' | 'No' | 'Unsure';
-              housingCoopDescription?: string;
-              indigenousDescription?: string;
-              multiFamilySelected?: boolean | null;
-              /** @enum {string} */
-              multiFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
-              nonProfitDescription?: string;
-              otherSelected?: boolean | null;
-              /** @enum {string} */
-              otherUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
-              otherUnitsDescription?: string;
-              /** @enum {string} */
-              rentalUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
-              singleFamilySelected?: boolean | null;
-              /** @enum {string} */
-              singleFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
-            };
-            location: {
-              /** @enum {string} */
-              naturalDisaster: 'Yes' | 'No';
-              /** @enum {string} */
-              projectLocation: 'Location coordinates' | 'Street address' | 'Pin or draw your location';
-              streetAddress?: string | null;
-              locality?: string | null;
-              province?: string | null;
-              latitude?: number | null;
-              longitude?: number | null;
-              ltsaPidLookup?: string | null;
-              geomarkUrl?: string | null;
-              geoJson?: unknown;
-              projectLocationDescription?: string | null;
-            };
-            permits: {
-              appliedPermits?:
-                | {
-                    permitTypeId: number;
-                    stage?: string | null;
-                    submittedDate?: string | number | unknown;
-                    permitTracking?:
-                      | {
-                          trackingId?: string | null;
-                          permitTrackingId?: number | null;
-                          shownToProponent?: boolean | null;
-                          sourceSystemKindId?: number | null;
-                          sourceSystemKind?: {
-                            sourceSystemKindId: number;
-                            description: string;
-                            integrated?: boolean;
-                            kind?: string | null;
-                            sourceSystem: string;
-                            createdAt?: string | number | unknown;
-                            createdBy?: string | null;
-                            updatedAt?: string | number | unknown;
-                            updatedBy?: string | null;
-                            deletedAt?: string | number | unknown;
-                            deletedBy?: string | null;
-                          } | null;
-                          permitId?: string | null;
-                          createdAt?: string | number | unknown;
-                          createdBy?: string | null;
-                          updatedAt?: string | number | unknown;
-                          updatedBy?: string | null;
-                          deletedAt?: string | number | unknown;
-                          deletedBy?: string | null;
-                        }[]
-                      | null;
-                  }[]
-                | null;
-              /** @enum {string} */
-              hasAppliedProvincialPermits: 'Yes' | 'No' | 'Unsure';
-              investigatePermits?:
-                | {
-                    permitTypeId: number;
-                  }[]
-                | null;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The submitted housing project */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['submitHousingProjectDraft'];
     delete?: never;
     options?: never;
     head?: never;
@@ -6725,211 +1205,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific housing project */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          housingProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A housing project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingProject'];
     put?: never;
     post?: never;
     /** Deletes a housing project */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          housingProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The housing project was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingProject'];
     options?: never;
     head?: never;
     /** Patches a housing project */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          housingProjectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            consentToFeedback?: boolean;
-            financiallySupported?: boolean;
-            queuePriority?: number;
-            /** @enum {string} */
-            submissionType?: 'Guidance' | 'Inapplicable';
-            companyNameRegistered?: string | null;
-            companyIdRegistered?: string | null;
-            projectName?: string;
-            projectDescription?: string | null;
-            /** @enum {string|null} */
-            singleFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure' | null;
-            /** @enum {string|null} */
-            multiFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure' | null;
-            otherUnitsDescription?: string | null;
-            otherUnits?: string | null;
-            /** @enum {string} */
-            hasRentalUnits?: 'Yes' | 'No' | 'Unsure';
-            rentalUnits?: string | null;
-            /** @enum {string} */
-            financiallySupportedBc?: 'Yes' | 'No' | 'Unsure';
-            /** @enum {string} */
-            financiallySupportedIndigenous?: 'Yes' | 'No' | 'Unsure';
-            indigenousDescription?: string | null;
-            /** @enum {string} */
-            financiallySupportedNonProfit?: 'Yes' | 'No' | 'Unsure';
-            nonProfitDescription?: string | null;
-            /** @enum {string} */
-            financiallySupportedHousingCoop?: 'Yes' | 'No' | 'Unsure';
-            housingCoopDescription?: string | null;
-            streetAddress?: string | null;
-            locality?: string | null;
-            province?: string | null;
-            locationPids?: string | null;
-            latitude?: number | null;
-            longitude?: number | null;
-            geomarkUrl?: string | null;
-            geoJson?: unknown;
-            naturalDisaster?: boolean;
-            projectLocationDescription?: string | null;
-            addedToAts?: boolean;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-            ltsaCompleted?: boolean;
-            bcOnlineCompleted?: boolean;
-            aaiUpdated?: boolean;
-            astNotes?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string} */
-            applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-          };
-        };
-      };
-      responses: {
-        /** @description The patched housing project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingProject'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchHousingProject'];
     trace?: never;
   };
   '/housing/access-request': {
@@ -6940,139 +1224,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get access requests */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of access requests */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingAccessRequests'];
     put?: never;
     /** Request to create/revoke a user and access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            user: {
-              userId?: string | null;
-              idp: string;
-              sub: string;
-              email: string;
-              firstName: string;
-              fullName: string;
-              lastName: string;
-              bceidBusinessName?: string | null;
-              active?: boolean;
-            };
-            accessRequest: {
-              accessRequestId?: string | null;
-              userId?: string | null;
-              grant: boolean;
-              groupId?: number | null;
-              status?: string | null;
-              update?: boolean | null;
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was actioned immediately (caller is an admin, grant) */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': {
-              userId: string;
-              grant: boolean;
-              groupId?: number | null;
-              /** @enum {string} */
-              status: 'Approved' | 'Pending' | 'Rejected';
-            };
-          };
-        };
-        /** @description The created access request, pending approval */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['AccessRequest'];
-          };
-        };
-        /** @description The access request was revoked immediately (caller is an admin, revoke) */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7089,59 +1244,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Process an access request */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          accessRequestId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            approve: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description The access request was processed */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['processHousingAccessRequest'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7158,63 +1261,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a document */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            documentId: string;
-            filename: string;
-            mimeType?: string;
-            filesize: number;
-          };
-        };
-      };
-      responses: {
-        /** @description The created document */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingDocument'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7232,53 +1279,7 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a document */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          documentId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The document was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingDocument'];
     options?: never;
     head?: never;
     patch?: never;
@@ -7292,55 +1293,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of documents */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of documents for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Document'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingDocuments'];
     put?: never;
     post?: never;
     delete?: never;
@@ -7357,55 +1310,7 @@ export interface paths {
       cookie?: never;
     };
     /** Gets enquiries related to an activityId */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries related to the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listRelatedHousingEnquiries'];
     put?: never;
     post?: never;
     delete?: never;
@@ -7424,62 +1329,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search all enquiries */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId?: string[];
-            createdBy?: string[];
-            enquiryId?: string[];
-            includeUser?: boolean;
-          };
-        };
-      };
-      responses: {
-        /** @description A list of enquiries matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchHousingEnquiries'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7494,171 +1344,15 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a specific enquiry */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingEnquiry'];
     put?: never;
     post?: never;
     /** Deletes an enquiry */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          enquiryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The enquiry was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingEnquiry'];
     options?: never;
     head?: never;
     /** Patches an enquiry */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            submissionType?: string | null;
-            relatedActivityId?: string | null;
-            enquiryDescription?: string | null;
-            assignedUserId?: string | null;
-            /** @enum {string} */
-            enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
-            /** @enum {string} */
-            submittedMethod?: 'Email' | 'PCNS' | 'Phone';
-            addedToAts?: boolean;
-            atsClientId?: number | null;
-            atsEnquiryId?: number | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated enquiry */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchHousingEnquiry'];
     trace?: never;
   };
   '/housing/enquiry': {
@@ -7669,113 +1363,10 @@ export interface paths {
       cookie?: never;
     };
     /** Gets a list of enquiries */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of enquiries */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Enquiry'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingEnquiries'];
     put?: never;
     /** Creates an enquiry and set status to Submitted */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            contact: {
-              contactId: string;
-              firstName: string;
-              lastName?: string | null;
-              email: string;
-              phoneNumber: string;
-              /** @enum {string} */
-              contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
-              /** @enum {string} */
-              contactPreference: 'Phone call' | 'Email' | 'Either';
-            };
-            enquiryDescription?: string | null;
-            relatedActivityId?: string | null;
-            /** @enum {string|null} */
-            submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created enquiry */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['CreateEnquiryResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingEnquiry'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7790,62 +1381,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get PIDs for a project */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          projectId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The PIDs for the project */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string;
-          };
-        };
-        /** @description No PIDs found for the project */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingProjectPids'];
     put?: never;
     post?: never;
     delete?: never;
@@ -7864,70 +1400,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create a note history */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note: string;
-            shownToProponent?: boolean;
-            title: string;
-            type: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The created note history */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingNoteHistory'];
     delete?: never;
     options?: never;
     head?: never;
@@ -7945,123 +1418,11 @@ export interface paths {
     put?: never;
     post?: never;
     /** Delete a note history */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The note history was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingNoteHistory'];
     options?: never;
     head?: never;
     /** Patch a note history */
-    patch: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          noteHistoryId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            /** Format: date-time */
-            bringForwardDate?: string | null;
-            /** @enum {string|null} */
-            bringForwardState?: 'Unresolved' | 'Resolved' | null;
-            escalateToSupervisor?: boolean;
-            escalateToDirector?: boolean;
-            escalationType?: string | null;
-            note?: string | null;
-            /** @enum {string} */
-            resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
-            shownToProponent?: boolean;
-            title?: string;
-            type?: string;
-          };
-        };
-      };
-      responses: {
-        /** @description The updated note history */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    patch: operations['patchHousingNoteHistory'];
     trace?: never;
   };
   '/housing/note/bring-forward': {
@@ -8072,55 +1433,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of bring forward note histories */
-    get: {
-      parameters: {
-        query?: {
-          bringForwardState?: 'Unresolved' | 'Resolved';
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of bring forward note histories */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['BringForward'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingBringForwards'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8137,55 +1450,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of note histories */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          activityId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of note histories for the activity */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingNoteHistories'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8202,192 +1467,10 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits */
-    get: {
-      parameters: {
-        query?: {
-          activityId?: string | null;
-          includeNotes?: boolean | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of permits */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listHousingPermits'];
     put?: never;
     /** Create or update a permit */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitType?: {
-              permitTypeId: number;
-              agency: string;
-              division?: string | null;
-              branch?: string | null;
-              businessDomain?: string | null;
-              type: string;
-              family?: string | null;
-              name: string;
-              nameSubtype?: string | null;
-              acronym?: string | null;
-              infoUrl?: string | null;
-              trackedInAts: boolean;
-              sourceSystem?: string | null;
-            };
-            permitId?: string | null;
-            permitTypeId: number;
-            activityId?: string;
-            issuedPermitId?: string | null;
-            permitNote?:
-              | ({
-                  permitId?: string | null;
-                  permitNoteId?: string | null;
-                  note: string;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                } | null)[]
-              | null;
-            permitTracking?:
-              | {
-                  trackingId?: string | null;
-                  permitTrackingId?: number | null;
-                  shownToProponent?: boolean | null;
-                  sourceSystemKindId?: number | null;
-                  sourceSystemKind?: {
-                    sourceSystemKindId: number;
-                    description: string;
-                    integrated?: boolean;
-                    kind?: string | null;
-                    sourceSystem: string;
-                    createdAt?: string | number | unknown;
-                    createdBy?: string | null;
-                    updatedAt?: string | number | unknown;
-                    updatedBy?: string | null;
-                    deletedAt?: string | number | unknown;
-                    deletedBy?: string | null;
-                  } | null;
-                  permitId?: string | null;
-                  createdAt?: string | number | unknown;
-                  createdBy?: string | null;
-                  updatedAt?: string | number | unknown;
-                  updatedBy?: string | null;
-                  deletedAt?: string | number | unknown;
-                  deletedBy?: string | null;
-                }[]
-              | null;
-            needed: string;
-            state: string;
-            stage: string;
-            onHoldCode?: string | null;
-            submittedDate?: string | null;
-            submittedTime?: string | null;
-            decisionDate?: string | null;
-            decisionTime?: string | null;
-            statusLastChanged?: string | null;
-            statusLastChangedTime?: string | null;
-            statusLastVerified?: string | null;
-            statusLastVerifiedTime?: string | null;
-            /** Format: date-time */
-            targetDate?: string | null;
-            targetDateDescription?: string | null;
-            technicalReviewer?: string | null;
-            createdAt?: string | number | unknown;
-            createdBy?: string | null;
-            updatedAt?: string | number | unknown;
-            updatedBy?: string | null;
-            deletedAt?: string | number | unknown;
-            deletedBy?: string | null;
-          };
-        };
-      };
-      responses: {
-        /** @description The created or updated permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['upsertHousingPermit'];
     delete?: never;
     options?: never;
     head?: never;
@@ -8402,105 +1485,11 @@ export interface paths {
       cookie?: never;
     };
     /** Get a permit */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The requested permit */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingPermit'];
     put?: never;
     post?: never;
     /** Delete a permit */
-    delete: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path: {
-          permitId: string;
-        };
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The permit was deleted */
-        204: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content?: never;
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    delete: operations['deleteHousingPermit'];
     options?: never;
     head?: never;
     patch?: never;
@@ -8516,62 +1505,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Create multiple permit records */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            permitTypeId: number;
-            activityId: string;
-            trackingId?: string | null;
-            submittedDate?: string | number | unknown;
-          }[];
-        };
-      };
-      responses: {
-        /** @description The created permits */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['Permit'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['createHousingIntakePermits'];
     delete?: never;
     options?: never;
     head?: never;
@@ -8586,62 +1520,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permits based on search criteria */
-    get: {
-      parameters: {
-        query?: {
-          dateRange?: string[] | null;
-          permitTypeId?: string | null;
-          searchTag?: string | null;
-          sourceSystemKindId?: string | null;
-          skip?: number | null;
-          sortField?: string | null;
-          sortOrder?: '0' | '1' | '-1' | null;
-          take?: number;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Paginated permits matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SearchPermitsResponse'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['searchHousingPermits'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8660,72 +1539,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Send an email with the roadmap data */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            activityId: string;
-            selectedFileIds?: string[];
-            emailData: {
-              bcc?: string[];
-              bodyType: string;
-              body: string;
-              cc?: string[];
-              delayTS?: number;
-              from: string;
-              priority?: string;
-              subject: string;
-              tag?: string;
-              to: string[];
-            };
-          };
-        };
-      };
-      responses: {
-        /** @description The note history created for the sent roadmap */
-        201: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['NoteHistory'];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['sendHousingRoadmap'];
     delete?: never;
     options?: never;
     head?: never;
@@ -8740,55 +1554,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get the roadmap note for a project */
-    get: {
-      parameters: {
-        query: {
-          activityId: string;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description The generated roadmap note text */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': string;
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingRoadmapNote'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8805,55 +1571,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get a list of permit types */
-    get: {
-      parameters: {
-        query?: {
-          initiative?: 'PCNS' | 'ELECTRIFICATION' | 'GENERAL' | 'HOUSING' | null;
-        };
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of permit types */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['PermitTypeWithInitiatives'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listPermitTypes'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8870,44 +1588,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get all electrification project and permit data for csv download */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Electrification project permit report rows */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ReportingPermitData'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getElectrificationProjectPermitReport'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8924,44 +1605,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get all general project and permit data for csv download */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description General project permit report rows */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['ReportingPermitData'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getGeneralProjectPermitReport'];
     put?: never;
     post?: never;
     delete?: never;
@@ -8978,44 +1622,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get all housing project and permit data for csv download */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description Housing project permit report rows */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['HousingReportingPermitData'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['getHousingProjectPermitReport'];
     put?: never;
     post?: never;
     delete?: never;
@@ -9032,35 +1639,7 @@ export interface paths {
       cookie?: never;
     };
     /** Get all source system kind table data */
-    get: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: never;
-      responses: {
-        /** @description A list of source system kinds */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['SourceSystemKind'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    get: operations['listSourceSystemKinds'];
     put?: never;
     post?: never;
     delete?: never;
@@ -9079,69 +1658,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** Search users */
-    post: {
-      parameters: {
-        query?: never;
-        header?: never;
-        path?: never;
-        cookie?: never;
-      };
-      requestBody?: {
-        content: {
-          'application/json': {
-            userId?: string[];
-            idp?: string[];
-            sub?: string;
-            email?: string;
-            firstName?: string;
-            fullName?: string;
-            lastName?: string;
-            active?: boolean;
-            group?: string[];
-            includeUserGroups?: boolean;
-            initiative?: string[];
-          };
-        };
-      };
-      responses: {
-        /** @description A list of users matching the search criteria */
-        200: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/json': components['schemas']['User'][];
-          };
-        };
-        /** @description Unauthorized */
-        401: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Forbidden */
-        403: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-        /** @description Validation error */
-        422: {
-          headers: {
-            [name: string]: unknown;
-          };
-          content: {
-            'application/problem+json': components['schemas']['Problem'];
-          };
-        };
-      };
-    };
+    post: operations['searchUsers'];
     delete?: never;
     options?: never;
     head?: never;
@@ -10241,4 +2758,7623 @@ export interface components {
   pathItems: never;
 }
 export type $defs = Record<string, never>;
-export type operations = Record<string, never>;
+export interface operations {
+  listActivityContacts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of activity contact linkages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ActivityContact'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  updateActivityContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          role: 'ADMIN' | 'MEMBER' | 'PRIMARY';
+        };
+      };
+    };
+    responses: {
+      /** @description The updated (and possibly demoted) activity contact linkages */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UpdateActivityContactResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createActivityContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** @enum {string} */
+          role: 'ADMIN' | 'MEMBER' | 'PRIMARY';
+        };
+      };
+    };
+    responses: {
+      /** @description The created activity contact linkage */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ActivityContact'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteActivityContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The activity contact linkage was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getCurrentContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The current user's contact */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Contact'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          userId?: string | null;
+          contactId?: string | null;
+          email: string;
+          firstName: string;
+          lastName?: string | null;
+          phoneNumber: string;
+          /** @enum {string} */
+          contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+          /** @enum {string} */
+          contactPreference: 'Phone call' | 'Email' | 'Either';
+        };
+      };
+    };
+    responses: {
+      /** @description The created or updated contact */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Contact'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  matchContacts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          contactId?: string[] | null;
+          userId?: string[] | null;
+          email?: string | null;
+          firstName?: string | null;
+          lastName?: string | null;
+          phoneNumber?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description Contacts matching the given search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Contact'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchContacts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          userId?: string[] | null;
+          contactId?: string[] | null;
+          email?: string | null;
+          firstName?: string | null;
+          lastName?: string | null;
+          phoneNumber?: string | null;
+          /** @enum {string|null} */
+          contactApplicantRelationship?: 'Property owner' | 'Project consultant' | 'Other' | null;
+          /** @enum {string|null} */
+          contactPreference?: 'Phone call' | 'Email' | 'Either' | null;
+          /** @default false */
+          hasActivity?: boolean;
+          /** @enum {string|null} */
+          initiative?: 'PCNS' | 'ELECTRIFICATION' | 'GENERAL' | 'HOUSING' | null;
+          /** @default false */
+          includeActivities?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description Contacts matching the given search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Contact'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getContact: {
+    parameters: {
+      query?: {
+        includeActivities?: boolean;
+      };
+      header?: never;
+      path: {
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested contact */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Contact'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteContact: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        contactId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The contact was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of electrification projects */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProject'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description The created electrification project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationProjectActivityIds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of activity IDs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchElectrificationProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          dateRange?: string[] | null;
+          includeUser?: boolean;
+          electrificationProjectId?: string[];
+          applicationStatus?: string[];
+          searchTag?: string;
+          projectType?: string[];
+          projectCategory?: string[];
+          /** @default 0 */
+          skip?: number | null;
+          sortField?: string | null;
+          /** @enum {string|null} */
+          sortOrder?: '0' | '1' | '-1' | null;
+          /** @default 10 */
+          take?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description A list of electrification projects matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchElectrificationProjectsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationProjectStatistics: {
+    parameters: {
+      query?: {
+        dateFrom?: string | null;
+        dateTo?: string | null;
+        monthYear?: string | null;
+        userId?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Electrification project statistics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProjectStatistics'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The draft was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationProjectDrafts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of electrification project drafts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertElectrificationProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          draftId?: string | null;
+          data: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated electrification project draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description The created electrification project draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  submitElectrificationProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string | null;
+          basic: {
+            projectDescription?: string | null;
+            projectName: string;
+            registeredId?: string | null;
+            registeredName: string;
+          };
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          draftId?: string | null;
+          project: {
+            bcHydroNumber?: string | null;
+            projectType: string;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The submitted electrification project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        electrificationProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested electrification project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        electrificationProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The electrification project was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchElectrificationProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        electrificationProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          projectName?: string;
+          companyNameRegistered?: string | null;
+          companyIdRegistered?: string | null;
+          projectType?: string;
+          bcHydroNumber?: string | null;
+          projectDescription?: string | null;
+          projectCategory?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string|null} */
+          hasEpa?: 'Yes' | 'No' | null;
+          megawatts?: number | null;
+          /** @enum {string|null} */
+          bcEnvironmentAssessNeeded?: 'Yes' | 'No' | null;
+          locationDescription?: string | null;
+          astNotes?: string | null;
+          queuePriority?: number;
+          /** @enum {string} */
+          submissionType?: 'Guidance' | 'Inapplicable';
+          /** @enum {string} */
+          applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+          addedToAts?: boolean;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+          aaiUpdated?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated electrification project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ElectrificationProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationAccessRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of access requests */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          user: {
+            userId?: string | null;
+            idp: string;
+            sub: string;
+            email: string;
+            firstName: string;
+            fullName: string;
+            lastName: string;
+            bceidBusinessName?: string | null;
+            active?: boolean;
+          };
+          accessRequest: {
+            accessRequestId?: string | null;
+            userId?: string | null;
+            grant: boolean;
+            groupId?: number | null;
+            status?: string | null;
+            update?: boolean | null;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was actioned immediately (caller is an admin, grant) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            userId: string;
+            grant: boolean;
+            groupId?: number | null;
+            /** @enum {string} */
+            status: 'Approved' | 'Pending' | 'Rejected';
+          };
+        };
+      };
+      /** @description The created access request, pending approval */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'];
+        };
+      };
+      /** @description The access request was revoked immediately (caller is an admin, revoke) */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  processElectrificationAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accessRequestId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          approve: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was processed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          documentId: string;
+          filename: string;
+          mimeType?: string;
+          filesize: number;
+        };
+      };
+    };
+    responses: {
+      /** @description The created document */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        documentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The document was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationDocuments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of documents for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listRelatedElectrificationEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries related to the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchElectrificationEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          enquiryId?: string[];
+          includeUser?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description A list of enquiries matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The enquiry was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchElectrificationEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          submissionType?: string | null;
+          relatedActivityId?: string | null;
+          enquiryDescription?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string} */
+          enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+          /** @enum {string} */
+          submittedMethod?: 'Email' | 'PCNS' | 'Phone';
+          addedToAts?: boolean;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          enquiryDescription?: string | null;
+          relatedActivityId?: string | null;
+          /** @enum {string|null} */
+          submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created enquiry */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreateEnquiryResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note: string;
+          shownToProponent?: boolean;
+          title: string;
+          type: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The created note history */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The note history was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchElectrificationNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note?: string | null;
+          /** @enum {string} */
+          resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
+          shownToProponent?: boolean;
+          title?: string;
+          type?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated note history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationBringForwards: {
+    parameters: {
+      query?: {
+        bringForwardState?: 'Unresolved' | 'Resolved';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of bring forward note histories */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BringForward'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationNoteHistories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of note histories for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listElectrificationPermits: {
+    parameters: {
+      query?: {
+        activityId?: string | null;
+        includeNotes?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of permits */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertElectrificationPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitType?: {
+            permitTypeId: number;
+            agency: string;
+            division?: string | null;
+            branch?: string | null;
+            businessDomain?: string | null;
+            type: string;
+            family?: string | null;
+            name: string;
+            nameSubtype?: string | null;
+            acronym?: string | null;
+            infoUrl?: string | null;
+            trackedInAts: boolean;
+            sourceSystem?: string | null;
+          };
+          permitId?: string | null;
+          permitTypeId: number;
+          activityId?: string;
+          issuedPermitId?: string | null;
+          permitNote?:
+            | ({
+                permitId?: string | null;
+                permitNoteId?: string | null;
+                note: string;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              } | null)[]
+            | null;
+          permitTracking?:
+            | {
+                trackingId?: string | null;
+                permitTrackingId?: number | null;
+                shownToProponent?: boolean | null;
+                sourceSystemKindId?: number | null;
+                sourceSystemKind?: {
+                  sourceSystemKindId: number;
+                  description: string;
+                  integrated?: boolean;
+                  kind?: string | null;
+                  sourceSystem: string;
+                  createdAt?: string | number | unknown;
+                  createdBy?: string | null;
+                  updatedAt?: string | number | unknown;
+                  updatedBy?: string | null;
+                  deletedAt?: string | number | unknown;
+                  deletedBy?: string | null;
+                } | null;
+                permitId?: string | null;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              }[]
+            | null;
+          needed: string;
+          state: string;
+          stage: string;
+          onHoldCode?: string | null;
+          submittedDate?: string | null;
+          submittedTime?: string | null;
+          decisionDate?: string | null;
+          decisionTime?: string | null;
+          statusLastChanged?: string | null;
+          statusLastChangedTime?: string | null;
+          statusLastVerified?: string | null;
+          statusLastVerifiedTime?: string | null;
+          /** Format: date-time */
+          targetDate?: string | null;
+          targetDateDescription?: string | null;
+          technicalReviewer?: string | null;
+          createdAt?: string | number | unknown;
+          createdBy?: string | null;
+          updatedAt?: string | number | unknown;
+          updatedBy?: string | null;
+          deletedAt?: string | number | unknown;
+          deletedBy?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created or updated permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteElectrificationPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The permit was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createElectrificationIntakePermits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitTypeId: number;
+          activityId: string;
+          trackingId?: string | null;
+          submittedDate?: string | number | unknown;
+        }[];
+      };
+    };
+    responses: {
+      /** @description The created permits */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchElectrificationPermits: {
+    parameters: {
+      query?: {
+        dateRange?: string[] | null;
+        permitTypeId?: string | null;
+        searchTag?: string | null;
+        sourceSystemKindId?: string | null;
+        skip?: number | null;
+        sortField?: string | null;
+        sortOrder?: '0' | '1' | '-1' | null;
+        take?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated permits matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPermitsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  sendElectrificationRoadmap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          selectedFileIds?: string[];
+          emailData: {
+            bcc?: string[];
+            bodyType: string;
+            body: string;
+            cc?: string[];
+            delayTS?: number;
+            from: string;
+            priority?: string;
+            subject: string;
+            tag?: string;
+            to: string[];
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The note history created for the sent roadmap */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationRoadmapNote: {
+    parameters: {
+      query: {
+        activityId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The generated roadmap note text */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of general projects */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProject'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description The created general project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralProjectActivityIds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of activity IDs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchGeneralProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          dateRange?: string[] | null;
+          includeUser?: boolean;
+          generalProjectId?: string[];
+          applicationStatus?: string[];
+          searchTag?: string;
+          submissionType?: ('Guidance' | 'Inapplicable')[];
+          /** @default 0 */
+          skip?: number | null;
+          sortField?: string | null;
+          /** @enum {string|null} */
+          sortOrder?: '0' | '1' | '-1' | null;
+          /** @default 10 */
+          take?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description A list of general projects matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchGeneralProjectsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralProjectStatistics: {
+    parameters: {
+      query?: {
+        dateFrom?: string | null;
+        dateTo?: string | null;
+        monthYear?: string | null;
+        userId?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description General project statistics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProjectStatistics'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The draft was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralProjectDrafts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of general project drafts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertGeneralProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          draftId?: string | null;
+          data: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated general project draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description The created general project draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  submitGeneralProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          draftId?: string | null;
+          activityId?: string | null;
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          basic: {
+            /** @enum {string} */
+            projectApplicantType: 'Business' | 'Individual';
+            projectName: string;
+            projectNumber?: string;
+            projectDescription: string;
+            registeredId?: string | null;
+            registeredName?: string | null;
+          };
+          location: {
+            /** @enum {string} */
+            naturalDisaster: 'Yes' | 'No';
+            /** @enum {string} */
+            projectLocation: 'Location coordinates' | 'Street address' | 'Pin or draw your location';
+            streetAddress?: string | null;
+            locality?: string | null;
+            province?: string | null;
+            latitude?: number | null;
+            longitude?: number | null;
+            ltsaPidLookup?: string | null;
+            geomarkUrl?: string | null;
+            geoJson?: unknown;
+            projectLocationDescription?: string | null;
+          };
+          permits: {
+            appliedPermits?:
+              | {
+                  permitTypeId: number;
+                  stage?: string | null;
+                  submittedDate?: string | number | unknown;
+                  permitTracking?:
+                    | {
+                        trackingId?: string | null;
+                        permitTrackingId?: number | null;
+                        shownToProponent?: boolean | null;
+                        sourceSystemKindId?: number | null;
+                        sourceSystemKind?: {
+                          sourceSystemKindId: number;
+                          description: string;
+                          integrated?: boolean;
+                          kind?: string | null;
+                          sourceSystem: string;
+                          createdAt?: string | number | unknown;
+                          createdBy?: string | null;
+                          updatedAt?: string | number | unknown;
+                          updatedBy?: string | null;
+                          deletedAt?: string | number | unknown;
+                          deletedBy?: string | null;
+                        } | null;
+                        permitId?: string | null;
+                        createdAt?: string | number | unknown;
+                        createdBy?: string | null;
+                        updatedAt?: string | number | unknown;
+                        updatedBy?: string | null;
+                        deletedAt?: string | number | unknown;
+                        deletedBy?: string | null;
+                      }[]
+                    | null;
+                }[]
+              | null;
+            /** @enum {string} */
+            hasAppliedProvincialPermits: 'Yes' | 'No' | 'Unsure';
+            investigatePermits?:
+              | {
+                  permitTypeId: number;
+                }[]
+              | null;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The submitted general project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        generalProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested general project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        generalProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The general project was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchGeneralProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        generalProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          queuePriority?: number;
+          /** @enum {string} */
+          submissionType?: 'Guidance' | 'Inapplicable';
+          companyNameRegistered?: string | null;
+          companyIdRegistered?: string | null;
+          projectName?: string;
+          activityType?: string;
+          projectDescription?: string | null;
+          streetAddress?: string | null;
+          locality?: string | null;
+          province?: string | null;
+          locationPids?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          geomarkUrl?: string | null;
+          geoJson?: unknown;
+          naturalDisaster?: boolean;
+          projectLocationDescription?: string | null;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+          aaiUpdated?: boolean;
+          astNotes?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string} */
+          applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+          region?: string | null;
+          area?: string | null;
+          businessArea?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated general project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GeneralProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralAccessRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of access requests */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          user: {
+            userId?: string | null;
+            idp: string;
+            sub: string;
+            email: string;
+            firstName: string;
+            fullName: string;
+            lastName: string;
+            bceidBusinessName?: string | null;
+            active?: boolean;
+          };
+          accessRequest: {
+            accessRequestId?: string | null;
+            userId?: string | null;
+            grant: boolean;
+            groupId?: number | null;
+            status?: string | null;
+            update?: boolean | null;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was actioned immediately (caller is an admin, grant) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            userId: string;
+            grant: boolean;
+            groupId?: number | null;
+            /** @enum {string} */
+            status: 'Approved' | 'Pending' | 'Rejected';
+          };
+        };
+      };
+      /** @description The created access request, pending approval */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'];
+        };
+      };
+      /** @description The access request was revoked immediately (caller is an admin, revoke) */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  processGeneralAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accessRequestId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          approve: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was processed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          documentId: string;
+          filename: string;
+          mimeType?: string;
+          filesize: number;
+        };
+      };
+    };
+    responses: {
+      /** @description The created document */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        documentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The document was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralDocuments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of documents for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listRelatedGeneralEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries related to the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchGeneralEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          enquiryId?: string[];
+          includeUser?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description A list of enquiries matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The enquiry was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchGeneralEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          submissionType?: string | null;
+          relatedActivityId?: string | null;
+          enquiryDescription?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string} */
+          enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+          /** @enum {string} */
+          submittedMethod?: 'Email' | 'PCNS' | 'Phone';
+          addedToAts?: boolean;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          enquiryDescription?: string | null;
+          relatedActivityId?: string | null;
+          /** @enum {string|null} */
+          submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created enquiry */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreateEnquiryResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralProjectPids: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PIDs for the project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description No PIDs found for the project */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note: string;
+          shownToProponent?: boolean;
+          title: string;
+          type: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The created note history */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The note history was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchGeneralNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note?: string | null;
+          /** @enum {string} */
+          resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
+          shownToProponent?: boolean;
+          title?: string;
+          type?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated note history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralBringForwards: {
+    parameters: {
+      query?: {
+        bringForwardState?: 'Unresolved' | 'Resolved';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of bring forward note histories */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BringForward'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralNoteHistories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of note histories for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listGeneralPermits: {
+    parameters: {
+      query?: {
+        activityId?: string | null;
+        includeNotes?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of permits */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertGeneralPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitType?: {
+            permitTypeId: number;
+            agency: string;
+            division?: string | null;
+            branch?: string | null;
+            businessDomain?: string | null;
+            type: string;
+            family?: string | null;
+            name: string;
+            nameSubtype?: string | null;
+            acronym?: string | null;
+            infoUrl?: string | null;
+            trackedInAts: boolean;
+            sourceSystem?: string | null;
+          };
+          permitId?: string | null;
+          permitTypeId: number;
+          activityId?: string;
+          issuedPermitId?: string | null;
+          permitNote?:
+            | ({
+                permitId?: string | null;
+                permitNoteId?: string | null;
+                note: string;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              } | null)[]
+            | null;
+          permitTracking?:
+            | {
+                trackingId?: string | null;
+                permitTrackingId?: number | null;
+                shownToProponent?: boolean | null;
+                sourceSystemKindId?: number | null;
+                sourceSystemKind?: {
+                  sourceSystemKindId: number;
+                  description: string;
+                  integrated?: boolean;
+                  kind?: string | null;
+                  sourceSystem: string;
+                  createdAt?: string | number | unknown;
+                  createdBy?: string | null;
+                  updatedAt?: string | number | unknown;
+                  updatedBy?: string | null;
+                  deletedAt?: string | number | unknown;
+                  deletedBy?: string | null;
+                } | null;
+                permitId?: string | null;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              }[]
+            | null;
+          needed: string;
+          state: string;
+          stage: string;
+          onHoldCode?: string | null;
+          submittedDate?: string | null;
+          submittedTime?: string | null;
+          decisionDate?: string | null;
+          decisionTime?: string | null;
+          statusLastChanged?: string | null;
+          statusLastChangedTime?: string | null;
+          statusLastVerified?: string | null;
+          statusLastVerifiedTime?: string | null;
+          /** Format: date-time */
+          targetDate?: string | null;
+          targetDateDescription?: string | null;
+          technicalReviewer?: string | null;
+          createdAt?: string | number | unknown;
+          createdBy?: string | null;
+          updatedAt?: string | number | unknown;
+          updatedBy?: string | null;
+          deletedAt?: string | number | unknown;
+          deletedBy?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created or updated permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteGeneralPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The permit was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createGeneralIntakePermits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitTypeId: number;
+          activityId: string;
+          trackingId?: string | null;
+          submittedDate?: string | number | unknown;
+        }[];
+      };
+    };
+    responses: {
+      /** @description The created permits */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchGeneralPermits: {
+    parameters: {
+      query?: {
+        dateRange?: string[] | null;
+        permitTypeId?: string | null;
+        searchTag?: string | null;
+        sourceSystemKindId?: string | null;
+        skip?: number | null;
+        sortField?: string | null;
+        sortOrder?: '0' | '1' | '-1' | null;
+        take?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated permits matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPermitsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  sendGeneralRoadmap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          selectedFileIds?: string[];
+          emailData: {
+            bcc?: string[];
+            bodyType: string;
+            body: string;
+            cc?: string[];
+            delayTS?: number;
+            from: string;
+            priority?: string;
+            subject: string;
+            tag?: string;
+            to: string[];
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The note history created for the sent roadmap */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralRoadmapNote: {
+    parameters: {
+      query: {
+        activityId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The generated roadmap note text */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of housing projects */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProject'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': Record<string, never>;
+      };
+    };
+    responses: {
+      /** @description The created housing project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingProjectActivityIds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of activity IDs */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string[];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchHousingProjects: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          dateRange?: string[] | null;
+          includeUser?: boolean;
+          housingProjectId?: string[];
+          applicationStatus?: string[];
+          searchTag?: string;
+          submissionType?: ('Guidance' | 'Inapplicable')[];
+          /** @default 0 */
+          skip?: number | null;
+          sortField?: string | null;
+          /** @enum {string|null} */
+          sortOrder?: '0' | '1' | '-1' | null;
+          /** @default 10 */
+          take?: number;
+        };
+      };
+    };
+    responses: {
+      /** @description Housing projects matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchHousingProjectsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingProjectStatistics: {
+    parameters: {
+      query?: {
+        dateFrom?: string | null;
+        dateTo?: string | null;
+        monthYear?: string | null;
+        userId?: string | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Housing project statistics */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProjectStatistics'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A housing project draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        draftId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The draft was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingProjectDrafts: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of housing project drafts */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertHousingProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          draftId?: string | null;
+          data: unknown;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated housing project draft */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description The created housing project draft */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Draft'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  submitHousingProjectDraft: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          draftId?: string | null;
+          activityId?: string | null;
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          basic: {
+            consentToFeedback: boolean;
+            /** @enum {string} */
+            projectApplicantType: 'Business' | 'Individual';
+            projectName: string;
+            projectDescription: string;
+            registeredId?: string | null;
+            registeredName?: string | null;
+          };
+          housing: {
+            /** @enum {string} */
+            financiallySupportedBc: 'Yes' | 'No' | 'Unsure';
+            /** @enum {string} */
+            financiallySupportedIndigenous: 'Yes' | 'No' | 'Unsure';
+            /** @enum {string} */
+            financiallySupportedNonProfit: 'Yes' | 'No' | 'Unsure';
+            /** @enum {string} */
+            financiallySupportedHousingCoop: 'Yes' | 'No' | 'Unsure';
+            /** @enum {string} */
+            hasRentalUnits: 'Yes' | 'No' | 'Unsure';
+            housingCoopDescription?: string;
+            indigenousDescription?: string;
+            multiFamilySelected?: boolean | null;
+            /** @enum {string} */
+            multiFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
+            nonProfitDescription?: string;
+            otherSelected?: boolean | null;
+            /** @enum {string} */
+            otherUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
+            otherUnitsDescription?: string;
+            /** @enum {string} */
+            rentalUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
+            singleFamilySelected?: boolean | null;
+            /** @enum {string} */
+            singleFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure';
+          };
+          location: {
+            /** @enum {string} */
+            naturalDisaster: 'Yes' | 'No';
+            /** @enum {string} */
+            projectLocation: 'Location coordinates' | 'Street address' | 'Pin or draw your location';
+            streetAddress?: string | null;
+            locality?: string | null;
+            province?: string | null;
+            latitude?: number | null;
+            longitude?: number | null;
+            ltsaPidLookup?: string | null;
+            geomarkUrl?: string | null;
+            geoJson?: unknown;
+            projectLocationDescription?: string | null;
+          };
+          permits: {
+            appliedPermits?:
+              | {
+                  permitTypeId: number;
+                  stage?: string | null;
+                  submittedDate?: string | number | unknown;
+                  permitTracking?:
+                    | {
+                        trackingId?: string | null;
+                        permitTrackingId?: number | null;
+                        shownToProponent?: boolean | null;
+                        sourceSystemKindId?: number | null;
+                        sourceSystemKind?: {
+                          sourceSystemKindId: number;
+                          description: string;
+                          integrated?: boolean;
+                          kind?: string | null;
+                          sourceSystem: string;
+                          createdAt?: string | number | unknown;
+                          createdBy?: string | null;
+                          updatedAt?: string | number | unknown;
+                          updatedBy?: string | null;
+                          deletedAt?: string | number | unknown;
+                          deletedBy?: string | null;
+                        } | null;
+                        permitId?: string | null;
+                        createdAt?: string | number | unknown;
+                        createdBy?: string | null;
+                        updatedAt?: string | number | unknown;
+                        updatedBy?: string | null;
+                        deletedAt?: string | number | unknown;
+                        deletedBy?: string | null;
+                      }[]
+                    | null;
+                }[]
+              | null;
+            /** @enum {string} */
+            hasAppliedProvincialPermits: 'Yes' | 'No' | 'Unsure';
+            investigatePermits?:
+              | {
+                  permitTypeId: number;
+                }[]
+              | null;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The submitted housing project */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        housingProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A housing project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        housingProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The housing project was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchHousingProject: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        housingProjectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          consentToFeedback?: boolean;
+          financiallySupported?: boolean;
+          queuePriority?: number;
+          /** @enum {string} */
+          submissionType?: 'Guidance' | 'Inapplicable';
+          companyNameRegistered?: string | null;
+          companyIdRegistered?: string | null;
+          projectName?: string;
+          projectDescription?: string | null;
+          /** @enum {string|null} */
+          singleFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure' | null;
+          /** @enum {string|null} */
+          multiFamilyUnits?: '1-9' | '10-49' | '50-500' | '>500' | 'Unsure' | null;
+          otherUnitsDescription?: string | null;
+          otherUnits?: string | null;
+          /** @enum {string} */
+          hasRentalUnits?: 'Yes' | 'No' | 'Unsure';
+          rentalUnits?: string | null;
+          /** @enum {string} */
+          financiallySupportedBc?: 'Yes' | 'No' | 'Unsure';
+          /** @enum {string} */
+          financiallySupportedIndigenous?: 'Yes' | 'No' | 'Unsure';
+          indigenousDescription?: string | null;
+          /** @enum {string} */
+          financiallySupportedNonProfit?: 'Yes' | 'No' | 'Unsure';
+          nonProfitDescription?: string | null;
+          /** @enum {string} */
+          financiallySupportedHousingCoop?: 'Yes' | 'No' | 'Unsure';
+          housingCoopDescription?: string | null;
+          streetAddress?: string | null;
+          locality?: string | null;
+          province?: string | null;
+          locationPids?: string | null;
+          latitude?: number | null;
+          longitude?: number | null;
+          geomarkUrl?: string | null;
+          geoJson?: unknown;
+          naturalDisaster?: boolean;
+          projectLocationDescription?: string | null;
+          addedToAts?: boolean;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+          ltsaCompleted?: boolean;
+          bcOnlineCompleted?: boolean;
+          aaiUpdated?: boolean;
+          astNotes?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string} */
+          applicationStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+        };
+      };
+    };
+    responses: {
+      /** @description The patched housing project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingProject'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingAccessRequests: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of access requests */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          user: {
+            userId?: string | null;
+            idp: string;
+            sub: string;
+            email: string;
+            firstName: string;
+            fullName: string;
+            lastName: string;
+            bceidBusinessName?: string | null;
+            active?: boolean;
+          };
+          accessRequest: {
+            accessRequestId?: string | null;
+            userId?: string | null;
+            grant: boolean;
+            groupId?: number | null;
+            status?: string | null;
+            update?: boolean | null;
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was actioned immediately (caller is an admin, grant) */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': {
+            userId: string;
+            grant: boolean;
+            groupId?: number | null;
+            /** @enum {string} */
+            status: 'Approved' | 'Pending' | 'Rejected';
+          };
+        };
+      };
+      /** @description The created access request, pending approval */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AccessRequest'];
+        };
+      };
+      /** @description The access request was revoked immediately (caller is an admin, revoke) */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  processHousingAccessRequest: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        accessRequestId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          approve: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description The access request was processed */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          documentId: string;
+          filename: string;
+          mimeType?: string;
+          filesize: number;
+        };
+      };
+    };
+    responses: {
+      /** @description The created document */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingDocument: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        documentId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The document was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingDocuments: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of documents for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Document'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listRelatedHousingEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries related to the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchHousingEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId?: string[];
+          createdBy?: string[];
+          enquiryId?: string[];
+          includeUser?: boolean;
+        };
+      };
+    };
+    responses: {
+      /** @description A list of enquiries matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        enquiryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The enquiry was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchHousingEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          submissionType?: string | null;
+          relatedActivityId?: string | null;
+          enquiryDescription?: string | null;
+          assignedUserId?: string | null;
+          /** @enum {string} */
+          enquiryStatus?: 'New' | 'In Progress' | 'Delayed' | 'Completed';
+          /** @enum {string} */
+          submittedMethod?: 'Email' | 'PCNS' | 'Phone';
+          addedToAts?: boolean;
+          atsClientId?: number | null;
+          atsEnquiryId?: number | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated enquiry */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingEnquiries: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of enquiries */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Enquiry'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingEnquiry: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          contact: {
+            contactId: string;
+            firstName: string;
+            lastName?: string | null;
+            email: string;
+            phoneNumber: string;
+            /** @enum {string} */
+            contactApplicantRelationship: 'Property owner' | 'Project consultant' | 'Other';
+            /** @enum {string} */
+            contactPreference: 'Phone call' | 'Email' | 'Either';
+          };
+          enquiryDescription?: string | null;
+          relatedActivityId?: string | null;
+          /** @enum {string|null} */
+          submissionType?: 'Assistance' | 'General enquiry' | 'Status request' | 'Escalation' | 'Inapplicable' | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created enquiry */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CreateEnquiryResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingProjectPids: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        projectId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The PIDs for the project */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description No PIDs found for the project */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note: string;
+          shownToProponent?: boolean;
+          title: string;
+          type: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The created note history */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The note history was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  patchHousingNoteHistory: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        noteHistoryId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          /** Format: date-time */
+          bringForwardDate?: string | null;
+          /** @enum {string|null} */
+          bringForwardState?: 'Unresolved' | 'Resolved' | null;
+          escalateToSupervisor?: boolean;
+          escalateToDirector?: boolean;
+          escalationType?: string | null;
+          note?: string | null;
+          /** @enum {string} */
+          resource: 'ELECTRIFICATION_PROJECT' | 'ENQUIRY' | 'GENERAL_PROJECT' | 'HOUSING_PROJECT';
+          shownToProponent?: boolean;
+          title?: string;
+          type?: string;
+        };
+      };
+    };
+    responses: {
+      /** @description The updated note history */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingBringForwards: {
+    parameters: {
+      query?: {
+        bringForwardState?: 'Unresolved' | 'Resolved';
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of bring forward note histories */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BringForward'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingNoteHistories: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        activityId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of note histories for the activity */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listHousingPermits: {
+    parameters: {
+      query?: {
+        activityId?: string | null;
+        includeNotes?: boolean | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of permits */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  upsertHousingPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitType?: {
+            permitTypeId: number;
+            agency: string;
+            division?: string | null;
+            branch?: string | null;
+            businessDomain?: string | null;
+            type: string;
+            family?: string | null;
+            name: string;
+            nameSubtype?: string | null;
+            acronym?: string | null;
+            infoUrl?: string | null;
+            trackedInAts: boolean;
+            sourceSystem?: string | null;
+          };
+          permitId?: string | null;
+          permitTypeId: number;
+          activityId?: string;
+          issuedPermitId?: string | null;
+          permitNote?:
+            | ({
+                permitId?: string | null;
+                permitNoteId?: string | null;
+                note: string;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              } | null)[]
+            | null;
+          permitTracking?:
+            | {
+                trackingId?: string | null;
+                permitTrackingId?: number | null;
+                shownToProponent?: boolean | null;
+                sourceSystemKindId?: number | null;
+                sourceSystemKind?: {
+                  sourceSystemKindId: number;
+                  description: string;
+                  integrated?: boolean;
+                  kind?: string | null;
+                  sourceSystem: string;
+                  createdAt?: string | number | unknown;
+                  createdBy?: string | null;
+                  updatedAt?: string | number | unknown;
+                  updatedBy?: string | null;
+                  deletedAt?: string | number | unknown;
+                  deletedBy?: string | null;
+                } | null;
+                permitId?: string | null;
+                createdAt?: string | number | unknown;
+                createdBy?: string | null;
+                updatedAt?: string | number | unknown;
+                updatedBy?: string | null;
+                deletedAt?: string | number | unknown;
+                deletedBy?: string | null;
+              }[]
+            | null;
+          needed: string;
+          state: string;
+          stage: string;
+          onHoldCode?: string | null;
+          submittedDate?: string | null;
+          submittedTime?: string | null;
+          decisionDate?: string | null;
+          decisionTime?: string | null;
+          statusLastChanged?: string | null;
+          statusLastChangedTime?: string | null;
+          statusLastVerified?: string | null;
+          statusLastVerifiedTime?: string | null;
+          /** Format: date-time */
+          targetDate?: string | null;
+          targetDateDescription?: string | null;
+          technicalReviewer?: string | null;
+          createdAt?: string | number | unknown;
+          createdBy?: string | null;
+          updatedAt?: string | number | unknown;
+          updatedBy?: string | null;
+          deletedAt?: string | number | unknown;
+          deletedBy?: string | null;
+        };
+      };
+    };
+    responses: {
+      /** @description The created or updated permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The requested permit */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  deleteHousingPermit: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        permitId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The permit was deleted */
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  createHousingIntakePermits: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          permitTypeId: number;
+          activityId: string;
+          trackingId?: string | null;
+          submittedDate?: string | number | unknown;
+        }[];
+      };
+    };
+    responses: {
+      /** @description The created permits */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['Permit'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchHousingPermits: {
+    parameters: {
+      query?: {
+        dateRange?: string[] | null;
+        permitTypeId?: string | null;
+        searchTag?: string | null;
+        sourceSystemKindId?: string | null;
+        skip?: number | null;
+        sortField?: string | null;
+        sortOrder?: '0' | '1' | '-1' | null;
+        take?: number;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Paginated permits matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SearchPermitsResponse'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  sendHousingRoadmap: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          activityId: string;
+          selectedFileIds?: string[];
+          emailData: {
+            bcc?: string[];
+            bodyType: string;
+            body: string;
+            cc?: string[];
+            delayTS?: number;
+            from: string;
+            priority?: string;
+            subject: string;
+            tag?: string;
+            to: string[];
+          };
+        };
+      };
+    };
+    responses: {
+      /** @description The note history created for the sent roadmap */
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['NoteHistory'];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingRoadmapNote: {
+    parameters: {
+      query: {
+        activityId: string;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description The generated roadmap note text */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': string;
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listPermitTypes: {
+    parameters: {
+      query?: {
+        initiative?: 'PCNS' | 'ELECTRIFICATION' | 'GENERAL' | 'HOUSING' | null;
+      };
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of permit types */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PermitTypeWithInitiatives'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getElectrificationProjectPermitReport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Electrification project permit report rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReportingPermitData'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getGeneralProjectPermitReport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description General project permit report rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ReportingPermitData'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  getHousingProjectPermitReport: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description Housing project permit report rows */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['HousingReportingPermitData'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  listSourceSystemKinds: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      /** @description A list of source system kinds */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SourceSystemKind'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+  searchUsers: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: {
+      content: {
+        'application/json': {
+          userId?: string[];
+          idp?: string[];
+          sub?: string;
+          email?: string;
+          firstName?: string;
+          fullName?: string;
+          lastName?: string;
+          active?: boolean;
+          group?: string[];
+          includeUserGroups?: boolean;
+          initiative?: string[];
+        };
+      };
+    };
+    responses: {
+      /** @description A list of users matching the search criteria */
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['User'][];
+        };
+      };
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+      /** @description Validation error */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/problem+json': components['schemas']['Problem'];
+        };
+      };
+    };
+  };
+}

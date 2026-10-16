@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { ListPermitTypesRequest, PermitType } from '@/types';
+import type { PermitType, QueryParams } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -19,7 +19,7 @@ const permitTypeRoutes = {
  * @param req - The request payload containing the optional initiative.
  * @returns A promise resolving to the available permit types.
  */
-export function listPermitTypes(req: ListPermitTypesRequest): Promise<PermitType[]> {
+export function listPermitTypes(req: QueryParams<'listPermitTypes'>): Promise<PermitType[]> {
   const { initiative } = req;
 
   return api.get<PermitType[]>(permitTypeRoutes.root(), {

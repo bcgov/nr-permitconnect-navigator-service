@@ -315,10 +315,11 @@ describe('SubmissionStatistics.vue', () => {
       const { wrapper, mockProjectService } = mountSubmissionStatistics();
       const [dateFromPicker] = wrapper.findAllComponents(DatePicker);
 
-      await dateFromPicker.vm.$emit('update:modelValue', '2026-01-01');
+      // PrimeVue DatePicker emits Date objects; the query sends them as ISO strings
+      await dateFromPicker.vm.$emit('update:modelValue', new Date('2026-01-01T00:00:00.000Z'));
 
       expect(mockProjectService.getProjectStatistics).toHaveBeenCalledWith(
-        expect.objectContaining({ dateFrom: '2026-01-01', userId: undefined })
+        expect.objectContaining({ dateFrom: '2026-01-01T00:00:00.000Z', userId: undefined })
       );
     });
   });

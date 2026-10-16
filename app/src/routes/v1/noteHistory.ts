@@ -34,6 +34,7 @@ export default function createNoteHistoryRouter(basePath: string, tagPrefix: str
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `create${tagPrefix}NoteHistory`,
     summary: 'Create a note history',
     tags: [`${tagPrefix} Note`],
     schema: schema.createNoteHistory,
@@ -50,6 +51,7 @@ export default function createNoteHistoryRouter(basePath: string, tagPrefix: str
   openapiRoute(basePath, router, {
     method: 'patch',
     path: '/:noteHistoryId',
+    operationId: `patch${tagPrefix}NoteHistory`,
     summary: 'Patch a note history',
     tags: [`${tagPrefix} Note`],
     schema: schema.patchNoteHistory,
@@ -66,6 +68,7 @@ export default function createNoteHistoryRouter(basePath: string, tagPrefix: str
   openapiRoute(basePath, router, {
     method: 'delete',
     path: '/:noteHistoryId',
+    operationId: `delete${tagPrefix}NoteHistory`,
     summary: 'Delete a note history',
     tags: [`${tagPrefix} Note`],
     schema: schema.deleteNoteHistory,
@@ -82,6 +85,7 @@ export default function createNoteHistoryRouter(basePath: string, tagPrefix: str
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/bring-forward',
+    operationId: `list${tagPrefix}BringForwards`,
     summary: 'Get a list of bring forward note histories',
     tags: [`${tagPrefix} Note`],
     schema: schema.listBringForwards,
@@ -98,6 +102,7 @@ export default function createNoteHistoryRouter(basePath: string, tagPrefix: str
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/list/:activityId',
+    operationId: `list${tagPrefix}NoteHistories`,
     summary: 'Get a list of note histories',
     tags: [`${tagPrefix} Note`],
     schema: schema.listNoteHistory,

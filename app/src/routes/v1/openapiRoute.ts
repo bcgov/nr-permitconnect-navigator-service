@@ -47,6 +47,8 @@ export function openapiRoute<
   config: {
     method: Method;
     path: string;
+    // Unique across the API; names the operation in generated client types
+    operationId: string;
     summary: string;
     tags: string[];
     schema?: S;
@@ -56,11 +58,12 @@ export function openapiRoute<
     handler: RequestHandler<ParamsOf<S>, ResBody, BodyOf<S>, QueryOf<S>, Locals>;
   }
 ): void {
-  const { method, path, summary, tags, schema, responses, middleware = [], handler } = config;
+  const { method, path, operationId, summary, tags, schema, responses, middleware = [], handler } = config;
 
   registry.registerPath({
     method,
     path: `${basePath}${path === '/' ? '' : toOpenApiPath(path)}`,
+    operationId,
     summary,
     tags,
     request: {

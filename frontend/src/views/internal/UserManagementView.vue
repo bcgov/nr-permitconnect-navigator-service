@@ -273,18 +273,16 @@ async function onCreateUserAccessRequest(user: User, group: Group) {
       'deletedBy'
     ]);
 
-    const userAccessRequest: UserAccessRequest = {
-      user,
-      accessRequest: {
-        userId: user.userId,
-        grant: true,
-        status: AccessRequestStatus.PENDING,
-        groupId: group.groupId
-      }
+    const accessRequest = {
+      userId: user.userId,
+      grant: true,
+      status: AccessRequestStatus.PENDING,
+      groupId: group.groupId
     };
+    const userAccessRequest: UserAccessRequest = { user, accessRequest };
 
     const response = await accessRequestService.createAccessRequest({
-      accessRequest: { ...userAccessRequest.accessRequest },
+      accessRequest: { ...accessRequest },
       user: omittedUser
     });
     // Update main data table

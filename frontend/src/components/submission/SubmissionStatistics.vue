@@ -12,13 +12,7 @@ import { projectServiceKey } from '@/utils/keys';
 
 import type { Ref } from 'vue';
 import type { ProjectService } from '@/types/services';
-import type {
-  InputEvent,
-  GetProjectStatisticsRequest,
-  ProjectStatistics,
-  User,
-  GetProjectPermitDataResponse
-} from '@/types';
+import type { InputEvent, ProjectStatistics, User, GetProjectPermitDataResponse } from '@/types';
 
 // Injections
 const projectService = inject<Ref<ProjectService<unknown>>>(projectServiceKey);
@@ -35,7 +29,7 @@ const NAV_GROUPS = [
 // State
 const assigneeOptions: Ref<User[]> = ref([]);
 const statistics = defineModel<ProjectStatistics | undefined>('statistics');
-const statisticFilters: Ref<GetProjectStatisticsRequest> = ref({});
+const statisticFilters: Ref<{ dateFrom?: Date; dateTo?: Date; monthYear?: Date; userId?: string }> = ref({});
 
 // Actions
 const getAssigneeOptionLabel = (e: User) => `${e.fullName} [${e.email}]`;
@@ -135,8 +129,11 @@ watch(
     if (!isEmpty && !isValidUuid) return;
 
     if (projectService) {
+      const { dateFrom, dateTo, monthYear } = statisticFilters.value;
       const searchPayload = {
-        ...statisticFilters.value,
+        dateFrom: dateFrom?.toISOString(),
+        dateTo: dateTo?.toISOString(),
+        monthYear: monthYear?.toISOString(),
         userId: isEmpty ? undefined : userId
       };
       statistics.value = await projectService.value.getProjectStatistics(searchPayload);

@@ -37,7 +37,6 @@ import type {
   DeepPartial,
   Enquiry,
   InputEvent,
-  PatchEnquiryRequest,
   Project,
   ProjectService,
   User
@@ -285,7 +284,7 @@ const onSubmit = async (formValues: GenericObject) => {
     const values: FormSchemaType = await setAtsSubmitData(transformed);
 
     // Generate final payload
-    const payload: PatchEnquiryRequest = {
+    const payload: Parameters<typeof enquiryService.patchEnquiry>[0] = {
       enquiryId: enquiry.enquiryId,
 
       // Enquiry description

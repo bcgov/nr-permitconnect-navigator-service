@@ -1,7 +1,7 @@
 import { api } from './apiClient';
 import { createRouteBuilder } from './routeBuilder';
 
-import type { SearchUsersRequest, User } from '@/types';
+import type { RequestBody, User } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -19,7 +19,7 @@ const userRoutes = {
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching users.
  */
-export function searchUsers(req: SearchUsersRequest): Promise<User[]> {
+export function searchUsers(req: RequestBody<'searchUsers'>): Promise<User[]> {
   return api.post<User[]>(userRoutes.search(), req);
 }
 
