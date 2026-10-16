@@ -1,6 +1,7 @@
 import { mockReset } from 'vitest-mock-extended';
 
 import {
+  TEST_CONTACT_1,
   TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
   TEST_CURRENT_CONTEXT,
   TEST_PERMIT_1,
@@ -24,6 +25,7 @@ import type { CurrentAuthorization, IntakePermitRequest } from '#types';
 vi.mock('config');
 
 const sendNotificationsSpy = vi.spyOn(permitDomain, 'sendPermitUpdateNotifications');
+const sendIntakePermitNotificationSpy = vi.spyOn(permitDomain, 'sendIntakePermitNotification');
 const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 const findPriorityPermitTrackingSpy = vi.spyOn(peachDomain, 'findPriorityPermitTracking');
 const getPiesRecordSpy = vi.spyOn(externalPeach, 'getPiesRecord');
@@ -68,6 +70,23 @@ describe('permit service', () => {
   });
 
   describe('intakePermitService', () => {
+    beforeEach(() => {
+      mockRepos.contact.findFirst.mockResolvedValue(TEST_CONTACT_1 as never);
+    });
+
+    it('throws 403 when the user has no associated contact record', async () => {
+      mockRepos.contact.findFirst.mockResolvedValueOnce(null as never);
+
+      await expect(
+        permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, [
+          { activityId: TEST_PERMIT_1.activityId, permitTypeId: TEST_PERMIT_1.permitTypeId }
+        ])
+      ).rejects.toThrow(new Problem(403, { detail: 'User does not have an associated contact record' }));
+
+      expect(mockRepos.contact.findFirst).toHaveBeenCalledWith({ where: { userId: TEST_CURRENT_CONTEXT.userId } });
+      expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
+    });
+
     it('creates a permit for each applied permit and tracking only for those with a trackingId', async () => {
       const intakeData: IntakePermitRequest[] = [
         {
@@ -84,6 +103,7 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValue({} as never);
       upsertPermitTrackingSpy.mockResolvedValueOnce({} as never);
+      sendIntakePermitNotificationSpy.mockResolvedValueOnce(undefined);
       mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
 
       const response = await permitService.intakePermitService(
@@ -125,25 +145,22 @@ describe('permit service', () => {
 
       mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
       mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
+      sendIntakePermitNotificationSpy.mockResolvedValueOnce(undefined);
 
       await permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, intakeData);
 
       expect(upsertPermitTrackingSpy).not.toHaveBeenCalled();
     });
 
-    it('returns an empty array when given no permits to intake', async () => {
-      mockRepos.permit.findMany.mockResolvedValueOnce([] as never);
-
-      const response = await permitService.intakePermitService(
-        TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR,
-        TEST_CURRENT_CONTEXT,
-        []
-      );
+    it('throws when given no permits to intake', async () => {
+      await expect(
+        permitService.intakePermitService(TEST_CURRENT_AUTH_CONTEXT_NAVIGATOR, TEST_CURRENT_CONTEXT, [])
+      ).rejects.toThrow('Cannot send intake permit notification without permits');
 
       expect(mockRepos.permit.upsert).not.toHaveBeenCalled();
       expect(upsertPermitTrackingSpy).not.toHaveBeenCalled();
-      expect(mockRepos.permit.findMany).toHaveBeenCalledWith({ where: { permitId: { in: [] } } });
-      expect(response).toStrictEqual([]);
+      expect(sendIntakePermitNotificationSpy).toHaveBeenCalledWith(expect.anything(), [], TEST_CONTACT_1);
+      expect(mockRepos.permit.findMany).not.toHaveBeenCalled();
     });
 
     describe('scope:self delegate check', () => {
@@ -170,6 +187,7 @@ describe('permit service', () => {
         mockRepos.activityContact.findMany.mockResolvedValueOnce([{ activityId: TEST_PERMIT_1.activityId }] as never);
         mockRepos.permit.upsert.mockResolvedValueOnce({} as never);
         mockRepos.permit.findMany.mockResolvedValueOnce([TEST_PERMIT_1] as never);
+        sendIntakePermitNotificationSpy.mockResolvedValueOnce(undefined);
 
         await permitService.intakePermitService(proponentAuthContext, TEST_CURRENT_CONTEXT, intakeData);
 

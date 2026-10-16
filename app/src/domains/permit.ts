@@ -5,18 +5,19 @@ import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { email } from '#src/external/ches';
-import { formatDateOnly, toTitleCase } from '#src/utils/index';
+import { formatDateOnly, splitDateTime, toTitleCase } from '#src/utils/index';
 import { PermitNeeded } from '#src/utils/enums/permit';
 import { ActivityContactRole } from '#src/utils/enums/projectCommon';
 import {
   initialPeachPermitUpdateTemplate,
+  intakePermitNotificationTemplate,
   navPermitStatusUpdateTemplate,
   permitNoteUpdateTemplate
 } from '#src/utils/templates';
 import { state } from '../../state.ts';
 
 import type { Repositories } from '#src/db/unitOfWork';
-import type { Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
+import type { Contact, Permit, PermitCreateInput, PermitUpdateEmailParams, ProjectRepositoryKeys } from '#types';
 import type { Initiative } from '#src/utils/enums/application';
 
 /**
@@ -222,4 +223,88 @@ export const sendPermitUpdateNotifications = async (
   await Promise.all(
     permitUpdateEmails.map((emailJob) => sendPermitUpdateEmail({ permitType: repositories.permitType }, emailJob))
   );
+};
+
+/**
+ * Sends out an email notification when new permits are submitted for a project by the proponent
+ * @param repositories - The required repositories
+ * @param permits Permit to send notifications for
+ * @param contact Contact record of the proponent associated with the permits
+ */
+export const sendIntakePermitNotification = async (
+  repositories: Pick<Repositories, ProjectRepositoryKeys | 'permitType' | 'user'>,
+  permits: Permit[],
+  contact: Contact
+) => {
+  const firstPermit = permits[0];
+  if (!firstPermit) {
+    throw new Error('Cannot send intake permit notification without permits');
+  }
+  if (!firstPermit.createdAt) {
+    throw new Error(`Permit ${firstPermit.permitId} is missing its creation date`);
+  }
+
+  const project = await getProjectByActivityId(
+    {
+      electrificationProject: repositories.electrificationProject,
+      generalProject: repositories.generalProject,
+      housingProject: repositories.housingProject
+    },
+    firstPermit.activityId
+  );
+
+  const initiative = (project.activity!.initiative!.code as Initiative).toLowerCase();
+
+  const navigatorId = project.assignedUserId;
+
+  // Add navigator update email to email jobs
+  let dearName = 'Navigator team';
+  const pcnsEmail: string = config.get('server.pcns.navEmail');
+  let navigatorEmail: string | undefined;
+  if (navigatorId) {
+    const navigator = await repositories.user.findById(navigatorId);
+    if (!navigator) return;
+    dearName = `${navigator.firstName} ${navigator.lastName}`;
+    navigatorEmail = navigator.email!;
+  }
+
+  const appUrl = config.get<string>('server.pcns.appUrl');
+  const permitLinks = await Promise.all(
+    permits.map(async (permit) => {
+      const permitType = await repositories.permitType.findUnique({
+        where: { permitTypeId: permit.permitTypeId }
+      });
+      if (!permitType) {
+        throw new Error(`Permit type ${permit.permitTypeId} not found`);
+      }
+
+      const href = `${appUrl}/i/${initiative}/project/${project.projectId}/authorization/${permit.permitId}`;
+      const label = `${permitType.businessDomain}: ${permitType.name}`;
+      return { href, label };
+    })
+  );
+
+  const emailBody = intakePermitNotificationTemplate({
+    dearName,
+    projectName: project.projectName,
+    activityId: project.activityId,
+    proponentName: contact.firstName,
+    relationshipToProject: contact.contactApplicantRelationship,
+    newPermitsCount: permits.length.toString(),
+    projectId: project.projectId,
+    submittedPermits: permitLinks,
+    submittedDate: splitDateTime(firstPermit.createdAt).date
+  });
+
+  const subject = `New ${toTitleCase(initiative)} permits have been submitted`;
+
+  const emailData = {
+    to: [navigatorEmail ?? pcnsEmail],
+    from: pcnsEmail,
+    subject: subject,
+    bodyType: 'html',
+    body: emailBody
+  };
+
+  await email(emailData);
 };
