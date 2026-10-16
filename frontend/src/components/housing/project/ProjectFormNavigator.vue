@@ -25,7 +25,7 @@ import { atsService, housingProjectService, mapService, userService } from '@/se
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ApplicationStatus, FormState, FormType, SubmissionType } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
@@ -269,7 +269,8 @@ async function initializeFormValues(project: HousingProject): Promise<DeepPartia
     // Submission state
     submissionState: {
       queuePriority: project.queuePriority,
-      submissionType: project.submissionType,
+      // Narrowed to the navigator submission types; any other stored type fails validation
+      submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
       applicationStatus: project.applicationStatus
     },
@@ -403,8 +404,7 @@ const onSubmit = async (formValues: GenericObject) => {
       // Submission State
       assignedUserId: (values.submissionState.assignedUser as User)?.userId ?? null,
       applicationStatus: values.submissionState.applicationStatus,
-      // The schema only accepts the navigator submission types the API allows here
-      submissionType: values.submissionState.submissionType as SubmissionType.GUIDANCE | SubmissionType.INAPPLICABLE,
+      submissionType: values.submissionState.submissionType,
       queuePriority: values.submissionState.queuePriority,
 
       // ATS

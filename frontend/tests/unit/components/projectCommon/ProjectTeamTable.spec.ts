@@ -46,7 +46,7 @@ const activityContacts: ActivityContact[] = [
 ];
 
 const wrapperSettings = (
-  zone = Zone.INTERNAL,
+  zone: Zone = Zone.INTERNAL,
   customContacts = activityContacts,
   currentUser = mockUserContact,
   customActivityContact = activityContacts[0]
@@ -54,7 +54,9 @@ const wrapperSettings = (
   props: {
     activityContacts: customContacts,
     currentUserActivityContact: customActivityContact,
-    isAdmin: [ActivityContactRole.ADMIN, ActivityContactRole.PRIMARY].includes(customActivityContact.role)
+    isAdmin: ([ActivityContactRole.ADMIN, ActivityContactRole.PRIMARY] as ActivityContactRole[]).includes(
+      customActivityContact.role
+    )
   },
   global: {
     plugins: [

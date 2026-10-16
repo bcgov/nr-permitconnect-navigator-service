@@ -64,7 +64,7 @@ const wrapperSettings = (
   enquiryId: string | undefined = undefined,
   projectId: string | undefined = undefined,
   noteHistoryId: string | undefined = undefined,
-  initiative = Initiative.HOUSING
+  initiative: Initiative = Initiative.HOUSING
 ) => ({
   props: {
     enquiryId,

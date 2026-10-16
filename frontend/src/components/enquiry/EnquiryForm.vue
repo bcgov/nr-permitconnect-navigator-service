@@ -174,7 +174,8 @@ async function initializeFormValues(): Promise<DeepPartial<FormSchemaType>> {
       assignedUser: assigneeOptions[0] ?? null,
       enquiryStatus: enquiry?.enquiryStatus,
       submittedMethod: enquiry?.submittedMethod,
-      submissionType: enquiry?.submissionType
+      // Enquiries only hold enquiry submission types
+      submissionType: enquiry?.submissionType as FormSchemaType['submissionState']['submissionType']
     },
 
     atsInfo: {

@@ -51,7 +51,7 @@ const mockActivityContact: ActivityContact = {
   contact: mockContact
 };
 
-const wrapperSettings = (zone = Zone.INTERNAL) => ({
+const wrapperSettings = (zone: Zone = Zone.INTERNAL) => ({
   global: {
     plugins: [
       createTestingPinia({
