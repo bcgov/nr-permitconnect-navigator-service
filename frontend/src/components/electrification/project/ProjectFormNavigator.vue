@@ -18,14 +18,19 @@ import SubmissionStateSection from '@/components/form/section/SubmissionStateSec
 import { Button, Message, useConfirm, useToast } from '@/lib/primevue';
 import { atsService, electrificationProjectService, userService } from '@/services';
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
-import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
+import {
+  APPLICATION_STATUS_LIST,
+  ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX,
+  ATS_MANAGING_REGION
+} from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
 import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
-import { toTypedSchema } from '@/utils/zodSchema';
+import { isOneOf, toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/electrification/projectFormNavigatorSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { Ref } from 'vue';
 import type {
@@ -112,29 +117,21 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
   if (project.assignedUserId) assigneeOptions = await userService.searchUsers({ userId: [project.assignedUserId] });
 
   return {
-    contact: {
-      contactId: getPrimaryActivityContact.value?.contactId,
-      firstName: getPrimaryActivityContact.value?.firstName,
-      lastName: getPrimaryActivityContact.value?.lastName,
-      phoneNumber: getPrimaryActivityContact.value?.phoneNumber,
-      email: getPrimaryActivityContact.value?.email,
-      contactApplicantRelationship: getPrimaryActivityContact.value?.contactApplicantRelationship,
-      contactPreference: getPrimaryActivityContact.value?.contactPreference,
-      userId: getPrimaryActivityContact.value?.userId
-    },
+    contact: toContactFormValues(getPrimaryActivityContact.value),
 
     companyProjectName: {
       companyIdRegistered: project.companyIdRegistered,
       companyNameRegistered: project.companyNameRegistered,
-      projectName: project.projectName
+      projectName: project.projectName ?? undefined
     },
 
     electrification: {
       bcHydroNumber: project.bcHydroNumber,
-      projectType: project.projectType,
+      projectType: project.projectType ?? undefined,
       // Stored values come from this form, so they are Yes or No
       hasEpa: (project.hasEpa ?? undefined) as FormSchemaType['electrification']['hasEpa'],
-      megawatts: project.megawatts,
+      // The API sends decimals as strings
+      megawatts: project.megawatts === null ? null : Number(project.megawatts),
       projectCategory: project.projectCategory,
       bcEnvironmentAssessNeeded: (project.bcEnvironmentAssessNeeded ??
         undefined) as FormSchemaType['electrification']['bcEnvironmentAssessNeeded']
@@ -151,11 +148,14 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
 
     // Submission state
     submissionState: {
-      queuePriority: project.queuePriority,
+      queuePriority: project.queuePriority ?? undefined,
       // Narrowed to the navigator submission types; any other stored type fails validation
       submissionType: project.submissionType as FormSchemaType['submissionState']['submissionType'],
       assignedUser: assigneeOptions[0] ?? null,
-      applicationStatus: project.applicationStatus
+      // Unknown stored values are dropped, so the form asks for them again
+      applicationStatus: isOneOf(APPLICATION_STATUS_LIST, project.applicationStatus)
+        ? project.applicationStatus
+        : undefined
     },
 
     // ATS link

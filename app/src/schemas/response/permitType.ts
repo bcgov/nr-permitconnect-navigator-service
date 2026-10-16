@@ -2,6 +2,7 @@ import { z } from 'zod';
 
 import '#src/schemas/openapi';
 import { initiativeModelSchema, permit_typeModelSchema, permit_type_initiative_xrefModelSchema } from '#prismaZod';
+import { SourceSystem } from '#src/db/codes/enums';
 
 const initiativeResponseSchema = initiativeModelSchema.omit({
   activity: true,
@@ -15,11 +16,17 @@ const permitTypeInitiativeXrefSchema = permit_type_initiative_xrefModelSchema
 
 // permitTypeInitiativeXref is always included by listPermitTypesService (see
 // src/services/permitType.ts) but optional here since this schema is also reused for
-// permit.permitType (a bare include, no xref - see permitSchema.ts) and as a request-body
-// field (see validators/permit.ts, which layers its own stricter field constraints on top).
+// permit.permitType (a bare include, no xref - see permit.ts).
 export const permitTypeSchema = permit_typeModelSchema
   .omit({ permit: true, sourceSystemCode: true, permitTypeInitiativeXref: true, permitTypeSourceSystemKindXref: true })
-  .extend({ permitTypeInitiativeXref: z.array(permitTypeInitiativeXrefSchema).optional() })
+  .extend({
+    permitTypeInitiativeXref: z.array(permitTypeInitiativeXrefSchema).optional(),
+    // Foreign key to a code table, so the spec lists its codes; the database guarantees them
+    sourceSystem: z
+      .string()
+      .nullable()
+      .openapi({ enum: Object.values(SourceSystem) })
+  })
   .openapi('PermitType');
 
 // listPermitTypesService always includes permitTypeInitiativeXref (with nested initiative) - see

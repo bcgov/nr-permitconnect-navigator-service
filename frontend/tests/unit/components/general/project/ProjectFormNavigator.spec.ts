@@ -18,8 +18,10 @@ import { updateLiveNameKey } from '@/utils/keys';
 
 import { t } from '../../../../helpers';
 import { mountComponent } from '../../../../mountComponent';
+import { testAuditFields, testContactDefaults } from '../../../../fixtures';
 
-import type { GeneralProject, User } from '@/types';
+import type { DeepPartial, GeneralProject, User } from '@/types';
+import type { FormSchemaType } from '@/validators/general/projectFormNavigatorSchema';
 
 // Mocks
 
@@ -39,6 +41,7 @@ const patchProjectSpy = vi.spyOn(generalProjectService, 'patchProject');
 const currentDate = new Date().toISOString();
 
 const exampleContact = {
+  ...testContactDefaults,
   contactId: 'contact123',
   firstName: 'John',
   lastName: 'Doe',
@@ -60,12 +63,10 @@ const testProject: GeneralProject = {
   submissionType: SubmissionType.GUIDANCE,
   projectName: 'Test Project',
   projectDescription: 'Description',
-  multiPermitsNeeded: 'No',
   astNotes: 'Notes',
   atsClientId: null,
   atsEnquiryId: null,
   aaiUpdated: false,
-  addedToAts: false,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: 'Test Location',
   activityType: 'Other',
@@ -73,11 +74,25 @@ const testProject: GeneralProject = {
   area: Area.COAST,
   naturalDisaster: false,
   hasAppliedProvincialPermits: BasicResponse.NO,
-  contacts: [exampleContact],
+  assignedUserId: null,
+  locationPids: null,
+  streetAddress: null,
+  relatedPermits: null,
+  projectNumber: null,
+  projectLocationDescription: null,
+  locality: null,
+  province: null,
+  checkProvincialPermits: null,
+  geomarkUrl: null,
+  businessArea: null,
+  latitude: null,
+  longitude: null,
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedAt',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  deletedBy: null,
+  deletedAt: null
 };
 
 // A primary activity contact backing `getPrimaryActivityContact`, so the
@@ -180,6 +195,19 @@ describe('ProjectFormNavigator', () => {
       expect(wrapper.isVisible()).toBe(true);
       expect(getPidsSpy).toHaveBeenCalledExactlyOnceWith({ projectId: testProject.generalProjectId });
     });
+
+    it('seeds decimals as numbers and drops missing codes', async () => {
+      const { wrapper } = mountProjectFormNavigator({
+        project: { ...testProject, latitude: '49.5', longitude: '-123.25', region: null, area: null }
+      });
+      await flushPromises();
+
+      const values = (
+        wrapper.vm as unknown as { formRef: { getValues: () => DeepPartial<FormSchemaType> } }
+      ).formRef.getValues();
+      expect(values.location).toMatchObject({ latitude: 49.5, longitude: -123.25 });
+      expect(values.submissionState).toMatchObject({ region: undefined, area: undefined });
+    });
   });
 
   describe('form submission', () => {
@@ -235,6 +263,7 @@ describe('ProjectFormNavigator', () => {
       const store = useProjectStore();
       store.activityContacts = [
         {
+          ...testAuditFields,
           contactId: 'new-contact-999',
           activityId: testProject.activityId,
           role: ActivityContactRole.PRIMARY,

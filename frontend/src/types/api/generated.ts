@@ -1838,8 +1838,10 @@ export interface components {
       aaiUpdated: boolean;
       atsClientId: number | null;
       astNotes: string | null;
-      projectType: string | null;
-      projectCategory: string | null;
+      /** @enum {string|null} */
+      projectType: 'IPP_HYDRO' | 'IPP_SOLAR' | 'IPP_WIND' | 'OTHER' | null;
+      /** @enum {string|null} */
+      projectCategory: 'CONNECTIVITY' | 'INTERCONNECTIVITY' | 'IPP' | 'REMOTE_RENEWABLE' | 'SUSTAINMENT' | null;
       createdBy: string | null;
       /** Format: date-time */
       createdAt: string | null;
@@ -2226,9 +2228,22 @@ export interface components {
       permitTypeId: number;
       activityId: string;
       issuedPermitId: string | null;
-      state: string;
+      /** @enum {string} */
+      state:
+        | 'ACCEPTED'
+        | 'APPROVED'
+        | 'CANCELLED'
+        | 'DENIED'
+        | 'IN_PROGRESS'
+        | 'INITIAL_REVIEW'
+        | 'ISSUED'
+        | 'NONE'
+        | 'PENDING_APPLICANT_ACTION'
+        | 'REJECTED'
+        | 'WITHDRAWN';
       needed: string | null;
-      stage: string;
+      /** @enum {string} */
+      stage: 'APPLICATION_SUBMISSION' | 'PENDING_DECISION' | 'POST_DECISION' | 'PRE_SUBMISSION' | 'TECHNICAL_REVIEW';
       submittedDate: string | null;
       createdBy: string | null;
       /** Format: date-time */
@@ -2249,7 +2264,8 @@ export interface components {
       /** Format: date-time */
       targetDate: string | null;
       targetDateDescription: string | null;
-      onHoldCode: string | null;
+      /** @enum {string|null} */
+      onHoldCode: 'APPLICANT_REQUEST' | 'LEGAL_ACTION' | 'MISSING_INFORMATION' | 'PENDING_EXTERNAL_DECISION' | null;
       technicalReviewer: string | null;
       activity?: {
         activityId: string;
@@ -2317,7 +2333,25 @@ export interface components {
       deletedBy: string | null;
       /** Format: date-time */
       deletedAt: string | null;
-      sourceSystem: string | null;
+      /** @enum {string|null} */
+      sourceSystem:
+        | 'ITSM-5285'
+        | 'ITSM-5314'
+        | 'ITSM-5364'
+        | 'ITSM-5527'
+        | 'ITSM-5528'
+        | 'ITSM-5644'
+        | 'ITSM-5816'
+        | 'ITSM-5939'
+        | 'ITSM-5963'
+        | 'ITSM-6004'
+        | 'ITSM-60081'
+        | 'ITSM-6030'
+        | 'ITSM-6072'
+        | 'ITSM-6117'
+        | 'ITSM-6136'
+        | 'ITSM-6197'
+        | null;
       infoUrl: string | null;
       permitTypeInitiativeXref?: {
         permitTypeId: number;
@@ -2368,7 +2402,24 @@ export interface components {
       sourceSystemKindId: number;
       kind: string | null;
       description: string | null;
-      sourceSystem: string;
+      /** @enum {string} */
+      sourceSystem:
+        | 'ITSM-5285'
+        | 'ITSM-5314'
+        | 'ITSM-5364'
+        | 'ITSM-5527'
+        | 'ITSM-5528'
+        | 'ITSM-5644'
+        | 'ITSM-5816'
+        | 'ITSM-5939'
+        | 'ITSM-5963'
+        | 'ITSM-6004'
+        | 'ITSM-60081'
+        | 'ITSM-6030'
+        | 'ITSM-6072'
+        | 'ITSM-6117'
+        | 'ITSM-6136'
+        | 'ITSM-6197';
       createdBy: string | null;
       /** Format: date-time */
       createdAt: string | null;
@@ -2387,8 +2438,21 @@ export interface components {
         activityId: string;
         permitTypeId: number;
         decisionDate: string | null;
-        stage: string;
-        state: string;
+        /** @enum {string} */
+        stage: 'APPLICATION_SUBMISSION' | 'PENDING_DECISION' | 'POST_DECISION' | 'PRE_SUBMISSION' | 'TECHNICAL_REVIEW';
+        /** @enum {string} */
+        state:
+          | 'ACCEPTED'
+          | 'APPROVED'
+          | 'CANCELLED'
+          | 'DENIED'
+          | 'IN_PROGRESS'
+          | 'INITIAL_REVIEW'
+          | 'ISSUED'
+          | 'NONE'
+          | 'PENDING_APPLICANT_ACTION'
+          | 'REJECTED'
+          | 'WITHDRAWN';
         statusLastChanged: string | null;
         submittedDate: string | null;
         permitType: {
@@ -2440,7 +2504,59 @@ export interface components {
       region: string | null;
       area: string | null;
       activityType: string | null;
-      businessArea: string | null;
+      /** @enum {string|null} */
+      businessArea:
+        | 'ABORIGINAL_RELATIONS'
+        | 'ADVANCED_EDUCATION'
+        | 'AGRICULTURAL_LAND_COMMISSION'
+        | 'AGRICULTURE'
+        | 'ARCHAEOLOGY'
+        | 'BC_ASSESSMENT_AUTHORITY'
+        | 'BC_ENERGY_REGULATOR'
+        | 'COMMUNITY_DEVELOPMENT'
+        | 'COMMUNITY_SPORT_AND_CULTURE'
+        | 'DEPARTMENT_OF_FISHERIES_AND_OCEANS_CANADA'
+        | 'ECONOMIC_DEVELOPMENT'
+        | 'EDUCATION'
+        | 'ELECTRIFICATION'
+        | 'ENERGY'
+        | 'ENVIRONMENT'
+        | 'ENVIRONMENTAL_PROTECTION'
+        | 'FEDERAL_GOVERNMENT'
+        | 'FINANCE'
+        | 'FISH_AND_WILDLIFE'
+        | 'FORESTS'
+        | 'FRASER_HEALTH_AUTHORITY'
+        | 'HEALTH_SERVICES'
+        | 'INTERIOR_HEALTH_AUTHORITY'
+        | 'LABOUR_AND_CITIZENS_SERVICES'
+        | 'LAND_TITLE_AUTHORITY'
+        | 'LANDS'
+        | 'LOCAL_GOVERNMENT_MUNICIPALITIES_AND_CITIES'
+        | 'MINES'
+        | 'MINISTRY_OF_ATTORNEY_GENERAL'
+        | 'MINISTRY_OF_SMALL_BUSINESS_AND_REVENUE'
+        | 'MOUNTAIN_RESORTS_BRANCH'
+        | 'NON_LISTED_PARTNER_AGENCY_OR_OTHER'
+        | 'NORTHERN_HEALTH_AUTHORITY'
+        | 'OFFICE_OF_THE_PREMIER'
+        | 'PARKS'
+        | 'PROVINCIAL_EMERGENCY_PROGRAM'
+        | 'PUBLIC_SERVICE_AGENCY'
+        | 'RANGE'
+        | 'RECREATION_SITES_AND_TRAILS'
+        | 'REGIONAL_DISTRICTS'
+        | 'RIPARIAN'
+        | 'RURAL_DEVELOPMENT'
+        | 'SMALL_BUSINESS_BC'
+        | 'SOLICITOR_GENERAL'
+        | 'SURVEYOR_GENERAL_LAND_TITLE_AND_SURVEY_AUTHORITIES'
+        | 'SYSTEMS'
+        | 'TRANSPORTATION'
+        | 'VANCOUVER_COAST_HEALTH_AUTHORITY'
+        | 'VANCOUVER_ISLAND_HEALTH_AUTHORITY'
+        | 'WATER'
+        | null;
       createdBy: string | null;
       /** Format: date-time */
       createdAt: string | null;

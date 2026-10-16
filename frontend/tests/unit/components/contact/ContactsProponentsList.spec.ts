@@ -10,10 +10,12 @@ import ContactsProponentsList from '@/components/contact/ContactsProponentsList.
 import { contactService } from '@/services';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 import { contactRouteNameKey } from '@/utils/keys';
+import { testContactDefaults } from '../../../fixtures';
 
 import type { Contact } from '@/types';
 
 const CONTACT_DATA = {
+  ...testContactDefaults,
   contactId: 'contact123',
   userId: 'user123',
   firstName: 'John',
@@ -22,10 +24,10 @@ const CONTACT_DATA = {
   email: 'john.doe@example.com',
   contactPreference: ContactPreference.EITHER,
   contactApplicantRelationship: ProjectRelationship.CONSULTANT,
-  createdAt: undefined,
-  createdBy: undefined,
-  updatedBy: undefined,
-  updatedAt: undefined
+  createdAt: null,
+  createdBy: null,
+  updatedBy: null,
+  updatedAt: null
 };
 
 vi.mock('vue-i18n', () => ({
@@ -45,6 +47,7 @@ vi.spyOn(contactService, 'deleteContact').mockResolvedValue(undefined);
 
 const testContacts: Contact[] = [
   {
+    ...testContactDefaults,
     contactId: 'contact123',
     firstName: 'John',
     lastName: 'Doe',

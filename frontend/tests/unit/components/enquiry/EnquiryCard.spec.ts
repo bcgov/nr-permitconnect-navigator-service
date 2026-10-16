@@ -11,6 +11,7 @@ import { ApplicationStatus, EnquirySubmittedMethod, SubmissionType } from '@/uti
 import type { Enquiry, User } from '@/types';
 import { projectEnquiryRouteNameKey } from '@/utils/keys';
 import { ref } from 'vue';
+import { testEnquiryDefaults } from '../../../fixtures';
 
 const searchUsersSpy = vi.spyOn(userService, 'searchUsers');
 
@@ -18,6 +19,7 @@ const currentDate = new Date().toISOString();
 
 // Example Enquiry object
 const testEnquiry: Enquiry = {
+  ...testEnquiryDefaults,
   enquiryId: 'enquiry123',
   activityId: 'activity456',
   submissionType: SubmissionType.ASSISTANCE,

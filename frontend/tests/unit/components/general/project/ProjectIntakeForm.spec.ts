@@ -9,6 +9,7 @@ import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCom
 
 import { mountComponent } from '../../../../mountComponent';
 import { mockRouter, resetMockRouter } from '../../../../mockRouter';
+import { testContactDefaults } from '../../../../fixtures';
 
 import type { Contact, Draft, GeneralProject } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
@@ -28,6 +29,7 @@ vi.mock('vue-router', () => ({
 // Fixtures
 
 const sampleContact: Contact = {
+  ...testContactDefaults,
   contactId: '82fba7a8-9cb6-47c4-95b0-81c165e5a317',
   userId: 'd3245118-f4d6-429a-be8e-f13f049ade3a',
   firstName: 'John',

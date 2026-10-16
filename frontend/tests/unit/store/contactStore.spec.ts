@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { useContactStore } from '@/store';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
+import { testContactDefaults } from '../../fixtures';
 
 import type { Contact } from '@/types';
 
@@ -13,6 +14,7 @@ beforeEach(() => {
 
 describe('Contact Store', () => {
   const getValidContact = (): Contact => ({
+    ...testContactDefaults,
     contactId: 'contact123',
     userId: 'user123',
     firstName: 'John',
@@ -51,7 +53,7 @@ describe('Contact Store', () => {
     it('returns true when phoneNumber is missing', () => {
       const contactStore = useContactStore();
       const contact = getValidContact();
-      delete contact.phoneNumber;
+      contact.phoneNumber = null;
 
       contactStore.setContact(contact);
       expect(contactStore.needsContactDetails).toBe(true);
@@ -60,7 +62,7 @@ describe('Contact Store', () => {
     it('returns true when contactApplicantRelationship is missing', () => {
       const contactStore = useContactStore();
       const contact = getValidContact();
-      delete contact.contactApplicantRelationship;
+      contact.contactApplicantRelationship = null;
 
       contactStore.setContact(contact);
       expect(contactStore.needsContactDetails).toBe(true);
@@ -69,7 +71,7 @@ describe('Contact Store', () => {
     it('returns true when contactPreference is missing', () => {
       const contactStore = useContactStore();
       const contact = getValidContact();
-      delete contact.contactPreference;
+      contact.contactPreference = null;
 
       contactStore.setContact(contact);
       expect(contactStore.needsContactDetails).toBe(true);

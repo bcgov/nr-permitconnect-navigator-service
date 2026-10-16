@@ -24,6 +24,7 @@ import { RouteName } from '@/utils/enums/application';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
+import { toContactFormValues } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
@@ -168,35 +169,19 @@ onBeforeMount(async () => {
         basic: {
           registeredName: project.companyNameRegistered ?? undefined,
           registeredId: project.companyIdRegistered,
-          projectName: project.projectName,
+          projectName: project.projectName ?? undefined,
           projectDescription: project.projectDescription
         },
-        contacts: {
-          firstName: primaryContact?.firstName,
-          lastName: primaryContact?.lastName,
-          phoneNumber: primaryContact?.phoneNumber,
-          email: primaryContact?.email,
-          contactApplicantRelationship: primaryContact?.contactApplicantRelationship,
-          contactPreference: primaryContact?.contactPreference,
-          contactId: primaryContact?.contactId
-        },
+        contacts: toContactFormValues(primaryContact),
         project: {
           bcHydroNumber: project.bcHydroNumber,
-          projectType: project.projectType
+          projectType: project.projectType ?? undefined
         }
       };
     } else {
       const userContact = useContactStore().getContact;
       initialFormValues.value = {
-        contacts: {
-          contactId: userContact?.contactId,
-          firstName: userContact?.firstName,
-          lastName: userContact?.lastName,
-          email: userContact?.email,
-          phoneNumber: userContact?.phoneNumber,
-          contactApplicantRelationship: userContact?.contactApplicantRelationship,
-          contactPreference: userContact?.contactPreference
-        }
+        contacts: toContactFormValues(userContact)
       };
     }
   } catch (e) {

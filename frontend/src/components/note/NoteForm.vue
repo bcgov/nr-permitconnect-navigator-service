@@ -77,7 +77,8 @@ function initializeFormValues() {
       escalateToDirector: noteHistory?.escalateToDirector,
       escalationType: noteHistory?.escalationType ?? undefined,
       noteHistoryId: noteHistory.noteHistoryId,
-      type: noteHistory.type,
+      // Narrowed to the note types the form edits; any other stored type fails validation
+      type: noteHistory.type as FormSchemaType['type'],
       title: noteHistory.title
     };
     shownToProponent.value = noteHistory.shownToProponent;
@@ -169,7 +170,7 @@ async function fetchCreatedBy() {
   const userIds = Array.from(new Set(noteHistory?.note?.map((n) => n.createdBy).filter(Boolean))) as [];
   const users = await userService.searchUsers({ userId: userIds });
   users.forEach((u: User) => {
-    createdByFullNames.value[u.userId] = u.fullName;
+    createdByFullNames.value[u.userId] = u.fullName ?? '';
   });
 }
 

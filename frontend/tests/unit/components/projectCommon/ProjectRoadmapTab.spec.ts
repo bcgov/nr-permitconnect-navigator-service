@@ -7,6 +7,8 @@ import ProjectRoadmapTab from '@/components/projectCommon/ProjectRoadmapTab.vue'
 import i18n from '@/i18n';
 import { roadmapService, userService } from '@/services';
 
+import { testAuditFields } from '../../../fixtures';
+
 vi.mock('@/services', () => ({
   roadmapService: { getRoadmapNote: vi.fn(), sendRoadmap: vi.fn() },
   userService: { searchUsers: vi.fn() }
@@ -17,6 +19,7 @@ describe('ProjectRoadmapTab.vue', () => {
     vi.mocked(roadmapService.getRoadmapNote).mockResolvedValue('Roadmap note');
     vi.mocked(userService.searchUsers).mockResolvedValue([
       {
+        ...testAuditFields,
         userId: 'user1',
         email: 'navigator@bcgov.bc.ca',
         firstName: 'Nav',
@@ -26,7 +29,6 @@ describe('ProjectRoadmapTab.vue', () => {
         idp: 'idir',
         active: true,
         groups: [],
-        elevatedRights: false,
         bceidBusinessName: ''
       }
     ]);

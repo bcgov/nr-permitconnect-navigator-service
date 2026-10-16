@@ -17,11 +17,14 @@ const currentDate = new Date().toISOString();
 
 const testNote: Note = {
   noteId: '123e4567-e89b-12d3-a456-426614174000',
+  noteHistoryId: '123e4567-e89b-12d3-a456-426614174001',
   note: 'This is a test note.',
   createdBy: 'testCreatedBy',
   createdAt: currentDate,
   updatedBy: 'testUpdatedBy',
-  updatedAt: currentDate
+  updatedAt: currentDate,
+  deletedBy: null,
+  deletedAt: null
 };
 
 const wrapperSettings = (testNoteProp = testNote) => ({

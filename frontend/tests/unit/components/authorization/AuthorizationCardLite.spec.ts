@@ -9,6 +9,7 @@ import AuthorizationCardLite from '@/components/authorization/AuthorizationCardL
 import { StorageKey } from '@/utils/enums/application';
 import { PermitStage, PermitState } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
+import { testAuditFields, testPermitDefaults } from '../../../fixtures';
 
 import type { Permit, PermitType } from '@/types';
 
@@ -28,22 +29,24 @@ vi.mock('vue-router', () => ({
 const currentDate = new Date().toISOString();
 
 const testPermitType: PermitType = {
+  ...testAuditFields,
   permitTypeId: 1,
   agency: 'Water, Land and Resource Stewardship',
   division: 'Forest Resiliency and Archaeology',
   branch: 'Archaeology',
   businessDomain: 'Archaeology',
   type: 'Alteration',
-  family: undefined,
+  family: null,
   name: 'Archaeology Alteration Permit',
-  nameSubtype: undefined,
+  nameSubtype: null,
   acronym: 'SAP',
-  trackedInATS: false,
-  sourceSystem: 'Archaeology Permit Tracking System',
-  sourceSystemAcronym: 'APTS'
+  trackedInAts: false,
+  sourceSystem: 'ITSM-5285',
+  infoUrl: null
 };
 
 const testPermit: Permit = {
+  ...testPermitDefaults,
   permitId: 'permitUUID',
   activityId: 'activityUUID',
   needed: PermitNeeded.YES,

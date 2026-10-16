@@ -44,7 +44,7 @@ export interface ListPermissionsRequest {
 }
 
 export interface GetPeachSummaryRequest {
-  permitTrackings: PermitTracking[];
+  permitTrackings: Partial<PermitTracking>[];
 }
 
 export interface ListIdirUsersRequest {

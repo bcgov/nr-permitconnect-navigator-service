@@ -10,6 +10,7 @@ import { contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 import { t } from '../../../helpers';
+import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
 import type * as VeeValidate from 'vee-validate';
 import type { Contact, ActivityContact } from '@/types';
@@ -39,6 +40,7 @@ vi.mock('vee-validate', async (importOriginal) => {
 });
 
 const mockContact: Contact = {
+  ...testContactDefaults,
   contactId: 'contact1',
   firstName: 'John',
   lastName: 'Doe',
@@ -47,6 +49,7 @@ const mockContact: Contact = {
 };
 
 const mockActivityContact: ActivityContact = {
+  ...testAuditFields,
   activityId: 'activity1',
   contactId: 'contact1',
   role: ActivityContactRole.MEMBER,
@@ -151,7 +154,7 @@ describe('ProjectTeamAddModal.vue', () => {
 
     it('populates search results in the datatable covering true/false userId paths', async () => {
       const contactWithUser = { ...mockContact, userId: 'user-123' };
-      const contactWithoutUser = { ...mockContact, contactId: 'contact2', userId: undefined };
+      const contactWithoutUser = { ...mockContact, contactId: 'contact2', userId: null };
 
       vi.mocked(contactService.matchContacts).mockResolvedValue([contactWithUser, contactWithoutUser]);
 

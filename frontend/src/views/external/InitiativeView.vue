@@ -133,7 +133,7 @@ const displayedProjectsInOrder = computed(() => {
   // Filter projects to only include active projects and sort them by last updated
   const active = projects.value
     .filter((p) =>
-      ([ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW] as ApplicationStatus[]).includes(p.applicationStatus)
+      ([ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW] as (string | null)[]).includes(p.applicationStatus)
     )
     .sort((a, b) => {
       if (a.submittedAt && b.submittedAt) {
@@ -345,7 +345,7 @@ onBeforeMount(async () => {
           <div class="col-span-3 flex items-center">
             <p
               :class="{
-                'font-bold': ([ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW] as ApplicationStatus[]).includes(
+                'font-bold': ([ApplicationStatus.IN_PROGRESS, ApplicationStatus.NEW] as (string | null)[]).includes(
                   project.applicationStatus
                 )
               }"

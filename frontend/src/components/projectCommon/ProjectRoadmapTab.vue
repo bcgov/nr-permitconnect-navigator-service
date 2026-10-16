@@ -98,9 +98,8 @@ watch(
       const assignee = (await userService.searchUsers({ userId: [project.assignedUserId] }))[0];
 
       if (assignee) {
-        navigator = assignee;
-        navigator.fullName = `${assignee.firstName} ${assignee.lastName}`;
-        bcc = (bcc ? `${bcc}; ` : '') + assignee.email;
+        navigator = { email: assignee.email ?? '', fullName: `${assignee.firstName} ${assignee.lastName}` };
+        if (assignee.email) bcc = (bcc ? `${bcc}; ` : '') + assignee.email;
       }
     }
 

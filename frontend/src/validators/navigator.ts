@@ -180,7 +180,7 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
     submissionState: formSection(
       z.looseObject({
         applicationStatus: requiredOneOf(t('validators.submissionState.applicationStatus'), APPLICATION_STATUS_LIST),
-        area: isGeneral ? z.enum(AREA_LIST, 'Area is a required field').optional() : z.string().nullish(),
+        area: isGeneral ? z.enum(AREA_LIST, 'Area is a required field') : z.string().nullish(),
         assignedUser: assignedToSchema(t('validators.submissionState.assignedToMsg')),
         queuePriority: z.preprocess(
           coerceNumber,
@@ -194,7 +194,7 @@ export function createSubmissionStatePanelSchema({ initiative, t }: CreateSchema
             .int(`${queuePriorityLabel} must be an integer`)
             .refine((value) => isOneOf(QUEUE_PRIORITY, value), oneOfMessage(queuePriorityLabel, QUEUE_PRIORITY))
         ),
-        region: isGeneral ? z.enum(REGION_LIST, 'Region is a required field').optional() : z.string().nullish(),
+        region: isGeneral ? z.enum(REGION_LIST, 'Region is a required field') : z.string().nullish(),
         submissionType: requiredOneOf(t('validators.submissionState.submissionType'), SUBMISSION_TYPE_LIST)
       })
     )
