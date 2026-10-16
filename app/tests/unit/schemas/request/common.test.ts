@@ -1,4 +1,12 @@
-import { activityId, dateOnlyString, email, phoneNumber, timeTzString, uuidv4 } from '#src/schemas/request/common';
+import {
+  activityId,
+  dateOnlyString,
+  email,
+  notInFutureDateOnlyString,
+  phoneNumber,
+  timeTzString,
+  uuidv4
+} from '#src/schemas/request/common';
 
 describe('common validators', () => {
   describe('activityId', () => {
@@ -33,15 +41,29 @@ describe('common validators', () => {
       }
     );
 
-    it('rejects a future date', () => {
+    it('accepts a future date', () => {
       const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
 
       const { success } = dateOnlyString.safeParse(tomorrow);
-      expect(success).toBe(false);
+      expect(success).toBe(true);
     });
 
     it('rejects a syntactically valid but impossible calendar date', () => {
       const { success } = dateOnlyString.safeParse('2025-02-29');
+      expect(success).toBe(false);
+    });
+  });
+
+  describe('notInFutureDateOnlyString', () => {
+    it('accepts valid past dates', () => {
+      const { success } = notInFutureDateOnlyString.safeParse('2000-01-01');
+      expect(success).toBe(true);
+    });
+
+    it('rejects a future date', () => {
+      const tomorrow = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+      const { success } = notInFutureDateOnlyString.safeParse(tomorrow);
       expect(success).toBe(false);
     });
   });

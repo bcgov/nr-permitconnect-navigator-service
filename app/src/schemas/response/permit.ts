@@ -46,6 +46,10 @@ export const permitSchema = permitModelSchema
     statusLastChanged: z.string().nullable(),
     submittedTime: z.string().nullable(),
     decisionTime: z.string().nullable(),
+    consultationStartDate: z.string().nullable(),
+    consultationStartTime: z.string().nullable(),
+    consultationEndDate: z.string().nullable(),
+    consultationEndTime: z.string().nullable(),
     statusLastVerifiedTime: z.string().nullable(),
     statusLastChangedTime: z.string().nullable()
   })

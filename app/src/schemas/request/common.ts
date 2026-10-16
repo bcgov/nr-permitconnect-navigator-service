@@ -5,17 +5,14 @@ import { Regex } from '#src/utils/enums/application';
 /** 8-character activity ID. */
 export const activityId = z.string().min(8).max(8);
 
-/** Date-only string (YYYY-MM-DD), canonical and not in the future. */
-export const dateOnlyString = z
-  .string()
-  .regex(new RegExp(Regex.DATE_ONLY), '"Must be a valid date in the format YYYY-MM-DD"')
-  .superRefine((value, ctx) => {
-    const d = new Date(value);
-    const canonical = Number.isNaN(d.getTime()) ? undefined : d.toISOString().slice(0, 10);
-    if (canonical !== value || d.getTime() > Date.now()) {
-      ctx.addIssue({ code: z.ZodIssueCode.custom, message: '"Must be a valid date in the format YYYY-MM-DD"' });
-    }
-  });
+/** Date-only string (YYYY-MM-DD), calendar-valid */
+export const dateOnlyString = z.iso.date({ message: 'Must be a valid date in the format YYYY-MM-DD', abort: true });
+
+/** Date-only string (YYYY-MM-DD), not after today (UTC) */
+export const notInFutureDateOnlyString = dateOnlyString.refine(
+  (value) => value <= new Date().toISOString().slice(0, 10),
+  'Must not be in the future'
+);
 
 /** Email address. */
 export const email = z.string().regex(new RegExp(Regex.EMAIL));

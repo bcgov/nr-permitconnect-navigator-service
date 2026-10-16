@@ -79,6 +79,10 @@ type PermitDateTimeKeys =
   | 'statusLastChanged'
   | 'submittedTime'
   | 'decisionTime'
+  | 'consultationStartDate'
+  | 'consultationStartTime'
+  | 'consultationEndDate'
+  | 'consultationEndTime'
   | 'statusLastVerifiedTime'
   | 'statusLastChangedTime';
 // permitStatusDatesTransform (db/extensions/permitStatusDates.ts) accepts these 8 fields as date/time
