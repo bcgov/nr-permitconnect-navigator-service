@@ -32,6 +32,7 @@ import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
@@ -72,7 +73,7 @@ const initialFormValues: Ref<DeepPartial<FormSchemaType> | undefined> = ref(unde
 const isSubmittable: Ref<boolean> = ref(false);
 const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const validationSchema = computed(() => {
-  return createProjectIntakeSchema(orgBookOptions.value);
+  return toTypedSchema(createProjectIntakeSchema(orgBookOptions.value));
 });
 
 // Actions

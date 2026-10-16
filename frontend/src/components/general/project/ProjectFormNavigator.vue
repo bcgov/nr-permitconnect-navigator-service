@@ -25,6 +25,7 @@ import { ApplicationStatus, Area, FormState, FormType, Region } from '@/utils/en
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/general/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
@@ -183,18 +184,18 @@ function onReOpen() {
     acceptLabel: t('i.common.projectForm.reopenAccept'),
     rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.cast(formValues);
+    const values = formValues as FormSchemaType;
 
     // Generate final payload
     const payload: PatchGeneralProjectRequest = {
@@ -220,7 +221,7 @@ const onSubmit = async (formValues: GenericObject) => {
       projectLocationDescription: values.locationDescription.description,
 
       // Additional Project Information
-      projectDescription: values.projectDescription.description,
+      projectDescription: values.projectDescription.description ?? undefined,
 
       // AST Notes
       astNotes: values.astNotes.notes,
@@ -258,12 +259,14 @@ const onSubmit = async (formValues: GenericObject) => {
   }
 };
 
-const projectFormNavigatorSchema = createProjectFormNavigatorSchema({
-  initiative: getInitiative.value,
-  t,
-  codeList,
-  orgBookOptions: orgBookOptions.value
-});
+const projectFormNavigatorSchema = toTypedSchema(
+  createProjectFormNavigatorSchema({
+    initiative: getInitiative.value,
+    t,
+    codeList,
+    orgBookOptions: orgBookOptions.value
+  })
+);
 
 // Set basic info, clear it if no contact is provided
 function setBasicInfo(contact?: Contact) {

@@ -74,8 +74,8 @@ describe('housing createProjectFormNavigatorSchema', () => {
       'submissionState.queuePriority': 'Priority is a required field',
       'submissionState.submissionType': 'Submission type is a required field',
       'projectAreasUpdated.aaiUpdated': AAI_REQUIRED,
-      'projectAreasUpdated.addedToAts': AAI_REQUIRED,
-      'projectAreasUpdated.ltsaCompleted': AAI_REQUIRED,
+      'projectAreasUpdated.addedToAts': 'Authorized Tracking System (ATS) updated is a required field',
+      'projectAreasUpdated.ltsaCompleted': 'Land Title Survey Authority (LTSA) completed is a required field',
       'projectAreasUpdated.bcOnlineCompleted': 'BC Online completed is a required field',
       'consent.consentToFeedback': 'Consent to feedback is a required field'
     });

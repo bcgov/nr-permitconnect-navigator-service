@@ -25,10 +25,11 @@ import { atsService, housingProjectService, mapService, userService } from '@/se
 import { useAppStore, useCodeStore, useFormStore, useProjectStore } from '@/store';
 import { ATS_ENQUIRY_TYPE_CODE_PROJECT_INTAKE_SUFFIX, ATS_MANAGING_REGION } from '@/utils/constants/projectCommon';
 import { ATSCreateTypes, BasicResponse, GroupName, Initiative } from '@/utils/enums/application';
-import { ApplicationStatus, FormState, FormType } from '@/utils/enums/projectCommon';
+import { ApplicationStatus, FormState, FormType, SubmissionType } from '@/utils/enums/projectCommon';
 import { formatDate } from '@/utils/formatters';
 import { formReadyKey } from '@/utils/keys';
 import { scrollToFirstError, setEmptyStringsToNull, toTitleCase } from '@/utils/utils';
+import { toTypedSchema } from '@/utils/zodSchema';
 import { createProjectFormNavigatorSchema } from '@/validators/housing/projectFormNavigatorSchema';
 
 import type { Ref } from 'vue';
@@ -40,7 +41,6 @@ import type {
   DeepPartial,
   HousingProject,
   OrgBookOption,
-  PatchHousingProjectRequest,
   User
 } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectFormNavigatorSchema';
@@ -107,12 +107,14 @@ const orgBookOptions: Ref<OrgBookOption[]> = ref([]);
 const showCancelMessage: Ref<boolean> = ref(false);
 
 const projectFormNavigatorSchema = computed(() => {
-  return createProjectFormNavigatorSchema({
-    initiative: getInitiative.value,
-    t,
-    codeList,
-    orgBookOptions: orgBookOptions.value
-  });
+  return toTypedSchema(
+    createProjectFormNavigatorSchema({
+      initiative: getInitiative.value,
+      t,
+      codeList,
+      orgBookOptions: orgBookOptions.value
+    })
+  );
 });
 
 // Actions
@@ -332,18 +334,18 @@ function onReOpen() {
     acceptLabel: t('i.common.projectForm.reopenAccept'),
     rejectLabel: t('i.common.projectForm.reopenReject'),
     rejectProps: { outlined: true },
-    accept: () => {
+    accept: async () => {
       formRef.value?.setFieldValue('submissionState.applicationStatus', ApplicationStatus.IN_PROGRESS);
-      if (formRef.value?.values) onSubmit(formRef.value?.values);
+      const result = await formRef.value?.validate();
+      if (result?.valid && result.values) onSubmit(result.values);
+      else if (result) onInvalidSubmit(result);
     }
   });
 }
 
 const onSubmit = async (formValues: GenericObject) => {
   try {
-    // vee-validate doesn't get transformed data from yup so
-    // manually run the form values through it here
-    const values: FormSchemaType = projectFormNavigatorSchema.value.cast(formValues);
+    const values = formValues as FormSchemaType;
 
     // Check for any ATS changes
     // Returns form values if no updates happen
@@ -354,7 +356,7 @@ const onSubmit = async (formValues: GenericObject) => {
     });
 
     // Generate final payload
-    const payload: PatchHousingProjectRequest = {
+    const payload: Parameters<typeof housingProjectService.patchProject>[0] = {
       projectId: project.projectId,
 
       // Company and Project Information
@@ -393,7 +395,7 @@ const onSubmit = async (formValues: GenericObject) => {
       projectLocationDescription: values.locationDescription.description,
 
       // Additional Project Information
-      projectDescription: values.projectDescription.description,
+      projectDescription: values.projectDescription.description ?? undefined,
 
       // AST Notes
       astNotes: values.astNotes.notes,
@@ -401,7 +403,8 @@ const onSubmit = async (formValues: GenericObject) => {
       // Submission State
       assignedUserId: (values.submissionState.assignedUser as User)?.userId ?? null,
       applicationStatus: values.submissionState.applicationStatus,
-      submissionType: values.submissionState.submissionType,
+      // The schema only accepts the navigator submission types the API allows here
+      submissionType: values.submissionState.submissionType as SubmissionType.GUIDANCE | SubmissionType.INAPPLICABLE,
       queuePriority: values.submissionState.queuePriority,
 
       // ATS

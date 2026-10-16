@@ -8,7 +8,8 @@ import { Button, useToast } from '@/lib/primevue';
 import { contactService } from '@/services';
 import { CONTACT_PREFERENCE_LIST, PROJECT_RELATIONSHIP_LIST } from '@/utils/constants/projectCommon';
 import { setEmptyStringsToNull } from '@/utils/utils';
-import { contactSchema } from '@/validators/contact';
+import { toTypedSchema } from '@/utils/zodSchema';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { GenericObject } from 'vee-validate';
 import type { Contact, UpsertContactRequest } from '@/types';
@@ -29,6 +30,7 @@ const { t } = useI18n();
 const toast = useToast();
 
 // State
+const validationSchema = toTypedSchema(contactFormSchema);
 const formRef = ref<InstanceType<typeof Form> | null>(null);
 const initialFormValues = ref({
   contactId: contact.contactId,
@@ -65,7 +67,7 @@ const onSubmit = async (values: GenericObject) => {
       v-if="contact"
       v-slot="{ meta }"
       ref="formRef"
-      :validation-schema="contactSchema"
+      :validation-schema="validationSchema"
       :initial-values="initialFormValues"
       @submit="onSubmit"
     >

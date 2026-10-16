@@ -186,6 +186,7 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
 export interface ElectrificationProjectService extends DraftableProjectService<ElectrificationProject, FormSchemaType> {
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getProject(req: GetProjectRequest): Promise<ElectrificationProject>;
+  patchProject(req: PatchElectrificationProjectRequest): Promise<ElectrificationProject>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: SearchElectrificationProjectRequest): Promise<SearchProjectsResponse>;

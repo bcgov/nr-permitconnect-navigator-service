@@ -1,5 +1,5 @@
 import { runSchema } from '../../helpers';
-import { enquirySchema } from '@/validators/enquiry';
+import { enquiryIntakeFormSchema } from '@/validators/enquiryIntakeFormSchema';
 import { ContactPreference, ProjectRelationship } from '@/utils/enums/projectCommon';
 
 // Mocks
@@ -22,13 +22,13 @@ const testEnquiry = {
 
 // Tests
 
-describe('enquirySchema', () => {
+describe('enquiryIntakeFormSchema', () => {
   it('accepts a well-formed enquiry', async () => {
-    expect(await runSchema(enquirySchema, testEnquiry)).toEqual({ value: testEnquiry, errors: {} });
+    expect(await runSchema(enquiryIntakeFormSchema, testEnquiry)).toEqual({ value: testEnquiry, errors: {} });
   });
 
   it('requires the description and contact fields', async () => {
-    expect((await runSchema(enquirySchema, {})).errors).toEqual({
+    expect((await runSchema(enquiryIntakeFormSchema, {})).errors).toEqual({
       'basic.enquiryDescription': 'Enquiry is a required field',
       'contacts.contactId': 'Contact ID is a required field',
       'contacts.contactApplicantRelationship': 'Relationship to project is a required field',

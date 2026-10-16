@@ -9,7 +9,7 @@ import { enquiryService } from '@/services';
 import { RouteName } from '@/utils/enums/application';
 import { SubmissionType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
-import { contactSchema } from '@/validators';
+import { contactFormSchema } from '@/validators/contact';
 
 import type { Ref } from 'vue';
 
@@ -26,7 +26,7 @@ const confirm = useConfirm();
 
 // Check if applicant section is filled
 const checkApplicantValuesValid = (): boolean => {
-  return contactSchema.isValidSync(formValues.value.contacts);
+  return contactFormSchema.safeParse(formValues.value.contacts).success;
 };
 
 const confirmSubmit = () => {

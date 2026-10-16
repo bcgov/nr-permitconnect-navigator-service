@@ -12,7 +12,7 @@ import type {
   GetProjectRequest,
   GetProjectStatisticsRequest,
   HousingProject,
-  PatchHousingProjectRequest,
+  RequestBody,
   ProjectStatistics,
   SearchHousingProjectRequest,
   SearchProjectsResponse,
@@ -138,7 +138,9 @@ export function listProjects(): Promise<HousingProject[]> {
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `HousingProject` resource.
  */
-export function patchProject(req: PatchHousingProjectRequest): Promise<HousingProject> {
+export function patchProject(
+  req: { projectId: string } & RequestBody<'/housing/project/{housingProjectId}', 'patch'>
+): Promise<HousingProject> {
   const { projectId, ...body } = req;
 
   return api.patch<HousingProject>(housingProjectRoutes.byId(projectId), body);
@@ -187,6 +189,7 @@ export interface HousingProjectService extends DraftableProjectService<HousingPr
   deleteDraft(req: DeleteDraftRequest): Promise<void>;
   getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
   getProject(req: GetProjectRequest): Promise<HousingProject>;
+  patchProject: typeof patchProject;
   listDrafts(): Promise<Draft<FormSchemaType>[]>;
   searchProjects(req: SearchHousingProjectRequest): Promise<SearchProjectsResponse>;
   submitDraft(req: SubmitDraftHousingProjectRequest): Promise<HousingProject>;
