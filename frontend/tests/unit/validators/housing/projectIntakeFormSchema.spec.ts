@@ -169,7 +169,7 @@ describe('housing createProjectIntakeSchema', () => {
       });
     });
 
-    // multiFamilyUnits is unchecked because multiFamilySelected is unset and the otherwise branch drops the oneOf
+    // Unit counts must be valid ranges even when their unit type is not selected
     it('rejects malformed answers', async () => {
       expect(
         await sectionErrors('housing', {
@@ -179,6 +179,8 @@ describe('housing createProjectIntakeSchema', () => {
         })
       ).toEqual({
         'housing.hasRentalUnits': 'Rental units must be one of the following values: Yes, No, Unsure',
+        'housing.multiFamilyUnits':
+          'Expected number of multi-family units must be one of the following values: 1-9, 10-49, 50-500, >500, Unsure',
         'housing.singleFamilyUnits':
           'Expected number of single-family units must be one of the following values: 1-9, 10-49, 50-500, >500, Unsure'
       });

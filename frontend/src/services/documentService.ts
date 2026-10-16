@@ -5,13 +5,7 @@ import { comsService } from './comsService';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 import { getFilenameAndExtension } from '@/utils/utils';
 
-import type {
-  CreateDocumentRequest,
-  DeleteDocumentRequest,
-  Document,
-  DownloadDocumentRequest,
-  ListDocumentsRequest
-} from '@/types';
+import type { ApiInitiative, Document, RequestBody } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -31,7 +25,7 @@ const documentRoutes = {
  * @param req - The request payload containing path parameters and the file.
  * @returns A promise resolving to the created `Document` resource.
  */
-export async function createDocument(req: CreateDocumentRequest): Promise<Document> {
+export async function createDocument(req: { document: File; activityId: string; bucketId: string }): Promise<Document> {
   const { activityId, bucketId, document } = req;
 
   let comsResponse;
@@ -58,13 +52,14 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
     });
 
     // Create document link
-    return await api.post<Document>(documentRoutes.root(), {
+    const body: RequestBody<`create${ApiInitiative}Document`> = {
       activityId: activityId,
       documentId: comsResponse.id,
       filename: comsResponse.name,
       mimeType: comsResponse.mimeType,
       filesize: comsResponse.length
-    });
+    };
+    return await api.post<Document>(documentRoutes.root(), body);
   } catch (e) {
     // In event of any error try to Delete COMS object if it was created
     if (comsResponse) {
@@ -79,16 +74,12 @@ export async function createDocument(req: CreateDocumentRequest): Promise<Docume
  * @param req - The request payload containing the document identifier and version identifier.
  * @returns A promise that resolves when the document and its association have been deleted.
  */
-export async function deleteDocument(req: DeleteDocumentRequest): Promise<void> {
+export async function deleteDocument(req: { documentId: string; versionId?: string }): Promise<void> {
   const { documentId, versionId } = req;
 
   try {
     await comsService.deleteObject({ objectId: documentId, versionId });
-    return await api.delete(documentRoutes.byId(documentId), {
-      params: {
-        versionId: versionId
-      }
-    });
+    return await api.delete(documentRoutes.byId(documentId));
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
   } catch (e) {
     // TODO: If one fails and other doesn't then??
@@ -100,7 +91,11 @@ export async function deleteDocument(req: DeleteDocumentRequest): Promise<void> 
  * @param req - The request payload containing the document identifier, filename, and optional version identifier.
  * @returns A promise that resolves when the document download has been initiated or completed.
  */
-export async function downloadDocument(req: DownloadDocumentRequest): Promise<void> {
+export async function downloadDocument(req: {
+  documentId: string;
+  filename: string;
+  versionId?: string;
+}): Promise<void> {
   const { documentId, filename, versionId } = req;
   await comsService.downloadObject({ objectId: documentId, filename, versionId });
 }
@@ -110,7 +105,7 @@ export async function downloadDocument(req: DownloadDocumentRequest): Promise<vo
  * @param req - The request payload containing the activity identifier.
  * @returns A promise resolving to an array of `Document` resources associated with the activity.
  */
-export async function listDocuments(req: ListDocumentsRequest): Promise<Document[]> {
+export async function listDocuments(req: { activityId: string }): Promise<Document[]> {
   const { activityId } = req;
   return api.get<Document[]>(documentRoutes.list(activityId));
 }

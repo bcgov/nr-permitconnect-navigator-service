@@ -101,15 +101,23 @@ function handleCreateNewActivity() {
       try {
         const userContact = useContactStore().getContact;
         if (!userContact) throw new Error('No contact');
+
+        // The API requires these, but a stored contact can lack them
+        const { phoneNumber, contactApplicantRelationship, contactPreference } = userContact;
+        if (!phoneNumber || !contactApplicantRelationship || !contactPreference) {
+          toast.error(t('enquiryListNavigator.failedSubmission'), t('enquiryListNavigator.incompleteContact'));
+          return;
+        }
+
         const response = await enquiryService.createEnquiry({
           contact: {
             contactId: userContact.contactId,
             firstName: userContact.firstName,
             lastName: userContact.lastName,
-            phoneNumber: userContact.phoneNumber,
+            phoneNumber,
             email: userContact.email,
-            contactApplicantRelationship: userContact.contactApplicantRelationship,
-            contactPreference: userContact.contactPreference
+            contactApplicantRelationship,
+            contactPreference
           }
         });
         if (response?.activityId) {

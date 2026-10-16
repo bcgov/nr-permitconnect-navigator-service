@@ -34,22 +34,15 @@ import { useContactStore, useFormStore, useProjectStore } from '@/store';
 import { BasicResponse, RouteName } from '@/utils/enums/application';
 import { PermitStage } from '@/utils/enums/codeEnums';
 import { PermitNeeded } from '@/utils/enums/permit';
-import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
+import { NumResidentialUnits } from '@/utils/enums/housing';
+import { ActivityContactRole, FormState, FormType, ProjectLocation } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 import { toTypedSchema } from '@/utils/zodSchema';
 
 import type { GeoJSON } from 'geojson';
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type {
-  DeepPartial,
-  Draft,
-  HousingProject,
-  HousingProjectIntake,
-  OrgBookOption,
-  Permit,
-  PermitTracking
-} from '@/types';
+import type { DeepPartial, Draft, HousingProject, RequestBody, OrgBookOption, Permit } from '@/types';
 import type { FormSchemaType } from '@/validators/housing/projectIntakeFormSchema';
 
 // Props
@@ -127,7 +120,7 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const payload: HousingProjectIntake = {
+    const payload: RequestBody<'submitHousingProjectDraft'> = {
       activityId: draft.value?.activityId,
       basic: {
         consentToFeedback: data.basic.consentToFeedback,
@@ -152,16 +145,16 @@ async function onSubmit(data: FormSchemaType) {
         singleFamilySelected: data.housing.singleFamilySelected,
         multiFamilySelected: data.housing.multiFamilySelected,
         otherSelected: data.housing.otherSelected,
-        singleFamilyUnits: data.housing.singleFamilyUnits,
-        multiFamilyUnits: data.housing.multiFamilyUnits,
-        otherUnitsDescription: data.housing.otherUnitsDescription,
-        otherUnits: data.housing.otherUnits,
+        // Hidden fields can keep a null initial value, which the API rejects
+        singleFamilyUnits: data.housing.singleFamilyUnits ?? undefined,
+        multiFamilyUnits: data.housing.multiFamilyUnits ?? undefined,
+        otherUnitsDescription: data.housing.otherUnitsDescription ?? undefined,
+        otherUnits: data.housing.otherUnits ?? undefined,
         hasRentalUnits: data.housing.hasRentalUnits,
         financiallySupportedBc: data.housing.financiallySupportedBc,
         financiallySupportedIndigenous: data.housing.financiallySupportedIndigenous,
         financiallySupportedNonProfit: data.housing.financiallySupportedNonProfit,
         financiallySupportedHousingCoop: data.housing.financiallySupportedHousingCoop,
-        // Hidden fields can keep a null initial value, which the API rejects
         rentalUnits: data.housing.rentalUnits ?? undefined,
         indigenousDescription: data.housing.indigenousDescription ?? undefined,
         nonProfitDescription: data.housing.nonProfitDescription ?? undefined,
@@ -183,7 +176,7 @@ async function onSubmit(data: FormSchemaType) {
       permits: {
         appliedPermits: data.permits.appliedPermits?.map((x) => ({
           submittedDate: x.submittedDate?.toISOString(),
-          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId } as PermitTracking],
+          permitTracking: [{ trackingId: x.permitTracking?.[0]?.trackingId }],
           permitTypeId: x.permitTypeId
         })),
         hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
@@ -270,7 +263,8 @@ onBeforeMount(() => {
           otherUnitsDescription: project.otherUnitsDescription,
           otherUnits: project.otherUnits,
           hasRentalUnits: project.hasRentalUnits,
-          rentalUnits: project.rentalUnits,
+          // Stored values come from this form, so they are one of the unit ranges / location types
+          rentalUnits: project.rentalUnits as NumResidentialUnits,
           financiallySupportedBc: project.financiallySupportedBc,
           financiallySupportedIndigenous: project.financiallySupportedIndigenous,
           indigenousDescription: project.indigenousDescription,
@@ -281,7 +275,7 @@ onBeforeMount(() => {
         },
         location: {
           naturalDisaster: project.naturalDisaster ? BasicResponse.YES : BasicResponse.NO,
-          projectLocation: project.projectLocation,
+          projectLocation: project.projectLocation as ProjectLocation,
           streetAddress: project.streetAddress,
           locality: project.locality,
           province: project.province,

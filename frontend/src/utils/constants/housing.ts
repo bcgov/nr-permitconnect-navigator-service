@@ -26,7 +26,7 @@ export const NUM_RESIDENTIAL_UNITS_LIST = [
   NumResidentialUnits.FIFTY_TO_FIVE_HUNDRED,
   NumResidentialUnits.GREATER_THAN_FIVE_HUNDRED,
   NumResidentialUnits.UNSURE
-];
+] as const;
 
 export const ORG_BOOK_QUERY_PARAMS = {
   limit: 100,

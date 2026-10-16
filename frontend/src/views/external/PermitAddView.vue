@@ -18,7 +18,7 @@ import { FormState } from '@/utils/enums/projectCommon';
 import { appliedPermitsValidator } from '@/validators/common';
 
 import type { GenericObject } from 'vee-validate';
-import type { IntakePermitRequest, Project, ProjectService } from '@/types';
+import type { ApiInitiative, Project, ProjectService, RequestBody } from '@/types';
 
 // Props
 const { projectId } = defineProps<{
@@ -104,7 +104,7 @@ async function onSubmit(data: FormSchemaType) {
     if (!data.permits.appliedPermits) throw new Error('No permits');
     if (!getProject.value) throw new Error('No activity');
 
-    const payload: IntakePermitRequest[] = data.permits.appliedPermits.map((x) => ({
+    const payload: RequestBody<`create${ApiInitiative}IntakePermits`> = data.permits.appliedPermits.map((x) => ({
       activityId: getProject.value!.activityId,
       permitTypeId: x.permitTypeId,
       trackingId: x.permitTracking?.[0]?.trackingId,

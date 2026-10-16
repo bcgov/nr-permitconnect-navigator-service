@@ -3,21 +3,13 @@ import { createRouteBuilder } from './routeBuilder';
 import { Initiative } from '@/utils/enums/application';
 
 import type {
-  CreateGeneralProjectRequest,
-  DeleteDraftRequest,
-  DeleteProjectRequest,
+  RequestBody,
+  QueryParams,
   Draft,
   DraftableProjectService,
-  GetDraftRequest,
-  GetProjectRequest,
-  GetProjectStatisticsRequest,
   GeneralProject,
-  PatchGeneralProjectRequest,
   ProjectStatistics,
-  SearchGeneralProjectRequest,
-  SearchProjectsResponse,
-  UpsertDraftRequest,
-  SubmitDraftGeneralProjectRequest
+  SearchProjectsResponse
 } from '@/types';
 import type { FormSchemaType } from '@/validators/general/projectIntakeFormSchema';
 
@@ -46,7 +38,7 @@ const generalProjectRoutes = {
  * @param req - The request payload containing the project data to create.
  * @returns A promise resolving to the created `GeneralProject` resource.
  */
-export function createProject(req: CreateGeneralProjectRequest): Promise<GeneralProject> {
+export function createProject(req: RequestBody<'createGeneralProject'>): Promise<GeneralProject> {
   const { ...body } = req;
 
   return api.post<GeneralProject>(generalProjectRoutes.root(), body);
@@ -57,7 +49,7 @@ export function createProject(req: CreateGeneralProjectRequest): Promise<General
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+export async function deleteDraft(req: { draftId: string }): Promise<void> {
   const { draftId } = req;
 
   return api.delete(generalProjectRoutes.draftById(draftId));
@@ -68,7 +60,7 @@ export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
+export async function deleteProject(req: { projectId: string }): Promise<void> {
   const { projectId } = req;
 
   return api.delete(generalProjectRoutes.byId(projectId));
@@ -79,7 +71,7 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving to the requested draft resource.
  */
-export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+export async function getDraft(req: { draftId: string }): Promise<Draft<FormSchemaType>> {
   const { draftId } = req;
 
   return api.get<Draft<FormSchemaType>>(generalProjectRoutes.draftById(draftId));
@@ -90,7 +82,7 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving to the requested `GeneralProject` resource.
  */
-export async function getProject(req: GetProjectRequest): Promise<GeneralProject> {
+export async function getProject(req: { projectId: string }): Promise<GeneralProject> {
   const { projectId } = req;
 
   return api.get<GeneralProject>(generalProjectRoutes.byId(projectId));
@@ -101,7 +93,9 @@ export async function getProject(req: GetProjectRequest): Promise<GeneralProject
  * @param req - The request payload containing optional statistic filters.
  * @returns A promise resolving to project statistics.
  */
-export async function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
+export async function getProjectStatistics(
+  req: QueryParams<'getGeneralProjectStatistics'>
+): Promise<ProjectStatistics> {
   const { ...filters } = req;
 
   return api.get<ProjectStatistics>(generalProjectRoutes.statistics(), {
@@ -138,7 +132,9 @@ export async function listProjects(): Promise<GeneralProject[]> {
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `GeneralProject` resource.
  */
-export async function patchProject(req: PatchGeneralProjectRequest): Promise<GeneralProject> {
+export async function patchProject(
+  req: { projectId: string } & RequestBody<'patchGeneralProject'>
+): Promise<GeneralProject> {
   const { projectId, ...body } = req;
 
   return api.patch<GeneralProject>(generalProjectRoutes.byId(projectId), body);
@@ -149,7 +145,7 @@ export async function patchProject(req: PatchGeneralProjectRequest): Promise<Gen
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `GeneralProject` resources.
  */
-export async function searchProjects(req: SearchGeneralProjectRequest): Promise<SearchProjectsResponse> {
+export async function searchProjects(req: RequestBody<'searchGeneralProjects'>): Promise<SearchProjectsResponse> {
   return api.post<SearchProjectsResponse>(generalProjectRoutes.search(), req);
 }
 
@@ -158,7 +154,7 @@ export async function searchProjects(req: SearchGeneralProjectRequest): Promise<
  * @param req - The request payload containing the project data to submit.
  * @returns A promise resolving to the submitted `GeneralProject` resource.
  */
-export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject> {
+export async function submitDraft(req: RequestBody<'submitGeneralProjectDraft'>): Promise<GeneralProject> {
   const { ...body } = req;
 
   return api.post<GeneralProject>(generalProjectRoutes.submitDraft(), body);
@@ -169,7 +165,7 @@ export async function submitDraft(req: SubmitDraftGeneralProjectRequest): Promis
  * @param req - The request payload containing the draft data.
  * @returns A promise resolving to the saved draft resource.
  */
-export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
+export async function upsertDraft(req: RequestBody<'upsertGeneralProjectDraft'>): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
   return api.post<Draft<FormSchemaType>>(generalProjectRoutes.draft(), body);
@@ -184,14 +180,8 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
  * It may be removed once all consumers are migrated to named imports.
  */
 export interface GeneralProjectService extends DraftableProjectService<GeneralProject, FormSchemaType> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  getProject(req: GetProjectRequest): Promise<GeneralProject>;
-  patchProject(req: PatchGeneralProjectRequest): Promise<GeneralProject>;
-  listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchGeneralProjectRequest): Promise<SearchProjectsResponse>;
-  submitDraft(req: SubmitDraftGeneralProjectRequest): Promise<GeneralProject>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+  patchProject: typeof patchProject;
+  submitDraft: typeof submitDraft;
 }
 
 export const generalProjectService: GeneralProjectService = {

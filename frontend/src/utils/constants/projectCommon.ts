@@ -64,7 +64,7 @@ export const PROJECT_LOCATION_LIST = [
   ProjectLocation.LOCATION_COORDINATES,
   ProjectLocation.STREET_ADDRESS,
   ProjectLocation.PIN_OR_DRAW
-];
+] as const;
 
 export const PROJECT_RELATIONSHIP_LIST = [
   ProjectRelationship.OWNER,

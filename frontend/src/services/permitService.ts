@@ -1,15 +1,7 @@
 import { api } from './apiClient';
 import { createInitiativeRouteBuilder } from './routeBuilder';
 
-import type {
-  DeletePermitRequest,
-  GetPermitRequest,
-  IntakePermitRequest,
-  ListPermitsRequest,
-  Permit,
-  SearchPermitsResponse,
-  UpsertPermitRequest
-} from '@/types';
+import type { ApiInitiative, Permit, QueryParams, RequestBody, SearchPermitsResponse } from '@/types';
 
 /**
  * Base route builder and endpoint definitions for this resource.
@@ -32,7 +24,7 @@ const permitRoutes = {
  * @param req - The request payload containing the permit ID.
  * @returns A promise resolving when the operation completes.
  */
-export function deletePermit(req: DeletePermitRequest): Promise<void> {
+export function deletePermit(req: { permitId: string }): Promise<void> {
   const { permitId } = req;
 
   return api.delete(permitRoutes.byId(permitId));
@@ -43,7 +35,7 @@ export function deletePermit(req: DeletePermitRequest): Promise<void> {
  * @param req - The request payload containing the permit ID.
  * @returns A promise resolving to the requested `Permit` resource.
  */
-export function getPermit(req: GetPermitRequest): Promise<Permit> {
+export function getPermit(req: { permitId: string }): Promise<Permit> {
   const { permitId } = req;
 
   return api.get<Permit>(permitRoutes.byId(permitId));
@@ -54,7 +46,7 @@ export function getPermit(req: GetPermitRequest): Promise<Permit> {
  * @param req - The request payload containing the permit intake information.
  * @returns A promise resolving to the new Permit information.
  */
-export function intakePermits(req: IntakePermitRequest[]): Promise<Permit[]> {
+export function intakePermits(req: RequestBody<`create${ApiInitiative}IntakePermits`>): Promise<Permit[]> {
   return api.post<Permit[]>(permitRoutes.intake(), req);
 }
 
@@ -63,7 +55,7 @@ export function intakePermits(req: IntakePermitRequest[]): Promise<Permit[]> {
  * @param req - Optional list filters.
  * @returns A promise resolving to an array of permits.
  */
-export function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
+export function listPermits(req?: QueryParams<`list${ApiInitiative}Permits`>): Promise<Permit[]> {
   return api.get<Permit[]>(permitRoutes.root(), {
     params: req
   });
@@ -74,7 +66,7 @@ export function listPermits(req?: ListPermitsRequest): Promise<Permit[]> {
  * @param req - Optional search criteria.
  * @returns A promise resolving to matching permits and total record count.
  */
-export function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsResponse> {
+export function searchPermits(req?: QueryParams<`search${ApiInitiative}Permits`>): Promise<SearchPermitsResponse> {
   return api.get<SearchPermitsResponse>(permitRoutes.search(), {
     params: req
   });
@@ -85,7 +77,7 @@ export function searchPermits(req?: ListPermitsRequest): Promise<SearchPermitsRe
  * @param req - The permit payload to save.
  * @returns A promise resolving to the saved permit.
  */
-export function upsertPermit(req: UpsertPermitRequest): Promise<Permit> {
+export function upsertPermit(req: RequestBody<`upsert${ApiInitiative}Permit`>): Promise<Permit> {
   return api.post<Permit>(permitRoutes.root(), req);
 }
 

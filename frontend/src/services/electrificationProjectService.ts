@@ -3,21 +3,13 @@ import { createRouteBuilder } from './routeBuilder';
 import { Initiative } from '@/utils/enums/application';
 
 import type {
-  CreateElectrificationProjectRequest,
-  DeleteDraftRequest,
-  DeleteProjectRequest,
+  RequestBody,
+  QueryParams,
   Draft,
   DraftableProjectService,
   ElectrificationProject,
-  GetDraftRequest,
-  GetProjectRequest,
-  GetProjectStatisticsRequest,
-  PatchElectrificationProjectRequest,
   ProjectStatistics,
-  SearchElectrificationProjectRequest,
-  SearchProjectsResponse,
-  UpsertDraftRequest,
-  SubmitDraftElectrificationProjectRequest
+  SearchProjectsResponse
 } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
@@ -46,7 +38,7 @@ const electrificationProjectRoutes = {
  * @param req - The request payload containing the project data to create.
  * @returns A promise resolving to the created `ElectrificationProject` resource.
  */
-export async function createProject(req: CreateElectrificationProjectRequest): Promise<ElectrificationProject> {
+export async function createProject(req: RequestBody<'createElectrificationProject'>): Promise<ElectrificationProject> {
   const { ...body } = req;
 
   return api.post<ElectrificationProject>(electrificationProjectRoutes.root(), body);
@@ -57,7 +49,7 @@ export async function createProject(req: CreateElectrificationProjectRequest): P
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
+export async function deleteDraft(req: { draftId: string }): Promise<void> {
   const { draftId } = req;
 
   return api.delete(electrificationProjectRoutes.draftById(draftId));
@@ -68,7 +60,7 @@ export async function deleteDraft(req: DeleteDraftRequest): Promise<void> {
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving when the operation completes.
  */
-export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
+export async function deleteProject(req: { projectId: string }): Promise<void> {
   const { projectId } = req;
 
   return api.delete(electrificationProjectRoutes.byId(projectId));
@@ -79,7 +71,7 @@ export async function deleteProject(req: DeleteProjectRequest): Promise<void> {
  * @param req - The request payload containing the draft ID.
  * @returns A promise resolving to the requested draft resource.
  */
-export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>> {
+export async function getDraft(req: { draftId: string }): Promise<Draft<FormSchemaType>> {
   const { draftId } = req;
 
   return api.get<Draft<FormSchemaType>>(electrificationProjectRoutes.draftById(draftId));
@@ -90,7 +82,7 @@ export async function getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaTy
  * @param req - The request payload containing the project ID.
  * @returns A promise resolving to the requested `ElectrificationProject` resource.
  */
-export async function getProject(req: GetProjectRequest): Promise<ElectrificationProject> {
+export async function getProject(req: { projectId: string }): Promise<ElectrificationProject> {
   const { projectId } = req;
 
   return api.get<ElectrificationProject>(electrificationProjectRoutes.byId(projectId));
@@ -101,7 +93,9 @@ export async function getProject(req: GetProjectRequest): Promise<Electrificatio
  * @param req - The request payload containing optional statistic filters.
  * @returns A promise resolving to project statistics.
  */
-export async function getProjectStatistics(req: GetProjectStatisticsRequest): Promise<ProjectStatistics> {
+export async function getProjectStatistics(
+  req: QueryParams<'getElectrificationProjectStatistics'>
+): Promise<ProjectStatistics> {
   const { ...filters } = req;
 
   return api.get<ProjectStatistics>(electrificationProjectRoutes.statistics(), {
@@ -138,7 +132,9 @@ export async function listProjects(): Promise<ElectrificationProject[]> {
  * @param req - The request payload containing the project ID and updated fields.
  * @returns A promise resolving to the updated `ElectrificationProject` resource.
  */
-export async function patchProject(req: PatchElectrificationProjectRequest): Promise<ElectrificationProject> {
+export async function patchProject(
+  req: { projectId: string } & RequestBody<'patchElectrificationProject'>
+): Promise<ElectrificationProject> {
   const { projectId, ...body } = req;
 
   return api.patch<ElectrificationProject>(electrificationProjectRoutes.byId(projectId), body);
@@ -149,7 +145,9 @@ export async function patchProject(req: PatchElectrificationProjectRequest): Pro
  * @param req - The request payload containing optional search criteria.
  * @returns A promise resolving to an array of `ElectrificationProject` resources.
  */
-export async function searchProjects(req: SearchElectrificationProjectRequest): Promise<SearchProjectsResponse> {
+export async function searchProjects(
+  req: RequestBody<'searchElectrificationProjects'>
+): Promise<SearchProjectsResponse> {
   return api.post<SearchProjectsResponse>(electrificationProjectRoutes.search(), req);
 }
 
@@ -158,7 +156,9 @@ export async function searchProjects(req: SearchElectrificationProjectRequest): 
  * @param req - The request payload containing the project data to submit.
  * @returns A promise resolving to the submitted `ElectrificationProject` resource.
  */
-export async function submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject> {
+export async function submitDraft(
+  req: RequestBody<'submitElectrificationProjectDraft'>
+): Promise<ElectrificationProject> {
   const { ...body } = req;
 
   return api.post<ElectrificationProject>(electrificationProjectRoutes.submitDraft(), body);
@@ -169,7 +169,9 @@ export async function submitDraft(req: SubmitDraftElectrificationProjectRequest)
  * @param req - The request payload containing the draft data.
  * @returns A promise resolving to the saved draft resource.
  */
-export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>> {
+export async function upsertDraft(
+  req: RequestBody<'upsertElectrificationProjectDraft'>
+): Promise<Draft<FormSchemaType>> {
   const { ...body } = req;
 
   return api.post<Draft<FormSchemaType>>(electrificationProjectRoutes.draft(), body);
@@ -184,14 +186,8 @@ export async function upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSc
  * It may be removed once all consumers are migrated to named imports.
  */
 export interface ElectrificationProjectService extends DraftableProjectService<ElectrificationProject, FormSchemaType> {
-  deleteDraft(req: DeleteDraftRequest): Promise<void>;
-  getProject(req: GetProjectRequest): Promise<ElectrificationProject>;
-  patchProject(req: PatchElectrificationProjectRequest): Promise<ElectrificationProject>;
-  getDraft(req: GetDraftRequest): Promise<Draft<FormSchemaType>>;
-  listDrafts(): Promise<Draft<FormSchemaType>[]>;
-  searchProjects(req: SearchElectrificationProjectRequest): Promise<SearchProjectsResponse>;
-  submitDraft(req: SubmitDraftElectrificationProjectRequest): Promise<ElectrificationProject>;
-  upsertDraft(req: UpsertDraftRequest): Promise<Draft<FormSchemaType>>;
+  patchProject: typeof patchProject;
+  submitDraft: typeof submitDraft;
 }
 
 export const electrificationProjectService: ElectrificationProjectService = {

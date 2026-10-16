@@ -77,14 +77,15 @@ async function searchPermits() {
         loading.value = true;
         permitService
           .searchPermits({
-            dateRange: dateRange.value,
-            permitTypeId: authorizationType.value?.permitTypeId,
-            sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId,
+            dateRange: dateRange.value?.map((date) => date.toISOString()),
+            permitTypeId: authorizationType.value?.permitTypeId?.toString(),
+            sourceSystemKindId: authorizationTracking.value?.sourceSystemKindId?.toString(),
             searchTag: searchTag.value?.trim() ? searchTag.value.trim() : undefined,
             skip: pagination.value.page && pagination.value.rows ? pagination.value.page * pagination.value.rows : 0,
             take: pagination.value.rows,
             sortField: pagination.value.field,
-            sortOrder: pagination.value.order
+            // DataTable sort orders are -1, 0 or 1
+            sortOrder: pagination.value.order?.toString() as '-1' | '0' | '1' | undefined
           })
           .then((res) => {
             searchResponse.value = res;

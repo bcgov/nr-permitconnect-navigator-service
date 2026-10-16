@@ -21,13 +21,12 @@ import { Button, useConfirm, useToast } from '@/lib/primevue';
 import { electrificationProjectService } from '@/services';
 import { useCodeStore, useContactStore, useFormStore } from '@/store';
 import { RouteName } from '@/utils/enums/application';
-import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { ActivityContactRole, FormState, FormType } from '@/utils/enums/projectCommon';
 import { generalErrorHandler } from '@/utils/utils';
 
 import type { GenericObject } from 'vee-validate';
 import type { Ref } from 'vue';
-import type { DeepPartial, Draft, ElectrificationProject, ElectrificationProjectIntake, OrgBookOption } from '@/types';
+import type { DeepPartial, Draft, ElectrificationProject, OrgBookOption } from '@/types';
 import type { FormSchemaType } from '@/validators/electrification/projectIntakeFormSchema';
 
 // Props
@@ -102,11 +101,12 @@ async function onSubmit(data: FormSchemaType) {
   try {
     autoSaveRef.value?.stopAutoSave();
 
-    const payload: ElectrificationProjectIntake = {
+    // The schema requires the asserted fields but its inferred types leave them optional
+    const payload: Parameters<typeof electrificationProjectService.submitDraft>[0] = {
       activityId: draft.value?.activityId,
       basic: {
         registeredId: data.basic.registeredId,
-        registeredName: data.basic.registeredName,
+        registeredName: data.basic.registeredName!,
         projectName: data.basic.projectName,
         projectDescription: data.basic.projectDescription
       },
@@ -115,14 +115,14 @@ async function onSubmit(data: FormSchemaType) {
         firstName: data.contacts.firstName,
         lastName: data.contacts.lastName,
         email: data.contacts.email,
-        phoneNumber: data.contacts.phoneNumber,
-        contactApplicantRelationship: data.contacts.contactApplicantRelationship,
-        contactPreference: data.contacts.contactPreference
+        phoneNumber: data.contacts.phoneNumber!,
+        contactApplicantRelationship: data.contacts.contactApplicantRelationship!,
+        contactPreference: data.contacts.contactPreference!
       },
       draftId: draft.value?.draftId,
       project: {
         bcHydroNumber: data.project.bcHydroNumber,
-        projectType: data.project.projectType as ElectrificationProjectType
+        projectType: data.project.projectType
       }
     };
 

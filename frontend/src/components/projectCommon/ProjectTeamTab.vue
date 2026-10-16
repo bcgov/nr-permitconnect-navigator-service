@@ -14,7 +14,7 @@ import { GroupName } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
 
 import type { Ref } from 'vue';
-import type { ActivityContact, Contact } from '@/types';
+import type { ActivityContact, Contact, RequestBody } from '@/types';
 
 // Composables
 const confirm = useConfirm();
@@ -136,7 +136,8 @@ async function onAddUsers(contactsAndRoles: { contact: Contact; role: ActivityCo
 
     try {
       if (!contact.contactId) {
-        contact = await contactService.upsertContact(contact);
+        // Contacts without an id are manual entries, already validated by the add modal's contact schema
+        contact = await contactService.upsertContact(contact as RequestBody<'upsertContact'>);
       }
 
       if (!getProject.value?.activityId) throw new Error('No activity ID');
