@@ -92,7 +92,7 @@ const testSubmission: HousingProject = {
   applicationStatus: ApplicationStatus.NEW,
   projectApplicantType: ProjectApplicant.INDIVIDUAL,
   projectLocation: '',
-  hasAppliedProvincialPermits: false,
+  hasAppliedProvincialPermits: BasicResponse.NO,
   contacts: []
 };
 

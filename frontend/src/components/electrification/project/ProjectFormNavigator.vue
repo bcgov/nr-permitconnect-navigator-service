@@ -130,10 +130,11 @@ async function initializeFormValues(project: ElectrificationProject): Promise<De
     electrification: {
       bcHydroNumber: project.bcHydroNumber,
       projectType: project.projectType,
-      hasEpa: project.hasEpa ? BasicResponse.YES : BasicResponse.NO,
+      // Stored values come from this form, so they are Yes or No
+      hasEpa: (project.hasEpa ?? undefined) as BasicResponse | undefined,
       megawatts: project.megawatts,
       projectCategory: project.projectCategory,
-      bcEnvironmentAssessNeeded: project.bcEnvironmentAssessNeeded ? BasicResponse.YES : BasicResponse.NO
+      bcEnvironmentAssessNeeded: (project.bcEnvironmentAssessNeeded ?? undefined) as BasicResponse | undefined
     },
 
     // Additional Info
