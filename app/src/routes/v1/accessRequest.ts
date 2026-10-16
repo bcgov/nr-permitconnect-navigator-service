@@ -43,6 +43,7 @@ export default function createAccessRequestRouter(basePath: string, tagPrefix: s
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `create${tagPrefix}AccessRequest`,
     summary: 'Request to create/revoke a user and access request',
     tags: [`${tagPrefix} Access Request`],
     schema: schema.createUserAccessRequest,
@@ -64,6 +65,7 @@ export default function createAccessRequestRouter(basePath: string, tagPrefix: s
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/:accessRequestId',
+    operationId: `process${tagPrefix}AccessRequest`,
     summary: 'Process an access request',
     tags: [`${tagPrefix} Access Request`],
     schema: schema.processUserAccessRequest,
@@ -80,6 +82,7 @@ export default function createAccessRequestRouter(basePath: string, tagPrefix: s
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/',
+    operationId: `list${tagPrefix}AccessRequests`,
     summary: 'Get access requests',
     tags: [`${tagPrefix} Access Request`],
     responses: {

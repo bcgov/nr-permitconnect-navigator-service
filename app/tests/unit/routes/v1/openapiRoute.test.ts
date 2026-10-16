@@ -25,6 +25,7 @@ const buildApp = (
   openapiRoute('/things', router, {
     method: 'post',
     path: '/:id',
+    operationId: 'createThing',
     summary: 'test route',
     tags: ['Test'],
     schema: { params: paramsSchema, body: bodySchema },
@@ -85,6 +86,7 @@ describe('openapiRoute', () => {
       expect.objectContaining({
         method: 'post',
         path: '/things/{id}',
+        operationId: 'createThing',
         summary: 'test route',
         tags: ['Test'],
         request: expect.objectContaining({

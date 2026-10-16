@@ -32,6 +32,7 @@ export default function createMapRouter(basePath: string, tagPrefix: string): Ro
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/pids/:projectId',
+    operationId: `get${tagPrefix}ProjectPids`,
     summary: 'Get PIDs for a project',
     tags: [`${tagPrefix} Map`],
     schema: schema.getPids,

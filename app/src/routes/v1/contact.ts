@@ -27,6 +27,7 @@ router.use(requireSomeGroup);
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/',
+  operationId: 'getCurrentContact',
   summary: "Get current user's contact information",
   tags: ['Contact'],
   responses: {
@@ -41,6 +42,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/match',
+  operationId: 'matchContacts',
   summary: 'Match contacts',
   tags: ['Contact'],
   schema: schema.matchContacts,
@@ -57,6 +59,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/search',
+  operationId: 'searchContacts',
   summary: 'Search contacts',
   tags: ['Contact'],
   schema: schema.searchContacts,
@@ -73,6 +76,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'get',
   path: '/:contactId',
+  operationId: 'getContact',
   summary: 'Get a specific contact',
   tags: ['Contact'],
   schema: schema.getContact,
@@ -89,6 +93,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'post',
   path: '/',
+  operationId: 'upsertContact',
   summary: 'Create or update a contact',
   tags: ['Contact'],
   schema: schema.upsertContact,
@@ -105,6 +110,7 @@ openapiRoute(basePath, router, {
 openapiRoute(basePath, router, {
   method: 'delete',
   path: '/:contactId',
+  operationId: 'deleteContact',
   summary: 'Delete a specific contact',
   tags: ['Contact'],
   schema: schema.deleteContact,

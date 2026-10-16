@@ -36,6 +36,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/list/:activityId',
+    operationId: `listRelated${tagPrefix}Enquiries`,
     summary: 'Gets enquiries related to an activityId',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.listRelatedEnquiries,
@@ -52,6 +53,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/search',
+    operationId: `search${tagPrefix}Enquiries`,
     summary: 'Search all enquiries',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.searchEnquiries,
@@ -68,6 +70,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/:enquiryId',
+    operationId: `get${tagPrefix}Enquiry`,
     summary: 'Gets a specific enquiry',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.getEnquiry,
@@ -84,6 +87,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'get',
     path: '/',
+    operationId: `list${tagPrefix}Enquiries`,
     summary: 'Gets a list of enquiries',
     tags: [`${tagPrefix} Enquiry`],
     responses: {
@@ -98,6 +102,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'post',
     path: '/',
+    operationId: `create${tagPrefix}Enquiry`,
     summary: 'Creates an enquiry and set status to Submitted',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.createEnquiry,
@@ -114,6 +119,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'patch',
     path: '/:enquiryId',
+    operationId: `patch${tagPrefix}Enquiry`,
     summary: 'Patches an enquiry',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.patchEnquiry,
@@ -130,6 +136,7 @@ export default function createEnquiryRouter(basePath: string, tagPrefix: string)
   openapiRoute(basePath, router, {
     method: 'delete',
     path: '/:enquiryId',
+    operationId: `delete${tagPrefix}Enquiry`,
     summary: 'Deletes an enquiry',
     tags: [`${tagPrefix} Enquiry`],
     schema: schema.deleteEnquiry,
