@@ -8,6 +8,7 @@ import i18n from '@/i18n';
 import { activityContactService, contactService } from '@/services';
 import { Zone } from '@/utils/enums/application';
 import { ActivityContactRole } from '@/utils/enums/projectCommon';
+import { omit } from '@/utils/utils';
 import { mockAxiosError, mockAxiosErrorNoResponse } from '../../../helpers';
 import { testAuditFields, testContactDefaults } from '../../../fixtures';
 
@@ -329,9 +330,11 @@ describe('ProjectTeamTab.vue', () => {
     });
 
     it('updates PRIMARY role WITH demotion and toasts successfully', async () => {
+      // The API returns bare rows, so the demoted contact's name has to come from the store
+      const bareRow = omit(mockActivityContact, ['contact']);
       vi.mocked(activityContactService.putActivityContact).mockResolvedValue({
-        updated: mockActivityContact,
-        demoted: mockActivityContact
+        updated: bareRow,
+        demoted: { ...bareRow, role: ActivityContactRole.ADMIN }
       });
 
       const wrapper = shallowMount(ProjectTeamTab, wrapperSettings());
@@ -340,7 +343,9 @@ describe('ProjectTeamTab.vue', () => {
       await manageModal.vm.$emit('projectTeamManageModal:manageUser', mockActivityContact, ActivityContactRole.PRIMARY);
       await flushPromises();
 
-      expect(mockToastSuccess).toHaveBeenCalled();
+      expect(mockToastSuccess).toHaveBeenCalledWith(
+        expect.stringContaining(`${mockContact.firstName} ${mockContact.lastName} has been demoted`)
+      );
       expect(manageModal.props('visible')).toBe(false);
     });
 
