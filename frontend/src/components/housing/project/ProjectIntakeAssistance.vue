@@ -12,6 +12,7 @@ import { generalErrorHandler, setEmptyStringsToNull } from '@/utils/utils';
 import { contactFormSchema } from '@/validators/contact';
 
 import type { Ref } from 'vue';
+import type { CreateEnquiryRequest } from '@/types';
 
 // Composables
 const formValues = useFormValues();
@@ -44,11 +45,9 @@ const confirmSubmit = () => {
 
 async function onAssistanceRequest() {
   try {
-    const enquiryData = {
-      basic: {
-        enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
-        submissionType: SubmissionType.ASSISTANCE
-      },
+    const enquiryData: CreateEnquiryRequest = {
+      enquiryDescription: t('projectIntakeAssistance.assistanceMessage'),
+      submissionType: SubmissionType.ASSISTANCE,
       contact: setEmptyStringsToNull({
         contactId: formValues.value.contacts.contactId,
         firstName: formValues.value.contacts.firstName,
