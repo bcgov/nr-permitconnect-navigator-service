@@ -8,7 +8,6 @@ import { useFormStore } from '@/store';
 import { RouteName, StorageKey } from '@/utils/enums/application';
 import { ElectrificationProjectType } from '@/utils/enums/codeEnums';
 import { ActivityContactRole, ContactPreference, FormType, ProjectRelationship } from '@/utils/enums/projectCommon';
-import { createProjectIntakeSchema } from '@/validators/electrification/projectIntakeFormSchema';
 
 import { mockRouter, resetMockRouter } from '../../../../mockRouter';
 import { mountComponent } from '../../../../mountComponent';
@@ -304,69 +303,42 @@ describe('ProjectIntakeForm', () => {
       expect(mockToastError).toHaveBeenCalled();
       expect(mockRouter.push).not.toHaveBeenCalled();
     });
-  });
 
-  // These don't need a mounted component at all --
-  // `createProjectIntakeSchema` is a pure function, so we test it directly.
-  describe('validation schema', () => {
-    const codeList = { ElectrificationProjectType: [ElectrificationProjectType.IPP_SOLAR] } as never;
-    const orgBookOptions = [{ registeredName: 'Test Co', registeredId: 'BC123' }];
+    // A raw yup schema hands @submit the raw form values; a Standard Schema (zod) hands it the parsed output,
+    // which would trim this value - update deliberately when migrating
+    it('submits raw form values rather than the schema-transformed output', async () => {
+      submitDraftSpy.mockResolvedValue({ activityId: 'activity-1', electrificationProjectId: 'project-1' } as never);
 
-    const validCases = [
-      {
-        category: 'basic',
-        data: {
-          basic: {
-            registeredId: 'BC123',
-            registeredName: 'Test Co',
-            projectName: 'Project',
-            projectDescription: undefined
-          }
-        }
-      },
-      {
-        category: 'project',
-        data: { project: { projectType: ElectrificationProjectType.IPP_SOLAR, bcHydroNumber: '12345' } }
-      }
-    ] as const;
+      const { wrapper } = mountProjectIntakeForm({
+        props: { project: { ...testProject, companyIdRegistered: '  BC123  ' } }
+      });
+      await wrapper
+        .findComponent(RegisteredBusinessCard)
+        .vm.$emit('update:orgBookOptions', [
+          { registeredId: 'BC123', registeredName: testProject.companyNameRegistered }
+        ]);
 
-    const invalidCases = [
-      { category: 'basic', data: { basic: { registeredName: 'Not a suggestion', projectName: 'Project' } } },
-      { category: 'basic', data: {} },
-      { category: 'project', data: { project: { projectType: 'NOT_A_TYPE' } } },
-      { category: 'project', data: {} }
-    ] as const;
+      await submitForm(wrapper);
+      await mockConfirmRequire.mock.calls[0]?.[0].accept();
+      await flushPromises();
 
-    it.each(validCases)('$category passes validation with well-formed data', async ({ category, data }) => {
-      await expect(
-        createProjectIntakeSchema(codeList, orgBookOptions).validateAt(category, data)
-      ).resolves.toBeTruthy();
+      expect(submitDraftSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ basic: expect.objectContaining({ registeredId: '  BC123  ' }) })
+      );
     });
 
-    it.each(invalidCases)('$category rejects malformed or missing data', async ({ category, data }) => {
-      await expect(
-        createProjectIntakeSchema(codeList, orgBookOptions).validateAt(category, data)
-      ).rejects.toThrowError();
-    });
+    it('blocks submit when required fields are missing', async () => {
+      const { wrapper } = mountProjectIntakeForm({ props: { project: { ...testProject, projectName: '' } } });
+      await wrapper
+        .findComponent(RegisteredBusinessCard)
+        .vm.$emit('update:orgBookOptions', [
+          { registeredId: testProject.companyIdRegistered, registeredName: testProject.companyNameRegistered }
+        ]);
 
-    it('requires a project description only when the project type is OTHER', async () => {
-      const schema = createProjectIntakeSchema(codeList, orgBookOptions);
+      await submitForm(wrapper);
 
-      await expect(
-        schema.validateAt(
-          'basic',
-          { basic: { registeredId: 'BC123', registeredName: 'Test Co', projectName: 'Project' } },
-          { context: { project: { projectType: ElectrificationProjectType.OTHER } } }
-        )
-      ).rejects.toThrowError();
-
-      await expect(
-        schema.validateAt(
-          'basic',
-          { basic: { registeredId: 'BC123', registeredName: 'Test Co', projectName: 'Project' } },
-          { context: { project: { projectType: ElectrificationProjectType.IPP_SOLAR } } }
-        )
-      ).resolves.toBeTruthy();
+      expect(mockConfirmRequire).not.toHaveBeenCalled();
+      expect(submitDraftSpy).not.toHaveBeenCalled();
     });
   });
 });
