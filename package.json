@@ -2,7 +2,8 @@
   "name": "nr-permitconnect-navigator-service-tools",
   "private": true,
   "scripts": {
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "release": "node release.mts"
   },
   "devDependencies": {
     "@commitlint/cli": "21.2.2",
