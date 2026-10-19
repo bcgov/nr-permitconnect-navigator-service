@@ -1,0 +1,40 @@
+name: Draft Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  draft:
+    name: Draft Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Checkout Wiki
+        uses: actions/checkout@v7
+        with:
+          repository: ${{ github.repository }}.wiki
+          path: wiki
+
+      - name: Create Draft Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          tag="v$(node -p "require('./app/package.json').version")"
+
+          # Roadmap section for this version, checkboxes stripped
+          awk -v h="## $tag" '/^## / { p = ($0 == h || index($0, h " ") == 1) } p' wiki/Product-Roadmap.md \
+            | sed 's/\[[xX ]\] //' > notes.md
+          if [ ! -s notes.md ]; then
+            echo "::error::No '## $tag' section found in the Product Roadmap wiki page."
+            exit 1
+          fi
+
+          # Chart releases share this repo and are marked latest, so pin the baseline to the last app tag
+          prev=$(git ls-remote --tags --refs origin 'refs/tags/v*' | sed 's|.*refs/tags/||' | sort -V | tail -1)
+          gh release create "$tag" --draft --title "$tag" --target "$GITHUB_SHA" --notes-file notes.md --generate-notes \
+            ${prev:+--notes-start-tag "$prev"}
