@@ -91,6 +91,38 @@ describe('permit domain', () => {
       expect(result.appliedPermitTrackers).toEqual([]);
     });
 
+    it('ignores client-supplied tracker IDs, stamps, and relations', () => {
+      const result = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [
+          {
+            permitTypeId: 1,
+            permitTracking: [
+              {
+                trackingId: 'TRK-1',
+                sourceSystemKindId: 3,
+                shownToProponent: true,
+                permitTrackingId: 123,
+                permitId: 'someone-elses-permit',
+                createdBy: 'spoofed',
+                deletedAt: new Date(),
+                sourceSystemKind: { sourceSystemKindId: 3, description: 'x', sourceSystem: 'y' }
+              }
+            ]
+          }
+        ]
+      });
+
+      expect(result.appliedPermitTrackers).toEqual([
+        {
+          permitId: result.appliedPermits[0].permitId,
+          trackingId: 'TRK-1',
+          sourceSystemKindId: 3,
+          shownToProponent: true
+        }
+      ]);
+    });
+
     it('returns empty arrays when no permits are given', () => {
       expect(buildIntakePermits('ACTI1234', { hasAppliedProvincialPermits: 'No' })).toEqual({
         appliedPermits: [],

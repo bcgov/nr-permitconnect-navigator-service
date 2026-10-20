@@ -4705,9 +4705,6 @@ paths:
                         properties:
                           permitTypeId:
                             type: number
-                          stage:
-                            type: string
-                            nullable: true
                           submittedDate:
                             anyOf:
                               - type: string
@@ -7392,9 +7389,6 @@ paths:
                         properties:
                           permitTypeId:
                             type: number
-                          stage:
-                            type: string
-                            nullable: true
                           submittedDate:
                             anyOf:
                               - type: string
@@ -10220,9 +10214,6 @@ paths:
                         properties:
                           permitTypeId:
                             type: number
-                          stage:
-                            type: string
-                            nullable: true
                           submittedDate:
                             anyOf:
                               - type: string
