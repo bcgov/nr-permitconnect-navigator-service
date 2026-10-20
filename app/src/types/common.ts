@@ -5,6 +5,11 @@ interface SplitDatetimeBase<T> {
   time: string | null;
 }
 
+export interface SplitStartEndDateTimes {
+  start: NullableDateTimeStrings;
+  end: NullableDateTimeStrings;
+}
+
 export type DateTimeStrings = SplitDatetimeBase<string>;
 
 export type NullableDateTimeStrings = SplitDatetimeBase<string | null>;

@@ -6,12 +6,12 @@ import { getLogger } from '#src/utils/log';
 
 import type {
   CodingEvent,
-  DateTimeStrings,
   Event as PiesEvent,
   NullableDateTimeStrings,
   PeachSummaryResponse,
   ProcessEvent,
-  PiesRecord
+  PiesRecord,
+  SplitStartEndDateTimes
 } from '#types';
 
 const log = getLogger(import.meta.filename);
@@ -25,6 +25,8 @@ interface Status {
 const PEACH_DECISION_STATES = new Set(['ALLOWED', 'DISALLOWED', 'OFFERED', 'ISSUED', 'DECLINED']);
 
 const PEACH_SUBMITTED_STATE = 'SUBMITTED';
+
+const PEACH_FIRST_NATIONS_CONSULTATION_STATE = 'FIRST_NATIONS_CONSULTATION';
 
 /**
  * Inferred process ordering from
@@ -239,12 +241,35 @@ const PROCESS_STATUS_MAPPINGS: Record<string, { stage: PermitStage; state: Permi
 function findSubmittedDate(processEvents: ProcessEvent[]): NullableDateTimeStrings {
   for (const pe of processEvents) {
     if (pe.process.code === PEACH_SUBMITTED_STATE) {
-      return piesEventToDateParts(pe.event);
+      return piesEventToDateParts(pe.event).start;
     }
   }
   return {
     date: null,
     time: null
+  };
+}
+
+/**
+ * Finds the first nations consultation start and end dates and times from a list of process events
+ * @param processEvents Process events to search
+ * @returns A split date representing the first nations consultation start and end date and time, or null if not found
+ */
+function findFirstNationsConsultationDate(processEvents: ProcessEvent[]): SplitStartEndDateTimes {
+  for (const pe of processEvents) {
+    if (pe.process.code === PEACH_FIRST_NATIONS_CONSULTATION_STATE) {
+      return piesEventToDateParts(pe.event);
+    }
+  }
+  return {
+    start: {
+      date: null,
+      time: null
+    },
+    end: {
+      date: null,
+      time: null
+    }
   };
 }
 
@@ -256,7 +281,7 @@ function findSubmittedDate(processEvents: ProcessEvent[]): NullableDateTimeStrin
 function findDecisionDate(processEvents: ProcessEvent[]): NullableDateTimeStrings {
   for (const pe of processEvents) {
     if (PEACH_DECISION_STATES.has(pe.process.code)) {
-      return piesEventToDateParts(pe.event);
+      return piesEventToDateParts(pe.event).start;
     }
   }
   return {
@@ -350,20 +375,16 @@ function piesEventStartToDate(piesEvent: PiesEvent): Date {
 }
 
 /**
- * Normalizes a PIES event into date and time strings
- * If start_datetime is present, it is used directly to split
- * Otherwise, returns start_date string and time as null
+ * Normalizes a PIES event into start and end date and time parts
  * @param piesEvent PIES event object
- * @returns An object with two strings representing the event start date and time seperately
+ * @returns An object with two objects containing the start and end date and time parts respectively
  */
-function piesEventToDateParts(piesEvent: PiesEvent): DateTimeStrings {
-  const { start_date, start_datetime } = piesEvent;
+function piesEventToDateParts(piesEvent: PiesEvent): SplitStartEndDateTimes {
+  const { start_date, start_datetime, end_date, end_datetime } = piesEvent;
+  const start = start_datetime ? splitDateTime(new Date(start_datetime)) : { date: start_date!, time: null };
+  const end = end_datetime ? splitDateTime(new Date(end_datetime)) : { date: end_date ?? null, time: null };
 
-  if (start_datetime) {
-    const startDate = new Date(start_datetime);
-    return splitDateTime(startDate);
-  }
-  return { date: start_date!, time: null };
+  return { start, end };
 }
 
 /**
@@ -461,9 +482,13 @@ export function summarizePiesRecord(record: PiesRecord): PeachSummaryResponse | 
 
   if (!stage || !state) return null;
 
-  const { date: statusLastChanged, time: statusLastChangedTime } = piesEventToDateParts(statusEvent);
+  const { date: statusLastChanged, time: statusLastChangedTime } = piesEventToDateParts(statusEvent).start;
   const { date: submittedDate, time: submittedTime } = findSubmittedDate(processEvents!);
   const { date: decisionDate, time: decisionTime } = findDecisionDate(processEvents!);
+  const {
+    start: { date: consultationStartDate, time: consultationStartTime },
+    end: { date: consultationEndDate, time: consultationEndTime }
+  } = findFirstNationsConsultationDate(processEvents!);
 
   return {
     stage,
@@ -474,7 +499,11 @@ export function summarizePiesRecord(record: PiesRecord): PeachSummaryResponse | 
     decisionDate,
     decisionTime,
     statusLastChanged,
-    statusLastChangedTime
+    statusLastChangedTime,
+    consultationStartDate,
+    consultationStartTime,
+    consultationEndDate,
+    consultationEndTime
   };
 }
 
