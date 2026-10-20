@@ -2,7 +2,7 @@ import prisma from '#src/db/database';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { createHousingProjectData, generateHousingProjectData } from '#src/domains/housingProject';
-import { upsertPermitTracking } from '#src/domains/permitTracking';
+import { createIntakePermits } from '#src/domains/permit';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { BasicResponse, Initiative } from '#src/utils/enums/application';
@@ -163,21 +163,17 @@ export const submitHousingProjectDraftService = async (
 ): Promise<HousingProject> => {
   return await unitOfWork.execute(
     async ({ activity, activityContact, contact, draft, housingProject, initiative, permit, permitTracking }) => {
-      const {
-        housingProject: project,
-        appliedPermits,
-        investigatePermits,
-        appliedPermitTrackers
-      } = await generateHousingProjectData({ activity, activityContact, contact, initiative }, data, currentContext);
+      const { housingProject: project, ...intakePermits } = await generateHousingProjectData(
+        { activity, activityContact, contact, initiative },
+        data,
+        currentContext
+      );
 
       // Create new housing project
       const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
-      await Promise.all(
-        [...appliedPermits, ...investigatePermits].map(async (p) => permit.upsert({ permitId: p.permitId }, p, p))
-      );
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+      await createIntakePermits({ permit, permitTracking }, intakePermits);
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });

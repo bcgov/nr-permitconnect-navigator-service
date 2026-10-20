@@ -74,16 +74,12 @@ export const generateGeneralProjectData = async (
     province: data.location.province ?? null
   };
 
-  const permits = {
-    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-  };
-
   // Put new general project together
   const generalProjectData = {
     generalProject: {
       ...basic,
       ...location,
-      ...permits,
+      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
       generalProjectId: randomUUID(),
       activityId: activityId,
       submittedAt: new Date(),
