@@ -4,7 +4,7 @@ import { PermitStage, PermitState } from '#src/db/codes/enums';
 import { unitOfWork } from '#src/db/unitOfWork';
 import { activityContactScope } from '#src/db/utils/utils';
 import { findPriorityPermitTracking } from '#src/domains/peach';
-import { buildNewPermitRecord, prepareNotificationEmails, prepareIntakeNotificationEmails } from '#src/domains/permit';
+import { buildNewPermitRecord, createIntakePermits, prepareNotificationEmails, prepareIntakeNotificationEmails } from '#src/domains/permit';
 import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { email } from '#src/external/ches';
 import { getPiesRecord } from '#src/external/peach';
@@ -150,18 +150,15 @@ export const intakePermitService = async (
       });
 
       // Create each permit and tracking IDs
-      const addedPermits = await Promise.all(
-        appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p))
-      );
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+      await createIntakePermits({ permit, permitTracking }, { appliedPermits, appliedPermitTrackers });
+
+      const permits = await permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
 
       const emails = await prepareIntakeNotificationEmails(
         { contact, electrificationProject, generalProject, housingProject, permitType, user },
         currentContext,
-        addedPermits
+        permits
       );
-
-      const permits = await permit.findMany({ where: { permitId: { in: appliedPermits.map((x) => x.permitId) } } });
 
       return { permits, emails };
     }

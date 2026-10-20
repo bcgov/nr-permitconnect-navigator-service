@@ -50,14 +50,10 @@ export const generateElectrificationProjectData = async (
     data.activityId
   );
 
-  const permits = {
-    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-  };
-
   // Put new electrification project together
   const electrificationProjectData = {
     electrificationProject: {
-      ...permits,
+      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
       companyIdRegistered: data.basic.registeredId ?? null,
       companyNameRegistered: data.basic.registeredName,
       projectName: data.basic.projectName,
