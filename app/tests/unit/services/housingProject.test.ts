@@ -37,19 +37,10 @@ describe('housingProject service', () => {
   });
 
   describe('createHousingProjectService', () => {
-    it('calls createHousingProjectData domain, creates project and permits, and returns result', async () => {
+    it('calls createHousingProjectData domain, creates project, and returns result', async () => {
       const projectData = { ...TEST_HOUSING_PROJECT_CREATE, geoJson: JSON.stringify({}) };
-      const generatedData = {
-        housingProject: projectData,
-        appliedPermits: [{ permitId: 'p1' }],
-        investigatePermits: [{ permitId: 'p2' }],
-        appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
-      };
-
-      createDataSpy.mockResolvedValueOnce(generatedData as never);
+      createDataSpy.mockResolvedValueOnce(projectData as never);
       mockRepos.housingProject.create.mockResolvedValueOnce(TEST_HOUSING_PROJECT_1 as never);
-      mockRepos.permit.upsert.mockResolvedValue({} as never);
-      upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
       const response = await housingProjectService.createHousingProjectService(TEST_CURRENT_CONTEXT);
 
@@ -65,8 +56,6 @@ describe('housingProject service', () => {
       );
       expect(mockRepos.housingProject.create).toHaveBeenCalledTimes(1);
       expect(mockRepos.housingProject.create).toHaveBeenCalledWith(projectData);
-      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
-      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
       expect(response).toStrictEqual(TEST_HOUSING_PROJECT_1);
     });
   });

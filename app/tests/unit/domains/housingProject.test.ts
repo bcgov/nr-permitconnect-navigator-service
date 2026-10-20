@@ -205,7 +205,7 @@ describe('housingProject domain', () => {
         Initiative.HOUSING,
         TEST_CURRENT_CONTEXT
       );
-      expect(result.housingProject.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
+      expect(result.activityId).toBe(TEST_ACTIVITY_HOUSING.activityId);
     });
 
     it('should throw error when activity creation fails', async () => {
@@ -229,20 +229,17 @@ describe('housingProject domain', () => {
       );
     });
 
-    it('should return a blank project shell with defaults and no permits', async () => {
+    it('should return a blank project shell with defaults', async () => {
       vi.spyOn(activityDomain, 'ensureActivityWithPrimaryContact').mockResolvedValueOnce(
         TEST_ACTIVITY_HOUSING.activityId
       );
 
       const result = await createHousingProjectData(mockRepos, TEST_CURRENT_CONTEXT);
 
-      expect(result.housingProject.applicationStatus).toBe(ApplicationStatus.NEW);
-      expect(result.housingProject.submissionType).toBe(SubmissionType.GUIDANCE);
-      expect(result.housingProject.submittedBy).toBe('test-user');
-      expect(result.housingProject.housingProjectId).toBeDefined();
-      expect(result.appliedPermits).toEqual([]);
-      expect(result.investigatePermits).toEqual([]);
-      expect(result.appliedPermitTrackers).toEqual([]);
+      expect(result.applicationStatus).toBe(ApplicationStatus.NEW);
+      expect(result.submissionType).toBe(SubmissionType.GUIDANCE);
+      expect(result.submittedBy).toBe('test-user');
+      expect(result.housingProjectId).toBeDefined();
     });
   });
 

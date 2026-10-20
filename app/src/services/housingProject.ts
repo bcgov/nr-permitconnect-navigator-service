@@ -22,26 +22,17 @@ import type {
 } from '#types';
 
 export const createHousingProjectService = async (currentContext: CurrentContext): Promise<HousingProject> => {
-  return await unitOfWork.execute(
-    async ({ activity, activityContact, contact, housingProject, initiative, permit, permitTracking }) => {
-      const {
-        housingProject: project,
-        appliedPermits,
-        investigatePermits,
-        appliedPermitTrackers
-      } = await createHousingProjectData({ activity, activityContact, contact, initiative }, currentContext);
+  return await unitOfWork.execute(async ({ activity, activityContact, contact, housingProject, initiative }) => {
+    const housingProjectData = await createHousingProjectData(
+      { activity, activityContact, contact, initiative },
+      currentContext
+    );
 
-      // Create new housing project
-      const response = await housingProject.create(project);
+    // Create new housing project
+    const response = await housingProject.create(housingProjectData);
 
-      // Create each permit and tracking IDs
-      await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
-      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
-
-      return response;
-    }
-  );
+    return response;
+  });
 };
 
 /**
@@ -183,11 +174,7 @@ export const submitHousingProjectDraftService = async (
       const response = await housingProject.create(project);
 
       // Create each permit and tracking IDs
-      await Promise.all(
-        appliedPermits.map(async (p) => {
-          permit.upsert({ permitId: p.permitId }, p, p);
-        })
-      );
+      await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
       await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
       await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
 

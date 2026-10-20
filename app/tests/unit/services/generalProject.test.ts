@@ -37,19 +37,10 @@ describe('generalProject service', () => {
   });
 
   describe('createGeneralProjectService', () => {
-    it('calls createGeneralProjectData domain, creates project and permits, and returns result', async () => {
+    it('calls createGeneralProjectData domain, creates project, and returns result', async () => {
       const projectData = { ...TEST_GENERAL_PROJECT_CREATE, geoJson: JSON.stringify({}) };
-      const generatedData = {
-        generalProject: projectData,
-        appliedPermits: [{ permitId: 'p1' }],
-        investigatePermits: [{ permitId: 'p2' }],
-        appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
-      };
-
-      createDataSpy.mockResolvedValueOnce(generatedData as never);
+      createDataSpy.mockResolvedValueOnce(projectData as never);
       mockRepos.generalProject.create.mockResolvedValueOnce(TEST_GENERAL_PROJECT_1 as never);
-      mockRepos.permit.upsert.mockResolvedValue({} as never);
-      upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
 
       const response = await generalProjectService.createGeneralProjectService(TEST_CURRENT_CONTEXT);
 
@@ -65,8 +56,6 @@ describe('generalProject service', () => {
       );
       expect(mockRepos.generalProject.create).toHaveBeenCalledTimes(1);
       expect(mockRepos.generalProject.create).toHaveBeenCalledWith(projectData);
-      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
-      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
       expect(response).toStrictEqual(TEST_GENERAL_PROJECT_1);
     });
   });
