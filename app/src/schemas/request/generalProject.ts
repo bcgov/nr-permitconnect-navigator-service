@@ -1,13 +1,12 @@
 import { z } from 'zod';
 
-import { appliedPermit } from './appliedPermit.ts';
+import { intakePermits } from './appliedPermit.ts';
 import { atsEnquirySubmissionFields } from './ats.ts';
 import { activityId, uuidv4 } from './common.ts';
 import { location } from './location.ts';
 import { paginationOptions } from './paginationOptions.ts';
 import { submittedContactSchema } from './submittedContact.ts';
 import { requireValidCode } from '#src/db/codes/validator';
-import { YES_NO_UNSURE_LIST } from '#src/utils/constants/application';
 import { PROJECT_APPLICANT_LIST } from '#src/utils/constants/housing';
 import { APPLICATION_STATUS_LIST, SUBMISSION_TYPE_LIST } from '#src/utils/constants/projectCommon';
 import { ProjectApplicant } from '#src/utils/enums/housing';
@@ -47,13 +46,7 @@ export const schema = {
             }
           }),
         location,
-        permits: z
-          .object({
-            appliedPermits: z.array(appliedPermit).nullish(),
-            hasAppliedProvincialPermits: z.enum(YES_NO_UNSURE_LIST as [string, ...string[]]),
-            investigatePermits: z.array(z.object({ permitTypeId: z.number() }).strict()).nullish()
-          })
-          .strict()
+        permits: intakePermits
       })
       .strict()
   },

@@ -22,26 +22,17 @@ import type {
 } from '#types';
 
 export const createGeneralProjectService = async (currentContext: CurrentContext): Promise<GeneralProject> => {
-  return await unitOfWork.execute(
-    async ({ activity, activityContact, contact, generalProject, initiative, permit, permitTracking }) => {
-      const {
-        generalProject: project,
-        appliedPermits,
-        investigatePermits,
-        appliedPermitTrackers
-      } = await createGeneralProjectData({ activity, activityContact, contact, initiative }, currentContext);
+  return await unitOfWork.execute(async ({ activity, activityContact, contact, generalProject, initiative }) => {
+    const generalProjectData = await createGeneralProjectData(
+      { activity, activityContact, contact, initiative },
+      currentContext
+    );
 
-      // Create new general project
-      const response = await generalProject.create(project);
+    // Create new general project
+    const response = await generalProject.create(generalProjectData);
 
-      // Create each permit and tracking IDs
-      await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
-      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
-
-      return response;
-    }
-  );
+    return response;
+  });
 };
 
 export const listGeneralProjectActivityIdsService = async (): Promise<string[]> => {

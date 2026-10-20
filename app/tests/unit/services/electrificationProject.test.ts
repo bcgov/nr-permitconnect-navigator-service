@@ -11,6 +11,7 @@ import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import prisma from '#src/db/database';
 import { activityContactScope } from '#src/db/utils/utils';
 import * as electrificationProjectDomain from '#src/domains/electrificationProject';
+import * as permitTrackingDomain from '#src/domains/permitTracking';
 import * as projectDomain from '#src/domains/project';
 import * as electrificationProjectService from '#src/services/electrificationProject';
 import { Initiative } from '#src/utils/enums/application';
@@ -26,6 +27,7 @@ vi.mock('../../../src/db/database.ts', () => ({
 const createDataSpy = vi.spyOn(electrificationProjectDomain, 'createElectrificationProjectData');
 const generateDataSpy = vi.spyOn(electrificationProjectDomain, 'generateElectrificationProjectData');
 const emailSpy = vi.spyOn(projectDomain, 'emailProjectConfirmation');
+const upsertPermitTrackingSpy = vi.spyOn(permitTrackingDomain, 'upsertPermitTracking');
 
 describe('electrificationProject service', () => {
   beforeEach(() => {
@@ -195,13 +197,21 @@ describe('electrificationProject service', () => {
   });
 
   describe('submitElectrificationProjectDraftService', () => {
-    it('creates project from draft, deletes draft, upserts contact, and sends email', async () => {
+    it('creates project from draft, creates permits, deletes draft, upserts contact, and sends email', async () => {
       const draftId = 'draft-123';
+      const generatedData = {
+        electrificationProject: TEST_ELECTRIFICATION_PROJECT_1,
+        appliedPermits: [{ permitId: 'p1' }],
+        investigatePermits: [{ permitId: 'p2' }],
+        appliedPermitTrackers: [{ permitId: 'p1', permitTrackingId: 'pt1' }]
+      };
       const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
       const projectResponse = { ...TEST_ELECTRIFICATION_PROJECT_1, contact: contactResponse };
 
-      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
+      generateDataSpy.mockResolvedValueOnce(generatedData as never);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(projectResponse as never);
+      mockRepos.permit.upsert.mockResolvedValue({} as never);
+      upsertPermitTrackingSpy.mockResolvedValue(undefined as never);
       mockRepos.draft.delete.mockResolvedValueOnce({} as never);
       mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
       emailSpy.mockResolvedValueOnce(undefined);
@@ -226,6 +236,8 @@ describe('electrificationProject service', () => {
       );
       expect(mockRepos.electrificationProject.create).toHaveBeenCalledTimes(1);
       expect(mockRepos.electrificationProject.create).toHaveBeenCalledWith(TEST_ELECTRIFICATION_PROJECT_1);
+      expect(mockRepos.permit.upsert).toHaveBeenCalledTimes(2);
+      expect(upsertPermitTrackingSpy).toHaveBeenCalledTimes(1);
       expect(mockRepos.draft.delete).toHaveBeenCalledTimes(1);
       expect(mockRepos.draft.delete).toHaveBeenCalledWith({ draftId });
       expect(mockRepos.contact.upsert).toHaveBeenCalledTimes(1);
@@ -246,10 +258,16 @@ describe('electrificationProject service', () => {
     });
 
     it('skips draft deletion when draftId is null', async () => {
+      const generatedData = {
+        electrificationProject: TEST_ELECTRIFICATION_PROJECT_1,
+        appliedPermits: [],
+        investigatePermits: [],
+        appliedPermitTrackers: []
+      };
       const contactResponse = { ...TEST_CONTACT_1, contactId: 'contact-1' };
       const projectResponse = { ...TEST_ELECTRIFICATION_PROJECT_1, contact: contactResponse };
 
-      generateDataSpy.mockResolvedValueOnce(TEST_ELECTRIFICATION_PROJECT_1 as never);
+      generateDataSpy.mockResolvedValueOnce(generatedData as never);
       mockRepos.electrificationProject.create.mockResolvedValueOnce(projectResponse as never);
       mockRepos.contact.upsert.mockResolvedValueOnce(contactResponse as never);
       emailSpy.mockResolvedValueOnce(undefined);

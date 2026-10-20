@@ -1,5 +1,5 @@
 import { PermitStage } from '#src/db/codes/enums';
-import { appliedPermit } from '#src/schemas/request/appliedPermit';
+import { appliedPermit, intakePermits } from '#src/schemas/request/appliedPermit';
 
 describe('appliedPermitsSchema', () => {
   it('should only accept numbers for permitTypeId', () => {
@@ -69,6 +69,29 @@ describe('appliedPermitsSchema', () => {
       permitTypeId: 123
     };
     const result = appliedPermit.safeParse(appliedPermits);
+    expect(result.success).toBe(true);
+  });
+});
+
+describe('intakePermits', () => {
+  it('rejects applied permits when hasAppliedProvincialPermits is No', () => {
+    const result = intakePermits.safeParse({
+      hasAppliedProvincialPermits: 'No',
+      appliedPermits: [{ permitTypeId: 1 }]
+    });
+    expect(result.success).toBe(false);
+  });
+
+  it.each(['Yes', 'Unsure'])('accepts applied permits when hasAppliedProvincialPermits is %s', (answer) => {
+    const result = intakePermits.safeParse({
+      hasAppliedProvincialPermits: answer,
+      appliedPermits: [{ permitTypeId: 1 }]
+    });
+    expect(result.success).toBe(true);
+  });
+
+  it('accepts No with no applied permits', () => {
+    const result = intakePermits.safeParse({ hasAppliedProvincialPermits: 'No', appliedPermits: [] });
     expect(result.success).toBe(true);
   });
 });

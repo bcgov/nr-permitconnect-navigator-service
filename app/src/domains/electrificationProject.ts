@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { ensureActivityWithPrimaryContact } from './activity.ts';
+import { buildIntakePermits } from './permit.ts';
 import { Initiative } from '#src/utils/enums/application';
 import { ApplicationStatus, SubmissionType } from '#src/utils/enums/projectCommon';
 
@@ -49,23 +50,31 @@ export const generateElectrificationProjectData = async (
     data.activityId
   );
 
+  const permits = {
+    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
+  };
+
   // Put new electrification project together
   const electrificationProjectData = {
-    companyIdRegistered: data.basic.registeredId ?? null,
-    companyNameRegistered: data.basic.registeredName,
-    projectName: data.basic.projectName,
-    projectDescription: data.basic.projectDescription,
-    bcHydroNumber: data.project.bcHydroNumber ?? null,
-    projectType: data.project.projectType,
-    electrificationProjectId: randomUUID(),
-    activityId: activityId,
-    submittedAt: new Date(),
-    submissionType: SubmissionType.GUIDANCE,
-    applicationStatus: ApplicationStatus.NEW,
-    aaiUpdated: false,
-    addedToAts: false,
-    queuePriority: null
-  } satisfies ElectrificationProjectCreateInput;
+    electrificationProject: {
+      ...permits,
+      companyIdRegistered: data.basic.registeredId ?? null,
+      companyNameRegistered: data.basic.registeredName,
+      projectName: data.basic.projectName,
+      projectDescription: data.basic.projectDescription,
+      bcHydroNumber: data.project.bcHydroNumber ?? null,
+      projectType: data.project.projectType,
+      electrificationProjectId: randomUUID(),
+      activityId: activityId,
+      submittedAt: new Date(),
+      submissionType: SubmissionType.GUIDANCE,
+      applicationStatus: ApplicationStatus.NEW,
+      aaiUpdated: false,
+      addedToAts: false,
+      queuePriority: null
+    } satisfies ElectrificationProjectCreateInput,
+    ...buildIntakePermits(activityId, data.permits)
+  };
 
   return electrificationProjectData;
 };

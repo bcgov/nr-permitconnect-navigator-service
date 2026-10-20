@@ -5,6 +5,7 @@ import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
+import { upsertPermitTracking } from '#src/domains/permitTracking';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
@@ -172,15 +173,34 @@ export const submitElectrificationProjectDraftService = async (
   currentContext: CurrentContext
 ): Promise<ElectrificationProject> => {
   return await unitOfWork.execute(
-    async ({ activity, activityContact, contact, draft, electrificationProject, initiative }) => {
-      const electrificationProjectData = await generateElectrificationProjectData(
+    async ({
+      activity,
+      activityContact,
+      contact,
+      draft,
+      electrificationProject,
+      initiative,
+      permit,
+      permitTracking
+    }) => {
+      const {
+        electrificationProject: project,
+        appliedPermits,
+        investigatePermits,
+        appliedPermitTrackers
+      } = await generateElectrificationProjectData(
         { activity, activityContact, contact, initiative },
         data,
         currentContext
       );
 
       // Create new electrification project
-      const response = await electrificationProject.create(electrificationProjectData);
+      const response = await electrificationProject.create(project);
+
+      // Create each permit and tracking IDs
+      await Promise.all(appliedPermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(investigatePermits.map(async (p) => permit.upsert({ permitId: p.permitId }, p, p)));
+      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });
@@ -190,8 +210,8 @@ export const submitElectrificationProjectDraftService = async (
 
       await emailProjectConfirmation(
         Initiative.ELECTRIFICATION,
-        electrificationProjectData.activityId,
-        electrificationProjectData.electrificationProjectId,
+        project.activityId,
+        project.electrificationProjectId,
         confirmationTemplateElectrificationSubmission,
         contactResponse
       );
