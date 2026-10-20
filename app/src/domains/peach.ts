@@ -152,22 +152,45 @@ export const applyPeachUpdates = async (
       peachSummary.statusLastChanged,
       peachSummary.statusLastChangedTime
     );
+    const peachConsultationStartDatetime = combineDateTime(
+      peachSummary.consultationStartDate,
+      peachSummary.consultationStartTime
+    );
+    const peachConsultationEndDatetime = combineDateTime(
+      peachSummary.consultationEndDate,
+      peachSummary.consultationEndTime
+    );
+
     const pcnsSubmittedDatetime = combineDateTime(pcnsPermit.submittedDate, pcnsPermit.submittedTime);
     const pcnsDecisionDatetime = combineDateTime(pcnsPermit.decisionDate, pcnsPermit.decisionTime);
     const pcnsStatusChangedDatetime = combineDateTime(pcnsPermit.statusLastChanged, pcnsPermit.statusLastChangedTime);
     const pcnsLastVerifiedDatetime = combineDateTime(pcnsPermit.statusLastVerified, pcnsPermit.statusLastVerifiedTime);
+    const pcnsConsultationStartDatetime = combineDateTime(
+      pcnsPermit.consultationStartDate,
+      pcnsPermit.consultationStartTime
+    );
+    const pcnsConsultationEndDatetime = combineDateTime(pcnsPermit.consultationEndDate, pcnsPermit.consultationEndTime);
 
     // Check differentials for PEACH vs PCNS status data
     const submittedDatesEqual = compareDates(peachSubmittedDatetime, pcnsSubmittedDatetime) === 0;
     const decisionDatesEqual = compareDates(peachDecisionDatetime, pcnsDecisionDatetime) === 0;
     const lastChangedDatesEqual = compareDates(peachStatusChangedDatetime, pcnsStatusChangedDatetime) === 0;
+    const consultationStartDatesEqual =
+      compareDates(peachConsultationStartDatetime, pcnsConsultationStartDatetime) === 0;
+    const consultationEndDatesEqual = compareDates(peachConsultationEndDatetime, pcnsConsultationEndDatetime) === 0;
     const stagesEqual = peachSummary.stage === (pcnsPermit.stage as PermitStage);
     const statesEqual = peachSummary.state === (pcnsPermit.state as PermitState);
     const onHoldCodesEqual = peachSummary.onHoldCode === pcnsPermit.onHoldCode;
 
     const stageOrStateHasDiff = !stagesEqual || !statesEqual;
     const hasDiff =
-      stageOrStateHasDiff || !onHoldCodesEqual || !submittedDatesEqual || !decisionDatesEqual || !lastChangedDatesEqual;
+      stageOrStateHasDiff ||
+      !onHoldCodesEqual ||
+      !submittedDatesEqual ||
+      !decisionDatesEqual ||
+      !lastChangedDatesEqual ||
+      !consultationStartDatesEqual ||
+      !consultationEndDatesEqual;
 
     if (!hasDiff) continue;
 
@@ -183,6 +206,12 @@ export const applyPeachUpdates = async (
 
     pcnsPermit.statusLastChanged = peachSummary.statusLastChanged;
     pcnsPermit.statusLastChangedTime = peachSummary.statusLastChangedTime;
+
+    pcnsPermit.consultationStartDate = peachSummary.consultationStartDate;
+    pcnsPermit.consultationStartTime = peachSummary.consultationStartTime;
+
+    pcnsPermit.consultationEndDate = peachSummary.consultationEndDate;
+    pcnsPermit.consultationEndTime = peachSummary.consultationEndTime;
 
     // Only update pcns' last verified date if current value is before peach status change
     const lastVerifiedBeforeStatusChange = compareDates(pcnsLastVerifiedDatetime, peachStatusChangedDatetime) < 0;
