@@ -226,6 +226,16 @@ describe('common validators', () => {
       expect(await runSchema(permitsFormSchema, validPermits)).toEqual({ value: validPermits, errors: {} });
     });
 
+    it('drops applied permits when hasAppliedProvincialPermits is No', async () => {
+      expect(
+        (await runSchema(permitsFormSchema, { ...validPermits, hasAppliedProvincialPermits: BasicResponse.NO })).value
+      ).toEqual({
+        hasAppliedProvincialPermits: BasicResponse.NO,
+        appliedPermits: undefined,
+        investigatePermits: validPermits.investigatePermits
+      });
+    });
+
     it('casts string permit type ids and submitted dates', async () => {
       expect(
         (

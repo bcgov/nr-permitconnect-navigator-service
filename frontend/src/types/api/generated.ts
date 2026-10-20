@@ -3896,7 +3896,6 @@ export interface operations {
             appliedPermits?:
               | {
                   permitTypeId: number;
-                  stage?: string | null;
                   submittedDate?: string | number | unknown;
                   permitTracking?:
                     | {
@@ -6145,7 +6144,6 @@ export interface operations {
             appliedPermits?:
               | {
                   permitTypeId: number;
-                  stage?: string | null;
                   submittedDate?: string | number | unknown;
                   permitTracking?:
                     | {
@@ -8481,7 +8479,6 @@ export interface operations {
             appliedPermits?:
               | {
                   permitTypeId: number;
-                  stage?: string | null;
                   submittedDate?: string | number | unknown;
                   permitTracking?:
                     | {

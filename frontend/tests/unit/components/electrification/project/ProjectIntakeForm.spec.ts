@@ -306,7 +306,7 @@ describe('ProjectIntakeForm', () => {
             projectName: testProject.projectName
           }),
           project: { bcHydroNumber: testProject.bcHydroNumber, projectType: testProject.projectType },
-          permits: { appliedPermits: [], hasAppliedProvincialPermits: BasicResponse.NO, investigatePermits: [] }
+          permits: { appliedPermits: undefined, hasAppliedProvincialPermits: BasicResponse.NO, investigatePermits: [] }
         })
       );
       expect(mockRouter.push).toHaveBeenCalledWith({
