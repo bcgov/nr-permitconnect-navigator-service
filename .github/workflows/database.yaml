@@ -15,6 +15,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ inputs.environment }}
   cancel-in-progress: false
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   deploy:
     name: Deploy CrunchyDB to ${{ inputs.environment }}
@@ -22,6 +25,7 @@ jobs:
       name: ${{ inputs.environment }}
     runs-on: ubuntu-latest
     permissions:
+      # Check out the repository
       contents: read
     steps:
       - name: Checkout repository

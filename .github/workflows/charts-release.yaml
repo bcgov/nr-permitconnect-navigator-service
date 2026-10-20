@@ -11,9 +11,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      # Push the chart index to gh-pages and create chart releases
+      contents: write
     steps:
       - name: Checkout
         uses: actions/checkout@v7

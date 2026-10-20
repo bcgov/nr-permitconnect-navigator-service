@@ -11,12 +11,17 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   build:
     name: Build & Push
     uses: ./.github/workflows/builder.yaml
     permissions:
+      # Builder checks out the repository
       contents: read
+      # Builder pushes images to GitHub Container Registry
       packages: write
     with:
       context: .
@@ -33,6 +38,7 @@ jobs:
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     uses: ./.github/workflows/deployer.yaml
     permissions:
+      # Deployer checks out the repository
       contents: read
     with:
       app_name: ${{ vars.APP_NAME }}
@@ -53,6 +59,7 @@ jobs:
       - deploy-dev
     uses: ./.github/workflows/deployer.yaml
     permissions:
+      # Deployer checks out the repository
       contents: read
     with:
       app_name: ${{ vars.APP_NAME }}
@@ -74,6 +81,7 @@ jobs:
       - deploy-test
     uses: ./.github/workflows/deployer.yaml
     permissions:
+      # Deployer checks out the repository
       contents: read
     with:
       app_name: ${{ vars.APP_NAME }}

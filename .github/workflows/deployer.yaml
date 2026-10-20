@@ -44,13 +44,17 @@ on:
         description: 'Openshift Service Account Token'
         required: true
 
+# Deny by default; each job grants only what it needs
+permissions: {}
+
 jobs:
   infra:
     name: ${{ inputs.environment }} ${{ inputs.job_name }}
     environment:
       name: ${{ inputs.environment }}
     permissions:
-      contents: read # This is required for actions/checkout
+      # Check out the repository
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
