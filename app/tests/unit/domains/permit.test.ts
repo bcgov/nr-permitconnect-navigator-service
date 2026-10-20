@@ -12,6 +12,7 @@ import { mockRepos } from '#tests/__mocks__/unitOfWorkMock';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
 import {
   buildIntakePermits,
+  createIntakePermits,
   listPeachIntegratedTrackings,
   sendPermitUpdateEmail,
   sendPermitUpdateNotifications
@@ -129,6 +130,24 @@ describe('permit domain', () => {
         investigatePermits: [],
         appliedPermitTrackers: []
       });
+    });
+  });
+
+  describe('createIntakePermits', () => {
+    it('saves every permit before creating the trackers', async () => {
+      const calls: string[] = [];
+      mockRepos.permit.upsert.mockImplementation((async () => calls.push('permit')) as never);
+      mockRepos.permitTracking.create.mockImplementation((async () => calls.push('tracker')) as never);
+      const intakePermits = buildIntakePermits('ACTI1234', {
+        hasAppliedProvincialPermits: 'Yes',
+        appliedPermits: [{ permitTypeId: 1, permitTracking: [{ trackingId: 'TRK-1' }] }],
+        investigatePermits: [{ permitTypeId: 2 }]
+      });
+
+      await createIntakePermits(mockRepos, intakePermits);
+
+      expect(calls).toEqual(['permit', 'permit', 'tracker']);
+      expect(mockRepos.permitTracking.create).toHaveBeenCalledWith(intakePermits.appliedPermitTrackers[0]);
     });
   });
 

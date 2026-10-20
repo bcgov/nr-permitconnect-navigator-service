@@ -156,17 +156,13 @@ export const generateHousingProjectData = async (
     streetAddress: data.location.streetAddress ?? null
   };
 
-  const permits = {
-    hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits
-  };
-
   // Put new housing project together
   const housingProjectData = {
     housingProject: {
       ...basic,
       ...housing,
       ...location,
-      ...permits,
+      hasAppliedProvincialPermits: data.permits.hasAppliedProvincialPermits,
       housingProjectId: randomUUID(),
       activityId: activityId,
       submittedAt: new Date(),

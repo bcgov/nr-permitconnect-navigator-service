@@ -5,7 +5,7 @@ import {
   createElectrificationProjectData,
   generateElectrificationProjectData
 } from '#src/domains/electrificationProject';
-import { upsertPermitTracking } from '#src/domains/permitTracking';
+import { createIntakePermits } from '#src/domains/permit';
 import { emailProjectConfirmation } from '#src/domains/project';
 import { getScopeUserId } from '#src/parsers/responseFiltering';
 import { Initiative } from '#src/utils/enums/application';
@@ -183,12 +183,7 @@ export const submitElectrificationProjectDraftService = async (
       permit,
       permitTracking
     }) => {
-      const {
-        electrificationProject: project,
-        appliedPermits,
-        investigatePermits,
-        appliedPermitTrackers
-      } = await generateElectrificationProjectData(
+      const { electrificationProject: project, ...intakePermits } = await generateElectrificationProjectData(
         { activity, activityContact, contact, initiative },
         data,
         currentContext
@@ -198,10 +193,7 @@ export const submitElectrificationProjectDraftService = async (
       const response = await electrificationProject.create(project);
 
       // Create each permit and tracking IDs
-      await Promise.all(
-        [...appliedPermits, ...investigatePermits].map(async (p) => permit.upsert({ permitId: p.permitId }, p, p))
-      );
-      await Promise.all(appliedPermitTrackers.map(async (pt) => upsertPermitTracking({ permitTracking }, pt)));
+      await createIntakePermits({ permit, permitTracking }, intakePermits);
 
       // Delete old draft
       if (draftId) await draft.delete({ draftId });

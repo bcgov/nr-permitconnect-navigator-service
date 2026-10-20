@@ -1,6 +1,7 @@
 import config from 'config';
 import { randomUUID } from 'node:crypto';
 
+import { upsertPermitTracking } from './permitTracking.ts';
 import { getProjectByActivityId } from './project.ts';
 import { codeTable } from '#src/db/codes/cache';
 import { PermitStage, PermitState } from '#src/db/codes/enums';
@@ -114,6 +115,30 @@ export const buildIntakePermits = (activityId: string, permits: DraftPermitsInpu
   );
 
   return { appliedPermits, investigatePermits, appliedPermitTrackers };
+};
+
+/**
+ * Saves the permits and trackers built for an intake
+ * @param repositories - The required repositories
+ * @param intakePermits - The permit and tracker records to save
+ */
+export const createIntakePermits = async (
+  repositories: Pick<Repositories, 'permit' | 'permitTracking'>,
+  intakePermits: {
+    appliedPermits: PermitCreateInput[];
+    investigatePermits?: PermitCreateInput[];
+    appliedPermitTrackers: PermitTrackingCreateInput[];
+  }
+) => {
+  const { appliedPermits, investigatePermits = [], appliedPermitTrackers } = intakePermits;
+
+  await Promise.all(
+    [...appliedPermits, ...investigatePermits].map((p) => repositories.permit.upsert({ permitId: p.permitId }, p, p))
+  );
+  // Trackers reference their permit, so they can only be saved once the permits exist
+  await Promise.all(
+    appliedPermitTrackers.map((pt) => upsertPermitTracking({ permitTracking: repositories.permitTracking }, pt))
+  );
 };
 
 /**
